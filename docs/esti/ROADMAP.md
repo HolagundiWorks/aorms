@@ -46,8 +46,8 @@ Canonical plan: **[APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)**.
 | W0 | Platform chrome, nomenclature, `WorkspaceType.PMC` | ✅ |
 | W1 | Snags + progress-report UI, AProc home KPIs, nav | ✅ |
 | W2 | Master programme milestones · package register | ✅ (W2.3 tender↔portal deferred) |
-| W3 | RA / steel **certification** (owner-side) | 🔲 |
-| W4 | MSP/P6 import · branded packs · ESTI over cert notes | 🔲 |
+| W3 | RA **certification** + client portal summaries | ✅ (steel/BBS cert deferred) |
+| W4 | CSV milestone import · RA cert PDF | ✅ (email digests / ESTI RAG deferred) |
 
 ## Market fit queue
 

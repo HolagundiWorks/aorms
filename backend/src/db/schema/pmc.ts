@@ -5,6 +5,7 @@ import {
   bigint,
   createdAt,
   date,
+  doublePrecision,
   id,
   integer,
   pgTable,
@@ -152,4 +153,57 @@ export const pmcPackages = pgTable("esti_pmc_package", {
   createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
+});
+
+/** AProc RA bill certification header (owner-side). */
+export const pmcRaBills = pgTable("esti_pmc_ra_bill", {
+  id: id(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projectOffices.id, { onDelete: "cascade" }),
+  packageId: uuid("package_id").references(() => pmcPackages.id, { onDelete: "set null" }),
+  ref: text("ref").notNull(),
+  billNo: text("bill_no").notNull(),
+  periodStart: date("period_start").notNull(),
+  periodEnd: date("period_end").notNull(),
+  status: text("status", {
+    enum: ["DRAFT", "SITE_CHECKED", "CERTIFIED", "SENT_TO_CLIENT", "CLOSED"],
+  })
+    .notNull()
+    .default("DRAFT"),
+  grossPaise: bigint("gross_paise", { mode: "number" }).notNull().default(0),
+  advanceRecoveryPaise: bigint("advance_recovery_paise", { mode: "number" })
+    .notNull()
+    .default(0),
+  retentionPaise: bigint("retention_paise", { mode: "number" }).notNull().default(0),
+  otherDeductionPaise: bigint("other_deduction_paise", { mode: "number" })
+    .notNull()
+    .default(0),
+  otherDeductionNote: text("other_deduction_note"),
+  gstNote: text("gst_note"),
+  tdsNote: text("tds_note"),
+  narrative: text("narrative"),
+  certifiedAt: timestamp("certified_at", { withTimezone: true }),
+  certifiedById: uuid("certified_by_id").references(() => users.id, { onDelete: "set null" }),
+  sentAt: timestamp("sent_at", { withTimezone: true }),
+  pdfKey: text("pdf_key"),
+  pdfStatus: text("pdf_status").notNull().default("NONE"),
+  createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+export const pmcRaLines = pgTable("esti_pmc_ra_line", {
+  id: id(),
+  billId: uuid("bill_id")
+    .notNull()
+    .references(() => pmcRaBills.id, { onDelete: "cascade" }),
+  sortOrder: integer("sort_order").notNull().default(0),
+  description: text("description").notNull(),
+  unit: text("unit"),
+  previousQty: doublePrecision("previous_qty").notNull().default(0),
+  thisQty: doublePrecision("this_qty").notNull().default(0),
+  ratePaise: bigint("rate_paise", { mode: "number" }).notNull().default(0),
+  amountPaise: bigint("amount_paise", { mode: "number" }).notNull().default(0),
+  createdAt: createdAt(),
 });

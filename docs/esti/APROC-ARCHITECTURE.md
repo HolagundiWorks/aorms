@@ -207,7 +207,7 @@ own revenue unless the firm also invoices the client for reimbursables (out of s
 | **Progress reports** | `progressReports` | **W1** |
 | Programme | master milestones | **W2** ✅ |
 | Packages | package register | **W2** ✅ |
-| RA certification | cert workflow | W3 |
+| RA certification | cert workflow | **W3** ✅ |
 
 Studio and Consulting keep the same Delivery panel — snags/MPR help architects too.
 
@@ -243,21 +243,21 @@ Workspace type `PMC`, nomenclature, `proc.aorms.in`, `/pmc` home shell, landing 
 
 ### Wave 3 — Certification
 
-| # | Item | Notes |
-|---|---|---|
-| W3.1 | RA bill **certification** records (draft → site checked → certified → sent to client) | India IS 1200 / cumulative qty |
-| W3.2 | Deductions: advance recovery, retention, GST/TDS notes | Cert narrative; not full tax engine |
-| W3.3 | Steel / BBS certification when BBS spine is on `main` | Depends on BBS/steel PRs |
-| W3.4 | Client portal: issued progress reports + certified RA summaries | Portal reuse |
+| # | Item | Notes | Status |
+|---|---|---|---|
+| W3.1 | RA bill **certification** (`esti_pmc_ra_bill` / lines) | Draft → site checked → certified → sent → closed | ✅ |
+| W3.2 | Deductions: advance recovery, retention, GST/TDS notes | Cert narrative; not full tax engine | ✅ |
+| W3.3 | Steel / BBS certification when BBS spine is on `main` | Depends on BBS/steel PRs | 🔲 |
+| W3.4 | Client portal: issued progress reports + certified RA summaries | `portal.issuedProgressReports` / `certifiedRaBills` | ✅ |
 
 ### Wave 4 — Integrations & polish
 
-| # | Item |
-|---|---|
-| W4.1 | MSP/P6 milestone import (CSV first, XER later) |
-| W4.2 | Branded MPR / RA cert PDF packs (worker `render_pdf`) |
-| W4.3 | Portfolio digests for PMC partners (email) |
-| W4.4 | ESTI: “Ask ESTI” over snags + progress + cert notes |
+| # | Item | Status |
+|---|---|---|
+| W4.1 | MSP/P6 milestone import (CSV first, XER later) | ✅ CSV · XER deferred |
+| W4.2 | Branded MPR / RA cert PDF packs (worker `render_pdf`) | ✅ MPR existed · RA cert added |
+| W4.3 | Portfolio digests for PMC partners (email) | 🔲 |
+| W4.4 | ESTI: “Ask ESTI” over snags + progress + cert notes | 🔲 (APIs live for RAG later) |
 
 ---
 

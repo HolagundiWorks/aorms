@@ -6,9 +6,10 @@ import { ProjectSiteVisits } from "../ProjectSiteVisits.js";
 import { ProjectPackages } from "./ProjectPackages.js";
 import { ProjectProgramme } from "./ProjectProgramme.js";
 import { ProjectProgressReports } from "./ProjectProgressReports.js";
+import { ProjectRaCertification } from "./ProjectRaCertification.js";
 import { ProjectSnags } from "./ProjectSnags.js";
 
-/** Site Progress | Communications | Minutes | Snags | Progress | Programme | Packages. */
+/** Full AProc / Studio Delivery spine. */
 export function ProjectDeliveryPanel({ projectId }: { projectId: string }) {
   const [sub, setSub] = useState(0);
   return (
@@ -28,6 +29,7 @@ export function ProjectDeliveryPanel({ projectId }: { projectId: string }) {
         <Tab label="Progress reports" />
         <Tab label="Programme" />
         <Tab label="Packages" />
+        <Tab label="RA certification" />
       </Tabs>
       {sub === 0 && <ProjectSiteVisits projectId={projectId} />}
       {sub === 1 && <ProjectCommunicationsLog projectId={projectId} />}
@@ -36,6 +38,7 @@ export function ProjectDeliveryPanel({ projectId }: { projectId: string }) {
       {sub === 4 && <ProjectProgressReports projectId={projectId} />}
       {sub === 5 && <ProjectProgramme projectId={projectId} />}
       {sub === 6 && <ProjectPackages projectId={projectId} />}
+      {sub === 7 && <ProjectRaCertification projectId={projectId} />}
     </Box>
   );
 }

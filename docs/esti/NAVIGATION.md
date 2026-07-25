@@ -55,7 +55,7 @@ Footer home launcher on consultancy host opens Enquiries (not Studio Intelligenc
 | Item | Kind | Destinations |
 |---|---|---|
 | **Home** | link | `/pmc` — open snags portfolio + pillars |
-| **Projects** | link | `/projects` (write) — Delivery: Site · Comms · Minutes · Snags · Progress · **Programme** · **Packages** |
+| **Projects** | link | `/projects` (write) — Delivery: Site · Comms · Minutes · Snags · Progress · Programme · Packages · **RA certification** |
 | **Clients** | link | `/clients` (write) |
 | **Delivery** | menu | Contractors · Consultants |
 | **Office** | menu | Proposals · Invoices · Financial Reports |

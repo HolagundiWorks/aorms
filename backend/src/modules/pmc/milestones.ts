@@ -1,4 +1,8 @@
-import { PmcMilestoneCreate, PmcMilestoneUpdate } from "@esti/contracts";
+import {
+  PmcMilestoneCreate,
+  PmcMilestoneCsvImport,
+  PmcMilestoneUpdate,
+} from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
 import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -6,6 +10,39 @@ import { pmcMilestones, projectOffices } from "../../db/schema.js";
 import { writeAudit } from "../../lib/audit.js";
 import { nextRef } from "../../lib/numbering.js";
 import { capabilityProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
+
+/** Parse simple CSV: title,plannedDate,baselineRef,notes (header optional). */
+function parseMilestoneCsv(csv: string): {
+  title: string;
+  plannedDate?: string;
+  baselineRef?: string;
+  notes?: string;
+}[] {
+  const lines = csv
+    .replace(/^\uFEFF/, "")
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+  if (lines.length === 0) return [];
+  const start =
+    /^title\b/i.test(lines[0]!) || lines[0]!.toLowerCase().startsWith("title,") ? 1 : 0;
+  const out: {
+    title: string;
+    plannedDate?: string;
+    baselineRef?: string;
+    notes?: string;
+  }[] = [];
+  for (let i = start; i < lines.length; i++) {
+    const cols = lines[i]!.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
+    const title = cols[0] ?? "";
+    if (title.length < 2) continue;
+    const plannedDate = cols[1] && /^\d{4}-\d{2}-\d{2}$/.test(cols[1]) ? cols[1] : undefined;
+    const baselineRef = cols[2] || undefined;
+    const notes = cols.slice(3).join(",").trim() || undefined;
+    out.push({ title, plannedDate, baselineRef, notes });
+  }
+  return out;
+}
 
 const manage = capabilityProcedure("write");
 
@@ -149,4 +186,49 @@ export const pmcMilestonesRouter = router({
         .where(eq(pmcMilestones.projectId, input.projectId));
       return row ?? { total: 0, complete: 0, attention: 0 };
     }),
+
+  /** Wave 4 — CSV import (title,plannedDate,baselineRef,notes). */
+  importCsv: manage.input(PmcMilestoneCsvImport).mutation(async ({ ctx, input }) => {
+    const rows = parseMilestoneCsv(input.csv);
+    if (rows.length === 0) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "No milestone rows found in CSV",
+      });
+    }
+    if (rows.length > 200) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "CSV limited to 200 milestones per import",
+      });
+    }
+    const created: string[] = [];
+    for (const [i, row] of rows.entries()) {
+      const { ref } = await nextRef(ctx.db, "pmc_milestone", "MS");
+      const [inserted] = await ctx.db
+        .insert(pmcMilestones)
+        .values({
+          projectId: input.projectId,
+          ref,
+          title: row.title,
+          plannedDate: row.plannedDate ?? null,
+          baselineRef: row.baselineRef ?? null,
+          notes: row.notes ?? null,
+          sortOrder: i,
+          status: "PLANNED",
+          percentComplete: 0,
+          createdById: ctx.user.id,
+        })
+        .returning({ id: pmcMilestones.id });
+      created.push(inserted!.id);
+    }
+    await writeAudit(ctx.db, {
+      entity: "pmc_milestone",
+      entityId: input.projectId,
+      action: "IMPORT",
+      actorId: ctx.user.id,
+      after: { count: created.length },
+    });
+    return { ok: true as const, count: created.length };
+  }),
 });

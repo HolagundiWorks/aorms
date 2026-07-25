@@ -305,6 +305,38 @@ def fetch_progress_report_full(rid: str) -> dict[str, Any] | None:
         return conn.execute(sql, [rid]).fetchone()
 
 
+def update_pmc_ra_bill(rid: str, **fields: Any) -> None:
+    _patch("esti_pmc_ra_bill", rid, set(), fields)
+
+
+def fetch_pmc_ra_bill_full(rid: str) -> dict[str, Any] | None:
+    sql = """
+        select b.ref, b.bill_no, b.period_start, b.period_end, b.status,
+               b.gross_paise, b.advance_recovery_paise, b.retention_paise,
+               b.other_deduction_paise, b.other_deduction_note, b.gst_note, b.tds_note,
+               b.narrative, b.certified_at,
+               p.ref as project_ref, p.title as project_title
+        from esti_pmc_ra_bill b
+        join esti_projectoffice p on p.id = b.project_id
+        where b.id = %s
+    """
+    with psycopg.connect(settings.database_url, row_factory=dict_row) as conn:
+        row = conn.execute(sql, [rid]).fetchone()
+        if not row:
+            return None
+        lines = conn.execute(
+            """
+            select description, unit, previous_qty, this_qty, rate_paise, amount_paise
+            from esti_pmc_ra_line
+            where bill_id = %s
+            order by sort_order
+            """,
+            [rid],
+        ).fetchall()
+        row["lines"] = lines
+        return row
+
+
 def update_feasibility_report(report_id: str, **fields: Any) -> None:
     """Patch an esti_feasibility_report row (only pdf_status / pdf_key; the
     snapshot is written by the backend and never touched here)."""

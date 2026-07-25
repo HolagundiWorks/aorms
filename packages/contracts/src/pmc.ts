@@ -189,3 +189,110 @@ export const PmcPackageUpdate = z.object({
   notes: z.string().max(4000).nullable().optional(),
 });
 export type PmcPackageUpdate = z.infer<typeof PmcPackageUpdate>;
+
+/** CSV import for master programme (Wave 4) — title,plannedDate,baselineRef,notes */
+export const PmcMilestoneCsvImport = z.object({
+  projectId: z.string().uuid(),
+  csv: z.string().min(1).max(500_000),
+});
+export type PmcMilestoneCsvImport = z.infer<typeof PmcMilestoneCsvImport>;
+
+/**
+ * RA bill certification — PMC certifies contractor interim bills for the client.
+ * Not the firm's own revenue; amounts are certified figures (paise).
+ */
+export const PmcRaBillStatus = z.enum([
+  "DRAFT",
+  "SITE_CHECKED",
+  "CERTIFIED",
+  "SENT_TO_CLIENT",
+  "CLOSED",
+]);
+export type PmcRaBillStatus = z.infer<typeof PmcRaBillStatus>;
+
+export const PMC_RA_BILL_STATUS_LABEL: Record<PmcRaBillStatus, string> = {
+  DRAFT: "Draft",
+  SITE_CHECKED: "Site checked",
+  CERTIFIED: "Certified",
+  SENT_TO_CLIENT: "Sent to client",
+  CLOSED: "Closed",
+};
+
+export const PmcRaLineInput = z.object({
+  description: z.string().min(1).max(500),
+  unit: z.string().max(40).optional(),
+  previousQty: z.number().min(0).max(1e12).optional(),
+  thisQty: z.number().min(0).max(1e12),
+  ratePaise: z.number().int().min(0),
+});
+export type PmcRaLineInput = z.infer<typeof PmcRaLineInput>;
+
+export const PmcRaBillCreate = z.object({
+  projectId: z.string().uuid(),
+  packageId: z.string().uuid().optional(),
+  billNo: z.string().min(1).max(80),
+  periodStart: z.string().date(),
+  periodEnd: z.string().date(),
+  narrative: z.string().max(8000).optional(),
+  lines: z.array(PmcRaLineInput).min(1).max(200),
+  advanceRecoveryPaise: z.number().int().min(0).optional(),
+  retentionPaise: z.number().int().min(0).optional(),
+  otherDeductionPaise: z.number().int().min(0).optional(),
+  otherDeductionNote: z.string().max(500).optional(),
+  gstNote: z.string().max(500).optional(),
+  tdsNote: z.string().max(500).optional(),
+});
+export type PmcRaBillCreate = z.infer<typeof PmcRaBillCreate>;
+
+export const PmcRaBillUpdate = z.object({
+  id: z.string().uuid(),
+  projectId: z.string().uuid(),
+  packageId: z.string().uuid().nullable().optional(),
+  billNo: z.string().min(1).max(80).optional(),
+  periodStart: z.string().date().optional(),
+  periodEnd: z.string().date().optional(),
+  narrative: z.string().max(8000).nullable().optional(),
+  lines: z.array(PmcRaLineInput).min(1).max(200).optional(),
+  advanceRecoveryPaise: z.number().int().min(0).optional(),
+  retentionPaise: z.number().int().min(0).optional(),
+  otherDeductionPaise: z.number().int().min(0).optional(),
+  otherDeductionNote: z.string().max(500).nullable().optional(),
+  gstNote: z.string().max(500).nullable().optional(),
+  tdsNote: z.string().max(500).nullable().optional(),
+});
+export type PmcRaBillUpdate = z.infer<typeof PmcRaBillUpdate>;
+
+export const PmcRaBillTransition = z.object({
+  id: z.string().uuid(),
+  projectId: z.string().uuid(),
+  to: PmcRaBillStatus,
+});
+export type PmcRaBillTransition = z.infer<typeof PmcRaBillTransition>;
+
+/** Allowed status transitions for RA certification. */
+export const PMC_RA_TRANSITIONS: Record<PmcRaBillStatus, readonly PmcRaBillStatus[]> = {
+  DRAFT: ["SITE_CHECKED"],
+  SITE_CHECKED: ["DRAFT", "CERTIFIED"],
+  CERTIFIED: ["SENT_TO_CLIENT"],
+  SENT_TO_CLIENT: ["CLOSED"],
+  CLOSED: [],
+};
+
+export function pmcRaLineAmountPaise(thisQty: number, ratePaise: number): number {
+  return Math.round(thisQty * ratePaise);
+}
+
+export function pmcRaNetPayablePaise(input: {
+  grossPaise: number;
+  advanceRecoveryPaise: number;
+  retentionPaise: number;
+  otherDeductionPaise: number;
+}): number {
+  return Math.max(
+    0,
+    input.grossPaise -
+      input.advanceRecoveryPaise -
+      input.retentionPaise -
+      input.otherDeductionPaise,
+  );
+}

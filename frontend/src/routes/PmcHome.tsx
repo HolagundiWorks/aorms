@@ -19,8 +19,8 @@ const PILLARS = [
   },
   {
     title: "Site certification",
-    body: "RA / steel certification next. Snags + progress reports already on Delivery.",
-    wave: "Wave 1–3",
+    body: "RA bill certification is live on Delivery. Steel/BBS cert follows when that spine lands.",
+    wave: "Wave 3 ✅",
   },
   {
     title: "Stakeholders",
@@ -38,11 +38,13 @@ export function PmcHome() {
   const snagsQ = trpc.snags.portfolioOpen.useQuery();
   const milestonesQ = trpc.pmcMilestones.portfolioAttention.useQuery();
   const packagesQ = trpc.pmcPackages.portfolioOpen.useQuery();
+  const raQ = trpc.pmcRaBills.portfolioOpen.useQuery();
 
   const projectRows = projectsQ.data ?? [];
   const openSnags = snagsQ.data ?? [];
   const attentionMs = milestonesQ.data ?? [];
   const openPkgs = packagesQ.data ?? [];
+  const openRa = raQ.data ?? [];
   const totalOpenSnags = openSnags.reduce((n, r) => n + Number(r.openCount), 0);
   const totalOpenPkgs = openPkgs.reduce((n, r) => n + Number(r.openCount), 0);
 
@@ -55,15 +57,15 @@ export function PmcHome() {
       <Stack spacing={3}>
         <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 56 * 8 }}>
           {AORMS_PMC.title} is the third {AORMS_PLATFORM.name} app — for project management
-          consultancies that plan, coordinate, and certify delivery. Programme and packages are
-          live on each project’s Delivery tab; RA certification follows in Wave 3.
+          consultancies that plan, coordinate, and certify delivery. Programme, packages, and RA
+          certification are live on each project’s Delivery tab.
         </Typography>
 
         <Box
           sx={{
             display: "grid",
             gap: 2,
-            gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" },
+            gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(5, 1fr)" },
           }}
         >
           <Box sx={{ py: 1.5, borderBottom: 1, borderColor: "divider" }}>
@@ -104,6 +106,18 @@ export function PmcHome() {
           </Box>
           <Box sx={{ py: 1.5, borderBottom: 1, borderColor: "divider" }}>
             <Typography variant="overline" color="text.secondary">
+              RA in flight
+            </Typography>
+            {raQ.isLoading ? (
+              <Skeleton width={48} height={36} />
+            ) : (
+              <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                {openRa.length}
+              </Typography>
+            )}
+          </Box>
+          <Box sx={{ py: 1.5, borderBottom: 1, borderColor: "divider" }}>
+            <Typography variant="overline" color="text.secondary">
               Active projects
             </Typography>
             {projectsQ.isLoading ? (
@@ -118,6 +132,46 @@ export function PmcHome() {
             </Button>
           </Box>
         </Box>
+
+        {(openRa.length > 0 || raQ.isLoading) && (
+          <Stack spacing={1}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              Attention — RA certification
+            </Typography>
+            {raQ.isLoading && <Skeleton variant="rectangular" height={48} />}
+            {openRa.slice(0, 8).map((b) => (
+              <Stack
+                key={b.id}
+                direction="row"
+                spacing={1}
+                sx={{
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  py: 1,
+                  borderBottom: 1,
+                  borderColor: "divider",
+                }}
+              >
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {b.projectRef} · {b.billNo}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {b.ref} · {b.status.replace(/_/g, " ")}
+                  </Typography>
+                </Box>
+                <Button
+                  component={RouterLink}
+                  to={`/projects/${b.projectId}?tab=delivery`}
+                  size="small"
+                  variant="outlined"
+                >
+                  Open
+                </Button>
+              </Stack>
+            ))}
+          </Stack>
+        )}
 
         {(attentionMs.length > 0 || milestonesQ.isLoading) && (
           <Stack spacing={1}>

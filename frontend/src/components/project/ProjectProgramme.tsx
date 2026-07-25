@@ -58,8 +58,19 @@ export function ProjectProgramme({ projectId }: { projectId: string }) {
     meta: { errorTitle: "Couldn't remove the milestone" },
     onSuccess: invalidate,
   });
+  const importCsv = trpc.pmcMilestones.importCsv.useMutation({
+    meta: { errorTitle: "Couldn't import CSV" },
+    onSuccess: (res) => {
+      invalidate();
+      setCsvOpen(false);
+      setCsvText("");
+      window.alert(`Imported ${res.count} milestone${res.count === 1 ? "" : "s"}`);
+    },
+  });
 
   const [createOpen, setCreateOpen] = useState(false);
+  const [csvOpen, setCsvOpen] = useState(false);
+  const [csvText, setCsvText] = useState("");
   const [form, setForm] = useState({
     title: "",
     plannedDate: "",
@@ -84,14 +95,19 @@ export function ProjectProgramme({ projectId }: { projectId: string }) {
           {attention > 0 ? ` · ${attention} need attention` : ""}
         </Typography>
         {canWrite && (
-          <Button size="small" variant="contained" onClick={() => setCreateOpen(true)}>
-            Add milestone
-          </Button>
+          <>
+            <Button size="small" variant="contained" onClick={() => setCreateOpen(true)}>
+              Add milestone
+            </Button>
+            <Button size="small" variant="outlined" onClick={() => setCsvOpen(true)}>
+              Import CSV
+            </Button>
+          </>
         )}
       </Stack>
       <Typography variant="body2" color="text.secondary">
         Master programme for client reporting. Not a contractor CPM schedule — link MSP/P6 activity
-        codes in Baseline ref when useful.
+        codes in Baseline ref when useful. CSV columns: title,plannedDate,baselineRef,notes.
       </Typography>
 
       {listQ.isLoading && (
@@ -231,6 +247,48 @@ export function ProjectProgramme({ projectId }: { projectId: string }) {
           </Box>
         ))}
       </Stack>
+
+      <Dialog
+        aria-labelledby="pmc-milestone-csv-title"
+        open={csvOpen}
+        onClose={() => {
+          setCsvOpen(false);
+          setCsvText("");
+        }}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle id="pmc-milestone-csv-title">Import milestones (CSV)</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="CSV"
+            value={csvText}
+            onChange={(e) => setCsvText(e.target.value)}
+            fullWidth
+            multiline
+            minRows={8}
+            placeholder={"title,plannedDate,baselineRef,notes\nSlab cast,2026-08-01,A1020,"}
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setCsvOpen(false);
+              setCsvText("");
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            disabled={csvText.trim().length < 3 || importCsv.isPending}
+            onClick={() => importCsv.mutate({ projectId, csv: csvText })}
+          >
+            Import
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog
         aria-labelledby="pmc-milestone-create-title"

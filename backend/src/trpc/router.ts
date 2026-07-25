@@ -84,6 +84,7 @@ import { progressReportsRouter } from "../modules/pmc/progressReports.js";
 import { phaseProgressRouter } from "../modules/pmc/phaseProgress.js";
 import { pmcMilestonesRouter } from "../modules/pmc/milestones.js";
 import { pmcPackagesRouter } from "../modules/pmc/packages.js";
+import { pmcRaBillsRouter } from "../modules/pmc/raBills.js";
 import { siteVisitRouter } from "../modules/siteVisit/router.js";
 import { cpiRouter } from "../modules/cpi/router.js";
 import { projectBriefRouter } from "../modules/project-brief/router.js";
@@ -202,6 +203,7 @@ export const appRouter = router({
   phaseProgress: phaseProgressRouter,
   pmcMilestones: pmcMilestonesRouter,
   pmcPackages: pmcPackagesRouter,
+  pmcRaBills: pmcRaBillsRouter,
   leads: leadsRouter,
   projectDna: projectDnaRouter,
   assessment: assessmentRouter,

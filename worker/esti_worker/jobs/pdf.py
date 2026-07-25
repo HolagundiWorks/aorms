@@ -28,6 +28,7 @@ from ..db import (
     fetch_progress_report_full,
     fetch_feasibility_report_full,
     fetch_site_instruction_full,
+    fetch_pmc_ra_bill_full,
     update_drawing,
     update_engagement,
     update_feeproposal,
@@ -42,6 +43,7 @@ from ..db import (
     update_site_instruction,
     update_specsheet,
     update_transmittal,
+    update_pmc_ra_bill,
 )
 from ..storage import get_bytes, put_bytes
 
@@ -547,6 +549,56 @@ def _progress_report_html(rec: dict[str, Any], firm: dict[str, Any]) -> str:
     </body></html>"""
 
 
+def _pmc_ra_bill_html(rec: dict[str, Any], firm: dict[str, Any]) -> str:
+    """AProc RA bill certification pack — certified quantities for the client."""
+    lines = rec.get("lines") or []
+    line_rows = "".join(
+        f"<tr><td>{_e(ln.get('description'))}</td>"
+        f"<td>{_e(ln.get('unit') or '')}</td>"
+        f"<td style='text-align:right'>{ln.get('previous_qty') or 0}</td>"
+        f"<td style='text-align:right'>{ln.get('this_qty') or 0}</td>"
+        f"<td style='text-align:right'>{_inr(int(ln.get('rate_paise') or 0))}</td>"
+        f"<td style='text-align:right'>{_inr(int(ln.get('amount_paise') or 0))}</td></tr>"
+        for ln in lines
+    )
+    gross = int(rec.get("gross_paise") or 0)
+    adv = int(rec.get("advance_recovery_paise") or 0)
+    ret = int(rec.get("retention_paise") or 0)
+    other = int(rec.get("other_deduction_paise") or 0)
+    net = max(0, gross - adv - ret - other)
+    return f"""<!doctype html><html><head><meta charset="utf-8">
+      <style>
+        body {{ font-family: Urbanist, Helvetica, sans-serif; font-size: 11pt; color: #141517; }}
+        table {{ width: 100%; border-collapse: collapse; margin-top: 12px; }}
+        th, td {{ border: 1px solid #d0d5dd; padding: 6px 8px; text-align: left; }}
+        th {{ background: #F2F4F7; }}
+        .muted {{ color: #667085; font-size: 9pt; }}
+      </style></head><body>
+      <h1>RA bill certification</h1>
+      <p><strong>Project:</strong> {_e(rec.get('project_ref'))} — {_e(rec.get('project_title'))}</p>
+      <p><strong>Bill:</strong> {_e(rec.get('bill_no'))} · {_e(rec.get('ref'))}</p>
+      <p><strong>Period:</strong> {_e(rec.get('period_start'))} to {_e(rec.get('period_end'))}</p>
+      <p><strong>Status:</strong> {_e(rec.get('status'))}</p>
+      <table>
+        <thead><tr><th>Description</th><th>Unit</th><th>Prev</th><th>This</th><th>Rate</th><th>Amount</th></tr></thead>
+        <tbody>{line_rows or '<tr><td colspan="6">No lines</td></tr>'}</tbody>
+      </table>
+      <table style="margin-top:16px; width:50%; margin-left:auto">
+        <tr><td>Gross</td><td style="text-align:right">{_inr(gross)}</td></tr>
+        <tr><td>Advance recovery</td><td style="text-align:right">{_inr(adv)}</td></tr>
+        <tr><td>Retention</td><td style="text-align:right">{_inr(ret)}</td></tr>
+        <tr><td>Other deductions</td><td style="text-align:right">{_inr(other)}</td></tr>
+        <tr><td><strong>Net certified</strong></td><td style="text-align:right"><strong>{_inr(net)}</strong></td></tr>
+      </table>
+      <p>{_e(rec.get('other_deduction_note') or '')}</p>
+      <p><strong>GST:</strong> {_e(rec.get('gst_note') or '—')} · <strong>TDS:</strong> {_e(rec.get('tds_note') or '—')}</p>
+      <h2>Narrative</h2>
+      <div>{_e(rec.get('narrative') or '')}</div>
+      <p class="muted">Certified by {_e(firm.get('legalName'))} as project management consultant.
+        Quantities per IS 1200 practice. Not a tax invoice of the PMC.</p>
+    </body></html>"""
+
+
 _BILL_TYPE_LABEL = {
     "RA": "Running account (RA) bill",
     "FINAL": "Final bill",
@@ -853,6 +905,7 @@ _RENDERERS = {
     "progress_report": (fetch_progress_report_full, _progress_report_html, update_progress_report, "progress_report"),
     "feasibility_report": (fetch_feasibility_report_full, _feasibility_report_html, update_feasibility_report, "feasibility_report"),
     "site_instruction": (fetch_site_instruction_full, _site_instruction_html, update_site_instruction, "site_instruction"),
+    "pmc_ra_bill": (fetch_pmc_ra_bill_full, _pmc_ra_bill_html, update_pmc_ra_bill, "pmc_ra_bill"),
 }
 
 

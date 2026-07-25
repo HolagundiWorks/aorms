@@ -105,6 +105,14 @@ export function Portal() {
     { projectId: openId ?? "" },
     { enabled: !!openId },
   );
+  const progressReportsQ = trpc.portal.issuedProgressReports.useQuery(
+    { projectId: openId ?? "" },
+    { enabled: !!openId },
+  );
+  const raBillsQ = trpc.portal.certifiedRaBills.useQuery(
+    { projectId: openId ?? "" },
+    { enabled: !!openId },
+  );
   const d = detailQ.data;
   const teamMembers = teamQ.data ?? [];
   const drawings = d?.drawings ?? [];
@@ -626,6 +634,75 @@ export function Portal() {
                   </TableBody>
                 </Table>
               </Box>
+            </Section>
+
+            <Section title="Progress reports">
+              <DataState
+                loading={progressReportsQ.isLoading}
+                isEmpty={(progressReportsQ.data ?? []).length === 0}
+                columnCount={3}
+                empty={{
+                  title: "No progress reports yet",
+                  description: "Issued period reports from your PMC or architect will appear here.",
+                }}
+              >
+                <Stack spacing={1}>
+                  {(progressReportsQ.data ?? []).map((r) => (
+                    <Box key={r.id} sx={{ py: 1, borderBottom: 1, borderColor: "divider" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {r.periodStart} → {r.periodEnd}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {r.physicalProgressPct != null ? `${r.physicalProgressPct}% physical · ` : ""}
+                        {r.openSnagCount} open snags
+                        {r.pdfStatus === "READY" ? " · PDF ready" : ""}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </DataState>
+            </Section>
+
+            <Section title="RA certifications">
+              <DataState
+                loading={raBillsQ.isLoading}
+                isEmpty={(raBillsQ.data ?? []).length === 0}
+                columnCount={3}
+                empty={{
+                  title: "No certified RA bills yet",
+                  description: "When your PMC certifies a contractor RA bill, the summary appears here.",
+                }}
+              >
+                <Stack spacing={1}>
+                  {(raBillsQ.data ?? []).map((b) => {
+                    const net = Math.max(
+                      0,
+                      b.grossPaise -
+                        b.advanceRecoveryPaise -
+                        b.retentionPaise -
+                        b.otherDeductionPaise,
+                    );
+                    return (
+                      <Box key={b.id} sx={{ py: 1, borderBottom: 1, borderColor: "divider" }}>
+                        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {b.billNo} · {b.ref}
+                          </Typography>
+                          <StatusDot
+                            color={b.status === "CLOSED" ? "green" : "teal"}
+                            label={b.status.replace(/_/g, " ")}
+                          />
+                        </Stack>
+                        <Typography variant="caption" color="text.secondary">
+                          {b.periodStart} → {b.periodEnd} · Gross {formatINR(b.grossPaise)} · Net{" "}
+                          {formatINR(net)}
+                          {b.pdfStatus === "READY" ? " · PDF ready" : ""}
+                        </Typography>
+                      </Box>
+                    );
+                  })}
+                </Stack>
+              </DataState>
             </Section>
 
             <Section title="Invoices">
