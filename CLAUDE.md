@@ -398,9 +398,11 @@ GST rates, SAC codes)
 project critical notes; `activity` — immutable activity timeline; `dashboard` —
 computed KPIs, Action Center, health modules (`dashboard.home` bundles the office home view); `portal` — client portal access
 
-**Site delivery (consultancy site supervision):**
+**Site delivery (consultancy site supervision + AProc):**
 - `snags` / `siteInstructions` / `progressReports` / `phaseProgress` / `siteVisits` /
-  `inspections` — architect site supervision ("Site Progress" under Projects).
+  `inspections` — site supervision (Project → Delivery)
+- `pmcMilestones` / `pmcPackages` — AProc Wave 2 master programme + package register
+  (governance, not contractor CPM; see `docs/esti/APROC-ARCHITECTURE.md`)
 
 > **Removed in the 2026-06-29 consultancy-only teardown** (migration 0117 dropped the
 > tables): `pmc` (hub/portfolio), `programme` (delivery Gantt / milestones),
