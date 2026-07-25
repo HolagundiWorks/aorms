@@ -103,7 +103,8 @@ Canonical brief: **[MARKET-FIT.md](MARKET-FIT.md)**.
 
 1. **Stripe auto-billing / auto-suspend** — manual India usage-billing path is the shipping path  
 2. **Desktop apps / direct cloud DB clients** — web-only system of record  
-3. **Construction tenders / RA bills / BBS** — outside advisory scope  
+3. **Construction tenders / RA bills / steel reconciliation** — outside advisory scope
+   (project **BBS cutting-length schedules** are in-scope as consultancy checking)  
 4. **W4 integrations** (Tally / Drive / WhatsApp capture) — phase 2 after first paying firms  
 
 ## Change rule

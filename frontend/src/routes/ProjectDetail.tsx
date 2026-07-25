@@ -12,6 +12,7 @@ import { type ReactNode, useEffect, useMemo } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ProjectPurchaseOrders } from "../components/ProjectPurchaseOrders.js";
 import { ProjectEstimates } from "../components/ProjectEstimates.js";
+import { ProjectBbs } from "../components/project/ProjectBbs.js";
 import { ProjectMeasurementPanel } from "../components/measurement/ProjectMeasurementPanel.js";
 import { DrawingsApprovalsPanel } from "../components/project/DrawingsApprovalsPanel.js";
 import { DocumentsSpecsPanel } from "../components/project/DocumentsSpecsPanel.js";
@@ -128,6 +129,11 @@ export function ProjectDetail() {
         slug: "purchase-orders",
         label: "Purchase Orders",
         panel: <ProjectPurchaseOrders projectId={id} />,
+      });
+      consultancyTabs.push({
+        slug: "bbs",
+        label: "BBS",
+        panel: <ProjectBbs projectId={id} />,
       });
     }
     if (showTeam) {

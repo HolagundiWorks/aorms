@@ -343,6 +343,11 @@ GST rates, SAC codes)
 - `estimates` — a project's priced BOQ against one rate book, with a per-item
   measurement book (nos × dimensions by unit shape) and a contingency/GST rollup
 
+**BBS** (`write`; 2026-07-25):
+- `bbs` — project bar bending schedules (`esti_bbs` / members / items); cutting
+  lengths from column/beam/slab/footing geometry (IS 456); diameter steel summary.
+  No steel reconciliation / RA bills.
+
 **Drawings:**
 - `drawings` — drawing/document management (DXF register)
 
@@ -361,7 +366,8 @@ GST rates, SAC codes)
 > domain model. Firm-level, versioned **Rate Books** (Library → Rate Books)
 > price a project's **Estimation** tab (priced BOQ + per-item measurement book +
 > contingency/GST rollup), both gated to `fees:manage`. No Contracts, Running/RA
-> Bills, tenders, or BBS — those stay out per the consultancy-only pivot below.
+> Bills or tenders — those stay out per the consultancy-only pivot below.
+> Project **BBS** (cutting-length schedules) is a separate Project workspace tab.
 > See `packages/contracts/src/estimation.ts` and `docs/esti/UNIFIED-ARCHITECTURE-V4.md`.
 
 **Team / HR / Performance:**
@@ -386,9 +392,10 @@ GST rates, SAC codes)
 > The in-product RIE/compliance rule engine, site assessments (`ruleVersions` /
 > `siteAssessments`), and the BBMP bylaw calculator (`bbmpRules`) were removed in the
 > 2026-06 Knowledge-Bank cleanup. The Estimation OS + Construction Cost spine
-> (incl. BBS / `esti_bbs`, the Components + Parametric KB tabs) were removed in the
-> 2026-06-28 teardown, **followed by Rate Books (`dsr`) and Rate Analysis
-> (`rateAnalysis`)** — the Knowledge Bank now holds only Specification + Lessons.
+> (incl. steel reconciliation, the Components + Parametric KB tabs) were removed
+> in the 2026-06-28 teardown, **followed by Rate Books (`dsr`) and Rate Analysis
+> (`rateAnalysis`)**. Project BBS schedules returned 2026-07-25 (`esti_bbs*` +
+> IS 456 cutting-length engine) without steel reconciliation.
 
 **Supplementary:** `comments` — threaded comments on records; `criticalNotes` —
 project critical notes; `activity` — immutable activity timeline; `dashboard` —

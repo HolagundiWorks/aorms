@@ -33,6 +33,7 @@ export * from "./sync.js";
 export * from "./pulse.js";
 export * from "./academy.js";
 export * from "./estimation.js";
+export * from "./bbs.js";
 
 export type { ProjectOfficeRow } from "./project.js";
 export * from "./usage.js";

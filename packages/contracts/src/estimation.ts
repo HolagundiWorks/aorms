@@ -8,10 +8,10 @@ import type { TagColor } from "./schemas.js";
  * github.com/HolagundiWorks/Construction-Billing-System (C++/wxWidgets desktop
  * app; MeasureShape classification and the qty/rate/contingency/GST rollup are
  * a direct port of its core/Units.cpp and domain/EstimateCalculator.cpp).
- * Deliberately excludes that app's Contracts/Running-Bills/BBS — those are
+ * Deliberately excludes that app's Contracts/Running-Bills — those are
  * construction-administration territory AORMS scoped out in the 2026-06-29
- * consultancy-only pivot. This is the architect's own costed BOQ for a client,
- * not contractor billing.
+ * consultancy-only pivot. Project BBS (cutting-length schedules) is a separate
+ * Project workspace module, not part of this priced-BOQ model.
  */
 
 // --- Measurement shape — classifies a unit of measurement so the measurement

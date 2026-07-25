@@ -92,6 +92,7 @@ import { systemRouter } from "../modules/system/router.js";
 import { academyRouter } from "../modules/academy/router.js";
 import { rateBookRouter } from "../modules/rateBook/router.js";
 import { estimateRouter } from "../modules/estimate/router.js";
+import { bbsRouter } from "../modules/bbs/router.js";
 import { eomsRouter } from "../modules/eoms/router.js";
 import { publicProcedure, router } from "./trpc.js";
 
@@ -214,6 +215,7 @@ export const appRouter = router({
   academy: academyRouter,
   rateBooks: rateBookRouter,
   estimates: estimateRouter,
+  bbs: bbsRouter,
   eoms: eomsRouter,
 });
 
