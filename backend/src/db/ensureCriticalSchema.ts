@@ -146,4 +146,89 @@ export async function ensureCriticalSchema(db: DB): Promise<void> {
       created_at timestamptz NOT NULL DEFAULT now()
     )
   `);
+
+  // 0223_bbs — Project Bar Bending Schedule.
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS esti_bbs (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      ref text NOT NULL UNIQUE,
+      project_id uuid NOT NULL REFERENCES esti_projectoffice(id) ON DELETE CASCADE,
+      title text NOT NULL,
+      status text NOT NULL DEFAULT 'DRAFT',
+      notes text,
+      created_by_id uuid REFERENCES esti_user(id) ON DELETE SET NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS esti_bbs_member (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      bbs_id uuid NOT NULL REFERENCES esti_bbs(id) ON DELETE CASCADE,
+      element text NOT NULL,
+      mark text,
+      input jsonb NOT NULL DEFAULT '{}'::jsonb,
+      sort_order integer NOT NULL DEFAULT 0,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS esti_bbs_item (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      bbs_id uuid NOT NULL REFERENCES esti_bbs(id) ON DELETE CASCADE,
+      member_id uuid REFERENCES esti_bbs_member(id) ON DELETE CASCADE,
+      bar_mark text NOT NULL,
+      member text,
+      element text,
+      role text,
+      dia_mm double precision NOT NULL,
+      no_of_members integer NOT NULL DEFAULT 1,
+      bars_per_member integer NOT NULL DEFAULT 1,
+      cutting_length_mm double precision NOT NULL,
+      weight_kg double precision NOT NULL DEFAULT 0,
+      floor text,
+      shape text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    )
+  `);
+
+  // 0224_steel_reconciliation — scheduled (BBS) vs issued vs consumed kg.
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS esti_steel_reconciliation (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      ref text NOT NULL UNIQUE,
+      project_id uuid NOT NULL REFERENCES esti_projectoffice(id) ON DELETE CASCADE,
+      bbs_id uuid REFERENCES esti_bbs(id) ON DELETE SET NULL,
+      title text NOT NULL,
+      status text NOT NULL DEFAULT 'DRAFT',
+      notes text,
+      scheduled_kg double precision NOT NULL DEFAULT 0,
+      issued_kg double precision NOT NULL DEFAULT 0,
+      consumed_kg double precision NOT NULL DEFAULT 0,
+      wastage_kg double precision NOT NULL DEFAULT 0,
+      finalized_by_id uuid REFERENCES esti_user(id) ON DELETE SET NULL,
+      finalized_at timestamptz,
+      created_by_id uuid REFERENCES esti_user(id) ON DELETE SET NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS esti_steel_reconciliation_item (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      reconciliation_id uuid NOT NULL REFERENCES esti_steel_reconciliation(id) ON DELETE CASCADE,
+      dia_mm double precision NOT NULL,
+      scheduled_kg double precision NOT NULL DEFAULT 0,
+      issued_kg double precision NOT NULL DEFAULT 0,
+      consumed_kg double precision NOT NULL DEFAULT 0,
+      wastage_kg double precision NOT NULL DEFAULT 0,
+      sort_order integer NOT NULL DEFAULT 0,
+      created_at timestamptz NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS esti_steel_recon_item_dia_uq
+      ON esti_steel_reconciliation_item(reconciliation_id, dia_mm)
+  `);
 }

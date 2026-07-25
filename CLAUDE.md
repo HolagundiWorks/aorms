@@ -347,6 +347,11 @@ GST rates, SAC codes)
 - `estimates` — a project's priced BOQ against one rate book, with a per-item
   measurement book (nos × dimensions by unit shape) and a contingency/GST rollup
 
+**BBS / steel recon** (`write`; finalize with `cost:approve`; 2026-07-25):
+- `bbs` — project bar bending schedules; IS 456 cutting lengths (Delivery → BBS)
+- `steelReconciliation` — scheduled (BBS) vs issued vs consumed kg by diameter
+  (Delivery → Steel recon). RA bills stay on `pmcRaBills`.
+
 **Drawings:**
 - `drawings` — drawing/document management (DXF register)
 
@@ -364,9 +369,11 @@ GST rates, SAC codes)
 > [Construction-Billing-System](https://github.com/HolagundiWorks/Construction-Billing-System)'s
 > domain model. Firm-level, versioned **Rate Books** (Library → Rate Books)
 > price a project's **Estimation** tab (priced BOQ + per-item measurement book +
-> contingency/GST rollup), both gated to `fees:manage`. No Contracts, Running/RA
-> Bills, tenders, or BBS — those stay out per the consultancy-only pivot below.
-> See `packages/contracts/src/estimation.ts` and `docs/esti/UNIFIED-ARCHITECTURE-V4.md`.
+> contingency/GST rollup), both gated to `fees:manage`. No Contracts or tenders
+> in this BOQ model. Project **BBS** + **steel reconciliation** returned as
+> Delivery sub-tabs (migrations `0223`/`0224`); contractor RA stays on AProc
+> `pmcRaBills`. See `packages/contracts/src/estimation.ts` and
+> `docs/esti/UNIFIED-ARCHITECTURE-V4.md`.
 
 **Team / HR / Performance:**
 - `team` / `assignments` — roster and project-staff assignments
@@ -390,9 +397,11 @@ GST rates, SAC codes)
 > The in-product RIE/compliance rule engine, site assessments (`ruleVersions` /
 > `siteAssessments`), and the BBMP bylaw calculator (`bbmpRules`) were removed in the
 > 2026-06 Knowledge-Bank cleanup. The Estimation OS + Construction Cost spine
-> (incl. BBS / `esti_bbs`, the Components + Parametric KB tabs) were removed in the
-> 2026-06-28 teardown, **followed by Rate Books (`dsr`) and Rate Analysis
-> (`rateAnalysis`)** — the Knowledge Bank now holds only Specification + Lessons.
+> (incl. steel reconciliation, the Components + Parametric KB tabs) were removed
+> in the 2026-06-28 teardown, **followed by Rate Books (`dsr`) and Rate Analysis
+> (`rateAnalysis`)**. Project BBS + steel recon returned 2026-07-25 (`esti_bbs*` /
+> `esti_steel_reconciliation*`, IS 456 engine) under Delivery; RA bills remain
+> on AProc `pmcRaBills`.
 
 **Supplementary:** `comments` — threaded comments on records; `criticalNotes` —
 project critical notes; `activity` — immutable activity timeline; `dashboard` —

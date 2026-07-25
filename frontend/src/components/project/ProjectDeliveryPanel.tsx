@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ProjectCommunicationsLog } from "../ProjectCommunicationsLog.js";
 import { ProjectMinutes } from "../ProjectMinutes.js";
 import { ProjectSiteVisits } from "../ProjectSiteVisits.js";
+import { ProjectBbs } from "./ProjectBbs.js";
 import { ProjectPackages } from "./ProjectPackages.js";
 import { ProjectPhaseProgress } from "./ProjectPhaseProgress.js";
 import { ProjectProgramme } from "./ProjectProgramme.js";
@@ -10,6 +11,7 @@ import { ProjectProgressReports } from "./ProjectProgressReports.js";
 import { ProjectRaCertification } from "./ProjectRaCertification.js";
 import { ProjectSnags } from "./ProjectSnags.js";
 import { ProjectSteelCertification } from "./ProjectSteelCertification.js";
+import { ProjectSteelReconciliation } from "./ProjectSteelReconciliation.js";
 
 /** Full AProc / Studio Delivery spine. */
 export function ProjectDeliveryPanel({ projectId }: { projectId: string }) {
@@ -33,6 +35,8 @@ export function ProjectDeliveryPanel({ projectId }: { projectId: string }) {
         <Tab label="Packages" />
         <Tab label="RA certification" />
         <Tab label="Steel certification" />
+        <Tab label="BBS" />
+        <Tab label="Steel recon" />
         <Tab label="Phase stages" />
       </Tabs>
       {sub === 0 && <ProjectSiteVisits projectId={projectId} />}
@@ -44,7 +48,9 @@ export function ProjectDeliveryPanel({ projectId }: { projectId: string }) {
       {sub === 6 && <ProjectPackages projectId={projectId} />}
       {sub === 7 && <ProjectRaCertification projectId={projectId} />}
       {sub === 8 && <ProjectSteelCertification projectId={projectId} />}
-      {sub === 9 && <ProjectPhaseProgress projectId={projectId} />}
+      {sub === 9 && <ProjectBbs projectId={projectId} />}
+      {sub === 10 && <ProjectSteelReconciliation projectId={projectId} />}
+      {sub === 11 && <ProjectPhaseProgress projectId={projectId} />}
     </Box>
   );
 }
