@@ -63,8 +63,8 @@ export function buildAgentMockAnswer(snapshot: OperatorSnapshot, question: strin
     }
   } else if (/tender|bid/.test(q)) {
     parts.push(
-      "For **RFPs the practice is pursuing**, open **Office → Bids** (firm-as-bidder desk).",
-      "Contractor tendering (issue / sealed bids / award) is out of scope — use **Third Parties → Contractors** for the directory and **Projects → Site Progress** for site supervision.",
+      "The firm **issues** tenders from **Project → Tenders** (or **Office → Tenders**).",
+      "Invited contractors bid in the **contractor portal** (`/access`). Amounts stay sealed until the office closes the tender.",
     );
   } else if (/project|status|overview/.test(q)) {
     if (p) {

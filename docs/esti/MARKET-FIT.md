@@ -105,8 +105,8 @@ Tally / Zoho Books deepen · Drive for drawings · WhatsApp capture — not day-
 Desktop app · raw cloud DB clients · **contractor** tenders (issue/award) / RA bills / BBS ·
 “AI that designs the building.” · W4 integrations.
 
-**In scope (shipped):** firm-as-bidder **Bids** desk — RFPs the practice pursues
-(`/office/bids`).
+**In scope (shipped):** project **Tenders** — firm issues; contractors bid in portal
+(`/office/tenders`, Project → Tenders).
 
 ---
 

@@ -50,8 +50,7 @@ export const DEFAULT_NUMBERING_SCOPES: Record<string, { prefix: string; padding:
   feeproposal: { prefix: "FEE", padding: 4 },
   mom: { prefix: "MOM", padding: 4 },
   expense: { prefix: "EXP", padding: 4 },
-  /** Firm-as-bidder RFP / tender opportunities (bid desk). */
-  bid: { prefix: "BID", padding: 4 },
+  tender: { prefix: "TND", padding: 4 },
 };
 
 export const OfficeTemplateKind = z.enum(["LETTER", "SCOPE", "COA", "CONTRACT", "MOM"]);

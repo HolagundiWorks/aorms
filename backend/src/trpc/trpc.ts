@@ -13,6 +13,7 @@ export const publicProcedure = t.procedure;
 const DEMO_BLOCKED_MUTATIONS = new Set([
   "clients.createPortalUser",
   "consultants.createLogin",
+  "contractors.createLogin",
   "users.changePassword",
   "users.createStaff",
   "users.resetPassword",

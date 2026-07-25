@@ -34,7 +34,7 @@
 | **Projects** | link | `/projects` |
 | **Clients** | link | `/clients` (write capability) |
 | **Teams** | menu | Teams · Performance · HR |
-| **Office** | menu (2 labelled groups — Hick/Miller) | **Office:** Leads · **Bids** · Proposals · Documents · Contracts · Letters · **Finance:** Invoices · Reconcile · Cashbook · Expenses · Payroll · Financial Reports |
+| **Office** | menu (2 labelled groups — Hick/Miller) | **Office:** Leads · **Tenders** · Proposals · Documents · Contracts · Letters · **Finance:** Invoices · Reconcile · Cashbook · Expenses · Payroll · Financial Reports |
 
 **Consultancy host** (`consultancy.aorms.in`) — engineering workspace chrome:
 
@@ -56,7 +56,7 @@ Footer home launcher on consultancy host opens Enquiries (not Studio Intelligenc
 | **Teams** menu | `hrEnabled` firm setting — when off, the whole menu is pruned |
 | Teams › Performance | `hrEnabled` + rank ≥ 60 |
 | Teams › HR | `hrEnabled` + `hr:manage` |
-| Office › Leads, **Bids**, Documents, Contracts, Letters | `write` |
+| Office › Leads, **Tenders**, Documents, Contracts, Letters | `write` |
 | Office › Proposals | `fees:manage` |
 | Finance › Invoices, Reconcile, Cashbook, Expenses | `invoice:manage` |
 | Finance › Payroll | `hrEnabled` + `hr:manage` |
@@ -97,7 +97,7 @@ Active Projects ✅ (`/projects`) → Project Details ✅ (`/projects/:id`).
 | Group | Primary tabs | Nested (in-panel) |
 |---|---|---|
 | Setup | Overview · Brief · Settings | Brief → Project Info \| Pipeline \| Program \| **R&O** \| CPI |
-| Project workspace | Measurement · Drawings & approvals · Documents · Invoices · Team · Delivery · Lessons | Drawings → Drawings \| Transmittals \| Approvals; Documents → Documents \| Specs; Delivery → Site \| Comms \| Minutes |
+| Project workspace | Measurement · Drawings & approvals · Documents · Invoices · Team · **Tenders** · Delivery · Lessons | Drawings → Drawings \| Transmittals \| Approvals; Documents → Documents \| Specs; Delivery → Site \| Comms \| Minutes |
 
 Legacy `?tab=` deep links (`info`, `pipeline`, `site-visits`, `approvals`, `invoices`, …) redirect to the new parent slug while preserving `approvalId` / `invoiceId` when present.
 
@@ -141,14 +141,14 @@ Route `/office/ai-studio` — plan-gated, rank ≥ 60. Not a ribbon item.
 
 ## 8–9. Office + Finance (Office ribbon menu)
 One trigger, **two labelled ListSubheader groups** (2026-07-11, Hick/Miller — the
-flat list had reached 11 items): **Office** (Leads · **Bids** `/office/bids` ·
+flat list had reached 11 items): **Office** (Leads · **Tenders** `/office/tenders` ·
 Proposals · Documents · Contracts · Letters) and **Finance** (Consultancy Invoices ·
 Reconcile · Cashbook · Office Expenses · Payroll · Financial Reports `/filing`) —
 capability-gated as in `App.tsx`; empty groups are pruned per role.
 
-**Bids** (✅ 2026-07-25) is the **firm-as-bidder** desk — GeM / state portal / private
-RFP opportunities the practice pursues. It is **not** contractor tendering (issue /
-sealed bids / award). Legacy `/tenders` redirects here.
+**Tenders** (✅ 2026-07-25): the firm **issues** project tenders; invited contractors
+bid in the contractor portal. Primary UI is **Project → Tenders**; Office list shows
+open tenders. `/tenders` and legacy `/bids` redirect to `/office/tenders`.
 
 ## 10. LXOS 🚧
 Route `/lxos` (`/leos` redirects). Single-page (no tabs — Parkinson / Goal Gradient,
@@ -182,9 +182,9 @@ sections. Community Exchange · Professional Identity remain 🔲 behind a singl
 ---
 
 ## Removed (consultancy-only)
-**PMC**, **Construction**, **Programme**, **contractor Tenders** (`esti_tender*`),
-**Mood boards** — routes redirect to `/projects` (or Bids for `/tenders`). Top-level
-**Estimation** nav removed; `/estimation*` → `/projects`.
+**PMC**, **Construction**, **Programme**, **Mood boards**, BOQ line-item tendering /
+work-package award bridges — routes redirect to `/projects`. Top-level **Estimation**
+nav removed; `/estimation*` → `/projects`. Lump-sum **Project › Tenders** is live again.
 
 ## Closing philosophy
 AORMS is an **operating system for design studios**: work and learning coexist,

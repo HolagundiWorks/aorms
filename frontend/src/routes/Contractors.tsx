@@ -27,6 +27,7 @@ import { RailLayout } from "../components/RailLayout.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
 import { StatusDot } from "../components/StatusTag.js";
 import { trpc } from "../lib/trpc.js";
+import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
 
 type FormState = {
   id?: string;
@@ -59,11 +60,20 @@ export function Contractors() {
   const [form, setForm] = useState<FormState | null>(null);
   const [rating, setRating] = useState<{ id: string; name: string; quality: string; timeliness: string; safety: string; notes: string } | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [login, setLogin] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
 
   const create = trpc.contractors.create.useMutation({ meta: { errorTitle: "Couldn't create the contractor" }, onSuccess: () => { invalidate(); setForm(null); } });
   const update = trpc.contractors.update.useMutation({ meta: { errorTitle: "Couldn't update the contractor" }, onSuccess: () => { invalidate(); setForm(null); } });
   const setRatingM = trpc.contractors.setRating.useMutation({ meta: { errorTitle: "Couldn't save the rating" }, onSuccess: () => { invalidate(); setRating(null); } });
   const remove = trpc.contractors.remove.useMutation({ meta: { errorTitle: "Couldn't delete the contractor" }, onSuccess: invalidate });
+  const createLogin = trpc.contractors.createLogin.useMutation({
+    meta: { errorTitle: "Couldn't create the contractor login" },
+    onSuccess: () => {
+      setLogin(null);
+      setLoginForm({ email: "", password: "" });
+    },
+  });
 
   const saving = create.isPending || update.isPending;
   const err = create.error || update.error;
@@ -82,7 +92,7 @@ export function Contractors() {
   };
 
   useScreenActions(
-    form !== null || rating !== null
+    form !== null || rating !== null || login !== null
       ? []
       : [
           {
@@ -94,7 +104,7 @@ export function Contractors() {
             onClick: () => setForm({ ...EMPTY }),
           },
         ],
-    [form, rating],
+    [form, rating, login],
   );
 
   const columns: GridColDef[] = [
@@ -207,6 +217,13 @@ export function Contractors() {
                   safety: c.safetyRating ? String(c.safetyRating) : "",
                   notes: c.notes ?? "",
                 }),
+              },
+              {
+                label: "Create portal login",
+                onClick: () => {
+                  setLogin({ id: c.id, name: c.name, email: c.email ?? "" });
+                  setLoginForm({ email: c.email ?? "", password: "" });
+                },
               },
               {
                 label: "Remove",
@@ -332,6 +349,71 @@ export function Contractors() {
             notes: rating.notes || undefined,
           })}>
             {setRatingM.isPending ? "Saving…" : "Save rating"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        aria-labelledby="contractors-login-title"
+        open={!!login}
+        onClose={() => setLogin(null)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle id="contractors-login-title">
+          {`Create login — ${login?.name ?? ""}`}
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <p>
+              Provisions a {AORMS_PORTALS.contractor.label.toLowerCase()} login so this contractor
+              can open invitations and submit sealed bids at /access.
+            </p>
+            <TextField
+              id="ct-login-email"
+              label="Login email"
+              type="email"
+              value={loginForm.email}
+              onChange={(e) =>
+                setLoginForm((f) => ({ ...f, email: e.target.value }))
+              }
+            />
+            <TextField
+              id="ct-login-password"
+              label="Temporary password (min 8 chars)"
+              type="password"
+              autoComplete="new-password"
+              value={loginForm.password}
+              onChange={(e) =>
+                setLoginForm((f) => ({ ...f, password: e.target.value }))
+              }
+            />
+            {createLogin.error && (
+              <Alert severity="error">{createLogin.error.message}</Alert>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" color="inherit" onClick={() => setLogin(null)}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            disabled={
+              !loginForm.email ||
+              loginForm.password.length < 8 ||
+              createLogin.isPending
+            }
+            onClick={() =>
+              login &&
+              createLogin.mutate({
+                contractorId: login.id,
+                email: loginForm.email,
+                password: loginForm.password,
+              })
+            }
+          >
+            {createLogin.isPending ? "Creating…" : "Create login"}
           </Button>
         </DialogActions>
       </Dialog>

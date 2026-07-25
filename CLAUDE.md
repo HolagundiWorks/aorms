@@ -325,8 +325,9 @@ GST rates, SAC codes)
 
 **Clients & projects:**
 - `clients` — client CRM; `clientLog` — interaction history
-- `leads` — inbound enquiry capture; `bids` — **firm-as-bidder** RFP / tender desk
- (`esti_bid_opportunity`; not contractor sealed-bid tendering)
+- `leads` — inbound enquiry capture
+- `tenders` — firm **issues** project tenders; `contractorPortal` — invited contractors
+ submit sealed lump-sum bids (login at `/access`)
 - `projectOffice` — project-level admin data; `phases` — project phase management
 - `proposals` — **unified** proposals: COA fee proposals + scope agreements in one
  `esti_proposal` model (`fees:manage`); includes the Project OS client-approval gate
@@ -402,8 +403,10 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
 
 > **Removed in the 2026-06-29 consultancy-only teardown** (migration 0117 dropped the
 > tables): `pmc` (hub/portfolio), `programme` (delivery Gantt / milestones),
-> `constructionSchedule` (CPM), `construction` (contractor coordination), the **tenders**
-> spine (`esti_tender*`), and **mood boards** (`esti_moodboard`). Do not reference these.
+> `constructionSchedule` (CPM), `construction` (contractor coordination), the old
+> work-package tender spine, and **mood boards** (`esti_moodboard`). A narrower
+> lump-sum **Project › Tenders** flow shipped 2026-07-25 (`esti_tender*` +
+> `contractorPortal` — firm issues; contractors bid; no BOQ/RA award bridge).
 
 **Library (2026-06-29):**
 - `compliance` — structured compliance library: `far` / `setback` / `nbc` / `fire` /
@@ -436,8 +439,9 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
 > (Item/Compliance/Master Plan/Standards) and **AI Studio** (plan+rank gated) are top-level
 > sidebar entries; Studio holds Teams/Performance/HR. Search is a **header** action
 > (with the Alerts bell, ID card, clock and Pomodoro). **Removed (consultancy-only):** PMC,
-> Construction, Programme, Tenders, mood boards. Edit nav via the `nav` tree and keep
-> NAVIGATION.md in sync.
+> Construction, Programme, mood boards. **Tenders** is back as firm-issued project
+> tenders (Office › Tenders + Project › Tenders; bidding in the contractor portal).
+> Edit nav via the `nav` tree and keep NAVIGATION.md in sync.
 
 Key routes by area:
 
@@ -453,8 +457,9 @@ Key routes by area:
 | `Team.tsx` / `Hr.tsx` | Team roster and HR/payroll (hrEnabled gated); Studio (`/team`, `/hr`) |
 | `Invoices.tsx` | Consultancy invoices (Finance) |
 | `Proposals.tsx` | **Unified Proposals** (Office, `/office/proposals`) — COA fee + scope; `trpc.proposals` |
+| `Tenders.tsx` | **Office › Tenders** (`/office/tenders`) — open firm-issued project tenders; detail on Project › Tenders |
 | `Reconcile.tsx` | Financial reconciliation (route kept; not in V3 menu) |
-| `Consultants.tsx` / `Contractors.tsx` | Consultants / contractors (Third Parties) |
+| `Consultants.tsx` / `Contractors.tsx` | Consultants / contractors (Third Parties); contractors can provision portal logins for bidding |
 | `Letters.tsx` / `Contracts.tsx` | Office documents |
 | `Filing.tsx` | GST/TDS filing abstracts (Finance › Financial Reports) |
 | `SpecCatalogLibrary.tsx` | Library › Specification catalogue (`/libraries/spec-catalog`) — versioned category/item/make/spec/finish rows (`/knowledge-bank` redirects here; the old Item Library — Materials/Labour/Brands/Recipes — was removed 2026-07-09) |
@@ -470,6 +475,7 @@ Key routes by area:
 | `Alerts.tsx` | Notification/alert center (header bell) |
 | `Portal.tsx` | Client portal — `/` and `/projects/:projectId` |
 | `CollaboratorPortal.tsx` | Consultant portal — `/` and `/projects/:projectId` |
+| `ContractorPortal.tsx` | Contractor portal — invited tenders + sealed lump-sum bids (`CONTRACTOR` login at `/access`) |
 | `Company.tsx` | Removed — `/company` redirects to `/company-account` |
 | `Users.tsx` | User management (firm:admin) |
 | `Settings.tsx` | Removed — `/settings` redirects to `/account#settings` |

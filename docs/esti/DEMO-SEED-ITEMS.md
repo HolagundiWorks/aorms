@@ -194,14 +194,14 @@ Phase-linked billing is written on **fresh** seed only. To refresh billing signa
 
 ---
 
-## Bid desk (firm-as-bidder)
+## Project tenders (firm issues · contractors bid)
 
 | Record | Value |
 |--------|-------|
-| Municipal school campus | GOVERNMENT_RFP · PREPARING · EMD sample |
-| Apex PEB invited bid | INVITED · WATCHING |
+| Sharma Villa civil package | OPEN · 2 invitations (Vinayaka Civil · Sairam Structural) |
+| Contractor portal | `contractor@demo.aorms.in` / demo password → `/access` |
 
-Route: `/office/bids`. Not contractor sealed-bid tendering.
+Routes: Project → Tenders · Office → Tenders · contractor portal home.
 
 ---
 

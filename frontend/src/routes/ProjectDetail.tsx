@@ -17,6 +17,7 @@ import { DrawingsApprovalsPanel } from "../components/project/DrawingsApprovalsP
 import { DocumentsSpecsPanel } from "../components/project/DocumentsSpecsPanel.js";
 import { ProjectBriefPanel } from "../components/project/ProjectBriefPanel.js";
 import { ProjectDeliveryPanel } from "../components/project/ProjectDeliveryPanel.js";
+import { ProjectTenders } from "../components/project/ProjectTenders.js";
 import { ProjectInvoicesPanel } from "../components/project/ProjectInvoicesPanel.js";
 import { ProjectRailNav } from "../components/project/ProjectRailNav.js";
 import { ProjectSettings } from "../components/ProjectSettings.js";
@@ -128,6 +129,11 @@ export function ProjectDetail() {
         slug: "purchase-orders",
         label: "Purchase Orders",
         panel: <ProjectPurchaseOrders projectId={id} />,
+      });
+      consultancyTabs.push({
+        slug: "tenders",
+        label: "Tenders",
+        panel: <ProjectTenders projectId={id} />,
       });
     }
     if (showTeam) {

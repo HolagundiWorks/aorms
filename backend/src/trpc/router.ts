@@ -13,6 +13,8 @@ import { collaboratorRouter } from "../modules/consultant/portal.js";
 import { consultantRouter } from "../modules/consultant/router.js";
 import { consultancyRouter } from "../modules/consultancy/router.js";
 import { contractorRouter } from "../modules/contractor/router.js";
+import { contractorPortalRouter } from "../modules/contractor/portal.js";
+import { tendersRouter } from "../modules/tender/router.js";
 import { vendorRouter } from "../modules/vendor/router.js";
 import { complianceRouter } from "../modules/compliance/router.js";
 import { masterPlanRouter } from "../modules/masterplan/router.js";
@@ -23,7 +25,6 @@ import { usageRouter } from "../modules/usage/router.js";
 import { clientLogRouter } from "../modules/clientlog/log.js";
 import { clientRouter } from "../modules/clientlog/router.js";
 import { leadsRouter } from "../modules/projectos/leads.js";
-import { bidsRouter } from "../modules/projectos/bids.js";
 import { projectDnaRouter } from "../modules/projectos/dna.js";
 import { assessmentRouter } from "../modules/projectos/assessment.js";
 import { feasibilityRouter } from "../modules/projectos/feasibility.js";
@@ -139,6 +140,8 @@ export const appRouter = router({
   // Studio architect↔consultant `engagements` namespace below.
   consultancy: consultancyRouter,
   contractors: contractorRouter,
+  contractorPortal: contractorPortalRouter,
+  tenders: tendersRouter,
   vendors: vendorRouter,
   compliance: complianceRouter,
   masterPlans: masterPlanRouter,
@@ -200,7 +203,6 @@ export const appRouter = router({
   progressReports: progressReportsRouter,
   phaseProgress: phaseProgressRouter,
   leads: leadsRouter,
-  bids: bidsRouter,
   projectDna: projectDnaRouter,
   assessment: assessmentRouter,
   feasibility: feasibilityRouter,

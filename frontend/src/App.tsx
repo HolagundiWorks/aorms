@@ -110,7 +110,8 @@ const OfficeExpenses = lazyRoute(() => import("./routes/OfficeExpenses.js"), "Of
 const CashBook = lazyRoute(() => import("./routes/OfficeExpenses.js"), "CashBook");
 const Proposals = lazyRoute(() => import("./routes/Proposals.js"), "Proposals");
 const Leads = lazyRoute(() => import("./routes/Leads.js"), "Leads");
-const Bids = lazyRoute(() => import("./routes/Bids.js"), "Bids");
+const Tenders = lazyRoute(() => import("./routes/Tenders.js"), "Tenders");
+const ContractorPortal = lazyRoute(() => import("./routes/ContractorPortal.js"), "ContractorPortal");
 const SpecCatalogLibrary = lazyRoute(() => import("./routes/SpecCatalogLibrary.js"), "SpecCatalogLibrary");
 const RateBookLibrary = lazyRoute(() => import("./routes/RateBookLibrary.js"), "RateBookLibrary");
 const ItemLibraryLibrary = lazyRoute(() => import("./routes/ItemLibraryLibrary.js"), "ItemLibraryLibrary");
@@ -142,10 +143,6 @@ const Performance = lazyRoute(() => import("./routes/Performance.js"), "Performa
 const Clients = lazyRoute(() => import("./routes/Clients.js"), "Clients");
 const Consultants = lazyRoute(() => import("./routes/Consultants.js"), "Consultants");
 const Contractors = lazyRoute(() => import("./routes/Contractors.js"), "Contractors");
-const ContractorPortalStub = lazyRoute(
-  () => import("./routes/ContractorPortalStub.js"),
-  "ContractorPortalStub",
-);
 const Lxos = lazyRoute(() => import("./routes/Lxos.js"), "Lxos");
 const SystemAdmin = lazyRoute(() => import("./routes/SystemAdmin.js"), "SystemAdmin");
 const Blog = lazyRoute(() => import("./routes/Blog.js"), "Blog");
@@ -372,7 +369,7 @@ function AppWorkspace() {
     return (
       <div>
         <Routes>
-          <Route path="/" element={<ContractorPortalStub />} />
+          <Route path="/" element={<ContractorPortal />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
@@ -445,7 +442,7 @@ function AppWorkspace() {
             ...(can(user.role, "write")
               ? [
                   { label: "Leads", to: "/leads", icon: ContactPage },
-                  { label: "Bids", to: "/office/bids", icon: Gavel },
+                  { label: "Tenders", to: "/office/tenders", icon: Gavel },
                 ]
               : []),
             ...(can(user.role, "fees:manage") ? [{ label: "Proposals", to: "/office/proposals", icon: Document }] : []),
@@ -741,13 +738,16 @@ function AppWorkspace() {
                   <Route path="/leads" element={<Leads />} />
                 )}
                 {can(user.role, "write") && (
-                  <Route path="/office/bids" element={<Bids />} />
+                  <Route path="/office/tenders" element={<Tenders />} />
                 )}
                 {can(user.role, "write") && (
-                  <Route path="/bids" element={<Navigate to="/office/bids" replace />} />
+                  <Route path="/tenders" element={<Navigate to="/office/tenders" replace />} />
                 )}
                 {can(user.role, "write") && (
-                  <Route path="/tenders" element={<Navigate to="/office/bids" replace />} />
+                  <Route path="/office/bids" element={<Navigate to="/office/tenders" replace />} />
+                )}
+                {can(user.role, "write") && (
+                  <Route path="/bids" element={<Navigate to="/office/tenders" replace />} />
                 )}
                 <Route
                   path="/client-requests"
