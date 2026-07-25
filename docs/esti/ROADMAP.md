@@ -1,7 +1,7 @@
 # AORMS Implementation Roadmap
 
-**Status:** COMPLETE · **Updated:** 2026-07-24  
-**Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
+**Status:** COMPLETE · **Updated:** 2026-07-25  
+**Platform build:** COMPLETE (P0–P10 · P9.V · P9.M · bid desk)  
 **Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)
 
 Phases 0–28 are **engineering-complete** for **AORMS-Studio**. **AORMS-Consultancy**
@@ -66,6 +66,18 @@ Canonical brief: **[MARKET-FIT.md](MARKET-FIT.md)**.
 | W3.2 | Engagement→invoice demo seed (`EQ-DEMO-001` → `C-DEMO-001` BILLABLE stage) | M6 Consultancy | ✅ |
 | W3.3 | Reference-firm packaging (Holagundi DEMO-SCRIPT + ICP-ONE-PAGER) | M5 / M6 | ✅ |
 
+### Bid desk — ✅ shipped (2026-07-25)
+
+Firm-as-bidder **RFP / tender opportunity** register — **not** contractor
+tendering (issue / sealed bids / award; still deferred/out of scope).
+
+| # | Item | Status |
+|---|---|---|
+| B1 | `esti_bid_opportunity` + contracts + `bids` tRPC | ✅ |
+| B2 | Office › Bids UI (`/office/bids`) · `/tenders` alias | ✅ |
+| B3 | Open-as-lead into Studio acquisition funnel | ✅ |
+| B4 | Demo seed sample bids | ✅ |
+
 ### Wave 4 — deferred (phase 2)
 
 | Wave | Focus | Status |
@@ -103,7 +115,7 @@ Canonical brief: **[MARKET-FIT.md](MARKET-FIT.md)**.
 
 1. **Stripe auto-billing / auto-suspend** — manual India usage-billing path is the shipping path  
 2. **Desktop apps / direct cloud DB clients** — web-only system of record  
-3. **Construction tenders / RA bills / BBS** — outside advisory scope  
+3. **Contractor tenders** (issue / sealed bids / comparison / award) / RA bills / BBS — outside advisory scope (firm-as-bidder **Bids** desk is in scope)  
 4. **W4 integrations** (Tally / Drive / WhatsApp capture) — phase 2 after first paying firms  
 
 ## Change rule

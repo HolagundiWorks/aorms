@@ -16,7 +16,7 @@ research conclusions** and what we must ship for paying firms.
 | | |
 |---|---|
 | **Buyer** | Indian AEC **advisory** firms — architecture studios and engineering consultancies (structural / MEP / civil), roughly **5–50 people** |
-| **Not for** | Contractors, PMC portfolios, construction execution ERP, warehouses / RA bills / tenders |
+| **Not for** | Contractors, PMC portfolios, construction execution ERP, warehouses / RA bills / **contractor** tenders |
 | **Category** | A/E practice ops / light PSA — not CAD, not construction PM, not generic ERP |
 | **JTBD** | Replace WhatsApp + email + Excel + generic PM + ad-hoc GST with one **office operating record**: fees → delivery → revisions → site supervision → invoices → portals |
 
@@ -102,8 +102,11 @@ Implementation status lives on [ROADMAP.md](ROADMAP.md) § Market fit.
 Tally / Zoho Books deepen · Drive for drawings · WhatsApp capture — not day-one.
 
 ### Explicitly defer
-Desktop app · raw cloud DB clients · construction tenders / RA bills / BBS ·
+Desktop app · raw cloud DB clients · **contractor** tenders (issue/award) / RA bills / BBS ·
 “AI that designs the building.” · W4 integrations.
+
+**In scope (shipped):** firm-as-bidder **Bids** desk — RFPs the practice pursues
+(`/office/bids`).
 
 ---
 

@@ -194,6 +194,17 @@ Phase-linked billing is written on **fresh** seed only. To refresh billing signa
 
 ---
 
+## Bid desk (firm-as-bidder)
+
+| Record | Value |
+|--------|-------|
+| Municipal school campus | GOVERNMENT_RFP · PREPARING · EMD sample |
+| Apex PEB invited bid | INVITED · WATCHING |
+
+Route: `/office/bids`. Not contractor sealed-bid tendering.
+
+---
+
 ## Consultancy spine (AORMS-Consultancy)
 
 | Record | Value |

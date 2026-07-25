@@ -23,6 +23,7 @@ import { usageRouter } from "../modules/usage/router.js";
 import { clientLogRouter } from "../modules/clientlog/log.js";
 import { clientRouter } from "../modules/clientlog/router.js";
 import { leadsRouter } from "../modules/projectos/leads.js";
+import { bidsRouter } from "../modules/projectos/bids.js";
 import { projectDnaRouter } from "../modules/projectos/dna.js";
 import { assessmentRouter } from "../modules/projectos/assessment.js";
 import { feasibilityRouter } from "../modules/projectos/feasibility.js";
@@ -199,6 +200,7 @@ export const appRouter = router({
   progressReports: progressReportsRouter,
   phaseProgress: phaseProgressRouter,
   leads: leadsRouter,
+  bids: bidsRouter,
   projectDna: projectDnaRouter,
   assessment: assessmentRouter,
   feasibility: feasibilityRouter,

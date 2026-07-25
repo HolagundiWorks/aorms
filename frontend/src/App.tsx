@@ -10,6 +10,7 @@ import {
   CompareArrows,
   ContactPage,
   Description as Document,
+  Gavel,
   Email,
   Apartment as Enterprise,
   Engineering,
@@ -109,6 +110,7 @@ const OfficeExpenses = lazyRoute(() => import("./routes/OfficeExpenses.js"), "Of
 const CashBook = lazyRoute(() => import("./routes/OfficeExpenses.js"), "CashBook");
 const Proposals = lazyRoute(() => import("./routes/Proposals.js"), "Proposals");
 const Leads = lazyRoute(() => import("./routes/Leads.js"), "Leads");
+const Bids = lazyRoute(() => import("./routes/Bids.js"), "Bids");
 const SpecCatalogLibrary = lazyRoute(() => import("./routes/SpecCatalogLibrary.js"), "SpecCatalogLibrary");
 const RateBookLibrary = lazyRoute(() => import("./routes/RateBookLibrary.js"), "RateBookLibrary");
 const ItemLibraryLibrary = lazyRoute(() => import("./routes/ItemLibraryLibrary.js"), "ItemLibraryLibrary");
@@ -441,7 +443,10 @@ function AppWorkspace() {
           label: "Office",
           items: [
             ...(can(user.role, "write")
-              ? [{ label: "Leads", to: "/leads", icon: ContactPage }]
+              ? [
+                  { label: "Leads", to: "/leads", icon: ContactPage },
+                  { label: "Bids", to: "/office/bids", icon: Gavel },
+                ]
               : []),
             ...(can(user.role, "fees:manage") ? [{ label: "Proposals", to: "/office/proposals", icon: Document }] : []),
             ...(can(user.role, "write")
@@ -734,6 +739,15 @@ function AppWorkspace() {
                 <Route path="/third-parties" element={<Navigate to="/clients" replace />} />
                 {can(user.role, "write") && (
                   <Route path="/leads" element={<Leads />} />
+                )}
+                {can(user.role, "write") && (
+                  <Route path="/office/bids" element={<Bids />} />
+                )}
+                {can(user.role, "write") && (
+                  <Route path="/bids" element={<Navigate to="/office/bids" replace />} />
+                )}
+                {can(user.role, "write") && (
+                  <Route path="/tenders" element={<Navigate to="/office/bids" replace />} />
                 )}
                 <Route
                   path="/client-requests"

@@ -58,7 +58,8 @@ include the contractor-facing coordination needed by an architect:
   verification, and payment-certificate support (rebuilding as the CMS).
 
 *(Contractor tendering — issue / sealed bids / comparison / award — was removed in the
-2026-06-29 consultancy-only teardown; AORMS does not run contractor bidding.)*
+2026-06-29 consultancy-only teardown; AORMS does not run contractor bidding.
+Firm-as-bidder RFP tracking is Office › Bids.)*
 
 Inventory, warehouses, labour gangs, attendance for contractor labour, GRNs,
 subcontractor ledgers, contractor-side RA-bill accounting, and construction-company finance are

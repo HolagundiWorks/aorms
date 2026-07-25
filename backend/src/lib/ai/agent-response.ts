@@ -63,7 +63,8 @@ export function buildAgentMockAnswer(snapshot: OperatorSnapshot, question: strin
     }
   } else if (/tender|bid/.test(q)) {
     parts.push(
-      "Tenders are not part of AORMS (consultancy-only). Use **Projects → Site Progress** for site supervision, or **Third Parties → Contractors** for the directory.",
+      "For **RFPs the practice is pursuing**, open **Office → Bids** (firm-as-bidder desk).",
+      "Contractor tendering (issue / sealed bids / award) is out of scope — use **Third Parties → Contractors** for the directory and **Projects → Site Progress** for site supervision.",
     );
   } else if (/project|status|overview/.test(q)) {
     if (p) {

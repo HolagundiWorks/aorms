@@ -9,6 +9,7 @@ export * from "./coa.js";
 export * from "./fy.js";
 export * from "./permits.js";
 export * from "./lead.js";
+export * from "./bid.js";
 export * from "./project-dna.js";
 export * from "./pre-project-assessment.js";
 export * from "./feasibility.js";

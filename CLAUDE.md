@@ -325,11 +325,13 @@ GST rates, SAC codes)
 
 **Clients & projects:**
 - `clients` — client CRM; `clientLog` — interaction history
+- `leads` — inbound enquiry capture; `bids` — **firm-as-bidder** RFP / tender desk
+ (`esti_bid_opportunity`; not contractor sealed-bid tendering)
 - `projectOffice` — project-level admin data; `phases` — project phase management
 - `proposals` — **unified** proposals: COA fee proposals + scope agreements in one
-  `esti_proposal` model (`fees:manage`); includes the Project OS client-approval gate
-  (`setClientApproval`). *(The separate `feeProposals` namespace + thin `esti_proposal`
-  were merged here — migration 0116.)*
+ `esti_proposal` model (`fees:manage`); includes the Project OS client-approval gate
+ (`setClientApproval`). *(The separate `feeProposals` namespace + thin `esti_proposal`
+ were merged here — migration 0116.)*
 - `invoices` — GST invoicing (`invoice:manage`/`invoice:delete`); `reconcile` —
   financial reconciliation; `purchaseOrders` — PO management
 - `permits` — building permit tracking; `approvals` — internal approval workflows

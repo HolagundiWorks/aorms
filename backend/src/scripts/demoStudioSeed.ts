@@ -9,6 +9,7 @@ import {
   activities,
   approvals,
   attendance,
+  bidOpportunities,
   estimateItems,
   estimates,
   firm,
@@ -323,6 +324,51 @@ export async function seedStudioGlanceAndLeads(
         createdById: principalId,
       });
     }
+  }
+
+  // Bid desk — firm-as-bidder RFPs (not contractor tenders).
+  const bidCount = (await db.select({ n: count() }).from(bidOpportunities))[0]?.n ?? 0;
+  if (bidCount === 0) {
+    const dueSoon = new Date();
+    dueSoon.setDate(dueSoon.getDate() + 12);
+    const dueWatch = new Date();
+    dueWatch.setDate(dueWatch.getDate() + 40);
+    const { ref: bid1 } = await nextRef(db, "bid", "BID");
+    const { ref: bid2 } = await nextRef(db, "bid", "BID");
+    await db.insert(bidOpportunities).values([
+      {
+        ref: bid1,
+        title: "Municipal school campus — architectural consultancy",
+        issuerName: "Bengaluru Urban District Education Dept",
+        referenceNo: "BDD/ARCH/2026/114",
+        source: "GOVERNMENT_RFP",
+        portalUrl: "https://eproc.karnataka.gov.in",
+        submissionDueAt: dueSoon,
+        emdPaise: 2_50_000_00,
+        estimatedFeePaise: 45_00_000_00,
+        city: "Bengaluru",
+        siteLocation: "East Bengaluru",
+        status: "PREPARING",
+        notes: "demo-seed:bid-desk",
+        ownerId: principalId,
+        createdById: principalId,
+      },
+      {
+        ref: bid2,
+        title: "PEB warehouse design — invited consultancy bid",
+        issuerName: "Apex Precast Structures Pvt Ltd",
+        referenceNo: "APS/RFP/STR/09",
+        source: "INVITED",
+        submissionDueAt: dueWatch,
+        estimatedFeePaise: 18_00_000_00,
+        city: "Bengaluru",
+        siteLocation: "Whitefield",
+        status: "WATCHING",
+        notes: "demo-seed:bid-desk",
+        ownerId: principalId,
+        createdById: principalId,
+      },
+    ]);
   }
 
   const today = dayOffset(0);
