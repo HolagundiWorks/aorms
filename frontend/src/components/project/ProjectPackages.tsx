@@ -33,7 +33,178 @@ const STATUS_TAG: Record<string, "gray" | "green" | "red" | "blue" | "teal"> = {
 
 const shrink = { slotProps: { inputLabel: { shrink: true } } } as const;
 
-/** Package register — AProc Wave 2 owner-side tender oversight. */
+function PackageTenderPanel({
+  projectId,
+  packageId,
+  canWrite,
+}: {
+  projectId: string;
+  packageId: string;
+  canWrite: boolean;
+}) {
+  const utils = trpc.useUtils();
+  const contractorsQ = trpc.contractors.list.useQuery(
+    { activeOnly: true },
+    { enabled: canWrite },
+  );
+  const invitesQ = trpc.pmcPackageTenders.listInvites.useQuery({ projectId, packageId });
+  const bidsQ = trpc.pmcPackageTenders.listBids.useQuery({ projectId, packageId });
+  const [inviteContractorId, setInviteContractorId] = useState("");
+
+  const invalidate = () => {
+    void utils.pmcPackageTenders.listInvites.invalidate({ projectId, packageId });
+    void utils.pmcPackageTenders.listBids.invalidate({ projectId, packageId });
+    void utils.pmcPackages.listByProject.invalidate({ projectId });
+    void utils.pmcPackages.portfolioOpen.invalidate();
+  };
+
+  const invite = trpc.pmcPackageTenders.invite.useMutation({
+    meta: { errorTitle: "Couldn't invite contractor" },
+    onSuccess: () => {
+      invalidate();
+      setInviteContractorId("");
+    },
+  });
+  const withdrawInvite = trpc.pmcPackageTenders.withdrawInvite.useMutation({
+    meta: { errorTitle: "Couldn't withdraw invite" },
+    onSuccess: invalidate,
+  });
+  const openBids = trpc.pmcPackageTenders.openBids.useMutation({
+    meta: { errorTitle: "Couldn't open bids" },
+    onSuccess: invalidate,
+  });
+  const award = trpc.pmcPackageTenders.award.useMutation({
+    meta: { errorTitle: "Couldn't award package" },
+    onSuccess: invalidate,
+  });
+
+  const invites = invitesQ.data ?? [];
+  const bidData = bidsQ.data;
+  const contractors = contractorsQ.data ?? [];
+  const invitedIds = new Set(invites.filter((i) => i.status === "INVITED").map((i) => i.contractorId));
+
+  return (
+    <Stack spacing={1} sx={{ mt: 1, pl: 1, borderLeft: 2, borderColor: "divider" }}>
+      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+        Tender invites & bids
+      </Typography>
+      {canWrite && (
+        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", alignItems: "center" }}>
+          <TextField
+            select
+            size="small"
+            label="Invite contractor"
+            value={inviteContractorId}
+            sx={{ minWidth: 180 }}
+            onChange={(e) => setInviteContractorId(e.target.value)}
+          >
+            <MenuItem value="">—</MenuItem>
+            {contractors
+              .filter((c) => !invitedIds.has(c.id))
+              .map((c) => (
+                <MenuItem key={c.id} value={c.id}>
+                  {c.name}
+                </MenuItem>
+              ))}
+          </TextField>
+          <Button
+            size="small"
+            variant="outlined"
+            disabled={!inviteContractorId || invite.isPending}
+            onClick={() =>
+              invite.mutate({
+                projectId,
+                packageId,
+                contractorId: inviteContractorId,
+                startTendering: true,
+              })
+            }
+          >
+            Invite
+          </Button>
+          {bidData?.sealed && (
+            <Button
+              size="small"
+              variant="contained"
+              disabled={openBids.isPending}
+              onClick={() => openBids.mutate({ projectId, packageId })}
+            >
+              Open bids ({bidData.submittedCount} sealed)
+            </Button>
+          )}
+        </Stack>
+      )}
+      {invites.length > 0 && (
+        <Typography variant="caption" color="text.secondary">
+          Invites:{" "}
+          {invites
+            .map((i) => `${i.contractorName} (${i.status})`)
+            .join(" · ")}
+        </Typography>
+      )}
+      {canWrite &&
+        invites
+          .filter((i) => i.status === "INVITED")
+          .map((i) => (
+            <Button
+              key={i.id}
+              size="small"
+              variant="text"
+              color="error"
+              sx={{ alignSelf: "flex-start" }}
+              disabled={withdrawInvite.isPending}
+              onClick={() =>
+                withdrawInvite.mutate({ projectId, packageId, inviteId: i.id })
+              }
+            >
+              Withdraw {i.contractorName}
+            </Button>
+          ))}
+      {bidData && bidData.bids.length > 0 && (
+        <Stack spacing={0.5}>
+          {bidData.bids.map((b) => (
+            <Stack
+              key={b.id}
+              direction="row"
+              spacing={1}
+              sx={{ alignItems: "center", flexWrap: "wrap" }}
+            >
+              <Typography variant="body2">
+                {b.contractorName}
+                {bidData.sealed
+                  ? " — bid submitted (sealed)"
+                  : b.amountPaise != null
+                    ? ` — ${formatINR(b.amountPaise)}`
+                    : ""}{" "}
+                [{b.status}]
+              </Typography>
+              {canWrite && !bidData.sealed && b.status === "SUBMITTED" && (
+                <Button
+                  size="small"
+                  variant="contained"
+                  disabled={award.isPending}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Award this package to ${b.contractorName}${b.amountPaise != null ? ` at ${formatINR(b.amountPaise)}` : ""}?`,
+                      )
+                    ) {
+                      award.mutate({ projectId, packageId, bidId: b.id });
+                    }
+                  }}
+                >
+                  Award
+                </Button>
+              )}
+            </Stack>
+          ))}
+        </Stack>
+      )}
+    </Stack>
+  );
+}
+
+/** Package register — AProc Wave 2 owner-side tender oversight + W2.3 invites/bids. */
 export function ProjectPackages({ projectId }: { projectId: string }) {
   const { user } = useAuth();
   const utils = trpc.useUtils();
@@ -65,6 +236,7 @@ export function ProjectPackages({ projectId }: { projectId: string }) {
   });
 
   const [createOpen, setCreateOpen] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
     trade: "",
@@ -96,8 +268,8 @@ export function ProjectPackages({ projectId }: { projectId: string }) {
         )}
       </Stack>
       <Typography variant="body2" color="text.secondary">
-        Owner-side work / tender packages. The PMC certifies and oversees — the firm does not bid.
-        Contractor bidding lands in the contractor portal later.
+        Owner-side work / tender packages. Invite contractors from here; they bid in the contractor
+        portal. The PMC certifies and awards — the firm does not bid.
       </Typography>
 
       {listQ.isLoading && (
@@ -203,6 +375,13 @@ export function ProjectPackages({ projectId }: { projectId: string }) {
                   <Button
                     size="small"
                     variant="text"
+                    onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
+                  >
+                    {expandedId === p.id ? "Hide tender" : "Tender desk"}
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="text"
                     color="error"
                     disabled={remove.isPending}
                     onClick={() => {
@@ -214,6 +393,13 @@ export function ProjectPackages({ projectId }: { projectId: string }) {
                     Remove
                   </Button>
                 </Stack>
+              )}
+              {(expandedId === p.id || (!canWrite && p.status === "TENDERING")) && (
+                <PackageTenderPanel
+                  projectId={projectId}
+                  packageId={p.id}
+                  canWrite={canWrite}
+                />
               )}
             </Stack>
           </Box>

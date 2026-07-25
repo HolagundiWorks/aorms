@@ -148,9 +148,9 @@ const Performance = lazyRoute(() => import("./routes/Performance.js"), "Performa
 const Clients = lazyRoute(() => import("./routes/Clients.js"), "Clients");
 const Consultants = lazyRoute(() => import("./routes/Consultants.js"), "Consultants");
 const Contractors = lazyRoute(() => import("./routes/Contractors.js"), "Contractors");
-const ContractorPortalStub = lazyRoute(
-  () => import("./routes/ContractorPortalStub.js"),
-  "ContractorPortalStub",
+const ContractorPortal = lazyRoute(
+  () => import("./routes/ContractorPortal.js"),
+  "ContractorPortal",
 );
 const Lxos = lazyRoute(() => import("./routes/Lxos.js"), "Lxos");
 const SystemAdmin = lazyRoute(() => import("./routes/SystemAdmin.js"), "SystemAdmin");
@@ -415,12 +415,12 @@ function AppWorkspace() {
       </div>
     );
 
-  // Contractors (scoped to a contractor record) get the login-based contractor portal.
+  // Contractors (scoped to a contractor record) get the package-tender portal.
   if (user.role === "CONTRACTOR" && user.contractorId)
     return (
       <div>
         <Routes>
-          <Route path="/" element={<ContractorPortalStub />} />
+          <Route path="/" element={<ContractorPortal />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

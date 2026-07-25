@@ -1,4 +1,5 @@
 import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
+import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { AORMS_PMC, AORMS_PLATFORM } from "../lib/product-nomenclature.js";
 import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
@@ -13,13 +14,13 @@ const PILLARS = [
     wave: "Wave 2 ✅",
   },
   {
-    title: "Packages",
-    body: "Work / tender package register — owner-side oversight. Live under Delivery → Packages.",
+    title: "Packages & tenders",
+    body: "Invite contractors from Delivery → Packages; they bid in the contractor portal (sealed until open).",
     wave: "Wave 2 ✅",
   },
   {
     title: "Site certification",
-    body: "RA bill certification is live on Delivery. Steel/BBS cert follows when that spine lands.",
+    body: "RA bills and steel (issued/consumed kg) certification on Delivery — certify for the client.",
     wave: "Wave 3 ✅",
   },
   {
@@ -39,6 +40,17 @@ export function PmcHome() {
   const milestonesQ = trpc.pmcMilestones.portfolioAttention.useQuery();
   const packagesQ = trpc.pmcPackages.portfolioOpen.useQuery();
   const raQ = trpc.pmcRaBills.portfolioOpen.useQuery();
+  const [digestMsg, setDigestMsg] = useState<string | null>(null);
+  const sendDigest = trpc.pmcDigest.send.useMutation({
+    meta: { errorTitle: "Couldn't send portfolio digest" },
+    onSuccess: (res) => {
+      setDigestMsg(
+        res.sent
+          ? `Digest sent to ${res.to}`
+          : `Digest not sent${res.reason ? `: ${res.reason}` : ""}`,
+      );
+    },
+  });
 
   const projectRows = projectsQ.data ?? [];
   const openSnags = snagsQ.data ?? [];
@@ -55,11 +67,34 @@ export function PmcHome() {
     >
       <PageBreadcrumb items={[{ label: AORMS_PMC.title }, { label: "Home" }]} />
       <Stack spacing={3}>
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 56 * 8 }}>
-          {AORMS_PMC.title} is the third {AORMS_PLATFORM.name} app — for project management
-          consultancies that plan, coordinate, and certify delivery. Programme, packages, and RA
-          certification are live on each project’s Delivery tab.
-        </Typography>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+          sx={{ alignItems: { sm: "flex-start" }, justifyContent: "space-between" }}
+        >
+          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 56 * 8 }}>
+            {AORMS_PMC.title} is the third {AORMS_PLATFORM.name} app — for project management
+            consultancies that plan, coordinate, and certify delivery. Programme, packages, tenders,
+            RA and steel certification are live on each project’s Delivery tab.
+          </Typography>
+          <Button
+            size="small"
+            variant="outlined"
+            disabled={sendDigest.isPending}
+            onClick={() => {
+              setDigestMsg(null);
+              sendDigest.mutate({});
+            }}
+            sx={{ flexShrink: 0 }}
+          >
+            {sendDigest.isPending ? "Sending…" : "Email portfolio digest"}
+          </Button>
+        </Stack>
+        {digestMsg && (
+          <Typography variant="caption" color="text.secondary">
+            {digestMsg}
+          </Typography>
+        )}
 
         <Box
           sx={{

@@ -5,7 +5,12 @@ import type { DB } from "../../db/index.js";
 import {
   clients,
   decisions,
+  pmcMilestones,
+  pmcPackages,
+  pmcRaBills,
+  pmcSteelCerts,
   projectOffices,
+  snags,
   tasks,
   teamMembers,
 } from "../../db/schema.js";
@@ -24,6 +29,14 @@ export type OperatorSnapshot = {
     openConstruction: { projectRef: string; kind: string; subject: string }[];
     myOpenTasks: { title: string; projectRef: string | null; dueDate: string | null; priority: string }[];
     revisionRiskBand: string;
+    /** AProc portfolio signals for Ask ESTI (W4.4). */
+    aproc?: {
+      openSnags: number;
+      milestoneAlerts: number;
+      openPackages: number;
+      raInFlight: number;
+      steelInFlight: number;
+    };
   };
   project?: {
     ref: string;
@@ -32,6 +45,13 @@ export type OperatorSnapshot = {
     stage: string | null;
     openTasks: number;
     openDecisions: { title: string; state: string; category: string | null }[];
+    aproc?: {
+      openSnags: number;
+      delayedMilestones: { ref: string; title: string; status: string }[];
+      openPackages: { ref: string; title: string; status: string }[];
+      raInFlight: { ref: string; billNo: string; status: string }[];
+      steelInFlight: { ref: string; status: string; wastagePct: number }[];
+    };
   };
 };
 
@@ -98,6 +118,57 @@ export async function loadOperatorSnapshot(
     }
   }
 
+  const [snagAgg] = await db
+    .select({ n: count() })
+    .from(snags)
+    .innerJoin(projectOffices, eq(snags.projectId, projectOffices.id))
+    .where(
+      and(
+        isNull(projectOffices.archivedAt),
+        inArray(snags.status, ["OPEN", "IN_PROGRESS"]),
+      ),
+    );
+  const [msAgg] = await db
+    .select({ n: count() })
+    .from(pmcMilestones)
+    .innerJoin(projectOffices, eq(pmcMilestones.projectId, projectOffices.id))
+    .where(
+      and(
+        isNull(projectOffices.archivedAt),
+        inArray(pmcMilestones.status, ["AT_RISK", "DELAYED"]),
+      ),
+    );
+  const [pkgAgg] = await db
+    .select({ n: count() })
+    .from(pmcPackages)
+    .innerJoin(projectOffices, eq(pmcPackages.projectId, projectOffices.id))
+    .where(
+      and(
+        isNull(projectOffices.archivedAt),
+        sql`${pmcPackages.status} not in ('COMPLETE', 'CANCELLED')`,
+      ),
+    );
+  const [raAgg] = await db
+    .select({ n: count() })
+    .from(pmcRaBills)
+    .innerJoin(projectOffices, eq(pmcRaBills.projectId, projectOffices.id))
+    .where(
+      and(
+        isNull(projectOffices.archivedAt),
+        inArray(pmcRaBills.status, ["DRAFT", "SITE_CHECKED", "CERTIFIED"]),
+      ),
+    );
+  const [steelAgg] = await db
+    .select({ n: count() })
+    .from(pmcSteelCerts)
+    .innerJoin(projectOffices, eq(pmcSteelCerts.projectId, projectOffices.id))
+    .where(
+      and(
+        isNull(projectOffices.archivedAt),
+        inArray(pmcSteelCerts.status, ["DRAFT", "SITE_CHECKED", "CERTIFIED"]),
+      ),
+    );
+
   snapshot.office = {
     activeProjects: projectRows.map((p) => ({
       ref: p.ref,
@@ -141,6 +212,13 @@ export async function loadOperatorSnapshot(
       priority: t.priority,
     })),
     revisionRiskBand: ac.revisionRiskBand,
+    aproc: {
+      openSnags: Number(snagAgg?.n ?? 0),
+      milestoneAlerts: Number(msAgg?.n ?? 0),
+      openPackages: Number(pkgAgg?.n ?? 0),
+      raInFlight: Number(raAgg?.n ?? 0),
+      steelInFlight: Number(steelAgg?.n ?? 0),
+    },
   };
 
   for (const row of projectRows.slice(0, 5)) {
@@ -176,6 +254,71 @@ export async function loadOperatorSnapshot(
         .orderBy(desc(decisions.createdAt))
         .limit(8);
 
+      const [projSnags] = await db
+        .select({ n: count() })
+        .from(snags)
+        .where(and(eq(snags.projectId, projectId), inArray(snags.status, ["OPEN", "IN_PROGRESS"])));
+
+      const delayedMs = await db
+        .select({
+          ref: pmcMilestones.ref,
+          title: pmcMilestones.title,
+          status: pmcMilestones.status,
+        })
+        .from(pmcMilestones)
+        .where(
+          and(
+            eq(pmcMilestones.projectId, projectId),
+            inArray(pmcMilestones.status, ["AT_RISK", "DELAYED"]),
+          ),
+        )
+        .limit(6);
+
+      const openPkgs = await db
+        .select({
+          ref: pmcPackages.ref,
+          title: pmcPackages.title,
+          status: pmcPackages.status,
+        })
+        .from(pmcPackages)
+        .where(
+          and(
+            eq(pmcPackages.projectId, projectId),
+            sql`${pmcPackages.status} not in ('COMPLETE', 'CANCELLED')`,
+          ),
+        )
+        .limit(6);
+
+      const raRows = await db
+        .select({
+          ref: pmcRaBills.ref,
+          billNo: pmcRaBills.billNo,
+          status: pmcRaBills.status,
+        })
+        .from(pmcRaBills)
+        .where(
+          and(
+            eq(pmcRaBills.projectId, projectId),
+            inArray(pmcRaBills.status, ["DRAFT", "SITE_CHECKED", "CERTIFIED"]),
+          ),
+        )
+        .limit(6);
+
+      const steelRows = await db
+        .select({
+          ref: pmcSteelCerts.ref,
+          status: pmcSteelCerts.status,
+          wastagePct: pmcSteelCerts.wastagePct,
+        })
+        .from(pmcSteelCerts)
+        .where(
+          and(
+            eq(pmcSteelCerts.projectId, projectId),
+            inArray(pmcSteelCerts.status, ["DRAFT", "SITE_CHECKED", "CERTIFIED"]),
+          ),
+        )
+        .limit(6);
+
       snapshot.project = {
         ref: proj.ref,
         title: proj.title,
@@ -187,6 +330,13 @@ export async function loadOperatorSnapshot(
           state: d.state,
           category: d.category,
         })),
+        aproc: {
+          openSnags: Number(projSnags?.n ?? 0),
+          delayedMilestones: delayedMs,
+          openPackages: openPkgs,
+          raInFlight: raRows,
+          steelInFlight: steelRows,
+        },
       };
 
       for (const d of decRows.slice(0, 4)) {
@@ -218,6 +368,26 @@ export function formatOperatorSnapshot(snapshot: OperatorSnapshot): string {
         ? `Open CRIF decisions:\n${p.openDecisions.map((d) => `- ${d.title} (${d.state}${d.category ? `, ${d.category}` : ""})`).join("\n")}`
         : "Open CRIF decisions: none",
     );
+    if (p.aproc) {
+      const a = p.aproc;
+      lines.push(
+        "",
+        "## AProc on this project (Delivery)",
+        `Open snags: ${a.openSnags}`,
+        a.delayedMilestones.length
+          ? `Milestone alerts:\n${a.delayedMilestones.map((m) => `- ${m.ref} — ${m.title} [${m.status}]`).join("\n")}`
+          : "Milestone alerts: none",
+        a.openPackages.length
+          ? `Open packages:\n${a.openPackages.map((x) => `- ${x.ref} — ${x.title} [${x.status}]`).join("\n")}`
+          : "Open packages: none",
+        a.raInFlight.length
+          ? `RA certification in flight:\n${a.raInFlight.map((r) => `- ${r.ref} (${r.billNo}) [${r.status}]`).join("\n")}`
+          : "RA certification in flight: none",
+        a.steelInFlight.length
+          ? `Steel certification in flight:\n${a.steelInFlight.map((s) => `- ${s.ref} [${s.status}] wastage ${s.wastagePct}%`).join("\n")}`
+          : "Steel certification in flight: none",
+      );
+    }
   }
 
   if (snapshot.office) {
@@ -259,6 +429,19 @@ export function formatOperatorSnapshot(snapshot: OperatorSnapshot): string {
     if (o.myOpenTasks.length) {
       lines.push(
         `Your open tasks:\n${o.myOpenTasks.map((t) => `- ${t.title}${t.projectRef ? ` (${t.projectRef})` : ""}${t.dueDate ? ` due ${t.dueDate}` : ""}`).join("\n")}`,
+      );
+    }
+    if (o.aproc) {
+      const a = o.aproc;
+      lines.push(
+        "",
+        "## AProc portfolio (owner-side PMC)",
+        `Open snags: ${a.openSnags}`,
+        `Milestone alerts (at risk / delayed): ${a.milestoneAlerts}`,
+        `Open packages: ${a.openPackages}`,
+        `RA bills in flight: ${a.raInFlight}`,
+        `Steel certs in flight: ${a.steelInFlight}`,
+        "Screens: AProc home (/pmc) · Project → Delivery (Programme, Packages, RA, Steel).",
       );
     }
   }

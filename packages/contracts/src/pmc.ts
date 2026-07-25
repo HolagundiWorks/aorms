@@ -296,3 +296,106 @@ export function pmcRaNetPayablePaise(input: {
       input.otherDeductionPaise,
   );
 }
+
+/** Package tender invite — PMC invites contractors; firm does not bid. */
+export const PmcInviteStatus = z.enum(["INVITED", "WITHDRAWN", "DECLINED"]);
+export type PmcInviteStatus = z.infer<typeof PmcInviteStatus>;
+
+export const PmcPackageInviteCreate = z.object({
+  projectId: z.string().uuid(),
+  packageId: z.string().uuid(),
+  contractorId: z.string().uuid(),
+  notes: z.string().max(2000).optional(),
+  /** When true (default), set package status to TENDERING. */
+  startTendering: z.boolean().optional(),
+});
+export type PmcPackageInviteCreate = z.infer<typeof PmcPackageInviteCreate>;
+
+export const PmcBidStatus = z.enum(["SUBMITTED", "WITHDRAWN", "AWARDED", "REJECTED"]);
+export type PmcBidStatus = z.infer<typeof PmcBidStatus>;
+
+export const PmcPackageBidSubmit = z.object({
+  packageId: z.string().uuid(),
+  amountPaise: z.number().int().min(1),
+  coverNote: z.string().max(8000).optional(),
+  validityDays: z.number().int().min(1).max(365).optional(),
+});
+export type PmcPackageBidSubmit = z.infer<typeof PmcPackageBidSubmit>;
+
+export const PmcPackageAward = z.object({
+  projectId: z.string().uuid(),
+  packageId: z.string().uuid(),
+  bidId: z.string().uuid(),
+});
+export type PmcPackageAward = z.infer<typeof PmcPackageAward>;
+
+/**
+ * Steel certification — issued vs consumed kg (lightweight, no BBS ERP).
+ * Wastage % = max(0, (issued − consumed) / issued × 100) when issued > 0.
+ */
+export const PmcSteelCertStatus = z.enum([
+  "DRAFT",
+  "SITE_CHECKED",
+  "CERTIFIED",
+  "SENT_TO_CLIENT",
+  "CLOSED",
+]);
+export type PmcSteelCertStatus = z.infer<typeof PmcSteelCertStatus>;
+
+export const PMC_STEEL_CERT_STATUS_LABEL: Record<PmcSteelCertStatus, string> = {
+  DRAFT: "Draft",
+  SITE_CHECKED: "Site checked",
+  CERTIFIED: "Certified",
+  SENT_TO_CLIENT: "Sent to client",
+  CLOSED: "Closed",
+};
+
+export const PMC_STEEL_TRANSITIONS: Record<PmcSteelCertStatus, readonly PmcSteelCertStatus[]> = {
+  DRAFT: ["SITE_CHECKED"],
+  SITE_CHECKED: ["DRAFT", "CERTIFIED"],
+  CERTIFIED: ["SENT_TO_CLIENT"],
+  SENT_TO_CLIENT: ["CLOSED"],
+  CLOSED: [],
+};
+
+export const PmcSteelCertCreate = z.object({
+  projectId: z.string().uuid(),
+  packageId: z.string().uuid().optional(),
+  periodStart: z.string().date(),
+  periodEnd: z.string().date(),
+  issuedKg: z.number().min(0).max(1e9),
+  consumedKg: z.number().min(0).max(1e9),
+  narrative: z.string().max(8000).optional(),
+});
+export type PmcSteelCertCreate = z.infer<typeof PmcSteelCertCreate>;
+
+export const PmcSteelCertUpdate = z.object({
+  id: z.string().uuid(),
+  projectId: z.string().uuid(),
+  packageId: z.string().uuid().nullable().optional(),
+  periodStart: z.string().date().optional(),
+  periodEnd: z.string().date().optional(),
+  issuedKg: z.number().min(0).max(1e9).optional(),
+  consumedKg: z.number().min(0).max(1e9).optional(),
+  narrative: z.string().max(8000).nullable().optional(),
+});
+export type PmcSteelCertUpdate = z.infer<typeof PmcSteelCertUpdate>;
+
+export const PmcSteelCertTransition = z.object({
+  id: z.string().uuid(),
+  projectId: z.string().uuid(),
+  to: PmcSteelCertStatus,
+});
+export type PmcSteelCertTransition = z.infer<typeof PmcSteelCertTransition>;
+
+export function pmcSteelWastagePct(issuedKg: number, consumedKg: number): number {
+  if (issuedKg <= 0) return 0;
+  return Math.max(0, Math.round(((issuedKg - consumedKg) / issuedKg) * 1000) / 10);
+}
+
+/** Owner-triggered AProc portfolio digest email. */
+export const PmcDigestSend = z.object({
+  /** Override recipient; defaults to firm.email then actor email. */
+  to: z.string().email().optional(),
+});
+export type PmcDigestSend = z.infer<typeof PmcDigestSend>;

@@ -149,7 +149,89 @@ export const pmcPackages = pgTable("esti_pmc_package", {
   contractValuePaise: bigint("contract_value_paise", { mode: "number" }),
   tenderCloseDate: date("tender_close_date"),
   awardDate: date("award_date"),
+  /** When set, staff may see bid amounts (unsealed). Null = sealed while tendering. */
+  bidsOpenedAt: timestamp("bids_opened_at", { withTimezone: true }),
   notes: text("notes"),
+  createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/**
+ * Invite a contractor to bid on an owner-side package (W2.3).
+ * Firm does not bid — contractors respond via the contractor portal.
+ */
+export const pmcPackageInvites = pgTable("esti_pmc_package_invite", {
+  id: id(),
+  packageId: uuid("package_id")
+    .notNull()
+    .references(() => pmcPackages.id, { onDelete: "cascade" }),
+  contractorId: uuid("contractor_id")
+    .notNull()
+    .references(() => contractors.id, { onDelete: "cascade" }),
+  status: text("status", {
+    enum: ["INVITED", "WITHDRAWN", "DECLINED"],
+  })
+    .notNull()
+    .default("INVITED"),
+  notes: text("notes"),
+  invitedById: uuid("invited_by_id").references(() => users.id, { onDelete: "set null" }),
+  invitedAt: timestamp("invited_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/** Contractor bid on a package — sealed until PMC opens bids. */
+export const pmcPackageBids = pgTable("esti_pmc_package_bid", {
+  id: id(),
+  packageId: uuid("package_id")
+    .notNull()
+    .references(() => pmcPackages.id, { onDelete: "cascade" }),
+  inviteId: uuid("invite_id").references(() => pmcPackageInvites.id, {
+    onDelete: "set null",
+  }),
+  contractorId: uuid("contractor_id")
+    .notNull()
+    .references(() => contractors.id, { onDelete: "cascade" }),
+  amountPaise: bigint("amount_paise", { mode: "number" }).notNull(),
+  coverNote: text("cover_note"),
+  validityDays: integer("validity_days"),
+  status: text("status", {
+    enum: ["SUBMITTED", "WITHDRAWN", "AWARDED", "REJECTED"],
+  })
+    .notNull()
+    .default("SUBMITTED"),
+  submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().defaultNow(),
+  withdrawnAt: timestamp("withdrawn_at", { withTimezone: true }),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/**
+ * Lightweight steel certification (W3.3) — issued vs consumed kg + wastage.
+ * Not the full BBS / steel reconciliation ERP spine.
+ */
+export const pmcSteelCerts = pgTable("esti_pmc_steel_cert", {
+  id: id(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projectOffices.id, { onDelete: "cascade" }),
+  packageId: uuid("package_id").references(() => pmcPackages.id, { onDelete: "set null" }),
+  ref: text("ref").notNull(),
+  periodStart: date("period_start").notNull(),
+  periodEnd: date("period_end").notNull(),
+  status: text("status", {
+    enum: ["DRAFT", "SITE_CHECKED", "CERTIFIED", "SENT_TO_CLIENT", "CLOSED"],
+  })
+    .notNull()
+    .default("DRAFT"),
+  issuedKg: doublePrecision("issued_kg").notNull().default(0),
+  consumedKg: doublePrecision("consumed_kg").notNull().default(0),
+  wastagePct: doublePrecision("wastage_pct").notNull().default(0),
+  narrative: text("narrative"),
+  certifiedAt: timestamp("certified_at", { withTimezone: true }),
+  certifiedById: uuid("certified_by_id").references(() => users.id, { onDelete: "set null" }),
+  sentAt: timestamp("sent_at", { withTimezone: true }),
   createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),

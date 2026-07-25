@@ -206,8 +206,9 @@ own revenue unless the firm also invoices the client for reimbursables (out of s
 | **Snags** | `snags` | **W1** |
 | **Progress reports** | `progressReports` | **W1** |
 | Programme | master milestones | **W2** ✅ |
-| Packages | package register | **W2** ✅ |
+| Packages | package register + tender invites | **W2** ✅ |
 | RA certification | cert workflow | **W3** ✅ |
+| Steel certification | issued/consumed kg | **W3** ✅ |
 
 Studio and Consulting keep the same Delivery panel — snags/MPR help architects too.
 
@@ -238,7 +239,7 @@ Workspace type `PMC`, nomenclature, `proc.aorms.in`, `/pmc` home shell, landing 
 |---|---|---|---|
 | W2.1 | `esti_pmc_milestone` — master programme (not CPM) | Client reporting · `pmcMilestones` | ✅ |
 | W2.2 | `esti_pmc_package` — package register + status | Tender oversight · `pmcPackages` | ✅ |
-| W2.3 | Owner-side tender invitation → contractor portal bids | Align with Bid desk PR if merged | 🔲 |
+| W2.3 | Owner-side tender invitation → contractor portal bids | `pmcPackageTenders` + `contractorPortal`; sealed until open | ✅ |
 | W2.4 | AProc home tiles (delayed milestones · open packages) | `/pmc` | ✅ |
 
 ### Wave 3 — Certification
@@ -247,7 +248,7 @@ Workspace type `PMC`, nomenclature, `proc.aorms.in`, `/pmc` home shell, landing 
 |---|---|---|---|
 | W3.1 | RA bill **certification** (`esti_pmc_ra_bill` / lines) | Draft → site checked → certified → sent → closed | ✅ |
 | W3.2 | Deductions: advance recovery, retention, GST/TDS notes | Cert narrative; not full tax engine | ✅ |
-| W3.3 | Steel / BBS certification when BBS spine is on `main` | Depends on BBS/steel PRs | 🔲 |
+| W3.3 | Steel certification (lightweight issued/consumed kg) | `esti_pmc_steel_cert` — full BBS ERP still deferred | ✅ |
 | W3.4 | Client portal: issued progress reports + certified RA summaries | `portal.issuedProgressReports` / `certifiedRaBills` | ✅ |
 
 ### Wave 4 — Integrations & polish
@@ -256,8 +257,8 @@ Workspace type `PMC`, nomenclature, `proc.aorms.in`, `/pmc` home shell, landing 
 |---|---|---|
 | W4.1 | MSP/P6 milestone import (CSV first, XER later) | ✅ CSV · XER deferred |
 | W4.2 | Branded MPR / RA cert PDF packs (worker `render_pdf`) | ✅ MPR existed · RA cert added |
-| W4.3 | Portfolio digests for PMC partners (email) | 🔲 |
-| W4.4 | ESTI: “Ask ESTI” over snags + progress + cert notes | 🔲 (APIs live for RAG later) |
+| W4.3 | Portfolio digests for PMC partners (email) | ✅ `pmcDigest.send` (SMTP optional) |
+| W4.4 | ESTI: “Ask ESTI” over snags + progress + cert notes | ✅ operator-context AProc block + wiki |
 
 ---
 

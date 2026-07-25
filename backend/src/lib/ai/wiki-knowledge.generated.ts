@@ -521,7 +521,18 @@ When the client requests a change:
 ### Consultant and contractor portals
 
 - **Consultants** � scoped to their engagement; RFIs and issued drawings only.
-- **Contractors** � site instructions and drawings for their package; no office-wide access.
+- **Contractors** � package tender invites and sealed bids via the contractor portal (AProc), plus site instructions for awarded packages; no office-wide access.
+
+### AProc (Accelerated Project Management)
+
+Owner-side PMC governance in **AProc** (/pmc, proc.aorms.in):
+
+1. **Programme** � master milestones for client reporting (not full P6/MSP).
+2. **Packages** � work/tender register; invite contractors; open sealed bids; award.
+3. **RA certification** � draft � site checked � certified (cost:approve) � sent to client.
+4. **Steel certification** � issued vs consumed kg + wastage % (lightweight; not full BBS ERP).
+5. **Portfolio digest** � email open snags / milestone alerts / RA in flight from AProc home.
+6. Ask ESTI sees live AProc portfolio and project Delivery facts in operator context.
 
 ---
 
