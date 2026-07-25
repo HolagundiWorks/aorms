@@ -69,9 +69,14 @@ export const LANDING_FAQ = [
       `${ESTI.name} (${ESTI.expansion}) is the ${ESTI.role.toLowerCase()} — ${ESTI.summary} Live in ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title} on the same spine.`,
   },
   {
+    question: `What does ${AORMS_PMC.title} include?`,
+    answer:
+      `${AORMS_PMC.title} is owner-side PMC governance: master programme milestones (CSV and Primavera P6 XER import), package tenders with sealed contractor-portal bids, RA and steel certification, BBS and steel reconciliation — not a contractor labour ERP or full CPM engine. Preview at ${AORMS_PMC.appUrl.replace(/^https:\/\//, "")}.`,
+  },
+  {
     question: "Is this documentation the shipped product?",
     answer:
-      `This page is the platform north-star (v1.0 pre-release). Live browser workspaces at ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")} and ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")} implement the apps; ${AORMS_PMC.title} is in preview. Stack details differ in places (Fastify + tRPC today vs REST/GraphQL in the north-star spec).`,
+      `This page is the live platform home. Browser workspaces at ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")} and ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")} are live; ${AORMS_PMC.title} is in preview at ${AORMS_PMC.appUrl.replace(/^https:\/\//, "")}.`,
   },
 ] as const;
 

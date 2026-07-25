@@ -103,7 +103,7 @@ under Site Progress on the same project as the drawings and decisions it relates
 
 ### Is this a construction management or contractor tool?
 
-No. AORMS is consultancy-only. It records what the architect observed, instructed and
+No. AORMS serves consultancies and PMC firms. It records what the architect observed, instructed and
 signed during supervision; it does not run the contractor's programme or bar chart.
 The boundary is deliberate, so the site record stays a record of the architect's role.
 

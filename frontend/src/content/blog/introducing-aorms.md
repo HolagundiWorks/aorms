@@ -1,7 +1,7 @@
 ---
 title: Introducing AORMS  fee recovery and revision control for the Indian architecture practice
 date: 2026-07-10
-excerpt: AORMS-Studio connects what a practice has delivered with what it has billed, and gives every client-driven revision a dated, approved record before site or drawings move  the first workspace on the AORMS platform.
+excerpt: AStudio connects what a practice has delivered with what it has billed, and gives every client-driven revision a dated, approved record before site or drawings move  the first workspace on the AORMS platform.
 tags: Product, Vision
 author: Human Centric Works
 coverImage: /esti-logo.png
@@ -9,9 +9,9 @@ coverImage: /esti-logo.png
 
 **AORMS** is the platform  operational and design frameworks for **AEC consulting
 firms** (architecture and engineering practices that advise clients), with **EOMS**
-as the knowledge bank and **ESTI** as the internal agent. **AORMS-Studio** is the
-live architecture app (web-only); **AORMS-Consultancy** for engineering consultancies
-shares the same spine and is live. This post is about what **AORMS-Studio**
+as the knowledge bank and **ESTI** as the internal agent. **AStudio** is the
+live architecture app (web-only); **AConsulting** for engineering consultancies
+shares the same spine and is live. This post is about what **AStudio**
 does best for Indian architecture practices.
 
 Most architecture practices do not fail on design. They fail on the quiet

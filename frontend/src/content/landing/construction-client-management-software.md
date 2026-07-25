@@ -20,7 +20,7 @@ During construction the client should see progress without wandering through you
 
 ## Approvals and RFIs that don't stall the site
 
-Work stalls when a decision sits in someone's inbox. AORMS keeps approvals on record — what was sent, the drawing revision, the date and the client's response — so a delayed sign-off is visible. Contractors get a scoped portal for documents and site coordination (RFIs, submittals, snags, NCRs), so queries route to the firm with a trail. You coordinate client and contractor from one advisory record — not a tender or contractor ERP.
+Work stalls when a decision sits in someone's inbox. AORMS keeps approvals on record — what was sent, the drawing revision, the date and the client's response — so a delayed sign-off is visible. Contractors get a scoped portal for documents and site coordination (RFIs, submittals, snags, NCRs), so queries route to the firm with a trail. You coordinate client and contractor from one advisory record — not a contractor labour ERP (PMC package oversight lives in AProc).
 
 ## Site instructions and progress, with the client in the loop
 

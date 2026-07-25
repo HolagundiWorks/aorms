@@ -61,7 +61,7 @@ If you are evaluating AORMS for the wider practice, the [architecture practice m
 
 ## Pre-construction risk & opportunity
 
-Before issue, AORMS-Studio keeps a project **risk register**, **opportunity scorecard**, and **design phase gates** (concept → schematic → detailed → issue readiness) on Brief → R&O — consultancy delivery, not construction PM.
+Before issue, AStudio keeps a project **risk register**, **opportunity scorecard**, and **design phase gates** (concept → schematic → detailed → issue readiness) on Brief → R&O — consultancy delivery, not contractor ERP (AProc covers owner-side PMC).
 
 ## Frequently asked questions
 

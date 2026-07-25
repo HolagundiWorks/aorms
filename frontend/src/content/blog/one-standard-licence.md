@@ -15,7 +15,8 @@ not which installer you downloaded.
 
 ## What you get
 
-- Staff workspace in the browser (**AORMS-Studio** today; **AORMS-Consultancy** at launch)
+- Staff workspace in the browser (**AStudio**, **AConsulting**, and **AProc**
+  preview — same licence spine)
 - Client / consultant / contractor portals on the same platform
 - Identity and company licensing through the AORMS account hub
 - ESTI and related AI features with **BYO API key** support where configured

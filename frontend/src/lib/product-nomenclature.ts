@@ -183,9 +183,9 @@ export const PLATFORM_APPS = [
     body:
       "PMC firms that govern programme, packages, and site certification for clients — accelerated project management on the same AORMS spine, without becoming a contractor ERP.",
     bullets: [
-      "Programme & package governance",
-      "RA / steel certification workflows",
-      "Client-facing delivery oversight",
+      "Programme (CSV / P6 XER milestones) & packages",
+      "BBS, steel recon & RA certification",
+      "Contractor portal bids · client delivery oversight",
     ],
     workspaceSlug: AORMS_PMC.slug,
     href: AORMS_PMC.appUrl,

@@ -101,6 +101,10 @@ const FAQ = [
     a: `${AORMS_STUDIO.title} (architecture) and ${AORMS_CONSULTANCY.title} (engineering) are live; ${AORMS_PMC.title} (PMC) is in preview — ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")}, ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")}, and ${AORMS_PMC.appUrl.replace(/^https:\/\//, "")}.`,
   },
   {
+    q: `What does ${AORMS_PMC.title} cover?`,
+    a: `Owner-side PMC governance: programme milestones (CSV / P6 XER), packages with sealed contractor bids, BBS and steel recon, RA/steel certification — not contractor labour ERP. Preview at ${AORMS_PMC.appUrl.replace(/^https:\/\//, "")}.`,
+  },
+  {
     q: "How much does it cost?",
     a: `One Standard licence — unlimited users, full workspace, 5 GB storage included. You pay only for extra storage and hosted AI usage (or bring your own API key). No Lite/Pro tiers, no desktop SKU. See Pricing below.`,
   },

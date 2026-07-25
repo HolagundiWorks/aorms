@@ -1,7 +1,7 @@
 ---
 title: Pre-construction risks and opportunities — Brief to issue readiness
 date: 2026-07-22
-excerpt: Before drawings issue, AORMS-Studio keeps a structured R&O register — risks and opportunities scored from Brief through CONCEPT to ISSUE_READINESS, tied to fee and reliance.
+excerpt: Before drawings issue, AStudio keeps a structured R&O register — risks and opportunities scored from Brief through CONCEPT to ISSUE_READINESS, tied to fee and reliance.
 tags: Operations, Practice, Workflow, Product
 author: Human Centric Works
 ---
@@ -10,7 +10,7 @@ Most “early warning” talk in architecture offices is informal — a WhatsApp
 a corridor note, a principal’s memory. By the time a risk is written down, the
 drawing set is already mid-issue and the fee stage is already half spent.
 
-**AORMS-Studio** treats pre-construction **risks and opportunities (R&O)** as a
+**AStudio** treats pre-construction **risks and opportunities (R&O)** as a
 first-class register on the project, not a slide in a kickoff deck.
 
 ## What the register is for
@@ -37,7 +37,7 @@ gate**, date the decision, keep the evidence on the project record.
 R&O lives beside project Info, phases, drawings, and fee stages. Studio
 Intelligence can surface blockers that sit in the register the same way it
 surfaces overdue approvals or unbilled stages. Engineering consultancies on
-**AORMS-Consultancy** share the same platform pattern when that workspace launches.
+**AConsulting** share the same platform pattern on the same spine (live).
 
 ## Read next
 

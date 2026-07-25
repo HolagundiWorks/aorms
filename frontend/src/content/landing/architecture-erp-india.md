@@ -13,7 +13,7 @@ not need a heavy manufacturing-style ERP. They need one reliable office record:
 projects, phases, drawings, approvals, fees, bills, clients, contractors and team
 responsibilities connected in a way the practice can actually use.
 
-**AORMS-Studio** is **AORMS-Studio** on the **AORMS** platform. It gives Indian
+**AStudio** is **AStudio** on the **AORMS** platform. It gives Indian
 architecture firms an ERP-like backbone without asking the team to abandon the way
 architectural work moves.
 

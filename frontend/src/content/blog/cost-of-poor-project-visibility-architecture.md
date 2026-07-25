@@ -90,4 +90,4 @@ see [account and licence](https://aorms.in/wiki/account-and-licence).
 
 ---
 
-*Human Centric Works — AORMS-Studio for Indian consultancies.*
+*Human Centric Works — AStudio for Indian consultancies.*

@@ -1,4 +1,4 @@
-﻿---
+---
 title: Revisions aren't the problem � the missing record is
 date: 2026-07-10
 excerpt: Every architect feels the weight of drawing the same project twice. It is not a client problem or a discipline problem � it is a record problem. And records can be built.

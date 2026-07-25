@@ -1,14 +1,14 @@
 ---
 title: Why we built AORMS — the story behind the practice management system
 date: 2026-07-10
-excerpt: Brilliant design work held together by spreadsheets, messaging threads, and one senior person's memory — and fees leaking away before invoices were raised. The AORMS-Studio was built to close that gap on the AORMS platform.
+excerpt: Brilliant design work held together by spreadsheets, messaging threads, and one senior person's memory — and fees leaking away before invoices were raised. The AStudio was built to close that gap on the AORMS platform.
 tags: Vision, Story
 author: Human Centric Works
 ---
 
 **AORMS** today is a platform for **consulting offices that advise** — an operational
 framework and a design framework on one spine (see the [platform overview](/blog/aorms-platform-operational-design-frameworks)).
-**AORMS-Studio** is the first workspace we shipped: Indian architecture
+**AStudio** is the first workspace we shipped: Indian architecture
 consultancies. This is the story of why that workspace exists.
 
 Walk into almost any architecture practice in India and you will find brilliant
@@ -36,7 +36,7 @@ system, and software should do the *watching* so the principal does not have to.
 
 ## What we built
 
-**AORMS-Studio** — **AORMS-Studio** on the **AORMS** platform — observes the whole
+**AStudio** — **AStudio** on the **AORMS** platform — observes the whole
 office continuously, reasons across its parts, predicts where pressure is
 building, and recommends the one action that matters most today. It speaks the
 language of an Indian practice natively: GST, SAC codes, FY dates, COA fee logic,
