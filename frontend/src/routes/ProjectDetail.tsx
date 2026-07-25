@@ -43,6 +43,8 @@ const LEGACY_TAB: Record<string, string> = {
   "site-visits": "delivery",
   communications: "delivery",
   minutes: "delivery",
+  snags: "delivery",
+  "progress-reports": "delivery",
   approvals: "drawings",
 };
 

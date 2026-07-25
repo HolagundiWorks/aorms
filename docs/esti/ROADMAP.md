@@ -35,7 +35,19 @@ docs were removed 2026-07-24 (Git history retains them).
 | --- | --- |
 | **AStudio** (*Accelerated Studio*, architecture) | **Live** — `studio.aorms.in` |
 | **AConsulting** (*Accelerated Consulting*, engineering) | **Live** — `consultancy.aorms.in` (P9.V ✅ · P9.M ✅) |
-| **AProc** (*Accelerated Project Management*, PMC) | **Preview** — `proc.aorms.in` · `/pmc` |
+| **AProc** (*Accelerated Project Management*, PMC) | **Preview → Wave 1** — `proc.aorms.in` · `/pmc` · see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md) |
+
+## AProc delivery waves
+
+Canonical plan: **[APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)**.
+
+| Wave | Focus | Status |
+| --- | --- | --- |
+| W0 | Platform chrome, nomenclature, `WorkspaceType.PMC` | ✅ |
+| W1 | Snags + progress-report UI, AProc home KPIs, nav | 🚧 |
+| W2 | Master programme milestones · package register | 🔲 |
+| W3 | RA / steel **certification** (owner-side) | 🔲 |
+| W4 | MSP/P6 import · branded packs · ESTI over cert notes | 🔲 |
 
 ## Market fit queue
 

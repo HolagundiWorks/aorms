@@ -1,8 +1,8 @@
 import { SnagCreate, SnagUpdate } from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNull, ne, sql } from "drizzle-orm";
 import { z } from "zod";
-import { snags } from "../../db/schema.js";
+import { projectOffices, snags } from "../../db/schema.js";
 import { writeAudit } from "../../lib/audit.js";
 import { nextRef } from "../../lib/numbering.js";
 import { capabilityProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
@@ -18,6 +18,22 @@ export const snagsRouter = router({
         .where(eq(snags.projectId, input.projectId))
         .orderBy(asc(snags.dueDate), asc(snags.createdAt));
     }),
+
+  /** Portfolio rollup for AProc home — open snags per active project. */
+  portfolioOpen: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db
+      .select({
+        projectId: snags.projectId,
+        projectTitle: projectOffices.title,
+        projectRef: projectOffices.ref,
+        openCount: sql<number>`count(*)::int`,
+      })
+      .from(snags)
+      .innerJoin(projectOffices, eq(snags.projectId, projectOffices.id))
+      .where(and(ne(snags.status, "CLOSED"), isNull(projectOffices.archivedAt)))
+      .groupBy(snags.projectId, projectOffices.title, projectOffices.ref)
+      .orderBy(sql`count(*) desc`);
+  }),
 
   create: manage.input(SnagCreate).mutation(async ({ ctx, input }) => {    const { ref } = await nextRef(ctx.db, "snag", "SNG");
     const [row] = await ctx.db

@@ -9,8 +9,10 @@
 > [UNIFIED-ARCHITECTURE-V4.md](UNIFIED-ARCHITECTURE-V4.md) § "System state"; the two
 > are reconciled here via the **Status** column.
 >
-> **AORMS is a consultancy-only practice system.** Construction-delivery modules
-> (PMC, Construction, Programme, Tenders) and mood boards are **removed**.
+> **AORMS apps:** AStudio · AConsulting · **AProc** (PMC preview). The retired
+> contractor-ERP modules (old PMC hub, Construction, Programme Gantt, Tenders)
+> stay removed — AProc is a **greenfield** PMC consultancy workspace; see
+> [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md).
 >
 > **Spatial model (HCW-UI-Kit):** glass **ribbon** (top) · **rail** (20%) · **stage**
 > (80%) · **ActionDock** (bottom-centre CTAs) · glass **taskbar footer**. See
@@ -47,6 +49,18 @@
 | **Office** | menu | **Finance:** Invoices · Reconcile · Cashbook · Reports · **Studio link:** Projects · Proposals · Standards |
 
 Footer home launcher on consultancy host opens Enquiries (not Studio Intelligence).
+
+**PMC host** (`proc.aorms.in` / path `/pmc`) — AProc chrome (`pmcNav`):
+
+| Item | Kind | Destinations |
+|---|---|---|
+| **Home** | link | `/pmc` — open snags portfolio + pillars |
+| **Projects** | link | `/projects` (write) — Delivery tab: Site · Comms · Minutes · **Snags** · **Progress reports** |
+| **Clients** | link | `/clients` (write) |
+| **Delivery** | menu | Contractors · Consultants |
+| **Office** | menu | Proposals · Invoices · Financial Reports |
+
+Footer home launcher on PMC host opens `/pmc`.
 
 **Capability gates (ribbon pruning — source: `App.tsx`):**
 

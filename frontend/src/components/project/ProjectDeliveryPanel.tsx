@@ -3,8 +3,10 @@ import { useState } from "react";
 import { ProjectCommunicationsLog } from "../ProjectCommunicationsLog.js";
 import { ProjectMinutes } from "../ProjectMinutes.js";
 import { ProjectSiteVisits } from "../ProjectSiteVisits.js";
+import { ProjectProgressReports } from "./ProjectProgressReports.js";
+import { ProjectSnags } from "./ProjectSnags.js";
 
-/** Site Progress | Communications | Minutes. */
+/** Site Progress | Communications | Minutes | Snags | Progress reports. */
 export function ProjectDeliveryPanel({ projectId }: { projectId: string }) {
   const [sub, setSub] = useState(0);
   return (
@@ -20,10 +22,14 @@ export function ProjectDeliveryPanel({ projectId }: { projectId: string }) {
         <Tab label="Site Progress" />
         <Tab label="Communications" />
         <Tab label="Minutes" />
+        <Tab label="Snags" />
+        <Tab label="Progress reports" />
       </Tabs>
       {sub === 0 && <ProjectSiteVisits projectId={projectId} />}
       {sub === 1 && <ProjectCommunicationsLog projectId={projectId} />}
       {sub === 2 && <ProjectMinutes projectId={projectId} />}
+      {sub === 3 && <ProjectSnags projectId={projectId} />}
+      {sub === 4 && <ProjectProgressReports projectId={projectId} />}
     </Box>
   );
 }

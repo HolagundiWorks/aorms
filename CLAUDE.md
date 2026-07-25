@@ -63,6 +63,7 @@ Docker Compose (`compose.yaml`).
 
 Frozen host map: [`docs/esti/AORMS-SURFACE-URLS.md`](docs/esti/AORMS-SURFACE-URLS.md) ·
 `frontend/src/lib/aorms-surface-urls.ts`.
+AProc architecture & waves: [`docs/esti/APROC-ARCHITECTURE.md`](docs/esti/APROC-ARCHITECTURE.md).
 
 **Operator:** **Human Centric Works (HCW)** — design studio behind `@hcw/ui-kit` and AORMS.
 - [`docs/marketing/LANDING-REDESIGN-CONTEXT.md`](docs/marketing/LANDING-REDESIGN-CONTEXT.md) — landing/marketing brief.

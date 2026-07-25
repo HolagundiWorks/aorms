@@ -527,6 +527,7 @@ function AppWorkspace() {
     },
   ];
 
+  // AProc — see docs/esti/APROC-ARCHITECTURE.md (Wave 1 chrome).
   const pmcNav: NavNode[] = [
     { label: "Home", to: "/pmc", icon: MapIcon },
     ...(can(user.role, "write")
@@ -549,6 +550,9 @@ function AppWorkspace() {
       label: "Office",
       icon: Enterprise,
       items: [
+        ...(can(user.role, "fees:manage")
+          ? [{ label: "Proposals", to: "/office/proposals", icon: Document }]
+          : []),
         ...(can(user.role, "invoice:manage")
           ? [{ label: "Invoices", to: "/invoices", icon: Receipt }]
           : []),
