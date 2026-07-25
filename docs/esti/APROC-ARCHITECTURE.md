@@ -205,8 +205,8 @@ own revenue unless the firm also invoices the client for reimbursables (out of s
 | Minutes | MoM | ✅ |
 | **Snags** | `snags` | **W1** |
 | **Progress reports** | `progressReports` | **W1** |
-| Programme | master milestones | W2 |
-| Packages | package register | W2 |
+| Programme | master milestones | **W2** ✅ |
+| Packages | package register | **W2** ✅ |
 | RA certification | cert workflow | W3 |
 
 Studio and Consulting keep the same Delivery panel — snags/MPR help architects too.
@@ -234,12 +234,12 @@ Workspace type `PMC`, nomenclature, `proc.aorms.in`, `/pmc` home shell, landing 
 
 ### Wave 2 — Programme & packages (greenfield)
 
-| # | Item | Notes |
-|---|---|---|
-| W2.1 | `esti_pmc_milestone` — master programme (not CPM) | Client reporting |
-| W2.2 | `esti_pmc_package` — package register + status | Tender oversight |
-| W2.3 | Owner-side tender invitation → contractor portal bids | Align with Bid desk PR if merged |
-| W2.4 | AProc dashboard tiles (physical %, delayed milestones) | Studio Intelligence pattern |
+| # | Item | Notes | Status |
+|---|---|---|---|
+| W2.1 | `esti_pmc_milestone` — master programme (not CPM) | Client reporting · `pmcMilestones` | ✅ |
+| W2.2 | `esti_pmc_package` — package register + status | Tender oversight · `pmcPackages` | ✅ |
+| W2.3 | Owner-side tender invitation → contractor portal bids | Align with Bid desk PR if merged | 🔲 |
+| W2.4 | AProc home tiles (delayed milestones · open packages) | `/pmc` | ✅ |
 
 ### Wave 3 — Certification
 

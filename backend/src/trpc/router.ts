@@ -82,6 +82,8 @@ import { snagsRouter } from "../modules/pmc/snags.js";
 import { siteInstructionsRouter } from "../modules/pmc/siteInstructions.js";
 import { progressReportsRouter } from "../modules/pmc/progressReports.js";
 import { phaseProgressRouter } from "../modules/pmc/phaseProgress.js";
+import { pmcMilestonesRouter } from "../modules/pmc/milestones.js";
+import { pmcPackagesRouter } from "../modules/pmc/packages.js";
 import { siteVisitRouter } from "../modules/siteVisit/router.js";
 import { cpiRouter } from "../modules/cpi/router.js";
 import { projectBriefRouter } from "../modules/project-brief/router.js";
@@ -198,6 +200,8 @@ export const appRouter = router({
   siteInstructions: siteInstructionsRouter,
   progressReports: progressReportsRouter,
   phaseProgress: phaseProgressRouter,
+  pmcMilestones: pmcMilestonesRouter,
+  pmcPackages: pmcPackagesRouter,
   leads: leadsRouter,
   projectDna: projectDnaRouter,
   assessment: assessmentRouter,

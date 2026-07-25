@@ -102,3 +102,90 @@ export const DEFAULT_LIVE_STAGES: Record<string, { code: string; label: string }
     { code: "CLOSURE", label: "Project closure" },
   ],
 };
+
+/** Master programme milestone — client reporting, not contractor CPM. */
+export const PmcMilestoneStatus = z.enum([
+  "PLANNED",
+  "ON_TRACK",
+  "AT_RISK",
+  "DELAYED",
+  "COMPLETE",
+]);
+export type PmcMilestoneStatus = z.infer<typeof PmcMilestoneStatus>;
+
+export const PMC_MILESTONE_STATUS_LABEL: Record<PmcMilestoneStatus, string> = {
+  PLANNED: "Planned",
+  ON_TRACK: "On track",
+  AT_RISK: "At risk",
+  DELAYED: "Delayed",
+  COMPLETE: "Complete",
+};
+
+export const PmcMilestoneCreate = z.object({
+  projectId: z.string().uuid(),
+  title: z.string().min(2).max(200),
+  plannedDate: z.string().date().optional(),
+  baselineRef: z.string().max(120).optional(),
+  sortOrder: z.number().int().min(0).max(9999).optional(),
+  notes: z.string().max(4000).optional(),
+});
+export type PmcMilestoneCreate = z.infer<typeof PmcMilestoneCreate>;
+
+export const PmcMilestoneUpdate = z.object({
+  id: z.string().uuid(),
+  projectId: z.string().uuid(),
+  title: z.string().min(2).max(200).optional(),
+  plannedDate: z.string().date().nullable().optional(),
+  actualDate: z.string().date().nullable().optional(),
+  percentComplete: z.number().int().min(0).max(100).optional(),
+  status: PmcMilestoneStatus.optional(),
+  baselineRef: z.string().max(120).nullable().optional(),
+  sortOrder: z.number().int().min(0).max(9999).optional(),
+  notes: z.string().max(4000).nullable().optional(),
+});
+export type PmcMilestoneUpdate = z.infer<typeof PmcMilestoneUpdate>;
+
+/** Work package / tender package — owner-side oversight (PMC certifies, does not bid). */
+export const PmcPackageStatus = z.enum([
+  "DRAFT",
+  "TENDERING",
+  "AWARDED",
+  "IN_PROGRESS",
+  "COMPLETE",
+  "CANCELLED",
+]);
+export type PmcPackageStatus = z.infer<typeof PmcPackageStatus>;
+
+export const PMC_PACKAGE_STATUS_LABEL: Record<PmcPackageStatus, string> = {
+  DRAFT: "Draft",
+  TENDERING: "Tendering",
+  AWARDED: "Awarded",
+  IN_PROGRESS: "In progress",
+  COMPLETE: "Complete",
+  CANCELLED: "Cancelled",
+};
+
+export const PmcPackageCreate = z.object({
+  projectId: z.string().uuid(),
+  title: z.string().min(2).max(200),
+  trade: z.string().max(100).optional(),
+  contractorId: z.string().uuid().optional(),
+  contractValuePaise: z.number().int().min(0).optional(),
+  tenderCloseDate: z.string().date().optional(),
+  notes: z.string().max(4000).optional(),
+});
+export type PmcPackageCreate = z.infer<typeof PmcPackageCreate>;
+
+export const PmcPackageUpdate = z.object({
+  id: z.string().uuid(),
+  projectId: z.string().uuid(),
+  title: z.string().min(2).max(200).optional(),
+  trade: z.string().max(100).nullable().optional(),
+  status: PmcPackageStatus.optional(),
+  contractorId: z.string().uuid().nullable().optional(),
+  contractValuePaise: z.number().int().min(0).nullable().optional(),
+  tenderCloseDate: z.string().date().nullable().optional(),
+  awardDate: z.string().date().nullable().optional(),
+  notes: z.string().max(4000).nullable().optional(),
+});
+export type PmcPackageUpdate = z.infer<typeof PmcPackageUpdate>;
