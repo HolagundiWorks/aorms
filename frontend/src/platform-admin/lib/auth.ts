@@ -21,7 +21,7 @@ export interface OrgHandle {
   publicId: string | null;
   name: string;
   slug: string;
-  /** Which AORMS workspace the company runs — STUDIO | CONSULTANCY. */
+  /** Which AORMS workspace the company runs — STUDIO | CONSULTANCY | PMC. */
   workspaceType?: string;
 }
 
@@ -137,7 +137,7 @@ export function switchCompany(company: string): Promise<Me> {
 export function createCompany(
   name: string,
   loginDomain?: string,
-  workspaceType?: "STUDIO" | "CONSULTANCY",
+  workspaceType?: "STUDIO" | "CONSULTANCY" | "PMC",
 ): Promise<Me & { error?: string }> {
   return postMe("/platform/auth/create-company", { name, loginDomain, workspaceType });
 }

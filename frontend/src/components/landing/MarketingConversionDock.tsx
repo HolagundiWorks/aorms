@@ -1,6 +1,6 @@
 import { ActionDock, useScreenActions } from "@hcw/ui-kit";
 import { useNavigate } from "react-router-dom";
-import { AORMS_CONSULTANCY, AORMS_STUDIO } from "../../lib/product-nomenclature.js";
+import { AORMS_CONSULTANCY, AORMS_PMC, AORMS_STUDIO } from "../../lib/product-nomenclature.js";
 
 export type MarketingConversionDockVariant = "default" | "platform-apps";
 
@@ -16,7 +16,7 @@ export function MarketingConversionDock({
     variant === "platform-apps"
       ? [
           {
-            id: "aorms-studio",
+            id: "astudio",
             label: AORMS_STUDIO.title,
             zone: "center",
             tone: "primary",
@@ -25,12 +25,21 @@ export function MarketingConversionDock({
             },
           },
           {
-            id: "aorms-consultancy",
+            id: "aconsulting",
             label: AORMS_CONSULTANCY.title,
             zone: "center",
             tone: "primary",
             onClick: () => {
               window.location.href = AORMS_CONSULTANCY.appUrl;
+            },
+          },
+          {
+            id: "aproc",
+            label: AORMS_PMC.title,
+            zone: "center",
+            tone: "primary",
+            onClick: () => {
+              window.location.href = AORMS_PMC.appUrl;
             },
           },
         ]

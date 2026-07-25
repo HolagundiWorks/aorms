@@ -1,4 +1,4 @@
-/** SEO for /login — AORMS-Studio marketing + sign-in (canonical vertical entry page). */
+/** SEO for /login — AStudio marketing + sign-in (canonical vertical entry page). */
 import { AORMS_STUDIO, AORMS_PLATFORM, EOMS, ESTI } from "./product-nomenclature.js";
 
 const BASE = "https://aorms.in/";
@@ -9,7 +9,7 @@ export const ARCHITECTURE_LANDING_SEO = {
   description:
     `${AORMS_STUDIO.title} — the architecture consultancy workspace on AORMS — fee recovery, MoM-led client revisions, GST billing, drawings, studio load and portals. Not construction project management. Unlimited users. 5 GB included.`,
   keywords:
-    `architecture consultancy software India, architecture advisory practice, fee recovery architects, architect fee proposal software COA, GST billing architects India, client revision management architects, AORMS-Studio, ${LEGACY_SLUGS}, ESTI`,
+    `architecture consultancy software India, architecture advisory practice, fee recovery architects, architect fee proposal software COA, GST billing architects India, client revision management architects, AStudio, Accelerated Studio, ${LEGACY_SLUGS}, ESTI`,
   ogTitle: `${AORMS_STUDIO.title} — from chaos to clarity`,
   ogDescription:
     `One cloud workspace for Indian architecture consultancies: fee recovery, MoM-to-site revisions, GST, drawings, studio load and portals — ${AORMS_STUDIO.title} on the AORMS platform.`,

@@ -1,5 +1,12 @@
 import { Alert, AlertTitle, Box, CircularProgress } from "@mui/material";
-import { AORMS_STUDIO, AORMS_CONSULTANCY, isAormsStudioLegacySlug } from "./lib/product-nomenclature.js";
+import {
+  AORMS_STUDIO,
+  AORMS_CONSULTANCY,
+  AORMS_PMC,
+  isAormsStudioLegacySlug,
+  isAormsConsultancyLegacySlug,
+  isAormsPmcLegacySlug,
+} from "./lib/product-nomenclature.js";
 import {
   Analytics,
   Archive,
@@ -99,6 +106,7 @@ const ConsultancyEnquiries = lazyRoute(
   () => import("./routes/ConsultancyEnquiries.js"),
   "ConsultancyEnquiries",
 );
+const PmcHome = lazyRoute(() => import("./routes/PmcHome.js"), "PmcHome");
 const Contracts = lazyRoute(() => import("./routes/Contracts.js"), "Contracts");
 const DocumentsRegister = lazyRoute(() => import("./routes/DocumentsRegister.js"), "DocumentsRegister");
 const Letters = lazyRoute(() => import("./routes/Letters.js"), "Letters");
@@ -253,20 +261,52 @@ function AppWorkspace() {
   if (!ADMIN_CONSOLE_URL && (isAdminHost() || pathname.startsWith("/platform-admin")))
     return <PlatformAdmin />;
 
-  // consultancy.aorms.in — AORMS-Consultancy. Authenticated staff enter the
+  // consultancy.aorms.in — AConsulting. Authenticated staff enter the
   // engineering workspace (Enquiries home); everyone else sees the
   // unified platform landing. One login window — the workspace type only
   // routes where a company works.
   if (surface === "consultancy") {
     if (user && isStaffRole(user.role)) {
-      if (pathname === "/" || pathname === AORMS_CONSULTANCY.marketingPath)
+      if (
+        pathname === "/" ||
+        pathname === AORMS_CONSULTANCY.marketingPath ||
+        pathname === AORMS_CONSULTANCY.legacyMarketingPath
+      )
         return <Navigate to="/consultancy/enquiries" replace />;
       // Fall through to the authenticated app router below.
     } else {
-      if (pathname === "/" || pathname === AORMS_CONSULTANCY.marketingPath)
+      if (
+        pathname === "/" ||
+        pathname === AORMS_CONSULTANCY.marketingPath ||
+        pathname === AORMS_CONSULTANCY.legacyMarketingPath
+      )
         return <Landing />;
       if (pathname === "/login") {
         // Fall through — staff sign-in works on this host too (single login).
+      } else {
+        return <Navigate to="/" replace />;
+      }
+    }
+  }
+
+  // proc.aorms.in / pmc.aorms.in — AProc (Accelerated Project Management).
+  if (surface === "pmc") {
+    if (user && isStaffRole(user.role)) {
+      if (
+        pathname === "/" ||
+        pathname === AORMS_PMC.marketingPath ||
+        pathname === AORMS_PMC.legacyMarketingPath
+      )
+        return <Navigate to="/pmc" replace />;
+    } else {
+      if (
+        pathname === "/" ||
+        pathname === AORMS_PMC.marketingPath ||
+        pathname === AORMS_PMC.legacyMarketingPath
+      )
+        return <Landing />;
+      if (pathname === "/login") {
+        // Fall through — staff sign-in on this host.
       } else {
         return <Navigate to="/" replace />;
       }
@@ -301,8 +341,18 @@ function AppWorkspace() {
       isLandingSlug(pathname) ||
       slug === AORMS_STUDIO.slug ||
       isAormsStudioLegacySlug(slug);
-    if (pathname === AORMS_CONSULTANCY.marketingPath || slug === AORMS_CONSULTANCY.slug)
+    if (
+      pathname === AORMS_CONSULTANCY.marketingPath ||
+      pathname === AORMS_CONSULTANCY.legacyMarketingPath ||
+      isAormsConsultancyLegacySlug(slug)
+    )
       return <Navigate to="/#consultancy" replace />;
+    if (
+      pathname === AORMS_PMC.marketingPath ||
+      pathname === AORMS_PMC.legacyMarketingPath ||
+      isAormsPmcLegacySlug(slug)
+    )
+      return <Navigate to="/#pmc" replace />;
     if (isRemovedMarketing) return <Navigate to="/" replace />;
   }
 
@@ -477,6 +527,38 @@ function AppWorkspace() {
     },
   ];
 
+  const pmcNav: NavNode[] = [
+    { label: "Home", to: "/pmc", icon: MapIcon },
+    ...(can(user.role, "write")
+      ? [{ label: "Projects", to: "/projects", icon: Building }]
+      : []),
+    ...(can(user.role, "write")
+      ? [{ label: "Clients", to: "/clients", icon: User }]
+      : []),
+    {
+      kind: "menu",
+      label: "Delivery",
+      icon: Engineering,
+      items: [
+        { label: "Contractors", to: "/contractors", icon: Tools },
+        { label: "Consultants", to: "/consultants", icon: UserProfile },
+      ],
+    },
+    {
+      kind: "menu",
+      label: "Office",
+      icon: Enterprise,
+      items: [
+        ...(can(user.role, "invoice:manage")
+          ? [{ label: "Invoices", to: "/invoices", icon: Receipt }]
+          : []),
+        ...(can(user.role, "reports:view")
+          ? [{ label: "Financial Reports", to: "/filing", icon: Report }]
+          : []),
+      ],
+    },
+  ];
+
   const consultancyNav: NavNode[] = [
     { label: "Enquiries", to: "/consultancy/enquiries", icon: ContactPage },
     { label: "Engagements", to: "/consultancy/engagements", icon: Engineering },
@@ -535,7 +617,13 @@ function AppWorkspace() {
     },
   ];
 
-  const nav: NavNode[] = prune(surface === "consultancy" ? consultancyNav : studioNav);
+  const nav: NavNode[] = prune(
+    surface === "consultancy" || pathname.startsWith("/consultancy")
+      ? consultancyNav
+      : surface === "pmc" || pathname.startsWith("/pmc")
+        ? pmcNav
+        : studioNav,
+  );
 
   // Admin hamburger: remaining Third Parties, Library, system.
   const adminGroups: { heading: string; items: NavLink[] }[] = [
@@ -642,7 +730,7 @@ function AppWorkspace() {
                 <Route path="/libraries/knowledge-bank-portal" element={<KnowledgeBankPortal />} />
                 <Route path="/libraries/repository" element={<Navigate to="/libraries/knowledge-bank-portal" replace />} />
                 {atLeast(60) && <Route path="/vendors" element={<Vendors />} />}
-                {/* AORMS-Consultancy — ribbon swaps to Enquiries · Engagements on
+                {/* AConsulting — ribbon swaps to Enquiries · Engagements on
                     consultancy.aorms.in (see consultancyNav above). */}
                 <Route path="/consultancy" element={<Navigate to="/consultancy/enquiries" replace />} />
                 <Route path="/consultancy/enquiries" element={<ConsultancyEnquiries />} />
@@ -684,17 +772,9 @@ function AppWorkspace() {
                 )}
                 <Route path="/tasks" element={<Work />} />
                 <Route path="/work" element={<Navigate to="/tasks" replace />} />
-                {/* Consultancy-only: PMC / Construction / Programme removed. */}
-                <Route
-                  path="/pmc"
-                  element={
-                    <LegacyModuleRedirect
-                      to="/projects"
-                      title="PMC module removed"
-                      subtitle="Portfolio management was retired — opening Projects."
-                    />
-                  }
-                />
+                {/* AProc — Accelerated Project Management (PMC) home */}
+                <Route path="/pmc" element={<PmcHome />} />
+                {/* Legacy contractor-ERP programme hub — retired; Delivery lives on projects. */}
                 <Route
                   path="/programme"
                   element={

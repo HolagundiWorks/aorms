@@ -43,8 +43,8 @@ export async function createCompany(
   input: {
     name: string;
     loginDomain?: string | null;
-    /** Which AORMS workspace the company runs — STUDIO (default) | CONSULTANCY. */
-    workspaceType?: "STUDIO" | "CONSULTANCY";
+    /** Which AORMS workspace the company runs — STUDIO (default) | CONSULTANCY | PMC. */
+    workspaceType?: "STUDIO" | "CONSULTANCY" | "PMC";
   },
 ): Promise<OrgHandle | { error: "domain_mismatch" | "domain_unverified" }> {
   const loginDomain = input.loginDomain?.trim().toLowerCase().replace(/^@/, "") || null;

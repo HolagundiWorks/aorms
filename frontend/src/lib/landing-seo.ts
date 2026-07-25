@@ -1,6 +1,7 @@
 /** Landing-page SEO — platform home `/`. Keep in sync with index.html meta tags. */
 import {
   AORMS_CONSULTANCY,
+  AORMS_PMC,
   AORMS_PLATFORM,
   AORMS_STUDIO,
   EOMS,
@@ -10,15 +11,15 @@ import {
 export const LANDING_SEO = {
   title: `AORMS | ${AORMS_PLATFORM.expansion}`,
   description:
-    "Operational and design frameworks for AEC consulting firms — architecture and engineering consultancies on one spine with EOMS intelligence. Not solution delivery. Not construction project management.",
+    "Operational and design frameworks for AEC consulting and PMC firms — architecture, engineering, and project management consultancies on one spine with EOMS intelligence.",
   keywords:
-    "AORMS, EOMS, AEC consulting, architecture consultancy software, engineering consultancy software, operational framework, design framework, AORMS-Studio, AORMS-Consultancy, workflow consolidation",
+    "AORMS, EOMS, AEC consulting, AStudio, AConsulting, AProc, architecture consultancy software, engineering consultancy software, PMC software, operational framework, design framework, workflow consolidation",
   ogTitle: `AORMS — ${AORMS_PLATFORM.heroHeadline[0]} ${AORMS_PLATFORM.heroHeadline[1]}`,
   ogDescription:
-    "Accelerated Operational Resources Management System: operational and design frameworks for AEC consulting firms. Two apps — AORMS-Studio (architecture) and AORMS-Consultancy (engineering). One spine.",
+    "Accelerated Operational Resources Management System: three apps — AStudio (architecture), AConsulting (engineering), AProc (PMC). One spine.",
   twitterTitle: "AORMS — frameworks for AEC consultancies",
   twitterDescription:
-    `Operational + design frameworks for architecture and engineering consultancies. EOMS dual-tier intelligence. ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title} are both live.`,
+    `Operational + design frameworks for architecture, engineering, and PMC consultancies. ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title} live; ${AORMS_PMC.title} in preview.`,
   headline: `${AORMS_PLATFORM.heroHeadline[0]} ${AORMS_PLATFORM.heroHeadline[1]}`,
   footerBlurb: `${AORMS_PLATFORM.name} (${AORMS_PLATFORM.expansion}).`,
   canonical: "https://aorms.in/",
@@ -30,22 +31,22 @@ export const LANDING_FAQ = [
   {
     question: "What is AORMS?",
     answer:
-      `AORMS (Accelerated Operational Resources Management System) is a pre-release platform for AEC consulting firms — architecture and engineering practices that advise clients. It combines an operational framework and a design framework on one spine, with ${EOMS.name} as the ${EOMS.role.toLowerCase()} and ${ESTI.name} as the ${ESTI.role.toLowerCase()} in ${AORMS_STUDIO.title}. We are not in solution delivery or construction project management.`,
+      `AORMS (Accelerated Operational Resources Management System) is a pre-release platform for AEC consulting and project management firms — architecture, engineering, and PMC practices. It combines an operational framework and a design framework on one spine, with ${EOMS.name} as the ${EOMS.role.toLowerCase()} and ${ESTI.name} as the ${ESTI.role.toLowerCase()} in ${AORMS_STUDIO.title}.`,
   },
   {
     question: "Who is the platform for?",
     answer:
-      "AEC consulting firms — architecture and engineering practices of 5–500 people replacing scattered messaging, advisory workflows, documentation, email, sheets, and file sharing. AORMS-Studio ships for architecture consultancies; AORMS-Consultancy ships for engineering consultancies.",
+      `AEC consulting and PMC firms — architecture, engineering, and project management practices of 5–500 people replacing scattered messaging, advisory workflows, documentation, email, sheets, and file sharing. ${AORMS_STUDIO.title} ships for architecture; ${AORMS_CONSULTANCY.title} for engineering; ${AORMS_PMC.title} for PMC (preview).`,
   },
   {
-    question: "What are AORMS-Studio and AORMS-Consultancy?",
+    question: `What are ${AORMS_STUDIO.title}, ${AORMS_CONSULTANCY.title}, and ${AORMS_PMC.title}?`,
     answer:
-      `${AORMS_STUDIO.title} is the architecture consultancy app — Indian architecture and design practices (live at ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")}). ${AORMS_CONSULTANCY.title} is the engineering consultancy app — structural, MEP, civil, and multidisciplinary firms (live at ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")}). Both share the same AORMS platform spine, ${EOMS.name} (${EOMS.role.toLowerCase()}), and an internal-agent profile per app.`,
+      `${AORMS_STUDIO.title} (${AORMS_STUDIO.expansion}) is the architecture consultancy app (live at ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")}). ${AORMS_CONSULTANCY.title} (${AORMS_CONSULTANCY.expansion}) is the engineering consultancy app (live at ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")}). ${AORMS_PMC.title} (${AORMS_PMC.expansion}) is the PMC app (preview at ${AORMS_PMC.appUrl.replace(/^https:\/\//, "")}). All share the same AORMS platform spine and ${EOMS.name}.`,
   },
   {
     question: "What are the operational and design frameworks?",
     answer:
-      "The operational framework is how the consulting office runs — intake, process standards, review, audit, and governed knowledge. The design framework is how engagements are structured — methodologies, deliverable models, and versioned advisory templates. AORMS is built for AEC consultancies that advise, not firms that deliver solutions or run construction project management.",
+      "The operational framework is how the consulting office runs — intake, process standards, review, audit, and governed knowledge. The design framework is how engagements are structured — methodologies, deliverable models, and versioned advisory templates. AORMS is built for AEC consultancies and PMC firms that advise and govern — not contractor ERP.",
   },
   {
     question: "What is the dual-tier AI architecture?",
@@ -70,7 +71,7 @@ export const LANDING_FAQ = [
   {
     question: "Is this documentation the shipped product?",
     answer:
-      `This page is the platform north-star (v1.0 pre-release). Live browser workspaces at ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")} and ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")} implement the apps; stack details differ in places (Fastify + tRPC today vs REST/GraphQL in the north-star spec).`,
+      `This page is the platform north-star (v1.0 pre-release). Live browser workspaces at ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")} and ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")} implement the apps; ${AORMS_PMC.title} is in preview. Stack details differ in places (Fastify + tRPC today vs REST/GraphQL in the north-star spec).`,
   },
 ] as const;
 
@@ -137,7 +138,11 @@ export function injectLandingJsonLd(): void {
         alternateName: [
           AORMS_PLATFORM.expansion,
           AORMS_STUDIO.title,
+          AORMS_STUDIO.expansion,
           AORMS_CONSULTANCY.title,
+          AORMS_CONSULTANCY.expansion,
+          AORMS_PMC.title,
+          AORMS_PMC.expansion,
           EOMS.name,
           EOMS.expansion,
           ESTI.name,
@@ -152,12 +157,12 @@ export function injectLandingJsonLd(): void {
         audience: {
           "@type": "Audience",
           audienceType:
-            "AEC consulting firms — architecture and engineering consultancies (5–500 people)",
+            "AEC consulting and PMC firms — architecture, engineering, and project management consultancies (5–500 people)",
         },
         offers: {
           "@type": "Offer",
           name: `${AORMS_PLATFORM.name} platform`,
-          description: `Pre-release platform. ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title} shipping with the standard licence (web-only).`,
+          description: `Pre-release platform. ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title} shipping; ${AORMS_PMC.title} in preview — standard licence (web-only).`,
           url: `https://aorms.in/login`,
         },
         publisher: { "@id": "https://aorms.in/#organization" },

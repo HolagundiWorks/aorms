@@ -9,6 +9,7 @@ import {
   Grid,
   Stack,
   Typography,
+  type Theme,
 } from "@mui/material";
 import ArrowForward from "@mui/icons-material/ArrowForwardOutlined";
 import FolderOutlined from "@mui/icons-material/FolderOutlined";
@@ -30,6 +31,7 @@ import {
   PLATFORM_APPS,
   AORMS_STUDIO,
   AORMS_CONSULTANCY,
+  AORMS_PMC,
   EOMS,
   ESTI,
   HUMAN_CENTRIC_WORKS,
@@ -96,7 +98,7 @@ const FAQ = [
   },
   {
     q: "Which apps ship today?",
-    a: `${AORMS_STUDIO.title} (architecture) and ${AORMS_CONSULTANCY.title} (engineering) are both live on the same spine — ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")} and ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")}.`,
+    a: `${AORMS_STUDIO.title} (architecture) and ${AORMS_CONSULTANCY.title} (engineering) are live; ${AORMS_PMC.title} (PMC) is in preview — ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")}, ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")}, and ${AORMS_PMC.appUrl.replace(/^https:\/\//, "")}.`,
   },
   {
     q: "How much does it cost?",
@@ -104,7 +106,7 @@ const FAQ = [
   },
   {
     q: "Who should start with AORMS first?",
-    a: `Architecture studios of about 5–25 people in India who lose fee recovery to revisions and site chaos — COA proposals, GST invoices, drawings, and a client portal on one record. Engineering consultancies use ${AORMS_CONSULTANCY.title} on the same spine.`,
+    a: `Architecture studios of about 5–25 people in India who lose fee recovery to revisions and site chaos — COA proposals, GST invoices, drawings, and a client portal on one record. Engineering consultancies use ${AORMS_CONSULTANCY.title}; PMC firms use ${AORMS_PMC.title} on the same spine.`,
   },
 ] as const;
 
@@ -295,7 +297,7 @@ export function Landing() {
             <Grid container spacing={3}>
               {Object.values(PLATFORM_FRAMEWORKS).map((fw) => (
                 <Grid key={fw.title} size={{ xs: 12, md: 6 }}>
-                  <Surface layer="flat" sx={{ p: 3, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
+                  <Surface layer="flat" sx={{ p: 3, height: "100%", border: (t: Theme) => `1px solid ${t.palette.divider}` }}>
                     <Typography variant="h6" component="h3" sx={{ fontWeight: 700 }}>
                       {fw.title}
                     </Typography>
@@ -349,7 +351,7 @@ export function Landing() {
             <Grid container spacing={3}>
               {MODULES.map((m) => (
                 <Grid key={m.title} size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Surface layer="flat" sx={{ p: 3, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
+                  <Surface layer="flat" sx={{ p: 3, height: "100%", border: (t: Theme) => `1px solid ${t.palette.divider}` }}>
                     <Box sx={{ color: "primary.main", display: "flex" }}>{m.icon}</Box>
                     <Typography variant="subtitle1" component="h3" sx={{ mt: 1.5, fontWeight: 700 }}>
                       {m.title}
@@ -366,16 +368,16 @@ export function Landing() {
           {/* Apps */}
           <Box id="apps" component="section" sx={{ py: { xs: 6, md: 9 } }}>
             <SectionHead
-              eyebrow="Two apps, one spine"
-              title="Architecture and engineering, live."
-              lead="Both AEC disciplines run on the same operational spine — deployed as focused apps."
+              eyebrow="Three apps, one spine"
+              title="Architecture, engineering, and PMC."
+              lead={`${AORMS_STUDIO.title}, ${AORMS_CONSULTANCY.title}, and ${AORMS_PMC.title} — focused workspaces on the same AORMS operational spine.`}
             />
             <Grid container spacing={3}>
               {PLATFORM_APPS.map((app) => (
-                <Grid key={app.id} size={{ xs: 12, md: 6 }}>
+                <Grid key={app.id} size={{ xs: 12, md: 4 }}>
                   <Surface
                     layer="soft"
-                    id={app.id === "architecture" ? "studio" : "consultancy"}
+                    id={app.id}
                     sx={{ p: 3, height: "100%" }}
                   >
                     <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
@@ -397,8 +399,8 @@ export function Landing() {
                       >
                         {app.status === "live"
                           ? "Live"
-                          : app.status === "launch_gated"
-                            ? "Coming soon"
+                          : app.status === "preview"
+                            ? "Preview"
                             : "Roadmap"}
                       </Typography>
                     </Stack>
@@ -450,8 +452,8 @@ export function Landing() {
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
                     ACTIVE licence from signup — projects, fees, GST invoices, drawings,
-                    portals, Studio Intelligence, and {AORMS_CONSULTANCY.title} on the same spine.
-                    Unlimited staff logins.
+                    portals, Studio Intelligence, {AORMS_CONSULTANCY.title}, and {AORMS_PMC.title}
+                    on the same spine. Unlimited staff logins.
                   </Typography>
                 </Surface>
               </Grid>
@@ -502,8 +504,8 @@ export function Landing() {
               Bring your practice onto one system.
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mt: 2, maxWidth: 560, mx: "auto" }}>
-              Sign in to {AORMS_STUDIO.title} or {AORMS_CONSULTANCY.title} — same platform,
-              discipline-fit workspace.
+              Sign in to {AORMS_STUDIO.title}, {AORMS_CONSULTANCY.title}, or {AORMS_PMC.title} —
+              same platform, discipline-fit workspace.
             </Typography>
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "center", mt: 4 }}>
               <Button component={RouterLink} to="/login" variant="contained" size="large" endIcon={<ArrowForward />}>
@@ -517,6 +519,15 @@ export function Landing() {
                 endIcon={<ArrowForward />}
               >
                 {AORMS_CONSULTANCY.title}
+              </Button>
+              <Button
+                component="a"
+                href={AORMS_PMC.appUrl}
+                variant="outlined"
+                size="large"
+                endIcon={<ArrowForward />}
+              >
+                {AORMS_PMC.title}
               </Button>
               <Button
                 component="a"

@@ -1,12 +1,13 @@
 # AORMS Implementation Roadmap
 
-**Status:** COMPLETE · **Updated:** 2026-07-24  
+**Status:** COMPLETE · **Updated:** 2026-07-25  
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
 **Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)
 
-Phases 0–28 are **engineering-complete** for **AORMS-Studio**. **AORMS-Consultancy**
-is **live**. Stripe auto-billing remains **deferred by choice**. Market-fit Waves
-1–3 are **shipped**; Wave 4 (integrations) stays phase-2 by design.
+Phases 0–28 are **engineering-complete** for **AStudio**. **AConsulting**
+is **live**. **AProc** (PMC) is **preview** chrome. Stripe auto-billing remains
+**deferred by choice**. Market-fit Waves 1–3 are **shipped**; Wave 4
+(integrations) stays phase-2 by design.
 
 This is the **single** delivery roadmap. Superseded autopilot / audit / fix-plan
 docs were removed 2026-07-24 (Git history retains them).
@@ -32,8 +33,9 @@ docs were removed 2026-07-24 (Git history retains them).
 
 | App | Status |
 | --- | --- |
-| **AORMS-Studio** (architecture) | **Live** — `studio.aorms.in` |
-| **AORMS-Consultancy** (engineering) | **Live** — `consultancy.aorms.in` (P9.V ✅ · P9.M ✅) |
+| **AStudio** (*Accelerated Studio*, architecture) | **Live** — `studio.aorms.in` |
+| **AConsulting** (*Accelerated Consulting*, engineering) | **Live** — `consultancy.aorms.in` (P9.V ✅ · P9.M ✅) |
+| **AProc** (*Accelerated Project Management*, PMC) | **Preview** — `proc.aorms.in` · `/pmc` |
 
 ## Market fit queue
 

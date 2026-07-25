@@ -335,8 +335,11 @@ export function registerAuthRoutes(app: FastifyInstance): void {
       reply.code(400);
       return { error: "invalid_name" };
     }
-    // Workspace pick (STUDIO | CONSULTANCY) — anything else falls back to STUDIO.
-    const workspaceType = body?.workspaceType === "CONSULTANCY" ? "CONSULTANCY" : "STUDIO";
+    // Workspace pick (STUDIO | CONSULTANCY | PMC) — anything else falls back to STUDIO.
+    const workspaceType =
+      body?.workspaceType === "CONSULTANCY" || body?.workspaceType === "PMC"
+        ? body.workspaceType
+        : "STUDIO";
     const org = await createCompany(s.accountId, {
       name,
       loginDomain: body?.loginDomain,
