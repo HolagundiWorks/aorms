@@ -153,3 +153,70 @@ export async function ensureDemoConsultancyPlatformOrg(): Promise<void> {
     });
   }
 }
+
+const DEMO_PMC_SLUG = "pmc-demo";
+const DEMO_PMC_NAME = "AORMS PMC Demo";
+
+/**
+ * Third platform org for AProc demos — same principal credentials,
+ * workspace_type PMC so Account Hub can open proc.aorms.in.
+ */
+export async function ensureDemoPmcPlatformOrg(): Promise<void> {
+  const [account] = await db
+    .select()
+    .from(schema.accounts)
+    .where(eq(schema.accounts.email, DEMO_PRINCIPAL))
+    .limit(1);
+  if (!account) return;
+
+  let [org] = await db
+    .select()
+    .from(schema.organizations)
+    .where(eq(schema.organizations.slug, DEMO_PMC_SLUG))
+    .limit(1);
+
+  if (!org) {
+    const orgId = newId("org");
+    [org] = await db
+      .insert(schema.organizations)
+      .values({
+        id: orgId,
+        name: DEMO_PMC_NAME,
+        slug: DEMO_PMC_SLUG,
+        loginDomain: "pmc-demo.aorms.in",
+        billingEmail: DEMO_PRINCIPAL,
+        ownerAccountId: account.id,
+        workspaceType: "PMC",
+      })
+      .returning();
+  } else {
+    await db
+      .update(schema.organizations)
+      .set({
+        name: DEMO_PMC_NAME,
+        workspaceType: "PMC",
+        ownerAccountId: account.id,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.organizations.id, org.id));
+  }
+
+  if (!org) return;
+
+  const [member] = await db
+    .select()
+    .from(schema.orgMembers)
+    .where(and(eq(schema.orgMembers.orgId, org.id), eq(schema.orgMembers.accountId, account.id)))
+    .limit(1);
+
+  if (!member) {
+    await db.insert(schema.orgMembers).values({
+      id: newId("mem"),
+      orgId: org.id,
+      accountId: account.id,
+      role: "OWNER",
+      status: "ACTIVE",
+      activatedAt: new Date(),
+    });
+  }
+}

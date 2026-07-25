@@ -4,6 +4,7 @@ import { ProjectCommunicationsLog } from "../ProjectCommunicationsLog.js";
 import { ProjectMinutes } from "../ProjectMinutes.js";
 import { ProjectSiteVisits } from "../ProjectSiteVisits.js";
 import { ProjectPackages } from "./ProjectPackages.js";
+import { ProjectPhaseProgress } from "./ProjectPhaseProgress.js";
 import { ProjectProgramme } from "./ProjectProgramme.js";
 import { ProjectProgressReports } from "./ProjectProgressReports.js";
 import { ProjectRaCertification } from "./ProjectRaCertification.js";
@@ -32,6 +33,7 @@ export function ProjectDeliveryPanel({ projectId }: { projectId: string }) {
         <Tab label="Packages" />
         <Tab label="RA certification" />
         <Tab label="Steel certification" />
+        <Tab label="Phase stages" />
       </Tabs>
       {sub === 0 && <ProjectSiteVisits projectId={projectId} />}
       {sub === 1 && <ProjectCommunicationsLog projectId={projectId} />}
@@ -42,6 +44,7 @@ export function ProjectDeliveryPanel({ projectId }: { projectId: string }) {
       {sub === 6 && <ProjectPackages projectId={projectId} />}
       {sub === 7 && <ProjectRaCertification projectId={projectId} />}
       {sub === 8 && <ProjectSteelCertification projectId={projectId} />}
+      {sub === 9 && <ProjectPhaseProgress projectId={projectId} />}
     </Box>
   );
 }

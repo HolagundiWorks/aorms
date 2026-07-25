@@ -24,6 +24,7 @@ import {
   moms,
   phases,
   pmcRaBills,
+  pmcSteelCerts,
   portalSubmissions,
   progressReports,
   projectOffices,
@@ -448,6 +449,48 @@ export const portalRouter = router({
           ),
         )
         .orderBy(desc(pmcRaBills.periodEnd));
+    }),
+
+  /** AProc — certified / sent steel certifications for the client's projects. */
+  certifiedSteelCerts: clientProcedure
+    .input(z.object({ projectId: z.string().uuid() }).optional())
+    .query(async ({ ctx, input }) => {
+      const owned = await ctx.db
+        .select({ id: projectOffices.id })
+        .from(projectOffices)
+        .where(eq(projectOffices.clientId, ctx.user.clientId));
+      const ids = owned.map((p) => p.id);
+      if (ids.length === 0) return [];
+      if (input?.projectId) {
+        if (!ids.includes(input.projectId)) throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      return ctx.db
+        .select({
+          id: pmcSteelCerts.id,
+          projectId: pmcSteelCerts.projectId,
+          projectRef: projectOffices.ref,
+          projectTitle: projectOffices.title,
+          ref: pmcSteelCerts.ref,
+          periodStart: pmcSteelCerts.periodStart,
+          periodEnd: pmcSteelCerts.periodEnd,
+          status: pmcSteelCerts.status,
+          issuedKg: pmcSteelCerts.issuedKg,
+          consumedKg: pmcSteelCerts.consumedKg,
+          wastagePct: pmcSteelCerts.wastagePct,
+          certifiedAt: pmcSteelCerts.certifiedAt,
+          sentAt: pmcSteelCerts.sentAt,
+        })
+        .from(pmcSteelCerts)
+        .innerJoin(projectOffices, eq(pmcSteelCerts.projectId, projectOffices.id))
+        .where(
+          and(
+            inArray(pmcSteelCerts.status, ["CERTIFIED", "SENT_TO_CLIENT", "CLOSED"]),
+            input?.projectId
+              ? eq(pmcSteelCerts.projectId, input.projectId)
+              : inArray(pmcSteelCerts.projectId, ids),
+          ),
+        )
+        .orderBy(desc(pmcSteelCerts.periodEnd));
     }),
 
   /** Revision stats for the client dashboard — change request breakdown by category. */

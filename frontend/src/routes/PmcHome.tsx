@@ -32,7 +32,7 @@ const PILLARS = [
 
 /**
  * AProc home — Accelerated Project Management (PMC) workspace entry.
- * Waves 1–2: snags, programme attention, open packages.
+ * Waves 0–4: portfolio KPIs, digest email, Delivery deep-links.
  */
 export function PmcHome() {
   const projectsQ = trpc.projectOffice.list.useQuery({ limit: 12, offset: 0 });

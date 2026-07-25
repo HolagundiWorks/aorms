@@ -1,6 +1,6 @@
 # AProc — architecture & delivery guidelines
 
-**Status:** Canonical plan · **App:** AProc (*Accelerated Project Management*) · **Updated:** 2026-07-25  
+**Status:** Waves 0–4 shipped (preview) · **App:** AProc (*Accelerated Project Management*) · **Updated:** 2026-07-25  
 **Owner:** Human Centric Works · **Executable names:** `AORMS_PMC` / `APROC` in `product-nomenclature.ts`
 
 This document is the **architecture law** for the third AORMS app. Where older docs say
@@ -131,7 +131,7 @@ Wave 1 does **not** include XER/XML P6 parsers. Milestone register + % complete 
 | Inspections | `inspections` | Documents | Quality packs |
 | Snags | `snags` | **API only → wire UI** | Snag register |
 | Progress reports | `progressReports` | **API only → wire UI** | MPR / period MIS |
-| Phase live stages | `phaseProgress` | **API only → wire UI** | CA / handover stages |
+| Phase live stages | `phaseProgress` | Delivery → Phase stages | CA / handover stages |
 | Drawings / tx / approvals | `drawings`, `transmittals`, `approvals` | Drawings tab | Design control |
 | MoM | `moms` | Delivery › Minutes | Progress meetings |
 | Contractors / consultants | `contractors`, `consultants` | Third parties | Stakeholders |
@@ -170,7 +170,7 @@ PMC firm (workspace_type = PMC)
               │     └── BidRound / Award  [NEW — owner-side; contractor portal bids]
               ├── Certification           [NEW envelope]
               │     ├── RaBillCert[]      [NEW — certify contractor interim bills]
-              │     └── SteelCert[]       [NEW — optional; after BBS lands on spine]
+              │     └── SteelCert[]       [shipped lightweight; full BBS ERP deferred]
               ├── Site supervision        [REUSE snags, SI, visits, inspections]
               ├── ProgressReport[]        [REUSE — wire UI]
               ├── Drawings / RFI trail    [REUSE drawings + communications]
@@ -209,6 +209,7 @@ own revenue unless the firm also invoices the client for reimbursables (out of s
 | Packages | package register + tender invites | **W2** ✅ |
 | RA certification | cert workflow | **W3** ✅ |
 | Steel certification | issued/consumed kg | **W3** ✅ |
+| Phase stages | CA / handover live stages | **W1** ✅ |
 
 Studio and Consulting keep the same Delivery panel — snags/MPR help architects too.
 
@@ -231,7 +232,7 @@ Workspace type `PMC`, nomenclature, `proc.aorms.in`, `/pmc` home shell, landing 
 | W1.3 | `ProjectProgressReports` + Delivery sub-tab | `progressReports` API | ✅ |
 | W1.4 | AProc home — open projects + open snag counts | `projectOffice` / `snags.portfolioOpen` | ✅ |
 | W1.5 | Expand `pmcNav` + `NAVIGATION.md` AProc section | chrome | ✅ |
-| W1.6 | Wire `phaseProgress` into Delivery or Brief (optional stretch) | `phaseProgress` | 🔲 |
+| W1.6 | Wire `phaseProgress` into Delivery | `ProjectPhaseProgress` | ✅ |
 
 ### Wave 2 — Programme & packages (greenfield)
 
@@ -249,7 +250,7 @@ Workspace type `PMC`, nomenclature, `proc.aorms.in`, `/pmc` home shell, landing 
 | W3.1 | RA bill **certification** (`esti_pmc_ra_bill` / lines) | Draft → site checked → certified → sent → closed | ✅ |
 | W3.2 | Deductions: advance recovery, retention, GST/TDS notes | Cert narrative; not full tax engine | ✅ |
 | W3.3 | Steel certification (lightweight issued/consumed kg) | `esti_pmc_steel_cert` — full BBS ERP still deferred | ✅ |
-| W3.4 | Client portal: issued progress reports + certified RA summaries | `portal.issuedProgressReports` / `certifiedRaBills` | ✅ |
+| W3.4 | Client portal: issued progress reports + certified RA / steel | `portal.issuedProgressReports` / `certifiedRaBills` / `certifiedSteelCerts` | ✅ |
 
 ### Wave 4 — Integrations & polish
 
@@ -292,11 +293,11 @@ Workspace type `PMC`, nomenclature, `proc.aorms.in`, `/pmc` home shell, landing 
 
 | Topic | Recommendation | Status |
 | --- | --- | --- |
-| Separate `pmc:` capabilities | Defer to W3 | Open |
+| Separate `pmc:` capabilities | Reuse `write` / `cost:approve` / `reports:view` | Decided |
 | RA cert vs reusing Estimation BOQ lines | Separate cert entity linked to package | Decided |
 | Share Delivery snags with Studio | Yes — one panel | Decided |
-| P6 sync | W4 | Deferred |
-| Demo firm `workspace_type=PMC` | Seed in demo platform | Planned W1.4+ |
+| P6 sync | CSV milestones only; XER later | Deferred |
+| Demo firm `workspace_type=PMC` | Platform org seed (`ensureDemoPmcPlatformOrg`) | ✅ |
 
 ---
 

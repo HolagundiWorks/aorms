@@ -402,9 +402,10 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
 - `snags` / `siteInstructions` / `progressReports` / `phaseProgress` / `siteVisits` /
   `inspections` — site supervision (Project → Delivery)
 - `pmcMilestones` / `pmcPackages` / `pmcPackageTenders` / `pmcRaBills` /
-  `pmcSteelCerts` / `pmcDigest` / `contractorPortal` — AProc programme, packages,
-  sealed tender bids, RA + steel certification, portfolio digest (owner-side;
-  see `docs/esti/APROC-ARCHITECTURE.md`)
+  `pmcSteelCerts` / `pmcDigest` / `contractorPortal` / `phaseProgress` — AProc
+  programme, packages, sealed tender bids, RA + steel certification, portfolio
+  digest, CA/handover live stages (owner-side; see
+  `docs/esti/APROC-ARCHITECTURE.md`)
 
 > **Removed in the 2026-06-29 consultancy-only teardown** (migration 0117 dropped the
 > tables): `pmc` (hub/portfolio), `programme` (delivery Gantt / milestones),

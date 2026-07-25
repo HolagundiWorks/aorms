@@ -9,9 +9,9 @@
 > [UNIFIED-ARCHITECTURE-V4.md](UNIFIED-ARCHITECTURE-V4.md) § "System state"; the two
 > are reconciled here via the **Status** column.
 >
-> **AORMS apps:** AStudio · AConsulting · **AProc** (PMC preview). The retired
-> contractor-ERP modules (old PMC hub, Construction, Programme Gantt, Tenders)
-> stay removed — AProc is a **greenfield** PMC consultancy workspace; see
+> **AORMS apps:** AStudio · AConsulting · **AProc** (PMC preview · Waves 0–4 ✅).
+> The retired contractor-ERP modules (old PMC hub, Construction, Programme Gantt,
+> Tenders) stay removed — AProc is a **greenfield** PMC consultancy workspace; see
 > [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md).
 >
 > **Spatial model (HCW-UI-Kit):** glass **ribbon** (top) · **rail** (20%) · **stage**
@@ -54,8 +54,8 @@ Footer home launcher on consultancy host opens Enquiries (not Studio Intelligenc
 
 | Item | Kind | Destinations |
 |---|---|---|
-| **Home** | link | `/pmc` — open snags portfolio + pillars |
-| **Projects** | link | `/projects` (write) — Delivery: Site · Comms · Minutes · Snags · Progress · Programme · Packages · **RA certification** |
+| **Home** | link | `/pmc` — portfolio KPIs · digest · pillars |
+| **Projects** | link | `/projects` (write) — Delivery: Site · Comms · Minutes · Snags · Progress · Programme · Packages · RA · Steel · Phase stages |
 | **Clients** | link | `/clients` (write) |
 | **Delivery** | menu | Contractors · Consultants |
 | **Office** | menu | Proposals · Invoices · Financial Reports |

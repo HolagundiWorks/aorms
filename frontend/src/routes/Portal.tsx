@@ -113,6 +113,10 @@ export function Portal() {
     { projectId: openId ?? "" },
     { enabled: !!openId },
   );
+  const steelCertsQ = trpc.portal.certifiedSteelCerts.useQuery(
+    { projectId: openId ?? "" },
+    { enabled: !!openId },
+  );
   const d = detailQ.data;
   const teamMembers = teamQ.data ?? [];
   const drawings = d?.drawings ?? [];
@@ -701,6 +705,38 @@ export function Portal() {
                       </Box>
                     );
                   })}
+                </Stack>
+              </DataState>
+            </Section>
+
+            <Section title="Steel certifications">
+              <DataState
+                loading={steelCertsQ.isLoading}
+                isEmpty={(steelCertsQ.data ?? []).length === 0}
+                columnCount={3}
+                empty={{
+                  title: "No certified steel records yet",
+                  description: "When your PMC certifies issued vs consumed steel, the summary appears here.",
+                }}
+              >
+                <Stack spacing={1}>
+                  {(steelCertsQ.data ?? []).map((c) => (
+                    <Box key={c.id} sx={{ py: 1, borderBottom: 1, borderColor: "divider" }}>
+                      <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {c.ref}
+                        </Typography>
+                        <StatusDot
+                          color={c.status === "CLOSED" ? "green" : "teal"}
+                          label={c.status.replace(/_/g, " ")}
+                        />
+                      </Stack>
+                      <Typography variant="caption" color="text.secondary">
+                        {c.periodStart} → {c.periodEnd} · Issued {c.issuedKg} kg · Consumed{" "}
+                        {c.consumedKg} kg · Wastage {c.wastagePct}%
+                      </Typography>
+                    </Box>
+                  ))}
                 </Stack>
               </DataState>
             </Section>
