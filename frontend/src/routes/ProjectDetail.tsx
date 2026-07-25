@@ -13,6 +13,8 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { ProjectPurchaseOrders } from "../components/ProjectPurchaseOrders.js";
 import { ProjectEstimates } from "../components/ProjectEstimates.js";
 import { ProjectBbs } from "../components/project/ProjectBbs.js";
+import { ProjectSteelReconciliation } from "../components/project/ProjectSteelReconciliation.js";
+import { ProjectRunningBills } from "../components/project/ProjectRunningBills.js";
 import { ProjectMeasurementPanel } from "../components/measurement/ProjectMeasurementPanel.js";
 import { DrawingsApprovalsPanel } from "../components/project/DrawingsApprovalsPanel.js";
 import { DocumentsSpecsPanel } from "../components/project/DocumentsSpecsPanel.js";
@@ -134,6 +136,16 @@ export function ProjectDetail() {
         slug: "bbs",
         label: "BBS",
         panel: <ProjectBbs projectId={id} />,
+      });
+      consultancyTabs.push({
+        slug: "steel",
+        label: "Steel",
+        panel: <ProjectSteelReconciliation projectId={id} />,
+      });
+      consultancyTabs.push({
+        slug: "ra-bills",
+        label: "RA bills",
+        panel: <ProjectRunningBills projectId={id} />,
       });
     }
     if (showTeam) {

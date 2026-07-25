@@ -343,10 +343,11 @@ GST rates, SAC codes)
 - `estimates` — a project's priced BOQ against one rate book, with a per-item
   measurement book (nos × dimensions by unit shape) and a contingency/GST rollup
 
-**BBS** (`write`; 2026-07-25):
-- `bbs` — project bar bending schedules (`esti_bbs` / members / items); cutting
-  lengths from column/beam/slab/footing geometry (IS 456); diameter steel summary.
-  No steel reconciliation / RA bills.
+**BBS / steel / RA** (`write`; certify with `cost:approve`; 2026-07-25):
+- `bbs` — project bar bending schedules; IS 456 cutting lengths
+- `steelReconciliation` — scheduled (BBS) vs issued vs consumed kg by diameter
+- `runningBills` — contractor RA / final bills for architect site-check + certification
+  (free-form lines + deductions; no work-package spine)
 
 **Drawings:**
 - `drawings` — drawing/document management (DXF register)
