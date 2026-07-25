@@ -32,6 +32,7 @@ async function firmReferencesKey(db: DB, key: string): Promise<boolean> {
       UNION ALL SELECT 1 FROM esti_client_onboarding WHERE agreement_doc_key = ${key} OR id_doc_key = ${key}
       UNION ALL SELECT 1 FROM esti_expense WHERE receipt_key = ${key}
       UNION ALL SELECT 1 FROM esti_inspection_photo WHERE storage_key = ${key}
+      UNION ALL SELECT 1 FROM esti_moodboard_item WHERE payload->>'storageKey' = ${key}
       UNION ALL SELECT 1 FROM esti_reconcile WHERE storage_key = ${key}
       UNION ALL SELECT 1 FROM esti_compliance_doc WHERE file_key = ${key}
       UNION ALL SELECT 1 FROM esti_master_plan WHERE file_key = ${key}

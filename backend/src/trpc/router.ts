@@ -101,6 +101,7 @@ import { rateBookRouter } from "../modules/rateBook/router.js";
 import { estimateRouter } from "../modules/estimate/router.js";
 import { bbsRouter } from "../modules/bbs/router.js";
 import { steelReconciliationRouter } from "../modules/steel/router.js";
+import { moodboardRouter } from "../modules/moodboard/router.js";
 import { eomsRouter } from "../modules/eoms/router.js";
 import { publicProcedure, router } from "./trpc.js";
 
@@ -232,6 +233,7 @@ export const appRouter = router({
   estimates: estimateRouter,
   bbs: bbsRouter,
   steelReconciliation: steelReconciliationRouter,
+  moodboard: moodboardRouter,
   eoms: eomsRouter,
 });
 

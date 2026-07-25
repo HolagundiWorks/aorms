@@ -18,6 +18,7 @@ import { DocumentsSpecsPanel } from "../components/project/DocumentsSpecsPanel.j
 import { ProjectBriefPanel } from "../components/project/ProjectBriefPanel.js";
 import { ProjectDeliveryPanel } from "../components/project/ProjectDeliveryPanel.js";
 import { ProjectInvoicesPanel } from "../components/project/ProjectInvoicesPanel.js";
+import { ProjectMoodboard } from "../components/project/ProjectMoodboard.js";
 import { ProjectRailNav } from "../components/project/ProjectRailNav.js";
 import { ProjectSettings } from "../components/ProjectSettings.js";
 import { ProjectTeam } from "../components/ProjectTeam.js";
@@ -107,6 +108,11 @@ export function ProjectDetail() {
         slug: "documents",
         label: "Documents",
         panel: <DocumentsSpecsPanel projectId={id} />,
+      },
+      {
+        slug: "moodboard",
+        label: "Moodboard",
+        panel: <ProjectMoodboard projectId={id} />,
       },
     ];
     if (canInvoice) {

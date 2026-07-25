@@ -416,10 +416,12 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
   certification, portfolio digest, CA/handover live stages (owner-side; see
   `docs/esti/APROC-ARCHITECTURE.md`)
 
-> **Removed in the 2026-06-29 consultancy-only teardown** (migration 0117 dropped the
-> tables): `pmc` (hub/portfolio), `programme` (delivery Gantt / milestones),
-> `constructionSchedule` (CPM), `construction` (contractor coordination), the **tenders**
-> spine (`esti_tender*`), and **mood boards** (`esti_moodboard`). Do not reference these.
+> **Removed in the 2026-06-29 consultancy-only teardown** (migration 0117):
+> `constructionSchedule` (CPM) and contractor coordination ERP. Do not revive those.
+>
+> **Restored later:** PMC programme/packages/tenders/RA (AProc), and **AStudio
+> moodboards** (`moodboard` namespace, migration `0225` — freeform IMAGE/STICKY/PATH
+> canvas on Project › Moodboard; not the old `esti_moodimage` model).
 
 **Library (2026-06-29):**
 - `compliance` — structured compliance library: `far` / `setback` / `nbc` / `fire` /
@@ -451,8 +453,8 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
 > nested sidebar is a recursive `NavNode` tree (`link` | `menu`) in `App.tsx`; **Library**
 > (Item/Compliance/Master Plan/Standards) and **AI Studio** (plan+rank gated) are top-level
 > sidebar entries; Studio holds Teams/Performance/HR. Search is a **header** action
-> (with the Alerts bell, ID card, clock and Pomodoro). **Removed (consultancy-only):** PMC,
-> Construction, Programme, Tenders, mood boards. Edit nav via the `nav` tree and keep
+> (with the Alerts bell, ID card, clock and Pomodoro). **Project workspace** also
+> hosts Moodboard (AStudio canvas + discussion). Edit nav via the `nav` tree and keep
 > NAVIGATION.md in sync.
 
 Key routes by area:
@@ -461,7 +463,7 @@ Key routes by area:
 |---|---|
 | `StudioAbstract.tsx` | **Studio Intelligence** home screen (route `/`; component/file name kept as StudioAbstract) — tabs Overview · Lead · Project · Financial · Team · Work · Approval, each one shell: header + **4 KPI cards** + a **DataTable** that scrolls inside its Tile (page never scrolls, 100% width). Overview merges Studio + Summary and carries the right **sidebar** (AI recommendation over last-10 Office Log). Zone-state vocab in `components/dashboard/zoneState.ts`; uses `dashboard.home`. |
 | `Projects.tsx` ⚠️ | Project list (parallel WIP — avoid editing unless asked) |
-| `ProjectDetail.tsx` | Single project — phases, tasks, drawings, decisions, Estimation (BOQ, `fees:manage` gated) |
+| `ProjectDetail.tsx` | Single project — phases, tasks, drawings, Moodboard (canvas + discussion), decisions, Estimation (BOQ, `fees:manage` gated) |
 | `ArchivedProjects.tsx` | Archived project browser |
 | `Clients.tsx` ⚠️ | Client CRM (parallel WIP — avoid editing unless asked); Third Parties (`/clients`) |
 | `Work.tsx` | Work hub shell — tabs in `components/work/` (`/tasks`; `/work` alias); Tasks pillar |

@@ -35,6 +35,7 @@ export * from "./academy.js";
 export * from "./estimation.js";
 export * from "./bbs.js";
 export * from "./steel-recon.js";
+export * from "./moodboard.js";
 
 export type { ProjectOfficeRow } from "./project.js";
 export * from "./usage.js";
