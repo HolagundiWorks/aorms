@@ -2,6 +2,8 @@ import {
   PmcMilestoneCreate,
   PmcMilestoneCsvImport,
   PmcMilestoneUpdate,
+  PmcMilestoneXerImport,
+  extractXerMilestones,
 } from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
 import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
@@ -228,6 +230,58 @@ export const pmcMilestonesRouter = router({
       action: "IMPORT",
       actorId: ctx.user.id,
       after: { count: created.length },
+    });
+    return { ok: true as const, count: created.length };
+  }),
+
+  /**
+   * Wave 4 — Primavera P6 XER import (milestones + WBS steps by default).
+   * Governance register only — does not build a CPM network.
+   */
+  importXer: manage.input(PmcMilestoneXerImport).mutation(async ({ ctx, input }) => {
+    const rows = extractXerMilestones(input.xer, {
+      includeActivities: input.includeActivities === true,
+    });
+    if (rows.length === 0) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message:
+          "No milestones found in XER (looked for TT_Mile / TT_FinMile / WBSSTEP). Enable “include activities” to import all TASK rows.",
+      });
+    }
+    if (rows.length > 500) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "XER limited to 500 milestones per import",
+      });
+    }
+    const created: string[] = [];
+    for (const [i, row] of rows.entries()) {
+      const { ref } = await nextRef(ctx.db, "pmc_milestone", "MS");
+      const [inserted] = await ctx.db
+        .insert(pmcMilestones)
+        .values({
+          projectId: input.projectId,
+          ref,
+          title: row.title,
+          plannedDate: row.plannedDate ?? null,
+          actualDate: row.actualDate ?? null,
+          baselineRef: row.baselineRef ?? null,
+          notes: row.notes ?? null,
+          sortOrder: i,
+          status: row.status,
+          percentComplete: row.percentComplete,
+          createdById: ctx.user.id,
+        })
+        .returning({ id: pmcMilestones.id });
+      created.push(inserted!.id);
+    }
+    await writeAudit(ctx.db, {
+      entity: "pmc_milestone",
+      entityId: input.projectId,
+      action: "IMPORT",
+      actorId: ctx.user.id,
+      after: { count: created.length, source: "xer" },
     });
     return { ok: true as const, count: created.length };
   }),

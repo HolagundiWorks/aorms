@@ -113,9 +113,12 @@ AProc uses the same Rail · Stage · Taskbar · ActionDock model. No parallel de
 Prefer IS 1200 / CPWD / FIDIC-aligned labels in UI copy (RA bill, MB, snag, site
 instruction, DPR/MPR). Avoid US-only jargon (e.g. “pay app”) as primary labels.
 
-### P6 — Import schedule later
+### P6 — Import schedule (CSV + XER)
 
-Wave 1 does **not** include XER/XML P6 parsers. Milestone register + % complete is enough.
+Master programme accepts **CSV** and **Primavera P6 XER** milestone imports
+(`pmcMilestones.importCsv` / `importXer`). XER pulls `TT_Mile` / `TT_FinMile` (+
+WBSSTEP); optional “include activities” maps TASK rows into the governance
+register. This is **not** a CPM engine — P6 remains the planner’s system of record.
 
 ---
 
@@ -170,7 +173,9 @@ PMC firm (workspace_type = PMC)
               │     └── BidRound / Award  [NEW — owner-side; contractor portal bids]
               ├── Certification           [NEW envelope]
               │     ├── RaBillCert[]      [NEW — certify contractor interim bills]
-              │     └── SteelCert[]       [shipped lightweight; full BBS ERP deferred]
+              │     ├── SteelCert[]       [lightweight issued/consumed]
+              │     ├── BbsSchedule[]     [IS 456 cutting-length — `bbs`]
+              │     └── SteelRecon[]      [scheduled vs issued/consumed by dia]
               ├── Site supervision        [REUSE snags, SI, visits, inspections]
               ├── ProgressReport[]        [REUSE — wire UI]
               ├── Drawings / RFI trail    [REUSE drawings + communications]
@@ -209,6 +214,8 @@ own revenue unless the firm also invoices the client for reimbursables (out of s
 | Packages | package register + tender invites | **W2** ✅ |
 | RA certification | cert workflow | **W3** ✅ |
 | Steel certification | issued/consumed kg | **W3** ✅ |
+| BBS | IS 456 cutting-length schedules | **W5** ✅ |
+| Steel recon | scheduled vs issued/consumed by dia | **W5** ✅ |
 | Phase stages | CA / handover live stages | **W1** ✅ |
 
 Studio and Consulting keep the same Delivery panel — snags/MPR help architects too.
@@ -249,17 +256,25 @@ Workspace type `PMC`, nomenclature, `proc.aorms.in`, `/pmc` home shell, landing 
 |---|---|---|---|
 | W3.1 | RA bill **certification** (`esti_pmc_ra_bill` / lines) | Draft → site checked → certified → sent → closed | ✅ |
 | W3.2 | Deductions: advance recovery, retention, GST/TDS notes | Cert narrative; not full tax engine | ✅ |
-| W3.3 | Steel certification (lightweight issued/consumed kg) | `esti_pmc_steel_cert` — full BBS ERP still deferred | ✅ |
+| W3.3 | Steel certification (lightweight issued/consumed kg) | `esti_pmc_steel_cert` | ✅ |
 | W3.4 | Client portal: issued progress reports + certified RA / steel | `portal.issuedProgressReports` / `certifiedRaBills` / `certifiedSteelCerts` | ✅ |
 
 ### Wave 4 — Integrations & polish
 
 | # | Item | Status |
 |---|---|---|
-| W4.1 | MSP/P6 milestone import (CSV first, XER later) | ✅ CSV · XER deferred |
+| W4.1 | MSP/P6 milestone import (CSV + XER) | ✅ `importCsv` · `importXer` |
 | W4.2 | Branded MPR / RA cert PDF packs (worker `render_pdf`) | ✅ MPR existed · RA cert added |
 | W4.3 | Portfolio digests for PMC partners (email) | ✅ `pmcDigest.send` (SMTP optional) |
 | W4.4 | ESTI: “Ask ESTI” over snags + progress + cert notes | ✅ operator-context AProc block + wiki |
+
+### Wave 5 — BBS ERP + schedule interchange
+
+| # | Item | Notes | Status |
+|---|---|---|---|
+| W5.1 | Project BBS — IS 456 cutting-length engine | `bbs` · `esti_bbs*` · Delivery › BBS | ✅ |
+| W5.2 | Steel reconciliation by diameter (seed from BBS) | `steelReconciliation` · Delivery › Steel recon | ✅ |
+| W5.3 | P6 XER → master programme milestones | Pure parser in `@esti/contracts` `p6-xer` | ✅ |
 
 ---
 
@@ -296,7 +311,7 @@ Workspace type `PMC`, nomenclature, `proc.aorms.in`, `/pmc` home shell, landing 
 | Separate `pmc:` capabilities | Reuse `write` / `cost:approve` / `reports:view` | Decided |
 | RA cert vs reusing Estimation BOQ lines | Separate cert entity linked to package | Decided |
 | Share Delivery snags with Studio | Yes — one panel | Decided |
-| P6 sync | CSV milestones only; XER later | Deferred |
+| P6 sync | CSV + XER milestone import (no CPM engine) | ✅ |
 | Demo firm `workspace_type=PMC` | Platform org seed (`ensureDemoPmcPlatformOrg`) | ✅ |
 
 ---

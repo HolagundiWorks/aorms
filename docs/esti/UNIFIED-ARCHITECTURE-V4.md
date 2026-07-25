@@ -44,9 +44,10 @@
   `collab`, contractors
 - **Site supervision** (consultancy + AProc Delivery) — `snags`, `siteInstructions`,
   `progressReports`, `phaseProgress`, `siteVisits`, `inspections`
-- **AProc** (PMC preview · Waves 0–4 ✅) — `pmcMilestones`, `pmcPackages`,
-  `pmcPackageTenders`, `pmcRaBills`, `pmcSteelCerts`, `pmcDigest`, `contractorPortal`
-  — owner-side programme / packages / cert; see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)
+- **AProc** (PMC preview · Waves 0–5 ✅) — `pmcMilestones` (CSV/XER), `pmcPackages`,
+  `pmcPackageTenders`, `pmcRaBills`, `pmcSteelCerts`, `pmcDigest`, `contractorPortal`,
+  `bbs`, `steelReconciliation` — owner-side programme / packages / cert / BBS;
+  see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)
 - **Libraries** — `specCatalog`, `compliance` (far/setback/nbc/fire/regulation),
   `masterPlans`, `standards`, `rateBooks`
 - **Estimation** — `estimates`, `measurement` / `planMarkup` (browser takeoff → estimate)
@@ -185,3 +186,4 @@ Status legend — **✅ Implemented** (shipped, in the live router) ·
 | 4.1 | 2026-06-28 | Reconciled to the 2026-06-28 teardown — added the **System state** source-of-truth section; rewrote pillar 4; fixed reading order. |
 | 4.2 | 2026-07-22 | Reconciled System state to post-P9/P10 reality — removed stale `knowledgeBank`/`companion`/`pmc` live claims; added `projectPrecon`, `consultancy.*`, fee-stage invoices, enquiry go/no-go; Project OS = consultancy delivery (not construction PM); Consultancy marked code-complete / live. |
 | 4.3 | 2026-07-25 | AProc Waves 0–4 shipped as greenfield PMC workspace (`esti_pmc_*`); clarify 0117 teardown ≠ AProc; contractor portal bids live; point to APROC-ARCHITECTURE. |
+| 4.4 | 2026-07-25 | AProc Wave 5 — BBS + steel reconciliation + P6 XER milestone import (`0223`–`0224`). |

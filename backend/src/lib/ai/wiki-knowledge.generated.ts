@@ -527,10 +527,10 @@ When the client requests a change:
 
 Owner-side PMC governance in **AProc** (/pmc, proc.aorms.in):
 
-1. **Programme** � master milestones for client reporting (not full P6/MSP).
+1. **Programme** � master milestones for client reporting; import CSV or Primavera P6 XER (milestones, not a CPM engine).
 2. **Packages** � work/tender register; invite contractors; open sealed bids; award.
 3. **RA certification** � draft � site checked � certified (cost:approve) � sent to client.
-4. **Steel certification** � issued vs consumed kg + wastage % (lightweight; not full BBS ERP).
+4. **BBS + steel** � IS 456 cutting-length schedules (BBS), steel reconciliation by diameter, plus lightweight steel cert (issued/consumed kg).
 5. **Portfolio digest** � email open snags / milestone alerts / RA in flight from AProc home.
 6. Ask ESTI sees live AProc portfolio and project Delivery facts in operator context.
 

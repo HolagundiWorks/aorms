@@ -3,12 +3,13 @@
 **Status:** COMPLETE · **Updated:** 2026-07-25  
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
 **Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
-**AProc waves:** COMPLETE (W0–W4) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)
+**AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)
 
 Phases 0–28 are **engineering-complete** for **AStudio**. **AConsulting**
-is **live**. **AProc** (PMC) Waves **0–4 are shipped** (preview product — not
-full P6/BBS ERP). Stripe auto-billing remains **deferred by choice**.
-Market-fit Waves 1–3 are **shipped**; Wave 4 (integrations) stays phase-2 by design.
+is **live**. **AProc** (PMC) Waves **0–5 are shipped** (preview product —
+owner-side BBS/steel recon + P6 XER milestone import; not a contractor CPM ERP).
+Stripe auto-billing remains **deferred by choice**. Market-fit Waves 1–3 are
+**shipped**; Wave 4 (integrations) stays phase-2 by design.
 
 This is the **single** delivery roadmap. Superseded autopilot / audit / fix-plan
 docs were removed 2026-07-24 (Git history retains them).
@@ -37,7 +38,7 @@ docs were removed 2026-07-24 (Git history retains them).
 | --- | --- |
 | **AStudio** (*Accelerated Studio*, architecture) | **Live** — `studio.aorms.in` |
 | **AConsulting** (*Accelerated Consulting*, engineering) | **Live** — `consultancy.aorms.in` (P9.V ✅ · P9.M ✅) |
-| **AProc** (*Accelerated Project Management*, PMC) | **Preview · Waves 0–4 ✅** — `proc.aorms.in` · `/pmc` · [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md) |
+| **AProc** (*Accelerated Project Management*, PMC) | **Preview · Waves 0–5 ✅** — `proc.aorms.in` · `/pmc` · [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md) |
 
 ## AProc delivery waves
 
@@ -49,16 +50,17 @@ Canonical plan: **[APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)**.
 | W1 | Snags + progress reports + phase live stages + home KPIs + nav | ✅ |
 | W2 | Master programme · packages · tender invites ↔ contractor portal | ✅ |
 | W3 | RA + steel certification · client portal summaries | ✅ |
-| W4 | CSV import · RA PDF · portfolio digest email · ESTI AProc context | ✅ |
+| W4 | CSV + **P6 XER** import · RA PDF · portfolio digest · ESTI context | ✅ |
+| W5 | **BBS** (IS 456) + **steel reconciliation** ERP | ✅ |
 
 **Namespaces:** `pmcMilestones` · `pmcPackages` · `pmcPackageTenders` · `pmcRaBills` ·
-`pmcSteelCerts` · `pmcDigest` · `contractorPortal` · `snags` · `progressReports` ·
-`phaseProgress` (Delivery tab).
+`pmcSteelCerts` · `pmcDigest` · `contractorPortal` · `bbs` · `steelReconciliation` ·
+`snags` · `progressReports` · `phaseProgress` (Delivery tab).
 
-**Still deferred (by design):** full BBS / steel reconciliation ERP · P6 XER import ·
-contractor labour / plant ERP (refuse list in APROC-ARCHITECTURE).
+**Still deferred (by design):** contractor labour / plant ERP · full P6 CPM engine
+(refuse list in APROC-ARCHITECTURE). XER imports **milestones**, not a schedule network.
 
-**Migrations:** `0220` programme/packages · `0221` RA cert · `0222` tender invites + steel.
+**Migrations:** `0220`–`0222` AProc core · `0223` BBS · `0224` steel reconciliation.
 
 ## Market fit queue
 
@@ -123,14 +125,14 @@ Canonical brief: **[MARKET-FIT.md](MARKET-FIT.md)**.
 | **Blog / SEO** | `/blog` live; feed/sitemap refreshed |
 | **HCW License Manager** | In-tree (`admin.aorms.in`) |
 | **Market fit W1–W3** | GTM scrub · portal · fee recovery · onboarding · capacity · digests · consultancy chrome · demo seed · packaging |
-| **AProc W0–W4** | Chrome · Delivery governance · programme/packages/tenders · RA+steel cert · digest · ESTI context (`0220`–`0222`) |
+| **AProc W0–W5** | Chrome · Delivery · tenders · RA/steel cert · BBS + steel recon · CSV/XER · digest · ESTI (`0220`–`0224`) |
 
 ## Deferred (by choice — not blocking)
 
 1. **Stripe auto-billing / auto-suspend** — manual India usage-billing path is the shipping path  
 2. **Desktop apps / direct cloud DB clients** — web-only system of record  
-3. **Contractor ERP / full BBS / P6 XER** — outside AProc scope (owner-side cert only; see APROC refuse list)  
-4. **W4 integrations** (Tally / Drive / WhatsApp capture) — phase 2 after first paying firms  
+3. **Contractor labour / plant ERP · full P6 CPM engine** — outside AProc (owner-side cert + milestone import only)  
+4. **Market-fit W4 integrations** (Tally / Drive / WhatsApp capture) — phase 2 after first paying firms  
 
 ## Change rule
 

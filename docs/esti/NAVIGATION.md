@@ -55,7 +55,7 @@ Footer home launcher on consultancy host opens Enquiries (not Studio Intelligenc
 | Item | Kind | Destinations |
 |---|---|---|
 | **Home** | link | `/pmc` — portfolio KPIs · digest · pillars |
-| **Projects** | link | `/projects` (write) — Delivery: Site · Comms · Minutes · Snags · Progress · Programme · Packages · RA · Steel · Phase stages |
+| **Projects** | link | `/projects` (write) — Delivery: Site · Comms · Minutes · Snags · Progress · Programme (CSV/XER) · Packages · RA · Steel · BBS · Steel recon · Phase stages |
 | **Clients** | link | `/clients` (write) |
 | **Delivery** | menu | Contractors · Consultants |
 | **Office** | menu | Proposals · Invoices · Financial Reports |

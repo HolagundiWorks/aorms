@@ -5,9 +5,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
   MenuItem,
   Skeleton,
   Stack,
+  Switch,
   TextField,
   Typography,
 } from "@mui/material";
@@ -16,7 +18,7 @@ import {
   PmcMilestoneStatus,
   can,
 } from "@esti/contracts";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useAuth } from "../../lib/auth.js";
 import { trpc } from "../../lib/trpc.js";
 import { StatusDot } from "../StatusTag.js";
@@ -67,10 +69,24 @@ export function ProjectProgramme({ projectId }: { projectId: string }) {
       window.alert(`Imported ${res.count} milestone${res.count === 1 ? "" : "s"}`);
     },
   });
+  const importXer = trpc.pmcMilestones.importXer.useMutation({
+    meta: { errorTitle: "Couldn't import XER" },
+    onSuccess: (res) => {
+      invalidate();
+      setXerOpen(false);
+      setXerText("");
+      setIncludeActivities(false);
+      window.alert(`Imported ${res.count} milestone${res.count === 1 ? "" : "s"} from XER`);
+    },
+  });
 
   const [createOpen, setCreateOpen] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
   const [csvText, setCsvText] = useState("");
+  const [xerOpen, setXerOpen] = useState(false);
+  const [xerText, setXerText] = useState("");
+  const [includeActivities, setIncludeActivities] = useState(false);
+  const xerFileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     title: "",
     plannedDate: "",
@@ -102,12 +118,15 @@ export function ProjectProgramme({ projectId }: { projectId: string }) {
             <Button size="small" variant="outlined" onClick={() => setCsvOpen(true)}>
               Import CSV
             </Button>
+            <Button size="small" variant="outlined" onClick={() => setXerOpen(true)}>
+              Import P6 XER
+            </Button>
           </>
         )}
       </Stack>
       <Typography variant="body2" color="text.secondary">
-        Master programme for client reporting. Not a contractor CPM schedule — link MSP/P6 activity
-        codes in Baseline ref when useful. CSV columns: title,plannedDate,baselineRef,notes.
+        Master programme for client reporting. Not a contractor CPM schedule — import P6 XER
+        milestones (or CSV). Activity IDs land in Baseline ref.
       </Typography>
 
       {listQ.isLoading && (
@@ -284,6 +303,94 @@ export function ProjectProgramme({ projectId }: { projectId: string }) {
             variant="contained"
             disabled={csvText.trim().length < 3 || importCsv.isPending}
             onClick={() => importCsv.mutate({ projectId, csv: csvText })}
+          >
+            Import
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        aria-labelledby="pmc-milestone-xer-title"
+        open={xerOpen}
+        onClose={() => {
+          setXerOpen(false);
+          setXerText("");
+          setIncludeActivities(false);
+        }}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle id="pmc-milestone-xer-title">Import P6 XER</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              Imports Primavera P6 milestones (TT_Mile / TT_FinMile) and WBS steps into the master
+              programme. Does not build a CPM network.
+            </Typography>
+            <input
+              ref={xerFileRef}
+              type="file"
+              accept=".xer,text/plain"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  setXerText(typeof reader.result === "string" ? reader.result : "");
+                };
+                reader.readAsText(file);
+                e.target.value = "";
+              }}
+            />
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => xerFileRef.current?.click()}
+              sx={{ alignSelf: "flex-start" }}
+            >
+              Choose .xer file
+            </Button>
+            <TextField
+              label="XER contents"
+              value={xerText}
+              onChange={(e) => setXerText(e.target.value)}
+              fullWidth
+              multiline
+              minRows={8}
+              placeholder="Paste XER text or choose a .xer file"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={includeActivities}
+                  onChange={(e) => setIncludeActivities(e.target.checked)}
+                />
+              }
+              label="Include all activities (not only milestones)"
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setXerOpen(false);
+              setXerText("");
+              setIncludeActivities(false);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            disabled={xerText.trim().length < 10 || importXer.isPending}
+            onClick={() =>
+              importXer.mutate({
+                projectId,
+                xer: xerText,
+                includeActivities: includeActivities || undefined,
+              })
+            }
           >
             Import
           </Button>
