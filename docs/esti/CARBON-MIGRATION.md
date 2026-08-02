@@ -211,12 +211,20 @@ stay separated by DOM). ✅ **Verified in the build:** the emitted CSS wraps all
 Carbon rules in `@layer carbon{}` while `:root` tokens + Urbanist stay unlayered;
 `tsc`/`eslint`/`vite build` green.
 
-**Remaining for Wave 1:** IBM Plex fonts self-hosted; map app light/dark →
-`white`/`g10`/`g90`/`g100`; decide the accent token; and (later) replace the
-prebuilt `styles.min.css` import with a **tree-shaken Sass `@use`** of only the
-components in use (the full CSS adds ~830 KB uncompressed to `main.css` today).
-**Exit:** Carbon theme available app-wide via `CarbonScope`; zero visual
-regression on kit screens; build + CSP green.
+**Tree-shaken (done 2026-08-02):** the prebuilt `styles.min.css` import was
+replaced with `src/carbon/carbon-tree.scss` — a selective Sass `@use` of the
+Carbon foundation plus only the components in use, imported into `@layer carbon`
+via `carbon.css`. A `@use '.../components/<name>'` line is added per wave as new
+components appear. ✅ Verified in the build: Carbon's contribution to `main.css`
+dropped from ~830 KB to ~393 KB (uncompressed), the `@layer carbon` scoping and
+`.cds--g10`/`.cds--white` theme classes are preserved, and `:root` tokens +
+Urbanist stay unlayered. No Sass deprecation warnings.
+
+**Remaining for Wave 1:** self-host IBM Plex fonts (`$css--font-face` is off, so
+type currently falls back until fonts land); map app light/dark →
+`white`/`g10`/`g90`/`g100`; decide the accent token. **Exit:** Carbon theme
+available app-wide via `CarbonScope`; zero visual regression on kit screens;
+build + CSP green.
 
 ### Wave 2 — Carbon adapters + retire the bespoke primitives (1–2 sprints)
 Per § 0 (pure Carbon), split the ~20 kit primitives into two buckets:

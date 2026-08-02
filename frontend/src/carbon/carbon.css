@@ -1,16 +1,13 @@
 /**
- * IBM Carbon Design System global stylesheet — loaded ONCE, scoped to a
- * low-priority cascade layer.
+ * IBM Carbon Design System styles — tree-shaken and scoped to a low-priority
+ * cascade layer.
  *
  * Wave 1 of the HCW-UI-Kit → Carbon migration (docs/esti/CARBON-MIGRATION.md).
- * The spike found that Carbon's global CSS applies its own reset + base type and
- * redefines --cds-* tokens, which would restyle the 276 existing kit/MUI screens.
- *
- * Putting Carbon inside `@layer carbon` fixes that: unlayered rules always beat
- * any @layer, so the app's own base/reset/tokens (styles.scss, tokens.css,
- * landing.scss — all unlayered) win on kit screens, while Carbon components
- * (.cds--*, which the app never targets) still style themselves from this layer.
- * The Carbon THEME (--cds-* values + IBM Plex) is applied per-subtree by
- * <CarbonScope>, never on :root — so unmigrated screens are untouched.
+ * `carbon-tree.scss` compiles only the foundation + the Carbon components this
+ * app actually renders (not the full ~830 KB stylesheet). Importing it with
+ * `layer(carbon)` puts every Carbon rule inside `@layer carbon`, so the app's
+ * own unlayered styles (styles.scss, tokens.css, landing.scss) always win —
+ * Carbon's reset/base/`--cds-*` cannot restyle the existing kit/MUI screens.
+ * The Carbon THEME is applied per-subtree by <CarbonScope>, never on :root.
  */
-@import "@carbon/styles/css/styles.min.css" layer(carbon);
+@import "./carbon-tree.scss" layer(carbon);
