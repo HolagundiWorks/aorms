@@ -35,6 +35,12 @@ import {
   TextInput,
 } from "@carbon/react";
 import { CarbonScope, type CarbonTheme } from "../carbon/CarbonScope.js";
+import {
+  StatusDot,
+  DataState,
+  ConfirmModal,
+  PageBreadcrumb,
+} from "../carbon/adapters/index.js";
 import { ArrowRight, Add, CheckmarkFilled } from "@carbon/icons-react";
 
 const SCHEMES: readonly CarbonTheme[] = ["white", "g10", "g90", "g100"];
@@ -49,6 +55,7 @@ const ROWS = [
 export function CarbonSpike() {
   const [scheme, setScheme] = useState<CarbonTheme>("g10");
   const [name, setName] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
     <CarbonScope theme={scheme}>
@@ -100,6 +107,7 @@ export function CarbonSpike() {
                 <TabList aria-label="Spike sections">
                   <Tab>Inputs</Tab>
                   <Tab>Data table</Tab>
+                  <Tab>Kit adapters</Tab>
                 </TabList>
                 <TabPanels>
                   <TabPanel>
@@ -155,6 +163,49 @@ export function CarbonSpike() {
                         </TableBody>
                       </Table>
                     </div>
+                  </TabPanel>
+                  <TabPanel>
+                    <Stack gap={6} style={{ paddingTop: "1rem", maxWidth: "40rem" }}>
+                      <PageBreadcrumb
+                        linkComponent={RouterLink}
+                        linkPropName="to"
+                        items={[
+                          { label: "Home", to: "/" },
+                          { label: "Carbon spike", to: "/carbon-spike" },
+                          { label: "Kit adapters" },
+                        ]}
+                      />
+                      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                        <StatusDot color="green" label="On track" />
+                        <StatusDot color="red" label="Blocked" shape="triangle" />
+                        <StatusDot color="gray" label="Draft" />
+                      </div>
+                      <DataState
+                        loading={false}
+                        isEmpty
+                        empty={{
+                          title: "No projects yet",
+                          description: "Adapter-rendered empty state (kit DataState API → Carbon Tile).",
+                          action: <Button size="sm">Create project</Button>,
+                        }}
+                      >
+                        {null}
+                      </DataState>
+                      <Button kind="danger" onClick={() => setConfirmOpen(true)}>
+                        Open ConfirmModal
+                      </Button>
+                      <ConfirmModal
+                        open={confirmOpen}
+                        danger
+                        kind="mistake"
+                        heading="Delete this project?"
+                        reason="This client has open invoices."
+                        body="This cannot be undone."
+                        confirmText="Delete"
+                        onConfirm={() => setConfirmOpen(false)}
+                        onClose={() => setConfirmOpen(false)}
+                      />
+                    </Stack>
                   </TabPanel>
                 </TabPanels>
               </Tabs>

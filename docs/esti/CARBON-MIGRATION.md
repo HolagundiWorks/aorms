@@ -243,6 +243,16 @@ rewrites for bucket 2. **Exit:** adapters render stock Carbon; every retired
 primitive has a Carbon-pattern replacement plan; a11y (keyboard/focus) parity
 verified; visual baselines re-shot.
 
+**Delivered 2026-08-02** (`frontend/src/carbon/adapters/`): the four highest-use
+bucket-1 adapters — `StatusDot`→`Tag` (302 uses), `DataState`→`SkeletonText`+
+`Tile` empty-state (243), `PageBreadcrumb`→`Breadcrumb` + `document.title` (116),
+`ConfirmModal`→`Modal`(danger) (55) — each exposing the kit prop API so Wave 3
+call-sites migrate by import swap (`@hcw/ui-kit` → `../carbon/adapters`). All
+render stock Carbon, are exercised on `/carbon-spike`, and pass tsc/eslint/build;
+the `breadcrumb` component was added to `carbon-tree.scss`. **Remaining bucket-1:**
+`pushToast`/`ToastHost`→`ToastNotification` global container. **Bucket-2**
+retirements are rewritten in Waves 3/5 as planned.
+
 ### Wave 3 — App MUI → Carbon, by domain (the bulk; 4–6 sprints)
 Convert the **198 MUI files** screen-by-screen in dependency order. Suggested
 tranches (each = its own PR, green before the next):
