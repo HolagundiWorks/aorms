@@ -350,10 +350,13 @@ GST rates, SAC codes)
 - `estimates` — a project's priced BOQ against one rate book, with a per-item
   measurement book (nos × dimensions by unit shape) and a contingency/GST rollup
 
-**BBS / steel recon** (`write`; finalize with `cost:approve`; 2026-07-25):
+**BBS / steel recon / running bills** (`write`; finalize with `cost:approve`; 2026-07-25):
 - `bbs` — project bar bending schedules; IS 456 cutting lengths (Delivery → BBS)
 - `steelReconciliation` — scheduled (BBS) vs issued vs consumed kg by diameter
-  (Delivery → Steel recon). RA bills stay on `pmcRaBills`.
+  (Delivery → Steel recon).
+- `runningBills` — project-level running-account (RA) bills with line items,
+  advances, and deductions (`esti_running_bill` / `esti_running_bill_item`;
+  `ProjectRunningBills.tsx`). Distinct from AProc contractor RA on `pmcRaBills`.
 
 **Drawings:**
 - `drawings` — drawing/document management (DXF register)
@@ -421,10 +424,14 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
 
 > **Removed in the 2026-06-29 consultancy-only teardown** (migration 0117 dropped the
 > tables): `pmc` (hub/portfolio), `programme` (delivery Gantt / milestones),
-> `constructionSchedule` (CPM), `construction` (contractor coordination), the old
-> work-package tender spine, and **mood boards** (`esti_moodboard`). A narrower
-> lump-sum **Project › Tenders** flow shipped 2026-07-25 (`esti_tender*` +
-> `contractorPortal` — firm issues; contractors bid; no BOQ/RA award bridge).
+> `constructionSchedule` (CPM), `construction` (contractor coordination), and the old
+> work-package tender spine. A narrower lump-sum **Project › Tenders** flow shipped
+> 2026-07-25 (`esti_tender*` + top-level `tenders` namespace + `contractorPortal` —
+> firm issues; contractors bid; no BOQ/RA award bridge).
+>
+> **Mood boards returned 2026-07-25** as an AStudio project canvas — the `moodboard`
+> namespace (`esti_moodboard*`; board CRUD + freeform canvas items with layers and
+> discussion; `ProjectMoodboard.tsx`).
 
 **Library (2026-06-29):**
 - `compliance` — structured compliance library: `far` / `setback` / `nbc` / `fire` /
@@ -439,6 +446,8 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
 **Project brief, expenses, and system (Phases 17–20):**
 - `projectBrief` — Project Info questionnaire sections
 - `projectPrecon` — Studio pre-construction R&O: risks, opportunities, phase gates (Brief → R&O)
+- `moodboard` — AStudio project mood board canvas (`esti_moodboard*`; board CRUD +
+  freeform canvas items, layers, discussion; `ProjectMoodboard.tsx`)
 - `accounts` / `expenses` — office cash book and project costing expenses
 - `system` — release metadata (owner-only)
 - `marketing` — landing visit counter
@@ -457,8 +466,9 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
 > (Item/Compliance/Master Plan/Standards) and **AI Studio** (plan+rank gated) are top-level
 > sidebar entries; Studio holds Teams/Performance/HR. Search is a **header** action
 > (with the Alerts bell, ID card, clock and Pomodoro). **Removed (consultancy-only):** PMC,
-> Construction, Programme, mood boards. **Tenders** is back as firm-issued project
-> tenders (Office › Tenders + Project › Tenders; bidding in the contractor portal).
+> Construction, Programme. **Tenders** is back as firm-issued project
+> tenders (Office › Tenders + Project › Tenders; bidding in the contractor portal), and
+> **mood boards** returned as an AStudio project tab (`ProjectMoodboard.tsx`).
 > Edit nav via the `nav` tree and keep NAVIGATION.md in sync.
 
 Key routes by area:
@@ -467,7 +477,7 @@ Key routes by area:
 |---|---|
 | `StudioAbstract.tsx` | **Studio Intelligence** home screen (route `/`; component/file name kept as StudioAbstract) — tabs Overview · Lead · Project · Financial · Team · Work · Approval, each one shell: header + **4 KPI cards** + a **DataTable** that scrolls inside its Tile (page never scrolls, 100% width). Overview merges Studio + Summary and carries the right **sidebar** (AI recommendation over last-10 Office Log). Zone-state vocab in `components/dashboard/zoneState.ts`; uses `dashboard.home`. |
 | `Projects.tsx` ⚠️ | Project list (parallel WIP — avoid editing unless asked) |
-| `ProjectDetail.tsx` | Single project — phases, tasks, drawings, decisions, Estimation (BOQ, `fees:manage` gated) |
+| `ProjectDetail.tsx` | Single project — phases, tasks, drawings, decisions, Estimation (BOQ, `fees:manage` gated), Delivery (BBS · steel recon · running bills), Tenders, and Moodboard tabs |
 | `ArchivedProjects.tsx` | Archived project browser |
 | `Clients.tsx` ⚠️ | Client CRM (parallel WIP — avoid editing unless asked); Third Parties (`/clients`) |
 | `Work.tsx` | Work hub shell — tabs in `components/work/` (`/tasks`; `/work` alias); Tasks pillar |
