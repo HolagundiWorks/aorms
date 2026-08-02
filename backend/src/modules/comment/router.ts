@@ -2,16 +2,22 @@ import { ProjectCursorListParams, clampListLimit } from "@esti/contracts";
 import { and, desc, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { comments, projectOffices, tasks } from "../../db/schema.js";
+import {
+  comments,
+  moodboardItems,
+  moodboards,
+  projectOffices,
+  tasks,
+} from "../../db/schema.js";
 import { writeActivity } from "../../lib/activity.js";
 import { writeAudit } from "../../lib/audit.js";
 import { buildCursorPage, cursorWhere } from "../../lib/cursorPage.js";
 import { protectedProcedure, router } from "../../trpc/trpc.js";
 
-const commentObjectType = z.enum(["projectoffice", "task"]);
+const commentObjectType = z.enum(["projectoffice", "task", "moodboard", "moodboard_item"]);
 
-function commentVisibilityFromObjectType(objectType: z.infer<typeof commentObjectType>) {
-  return objectType === "projectoffice" ? "STAFF" : "STAFF";
+function commentVisibilityFromObjectType(_objectType: z.infer<typeof commentObjectType>) {
+  return "STAFF" as const;
 }
 
 export const commentRouter = router({
@@ -58,6 +64,23 @@ export const commentRouter = router({
       } else if (input.objectType === "task") {
         const [task] = await ctx.db.select().from(tasks).where(and(eq(tasks.id, input.objectId), eq(tasks.projectId, input.projectId))).limit(1);
         if (!task) throw new TRPCError({ code: "NOT_FOUND", message: "Task not found for project" });
+      } else if (input.objectType === "moodboard") {
+        const [board] = await ctx.db
+          .select()
+          .from(moodboards)
+          .where(and(eq(moodboards.id, input.objectId), eq(moodboards.projectId, input.projectId)))
+          .limit(1);
+        if (!board) throw new TRPCError({ code: "NOT_FOUND", message: "Moodboard not found for project" });
+      } else if (input.objectType === "moodboard_item") {
+        const [item] = await ctx.db
+          .select({ id: moodboardItems.id })
+          .from(moodboardItems)
+          .innerJoin(moodboards, eq(moodboardItems.moodboardId, moodboards.id))
+          .where(
+            and(eq(moodboardItems.id, input.objectId), eq(moodboards.projectId, input.projectId)),
+          )
+          .limit(1);
+        if (!item) throw new TRPCError({ code: "NOT_FOUND", message: "Moodboard item not found for project" });
       }
 
       const row = await ctx.db.transaction(async (tx) => {

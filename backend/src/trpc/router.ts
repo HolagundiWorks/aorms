@@ -13,8 +13,6 @@ import { collaboratorRouter } from "../modules/consultant/portal.js";
 import { consultantRouter } from "../modules/consultant/router.js";
 import { consultancyRouter } from "../modules/consultancy/router.js";
 import { contractorRouter } from "../modules/contractor/router.js";
-import { contractorPortalRouter } from "../modules/contractor/portal.js";
-import { tendersRouter } from "../modules/tender/router.js";
 import { vendorRouter } from "../modules/vendor/router.js";
 import { complianceRouter } from "../modules/compliance/router.js";
 import { masterPlanRouter } from "../modules/masterplan/router.js";
@@ -84,6 +82,13 @@ import { snagsRouter } from "../modules/pmc/snags.js";
 import { siteInstructionsRouter } from "../modules/pmc/siteInstructions.js";
 import { progressReportsRouter } from "../modules/pmc/progressReports.js";
 import { phaseProgressRouter } from "../modules/pmc/phaseProgress.js";
+import { pmcMilestonesRouter } from "../modules/pmc/milestones.js";
+import { pmcPackagesRouter } from "../modules/pmc/packages.js";
+import { pmcPackageTendersRouter } from "../modules/pmc/packageTenders.js";
+import { pmcRaBillsRouter } from "../modules/pmc/raBills.js";
+import { pmcSteelCertsRouter } from "../modules/pmc/steelCerts.js";
+import { pmcDigestRouter } from "../modules/pmc/digest.js";
+import { contractorPortalRouter } from "../modules/pmc/contractorPortal.js";
 import { siteVisitRouter } from "../modules/siteVisit/router.js";
 import { cpiRouter } from "../modules/cpi/router.js";
 import { projectBriefRouter } from "../modules/project-brief/router.js";
@@ -96,7 +101,7 @@ import { rateBookRouter } from "../modules/rateBook/router.js";
 import { estimateRouter } from "../modules/estimate/router.js";
 import { bbsRouter } from "../modules/bbs/router.js";
 import { steelReconciliationRouter } from "../modules/steel/router.js";
-import { runningBillsRouter } from "../modules/runningBill/router.js";
+import { moodboardRouter } from "../modules/moodboard/router.js";
 import { eomsRouter } from "../modules/eoms/router.js";
 import { publicProcedure, router } from "./trpc.js";
 
@@ -143,8 +148,6 @@ export const appRouter = router({
   // Studio architect↔consultant `engagements` namespace below.
   consultancy: consultancyRouter,
   contractors: contractorRouter,
-  contractorPortal: contractorPortalRouter,
-  tenders: tendersRouter,
   vendors: vendorRouter,
   compliance: complianceRouter,
   masterPlans: masterPlanRouter,
@@ -205,6 +208,13 @@ export const appRouter = router({
   siteInstructions: siteInstructionsRouter,
   progressReports: progressReportsRouter,
   phaseProgress: phaseProgressRouter,
+  pmcMilestones: pmcMilestonesRouter,
+  pmcPackages: pmcPackagesRouter,
+  pmcPackageTenders: pmcPackageTendersRouter,
+  pmcRaBills: pmcRaBillsRouter,
+  pmcSteelCerts: pmcSteelCertsRouter,
+  pmcDigest: pmcDigestRouter,
+  contractorPortal: contractorPortalRouter,
   leads: leadsRouter,
   projectDna: projectDnaRouter,
   assessment: assessmentRouter,
@@ -223,7 +233,7 @@ export const appRouter = router({
   estimates: estimateRouter,
   bbs: bbsRouter,
   steelReconciliation: steelReconciliationRouter,
-  runningBills: runningBillsRouter,
+  moodboard: moodboardRouter,
   eoms: eomsRouter,
 });
 

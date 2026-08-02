@@ -11,7 +11,7 @@ export function ContextualComments({
   description,
 }: {
   projectId: string;
-  objectType: "projectoffice" | "task";
+  objectType: "projectoffice" | "task" | "moodboard" | "moodboard_item";
   objectId: string;
   heading: string;
   description?: string;

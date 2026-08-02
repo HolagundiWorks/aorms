@@ -84,6 +84,7 @@ export * from "./item-library.js";
 export * from "./measurement-sheet.js";
 export * from "./plan-markup.js";
 export * from "./measurement-quantity.js";
+export * from "./moodboard.js";
 export * from "./import-text.js";
 export * from "./consultancy.js";
 export * from "./project-precon.js";

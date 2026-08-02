@@ -7,6 +7,7 @@ export type UploadDenial = { status: 401 | 403; error: string };
 export const UPLOAD_ROUTE_CAPABILITIES = {
   "/upload/drawing": "write",
   "/upload/inspection-photo": "write",
+  "/upload/mood-image": "write",
   "/upload/reconcile": "write",
   "/upload/firm-logo": "firm:admin",
   "/upload/profile-photo": "write",

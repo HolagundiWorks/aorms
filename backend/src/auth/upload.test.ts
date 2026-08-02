@@ -23,6 +23,7 @@ describe("uploadDenial", () => {
     expect(UPLOAD_ROUTE_CAPABILITIES).toEqual({
       "/upload/drawing": "write",
       "/upload/inspection-photo": "write",
+      "/upload/mood-image": "write",
       "/upload/reconcile": "write",
       "/upload/firm-logo": "firm:admin",
       "/upload/compliance-doc": "write",

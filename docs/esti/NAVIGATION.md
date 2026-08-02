@@ -192,8 +192,17 @@ sections. Community Exchange · Professional Identity remain 🔲 behind a singl
 ---
 
 ## Removed (consultancy-only)
-**PMC**, **Construction**, **Programme**, **Tenders**, **Mood boards** — routes redirect
-to `/projects`. Top-level **Estimation** nav removed; `/estimation*` → `/projects`.
+**Construction** (contractor ERP) — routes redirect to `/projects`. Top-level
+**Estimation** nav removed; `/estimation*` → `/projects`.
+
+**Moodboard** lives on the project workspace tab (`/projects/:id?tab=moodboard`) —
+Canva-like canvas (images, pen, sticky notes) with board/item discussion. Not a
+top-level sidebar entry.
+
+## Restored / live under Project workspace
+**Programme**, **Packages / tenders**, **RA certification**, **BBS**, **Steel
+reconciliation**, and **Moodboard** are project tabs (AProc / AStudio), not
+standalone nav pillars.
 
 ## Closing philosophy
 AORMS is an **operating system for design studios**: work and learning coexist,
