@@ -89,6 +89,8 @@ function lazyRoute(
 }
 
 const Alerts = lazyRoute(() => import("./routes/Alerts.js"), "Alerts");
+// Wave 1 Carbon migration spike — public probe screen (docs/esti/CARBON-MIGRATION.md).
+const CarbonSpike = lazyRoute(() => import("./routes/CarbonSpike.js"), "CarbonSpike");
 const ArchivedProjects = lazyRoute(() => import("./routes/ArchivedProjects.js"), "ArchivedProjects");
 const CollaboratorPortal = lazyRoute(() => import("./routes/CollaboratorPortal.js"), "CollaboratorPortal");
 const SitePortal = lazyRoute(() => import("./routes/SitePortal.js"), "SitePortal");
@@ -312,6 +314,10 @@ function AppWorkspace() {
   // Company owner portal — profile, members, company licence.
   if (pathname === "/company-account")
     return <CompanyAccountPortal />;
+
+  // Wave 1 Carbon migration spike — standalone public probe, all build variants.
+  if (pathname === "/carbon-spike")
+    return <CarbonSpike />;
 
   // studio.aorms.in — staff sign-in lives at /login (no platform landing).
   if (surface === "studio" && pathname === "/" && !user && !isLoading)

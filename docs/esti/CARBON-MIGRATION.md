@@ -13,6 +13,42 @@ public landing / marketing pages.
 
 ---
 
+## 0. Governing rule — PURE Carbon, no custom UI/UX (non-negotiable)
+
+> **The target is stock IBM Carbon. No custom UI/UX elements.**
+
+Every screen — app and landing — is composed **only** from stock `@carbon/react`
+components and documented Carbon patterns (UI Shell, DataTable, Notifications,
+Modal, Tile, Grid). Concretely, this rule means:
+
+- **No bespoke components** where Carbon provides one, and **no inventing**
+  components Carbon deliberately omits (no custom dock, rail, orb, KPI widget,
+  avatar). If Carbon has no component for a need, use the nearest Carbon pattern
+  (`HeaderGlobalBar` actions, `Tile`, `Tag`, `OverflowMenu`) — do **not** build a
+  new one.
+- **No HCW material languages** — glass and soft/neumorphic surfaces are
+  dropped. Elevation is Carbon `Layer`/`Tile` only. Flat, functional.
+- **No brand forks of component appearance** — use Carbon themes
+  (`white`/`g10`/`g90`/`g100`) and IBM Plex. Brand expression is limited to the
+  theme's interactive/accent **token** and logo lockups; it must not restyle
+  Carbon components away from spec.
+- **No MUI, no `@hcw/ui-kit`** in the final state; and no hand-rolled CSS that
+  reproduces a component Carbon already ships.
+- **Custom code is confined to composition and layout** — arranging stock Carbon
+  components with the Carbon grid and spacing tokens is expected; restyling them
+  is not.
+
+The **only** sanctioned non-Carbon primitives are unavoidable app plumbing that
+render **stock Carbon internally** and add no new visual language — a global
+toast container (Carbon `ToastNotification`), a `document.title`/breadcrumb
+side-effect wrapper (Carbon `Breadcrumb`), and route/skeleton glue. These wrap
+Carbon; they do not introduce custom UI.
+
+This rule **supersedes the open decisions in § 8** — they are resolved in favour
+of pure Carbon (flat, IBM Plex, Carbon UI Shell, no glass, IBM data-viz).
+
+---
+
 ## 1. Why (intent)
 
 Adopt Carbon as the single design system for the entire product — app to
@@ -110,17 +146,18 @@ the kit.
 | --- | --- | --- |
 | `Surface layer="flat"` | `Tile` / `Layer` | direct |
 | `Surface layer="soft"` | `Tile` + `Layer` (one step up) | drop neumorphism |
-| `Surface layer="glass"` | `Tile` (raised) / bespoke | **drop glass** or keep as brand override (§8) |
-| `GlassRail` | UI Shell `SideNav` + `Header` | rebuild; auth forms move off the rail |
-| `ActionDock` + `useScreenActions` | **bespoke** (keep the hook; restyle on Carbon `Button`) | no Carbon analogue |
-| `StatusDot` (302) | small status glyph + `Tag`/text (keep shape channel) | wrap once, migrate call-sites by import swap |
-| `DataState` (243) | `SkeletonText`/`SkeletonPlaceholder` + empty-state | wrap once |
-| `PageBreadcrumb` (116) | `Breadcrumb` + `document.title` side-effect | wrap once |
-| `ConfirmModal` (55) | `Modal`/`ComposedModal` (`danger`) | wrap once |
-| `ToastHost`/`pushToast` (68) | `ToastNotification` + container + `pushToast` shim | keep the API, swap the renderer |
-| `KpiStrip` / `MissionHeader` / `DecisionQueue` / `AwarenessStrip` | bespoke on Carbon `Tile`/type tokens | reimplement |
-| `HealthGlassOrb` / `BrandMark` / `Avatar`+`getInitials` | bespoke (Carbon has no Avatar) | reimplement |
-| `TaskbarFooter` / `SectionDock` | bespoke on UI Shell | reimplement |
+| `Surface layer="glass"` | `Tile` / `Layer` | **drop glass** — flat only (§0) |
+| `GlassRail` | UI Shell `SideNav` + `Header` | **replace** with stock UI Shell; auth forms move off the rail |
+| `ActionDock` + `useScreenActions` | `HeaderGlobalBar` actions / page `Button` set | **replace** — keep the hook as plumbing, **no custom dock UI** |
+| `StatusDot` (302) | stock `Tag` (+ status icon) | thin adapter rendering stock Carbon; migrate call-sites by import swap |
+| `DataState` (243) | `SkeletonText`/`SkeletonPlaceholder` + Carbon empty-state | thin adapter over stock Carbon |
+| `PageBreadcrumb` (116) | `Breadcrumb` + `document.title` side-effect | sanctioned plumbing wrapper (§0) |
+| `ConfirmModal` (55) | `Modal`/`ComposedModal` (`danger`) | thin adapter over stock `Modal` |
+| `ToastHost`/`pushToast` (68) | `ToastNotification` + container | sanctioned plumbing wrapper (keep API, stock renderer) |
+| `KpiStrip` / `MissionHeader` / `DecisionQueue` / `AwarenessStrip` | **compose** stock `Tile` + `Tag` + Carbon type | no custom widget — arrangement only |
+| `HealthGlassOrb` | stock `Tag` / status icon | **drop the orb** — no custom visual |
+| `Avatar`+`getInitials` / `BrandMark` | initials in a stock `Tile`/`Tag`; logo lockup only | no custom Avatar component |
+| `TaskbarFooter` / `SectionDock` | UI Shell `Header`/`SideNav` | **replace** with stock UI Shell — no custom nav |
 | `chromeIconSx` | Carbon icon `size` props | delete |
 | `createHcwTheme` / `KitRoot` / `MuiRoot` | `GlobalTheme` + `Theme` | replace at root |
 
@@ -171,15 +208,22 @@ Radiant Orange as the interactive/accent token override). **Exit:** Carbon
 tokens/type live globally; no visual regressions on existing screens (kit still
 renders); build + CSP green.
 
-### Wave 2 — Primitive parity shims (1–2 sprints)
-Reimplement the ~20 kit primitives as **Carbon-backed components exposed under
-the same import names/props** (`StatusDot`, `DataState`, `PageBreadcrumb`,
-`ConfirmModal`, `ToastHost`/`pushToast`, `Surface`, `ActionDock`+`useScreenActions`,
-`KpiStrip`, `Avatar`, `BrandMark`, `HealthGlassOrb`, `SectionDock`,
-`TaskbarFooter`). This flips the **78 kit files** to Carbon with near-zero
-call-site churn by changing what the shim renders. **Exit:** kit imports render
-Carbon internally; the 78 files are visually on Carbon; a11y (keyboard/focus)
-parity verified; visual baselines re-shot.
+### Wave 2 — Carbon adapters + retire the bespoke primitives (1–2 sprints)
+Per § 0 (pure Carbon), split the ~20 kit primitives into two buckets:
+1. **Thin adapters** that render **stock Carbon** under the same import name/props
+   so call-sites migrate by an import swap — `StatusDot`→`Tag`, `DataState`→
+   `Skeleton*`/empty-state, `ConfirmModal`→`Modal`, plus the sanctioned plumbing
+   wrappers `PageBreadcrumb`→`Breadcrumb` and `pushToast`→`ToastNotification`.
+   These add **no new visual language**.
+2. **Retire, don't reimplement** — `GlassRail`, `ActionDock`, `SectionDock`,
+   `TaskbarFooter`, `KpiStrip`, `HealthGlassOrb`, `Avatar`, `BrandMark`,
+   `Surface(soft/glass)`. Their call-sites are rewritten onto stock Carbon
+   patterns (UI Shell, `Tile`, `Tag`, `HeaderGlobalBar`) during Waves 3/5. **No
+   custom replacements are built.**
+This flips the **78 kit files** with near-zero churn for bucket 1 and scheduled
+rewrites for bucket 2. **Exit:** adapters render stock Carbon; every retired
+primitive has a Carbon-pattern replacement plan; a11y (keyboard/focus) parity
+verified; visual baselines re-shot.
 
 ### Wave 3 — App MUI → Carbon, by domain (the bulk; 4–6 sprints)
 Convert the **198 MUI files** screen-by-screen in dependency order. Suggested
@@ -248,26 +292,41 @@ run in parallel across contributors once Wave 2 lands the shims.
 
 ---
 
-## 8. Open decisions (settle in Wave 0)
+## 8. Decisions — RESOLVED by § 0 (pure Carbon)
 
-1. **Visual identity** — adopt Carbon's flat language wholesale, or keep the HCW
-   brand (Radiant Orange accent, Urbanist) as a Carbon theme override? This
-   drives Waves 1/5 heavily.
-2. **Glass & soft layers** — drop entirely for Carbon's flat `Layer`, or
-   preserve glass only on marketing (`landing.scss`) as a bespoke exception?
-3. **Type** — IBM Plex (Carbon default) vs. keep Urbanist via a type-token
-   override.
-4. **Spatial model** — replace Rail · Stage · Dock with Carbon UI Shell, or keep
-   the bespoke shell skinned with Carbon tokens? (`ActionDock` has no Carbon
-   analogue either way.)
-5. **Monorepo** — retire `hcwux`/`vendor/hcw-ui-kit` and own a thin
-   `frontend/src/carbon/` shim layer, vs. publish a Carbon-based successor kit.
-6. **Data-viz** — move `DATA_VIZ` canvas palette to IBM's data-vis palette, or
-   keep the current one.
+The governing rule settles these; recorded here for traceability.
+
+1. **Visual identity** — **Carbon flat, wholesale.** Brand expression limited to
+   the theme accent token + logo lockups; no component restyling.
+2. **Glass & soft layers** — **dropped everywhere**, marketing included. Flat
+   `Layer`/`Tile` only.
+3. **Type** — **IBM Plex** (Carbon default). Urbanist retired.
+4. **Spatial model** — **Carbon UI Shell** (`Header`/`SideNav`/`HeaderGlobalBar`).
+   Rail · Stage · Dock and `ActionDock` are retired, not reskinned.
+5. **Monorepo** — retire `hcwux`/`vendor/hcw-ui-kit`; keep only a **thin adapter
+   layer** (`frontend/src/carbon/`) that renders stock Carbon. No successor kit,
+   no custom component library.
+6. **Data-viz** — adopt the **IBM data-vis palette** (`@carbon/colors`).
+
+## 9. Wave 0/1 spike — findings (done 2026-08-02)
+
+A probe screen (`frontend/src/routes/CarbonSpike.tsx`, route `/carbon-spike`)
+renders stock `@carbon/react` under a Carbon `<Theme>` inside the live app.
+
+- **Integrates cleanly:** `@carbon/react@1.113` / `@carbon/icons-react@11` /
+  `@carbon/styles@1.112` install and peer-support React 19; frontend `tsc` +
+  `eslint` green; `vite build` succeeds and code-splits Carbon into its own
+  `vendor-carbon` chunk (~197 kB / ~57 kB gzip) — loaded only on Carbon routes.
+- **Confirmed risk:** importing `@carbon/styles` global CSS applies Carbon's
+  reset + base type app-wide once loaded, and its `:root --cds-*` tokens overlap
+  the frozen compat block in `styles.scss`. **Wave 1 must scope Carbon styles**
+  (Sass `@use` with a layer, or a scoped build) before Carbon lands on shared
+  screens. The spike keeps it isolated to `/carbon-spike`.
+- **Verdict:** the roadmap is sound; proceed to Wave 1 foundation.
 
 ---
 
-## 9. Doc chain to update at Wave 6
+## 10. Doc chain to update at Wave 6
 
 `CLAUDE.md` (§ UI / design system, structural-CSS notes) ·
 [`HCW-UI-KIT.md`](HCW-UI-KIT.md) (mark superseded) ·
