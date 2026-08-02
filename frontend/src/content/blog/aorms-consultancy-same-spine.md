@@ -1,22 +1,24 @@
 ---
-title: AORMS-Consultancy — engineering on the same operational spine
+title: AConsulting — engineering on the same operational spine
 date: 2026-07-22
-excerpt: AORMS-Consultancy is live for structural, MEP, and multidisciplinary engineering consultancies on the same AORMS spine as Studio.
+excerpt: AConsulting is live for structural, MEP, and multidisciplinary engineering consultancies on the same AORMS spine as AStudio — with AProc available for PMC firms.
 tags: Platform, Product, Practice
 author: Human Centric Works
 ---
 
-**AORMS-Studio** shipped first for Indian architecture consultancies. The platform
-was never architecture-only in design: **AORMS** is for **AEC consulting firms** —
-offices that advise, not firms that deliver the build as contractors.
+**AStudio** shipped first for Indian architecture consultancies. The platform
+was never architecture-only in design: **AORMS** is for **AEC consulting firms
+and PMC practices** — offices that advise and govern, not firms that deliver the
+build as contractors.
 
-**AORMS-Consultancy** is the engineering workspace on that spine: structural, MEP,
-civil, and multidisciplinary practices that need enquiries, engagements, fee
-stages, and governed delivery — without construction PM or tenders bolted on.
+**AConsulting** (*Accelerated Consulting*) is the engineering workspace on that
+spine: structural, MEP, civil, and multidisciplinary practices that need
+enquiries, engagements, fee stages, and governed delivery — without contractor
+ERP bolted on.
 
 ## Same spine, different workspace
 
-Consultancy does not fork a second product. It reuses the platform’s operational
+AConsulting does not fork a second product. It reuses the platform’s operational
 and design frameworks, identity, licensing, and AI posture:
 
 - **EOMS** for authoritative codes and knowledge-bank intake
@@ -27,11 +29,17 @@ and design frameworks, identity, licensing, and AI posture:
 What changes is the **workspace profile** — engineering enquiry → engagement →
 fee stages and Studio-linked invoicing — not a parallel ERP.
 
+## The third app
+
+**AProc** (*Accelerated Project Management*) is the PMC workspace for project
+management consultancies — programme, packages, and certification. Preview at
+`proc.aorms.in`. See [AProc for PMC firms](/blog/aproc-pmc-for-project-management-consultancies).
+
 ## Launch status
 
-**AORMS-Consultancy is live** at `consultancy.aorms.in`. Architecture practices
-stay on **AORMS-Studio**; engineering firms open the same platform with a
-discipline-fit shell.
+**AConsulting is live** at `consultancy.aorms.in`. Architecture practices stay
+on **AStudio**; engineering firms open the same platform with a discipline-fit
+shell.
 
 ## Read next
 

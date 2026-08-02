@@ -12,7 +12,26 @@ import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "../../db/index.js";
-import { activities, aiRuns, approvals, assignments, consDeliverables, consEngagements, drawings, invoices, moms, phases, portalSubmissions, projectOffices, teamMembers, transmittals, users } from "../../db/schema.js";
+import {
+  activities,
+  aiRuns,
+  approvals,
+  assignments,
+  consDeliverables,
+  consEngagements,
+  drawings,
+  invoices,
+  moms,
+  phases,
+  pmcRaBills,
+  pmcSteelCerts,
+  portalSubmissions,
+  progressReports,
+  projectOffices,
+  teamMembers,
+  transmittals,
+  users,
+} from "../../db/schema.js";
 import { writeActivity } from "../../lib/activity.js";
 import { runAiGateway } from "../../lib/ai/gateway.js";
 import { getFirm } from "../../lib/firm.js";
@@ -345,6 +364,134 @@ export const portalRouter = router({
       )
       .orderBy(desc(consDeliverables.issuedAt));
   }),
+
+  /** AProc — issued progress reports for the client's projects. */
+  issuedProgressReports: clientProcedure
+    .input(z.object({ projectId: z.string().uuid() }).optional())
+    .query(async ({ ctx, input }) => {
+      const owned = await ctx.db
+        .select({ id: projectOffices.id })
+        .from(projectOffices)
+        .where(eq(projectOffices.clientId, ctx.user.clientId));
+      const ids = owned.map((p) => p.id);
+      if (ids.length === 0) return [];
+      if (input?.projectId) {
+        if (!ids.includes(input.projectId)) throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      return ctx.db
+        .select({
+          id: progressReports.id,
+          projectId: progressReports.projectId,
+          projectRef: projectOffices.ref,
+          projectTitle: projectOffices.title,
+          periodStart: progressReports.periodStart,
+          periodEnd: progressReports.periodEnd,
+          physicalProgressPct: progressReports.physicalProgressPct,
+          openSnagCount: progressReports.openSnagCount,
+          status: progressReports.status,
+          pdfKey: progressReports.pdfKey,
+          pdfStatus: progressReports.pdfStatus,
+        })
+        .from(progressReports)
+        .innerJoin(projectOffices, eq(progressReports.projectId, projectOffices.id))
+        .where(
+          and(
+            eq(progressReports.status, "ISSUED"),
+            input?.projectId
+              ? eq(progressReports.projectId, input.projectId)
+              : inArray(progressReports.projectId, ids),
+          ),
+        )
+        .orderBy(desc(progressReports.periodEnd));
+    }),
+
+  /** AProc — certified / sent RA bills for the client's projects. */
+  certifiedRaBills: clientProcedure
+    .input(z.object({ projectId: z.string().uuid() }).optional())
+    .query(async ({ ctx, input }) => {
+      const owned = await ctx.db
+        .select({ id: projectOffices.id })
+        .from(projectOffices)
+        .where(eq(projectOffices.clientId, ctx.user.clientId));
+      const ids = owned.map((p) => p.id);
+      if (ids.length === 0) return [];
+      if (input?.projectId) {
+        if (!ids.includes(input.projectId)) throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      return ctx.db
+        .select({
+          id: pmcRaBills.id,
+          projectId: pmcRaBills.projectId,
+          projectRef: projectOffices.ref,
+          projectTitle: projectOffices.title,
+          ref: pmcRaBills.ref,
+          billNo: pmcRaBills.billNo,
+          periodStart: pmcRaBills.periodStart,
+          periodEnd: pmcRaBills.periodEnd,
+          status: pmcRaBills.status,
+          grossPaise: pmcRaBills.grossPaise,
+          advanceRecoveryPaise: pmcRaBills.advanceRecoveryPaise,
+          retentionPaise: pmcRaBills.retentionPaise,
+          otherDeductionPaise: pmcRaBills.otherDeductionPaise,
+          certifiedAt: pmcRaBills.certifiedAt,
+          sentAt: pmcRaBills.sentAt,
+          pdfKey: pmcRaBills.pdfKey,
+          pdfStatus: pmcRaBills.pdfStatus,
+        })
+        .from(pmcRaBills)
+        .innerJoin(projectOffices, eq(pmcRaBills.projectId, projectOffices.id))
+        .where(
+          and(
+            inArray(pmcRaBills.status, ["CERTIFIED", "SENT_TO_CLIENT", "CLOSED"]),
+            input?.projectId
+              ? eq(pmcRaBills.projectId, input.projectId)
+              : inArray(pmcRaBills.projectId, ids),
+          ),
+        )
+        .orderBy(desc(pmcRaBills.periodEnd));
+    }),
+
+  /** AProc — certified / sent steel certifications for the client's projects. */
+  certifiedSteelCerts: clientProcedure
+    .input(z.object({ projectId: z.string().uuid() }).optional())
+    .query(async ({ ctx, input }) => {
+      const owned = await ctx.db
+        .select({ id: projectOffices.id })
+        .from(projectOffices)
+        .where(eq(projectOffices.clientId, ctx.user.clientId));
+      const ids = owned.map((p) => p.id);
+      if (ids.length === 0) return [];
+      if (input?.projectId) {
+        if (!ids.includes(input.projectId)) throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      return ctx.db
+        .select({
+          id: pmcSteelCerts.id,
+          projectId: pmcSteelCerts.projectId,
+          projectRef: projectOffices.ref,
+          projectTitle: projectOffices.title,
+          ref: pmcSteelCerts.ref,
+          periodStart: pmcSteelCerts.periodStart,
+          periodEnd: pmcSteelCerts.periodEnd,
+          status: pmcSteelCerts.status,
+          issuedKg: pmcSteelCerts.issuedKg,
+          consumedKg: pmcSteelCerts.consumedKg,
+          wastagePct: pmcSteelCerts.wastagePct,
+          certifiedAt: pmcSteelCerts.certifiedAt,
+          sentAt: pmcSteelCerts.sentAt,
+        })
+        .from(pmcSteelCerts)
+        .innerJoin(projectOffices, eq(pmcSteelCerts.projectId, projectOffices.id))
+        .where(
+          and(
+            inArray(pmcSteelCerts.status, ["CERTIFIED", "SENT_TO_CLIENT", "CLOSED"]),
+            input?.projectId
+              ? eq(pmcSteelCerts.projectId, input.projectId)
+              : inArray(pmcSteelCerts.projectId, ids),
+          ),
+        )
+        .orderBy(desc(pmcSteelCerts.periodEnd));
+    }),
 
   /** Revision stats for the client dashboard — change request breakdown by category. */
   revisionStats: clientProcedure

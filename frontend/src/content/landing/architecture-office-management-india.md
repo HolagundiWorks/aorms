@@ -12,7 +12,7 @@ intro: One system for the whole Indian office � GST billing, COA fee recovery,
 
 An architecture office in India runs on a dozen things at once: fee milestones to bill, invoices to follow up, client revisions to track, authority approvals to chase, attendance to mark and a client asking where their drawings are. Most offices manage this across a project tool that ignores Indian practice, an accountant's separate ledger and a group chat. **Architecture office management India** practices can stand on means putting the commercial, revision-tracking and operational sides in one record � built for Indian offices, not adapted to them.
 
-**AORMS-Studio**, powered by ESTI, is that system: a cloud-hosted AORMS-Studio on the AORMS platform where fee recovery, revision control, projects, teams and client portals share one source of truth.
+**AStudio**, powered by ESTI, is that system: a cloud-hosted AStudio on the AORMS platform where fee recovery, revision control, projects, teams and client portals share one source of truth.
 
 ## Fee recovery, visible across the office
 

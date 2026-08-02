@@ -1,65 +1,69 @@
 # AORMS (`esti`) — agent instructions
 
 **AORMS** (**Accelerated Operational Resources Management System**) is the
-**platform** — operational consolidation for **AEC consulting firms** with dual-tier AI.
-The **shipped app** in this monorepo is **AORMS-Studio** (slug `aorms-studio`, legacy
-slugs `hived` and `aorms-architecture`, Indian architecture practices). **AORMS-Consultancy**
-(slug `aorms-consultancy`) is the engineering consultancy app — **code-complete** in this monorepo; live. Nomenclature:
+**platform** — operational consolidation for **AEC consulting and PMC firms** with
+dual-tier AI. Apps: **AStudio** (*Accelerated Studio*, architecture), **AConsulting**
+(*Accelerated Consulting*, engineering), **AProc** (*Accelerated Project Management*,
+PMC — preview). Slugs `astudio` / `aconsulting` / `aproc`; legacy marketing names
+AORMS-Studio / AORMS-Consultancy / AORMS-PMC redirect. Nomenclature:
 [`docs/esti/AORMS-PLATFORM-NOMENCLATURE.md`](docs/esti/AORMS-PLATFORM-NOMENCLATURE.md).
 
 **ESTI** (Embedded Studio Intelligence) is the **internal AI agent** in
-**AORMS-Studio**: Ask ESTI, the cognition engine, Studio Intelligence, ESTI Pulse.
+**AStudio**: Ask ESTI, the cognition engine, Studio Intelligence, ESTI Pulse.
 **EOMS** (Emergent Object Management System) is the **external knowledge bank** —
 a standalone API cataloging standard codebooks and building/compliance codes.
 Code identifiers (`@esti/*` packages, `esti_*` tables, repo name) keep the
-`esti` codename. See [`docs/esti/AORMS-PLATFORM-NOMENCLATURE.md`](docs/esti/AORMS-PLATFORM-NOMENCLATURE.md).
+`esti` codename.
 
 Monorepo (pnpm workspaces): `packages/contracts`, `backend` (Fastify + tRPC +
 Drizzle), `frontend` (React + Vite), plus a Python `worker`. Services run via
 Docker Compose (`compose.yaml`).
 
-## Product naming (agent memory — 2026-07-11)
+## Product naming (agent memory — 2026-07-25)
 
 **Canonical doc:** [`docs/esti/AORMS-PLATFORM-NOMENCLATURE.md`](docs/esti/AORMS-PLATFORM-NOMENCLATURE.md).
 **Executable constants:** `frontend/src/lib/product-nomenclature.ts` — import
-`AORMS_PLATFORM`, `AORMS_APPS`, `AORMS_STUDIO`, `AORMS_CONSULTANCY`, `AORMS_PORTALS`, `PLATFORM_APPS`, `EOMS`, `ESTI` for user-facing copy; do
-not hard-code product strings in UI/SEO.
+`AORMS_PLATFORM`, `AORMS_APPS`, `AORMS_STUDIO` / `ASTUDIO`, `AORMS_CONSULTANCY` /
+`ACONSULTING`, `AORMS_PMC` / `APROC`, `AORMS_PORTALS`, `PLATFORM_APPS`, `EOMS`,
+`ESTI` for user-facing copy; do not hard-code product strings in UI/SEO.
 
 | Name | Role |
 | --- | --- |
-| **AORMS** | Platform — *Accelerated Operational Resources Management System*; **AEC consulting firms only** (architecture + engineering); **not** solution delivery or construction PM |
-| **AORMS-Studio** | Shipped **architecture** app from this repo — Indian architecture consultancies; SPA at **`studio.aorms.in`** |
-| **AORMS-Consultancy** | **Engineering** consultancy app — live; structural, MEP, civil, multidisciplinary firms |
-| **EOMS** | **Knowledge bank** (standalone API) — standard codebooks & compliance codes; apps query it |
-| **ESTI** | **Internal AI agent** in **AORMS-Studio** — Ask ESTI, Studio Intelligence, ESTI Pulse |
+| **AORMS** | Platform — *Accelerated Operational Resources Management System*; AEC consulting + PMC |
+| **AStudio** | Architecture app (*Accelerated Studio*) — this repo; **`studio.aorms.in`**; slug `astudio` |
+| **AConsulting** | Engineering app (*Accelerated Consulting*) — live; **`consultancy.aorms.in`**; slug `aconsulting` |
+| **AProc** | PMC app (*Accelerated Project Management*) — preview; **`proc.aorms.in`**; slug `aproc` |
+| **EOMS** | Knowledge bank (standalone API) — standard codebooks & compliance codes |
+| **ESTI** | Internal AI agent in **AStudio** — Ask ESTI, Studio Intelligence, ESTI Pulse |
 | **`AORMS_PORTALS`** | Portal/surface UI labels — staff workspace, external portals, account hub |
-| **`aorms-studio`** | URL/wiki **slug** — legacy slugs `hived`, `aorms-architecture` redirect |
-| **`aorms-consultancy`** | Engineering app **slug** (live) |
 | **`esti`** | Repo codename — `@esti/*`, `esti_*` tables; never in marketing |
 
 **Retired terms (do not use in new copy):**
 
-- *Architecture Office Resource Management System* → **AORMS** (platform) or **AORMS-Studio** (app)
-- **AORMS portal** / **AORMS-Architecture** / **HiveD** (staff workspace) → **AORMS-Studio** — client/consultant/**contractor** *portals* keep the word *portal*
-- **EmOI** / *Embedded Operational Intelligence* → **EOMS** (*Emergent Object Management System*, knowledge bank)
-- Pre-2026-07 multi-industry platform scope (risk, education, auditing) → **AEC only**
+- *Architecture Office Resource Management System* → **AORMS** (platform) or **AStudio** (app)
+- **AORMS portal** / **AORMS-Architecture** / **HiveD** / **AORMS-Studio** → **AStudio**
+- **AORMS-Consultancy** → **AConsulting**; **AORMS-PMC** → **AProc**
+- **EmOI** / *Embedded Operational Intelligence* → **EOMS**
+- Pre-2026-07 multi-industry platform scope → **AEC + PMC consultancies**
 
 **Public marketing surfaces:**
 
 | Path / host | Role |
 | --- | --- |
 | `/` · **aorms.in** | Platform landing — operational + design frameworks, EOMS; all path-based pages below |
-| `/wiki` | Four-pillar wiki: HCW-UI · AORMS-Studio · AI core · Management |
+| `/wiki` | Four-pillar wiki: HCW-UI · AStudio · AI core · Management |
 | `/access` | Client, consultant, contractor, site portal sign-in |
 | `/account` · `/company-account` | AORMS account & licensing hub |
 | **admin.aorms.in** · `/platform-admin` | **HCW License Manager** console (in-tree — `backend/src/licensing-platform/`, `frontend/src/platform-admin/`) |
 | `/libraries/knowledge-bank-portal` | Knowledge Bank portal (EOMS textbook library) |
-| **studio.aorms.in** · `/login` | **AORMS-Studio** workspace (architecture) |
-| **consultancy.aorms.in** · `/aorms-consultancy` | **AORMS-Consultancy** engineering marketing + product entry (live) |
+| **studio.aorms.in** · `/login` | **AStudio** workspace (architecture) |
+| **consultancy.aorms.in** · `/aconsulting` | **AConsulting** engineering marketing + product entry |
+| **proc.aorms.in** · `/aproc` · `/pmc` | **AProc** PMC marketing + preview workspace |
 | `/blog` | Platform blog (practice + product notes) |
 
 Frozen host map: [`docs/esti/AORMS-SURFACE-URLS.md`](docs/esti/AORMS-SURFACE-URLS.md) ·
 `frontend/src/lib/aorms-surface-urls.ts`.
+AProc architecture & waves: [`docs/esti/APROC-ARCHITECTURE.md`](docs/esti/APROC-ARCHITECTURE.md).
 
 **Operator:** **Human Centric Works (HCW)** — design studio behind `@hcw/ui-kit` and AORMS.
 - [`docs/marketing/LANDING-REDESIGN-CONTEXT.md`](docs/marketing/LANDING-REDESIGN-CONTEXT.md) — landing/marketing brief.
@@ -76,7 +80,7 @@ via the repo’s wiki sync/build step.
 > **⚠️ CANONICAL (2026-07): `@hcw/ui-kit` v1.4.0** (*HCW-UI-Kit — Human Centric Works*,
 > vendored at `vendor/hcw-ui-kit` from [hcwux](https://github.com/HolagundiWorks/hcwux))
 > is the centralised, **layered** design system deployed against **every** surface —
-> **AORMS-Studio**, client/consultant portals, licensing console, and the landing page.
+> **AStudio**, client/consultant portals, licensing console, and the landing page.
 > **`@carbon/react` was removed (2026-07).** Carbon *Sass* colours/type scale survive
 > only as a frozen `--cds-*` compat block in `frontend/src/styles.scss` — no Carbon
 > React components anywhere.
@@ -343,6 +347,11 @@ GST rates, SAC codes)
 - `estimates` — a project's priced BOQ against one rate book, with a per-item
   measurement book (nos × dimensions by unit shape) and a contingency/GST rollup
 
+**BBS / steel recon** (`write`; finalize with `cost:approve`; 2026-07-25):
+- `bbs` — project bar bending schedules; IS 456 cutting lengths (Delivery → BBS)
+- `steelReconciliation` — scheduled (BBS) vs issued vs consumed kg by diameter
+  (Delivery → Steel recon). RA bills stay on `pmcRaBills`.
+
 **Drawings:**
 - `drawings` — drawing/document management (DXF register)
 
@@ -360,9 +369,11 @@ GST rates, SAC codes)
 > [Construction-Billing-System](https://github.com/HolagundiWorks/Construction-Billing-System)'s
 > domain model. Firm-level, versioned **Rate Books** (Library → Rate Books)
 > price a project's **Estimation** tab (priced BOQ + per-item measurement book +
-> contingency/GST rollup), both gated to `fees:manage`. No Contracts, Running/RA
-> Bills, tenders, or BBS — those stay out per the consultancy-only pivot below.
-> See `packages/contracts/src/estimation.ts` and `docs/esti/UNIFIED-ARCHITECTURE-V4.md`.
+> contingency/GST rollup), both gated to `fees:manage`. No Contracts or tenders
+> in this BOQ model. Project **BBS** + **steel reconciliation** returned as
+> Delivery sub-tabs (migrations `0223`/`0224`); contractor RA stays on AProc
+> `pmcRaBills`. See `packages/contracts/src/estimation.ts` and
+> `docs/esti/UNIFIED-ARCHITECTURE-V4.md`.
 
 **Team / HR / Performance:**
 - `team` / `assignments` — roster and project-staff assignments
@@ -386,17 +397,24 @@ GST rates, SAC codes)
 > The in-product RIE/compliance rule engine, site assessments (`ruleVersions` /
 > `siteAssessments`), and the BBMP bylaw calculator (`bbmpRules`) were removed in the
 > 2026-06 Knowledge-Bank cleanup. The Estimation OS + Construction Cost spine
-> (incl. BBS / `esti_bbs`, the Components + Parametric KB tabs) were removed in the
-> 2026-06-28 teardown, **followed by Rate Books (`dsr`) and Rate Analysis
-> (`rateAnalysis`)** — the Knowledge Bank now holds only Specification + Lessons.
+> (incl. steel reconciliation, the Components + Parametric KB tabs) were removed
+> in the 2026-06-28 teardown, **followed by Rate Books (`dsr`) and Rate Analysis
+> (`rateAnalysis`)**. Project BBS + steel recon returned 2026-07-25 (`esti_bbs*` /
+> `esti_steel_reconciliation*`, IS 456 engine) under Delivery; RA bills remain
+> on AProc `pmcRaBills`.
 
 **Supplementary:** `comments` — threaded comments on records; `criticalNotes` —
 project critical notes; `activity` — immutable activity timeline; `dashboard` —
 computed KPIs, Action Center, health modules (`dashboard.home` bundles the office home view); `portal` — client portal access
 
-**Site delivery (consultancy site supervision):**
+**Site delivery (consultancy site supervision + AProc):**
 - `snags` / `siteInstructions` / `progressReports` / `phaseProgress` / `siteVisits` /
-  `inspections` — architect site supervision ("Site Progress" under Projects).
+  `inspections` — site supervision (Project → Delivery)
+- `pmcMilestones` (CSV + P6 XER) / `pmcPackages` / `pmcPackageTenders` /
+  `pmcRaBills` / `pmcSteelCerts` / `pmcDigest` / `contractorPortal` /
+  `phaseProgress` — AProc programme, packages, sealed tender bids, RA + steel
+  certification, portfolio digest, CA/handover live stages (owner-side; see
+  `docs/esti/APROC-ARCHITECTURE.md`)
 
 > **Removed in the 2026-06-29 consultancy-only teardown** (migration 0117 dropped the
 > tables): `pmc` (hub/portfolio), `programme` (delivery Gantt / milestones),

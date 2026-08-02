@@ -1,7 +1,7 @@
 /**
- * Frozen AORMS surface URLs — canonical host map (2026-07-11).
- * Only **admin**, **studio**, and **consultancy** are subdomains; everything else
- * is a path on **aorms.in**. Docs: docs/esti/AORMS-SURFACE-URLS.md
+ * Frozen AORMS surface URLs — canonical host map (revised 2026-07-25).
+ * Subdomains: admin · studio · consultancy · proc. Everything else is a path
+ * on **aorms.in**. Docs: docs/esti/AORMS-SURFACE-URLS.md
  */
 export const AORMS_DOMAIN = "aorms.in" as const;
 
@@ -15,9 +15,14 @@ export const AORMS_PLATFORM_PAGES = {
     path: "/libraries/knowledge-bank-portal",
     label: "Knowledge Bank portal",
   },
-  studioLogin: { path: "/login", label: "AORMS-Studio sign-in" },
+  studioLogin: { path: "/login", label: "AStudio sign-in" },
   /** Path alias on apex; canonical marketing host is consultancy.aorms.in. */
-  consultancyMarketing: { path: "/aorms-consultancy", label: "AORMS-Consultancy" },
+  consultancyMarketing: { path: "/aconsulting", label: "AConsulting" },
+  /** Legacy path — redirects to /aconsulting. */
+  consultancyMarketingLegacy: { path: "/aorms-consultancy", label: "AConsulting" },
+  /** Path alias on apex; canonical host is proc.aorms.in. */
+  pmcMarketing: { path: "/aproc", label: "AProc" },
+  pmcMarketingLegacy: { path: "/aorms-pmc", label: "AProc" },
 } as const;
 
 /** Subdomains retired 2026-07 — nginx / client redirect to apex paths. */
@@ -36,22 +41,30 @@ export const AORMS_SURFACES = {
     host: `https://${AORMS_DOMAIN}`,
     hostnames: [AORMS_DOMAIN, `www.${AORMS_DOMAIN}`] as const,
   },
-  /** AORMS-Studio staff workspace (architecture app). */
+  /** AStudio staff workspace (architecture app). */
   studio: {
     id: "studio",
-    label: "AORMS-Studio",
+    label: "AStudio",
     host: `https://studio.${AORMS_DOMAIN}`,
     hostnames: [`studio.${AORMS_DOMAIN}`, `app.${AORMS_DOMAIN}`] as const,
     legacyRedirectFrom: [`app.${AORMS_DOMAIN}`] as const,
     loginPath: AORMS_PLATFORM_PAGES.studioLogin.path,
   },
-  /** AORMS-Consultancy marketing + future engineering workspace. */
+  /** AConsulting marketing + engineering workspace. */
   consultancy: {
     id: "consultancy",
-    label: "AORMS-Consultancy",
+    label: "AConsulting",
     host: `https://consultancy.${AORMS_DOMAIN}`,
     hostnames: [`consultancy.${AORMS_DOMAIN}`] as const,
     marketingPath: AORMS_PLATFORM_PAGES.consultancyMarketing.path,
+  },
+  /** AProc — Accelerated Project Management (PMC) workspace. */
+  pmc: {
+    id: "pmc",
+    label: "AProc",
+    host: `https://proc.${AORMS_DOMAIN}`,
+    hostnames: [`proc.${AORMS_DOMAIN}`, `pmc.${AORMS_DOMAIN}`] as const,
+    marketingPath: AORMS_PLATFORM_PAGES.pmcMarketing.path,
   },
   /** HCW licensing console (platform admin). */
   admin: {
@@ -76,6 +89,7 @@ export function detectSurface(
   const exact = HOST_TO_SURFACE.get(hostname);
   if (exact) return exact;
   if (/^admin\./.test(hostname)) return "admin";
+  if (/^(proc|pmc)\./.test(hostname)) return "pmc";
   return "unknown";
 }
 
@@ -124,6 +138,10 @@ export function isConsultancyHost(hostname?: string): boolean {
   return detectSurface(hostname) === "consultancy";
 }
 
+export function isPmcHost(hostname?: string): boolean {
+  return detectSurface(hostname) === "pmc";
+}
+
 /** Absolute URL for a subdomain surface + optional path. */
 export function surfaceAbsoluteUrl(surfaceId: AormsSurfaceId, path = "/"): string {
   const base = AORMS_SURFACES[surfaceId].host.replace(/\/+$/, "");
@@ -144,7 +162,13 @@ export function platformPageUrl(
 }
 
 /** All production origins that must appear in ALLOWED_ORIGINS (cookie CSRF). */
-export const AORMS_ALLOWED_ORIGINS = Object.values(AORMS_SURFACES).map((s) => s.host);
+export const AORMS_ALLOWED_ORIGINS = Array.from(
+  new Set(
+    Object.values(AORMS_SURFACES).flatMap((s) =>
+      ("hostnames" in s ? s.hostnames : []).map((h) => `https://${h}`),
+    ),
+  ),
+);
 
 /** Comma-separated ALLOWED_ORIGINS value for deploy .env files. */
 export const AORMS_ALLOWED_ORIGINS_CSV = AORMS_ALLOWED_ORIGINS.join(",");

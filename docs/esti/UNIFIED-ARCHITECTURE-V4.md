@@ -42,8 +42,12 @@
 - **HR** — `leaves`, `payroll`
 - **Clients / Third Parties** — `clients`, `clientLog`, `consultants`, `engagements`,
   `collab`, contractors
-- **Site supervision** (consultancy, not construction PM) — `snags`, `siteInstructions`,
+- **Site supervision** (consultancy + AProc Delivery) — `snags`, `siteInstructions`,
   `progressReports`, `phaseProgress`, `siteVisits`, `inspections`
+- **AProc** (PMC preview · Waves 0–5 ✅) — `pmcMilestones` (CSV/XER), `pmcPackages`,
+  `pmcPackageTenders`, `pmcRaBills`, `pmcSteelCerts`, `pmcDigest`, `contractorPortal`,
+  `bbs`, `steelReconciliation` — owner-side programme / packages / cert / BBS;
+  see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)
 - **Libraries** — `specCatalog`, `compliance` (far/setback/nbc/fire/regulation),
   `masterPlans`, `standards`, `rateBooks`
 - **Estimation** — `estimates`, `measurement` / `planMarkup` (browser takeoff → estimate)
@@ -62,12 +66,12 @@
 > **Proposals unified (2026-06-29):** the `feeProposals` namespace + thin `esti_proposal`
 > were merged into one **`proposals`** model (migration 0116).
 
-**Removed** (no namespace, table, route, or doc remains):
-- **Consultancy-only teardown (2026-06-29, migration 0117):** `pmc` (hub/portfolio),
-  `programme` (delivery Gantt / `esti_project_milestone`), `constructionSchedule` (CPM),
-  `construction` (contractor coordination), the **tenders** spine (`esti_tender*`), and
-  **mood boards** (`esti_moodboard`). AORMS is now consultancy-only; site supervision
-  (snags/inspections/progress) is kept under Projects.
+**Removed** (old contractor-ERP spine — do not revive as-is):
+- **Consultancy-only teardown (2026-06-29, migration 0117):** old `pmc` hub/portfolio,
+  `programme` Gantt / `esti_project_milestone`, `constructionSchedule` (CPM),
+  `construction` coordination, **tenders** (`esti_tender*`), **mood boards**.
+  **AProc** (2026-07) is a **greenfield** owner-side PMC workspace on new tables
+  (`esti_pmc_*`) — not a restore of 0117.
 - **Old Estimation OS + Construction Cost spine** (2026-06-28) — component master,
   RuleSet engine, `formula-engine`, `autoBoq`, CostingWindow, ParametricCanvas, Component
   Library, contractor item-bidding, work packages, running bills, measurement book,
@@ -136,22 +140,27 @@ Status legend — **✅ Implemented** (shipped, in the live router) ·
 ### 2. Project OS — ✅
 - **Implemented:** ProjectDetail (consultancy delivery), phases, project brief/Info, **pre-con R&O** (`projectPrecon` — risks, opportunities, CONCEPT→ISSUE_READINESS gates), drawings + transmittals (+ ack), MDR, approvals, permits, decisions + revision intelligence, proposals, fee stages ↔ Studio invoices, in-project invoicing, site supervision.
 - **AORMS-Consultancy:** parallel engagement spine (`consultancy.*`) with the same R&O pattern — see [AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md](AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md).
-- **Out of scope:** construction PM, CPM, tenders, PMC (removed 2026-06).
+- **Out of scope (Project OS):** contractor CPM / labour ERP. **AProc** covers
+  owner-side PMC governance separately ([APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)).
 
 ### 3. Task OS — ◐
 - **Implemented:** Work hub (tasks/board/calendar/activity), assignments, workload, attendance, ASPRF scoring with live `TaskClassification` + `TaskWorkType` + `difficultyCoefficient` + `estimatedHours`.
 - **Needs mapping / creation:** the unified **Task OS spine** — one task model that consistently links project ↔ phase ↔ assignment ↔ time ↔ ASPRF across every surface (flagged as the next build after the cleanup pass).
 
 ### 4. Estimation & cost — ✅
-- **Removed (2026-06-28):** Estimation OS / Construction Cost spine (tenders, RA bills,
-  BBS, old Rate Books/`dsr`, Rate Analysis, PMC/CPM). See "System state".
+- **Removed (2026-06-28):** Estimation OS / Construction Cost spine (contractor tenders,
+  RA ERP, BBS, old Rate Books/`dsr`, Rate Analysis, CPM). See "System state".
 - **Shipped:** firm **Rate Books** (`rateBooks`) price a project's **Estimation** tab
   (`estimates`) — priced BOQ + measurement book + contingency/GST — plus browser plan
   takeoff (`measurement` / `planMarkup`). Office cash book + expenses + purchase orders.
   Canonical: [NAVIGATION.md](NAVIGATION.md) § Estimation.
+- **AProc note:** owner-side RA/steel **certification** is not this cost spine — see
+  [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md).
 
 ### 5. Portals — ◐
-- **Implemented (AORMS-Studio):** Client portal (`portal`), Consultant portal (`collab`), Contractor portal (`contractorPortal`, stub rebuild), Site portal (`SitePortal` — mobile-first site inspections). All use `ExternalPortalShell` + HCW-UI-Kit (`GlassRail`), mobile-first.
+- **Implemented:** Client portal (`portal` — includes AProc progress/RA/steel summaries),
+  Consultant portal (`collab`), Contractor portal (`contractorPortal` — sealed package
+  bids), Site portal (`SitePortal`). All use `ExternalPortalShell` + HCW-UI-Kit.
 - **Account surfaces:** Personal **AORMS account** (`/account`), **Company account** (`/company-account`), **Licensing console** (`/platform-admin`) — not vertical workspaces; see [AORMS-PLATFORM-NOMENCLATURE](AORMS-PLATFORM-NOMENCLATURE.md) § Portals and surfaces.
 - **Staff workspace:** **AORMS-Studio** at `studio.aorms.in` — never called “AORMS portal” in product copy.
 
@@ -176,3 +185,5 @@ Status legend — **✅ Implemented** (shipped, in the live router) ·
 | 4.0 | 2026-06-25 | Initial unified north-star — six pillars, status against live router, reading order |
 | 4.1 | 2026-06-28 | Reconciled to the 2026-06-28 teardown — added the **System state** source-of-truth section; rewrote pillar 4; fixed reading order. |
 | 4.2 | 2026-07-22 | Reconciled System state to post-P9/P10 reality — removed stale `knowledgeBank`/`companion`/`pmc` live claims; added `projectPrecon`, `consultancy.*`, fee-stage invoices, enquiry go/no-go; Project OS = consultancy delivery (not construction PM); Consultancy marked code-complete / live. |
+| 4.3 | 2026-07-25 | AProc Waves 0–4 shipped as greenfield PMC workspace (`esti_pmc_*`); clarify 0117 teardown ≠ AProc; contractor portal bids live; point to APROC-ARCHITECTURE. |
+| 4.4 | 2026-07-25 | AProc Wave 5 — BBS + steel reconciliation + P6 XER milestone import (`0223`–`0224`). |

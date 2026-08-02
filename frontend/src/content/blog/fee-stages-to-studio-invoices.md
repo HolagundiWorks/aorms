@@ -1,7 +1,7 @@
 ---
 title: Fee stages to Studio invoices — closing the billable path
 date: 2026-07-22
-excerpt: Consultancy engagements carry fee stages that connect to AORMS-Studio invoices — so delivered advisory work stops sitting unbilled between two systems.
+excerpt: Consultancy engagements carry fee stages that connect to AStudio invoices — so delivered advisory work stops sitting unbilled between two systems.
 tags: Finance, Product, Operations, India
 author: Human Centric Works
 ---
@@ -27,8 +27,8 @@ a silent API call.
 
 ## Why architecture and engineering share this
 
-**AORMS-Studio** already bills COA-style stages with Indian GST detail. Engineering
-engagements on **AORMS-Consultancy** reuse that commercial grammar instead of
+**AStudio** already bills COA-style stages with Indian GST detail. Engineering
+engagements on **AConsulting** reuse that commercial grammar instead of
 inventing a second invoicing dialect. The walkthrough that gates consultancy
 launch is partly about this UX: principals must see stage → invoice without
 guessing which screen owns the truth.
@@ -44,4 +44,4 @@ guessing which screen owns the truth.
 
 - [How architecture firms lose revenue](/blog/how-architecture-firms-lose-revenue)
 - [GST invoicing for architects](/blog/gst-invoicing-for-architects)
-- [AORMS-Consultancy on the same spine](/blog/aorms-consultancy-same-spine)
+- [AConsulting on the same spine](/blog/aorms-consultancy-same-spine)

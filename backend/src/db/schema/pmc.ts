@@ -2,8 +2,10 @@ import { contractors } from "./delivery.js";
 import { users } from "./org-auth.js";
 import { phases, projectOffices } from "./project.js";
 import {
+  bigint,
   createdAt,
   date,
+  doublePrecision,
   id,
   integer,
   pgTable,
@@ -94,4 +96,196 @@ export const phaseProgress = pgTable("esti_phase_progress", {
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
+});
+
+/**
+ * AProc master programme milestone — client reporting / governance.
+ * Not a contractor CPM activity network (see docs/esti/APROC-ARCHITECTURE.md).
+ */
+export const pmcMilestones = pgTable("esti_pmc_milestone", {
+  id: id(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projectOffices.id, { onDelete: "cascade" }),
+  ref: text("ref").notNull(),
+  title: text("title").notNull(),
+  plannedDate: date("planned_date"),
+  actualDate: date("actual_date"),
+  percentComplete: integer("percent_complete").notNull().default(0),
+  status: text("status", {
+    enum: ["PLANNED", "ON_TRACK", "AT_RISK", "DELAYED", "COMPLETE"],
+  })
+    .notNull()
+    .default("PLANNED"),
+  /** Optional external baseline id (MSP/P6 activity code) — import later. */
+  baselineRef: text("baseline_ref"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  notes: text("notes"),
+  createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/**
+ * AProc work / tender package — owner-side register.
+ * Firm does not bid; contractor portal handles bidding (Wave 2.3+).
+ */
+export const pmcPackages = pgTable("esti_pmc_package", {
+  id: id(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projectOffices.id, { onDelete: "cascade" }),
+  ref: text("ref").notNull(),
+  title: text("title").notNull(),
+  trade: text("trade"),
+  status: text("status", {
+    enum: ["DRAFT", "TENDERING", "AWARDED", "IN_PROGRESS", "COMPLETE", "CANCELLED"],
+  })
+    .notNull()
+    .default("DRAFT"),
+  contractorId: uuid("contractor_id").references(() => contractors.id, {
+    onDelete: "set null",
+  }),
+  contractValuePaise: bigint("contract_value_paise", { mode: "number" }),
+  tenderCloseDate: date("tender_close_date"),
+  awardDate: date("award_date"),
+  /** When set, staff may see bid amounts (unsealed). Null = sealed while tendering. */
+  bidsOpenedAt: timestamp("bids_opened_at", { withTimezone: true }),
+  notes: text("notes"),
+  createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/**
+ * Invite a contractor to bid on an owner-side package (W2.3).
+ * Firm does not bid — contractors respond via the contractor portal.
+ */
+export const pmcPackageInvites = pgTable("esti_pmc_package_invite", {
+  id: id(),
+  packageId: uuid("package_id")
+    .notNull()
+    .references(() => pmcPackages.id, { onDelete: "cascade" }),
+  contractorId: uuid("contractor_id")
+    .notNull()
+    .references(() => contractors.id, { onDelete: "cascade" }),
+  status: text("status", {
+    enum: ["INVITED", "WITHDRAWN", "DECLINED"],
+  })
+    .notNull()
+    .default("INVITED"),
+  notes: text("notes"),
+  invitedById: uuid("invited_by_id").references(() => users.id, { onDelete: "set null" }),
+  invitedAt: timestamp("invited_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/** Contractor bid on a package — sealed until PMC opens bids. */
+export const pmcPackageBids = pgTable("esti_pmc_package_bid", {
+  id: id(),
+  packageId: uuid("package_id")
+    .notNull()
+    .references(() => pmcPackages.id, { onDelete: "cascade" }),
+  inviteId: uuid("invite_id").references(() => pmcPackageInvites.id, {
+    onDelete: "set null",
+  }),
+  contractorId: uuid("contractor_id")
+    .notNull()
+    .references(() => contractors.id, { onDelete: "cascade" }),
+  amountPaise: bigint("amount_paise", { mode: "number" }).notNull(),
+  coverNote: text("cover_note"),
+  validityDays: integer("validity_days"),
+  status: text("status", {
+    enum: ["SUBMITTED", "WITHDRAWN", "AWARDED", "REJECTED"],
+  })
+    .notNull()
+    .default("SUBMITTED"),
+  submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().defaultNow(),
+  withdrawnAt: timestamp("withdrawn_at", { withTimezone: true }),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/**
+ * Lightweight steel certification (W3.3) — issued vs consumed kg + wastage.
+ * Not the full BBS / steel reconciliation ERP spine.
+ */
+export const pmcSteelCerts = pgTable("esti_pmc_steel_cert", {
+  id: id(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projectOffices.id, { onDelete: "cascade" }),
+  packageId: uuid("package_id").references(() => pmcPackages.id, { onDelete: "set null" }),
+  ref: text("ref").notNull(),
+  periodStart: date("period_start").notNull(),
+  periodEnd: date("period_end").notNull(),
+  status: text("status", {
+    enum: ["DRAFT", "SITE_CHECKED", "CERTIFIED", "SENT_TO_CLIENT", "CLOSED"],
+  })
+    .notNull()
+    .default("DRAFT"),
+  issuedKg: doublePrecision("issued_kg").notNull().default(0),
+  consumedKg: doublePrecision("consumed_kg").notNull().default(0),
+  wastagePct: doublePrecision("wastage_pct").notNull().default(0),
+  narrative: text("narrative"),
+  certifiedAt: timestamp("certified_at", { withTimezone: true }),
+  certifiedById: uuid("certified_by_id").references(() => users.id, { onDelete: "set null" }),
+  sentAt: timestamp("sent_at", { withTimezone: true }),
+  createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/** AProc RA bill certification header (owner-side). */
+export const pmcRaBills = pgTable("esti_pmc_ra_bill", {
+  id: id(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projectOffices.id, { onDelete: "cascade" }),
+  packageId: uuid("package_id").references(() => pmcPackages.id, { onDelete: "set null" }),
+  ref: text("ref").notNull(),
+  billNo: text("bill_no").notNull(),
+  periodStart: date("period_start").notNull(),
+  periodEnd: date("period_end").notNull(),
+  status: text("status", {
+    enum: ["DRAFT", "SITE_CHECKED", "CERTIFIED", "SENT_TO_CLIENT", "CLOSED"],
+  })
+    .notNull()
+    .default("DRAFT"),
+  grossPaise: bigint("gross_paise", { mode: "number" }).notNull().default(0),
+  advanceRecoveryPaise: bigint("advance_recovery_paise", { mode: "number" })
+    .notNull()
+    .default(0),
+  retentionPaise: bigint("retention_paise", { mode: "number" }).notNull().default(0),
+  otherDeductionPaise: bigint("other_deduction_paise", { mode: "number" })
+    .notNull()
+    .default(0),
+  otherDeductionNote: text("other_deduction_note"),
+  gstNote: text("gst_note"),
+  tdsNote: text("tds_note"),
+  narrative: text("narrative"),
+  certifiedAt: timestamp("certified_at", { withTimezone: true }),
+  certifiedById: uuid("certified_by_id").references(() => users.id, { onDelete: "set null" }),
+  sentAt: timestamp("sent_at", { withTimezone: true }),
+  pdfKey: text("pdf_key"),
+  pdfStatus: text("pdf_status").notNull().default("NONE"),
+  createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+export const pmcRaLines = pgTable("esti_pmc_ra_line", {
+  id: id(),
+  billId: uuid("bill_id")
+    .notNull()
+    .references(() => pmcRaBills.id, { onDelete: "cascade" }),
+  sortOrder: integer("sort_order").notNull().default(0),
+  description: text("description").notNull(),
+  unit: text("unit"),
+  previousQty: doublePrecision("previous_qty").notNull().default(0),
+  thisQty: doublePrecision("this_qty").notNull().default(0),
+  ratePaise: bigint("rate_paise", { mode: "number" }).notNull().default(0),
+  amountPaise: bigint("amount_paise", { mode: "number" }).notNull().default(0),
+  createdAt: createdAt(),
 });

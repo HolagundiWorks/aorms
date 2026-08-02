@@ -15,7 +15,7 @@ office management software** replaces that scatter with a single record of the
 office: every project, drawing, revision, fee, invoice, approval and client
 portal interaction in one place, connected.
 
-**AORMS-Studio** — **AORMS-Studio** on the **AORMS** platform — is that record,
+**AStudio** — **AStudio** on the **AORMS** platform — is that record,
 built specifically for Indian architecture practices rather than adapted from a
 generic project tool.
 

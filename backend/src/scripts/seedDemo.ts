@@ -48,7 +48,11 @@ import { getOrgSettings } from "../lib/settings.js";
 import { nextRef } from "../lib/numbering.js";
 import { firmGstSystem } from "../lib/firm.js";
 import { ensureDefaultAccounts } from "../modules/expense/accounts.js";
-import { ensureDemoPlatformAccount, ensureDemoConsultancyPlatformOrg } from "../lib/demoPlatformSeed.js";
+import {
+  ensureDemoPlatformAccount,
+  ensureDemoConsultancyPlatformOrg,
+  ensureDemoPmcPlatformOrg,
+} from "../lib/demoPlatformSeed.js";
 import { ensureAiStudioEnabled } from "./seedAiStudio.js";
 import {
   clearStudioDemoRows,
@@ -131,6 +135,7 @@ async function backfillStudioDemo(principalId: string, pwHash: string): Promise<
   await upsertDemoFirm(db);
   await ensureDemoPlatformAccount(DEMO_PASSWORD);
   await ensureDemoConsultancyPlatformOrg();
+  await ensureDemoPmcPlatformOrg();
   await ensureDemoClientPortalUser(pwHash);
   const projectRows = await db
     .select({ id: projectOffices.id })
@@ -240,6 +245,7 @@ async function main() {
 
   await ensureDemoPlatformAccount(DEMO_PASSWORD);
   await ensureDemoConsultancyPlatformOrg();
+  await ensureDemoPmcPlatformOrg();
 
   const memberIds = await seedDemoTeamRoster(db, principal.id, pwHash);
   const mid = memberIds;

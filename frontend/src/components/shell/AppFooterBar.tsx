@@ -27,7 +27,7 @@ import { useWellnessReminders } from "../wellness/useWellnessReminders.js";
 import type { WellnessSection } from "../wellness/wellnessExercises.js";
 import { WELLNESS_OPEN_EVENT } from "../wellness/wellnessExercises.js";
 import { detectSurface } from "../../lib/aorms-surface-urls.js";
-import { AORMS_CONSULTANCY } from "../../lib/product-nomenclature.js";
+import { AORMS_CONSULTANCY, AORMS_PMC } from "../../lib/product-nomenclature.js";
 import { OfficeHealthGlyph } from "./OfficeHealthGlyph.js";
 import { useOfficeHealth } from "./useOfficeHealth.js";
 
@@ -36,7 +36,7 @@ import { useOfficeHealth } from "./useOfficeHealth.js";
  * icons are round neumorphic chips on the frosted surface:
  *
  *   LEFT   — calculator · office health · task due.
- *   CENTER — home (Studio Intelligence or Consultancy Enquiries) · tasks · Search · **Ask ESTI** · wellbeing · pomodoro.
+ *   CENTER — home (Studio Intelligence / AConsulting Enquiries / AProc) · tasks · Search · **Ask ESTI** · wellbeing · pomodoro.
  *   RIGHT  — clock · alerts · ID · sign out.
  *
  * The top border carries the office-health signal (green/amber/red).
@@ -73,12 +73,19 @@ export function AppFooterBar({
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const surface = detectSurface(window.location.hostname);
-  const isConsultancy = surface === "consultancy";
-  const homePath = isConsultancy ? "/consultancy/enquiries" : "/";
-  const homeLabel = isConsultancy ? `${AORMS_CONSULTANCY.title} enquiries` : "Studio Intelligence";
-  const homeActive = isConsultancy
-    ? pathname.startsWith("/consultancy")
-    : pathname === "/";
+  const isConsultancy = surface === "consultancy" || pathname.startsWith("/consultancy");
+  const isPmc = surface === "pmc" || pathname.startsWith("/pmc");
+  const homePath = isPmc ? "/pmc" : isConsultancy ? "/consultancy/enquiries" : "/";
+  const homeLabel = isPmc
+    ? `${AORMS_PMC.title} home`
+    : isConsultancy
+      ? `${AORMS_CONSULTANCY.title} enquiries`
+      : "Studio Intelligence";
+  const homeActive = isPmc
+    ? pathname.startsWith("/pmc")
+    : isConsultancy
+      ? pathname.startsWith("/consultancy")
+      : pathname === "/";
   const [showCalc, setShowCalc] = useState(false);
   const [showWellness, setShowWellness] = useState(false);
   const [wellnessSection, setWellnessSection] = useState<WellnessSection>("breathe");
@@ -203,7 +210,7 @@ export function AppFooterBar({
             color={homeActive ? "primary" : "default"}
             sx={chromeIconSx}
           >
-            {isConsultancy ? <Engineering /> : <AutoAwesome />}
+            {isPmc || isConsultancy ? <Engineering /> : <AutoAwesome />}
           </IconButton>
         </Tooltip>
         <Tooltip title="Tasks">

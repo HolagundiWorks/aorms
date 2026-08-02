@@ -99,5 +99,5 @@ project-native register (like AORMS) keeps revisions beside the sheets they affe
 
 ---
 
-*Human Centric Works builds AORMS — the AORMS-Studio advisory workspace for Indian consultancies.
+*Human Centric Works builds AORMS — the AStudio advisory workspace for Indian consultancies.
 Documentation: [aorms.in/wiki](https://aorms.in/wiki).*

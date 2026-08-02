@@ -25,8 +25,9 @@ export interface BlogPost {
 }
 
 function parseFrontmatter(raw: string): { data: Record<string, string>; body: string } {
-  const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(raw);
-  if (!match) return { data: {}, body: raw };
+  const text = raw.replace(/^\uFEFF/, "");
+  const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(text);
+  if (!match) return { data: {}, body: text };
   const data: Record<string, string> = {};
   for (const line of match[1]!.split(/\r?\n/)) {
     const idx = line.indexOf(":");

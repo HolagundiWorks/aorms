@@ -1,21 +1,21 @@
 /**
  * Product naming — keep in sync with docs/esti/AORMS-PLATFORM-NOMENCLATURE.md.
- * Platform: AORMS (AEC consulting firms only). Apps: AORMS-Studio + AORMS-Consultancy.
+ * Platform: AORMS. Apps: AStudio · AConsulting · AProc.
  */
 import { platformPageUrl } from "./aorms-surface-urls.js";
 export const AORMS_PLATFORM = {
   name: "AORMS",
   expansion: "Accelerated Operational Resources Management System",
-  /** Platform scope — AEC consulting only (2026-07). */
-  tagline: "The operating system for AEC consulting firms",
+  /** Platform scope — AEC consulting + PMC (2026-07). */
+  tagline: "The operating system for AEC consulting and project management firms",
   audience:
-    "AEC consulting firms — architecture and engineering practices that advise clients, not solution delivery or construction PM",
+    "AEC consulting firms and project management consultancies — architecture, engineering, and PMC practices that advise and govern projects",
   /** Platform home hero — no third-party product names. */
   heroHeadline: [
     "From disconnected tools to one operating system:",
-    "Built for architecture and engineering consultancies.",
+    "Built for architecture, engineering, and PMC consultancies.",
   ] as const,
-  aecDisciplines: ["Architecture", "Engineering"] as const,
+  aecDisciplines: ["Architecture", "Engineering", "Project management"] as const,
   fragmentedTools: [
     "Messaging",
     "Team communication",
@@ -41,65 +41,111 @@ export const PLATFORM_FRAMEWORKS = {
   },
 } as const;
 
-/** The two AORMS apps — `AORMS-{Name}` for architecture and engineering consultancies. */
+/**
+ * The three AORMS apps.
+ * Display names: AStudio · AConsulting · AProc (Accelerated …).
+ * Legacy marketing names AORMS-Studio / AORMS-Consultancy / AORMS-PMC redirect.
+ */
 export const AORMS_APPS = {
   studio: {
-    slug: "aorms-studio",
-    legacySlugs: ["hived", "aorms-architecture"] as const,
-    title: "AORMS-Studio",
+    slug: "astudio",
+    legacySlugs: ["aorms-studio", "hived", "aorms-architecture"] as const,
+    title: "AStudio",
+    expansion: "Accelerated Studio",
+    /** @deprecated Prefer title + expansion — kept for transitional copy. */
+    legacyTitle: "AORMS-Studio",
     discipline: "Architecture",
-    tagline: "Architecture consultancy workspace for Indian practices",
+    tagline: "Accelerated Studio — architecture consultancy workspace for Indian practices",
     audience: "Indian architecture and interior design consultancies",
     appUrl: "https://studio.aorms.in",
     /** @deprecated Use studio.aorms.in — app.aorms.in redirects at nginx. */
     legacyAppUrl: "https://app.aorms.in",
     marketingPath: "/login",
-    /** Unified landing section on `aorms.in`. */
     landingHref: "/#studio",
-    wikiPath: "/wiki/aorms-studio",
-    wikiName: "AORMS-Studio docs",
+    wikiPath: "/wiki/astudio",
+    wikiName: "AStudio docs",
     status: "live" as const,
   },
   consultancy: {
-    slug: "aorms-consultancy",
-    title: "AORMS-Consultancy",
+    slug: "aconsulting",
+    legacySlugs: ["aorms-consultancy"] as const,
+    title: "AConsulting",
+    expansion: "Accelerated Consulting",
+    legacyTitle: "AORMS-Consultancy",
     discipline: "Engineering",
-    tagline: "Engineering consultancy workspace",
+    tagline: "Accelerated Consulting — engineering consultancy workspace",
     audience:
       "Structural, MEP, civil, and multidisciplinary engineering consultancies advising on built-environment projects",
     appUrl: "https://consultancy.aorms.in",
-    marketingPath: "/aorms-consultancy",
-    /** Unified landing section on `aorms.in`. */
+    marketingPath: "/aconsulting",
+    legacyMarketingPath: "/aorms-consultancy",
     landingHref: "/#consultancy",
-    wikiPath: "/wiki/aorms-consultancy",
-    /** Live at consultancy.aorms.in (P9.M 2026-07-24). */
+    wikiPath: "/wiki/aconsulting",
     status: "live" as const,
+  },
+  pmc: {
+    slug: "aproc",
+    legacySlugs: ["aorms-pmc", "pmc"] as const,
+    title: "AProc",
+    expansion: "Accelerated Project Management",
+    legacyTitle: "AORMS-PMC",
+    discipline: "Project management",
+    tagline: "Accelerated Project Management — PMC workspace for project management consultancies",
+    audience:
+      "Project management consultancies that plan, coordinate, and certify delivery on behalf of clients — programme, packages, and site governance",
+    appUrl: "https://proc.aorms.in",
+    marketingPath: "/aproc",
+    legacyMarketingPath: "/aorms-pmc",
+    landingHref: "/#pmc",
+    wikiPath: "/wiki/aproc",
+    status: "preview" as const,
   },
 } as const;
 
-/** Shipped architecture app — this monorepo (Indian architecture consultancies). */
+/** Architecture app — this monorepo (Indian architecture consultancies). */
 export const AORMS_STUDIO = AORMS_APPS.studio;
+/** @deprecated Prefer ASTUDIO — same object. */
+export const ASTUDIO = AORMS_APPS.studio;
 
-/** Engineering consultancy app — live on the same spine. */
+/** Engineering consultancy app. */
 export const AORMS_CONSULTANCY = AORMS_APPS.consultancy;
+export const ACONSULTING = AORMS_APPS.consultancy;
+
+/** Project management consultancy app (PMC). */
+export const AORMS_PMC = AORMS_APPS.pmc;
+export const APROC = AORMS_APPS.pmc;
 
 /** Legacy single slug — prefer {@link AORMS_STUDIO.legacySlugs}. */
-export const AORMS_STUDIO_LEGACY_SLUG = AORMS_STUDIO.legacySlugs[1];
+export const AORMS_STUDIO_LEGACY_SLUG = AORMS_STUDIO.legacySlugs[0];
 
 export function isAormsStudioLegacySlug(slug: string): boolean {
   return (AORMS_STUDIO.legacySlugs as readonly string[]).includes(slug);
 }
 
-/** Platform landing — the two AEC apps on one spine. */
+export function isAormsConsultancyLegacySlug(slug: string): boolean {
+  return (
+    slug === AORMS_CONSULTANCY.slug ||
+    (AORMS_CONSULTANCY.legacySlugs as readonly string[]).includes(slug)
+  );
+}
+
+export function isAormsPmcLegacySlug(slug: string): boolean {
+  return (
+    slug === AORMS_PMC.slug || (AORMS_PMC.legacySlugs as readonly string[]).includes(slug)
+  );
+}
+
+/** Platform landing — three AEC apps on one spine. */
 export const PLATFORM_APPS = [
   {
-    id: "architecture",
+    id: "studio",
     status: AORMS_STUDIO.status,
     title: AORMS_STUDIO.discipline,
     workspace: AORMS_STUDIO.title,
+    expansion: AORMS_STUDIO.expansion,
     subtitle: "Architecture consultancies",
     body:
-      "Indian architecture and design consultancies — operational and design frameworks for fees, revisions, statutory compliance, drawings, and studio intelligence. Not construction project management.",
+      "Indian architecture and design consultancies — operational and design frameworks for fees, revisions, statutory compliance, drawings, and studio intelligence.",
     bullets: [
       "COA fee proposals & GST invoicing",
       "Drawing register & transmittals",
@@ -110,13 +156,14 @@ export const PLATFORM_APPS = [
     cta: `Open ${AORMS_STUDIO.title}`,
   },
   {
-    id: "engineering",
+    id: "consultancy",
     status: AORMS_CONSULTANCY.status,
     title: AORMS_CONSULTANCY.discipline,
     workspace: AORMS_CONSULTANCY.title,
+    expansion: AORMS_CONSULTANCY.expansion,
     subtitle: "Engineering consultancies",
     body:
-      "Structural, MEP, civil, and multidisciplinary engineering consultancies — engagement frameworks, review chains, deliverable models, and governed knowledge for advisory work on built-environment projects.",
+      "Structural, MEP, civil, and multidisciplinary engineering consultancies — engagement frameworks, review chains, deliverable models, and governed knowledge for advisory work.",
     bullets: [
       "Engagement & deliverable frameworks",
       "Serial review & sign-off chains",
@@ -126,12 +173,30 @@ export const PLATFORM_APPS = [
     href: AORMS_CONSULTANCY.appUrl,
     cta: `Open ${AORMS_CONSULTANCY.title}`,
   },
+  {
+    id: "pmc",
+    status: AORMS_PMC.status,
+    title: AORMS_PMC.discipline,
+    workspace: AORMS_PMC.title,
+    expansion: AORMS_PMC.expansion,
+    subtitle: "Project management consultancies",
+    body:
+      "PMC firms that govern programme, packages, and site certification for clients — accelerated project management on the same AORMS spine, without becoming a contractor ERP.",
+    bullets: [
+      "Programme (CSV / P6 XER milestones) & packages",
+      "BBS, steel recon & RA certification",
+      "Contractor portal bids · client delivery oversight",
+    ],
+    workspaceSlug: AORMS_PMC.slug,
+    href: AORMS_PMC.appUrl,
+    cta: `Open ${AORMS_PMC.title}`,
+  },
 ] as const;
 
 /**
  * Portal and surface labels — staff workspace, external portals, account hub.
- * Staff workspace is **AORMS-Studio** (never "AORMS portal"). External portals
- * keep the word *portal*; they are scoped to AORMS-Studio today.
+ * Staff workspace brand is **AStudio** (never "AORMS portal"). External portals
+ * keep the word *portal*; they are scoped to AStudio today.
  */
 export const AORMS_PORTALS = {
   studio: {

@@ -101,4 +101,4 @@ invoices. Studio Intelligence ranks what needs attention today. See
 
 ---
 
-*AORMS-Studio — advisory workspace for Indian consultancies. [aorms.in/wiki](https://aorms.in/wiki)*
+*AStudio — advisory workspace for Indian consultancies. [aorms.in/wiki](https://aorms.in/wiki)*

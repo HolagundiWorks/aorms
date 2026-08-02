@@ -16,7 +16,7 @@ ERP for contractor RA bills.
 AORMS is built for **architecture consultancies advising clients**. It connects
 site supervision and contractor coordination to drawings, approvals, and fee
 invoices. Contractor ledgers, sealed tenders, and RA-bill accounting stay out of
-scope (consultancy-only product boundary).
+scope (consultancy and PMC product boundary).
 
 ## What the advisory workflow needs
 

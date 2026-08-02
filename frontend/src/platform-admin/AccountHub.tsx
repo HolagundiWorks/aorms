@@ -4,7 +4,11 @@ import { Alert, AlertTitle, Button, Paper, Stack, Typography } from "@mui/materi
 import { Link as RouterLink } from "react-router-dom";
 import { WORKSPACE_TYPE_LABEL, type WorkspaceType } from "@esti/contracts";
 import type { Me } from "./lib/auth.js";
-import { AORMS_CONSULTANCY, AORMS_PORTALS } from "../lib/product-nomenclature.js";
+import {
+  AORMS_CONSULTANCY,
+  AORMS_PMC,
+  AORMS_PORTALS,
+} from "../lib/product-nomenclature.js";
 
 function Step({
   done,
@@ -46,7 +50,11 @@ export function AccountHub({ me }: { me: Me }) {
     me.memberships[0]?.org ??
     null;
   const wsType: WorkspaceType =
-    primaryOrg?.workspaceType === "CONSULTANCY" ? "CONSULTANCY" : "STUDIO";
+    primaryOrg?.workspaceType === "CONSULTANCY"
+      ? "CONSULTANCY"
+      : primaryOrg?.workspaceType === "PMC"
+        ? "PMC"
+        : "STUDIO";
   const wsLabel = WORKSPACE_TYPE_LABEL[wsType];
 
   return (
@@ -96,6 +104,10 @@ export function AccountHub({ me }: { me: Me }) {
               variant="contained"
               size="small"
             >
+              Open {wsLabel}
+            </Button>
+          ) : wsType === "PMC" ? (
+            <Button component="a" href={AORMS_PMC.appUrl} variant="contained" size="small">
               Open {wsLabel}
             </Button>
           ) : (

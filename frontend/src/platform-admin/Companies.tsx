@@ -369,7 +369,7 @@ export default function Companies({
             {/* Workspace pick — one licence manager, one login; the workspace type
                 only decides where this company works. */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-              {(["STUDIO", "CONSULTANCY"] as const).map((t) => (
+              {(["STUDIO", "CONSULTANCY", "PMC"] as const).map((t) => (
                 <Box
                   key={t}
                   component="button"

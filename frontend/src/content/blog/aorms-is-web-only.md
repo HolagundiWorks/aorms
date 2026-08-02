@@ -1,13 +1,13 @@
 ---
 title: AORMS is web-only — no desktop apps, one browser workspace
 date: 2026-07-22
-excerpt: AORMS-Studio and AORMS-Consultancy run in the browser. There is no Lite, Pro, or Manager desktop installer — one standard licence, storage and AI usage, sign in at studio.aorms.in.
+excerpt: AStudio and AConsulting run in the browser. There is no Lite, Pro, or Manager desktop installer — one standard licence, storage and AI usage, sign in at studio.aorms.in.
 tags: Product, Platform, Operations
 author: Human Centric Works
 ---
 
-AORMS is a **browser product**. Staff work in **AORMS-Studio** (and, when launched,
-**AORMS-Consultancy**) from a modern desktop browser. There is no native desktop
+AORMS is a **browser product**. Staff work in **AStudio** (and, is live,
+**AConsulting**) from a modern desktop browser. There is no native desktop
 shell to download, no offline Manager app, and no Lite/Pro packaging split.
 
 ## Why we dropped desktop

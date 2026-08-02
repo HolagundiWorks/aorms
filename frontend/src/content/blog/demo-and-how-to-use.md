@@ -1,16 +1,16 @@
 ---
 title: Try AORMS — the live demo and how to explore it
 date: 2026-05-18
-excerpt: A fully seeded AORMS-Studio practice on the public demo site — projects, billing, a team, client portals — sign in with the demo principal account.
-tags: Demo, Getting started, AORMS-Studio
+excerpt: A fully seeded AStudio practice on the public demo site — projects, billing, a team, client portals — sign in with the demo principal account.
+tags: Demo, Getting started, AStudio
 author: Human Centric Works
 ---
 
-The fastest way to understand **AORMS-Studio** is to walk through a real office. The public demo site ships a complete, seeded architecture **consultancy**, not an empty shell.
+The fastest way to understand **AStudio** is to walk through a real office. The public demo site ships a complete, seeded architecture **consultancy**, not an empty shell.
 
 ## Sign in to the demo workspace
 
-Open **[AORMS-Studio sign-in](/login)** and use the demo principal credentials shown on the login page for the hosted demo environment.
+Open **[AStudio sign-in](/login)** and use the demo principal credentials shown on the login page for the hosted demo environment.
 
 You land in a live workspace as the principal architect — no separate signup flow.
 

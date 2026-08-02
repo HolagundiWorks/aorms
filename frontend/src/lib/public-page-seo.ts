@@ -1,4 +1,5 @@
 /** SEO helpers for unauthenticated public pages (auth, 404 slugs). */
+import { AORMS_STUDIO } from "./product-nomenclature.js";
 
 function setMeta(selector: string, attr: "content" | "href", value: string) {
   document.querySelector(selector)?.setAttribute(attr, value);
@@ -38,7 +39,7 @@ export function applyPublicPageSeo(opts: {
 export function applyPublicNotFoundSeo(label: string): void {
   applyPublicPageSeo({
     title: `${label} not found — AORMS`,
-    description: `This ${label.toLowerCase()} does not exist on aorms.in. Browse the wiki, blog, or sign in to AORMS-Studio.`,
+    description: `This ${label.toLowerCase()} does not exist on aorms.in. Browse the wiki, blog, or sign in to ${AORMS_STUDIO.title}.`,
     path: window.location.pathname,
     noindex: true,
   });
@@ -46,9 +47,9 @@ export function applyPublicNotFoundSeo(label: string): void {
 
 export const AUTH_PAGE_SEO = {
   login: {
-    title: "Sign in — AORMS-Studio",
+    title: `Sign in — ${AORMS_STUDIO.title}`,
     description:
-      "Sign in to your AORMS-Studio architecture consultancy workspace. Google or email — then open your studio, account, or company.",
+      `Sign in to your ${AORMS_STUDIO.title} architecture consultancy workspace. Google or email — then open your studio, account, or company.`,
     path: "/login",
   },
   signup: {
@@ -59,18 +60,18 @@ export const AUTH_PAGE_SEO = {
   },
   forgotPassword: {
     title: "Reset password — AORMS",
-    description: "Request a password reset link for your AORMS-Studio workspace account.",
+    description: `Request a password reset link for your ${AORMS_STUDIO.title} workspace account.`,
     path: "/forgot-password",
   },
   resetPassword: {
     title: "Choose a new password — AORMS",
-    description: "Set a new password for your AORMS-Studio workspace from your reset email link.",
+    description: `Set a new password for your ${AORMS_STUDIO.title} workspace from your reset email link.`,
     path: "/reset-password",
   },
   externalAccess: {
     title: "External portal sign-in — AORMS",
     description:
-      "Sign in to your client, consultant, contractor, or site portal. Office staff use AORMS-Studio at /login.",
+      `Sign in to your client, consultant, contractor, or site portal. Office staff use ${AORMS_STUDIO.title} at /login.`,
     path: "/access",
   },
 } as const;

@@ -1,34 +1,43 @@
 ﻿# AORMS
 
-AORMS stands for Accelerated Operational Resources Management System — a platform for AEC consulting firms (architecture and engineering practices that advise clients).
+AORMS stands for Accelerated Operational Resources Management System — a platform for AEC consulting firms and project management consultancies (architecture, engineering, and PMC practices that advise and govern projects).
 
-AORMS is NOT solution delivery software and NOT construction project management. It provides an operational framework (how the office runs) and a design framework (how engagements are structured) on one spine, with **EOMS** (external knowledge bank) and **ESTI** (internal AI agent).
+AORMS is NOT contractor ERP and NOT a full Primavera/MSP replacement. It provides an operational framework (how the office runs) and a design framework (how engagements are structured) on one spine, with **EOMS** (external knowledge bank) and **ESTI** (internal AI agent).
 
-Two apps on one platform:
-- **AORMS-Studio** — architecture consultancy app for Indian architecture and design consultancies (shipping)
-- **AORMS-Consultancy** — engineering consultancy app for structural, MEP, civil, and multidisciplinary firms (live at consultancy.aorms.in)
+Three apps on one platform:
+- **AStudio** (*Accelerated Studio*) — architecture consultancy workspace for Indian architecture and design practices (live at studio.aorms.in)
+- **AConsulting** (*Accelerated Consulting*) — engineering consultancy workspace for structural, MEP, civil, and multidisciplinary firms (live at consultancy.aorms.in)
+- **AProc** (*Accelerated Project Management*) — PMC workspace for project management consultancies (preview at proc.aorms.in) — programme, packages, sealed contractor bids, RA/steel certification, BBS, P6 XER milestone import
 
 Platform home: https://aorms.in/
-Architecture app (sign in): https://aorms.in/login
-Central wiki: https://aorms.in/wiki
+Architecture app (sign in): https://aorms.in/login · https://studio.aorms.in
+Engineering app: https://consultancy.aorms.in
+PMC app: https://proc.aorms.in
+Blog: https://aorms.in/blog
+Central wiki: https://aorms.in/wiki (path may redirect to platform home while docs consolidate)
 
-AORMS-Studio capabilities:
-- Fee recovery — what needs invoicing, next payment stage, incoming receipts, due dates, GST reminders
-- Client revision management — MoM → ESTI extracts → client request → architect marks criticality → client approves → then site
-- Meeting minutes on the project record with ESTI-drafted revision requests
-- Drawing register, transmittals and client approval workflows
-- Pre-construction R&O — project risks, opportunities, design phase gates (Brief → R&O)
+AStudio capabilities:
+- Fee recovery — what needs invoicing, next payment stage, receipts, due dates, GST reminders
+- Client revision management — MoM → ESTI extracts → client request → architect criticality → client approves
+- Drawing register, transmittals, and client approval workflows
+- Pre-construction R&O — risks, opportunities, design phase gates
 - COA fee proposals and GST invoicing with reconciliation
 - Studio Intelligence dashboard and Ask ESTI (BYO API key supported)
-- **EOMS** — Emergent Object Management System (knowledge bank of codes & compliance); **ESTI** — internal AI agent (answers from firm repositories)
-- Official user documentation at aorms.in/wiki
-- **Web-only** browser workspace at studio.aorms.in — one standard licence, unlimited users, 5 GB included storage; no desktop apps
+- **EOMS** — Emergent Object Management System (knowledge bank); **ESTI** — internal AI agent
+- **Web-only** browser workspace — one Standard licence, unlimited users, included storage; no desktop apps
+
+AProc capabilities (owner-side PMC governance — not contractor labour ERP):
+- Master programme milestones (CSV + Primavera P6 XER import)
+- Package tender invites with sealed contractor-portal bids
+- RA bill and steel certification; BBS (IS 456) + steel reconciliation
+- Progress reports, snags, site supervision on the Delivery spine
 
 Website:
 https://aorms.in
 
 ## Public Pages
 - [AORMS platform home](https://aorms.in/)
-- [AORMS-Studio — sign in](https://aorms.in/login)
-- [AORMS-Consultancy — engineering app](https://consultancy.aorms.in/)
-- [AORMS Wiki — central documentation](https://aorms.in/wiki/)
+- [AStudio — sign in](https://aorms.in/login)
+- [AConsulting — engineering app](https://consultancy.aorms.in/)
+- [AProc — PMC app](https://proc.aorms.in/)
+- [AORMS Blog](https://aorms.in/blog/)

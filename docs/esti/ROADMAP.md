@@ -1,12 +1,15 @@
 # AORMS Implementation Roadmap
 
-**Status:** COMPLETE · **Updated:** 2026-07-24  
+**Status:** COMPLETE · **Updated:** 2026-07-25  
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
-**Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)
+**Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
+**AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)
 
-Phases 0–28 are **engineering-complete** for **AORMS-Studio**. **AORMS-Consultancy**
-is **live**. Stripe auto-billing remains **deferred by choice**. Market-fit Waves
-1–3 are **shipped**; Wave 4 (integrations) stays phase-2 by design.
+Phases 0–28 are **engineering-complete** for **AStudio**. **AConsulting**
+is **live**. **AProc** (PMC) Waves **0–5 are shipped** (preview product —
+owner-side BBS/steel recon + P6 XER milestone import; not a contractor CPM ERP).
+Stripe auto-billing remains **deferred by choice**. Market-fit Waves 1–3 are
+**shipped**; Wave 4 (integrations) stays phase-2 by design.
 
 This is the **single** delivery roadmap. Superseded autopilot / audit / fix-plan
 docs were removed 2026-07-24 (Git history retains them).
@@ -21,6 +24,7 @@ docs were removed 2026-07-24 (Git history retains them).
 | [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) | Standard licence law |
 | [AORMS-PLATFORM-NOMENCLATURE.md](AORMS-PLATFORM-NOMENCLATURE.md) | Naming (platform · apps · EOMS · ESTI) |
 | [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md) | Host / path map |
+| [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md) | **AProc** product law + delivery waves |
 | [P9V-CONSULTANCY-WALKTHROUGH.md](P9V-CONSULTANCY-WALKTHROUGH.md) | P9.V acceptance checklist (signed) |
 | [AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md](AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md) | Pre-con R&O law |
 | [AORMS-CONSULTANCY-SOP-CASE-STUDY.md](AORMS-CONSULTANCY-SOP-CASE-STUDY.md) | Consultancy SOP ↔ product |
@@ -32,8 +36,31 @@ docs were removed 2026-07-24 (Git history retains them).
 
 | App | Status |
 | --- | --- |
-| **AORMS-Studio** (architecture) | **Live** — `studio.aorms.in` |
-| **AORMS-Consultancy** (engineering) | **Live** — `consultancy.aorms.in` (P9.V ✅ · P9.M ✅) |
+| **AStudio** (*Accelerated Studio*, architecture) | **Live** — `studio.aorms.in` |
+| **AConsulting** (*Accelerated Consulting*, engineering) | **Live** — `consultancy.aorms.in` (P9.V ✅ · P9.M ✅) |
+| **AProc** (*Accelerated Project Management*, PMC) | **Preview · Waves 0–5 ✅** — `proc.aorms.in` · `/pmc` · [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md) |
+
+## AProc delivery waves
+
+Canonical plan: **[APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)**.
+
+| Wave | Focus | Status |
+| --- | --- | --- |
+| W0 | Platform chrome, nomenclature, `WorkspaceType.PMC` | ✅ |
+| W1 | Snags + progress reports + phase live stages + home KPIs + nav | ✅ |
+| W2 | Master programme · packages · tender invites ↔ contractor portal | ✅ |
+| W3 | RA + steel certification · client portal summaries | ✅ |
+| W4 | CSV + **P6 XER** import · RA PDF · portfolio digest · ESTI context | ✅ |
+| W5 | **BBS** (IS 456) + **steel reconciliation** ERP | ✅ |
+
+**Namespaces:** `pmcMilestones` · `pmcPackages` · `pmcPackageTenders` · `pmcRaBills` ·
+`pmcSteelCerts` · `pmcDigest` · `contractorPortal` · `bbs` · `steelReconciliation` ·
+`snags` · `progressReports` · `phaseProgress` (Delivery tab).
+
+**Still deferred (by design):** contractor labour / plant ERP · full P6 CPM engine
+(refuse list in APROC-ARCHITECTURE). XER imports **milestones**, not a schedule network.
+
+**Migrations:** `0220`–`0222` AProc core · `0223` BBS · `0224` steel reconciliation.
 
 ## Market fit queue
 
@@ -98,17 +125,18 @@ Canonical brief: **[MARKET-FIT.md](MARKET-FIT.md)**.
 | **Blog / SEO** | `/blog` live; feed/sitemap refreshed |
 | **HCW License Manager** | In-tree (`admin.aorms.in`) |
 | **Market fit W1–W3** | GTM scrub · portal · fee recovery · onboarding · capacity · digests · consultancy chrome · demo seed · packaging |
+| **AProc W0–W5** | Chrome · Delivery · tenders · RA/steel cert · BBS + steel recon · CSV/XER · digest · ESTI (`0220`–`0224`) |
 
 ## Deferred (by choice — not blocking)
 
 1. **Stripe auto-billing / auto-suspend** — manual India usage-billing path is the shipping path  
 2. **Desktop apps / direct cloud DB clients** — web-only system of record  
-3. **Construction tenders / RA bills / BBS** — outside advisory scope  
-4. **W4 integrations** (Tally / Drive / WhatsApp capture) — phase 2 after first paying firms  
+3. **Contractor labour / plant ERP · full P6 CPM engine** — outside AProc (owner-side cert + milestone import only)  
+4. **Market-fit W4 integrations** (Tally / Drive / WhatsApp capture) — phase 2 after first paying firms  
 
 ## Change rule
 
 Material feature changes update **PRD**, **NAVIGATION** (if IA moves),
-[MARKET-FIT.md](MARKET-FIT.md) (if GTM priority moves), and **this file** in the
-same pull request. **Do not** keep superseded specs in the tree — delete them;
-Git history is the archive.
+[MARKET-FIT.md](MARKET-FIT.md) (if GTM priority moves), [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)
+(if AProc waves move), and **this file** in the same pull request. **Do not** keep
+superseded specs in the tree — delete them; Git history is the archive.

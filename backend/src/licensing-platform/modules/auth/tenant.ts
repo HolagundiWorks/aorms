@@ -8,7 +8,7 @@ export interface OrgHandle {
   publicId: string | null;
   name: string;
   slug: string;
-  /** Which AORMS workspace the company runs — STUDIO | CONSULTANCY. */
+  /** Which AORMS workspace the company runs — STUDIO | CONSULTANCY | PMC. */
   workspaceType: string;
 }
 

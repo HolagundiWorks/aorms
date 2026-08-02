@@ -1,4 +1,4 @@
-﻿---
+---
 title: "We never approved that": the four words that cost architects the most
 date: 2026-06-22
 excerpt: Most architect-client disputes compress into four words. The fix is not a better memory or a sterner email � it is an approval record that cannot be argued with, starting from the minutes of meeting where the change was first discussed.
