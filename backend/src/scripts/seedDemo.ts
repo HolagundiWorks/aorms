@@ -42,7 +42,12 @@ import {
   transmittalItems,
   transmittals,
   tenderInvitations,
+  tenderBids,
   tenders,
+  runningBills,
+  runningBillItems,
+  moodboards,
+  moodboardItems,
   users,
 } from "../db/schema.js";
 import { emailMatches } from "../lib/email.js";
@@ -637,10 +642,125 @@ async function main() {
         })
         .returning();
       if (tender) {
-        await db.insert(tenderInvitations).values([
-          { tenderId: tender.id, contractorId: contractorRows[0].id },
-          { tenderId: tender.id, contractorId: contractorRows[1].id },
-        ]);
+        const invites = await db
+          .insert(tenderInvitations)
+          .values([
+            { tenderId: tender.id, contractorId: contractorRows[0].id },
+            { tenderId: tender.id, contractorId: contractorRows[1].id },
+          ])
+          .returning();
+        // Two sealed lump-sum bids so the tender detail + contractor portal
+        // have something to unseal and compare.
+        if (invites[0] && invites[1]) {
+          await db.insert(tenderBids).values([
+            {
+              invitationId: invites[0].id,
+              amountPaise: 1_24_50_000_00,
+              completionWeeks: 32,
+              notes: "Inclusive of GFC-set civil scope; excludes client-supplied fittings.",
+            },
+            {
+              invitationId: invites[1].id,
+              amountPaise: 1_31_20_000_00,
+              completionWeeks: 28,
+              notes: "Faster programme; PEB grid alternative offered as a variation.",
+            },
+          ]);
+        }
+      }
+    }
+  }
+
+  // ── Running (RA) bill — architect certification of a contractor bill ────────
+  if (allProjectIds[0] && contractorRows[0]) {
+    const [existingBill] = await db
+      .select({ id: runningBills.id })
+      .from(runningBills)
+      .where(eq(runningBills.projectId, allProjectIds[0]));
+    if (!existingBill) {
+      const { ref: raRef } = await nextRef(db, "runningbill", "RA");
+      const raItems = [
+        { description: "RCC M25 in foundations & footings", unit: "cum", qty: 42, ratePaise: 6_800_00 },
+        { description: "Reinforcement steel Fe500 — cut, bend & place", unit: "MT", qty: 3.2, ratePaise: 68_000_00 },
+        { description: "Formwork to foundations & plinth", unit: "sqm", qty: 180, ratePaise: 450_00 },
+      ];
+      const lineAmounts = raItems.map((it) => Math.round(it.qty * it.ratePaise));
+      const totalPaise = lineAmounts.reduce((a, b) => a + b, 0);
+      const retentionPaise = Math.round(totalPaise * 0.05);
+      const taxTdsPaise = Math.round(totalPaise * 0.02);
+      const netPayablePaise = totalPaise - retentionPaise - taxTdsPaise;
+      const [raBill] = await db
+        .insert(runningBills)
+        .values({
+          ref: raRef,
+          projectId: allProjectIds[0],
+          contractorId: contractorRows[0].id,
+          title: "RA Bill 01 — Civil works to plinth",
+          billType: "RA",
+          status: "CERTIFIED",
+          measurementDate: dayOffset(-4),
+          notes: "First running account bill; measurements site-verified.",
+          totalPaise,
+          retentionPaise,
+          taxTdsPaise,
+          netPayablePaise,
+          createdById: principal.id,
+        })
+        .returning();
+      if (raBill) {
+        await db.insert(runningBillItems).values(
+          raItems.map((it, idx) => ({
+            runningBillId: raBill.id,
+            sortOrder: idx,
+            description: it.description,
+            unit: it.unit,
+            qty: it.qty,
+            ratePaise: it.ratePaise,
+            amountPaise: lineAmounts[idx]!,
+            previousBilledQty: 0,
+            cumulativeBilledQty: it.qty,
+          })),
+        );
+      }
+    }
+  }
+
+  // ── Moodboard — AStudio concept canvas with sticky notes ────────────────────
+  if (allProjectIds[0]) {
+    const [existingBoard] = await db
+      .select({ id: moodboards.id })
+      .from(moodboards)
+      .where(eq(moodboards.projectId, allProjectIds[0]));
+    if (!existingBoard) {
+      const { ref: mbRef } = await nextRef(db, "moodboard", "MB");
+      const [board] = await db
+        .insert(moodboards)
+        .values({
+          ref: mbRef,
+          projectId: allProjectIds[0],
+          title: "Concept & materials — Sharma Villa",
+          createdById: principal.id,
+        })
+        .returning();
+      if (board) {
+        const notes = [
+          { x: 120, y: 110, text: "Warm minimal palette — travertine + oak", color: "#FFF59D" },
+          { x: 430, y: 150, text: "Double-height living, north light", color: "#B3E5FC" },
+          { x: 250, y: 360, text: "Courtyard as thermal buffer", color: "#C5E1A5" },
+        ];
+        await db.insert(moodboardItems).values(
+          notes.map((n, idx) => ({
+            moodboardId: board.id,
+            kind: "STICKY",
+            x: n.x,
+            y: n.y,
+            width: 220,
+            height: 160,
+            zIndex: idx,
+            payload: { text: n.text, color: n.color },
+            createdById: principal.id,
+          })),
+        );
       }
     }
   }
@@ -651,6 +771,7 @@ async function main() {
   console.log(`    client portal: client@demo.aorms.in / ${DEMO_PASSWORD} (sign in at /access)`);
   console.log(`    contractor portal: contractor@demo.aorms.in / ${DEMO_PASSWORD} (sign in at /access)`);
   console.log(`    ${projectDefs.length} projects · ${clientRows.length} clients · ${DEMO_LEADS.length} leads`);
+  console.log(`    delivery: OPEN tender + 2 sealed bids · RA bill 01 (certified) · concept moodboard`);
   console.log(`    consultancy: EQ-DEMO-001 → C-DEMO-001 (BILLABLE fee stage)`);
 }
 

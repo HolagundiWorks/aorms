@@ -27,6 +27,17 @@ sudo bash deploy/install-enterprise.sh
 
 See [`docs/esti/SELF-HOST-INSTALL.md`](../docs/esti/SELF-HOST-INSTALL.md).
 
+**Public landing + demo showcase:** marketing landing page + a fully seeded demo
+workspace, nothing else — secrets auto-generated, only domain + TLS email needed
+(disposable box; do not store real data). Add `WITH_LICENSING=true` to also show
+the `/platform-admin` console:
+
+```bash
+sudo bash deploy/install-demo.sh
+# non-interactive:
+DOMAIN=demo.aorms.in ADMIN_EMAIL=ops@aorms.in sudo -E bash deploy/install-demo.sh
+```
+
 ## Profiles (`PROFILE=` overrides on `install.sh`)
 
 | Profile | Public site | Demo data | Plan | Notes |
@@ -44,6 +55,7 @@ See [`docs/esti/SELF-HOST-INSTALL.md`](../docs/esti/SELF-HOST-INSTALL.md).
 |---|---|
 | `deploy/install.sh` | **AORMS-site installer (default: aorms profile)** → sets profile env → runs `install_core` |
 | `deploy/install-enterprise.sh` | **Customer Core/Enterprise self-host** — firm-only front door + licence-key activation; reuses `install_core` |
+| `deploy/install-demo.sh` | **Landing + demo showcase** — public marketing landing + seeded demo workspace only; auto-generates secrets, `WITH_LICENSING=true` adds the console; reuses `install_core` |
 | `deploy/install-admin-console.sh` | **Licensing console at `admin.DOMAIN`** — vhost + TLS for the `dist/admin.html` entry; same-box `/platform/` proxy (run after the main install; needs the `admin.` DNS record) |
 | `deploy/install-wiki-tls.sh` | **Legacy `wiki.DOMAIN`** — optional TLS so HTTPS redirects to `https://DOMAIN/wiki` (HTTP redirect block is in `nginx-proxy.conf`) |
 | `deploy/lib.sh` | Shared helpers + `write_env` + `install_core` (the one install flow) |
