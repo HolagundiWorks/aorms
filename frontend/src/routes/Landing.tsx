@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Link as RouterLink } from "react-router-dom";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
   Container,
@@ -11,15 +14,25 @@ import {
   Typography,
 } from "@mui/material";
 import ArrowForward from "@mui/icons-material/ArrowForwardOutlined";
+import ExpandMore from "@mui/icons-material/ExpandMoreOutlined";
 import FolderOutlined from "@mui/icons-material/FolderOutlined";
 import ReceiptLongOutlined from "@mui/icons-material/ReceiptLongOutlined";
 import ArchitectureOutlined from "@mui/icons-material/ArchitectureOutlined";
 import MenuBookOutlined from "@mui/icons-material/MenuBookOutlined";
 import GroupsOutlined from "@mui/icons-material/GroupsOutlined";
 import InsightsOutlined from "@mui/icons-material/InsightsOutlined";
+import PaymentsOutlined from "@mui/icons-material/PaymentsOutlined";
+import HubOutlined from "@mui/icons-material/HubOutlined";
+import VerifiedUserOutlined from "@mui/icons-material/VerifiedUserOutlined";
+import DnsOutlined from "@mui/icons-material/DnsOutlined";
+import LayersOutlined from "@mui/icons-material/LayersOutlined";
+import RuleOutlined from "@mui/icons-material/RuleOutlined";
+import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import {
   GlassRail,
+  KpiStrip,
   SectionDock,
+  StatusDot,
   Surface,
   type SectionDockLink,
 } from "@hcw/ui-kit";
@@ -41,12 +54,13 @@ import { useLandingVisitCounter } from "../lib/landing-visit.js";
 const SECTIONS: readonly SectionDockLink[] = [
   { href: "#top", label: "Overview" },
   { href: "#frameworks", label: "Frameworks" },
-  { href: "#ai", label: "Dual-AI" },
-  { href: "#inside", label: "Inside" },
+  { href: "#inside", label: "Features" },
+  { href: "#why", label: "Why AORMS" },
+  { href: "#how", label: "How it works" },
   { href: "#apps", label: "Apps" },
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
-];
+] as const;
 
 const MODULES = [
   {
@@ -81,6 +95,57 @@ const MODULES = [
   },
 ] as const;
 
+/** Why choose AORMS — benefit-framed (outcome), not feature-framed. */
+const BENEFITS = [
+  {
+    icon: <PaymentsOutlined fontSize="small" />,
+    title: "Stop losing fees to revisions",
+    body: "COA proposals, revision intelligence, and GST invoices on one record — so scope changes bill correctly instead of leaking margin.",
+  },
+  {
+    icon: <HubOutlined fontSize="small" />,
+    title: "One record, no re-keying",
+    body: "Projects, drawings, finance, team, and portals share a single spine. No exports, no reconciled spreadsheets, no version drift.",
+  },
+  {
+    icon: <VerifiedUserOutlined fontSize="small" />,
+    title: "AI you can actually trust",
+    body: `${ESTI.name} answers only from your firm's validated repositories — every answer traceable to a source, not a guess from the open web.`,
+  },
+  {
+    icon: <DnsOutlined fontSize="small" />,
+    title: "Runs on your server",
+    body: "Firm data stays in your environment. No external API keys required, and nothing is used to train third-party models.",
+  },
+] as const;
+
+/** How it works — three governed steps. */
+const STEPS = [
+  {
+    icon: <LayersOutlined fontSize="small" />,
+    title: "Consolidate",
+    body: "Bring the whole office onto one spine — projects, fees, drawings, team, and portals replace the 5–7 disconnected tools.",
+  },
+  {
+    icon: <RuleOutlined fontSize="small" />,
+    title: "Govern",
+    body: "Standards, review chains, and audit trails make the practice run the same way whoever is at the desk — versioned and shared.",
+  },
+  {
+    icon: <AutoAwesomeOutlined fontSize="small" />,
+    title: "Act with intelligence",
+    body: `Studio Intelligence surfaces what needs attention, and ${ESTI.name} answers from your validated data — decisions on evidence, not memory.`,
+  },
+] as const;
+
+/** Factual platform figures — structural, not fabricated customer metrics. */
+const STATS = [
+  { id: "apps", label: "AEC apps on one spine", value: "2" },
+  { id: "modules", label: "Consolidated modules", value: "80+" },
+  { id: "ai", label: "AI tiers · EOMS + ESTI", value: "Dual" },
+  { id: "storage", label: "Storage included", value: "5 GB" },
+] as const;
+
 const FAQ = [
   {
     q: "Who is AORMS for?",
@@ -113,13 +178,22 @@ function SectionHead({
   eyebrow,
   title,
   lead,
+  align = "left",
 }: {
   eyebrow: string;
   title: string;
   lead?: string;
+  align?: "left" | "center";
 }) {
   return (
-    <Stack spacing={1.5} sx={{ mb: 4, maxWidth: 720 }}>
+    <Stack
+      spacing={1.5}
+      sx={{
+        mb: 4,
+        maxWidth: 720,
+        ...(align === "center" ? { mx: "auto", textAlign: "center" } : null),
+      }}
+    >
       <Typography variant="overline" color="primary" sx={{ letterSpacing: "0.14em" }}>
         {eyebrow}
       </Typography>
@@ -127,11 +201,105 @@ function SectionHead({
         {title}
       </Typography>
       {lead ? (
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 620 }}>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ maxWidth: 620, ...(align === "center" ? { mx: "auto" } : null) }}
+        >
           {lead}
         </Typography>
       ) : null}
     </Stack>
+  );
+}
+
+/** Colourless skeleton bar — abstract placeholder, no fabricated data. */
+function Bar({ w = "100%" }: { w?: number | string }) {
+  return (
+    <Box
+      sx={{
+        height: 8,
+        width: w,
+        borderRadius: 1,
+        bgcolor: (t) => t.palette.action.hover,
+      }}
+    />
+  );
+}
+
+/**
+ * Abstract workspace preview for the hero — the rail · stage spatial model
+ * rendered as generic surfaces. No client names or fabricated metrics; the
+ * shape communicates the product, the labels stay real.
+ */
+function WorkspacePreview() {
+  return (
+    <Surface
+      layer="soft"
+      aria-hidden
+      sx={{ p: { xs: 2, md: 2.5 }, height: "100%" }}
+    >
+      <Stack direction="row" spacing={1.5} sx={{ height: "100%" }}>
+        {/* Rail */}
+        <Surface
+          layer="glass"
+          sx={{
+            width: 84,
+            flexShrink: 0,
+            p: 1.5,
+            display: { xs: "none", sm: "flex" },
+            flexDirection: "column",
+            gap: 1.25,
+          }}
+        >
+          <AormsLogo variant="sm" />
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Bar key={i} w={i === 0 ? "70%" : "100%"} />
+          ))}
+        </Surface>
+
+        {/* Stage */}
+        <Stack spacing={1.5} sx={{ flex: 1, minWidth: 0 }}>
+          <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+            <Typography variant="caption" sx={{ fontWeight: 700 }}>
+              Studio Intelligence
+            </Typography>
+            <StatusDot color="green" label="Live" size="sm" />
+          </Stack>
+
+          {/* KPI tiles */}
+          <Grid container spacing={1}>
+            {["Projects", "Proposals", "Invoices"].map((k) => (
+              <Grid key={k} size={4}>
+                <Surface layer="flat" sx={{ p: 1.25, border: (t) => `1px solid ${t.palette.divider}` }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.75 }}>
+                    {k}
+                  </Typography>
+                  <Bar w="55%" />
+                </Surface>
+              </Grid>
+            ))}
+          </Grid>
+
+          {/* Table skeleton */}
+          <Surface layer="flat" sx={{ p: 1.5, flex: 1, border: (t) => `1px solid ${t.palette.divider}` }}>
+            <Stack spacing={1.25}>
+              {[92, 78, 85, 64, 72].map((w, i) => (
+                <Stack key={i} direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                  <StatusDot
+                    color={i % 3 === 0 ? "gray" : "green"}
+                    label=""
+                    size="sm"
+                    shape={i % 3 === 0 ? "triangle" : "circle"}
+                  />
+                  <Bar w={`${w}%`} />
+                </Stack>
+              ))}
+            </Stack>
+          </Surface>
+        </Stack>
+      </Stack>
+    </Surface>
   );
 }
 
@@ -205,58 +373,80 @@ export function Landing() {
     <>
       <GlassRail glass="clear" mainId="lp-main" rail={rail} railAriaLabel="AORMS">
         <Container maxWidth="lg" disableGutters sx={{ pb: 12 }}>
-          {/* Hero */}
-          <Box id="top" component="section" sx={{ pt: { xs: 4, md: 8 }, pb: { xs: 6, md: 10 } }}>
-            <Box sx={{ mb: 2 }}>
-              <AormsLogo variant="hero" />
-            </Box>
-            <Typography variant="overline" color="primary" sx={{ letterSpacing: "0.14em" }}>
-              The operating system for AEC consulting
-            </Typography>
-            <Typography
-              variant="h1"
-              sx={{
-                mt: 2,
-                fontWeight: 800,
-                fontSize: { xs: "2.4rem", md: "3.6rem" },
-                lineHeight: 1.05,
-                letterSpacing: "-0.02em",
-                maxWidth: 900,
-              }}
-            >
-              {AORMS_PLATFORM.heroHeadline[0]}
-              <Box component="span" sx={{ display: "block", color: "text.secondary" }}>
-                {AORMS_PLATFORM.heroHeadline[1]}
-              </Box>
-            </Typography>
-            <Typography
-              variant="h6"
-              component="p"
-              color="text.secondary"
-              sx={{ mt: 3, maxWidth: 640, fontWeight: 400 }}
-            >
-              Architecture and engineering practices advise clients across dozens of
-              disconnected tools. AORMS consolidates the operational and design frameworks
-              of the whole office into one governed workspace, with dual-tier AI.
-            </Typography>
+          {/* Hero — two-column: copy + workspace preview */}
+          <Box id="top" component="section" sx={{ pt: { xs: 4, md: 8 }, pb: { xs: 6, md: 9 } }}>
+            <Grid container spacing={{ xs: 5, md: 6 }} sx={{ alignItems: "center" }}>
+              <Grid size={{ xs: 12, md: 7 }}>
+                <Box sx={{ mb: 2 }}>
+                  <AormsLogo variant="hero" />
+                </Box>
+                <Typography variant="overline" color="primary" sx={{ letterSpacing: "0.14em" }}>
+                  The operating system for AEC consulting
+                </Typography>
+                <Typography
+                  variant="h1"
+                  sx={{
+                    mt: 2,
+                    fontWeight: 800,
+                    fontSize: { xs: "2.4rem", md: "3.4rem" },
+                    lineHeight: 1.05,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  {AORMS_PLATFORM.heroHeadline[0]}
+                  <Box component="span" sx={{ display: "block", color: "text.secondary" }}>
+                    {AORMS_PLATFORM.heroHeadline[1]}
+                  </Box>
+                </Typography>
+                <Typography
+                  variant="h6"
+                  component="p"
+                  color="text.secondary"
+                  sx={{ mt: 3, maxWidth: 560, fontWeight: 400 }}
+                >
+                  Architecture and engineering practices advise clients across dozens of
+                  disconnected tools. AORMS consolidates the operational and design frameworks
+                  of the whole office into one governed workspace, with dual-tier AI.
+                </Typography>
 
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mt: 4 }}>
-              <Button
-                component={RouterLink}
-                to="/login"
-                variant="contained"
-                size="large"
-                endIcon={<ArrowForward />}
-              >
-                Sign in to {AORMS_STUDIO.title}
-              </Button>
-              <Button component="a" href="#frameworks" variant="outlined" size="large">
-                See how it works
-              </Button>
-            </Stack>
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mt: 4 }}>
+                  <Button
+                    component={RouterLink}
+                    to="/login"
+                    variant="contained"
+                    size="large"
+                    endIcon={<ArrowForward />}
+                  >
+                    Sign in to {AORMS_STUDIO.title}
+                  </Button>
+                  <Button component="a" href="#how" variant="outlined" size="large">
+                    See how it works
+                  </Button>
+                </Stack>
+
+                {/* Trust indicator */}
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ mt: 3, alignItems: "center", flexWrap: "wrap", rowGap: 1 }}
+                >
+                  <StatusDot color="green" label="" size="sm" />
+                  <Typography variant="caption" color="text.secondary">
+                    Two apps live on one spine · runs on your server · no external API keys
+                    required
+                  </Typography>
+                </Stack>
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 5 }}>
+                <Box sx={{ height: { xs: 340, md: 400 } }}>
+                  <WorkspacePreview />
+                </Box>
+              </Grid>
+            </Grid>
 
             {/* From fragmented tools → one system. */}
-            <Surface layer="soft" sx={{ mt: 6, p: { xs: 2.5, md: 3 } }}>
+            <Surface layer="soft" sx={{ mt: { xs: 6, md: 8 }, p: { xs: 2.5, md: 3 } }}>
               <Typography variant="overline" color="text.secondary">
                 Replaces the sprawl
               </Typography>
@@ -308,6 +498,110 @@ export function Landing() {
             </Grid>
           </Box>
 
+          {/* Inside — modules (features) */}
+          <Box id="inside" component="section" sx={{ py: { xs: 6, md: 9 } }}>
+            <SectionHead
+              eyebrow="Inside the workspace"
+              title="Everything the practice needs, consolidated"
+              lead="One workspace for the whole consulting office — no exports, no re-keying, no scattered spreadsheets."
+            />
+            <Grid container spacing={3}>
+              {MODULES.map((m) => (
+                <Grid key={m.title} size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Surface layer="flat" sx={{ p: 3, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
+                    <Box sx={{ color: "primary.main", display: "flex" }}>{m.icon}</Box>
+                    <Typography variant="subtitle1" component="h3" sx={{ mt: 1.5, fontWeight: 700 }}>
+                      {m.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      {m.body}
+                    </Typography>
+                  </Surface>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+
+          {/* Why choose us — benefits */}
+          <Box id="why" component="section" sx={{ py: { xs: 6, md: 9 } }}>
+            <SectionHead
+              eyebrow="Why AORMS"
+              title="Outcomes, not just features"
+              lead="What a consolidated, governed, audit-first workspace actually changes for the practice."
+            />
+            <Grid container spacing={3}>
+              {BENEFITS.map((b) => (
+                <Grid key={b.title} size={{ xs: 12, sm: 6 }}>
+                  <Surface layer="flat" sx={{ p: 3, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
+                    <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start" }}>
+                      <Box sx={{ color: "primary.main", display: "flex", mt: 0.25 }}>{b.icon}</Box>
+                      <Box>
+                        <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
+                          {b.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                          {b.body}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </Surface>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+
+          {/* How it works */}
+          <Box id="how" component="section" sx={{ py: { xs: 6, md: 9 } }}>
+            <SectionHead
+              eyebrow="How it works"
+              title="Consolidate. Govern. Act."
+              lead="One path from scattered tools to a governed practice with intelligence you can trust."
+            />
+            <Grid container spacing={3}>
+              {STEPS.map((s, i) => (
+                <Grid key={s.title} size={{ xs: 12, md: 4 }}>
+                  <Surface layer="soft" sx={{ p: 3, height: "100%" }}>
+                    <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+                      <Typography variant="h4" sx={{ fontWeight: 800, color: "primary.main", lineHeight: 1 }}>
+                        {i + 1}
+                      </Typography>
+                      <Box sx={{ color: "primary.main", display: "flex" }}>{s.icon}</Box>
+                    </Stack>
+                    <Typography variant="subtitle1" component="h3" sx={{ mt: 2, fontWeight: 700 }}>
+                      {s.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      {s.body}
+                    </Typography>
+                  </Surface>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+
+          {/* Statistics — factual platform figures */}
+          <Box component="section" sx={{ py: { xs: 5, md: 7 } }}>
+            <Surface layer="soft" sx={{ p: { xs: 3, md: 4 } }}>
+              <KpiStrip
+                aria-label="AORMS platform at a glance"
+                items={STATS.map((s) => ({
+                  id: s.id,
+                  label: s.label,
+                  value: (
+                    <Box component="span" sx={{ fontSize: "1.9rem", fontWeight: 800, color: "primary.main" }}>
+                      {s.value}
+                    </Box>
+                  ),
+                }))}
+              />
+              {visitCount != null ? (
+                <Typography variant="caption" color="text.disabled" sx={{ mt: 2, display: "block" }}>
+                  {visitCount.toLocaleString()} visits to this page and counting.
+                </Typography>
+              ) : null}
+            </Surface>
+          </Box>
+
           {/* Dual-tier AI */}
           <Box id="ai" component="section" sx={{ py: { xs: 6, md: 9 } }}>
             <SectionHead
@@ -332,30 +626,6 @@ export function Landing() {
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
                       {tier.summary}
-                    </Typography>
-                  </Surface>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-
-          {/* Inside — modules */}
-          <Box id="inside" component="section" sx={{ py: { xs: 6, md: 9 } }}>
-            <SectionHead
-              eyebrow="Inside the workspace"
-              title="Everything the practice needs, consolidated"
-              lead="One workspace for the whole consulting office — no exports, no re-keying, no scattered spreadsheets."
-            />
-            <Grid container spacing={3}>
-              {MODULES.map((m) => (
-                <Grid key={m.title} size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Surface layer="flat" sx={{ p: 3, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
-                    <Box sx={{ color: "primary.main", display: "flex" }}>{m.icon}</Box>
-                    <Typography variant="subtitle1" component="h3" sx={{ mt: 1.5, fontWeight: 700 }}>
-                      {m.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                      {m.body}
                     </Typography>
                   </Surface>
                 </Grid>
@@ -529,43 +799,97 @@ export function Landing() {
             </Stack>
           </Surface>
 
-          {/* FAQ */}
+          {/* FAQ — accordion */}
           <Box id="faq" component="section" sx={{ py: { xs: 6, md: 9 } }}>
             <SectionHead eyebrow="Questions" title="What practices ask first" />
-            <Stack divider={<Divider />} spacing={0}>
+            <Box sx={{ maxWidth: 820 }}>
               {FAQ.map((item) => (
-                <Box key={item.q} sx={{ py: 3 }}>
-                  <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
-                    {item.q}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: 720 }}>
-                    {item.a}
-                  </Typography>
-                </Box>
+                <Accordion
+                  key={item.q}
+                  disableGutters
+                  elevation={0}
+                  square
+                  sx={{
+                    bgcolor: "transparent",
+                    borderBottom: (t) => `1px solid ${t.palette.divider}`,
+                    "&:before": { display: "none" },
+                  }}
+                >
+                  <AccordionSummary
+                    expandIcon={<ExpandMore />}
+                    sx={{ px: 0, py: 1, "& .MuiAccordionSummary-content": { my: 1.5 } }}
+                  >
+                    <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
+                      {item.q}
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ px: 0, pt: 0, pb: 2.5 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 720 }}>
+                      {item.a}
+                    </Typography>
+                  </AccordionDetails>
+                </Accordion>
               ))}
-            </Stack>
+            </Box>
           </Box>
 
           {/* Footer */}
           <Box component="footer" sx={{ pt: 6, mt: 4, borderTop: (t) => `1px solid ${t.palette.divider}` }}>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1}
-              sx={{ justifyContent: "space-between", alignItems: { xs: "flex-start", sm: "center" } }}
-            >
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <AormsLogo variant="sm" />
-                <Typography variant="caption" color="text.secondary">
-                  {AORMS_PLATFORM.expansion}
+            <Grid container spacing={4} sx={{ mb: 4 }}>
+              <Grid size={{ xs: 12, md: 5 }}>
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.5 }}>
+                  <AormsLogo variant="sm" />
+                  <Typography variant="caption" color="text.secondary">
+                    {AORMS_PLATFORM.expansion}
+                  </Typography>
+                </Stack>
+                <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 360 }}>
+                  {AORMS_PLATFORM.tagline}. {HUMAN_CENTRIC_WORKS.attribution}.
                 </Typography>
-              </Stack>
-              <Typography variant="caption" color="text.secondary">
-                {HUMAN_CENTRIC_WORKS.attribution} · {HUMAN_CENTRIC_WORKS.location} ·{" "}
-                <Box component="a" href={`mailto:${HUMAN_CENTRIC_WORKS.email}`} sx={{ color: "inherit" }}>
-                  {HUMAN_CENTRIC_WORKS.email}
-                </Box>
-              </Typography>
-            </Stack>
+              </Grid>
+              <Grid size={{ xs: 6, md: 3 }}>
+                <Typography variant="overline" color="text.secondary">Product</Typography>
+                <Stack spacing={1} sx={{ mt: 1.5 }}>
+                  <Box component="a" href="#inside" sx={{ color: "text.secondary", textDecoration: "none" }}>
+                    <Typography variant="body2">Features</Typography>
+                  </Box>
+                  <Box component="a" href="#apps" sx={{ color: "text.secondary", textDecoration: "none" }}>
+                    <Typography variant="body2">Apps</Typography>
+                  </Box>
+                  <Box component="a" href="#pricing" sx={{ color: "text.secondary", textDecoration: "none" }}>
+                    <Typography variant="body2">Pricing</Typography>
+                  </Box>
+                  <Box component="a" href="#faq" sx={{ color: "text.secondary", textDecoration: "none" }}>
+                    <Typography variant="body2">FAQ</Typography>
+                  </Box>
+                </Stack>
+              </Grid>
+              <Grid size={{ xs: 6, md: 4 }}>
+                <Typography variant="overline" color="text.secondary">Company</Typography>
+                <Stack spacing={1} sx={{ mt: 1.5 }}>
+                  <Box component={RouterLink} to="/login" sx={{ color: "text.secondary", textDecoration: "none" }}>
+                    <Typography variant="body2">Sign in</Typography>
+                  </Box>
+                  <Box component={RouterLink} to="/account?mode=create" sx={{ color: "text.secondary", textDecoration: "none" }}>
+                    <Typography variant="body2">Create account</Typography>
+                  </Box>
+                  <Box
+                    component="a"
+                    href={`mailto:${HUMAN_CENTRIC_WORKS.email}`}
+                    sx={{ color: "text.secondary", textDecoration: "none" }}
+                  >
+                    <Typography variant="body2">{HUMAN_CENTRIC_WORKS.email}</Typography>
+                  </Box>
+                </Stack>
+              </Grid>
+            </Grid>
+            <Divider />
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 3, display: "block" }}>
+              {HUMAN_CENTRIC_WORKS.attribution} · {HUMAN_CENTRIC_WORKS.location} ·{" "}
+              <Box component="a" href={`mailto:${HUMAN_CENTRIC_WORKS.email}`} sx={{ color: "inherit" }}>
+                {HUMAN_CENTRIC_WORKS.email}
+              </Box>
+            </Typography>
           </Box>
         </Container>
       </GlassRail>
