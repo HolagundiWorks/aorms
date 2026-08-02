@@ -85,6 +85,11 @@ via the repo’s wiki sync/build step.
 > only as a frozen `--cds-*` compat block in `frontend/src/styles.scss` — no Carbon
 > React components anywhere.
 >
+> **➜ Planned reversal:** a migration back to the **IBM Carbon Design System**
+> (whole app + landing) is scoped in [`docs/esti/CARBON-MIGRATION.md`](docs/esti/CARBON-MIGRATION.md).
+> Until that migration reaches its decommission wave, **`@hcw/ui-kit` stays
+> canonical** and the rules below apply — build on the kit, not Carbon React.
+>
 > **Documentation map (read in order):** [`docs/hcw-kit/README.md`](docs/hcw-kit/README.md)
 > (sections 00–13). Agent contract + detection recipes:
 > [`docs/esti/HCW-KIT-AI-KNOWLEDGE-BASE.md`](docs/esti/HCW-KIT-AI-KNOWLEDGE-BASE.md).
