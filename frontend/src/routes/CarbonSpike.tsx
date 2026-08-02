@@ -13,7 +13,6 @@
  */
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import "@carbon/styles/css/styles.css";
 import {
   Button,
   Column,
@@ -34,12 +33,11 @@ import {
   Tabs,
   Tag,
   TextInput,
-  Theme,
 } from "@carbon/react";
+import { CarbonScope, type CarbonTheme } from "../carbon/CarbonScope.js";
 import { ArrowRight, Add, CheckmarkFilled } from "@carbon/icons-react";
 
-type CarbonScheme = "white" | "g10" | "g90" | "g100";
-const SCHEMES: readonly CarbonScheme[] = ["white", "g10", "g90", "g100"];
+const SCHEMES: readonly CarbonTheme[] = ["white", "g10", "g90", "g100"];
 
 const ROWS = [
   { id: "PRJ-001", name: "Sharma Villa", stage: "Design development", status: "On track" },
@@ -49,11 +47,11 @@ const ROWS = [
 
 /** Carbon-themed spike screen — not part of the shipped IA. */
 export function CarbonSpike() {
-  const [scheme, setScheme] = useState<CarbonScheme>("g10");
+  const [scheme, setScheme] = useState<CarbonTheme>("g10");
   const [name, setName] = useState("");
 
   return (
-    <Theme theme={scheme}>
+    <CarbonScope theme={scheme}>
       <div style={{ minHeight: "100vh", background: "var(--cds-background)", padding: "2rem" }}>
         <Grid>
           <Column sm={4} md={8} lg={16}>
@@ -82,7 +80,7 @@ export function CarbonSpike() {
                   id="carbon-spike-theme"
                   titleText="Carbon theme"
                   label="Select a theme"
-                  items={SCHEMES as unknown as CarbonScheme[]}
+                  items={SCHEMES as unknown as CarbonTheme[]}
                   selectedItem={scheme}
                   itemToString={(item) => (item ? String(item) : "")}
                   onChange={({ selectedItem }) => selectedItem && setScheme(selectedItem)}
@@ -164,6 +162,6 @@ export function CarbonSpike() {
           </Column>
         </Grid>
       </div>
-    </Theme>
+    </CarbonScope>
   );
 }

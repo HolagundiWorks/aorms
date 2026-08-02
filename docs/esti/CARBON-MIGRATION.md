@@ -199,14 +199,24 @@ screen** to validate coexistence, the token bridge, and the build (bundle size,
 CSP for fonts). **Exit:** decisions signed off; a Carbon component renders in
 the running app next to kit components.
 
-### Wave 1 — Foundation (1 sprint)
-Add `@carbon/react`, `@carbon/styles`, `@carbon/icons-react`, IBM Plex fonts.
-Mount `<GlobalTheme>`/`<Theme>` at the app root (co-existing with `KitRoot`).
-Convert the `--cds-*` compat block to real `@carbon/styles` tokens. Establish
-the Carbon theme (scheme ↔ `white`/`g10`/`g90`/`g100`, density, and — if kept —
-Radiant Orange as the interactive/accent token override). **Exit:** Carbon
-tokens/type live globally; no visual regressions on existing screens (kit still
-renders); build + CSP green.
+### Wave 1 — Foundation (1 sprint) — **partially delivered 2026-08-02**
+Add `@carbon/react`, `@carbon/styles`, `@carbon/icons-react`. Load Carbon's
+global CSS **once, inside a `@layer carbon`** cascade layer (`src/carbon/carbon.css`,
+imported in `main.tsx`) so the app's unlayered styles always win — Carbon's
+reset/base/tokens cannot leak onto the 276 kit/MUI screens. Apply the Carbon
+theme **per-subtree** via a `CarbonScope` adapter (`src/carbon/CarbonScope.tsx`),
+**not** a `:root` `<GlobalTheme>` — that keeps Carbon's real `--cds-*` off `:root`
+so the frozen compat block still serves unmigrated screens (the two token sets
+stay separated by DOM). ✅ **Verified in the build:** the emitted CSS wraps all
+Carbon rules in `@layer carbon{}` while `:root` tokens + Urbanist stay unlayered;
+`tsc`/`eslint`/`vite build` green.
+
+**Remaining for Wave 1:** IBM Plex fonts self-hosted; map app light/dark →
+`white`/`g10`/`g90`/`g100`; decide the accent token; and (later) replace the
+prebuilt `styles.min.css` import with a **tree-shaken Sass `@use`** of only the
+components in use (the full CSS adds ~830 KB uncompressed to `main.css` today).
+**Exit:** Carbon theme available app-wide via `CarbonScope`; zero visual
+regression on kit screens; build + CSP green.
 
 ### Wave 2 — Carbon adapters + retire the bespoke primitives (1–2 sprints)
 Per § 0 (pure Carbon), split the ~20 kit primitives into two buckets:
