@@ -62,6 +62,7 @@ DOMAIN=demo.aorms.in ADMIN_EMAIL=ops@aorms.in sudo -E bash deploy/install-demo.s
 | `deploy/update.sh` | In-place update (reads the profile from `.env`) |
 | `deploy/cleanup-vps.sh` | **VPS hygiene** — remove retired `/downloads` installers, `dist.old`, temp Docker containers; optional image/build-cache prune |
 | `deploy/fetch-installers.sh` | **Retired** — legacy Lite/Pro desktop installers |
+| `deploy/preflight-migrations.sh` | **Migration safety check** — clone the live DB to a scratch copy, apply pending migrations to the clone, report pass/fail; never touches the real DB. Run before `update.sh` on a migration release |
 | `deploy/backup.sh` / `restore.sh` | Postgres + MinIO backup / restore |
 | `deploy/nginx-proxy.conf` | nginx vhost template |
 
@@ -167,6 +168,19 @@ PLATFORM_ADMIN_EMAILS=you@firm.in
 ```
 
 then `bash deploy/update.sh`. Google OAuth: set `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` in `.env` (see [ADMIN-GUIDE.md](../docs/esti/ADMIN-GUIDE.md) §5).
+
+## Updating an existing box
+
+```bash
+cd /opt/esti
+sudo bash deploy/backup.sh                 # 1. always back up first
+sudo bash deploy/preflight-migrations.sh   # 2. dry-run migrations on a clone (do this on a release that adds migrations)
+sudo bash deploy/update.sh                 # 3. pull main, rebuild, migrate on boot, swap dist
+```
+
+`preflight-migrations.sh` clones the live DB, applies the pending migrations to
+the copy, and reports pass/fail without touching production — if it fails, fix
+the migration before running `update.sh`. Skip step 2 for a code-only release.
 
 ## Switching profiles on an existing box
 
