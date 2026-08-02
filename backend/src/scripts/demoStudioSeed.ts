@@ -325,6 +325,7 @@ export async function seedStudioGlanceAndLeads(
     }
   }
 
+
   const today = dayOffset(0);
   for (const [, memberId] of memberIds) {
     await db

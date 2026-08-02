@@ -57,8 +57,8 @@ include the contractor-facing coordination needed by an architect:
 - architect-side BOQ, estimation, purchase-order, site-measurement
   verification, and payment-certificate support (rebuilding as the CMS).
 
-*(Contractor tendering — issue / sealed bids / comparison / award — was removed in the
-2026-06-29 consultancy-only teardown; AORMS does not run contractor bidding.)*
+*(Project tenders: the firm issues; invited contractors bid in the contractor portal.
+BOQ line-item bidding and contractor execution accounting stay out of scope.)*
 
 Inventory, warehouses, labour gangs, attendance for contractor labour, GRNs,
 subcontractor ledgers, contractor-side RA-bill accounting, and construction-company finance are

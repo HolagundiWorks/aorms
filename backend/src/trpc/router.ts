@@ -13,6 +13,8 @@ import { collaboratorRouter } from "../modules/consultant/portal.js";
 import { consultantRouter } from "../modules/consultant/router.js";
 import { consultancyRouter } from "../modules/consultancy/router.js";
 import { contractorRouter } from "../modules/contractor/router.js";
+import { contractorPortalRouter } from "../modules/contractor/portal.js";
+import { tendersRouter } from "../modules/tender/router.js";
 import { vendorRouter } from "../modules/vendor/router.js";
 import { complianceRouter } from "../modules/compliance/router.js";
 import { masterPlanRouter } from "../modules/masterplan/router.js";
@@ -141,6 +143,8 @@ export const appRouter = router({
   // Studio architect↔consultant `engagements` namespace below.
   consultancy: consultancyRouter,
   contractors: contractorRouter,
+  contractorPortal: contractorPortalRouter,
+  tenders: tendersRouter,
   vendors: vendorRouter,
   compliance: complianceRouter,
   masterPlans: masterPlanRouter,

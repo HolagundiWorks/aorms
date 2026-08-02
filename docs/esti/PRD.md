@@ -167,9 +167,10 @@ The contractor module supports architect-side coordination only:
 - contractor company, GST/PAN, contacts, categories, and performance;
 - RFIs, material submittals, shop drawings, inspection requests, site
   instructions, snags, and NCRs;
-- *(Tendering — creation / issue / sealed bids / comparison / award — was
-  **removed** in the 2026-06-29 consultancy-only teardown along with the `esti_tender*`
-  spine; AORMS is consultancy-only and does not run contractor bidding.)*
+- **Project tenders (lump-sum):** the firm issues a tender on a project, invites
+  contractors, and reviews sealed bids after close; contractors submit via the
+  contractor portal (`contractorPortal`). BOQ line-item bidding and work-package
+  award bridges remain out of scope.
 - strict portal isolation between contractors.
 
 It does not provide inventory, labour, subcontractor, GRN, or contractor

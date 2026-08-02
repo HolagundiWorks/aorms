@@ -1,62 +1,72 @@
 import {
+  Alert,
   Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Skeleton,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { formatINR } from "@esti/contracts";
+import {
+  TENDER_INVITATION_STATUS_LABEL,
+  TENDER_INVITATION_STATUS_TAG,
+  TENDER_STATUS_LABEL,
+  TENDER_STATUS_TAG,
+  formatINR,
+  type TenderInvitationStatus,
+  type TenderStatus,
+} from "@esti/contracts";
+import { pushToast } from "@hcw/ui-kit";
 import { useState } from "react";
+import { DataState } from "../components/DataState.js";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
-import { StatusDot } from "../components/StatusTag.js";
-import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
+import { StatusTag } from "../components/StatusTag.js";
 import { trpc } from "../lib/trpc.js";
+import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
 
-/** Contractor portal — package tender invites and sealed bid submission (AProc W2.3). */
+/**
+ * Contractor portal — invited tenders and lump-sum bidding.
+ */
 export function ContractorPortal() {
   const utils = trpc.useUtils();
   const logout = trpc.auth.logout.useMutation({
     meta: { errorTitle: "Couldn't sign out" },
     onSuccess: () => utils.auth.me.invalidate(),
   });
-  const brandingQ = trpc.contractorPortal.branding.useQuery();
-  const invitesQ = trpc.contractorPortal.myInvites.useQuery();
+  const listQ = trpc.contractorPortal.myTenders.useQuery();
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [amountRupees, setAmountRupees] = useState("");
+  const [weeks, setWeeks] = useState("");
+  const [notes, setNotes] = useState("");
 
-  const [bidFor, setBidFor] = useState<{
-    packageId: string;
-    packageRef: string;
-    title: string;
-    existingAmountInr?: string;
-    existingNote?: string;
-  } | null>(null);
-  const [amountInr, setAmountInr] = useState("");
-  const [coverNote, setCoverNote] = useState("");
+  const detailQ = trpc.contractorPortal.getInvitation.useQuery(
+    { invitationId: openId! },
+    { enabled: !!openId },
+  );
 
-  const submitBid = trpc.contractorPortal.submitBid.useMutation({
+  const submit = trpc.contractorPortal.submitBid.useMutation({
     meta: { errorTitle: "Couldn't submit the bid" },
     onSuccess: () => {
-      void utils.contractorPortal.myInvites.invalidate();
-      setBidFor(null);
-      setAmountInr("");
-      setCoverNote("");
+      utils.contractorPortal.myTenders.invalidate();
+      if (openId) utils.contractorPortal.getInvitation.invalidate({ invitationId: openId });
+      pushToast({ kind: "success", title: "Bid submitted" });
     },
   });
-  const withdrawBid = trpc.contractorPortal.withdrawBid.useMutation({
-    meta: { errorTitle: "Couldn't withdraw the bid" },
-    onSuccess: () => void utils.contractorPortal.myInvites.invalidate(),
-  });
-  const declineInvite = trpc.contractorPortal.declineInvite.useMutation({
-    meta: { errorTitle: "Couldn't decline the invite" },
-    onSuccess: () => void utils.contractorPortal.myInvites.invalidate(),
+
+  const decline = trpc.contractorPortal.decline.useMutation({
+    meta: { errorTitle: "Couldn't decline the invitation" },
+    onSuccess: () => {
+      utils.contractorPortal.myTenders.invalidate();
+      setOpenId(null);
+      pushToast({ kind: "success", title: "Invitation declined" });
+    },
   });
 
-  const invites = invitesQ.data ?? [];
-  const firmName = brandingQ.data?.companyName ?? AORMS_PORTALS.contractor.label;
+  const rows = listQ.data ?? [];
+  const detail = detailQ.data;
 
   return (
     <ExternalPortalShell
@@ -64,176 +74,180 @@ export function ContractorPortal() {
       onSignOut={() => logout.mutate()}
       signingOut={logout.isPending}
     >
-      <Stack spacing={3} sx={{ maxWidth: 720 }}>
-        <Stack spacing={0.5}>
+      <Stack spacing={2}>
+        <Box>
           <Typography variant="h5" component="h1">
-            Package tenders
+            Tender invitations
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Invites from {firmName}. Submit sealed bids before the tender close date. Amounts stay
-            sealed until the PMC opens bids.
+            Bid on tenders issued by the architect&apos;s office. Your bid stays sealed until they
+            close the tender.
           </Typography>
-        </Stack>
+        </Box>
 
-        {invitesQ.isLoading && (
+        <DataState
+          loading={listQ.isLoading}
+          isEmpty={rows.length === 0}
+          columnCount={3}
+          empty={{
+            title: "No invitations yet",
+            description: "When the firm invites you to a tender, it appears here.",
+          }}
+        >
           <Stack spacing={1}>
-            {Array.from({ length: 2 }).map((_, i) => (
-              <Skeleton key={i} variant="rectangular" height={72} />
+            {rows.map((r) => (
+              <Box
+                key={r.invitationId}
+                sx={{
+                  py: 1.25,
+                  borderBottom: 1,
+                  borderColor: "divider",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  setOpenId(r.invitationId);
+                  setAmountRupees("");
+                  setWeeks("");
+                  setNotes("");
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setOpenId(r.invitationId);
+                  }
+                }}
+              >
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+                  <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                    {r.title}
+                  </Typography>
+                  <StatusTag
+                    value={r.status as TenderStatus}
+                    map={TENDER_STATUS_TAG}
+                    label={TENDER_STATUS_LABEL[r.status as TenderStatus] ?? r.status}
+                  />
+                  <StatusTag
+                    value={r.invitationStatus as TenderInvitationStatus}
+                    map={TENDER_INVITATION_STATUS_TAG}
+                    label={
+                      TENDER_INVITATION_STATUS_LABEL[
+                        r.invitationStatus as TenderInvitationStatus
+                      ] ?? r.invitationStatus
+                    }
+                  />
+                </Stack>
+                <Typography variant="caption" color="text.secondary">
+                  {r.projectRef} — {r.projectTitle}
+                  {r.dueDate ? ` · due ${r.dueDate}` : ""}
+                </Typography>
+              </Box>
             ))}
           </Stack>
-        )}
-
-        {!invitesQ.isLoading && invites.length === 0 && (
-          <Box sx={{ py: 2 }}>
-            <Typography variant="body1">No active package invites.</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              When the PMC invites your firm to tender a package, it will appear here.
-            </Typography>
-          </Box>
-        )}
-
-        <Stack spacing={1.5}>
-          {invites.map((inv) => (
-            <Box
-              key={inv.inviteId}
-              sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}
-            >
-              <Stack spacing={1}>
-                <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                    {inv.packageRef}
-                  </Typography>
-                  <StatusDot
-                    color={inv.packageStatus === "AWARDED" ? "teal" : "blue"}
-                    label={inv.packageStatus}
-                  />
-                  {inv.trade && (
-                    <Typography variant="caption" color="text.secondary">
-                      {inv.trade}
-                    </Typography>
-                  )}
-                </Stack>
-                <Typography variant="body2">{inv.packageTitle}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {inv.projectRef} — {inv.projectTitle}
-                  {inv.tenderCloseDate ? ` · Closes ${inv.tenderCloseDate}` : ""}
-                </Typography>
-                {inv.bid && (
-                  <Typography variant="body2">
-                    Your bid: {formatINR(inv.bid.amountPaise)} · {inv.bid.status}
-                  </Typography>
-                )}
-                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-                  {inv.canBid && (
-                    <Button
-                      size="small"
-                      variant="contained"
-                      onClick={() => {
-                        setBidFor({
-                          packageId: inv.packageId,
-                          packageRef: inv.packageRef,
-                          title: inv.packageTitle,
-                          existingAmountInr: inv.bid
-                            ? String(Math.round(inv.bid.amountPaise / 100))
-                            : undefined,
-                          existingNote: inv.bid?.coverNote ?? undefined,
-                        });
-                        setAmountInr(
-                          inv.bid ? String(Math.round(inv.bid.amountPaise / 100)) : "",
-                        );
-                        setCoverNote(inv.bid?.coverNote ?? "");
-                      }}
-                    >
-                      {inv.bid ? "Update bid" : "Submit bid"}
-                    </Button>
-                  )}
-                  {inv.bid?.status === "SUBMITTED" && inv.canBid && (
-                    <Button
-                      size="small"
-                      variant="text"
-                      color="error"
-                      disabled={withdrawBid.isPending}
-                      onClick={() => {
-                        if (window.confirm("Withdraw this bid?")) {
-                          withdrawBid.mutate({ bidId: inv.bid!.id });
-                        }
-                      }}
-                    >
-                      Withdraw bid
-                    </Button>
-                  )}
-                  {inv.inviteStatus === "INVITED" && inv.packageStatus === "TENDERING" && (
-                    <Button
-                      size="small"
-                      variant="text"
-                      disabled={declineInvite.isPending}
-                      onClick={() => {
-                        if (window.confirm("Decline this invite?")) {
-                          declineInvite.mutate({ inviteId: inv.inviteId });
-                        }
-                      }}
-                    >
-                      Decline
-                    </Button>
-                  )}
-                </Stack>
-              </Stack>
-            </Box>
-          ))}
-        </Stack>
+        </DataState>
       </Stack>
 
-      <Dialog
-        open={!!bidFor}
-        onClose={() => setBidFor(null)}
-        fullWidth
-        maxWidth="sm"
-        aria-labelledby="contractor-bid-title"
-      >
-        <DialogTitle id="contractor-bid-title">
-          Bid on {bidFor?.packageRef}
-        </DialogTitle>
+      <Dialog open={!!openId} onClose={() => setOpenId(null)} fullWidth maxWidth="sm">
+        <DialogTitle>{detail?.tender.title ?? "Tender"}</DialogTitle>
         <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <Typography variant="body2" color="text.secondary">
-              {bidFor?.title}
-            </Typography>
-            <TextField
-              label="Bid amount (₹)"
-              value={amountInr}
-              onChange={(e) => setAmountInr(e.target.value)}
-              fullWidth
-              required
-              helperText="Stored as paise — whole rupees"
-            />
-            <TextField
-              label="Cover note"
-              value={coverNote}
-              onChange={(e) => setCoverNote(e.target.value)}
-              fullWidth
-              multiline
-              minRows={3}
-            />
-          </Stack>
+          {detailQ.isLoading || !detail ? (
+            <Typography variant="body2">Loading…</Typography>
+          ) : (
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <Typography variant="body2" color="text.secondary">
+                {detail.projectRef} — {detail.projectTitle}
+                {detail.tender.dueDate ? ` · due ${detail.tender.dueDate}` : ""}
+              </Typography>
+              {detail.tender.scope && (
+                <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
+                  {detail.tender.scope}
+                </Typography>
+              )}
+              {detail.tender.instructions && (
+                <Alert severity="info">{detail.tender.instructions}</Alert>
+              )}
+
+              {detail.bid && (
+                <Alert severity="success">
+                  Your bid: {formatINR(detail.bid.amountPaise)}
+                  {detail.bid.completionWeeks != null
+                    ? ` · ${detail.bid.completionWeeks} weeks`
+                    : ""}
+                </Alert>
+              )}
+
+              {detail.canBid ? (
+                <Stack spacing={1.5}>
+                  <TextField
+                    label="Bid amount (₹)"
+                    value={amountRupees}
+                    onChange={(e) => setAmountRupees(e.target.value)}
+                  />
+                  <TextField
+                    label="Completion weeks (optional)"
+                    value={weeks}
+                    onChange={(e) => setWeeks(e.target.value)}
+                  />
+                  <TextField
+                    label="Notes (optional)"
+                    multiline
+                    rows={2}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                  />
+                  {submit.error && <Alert severity="error">{submit.error.message}</Alert>}
+                </Stack>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  Bidding is closed for this invitation.
+                </Typography>
+              )}
+              {decline.error && <Alert severity="error">{decline.error.message}</Alert>}
+            </Stack>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setBidFor(null)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={!amountInr.trim() || submitBid.isPending}
-            onClick={() => {
-              if (!bidFor) return;
-              const rupees = Number(amountInr.replace(/,/g, ""));
-              if (!Number.isFinite(rupees) || rupees <= 0) return;
-              submitBid.mutate({
-                packageId: bidFor.packageId,
-                amountPaise: Math.round(rupees * 100),
-                coverNote: coverNote.trim() || undefined,
-              });
-            }}
-          >
-            Submit
+          <Button variant="text" onClick={() => setOpenId(null)}>
+            Close
           </Button>
+          {detail?.canBid && detail.invitationStatus !== "SUBMITTED" && (
+            <Button
+              variant="outlined"
+              color="inherit"
+              disabled={decline.isPending}
+              onClick={() => openId && decline.mutate({ invitationId: openId })}
+            >
+              Decline
+            </Button>
+          )}
+          {detail?.canBid && (
+            <Button
+              variant="contained"
+              disabled={submit.isPending || !amountRupees.trim()}
+              onClick={() => {
+                const paise = Math.round(Number(amountRupees) * 100);
+                if (!Number.isFinite(paise) || paise <= 0) {
+                  pushToast({ kind: "error", title: "Enter a valid bid amount" });
+                  return;
+                }
+                const w = weeks.trim() ? Number(weeks) : undefined;
+                if (weeks.trim() && (!Number.isFinite(w) || (w ?? 0) <= 0)) {
+                  pushToast({ kind: "error", title: "Weeks must be a positive number" });
+                  return;
+                }
+                openId &&
+                  submit.mutate({
+                    invitationId: openId,
+                    amountPaise: paise,
+                    completionWeeks: w,
+                    notes: notes || undefined,
+                  });
+              }}
+            >
+              {submit.isPending ? "Submitting…" : detail.bid ? "Update bid" : "Submit bid"}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </ExternalPortalShell>

@@ -194,6 +194,17 @@ Phase-linked billing is written on **fresh** seed only. To refresh billing signa
 
 ---
 
+## Project tenders (firm issues · contractors bid)
+
+| Record | Value |
+|--------|-------|
+| Sharma Villa civil package | OPEN · 2 invitations (Vinayaka Civil · Sairam Structural) |
+| Contractor portal | `contractor@demo.aorms.in` / demo password → `/access` |
+
+Routes: Project → Tenders · Office → Tenders · contractor portal home.
+
+---
+
 ## Consultancy spine (AORMS-Consultancy)
 
 | Record | Value |

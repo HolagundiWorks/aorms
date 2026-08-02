@@ -147,126 +147,51 @@ export async function ensureCriticalSchema(db: DB): Promise<void> {
     )
   `);
 
-  // 0220_bbs — Project Bar Bending Schedule.
+  // 0220_tenders — firm issues; contractors bid in portal (lump-sum).
   await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS esti_bbs (
+    CREATE TABLE IF NOT EXISTS esti_tender (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      ref text NOT NULL UNIQUE,
       project_id uuid NOT NULL REFERENCES esti_projectoffice(id) ON DELETE CASCADE,
       title text NOT NULL,
+      category text,
+      scope text,
       status text NOT NULL DEFAULT 'DRAFT',
-      notes text,
+      due_date date,
+      instructions text,
+      awarded_contractor_id uuid REFERENCES esti_contractor(id) ON DELETE SET NULL,
       created_by_id uuid REFERENCES esti_user(id) ON DELETE SET NULL,
       created_at timestamptz NOT NULL DEFAULT now(),
       updated_at timestamptz NOT NULL DEFAULT now()
     )
   `);
   await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS esti_bbs_member (
+    CREATE TABLE IF NOT EXISTS esti_tender_invitation (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      bbs_id uuid NOT NULL REFERENCES esti_bbs(id) ON DELETE CASCADE,
-      element text NOT NULL,
-      mark text,
-      input jsonb NOT NULL DEFAULT '{}'::jsonb,
-      sort_order integer NOT NULL DEFAULT 0,
-      created_at timestamptz NOT NULL DEFAULT now(),
-      updated_at timestamptz NOT NULL DEFAULT now()
+      tender_id uuid NOT NULL REFERENCES esti_tender(id) ON DELETE CASCADE,
+      contractor_id uuid NOT NULL REFERENCES esti_contractor(id) ON DELETE CASCADE,
+      status text NOT NULL DEFAULT 'INVITED',
+      invited_at timestamptz NOT NULL DEFAULT now(),
+      viewed_at timestamptz
     )
   `);
   await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS esti_bbs_item (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      bbs_id uuid NOT NULL REFERENCES esti_bbs(id) ON DELETE CASCADE,
-      member_id uuid REFERENCES esti_bbs_member(id) ON DELETE CASCADE,
-      bar_mark text NOT NULL,
-      member text,
-      element text,
-      role text,
-      dia_mm double precision NOT NULL,
-      no_of_members integer NOT NULL DEFAULT 1,
-      bars_per_member integer NOT NULL DEFAULT 1,
-      cutting_length_mm double precision NOT NULL,
-      weight_kg double precision NOT NULL DEFAULT 0,
-      floor text,
-      shape text,
-      created_at timestamptz NOT NULL DEFAULT now()
-    )
+    CREATE UNIQUE INDEX IF NOT EXISTS esti_tender_invitation_tender_contractor_uq
+      ON esti_tender_invitation(tender_id, contractor_id)
   `);
-
-  // 0221_steel_ra_bills
   await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS esti_steel_reconciliation (
+    CREATE TABLE IF NOT EXISTS esti_tender_bid (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      ref text NOT NULL UNIQUE,
-      project_id uuid NOT NULL REFERENCES esti_projectoffice(id) ON DELETE CASCADE,
-      bbs_id uuid REFERENCES esti_bbs(id) ON DELETE SET NULL,
-      title text NOT NULL,
-      status text NOT NULL DEFAULT 'DRAFT',
+      invitation_id uuid NOT NULL REFERENCES esti_tender_invitation(id) ON DELETE CASCADE,
+      amount_paise bigint NOT NULL,
+      completion_weeks integer,
+      technical_score double precision,
       notes text,
-      scheduled_kg double precision NOT NULL DEFAULT 0,
-      issued_kg double precision NOT NULL DEFAULT 0,
-      consumed_kg double precision NOT NULL DEFAULT 0,
-      wastage_kg double precision NOT NULL DEFAULT 0,
-      finalized_by_id uuid REFERENCES esti_user(id) ON DELETE SET NULL,
-      finalized_at timestamptz,
-      created_by_id uuid REFERENCES esti_user(id) ON DELETE SET NULL,
+      submitted_by_id uuid REFERENCES esti_user(id) ON DELETE SET NULL,
       created_at timestamptz NOT NULL DEFAULT now(),
       updated_at timestamptz NOT NULL DEFAULT now()
     )
   `);
   await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS esti_steel_reconciliation_item (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      reconciliation_id uuid NOT NULL REFERENCES esti_steel_reconciliation(id) ON DELETE CASCADE,
-      dia_mm double precision NOT NULL,
-      scheduled_kg double precision NOT NULL DEFAULT 0,
-      issued_kg double precision NOT NULL DEFAULT 0,
-      consumed_kg double precision NOT NULL DEFAULT 0,
-      wastage_kg double precision NOT NULL DEFAULT 0,
-      sort_order integer NOT NULL DEFAULT 0,
-      created_at timestamptz NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE UNIQUE INDEX IF NOT EXISTS esti_steel_recon_item_dia_uq
-      ON esti_steel_reconciliation_item(reconciliation_id, dia_mm)
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS esti_running_bill (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      ref text NOT NULL UNIQUE,
-      project_id uuid NOT NULL REFERENCES esti_projectoffice(id) ON DELETE CASCADE,
-      contractor_id uuid REFERENCES esti_contractor(id) ON DELETE SET NULL,
-      title text NOT NULL,
-      bill_type text NOT NULL DEFAULT 'RA',
-      status text NOT NULL DEFAULT 'DRAFT',
-      measurement_date date,
-      notes text,
-      total_paise bigint NOT NULL DEFAULT 0,
-      retention_paise bigint NOT NULL DEFAULT 0,
-      advance_recovery_paise bigint NOT NULL DEFAULT 0,
-      tax_tds_paise bigint NOT NULL DEFAULT 0,
-      other_recovery_paise bigint NOT NULL DEFAULT 0,
-      net_payable_paise bigint NOT NULL DEFAULT 0,
-      status_history jsonb NOT NULL DEFAULT '[]'::jsonb,
-      created_by_id uuid REFERENCES esti_user(id) ON DELETE SET NULL,
-      created_at timestamptz NOT NULL DEFAULT now(),
-      updated_at timestamptz NOT NULL DEFAULT now()
-    )
-  `);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS esti_running_bill_item (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      running_bill_id uuid NOT NULL REFERENCES esti_running_bill(id) ON DELETE CASCADE,
-      sort_order integer NOT NULL DEFAULT 0,
-      description text NOT NULL,
-      unit text NOT NULL,
-      qty double precision NOT NULL DEFAULT 0,
-      rate_paise bigint NOT NULL DEFAULT 0,
-      amount_paise bigint NOT NULL DEFAULT 0,
-      previous_billed_qty double precision NOT NULL DEFAULT 0,
-      cumulative_billed_qty double precision NOT NULL DEFAULT 0,
-      created_at timestamptz NOT NULL DEFAULT now()
-    )
+    CREATE UNIQUE INDEX IF NOT EXISTS esti_tender_bid_invitation_uq ON esti_tender_bid(invitation_id)
   `);
 }

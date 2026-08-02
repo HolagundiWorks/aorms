@@ -41,6 +41,8 @@ import {
   teamMembers,
   transmittalItems,
   transmittals,
+  tenderInvitations,
+  tenders,
   users,
 } from "../db/schema.js";
 import { emailMatches } from "../lib/email.js";
@@ -281,13 +283,30 @@ async function main() {
   ]).returning();
 
   // ── Contractors ───────────────────────────────────────────────────────────
-  await db.insert(contractors).values([
+  const contractorRows = await db.insert(contractors).values([
     { name: "Vinayaka Civil Works",      category: "Civil",     companyName: "Vinayaka Civil Works Pvt Ltd",    email: "contracts@vinayakacivil.in",  phone: "+91 98440 10001", city: "Bengaluru", state: "Karnataka", qualityRating: 4, timelinessRating: 4, safetyRating: 4, createdById: principal.id },
     { name: "Sairam Structural Systems", category: "Structural", companyName: "Sairam Structural Pvt Ltd",       email: "info@sairamstruct.in",        phone: "+91 98440 10002", city: "Bengaluru", state: "Karnataka", qualityRating: 5, timelinessRating: 4, safetyRating: 3, createdById: principal.id },
     { name: "Bright MEP Solutions",      category: "MEP",       companyName: "Bright Engineering Services",     email: "mep@brighteng.in",            phone: "+91 98440 10003", city: "Bengaluru", state: "Karnataka", qualityRating: 3, timelinessRating: 3, safetyRating: 4, createdById: principal.id },
     { name: "Sunil Roofing & Waterproof",category: "Finishes",  companyName: "Sunil Roofing Works",             email: "sunil@srwroofing.in",          phone: "+91 98440 10004", city: "Bengaluru", state: "Karnataka", qualityRating: 4, timelinessRating: 3, safetyRating: 3, createdById: principal.id },
     { name: "Apex Interior Fit-out",     category: "Interior",  companyName: "Apex Interiors Pvt Ltd",          email: "projects@apexinteriors.in",   phone: "+91 98440 10005", city: "Bengaluru", state: "Karnataka", qualityRating: 4, timelinessRating: 4, safetyRating: 4, createdById: principal.id },
   ]).returning();
+
+  // Contractor portal login (bids via /access).
+  const contractorPortalEmail = "contractor@demo.aorms.in";
+  const [existingContractorUser] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, contractorPortalEmail));
+  if (!existingContractorUser && contractorRows[0]) {
+    await db.insert(users).values({
+      email: contractorPortalEmail,
+      fullName: contractorRows[0].name,
+      role: "CONTRACTOR",
+      contractorId: contractorRows[0].id,
+      passwordHash: pwHash,
+      isDemo: true,
+    });
+  }
 
   // ── Projects ──────────────────────────────────────────────────────────────
   type ProjDef = {
@@ -597,10 +616,40 @@ async function main() {
   if (allProjectIds[0]) await seedDemoTakeoff(db, allProjectIds[0]);
   await seedDemoConsultancy(db, principal.id);
 
+  // Showcase OPEN tender on Sharma Villa with two invitations.
+  if (allProjectIds[0] && contractorRows[0] && contractorRows[1]) {
+    const [existingTender] = await db
+      .select({ id: tenders.id })
+      .from(tenders)
+      .where(eq(tenders.projectId, allProjectIds[0]));
+    if (!existingTender) {
+      const [tender] = await db
+        .insert(tenders)
+        .values({
+          projectId: allProjectIds[0],
+          title: "Civil package — foundation & structure",
+          category: "Civil",
+          scope: "RCC foundations, columns to terrace, and related civil works per GFC set.",
+          status: "OPEN",
+          dueDate: dayOffset(14),
+          instructions: "Submit a lump-sum bid. Bids stay sealed until the office closes the tender.",
+          createdById: principal.id,
+        })
+        .returning();
+      if (tender) {
+        await db.insert(tenderInvitations).values([
+          { tenderId: tender.id, contractorId: contractorRows[0].id },
+          { tenderId: tender.id, contractorId: contractorRows[1].id },
+        ]);
+      }
+    }
+  }
+
   console.log("✓ seeded demo workspace (Studio Intelligence tuned)");
   console.log(`    principal: ${principalEmail} / ${DEMO_PASSWORD}`);
   console.log(`    team logins: lead@ · site@ · junior@ · accounts@demo.aorms.in (same password)`);
   console.log(`    client portal: client@demo.aorms.in / ${DEMO_PASSWORD} (sign in at /access)`);
+  console.log(`    contractor portal: contractor@demo.aorms.in / ${DEMO_PASSWORD} (sign in at /access)`);
   console.log(`    ${projectDefs.length} projects · ${clientRows.length} clients · ${DEMO_LEADS.length} leads`);
   console.log(`    consultancy: EQ-DEMO-001 → C-DEMO-001 (BILLABLE fee stage)`);
 }

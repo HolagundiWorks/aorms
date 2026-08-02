@@ -2,11 +2,18 @@ import { ContractorCategory, ContractorCreate, ContractorRating, ContractorUpdat
 import { TRPCError } from "@trpc/server";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { contractors } from "../../db/schema.js";
+import { hashPassword } from "../../auth/session.js";
+import { contractors, users } from "../../db/schema.js";
 import { writeAudit } from "../../lib/audit.js";
+import { emailMatches, normalizeEmail } from "../../lib/email.js";
 import { newPublicId } from "../../licensing-platform/lib/ids.js";
 import { assertNotFixedPlan, assertQuota } from "../../lib/plan.js";
-import { capabilityProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
+import {
+  capabilityProcedure,
+  ownerProcedure,
+  protectedProcedure,
+  router,
+} from "../../trpc/trpc.js";
 
 const blank = (v: string | undefined) => (v && v.length > 0 ? v : null);
 const manage = capabilityProcedure("write");
@@ -105,4 +112,47 @@ export const contractorRouter = router({
     await writeAudit(ctx.db, { entity: "contractor", entityId: input.id, action: "DELETE", actorId: ctx.user.id, before });
     return { ok: true as const };
   }),
+
+  /** Owner provisions a contractor portal login for tender bidding. */
+  createLogin: ownerProcedure
+    .input(
+      z.object({
+        contractorId: z.string().uuid(),
+        email: z.string().email(),
+        password: z.string().min(8),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [contractor] = await ctx.db
+        .select()
+        .from(contractors)
+        .where(eq(contractors.id, input.contractorId));
+      if (!contractor) throw new TRPCError({ code: "NOT_FOUND", message: "contractor not found" });
+
+      const email = normalizeEmail(input.email);
+      const [taken] = await ctx.db
+        .select({ id: users.id })
+        .from(users)
+        .where(emailMatches(users.email, email));
+      if (taken) throw new TRPCError({ code: "CONFLICT", message: "email already in use" });
+
+      const [u] = await ctx.db
+        .insert(users)
+        .values({
+          email,
+          fullName: contractor.name,
+          role: "CONTRACTOR",
+          contractorId: input.contractorId,
+          passwordHash: await hashPassword(input.password),
+        })
+        .returning({ id: users.id, email: users.email });
+      await writeAudit(ctx.db, {
+        entity: "user",
+        entityId: u!.id,
+        action: "CREATE_CONTRACTOR_LOGIN",
+        actorId: ctx.user.id,
+        after: { email, contractorId: input.contractorId },
+      });
+      return u!;
+    }),
 });

@@ -12,14 +12,12 @@ import { type ReactNode, useEffect, useMemo } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ProjectPurchaseOrders } from "../components/ProjectPurchaseOrders.js";
 import { ProjectEstimates } from "../components/ProjectEstimates.js";
-import { ProjectBbs } from "../components/project/ProjectBbs.js";
-import { ProjectSteelReconciliation } from "../components/project/ProjectSteelReconciliation.js";
-import { ProjectRunningBills } from "../components/project/ProjectRunningBills.js";
 import { ProjectMeasurementPanel } from "../components/measurement/ProjectMeasurementPanel.js";
 import { DrawingsApprovalsPanel } from "../components/project/DrawingsApprovalsPanel.js";
 import { DocumentsSpecsPanel } from "../components/project/DocumentsSpecsPanel.js";
 import { ProjectBriefPanel } from "../components/project/ProjectBriefPanel.js";
 import { ProjectDeliveryPanel } from "../components/project/ProjectDeliveryPanel.js";
+import { ProjectTenders } from "../components/project/ProjectTenders.js";
 import { ProjectInvoicesPanel } from "../components/project/ProjectInvoicesPanel.js";
 import { ProjectRailNav } from "../components/project/ProjectRailNav.js";
 import { ProjectSettings } from "../components/ProjectSettings.js";
@@ -46,12 +44,6 @@ const LEGACY_TAB: Record<string, string> = {
   "site-visits": "delivery",
   communications: "delivery",
   minutes: "delivery",
-  snags: "delivery",
-  "progress-reports": "delivery",
-  programme: "delivery",
-  packages: "delivery",
-  "ra-certification": "delivery",
-  "running-account": "delivery",
   approvals: "drawings",
 };
 
@@ -139,19 +131,9 @@ export function ProjectDetail() {
         panel: <ProjectPurchaseOrders projectId={id} />,
       });
       consultancyTabs.push({
-        slug: "bbs",
-        label: "BBS",
-        panel: <ProjectBbs projectId={id} />,
-      });
-      consultancyTabs.push({
-        slug: "steel",
-        label: "Steel",
-        panel: <ProjectSteelReconciliation projectId={id} />,
-      });
-      consultancyTabs.push({
-        slug: "ra-bills",
-        label: "RA bills",
-        panel: <ProjectRunningBills projectId={id} />,
+        slug: "tenders",
+        label: "Tenders",
+        panel: <ProjectTenders projectId={id} />,
       });
     }
     if (showTeam) {
