@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import AccountsTab from "./AccountsTab";
 import ApiKeysTab from "./ApiKeysTab";
+import CertificationsTab from "./CertificationsTab";
+import ComponentsTab from "./ComponentsTab";
 import DashboardTab from "./DashboardTab";
 import LicensesTab from "./LicensesTab";
 import OrgsTab from "./OrgsTab";
@@ -51,6 +53,14 @@ const SECTION_COPY: Record<
     title: "API keys",
     description: "Platform integration keys for external services.",
   },
+  certifications: {
+    title: "Certifications",
+    description: "Issue and manage portable certifications on an account (AORMS-U handle).",
+  },
+  components: {
+    title: "Component releases",
+    description: "Publish the signed manifest of downloadable components per edition.",
+  },
 };
 
 export default function AdminApp({
@@ -86,6 +96,8 @@ export default function AdminApp({
         {section === "orgs" && <OrgsTab />}
         {section === "products" && <ProductsTab />}
         {section === "apikeys" && <ApiKeysTab />}
+        {section === "certifications" && <CertificationsTab />}
+        {section === "components" && <ComponentsTab />}
       </AdminSection>
     </AdminConsoleShell>
   );
