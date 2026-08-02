@@ -140,7 +140,7 @@ const STEPS = [
 
 /** Factual platform figures — structural, not fabricated customer metrics. */
 const STATS = [
-  { id: "apps", label: "AEC apps on one spine", value: "2" },
+  { id: "apps", label: "AEC apps on one spine", value: "3" },
   { id: "modules", label: "Consolidated modules", value: "80+" },
   { id: "ai", label: "AI tiers · EOMS + ESTI", value: "Dual" },
   { id: "storage", label: "Storage included", value: "5 GB" },
@@ -636,16 +636,16 @@ export function Landing() {
           {/* Apps */}
           <Box id="apps" component="section" sx={{ py: { xs: 6, md: 9 } }}>
             <SectionHead
-              eyebrow="Two apps, one spine"
-              title="Architecture and engineering, live."
-              lead="Both AEC disciplines run on the same operational spine — deployed as focused apps."
+              eyebrow="Apps on one spine"
+              title="Architecture, engineering, and project management."
+              lead="Each AEC discipline runs on the same operational spine — deployed as a focused app."
             />
             <Grid container spacing={3}>
               {PLATFORM_APPS.map((app) => (
-                <Grid key={app.id} size={{ xs: 12, md: 6 }}>
+                <Grid key={app.id} size={{ xs: 12, md: 4 }}>
                   <Surface
                     layer="soft"
-                    id={app.id === "architecture" ? "studio" : "consultancy"}
+                    id={app.id}
                     sx={{ p: 3, height: "100%" }}
                   >
                     <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
@@ -667,8 +667,8 @@ export function Landing() {
                       >
                         {app.status === "live"
                           ? "Live"
-                          : app.status === "launch_gated"
-                            ? "Coming soon"
+                          : app.status === "preview"
+                            ? "Preview"
                             : "Roadmap"}
                       </Typography>
                     </Stack>

@@ -88,7 +88,9 @@ import { pmcPackageTendersRouter } from "../modules/pmc/packageTenders.js";
 import { pmcRaBillsRouter } from "../modules/pmc/raBills.js";
 import { pmcSteelCertsRouter } from "../modules/pmc/steelCerts.js";
 import { pmcDigestRouter } from "../modules/pmc/digest.js";
-import { contractorPortalRouter } from "../modules/pmc/contractorPortal.js";
+import { contractorPortalRouter } from "../modules/contractor/portal.js";
+import { tendersRouter } from "../modules/tender/router.js";
+import { runningBillsRouter } from "../modules/runningBill/router.js";
 import { siteVisitRouter } from "../modules/siteVisit/router.js";
 import { cpiRouter } from "../modules/cpi/router.js";
 import { projectBriefRouter } from "../modules/project-brief/router.js";
@@ -233,6 +235,8 @@ export const appRouter = router({
   estimates: estimateRouter,
   bbs: bbsRouter,
   steelReconciliation: steelReconciliationRouter,
+  tenders: tendersRouter,
+  runningBills: runningBillsRouter,
   moodboard: moodboardRouter,
   eoms: eomsRouter,
 });
