@@ -52,6 +52,7 @@ export const DEFAULT_NUMBERING_SCOPES: Record<string, { prefix: string; padding:
   expense: { prefix: "EXP", padding: 4 },
   bbs: { prefix: "BBS", padding: 4 },
   steelrecon: { prefix: "SREC", padding: 4 },
+  runningbill: { prefix: "RA", padding: 4 },
 };
 
 export const OfficeTemplateKind = z.enum(["LETTER", "SCOPE", "COA", "CONTRACT", "MOM"]);

@@ -82,13 +82,6 @@ import { snagsRouter } from "../modules/pmc/snags.js";
 import { siteInstructionsRouter } from "../modules/pmc/siteInstructions.js";
 import { progressReportsRouter } from "../modules/pmc/progressReports.js";
 import { phaseProgressRouter } from "../modules/pmc/phaseProgress.js";
-import { pmcMilestonesRouter } from "../modules/pmc/milestones.js";
-import { pmcPackagesRouter } from "../modules/pmc/packages.js";
-import { pmcPackageTendersRouter } from "../modules/pmc/packageTenders.js";
-import { pmcRaBillsRouter } from "../modules/pmc/raBills.js";
-import { pmcSteelCertsRouter } from "../modules/pmc/steelCerts.js";
-import { pmcDigestRouter } from "../modules/pmc/digest.js";
-import { contractorPortalRouter } from "../modules/pmc/contractorPortal.js";
 import { siteVisitRouter } from "../modules/siteVisit/router.js";
 import { cpiRouter } from "../modules/cpi/router.js";
 import { projectBriefRouter } from "../modules/project-brief/router.js";
@@ -101,6 +94,7 @@ import { rateBookRouter } from "../modules/rateBook/router.js";
 import { estimateRouter } from "../modules/estimate/router.js";
 import { bbsRouter } from "../modules/bbs/router.js";
 import { steelReconciliationRouter } from "../modules/steel/router.js";
+import { runningBillsRouter } from "../modules/runningBill/router.js";
 import { eomsRouter } from "../modules/eoms/router.js";
 import { publicProcedure, router } from "./trpc.js";
 
@@ -207,13 +201,6 @@ export const appRouter = router({
   siteInstructions: siteInstructionsRouter,
   progressReports: progressReportsRouter,
   phaseProgress: phaseProgressRouter,
-  pmcMilestones: pmcMilestonesRouter,
-  pmcPackages: pmcPackagesRouter,
-  pmcPackageTenders: pmcPackageTendersRouter,
-  pmcRaBills: pmcRaBillsRouter,
-  pmcSteelCerts: pmcSteelCertsRouter,
-  pmcDigest: pmcDigestRouter,
-  contractorPortal: contractorPortalRouter,
   leads: leadsRouter,
   projectDna: projectDnaRouter,
   assessment: assessmentRouter,
@@ -232,6 +219,7 @@ export const appRouter = router({
   estimates: estimateRouter,
   bbs: bbsRouter,
   steelReconciliation: steelReconciliationRouter,
+  runningBills: runningBillsRouter,
   eoms: eomsRouter,
 });
 

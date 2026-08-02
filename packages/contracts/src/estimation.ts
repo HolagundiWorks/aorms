@@ -11,7 +11,7 @@ import type { TagColor } from "./schemas.js";
  * Deliberately excludes that app's Contracts/Running-Bills — those are
  * construction-administration territory AORMS scoped out in the 2026-06-29
  * consultancy-only pivot. Project BBS (cutting-length schedules) is a separate
- * Project Delivery module, not part of this priced-BOQ model.
+ * Project workspace module, not part of this priced-BOQ model.
  */
 
 // --- Measurement shape — classifies a unit of measurement so the measurement

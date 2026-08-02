@@ -147,7 +147,7 @@ export async function ensureCriticalSchema(db: DB): Promise<void> {
     )
   `);
 
-  // 0223_bbs — Project Bar Bending Schedule.
+  // 0220_bbs — Project Bar Bending Schedule.
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS esti_bbs (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -193,7 +193,7 @@ export async function ensureCriticalSchema(db: DB): Promise<void> {
     )
   `);
 
-  // 0224_steel_reconciliation — scheduled (BBS) vs issued vs consumed kg.
+  // 0221_steel_ra_bills
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS esti_steel_reconciliation (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -230,5 +230,43 @@ export async function ensureCriticalSchema(db: DB): Promise<void> {
   await db.execute(sql`
     CREATE UNIQUE INDEX IF NOT EXISTS esti_steel_recon_item_dia_uq
       ON esti_steel_reconciliation_item(reconciliation_id, dia_mm)
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS esti_running_bill (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      ref text NOT NULL UNIQUE,
+      project_id uuid NOT NULL REFERENCES esti_projectoffice(id) ON DELETE CASCADE,
+      contractor_id uuid REFERENCES esti_contractor(id) ON DELETE SET NULL,
+      title text NOT NULL,
+      bill_type text NOT NULL DEFAULT 'RA',
+      status text NOT NULL DEFAULT 'DRAFT',
+      measurement_date date,
+      notes text,
+      total_paise bigint NOT NULL DEFAULT 0,
+      retention_paise bigint NOT NULL DEFAULT 0,
+      advance_recovery_paise bigint NOT NULL DEFAULT 0,
+      tax_tds_paise bigint NOT NULL DEFAULT 0,
+      other_recovery_paise bigint NOT NULL DEFAULT 0,
+      net_payable_paise bigint NOT NULL DEFAULT 0,
+      status_history jsonb NOT NULL DEFAULT '[]'::jsonb,
+      created_by_id uuid REFERENCES esti_user(id) ON DELETE SET NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS esti_running_bill_item (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      running_bill_id uuid NOT NULL REFERENCES esti_running_bill(id) ON DELETE CASCADE,
+      sort_order integer NOT NULL DEFAULT 0,
+      description text NOT NULL,
+      unit text NOT NULL,
+      qty double precision NOT NULL DEFAULT 0,
+      rate_paise bigint NOT NULL DEFAULT 0,
+      amount_paise bigint NOT NULL DEFAULT 0,
+      previous_billed_qty double precision NOT NULL DEFAULT 0,
+      cumulative_billed_qty double precision NOT NULL DEFAULT 0,
+      created_at timestamptz NOT NULL DEFAULT now()
+    )
   `);
 }
