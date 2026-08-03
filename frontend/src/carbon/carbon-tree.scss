@@ -46,6 +46,7 @@
 @use '@carbon/styles/scss/components/text-area';
 @use '@carbon/styles/scss/components/text-input';
 @use '@carbon/styles/scss/components/tile';
+@use '@carbon/styles/scss/components/toggle';
 
 // Emit Carbon's typography utility classes (.cds--type-*) — not emitted by
 // default in v11. Must follow all @use rules. Used by migrated markup.

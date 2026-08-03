@@ -1,8 +1,10 @@
-import { Alert, Box, Button, FormControlLabel, Stack, Switch, TextField, Typography } from "@mui/material";
+import { Button, InlineNotification, PasswordInput, Stack, Toggle } from "@carbon/react";
 import { UPLOAD_PASSWORD_MIN_LENGTH } from "@esti/contracts";
 import { useEffect, useState } from "react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { trpc } from "../../lib/trpc.js";
 
+/** Upload password protection settings (owner). Wave 3 (Carbon). */
 export function UploadSecurityPanel() {
   const utils = trpc.useUtils();
   const settingsQ = trpc.settings.get.useQuery();
@@ -29,52 +31,73 @@ export function UploadSecurityPanel() {
   const configured = settingsQ.data?.uploadPasswordConfigured ?? false;
 
   return (
-    <Box sx={{ p: 3, maxWidth: 760 }}>
-      <Stack spacing={2}>
-        <Typography variant="h5" component="h2">Upload protection</Typography>
-        <Typography variant="body2">
-          When enabled, every staff member must enter a shared upload password before
-          drawings, photos, bank statements, tender documents, or the firm logo can be
-          stored. Login credentials are not accepted — set a dedicated upload password
-          below.
-        </Typography>
-        {msg && <Alert severity="success" onClose={() => setMsg(null)}>{msg}</Alert>}
-        {err && <Alert severity="error" onClose={() => setErr(null)}>{err}</Alert>}
-        <FormControlLabel
-          control={<Switch checked={required} onChange={(e) => setRequired(e.target.checked)} />}
-          label="Require upload password"
-        />
-        {required && (
-          <TextField
-            id="upload-password-set"
-            type="password"
-            label={configured ? "New upload password (optional)" : "Upload password"}
-            helperText={
-              configured
-                ? "Leave blank to keep the current password."
-                : `Minimum ${UPLOAD_PASSWORD_MIN_LENGTH} characters.`
-            }
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="new-password"
-            fullWidth
+    <CarbonScope>
+      <div style={{ padding: "1rem", maxWidth: 760 }}>
+        <Stack gap={5}>
+          <h2 className="cds--type-heading-05" style={{ margin: 0 }}>
+            Upload protection
+          </h2>
+          <p className="cds--type-body-01" style={{ margin: 0 }}>
+            When enabled, every staff member must enter a shared upload password before
+            drawings, photos, bank statements, tender documents, or the firm logo can be stored.
+            Login credentials are not accepted — set a dedicated upload password below.
+          </p>
+          {msg && (
+            <InlineNotification
+              kind="success"
+              lowContrast
+              title="Saved"
+              subtitle={msg}
+              onCloseButtonClick={() => setMsg(null)}
+            />
+          )}
+          {err && (
+            <InlineNotification
+              kind="error"
+              lowContrast
+              title="Error"
+              subtitle={err}
+              onCloseButtonClick={() => setErr(null)}
+            />
+          )}
+          <Toggle
+            id="upload-password-required"
+            labelText="Require upload password"
+            toggled={required}
+            onToggle={(checked) => setRequired(checked)}
           />
-        )}
-        <Box>
-          <Button
-            variant="contained"
-            disabled={save.isPending || (required && !configured && password.length < UPLOAD_PASSWORD_MIN_LENGTH)}
-            onClick={() =>
-              save.mutate({
-                uploadPasswordRequired: required,
-                uploadPassword: password.trim() || undefined,
-              })
-            }
-          >
-            {save.isPending ? "Saving…" : "Save upload protection"}
-          </Button>
-        </Box>
-      </Stack>
-    </Box>
+          {required && (
+            <PasswordInput
+              id="upload-password-set"
+              labelText={configured ? "New upload password (optional)" : "Upload password"}
+              helperText={
+                configured
+                  ? "Leave blank to keep the current password."
+                  : `Minimum ${UPLOAD_PASSWORD_MIN_LENGTH} characters.`
+              }
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+            />
+          )}
+          <div>
+            <Button
+              disabled={
+                save.isPending ||
+                (required && !configured && password.length < UPLOAD_PASSWORD_MIN_LENGTH)
+              }
+              onClick={() =>
+                save.mutate({
+                  uploadPasswordRequired: required,
+                  uploadPassword: password.trim() || undefined,
+                })
+              }
+            >
+              {save.isPending ? "Saving…" : "Save upload protection"}
+            </Button>
+          </div>
+        </Stack>
+      </div>
+    </CarbonScope>
   );
 }

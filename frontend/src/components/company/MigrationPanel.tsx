@@ -1,22 +1,22 @@
-import { Alert, Box, Button, Stack, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { useState } from "react";
+import { Button, InlineNotification, Stack } from "@carbon/react";
+import { useRef, useState } from "react";
 import type { ChangeEvent } from "react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { trpc } from "../../lib/trpc.js";
 
-const HiddenFileInput = styled("input")({ display: "none" });
-
-/** Import or export a studio bundle between workspaces (owner). */
+/** Import or export a studio bundle between workspaces (owner). Wave 3 (Carbon). */
 export function MigrationPanel() {
   const utils = trpc.useUtils();
   const preflightQ = trpc.migration.preflight.useQuery();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const importMut = trpc.migration.import.useMutation({
     meta: { errorTitle: "Couldn't import the bundle" },
-    onSuccess: (r) => setMsg(r.diff.ok ? "Bundle imported and verified." : "Imported, but verification did not pass."),
+    onSuccess: (r) =>
+      setMsg(r.diff.ok ? "Bundle imported and verified." : "Imported, but verification did not pass."),
     onError: (e) => setErr(e.message),
   });
 
@@ -56,31 +56,57 @@ export function MigrationPanel() {
 
   const pf = preflightQ.data;
   return (
-    <Box sx={{ p: 3 }}>
-      <Stack spacing={2}>
-        <Typography variant="h6" component="h3">Studio migration</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Export this workspace as a JSON bundle, or import a bundle into a fresh empty
-          workspace. Import refuses a non-empty target and rolls back if verification fails.
-        </Typography>
-        {pf && (
-          <Typography variant="caption" color="text.secondary">
-            {pf.counts.projects} projects · {pf.counts.clients} clients · {pf.counts.invoices} invoices ·{" "}
-            {(pf.fileBytes / 1048576).toFixed(1)} MB files · schema {pf.schemaHead}
-          </Typography>
-        )}
-        <Stack direction="row" spacing={1}>
-          <Button variant="outlined" onClick={download} disabled={busy}>
-            {busy ? "Preparing…" : "Export bundle"}
-          </Button>
-          <Button variant="contained" component="label" disabled={importMut.isPending}>
-            {importMut.isPending ? "Importing…" : "Import bundle"}
-            <HiddenFileInput type="file" accept=".json,application/json" onChange={onFile} />
-          </Button>
+    <CarbonScope>
+      <div style={{ padding: "1rem" }}>
+        <Stack gap={5}>
+          <h3 className="cds--type-heading-03" style={{ margin: 0 }}>
+            Studio migration
+          </h3>
+          <p className="cds--type-body-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
+            Export this workspace as a JSON bundle, or import a bundle into a fresh empty
+            workspace. Import refuses a non-empty target and rolls back if verification fails.
+          </p>
+          {pf && (
+            <p className="cds--type-caption-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
+              {pf.counts.projects} projects · {pf.counts.clients} clients · {pf.counts.invoices} invoices ·{" "}
+              {(pf.fileBytes / 1048576).toFixed(1)} MB files · schema {pf.schemaHead}
+            </p>
+          )}
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <Button kind="secondary" onClick={download} disabled={busy}>
+              {busy ? "Preparing…" : "Export bundle"}
+            </Button>
+            <Button disabled={importMut.isPending} onClick={() => fileRef.current?.click()}>
+              {importMut.isPending ? "Importing…" : "Import bundle"}
+            </Button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".json,application/json"
+              onChange={onFile}
+              style={{ display: "none" }}
+            />
+          </div>
+          {msg && (
+            <InlineNotification
+              kind="success"
+              lowContrast
+              title="Done"
+              subtitle={msg}
+              onCloseButtonClick={() => setMsg(null)}
+            />
+          )}
+          {err && (
+            <InlineNotification
+              kind="error"
+              lowContrast
+              title="Error"
+              subtitle={err}
+              onCloseButtonClick={() => setErr(null)}
+            />
+          )}
         </Stack>
-        {msg && <Alert severity="success" onClose={() => setMsg(null)}>{msg}</Alert>}
-        {err && <Alert severity="error" onClose={() => setErr(null)}>{err}</Alert>}
-      </Stack>
-    </Box>
+      </div>
+    </CarbonScope>
   );
 }
