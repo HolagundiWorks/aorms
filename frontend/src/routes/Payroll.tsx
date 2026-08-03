@@ -1,28 +1,23 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  Stack,
-  TextField,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import AddIcon from "@mui/icons-material/Add";
+import { Modal, Select, SelectItem, Stack, TextInput } from "@carbon/react";
+import { Add } from "@carbon/icons-react";
 import { formatINR, parseRupeeInput } from "@esti/contracts";
 import { useState } from "react";
 import { useScreenActions } from "@hcw/ui-kit";
-import { DataState } from "../components/DataState.js";
-import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
+import { CarbonScope } from "../carbon/CarbonScope.js";
+import {
+  DataGrid,
+  DataState,
+  PageBreadcrumb,
+  StatusDot,
+  type GridColDef,
+} from "../carbon/adapters/index.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
-import { StatusDot } from "../components/StatusTag.js";
 import { PayslipPdfCell } from "../components/PayslipPdfCell.js";
 import { useCapabilities } from "../lib/capabilities.js";
 import { trpc } from "../lib/trpc.js";
 
-/** Finance › Payroll — monthly payslips (relocated from HR). */
+/** Finance › Payroll — monthly payslips (relocated from HR). Wave 3 (Carbon). */
 export function Payroll() {
   const utils = trpc.useUtils();
   const { canSalary } = useCapabilities();
@@ -46,7 +41,7 @@ export function Payroll() {
             zone: "center",
             tone: "primary",
             label: "Generate payslip",
-            icon: <AddIcon />,
+            icon: <Add />,
             disabled: team.length === 0,
             onClick: () => setOpen(true),
           },
@@ -71,27 +66,9 @@ export function Payroll() {
     { field: "month", headerName: "Month", flex: 0.8, minWidth: 110 },
     ...(canSalary
       ? ([
-          {
-            field: "grossPaise",
-            headerName: "Gross",
-            flex: 0.8,
-            minWidth: 120,
-            renderCell: (p) => formatINR(p.row.grossPaise, { paise: false }),
-          },
-          {
-            field: "deductionsPaise",
-            headerName: "Deductions",
-            flex: 0.8,
-            minWidth: 120,
-            renderCell: (p) => formatINR(p.row.deductionsPaise, { paise: false }),
-          },
-          {
-            field: "netPaise",
-            headerName: "Net",
-            flex: 0.8,
-            minWidth: 120,
-            renderCell: (p) => formatINR(p.row.netPaise, { paise: false }),
-          },
+          { field: "grossPaise", headerName: "Gross", flex: 0.8, minWidth: 120, type: "number", renderCell: (p) => formatINR(p.row.grossPaise, { paise: false }) },
+          { field: "deductionsPaise", headerName: "Deductions", flex: 0.8, minWidth: 120, type: "number", renderCell: (p) => formatINR(p.row.deductionsPaise, { paise: false }) },
+          { field: "netPaise", headerName: "Net", flex: 0.8, minWidth: 120, type: "number", renderCell: (p) => formatINR(p.row.netPaise, { paise: false }) },
         ] as GridColDef[])
       : []),
     {
@@ -114,11 +91,7 @@ export function Payroll() {
       sortable: false,
       filterable: false,
       renderCell: (p) => (
-        <RowActionsMenu
-          actions={[
-            !p.row.paid && { label: "Mark paid", onClick: () => markPaid.mutate({ id: p.row.id }) },
-          ]}
-        />
+        <RowActionsMenu actions={[!p.row.paid && { label: "Mark paid", onClick: () => markPaid.mutate({ id: p.row.id }) }]} />
       ),
     },
     {
@@ -134,10 +107,7 @@ export function Payroll() {
 
   return (
     <>
-      <RailLayout
-        title="Payroll"
-        description="Monthly payslips — gross, deductions and net pay."
-      >
+      <RailLayout title="Payroll" description="Monthly payslips — gross, deductions and net pay.">
         <PageBreadcrumb items={[{ label: "Office" }, { label: "Payroll" }]} />
         <DataState
           loading={payrollQ.isLoading}
@@ -145,76 +115,66 @@ export function Payroll() {
           columnCount={5}
           empty={{ title: "No payslips", description: "Generate a monthly payslip for a team member." }}
         >
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            density="compact"
-            disableRowSelectionOnClick
-            hideFooter
-            autoHeight
-          />
+          <DataGrid rows={rows} columns={columns} density="compact" disableRowSelectionOnClick hideFooter autoHeight />
         </DataState>
       </RailLayout>
 
-      <Dialog aria-labelledby="payroll-payslip-title" open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle id="payroll-payslip-title">Generate payslip</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
+      <CarbonScope>
+        <Modal
+          open={open}
+          size="sm"
+          modalHeading="Generate payslip"
+          primaryButtonText={generate.isPending ? "Generating…" : "Generate"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={!py.teamMemberId || !/^\d{4}-\d{2}$/.test(py.month) || generate.isPending}
+          onRequestClose={() => setOpen(false)}
+          onRequestSubmit={() =>
+            generate.mutate({
+              teamMemberId: py.teamMemberId,
+              month: py.month,
+              grossPaise: py.gross ? parseRupeeInput(py.gross) : undefined,
+              deductionsPaise: py.deductions ? parseRupeeInput(py.deductions) : 0,
+            })
+          }
+        >
+          <Stack gap={5}>
+            <Select
               id="py-m"
-              select
-              label="Member"
+              labelText="Member"
               value={py.teamMemberId}
               onChange={(e) => setPy((f) => ({ ...f, teamMemberId: e.target.value }))}
             >
-              <MenuItem value="">Select…</MenuItem>
+              <SelectItem value="" text="Select…" />
               {team.map((m) => (
-                <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>
+                <SelectItem key={m.id} value={m.id} text={m.name} />
               ))}
-            </TextField>
-            <TextField
+            </Select>
+            <TextInput
               id="py-month"
-              label="Month (YYYY-MM)"
+              labelText="Month (YYYY-MM)"
               placeholder="2026-06"
               value={py.month}
               onChange={(e) => setPy((f) => ({ ...f, month: e.target.value }))}
             />
             {canSalary && (
-              <TextField
+              <TextInput
                 id="py-gross"
-                label="Gross (₹) — defaults to monthly salary"
+                labelText="Gross (₹) — defaults to monthly salary"
                 value={py.gross}
                 onChange={(e) => setPy((f) => ({ ...f, gross: e.target.value }))}
               />
             )}
             {canSalary && (
-              <TextField
+              <TextInput
                 id="py-ded"
-                label="Deductions (₹)"
+                labelText="Deductions (₹)"
                 value={py.deductions}
                 onChange={(e) => setPy((f) => ({ ...f, deductions: e.target.value }))}
               />
             )}
           </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={!py.teamMemberId || !/^\d{4}-\d{2}$/.test(py.month) || generate.isPending}
-            onClick={() =>
-              generate.mutate({
-                teamMemberId: py.teamMemberId,
-                month: py.month,
-                grossPaise: py.gross ? parseRupeeInput(py.gross) : undefined,
-                deductionsPaise: py.deductions ? parseRupeeInput(py.deductions) : 0,
-              })
-            }
-          >
-            {generate.isPending ? "Generating…" : "Generate"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
+      </CarbonScope>
     </>
   );
 }
