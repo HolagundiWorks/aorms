@@ -1,19 +1,11 @@
-import {
-  Alert,
-  Box,
-  Button,
-  FormControlLabel,
-  Stack,
-  Switch,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Button, InlineNotification, NumberInput, Stack, Toggle } from "@carbon/react";
 import {
   DEFAULT_ESCALATION_SETTINGS,
   type EscalationSettings,
   parseEscalationSettings,
 } from "@esti/contracts";
 import { useEffect, useState } from "react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { trpc } from "../../lib/trpc.js";
 
 export function EscalationSettingsPanel() {
@@ -36,73 +28,76 @@ export function EscalationSettingsPanel() {
     },
   });
 
+  const num = (value: string | number, fallback: number) => Number(value) || fallback;
+
   return (
-    <Box sx={{ p: 3, maxWidth: 760 }}>
-      <Stack spacing={2}>
-        <Typography variant="h5" component="h2">Alert escalation</Typography>
-        <Typography variant="body2">
-          Controls when client approvals, follow-ups, overdue tasks, and leave
-          appear as immediate alerts vs the daily digest on the Alerts page.
-        </Typography>
-        {msg && <Alert severity="success" onClose={() => setMsg(null)}>{msg}</Alert>}
-        <TextField
-          id="esc-stale"
-          label="Stale client approval (days)"
-          helperText="Approvals unanswered for this many days become immediate alerts."
-          type="number"
-          value={String(form.staleApprovalDays)}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, staleApprovalDays: Number(e.target.value) || 7 }))
-          }
-          fullWidth
-        />
-        <TextField
-          id="esc-followup"
-          label="Follow-up lead time (days before due)"
-          helperText="0 = alert on the due date only."
-          type="number"
-          value={String(form.followUpLeadDays)}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, followUpLeadDays: Number(e.target.value) || 0 }))
-          }
-          fullWidth
-        />
-        <TextField
-          id="esc-task"
-          label="Overdue task threshold (days past due)"
-          type="number"
-          value={String(form.taskOverdueDays)}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, taskOverdueDays: Number(e.target.value) || 3 }))
-          }
-          fullWidth
-        />
-        <TextField
-          id="esc-leave"
-          label="Leave horizon (days ahead)"
-          helperText="Approved leave starting within this window surfaces on alerts."
-          type="number"
-          value={String(form.leaveHorizonDays)}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, leaveHorizonDays: Number(e.target.value) || 7 }))
-          }
-          fullWidth
-        />
-        <FormControlLabel
-          control={
-            <Switch
-              checked={form.digestEnabled}
-              onChange={(e) => setForm((f) => ({ ...f, digestEnabled: e.target.checked }))}
+    <CarbonScope>
+      <div style={{ padding: "1rem", maxWidth: 760 }}>
+        <Stack gap={5}>
+          <h2 className="cds--type-heading-05" style={{ margin: 0 }}>
+            Alert escalation
+          </h2>
+          <p className="cds--type-body-01" style={{ margin: 0 }}>
+            Controls when client approvals, follow-ups, overdue tasks, and leave appear as
+            immediate alerts vs the daily digest on the Alerts page.
+          </p>
+          {msg && (
+            <InlineNotification
+              kind="success"
+              lowContrast
+              title="Saved"
+              subtitle={msg}
+              onCloseButtonClick={() => setMsg(null)}
             />
-          }
-          label="Daily digest"
-        />
-        <Box>
-          <Button variant="contained" disabled={save.isPending} onClick={() => save.mutate(form)}>
-            {save.isPending ? "Saving…" : "Save escalation rules"}
-          </Button>
-        </Box>
-      </Stack>
-    </Box>
+          )}
+          <NumberInput
+            id="esc-stale"
+            label="Stale client approval (days)"
+            helperText="Approvals unanswered for this many days become immediate alerts."
+            value={form.staleApprovalDays}
+            onChange={(_e, { value }) =>
+              setForm((f) => ({ ...f, staleApprovalDays: num(value, 7) }))
+            }
+          />
+          <NumberInput
+            id="esc-followup"
+            label="Follow-up lead time (days before due)"
+            helperText="0 = alert on the due date only."
+            value={form.followUpLeadDays}
+            onChange={(_e, { value }) =>
+              setForm((f) => ({ ...f, followUpLeadDays: num(value, 0) }))
+            }
+          />
+          <NumberInput
+            id="esc-task"
+            label="Overdue task threshold (days past due)"
+            value={form.taskOverdueDays}
+            onChange={(_e, { value }) =>
+              setForm((f) => ({ ...f, taskOverdueDays: num(value, 3) }))
+            }
+          />
+          <NumberInput
+            id="esc-leave"
+            label="Leave horizon (days ahead)"
+            helperText="Approved leave starting within this window surfaces on alerts."
+            value={form.leaveHorizonDays}
+            onChange={(_e, { value }) =>
+              setForm((f) => ({ ...f, leaveHorizonDays: num(value, 7) }))
+            }
+          />
+          <Toggle
+            id="esc-digest"
+            labelText="Daily digest"
+            toggled={form.digestEnabled}
+            onToggle={(checked) => setForm((f) => ({ ...f, digestEnabled: checked }))}
+          />
+          <div>
+            <Button disabled={save.isPending} onClick={() => save.mutate(form)}>
+              {save.isPending ? "Saving…" : "Save escalation rules"}
+            </Button>
+          </div>
+        </Stack>
+      </div>
+    </CarbonScope>
   );
 }

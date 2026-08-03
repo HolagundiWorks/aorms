@@ -293,8 +293,9 @@ emitted Carbon's typography utility classes (`.cds--type-*`) in `carbon-tree.scs
 + `InlineNotification`), `UploadSecurityPanel` (→ Carbon `Toggle`/`PasswordInput`),
 `VendorRateCompare`, `SubmissionThread` (both → Carbon `Table`/`TextInput`/
 `TextArea` + adapters), `ContextualComments`, `ActivityTab` (→ Carbon `Select`/
-`TextArea` + adapters) — 30 total, all stock Carbon, no MUI/kit imports
-remaining, tsc+eslint+build green. `text-area`/`toggle` added to
+`TextArea` + adapters), `EscalationSettingsPanel` (→ Carbon `NumberInput`/
+`Toggle`) — 31 total, all stock Carbon, no MUI/kit imports remaining,
+tsc+eslint+build green. `text-area`/`toggle`/`number-input` added to
 `carbon-tree.scss`.
 
 **Deferred to a dedicated overlay pass:** `HeaderPomodoro`, `AiCarbon`, and
