@@ -1,14 +1,17 @@
-import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { CarbonScope } from "../carbon/CarbonScope.js";
 import { EstiOrchestrationStatus } from "./EstiOrchestrationStatus.js";
 
 /**
- * Standard app screen shell — **Rail · Stage** split (canonical Studio Intelligence
- * geometry). Every authenticated screen using this component gets the glass rail
- * panel, fixed full-height rail (desktop), and an independently scrolling stage.
+ * Standard app screen shell — Carbon layout (Wave 3).
  *
- *  - **RAIL** (20%, `.esti-dash-rail`): heading · vertical tabs · telemetry · actions
- *  - **STAGE** (80%, `.esti-dash-stage`): primary work surface
+ * Per the migration decision (docs/esti/CARBON-MIGRATION.md §8), the HCW
+ * Rail·Stage·glass geometry is dropped in favour of Carbon design principles: a
+ * flat bordered **side-nav column** (heading · section nav · filters · actions)
+ * beside a scrolling content area — all styled with Carbon tokens, no glass.
+ * Slots are unchanged so existing callers keep working while they migrate their
+ * own `tabs`/`aside` widgets to Carbon (prefer Carbon `Tabs` in the content, or
+ * side-nav links here).
  */
 export function RailLayout({
   title,
@@ -20,131 +23,88 @@ export function RailLayout({
 }: {
   title: string;
   description?: string;
-  /** Action buttons — pinned to the bottom of the rail. Pass `fullWidth` buttons. */
+  /** Action buttons — pinned to the bottom of the side column. */
   actions?: ReactNode;
-  /** Vertical section tabs in the rail (MUI `<Tabs orientation="vertical">`). */
+  /** Section nav for the side column (prefer Carbon side-nav links). */
   tabs?: ReactNode;
-  /** Telemetry / filters / summary below tabs in the rail. */
+  /** Telemetry / filters / summary below the nav. */
   aside?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <Box
-      className="esti-glass-dash"
-      sx={{
-        flex: 1,
-        minHeight: 0,
-        overflow: { xs: "visible", md: "hidden" },
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <Box
-        sx={{
+    <CarbonScope>
+      <div
+        style={{
           display: "flex",
-          flexDirection: { xs: "column", md: "row" },
+          flexDirection: "row",
+          gap: "1.5rem",
           flex: 1,
           minHeight: 0,
-          overflow: { xs: "visible", md: "hidden" },
-          gap: 2,
           alignItems: "stretch",
-          width: 1,
+          width: "100%",
         }}
       >
-        {/* Spacer reserves rail width while the rail is fixed (desktop). */}
-        <Box
-          aria-hidden
-          className="esti-dash-rail-spacer"
-          sx={{
-            display: { xs: "none", md: "block" },
-            flex: "0 0 20%",
-            maxWidth: "20%",
-            flexShrink: 0,
-          }}
-        />
-
-        {/* ── RAIL (20%) ─────────────────────────────────────────────── */}
-        <Box
-          className="esti-dash-rail"
-          sx={{
-            flex: { xs: "0 0 auto", md: "0 0 20%" },
-            maxWidth: { md: "20%" },
+        {/* Side-nav column */}
+        <aside
+          style={{
+            flex: "0 0 240px",
+            maxWidth: 240,
             minWidth: 0,
-            width: { xs: "100%", md: "auto" },
-            overflowY: { md: "auto" },
             display: "flex",
             flexDirection: "column",
-            gap: 1.5,
+            gap: "1rem",
+            borderRight: "1px solid var(--cds-border-subtle)",
+            paddingRight: "1rem",
+            overflowY: "auto",
           }}
         >
-          <Box sx={{ minWidth: 0, width: 1 }}>
-            <Typography
-              variant="overline"
-              color="text.secondary"
-              sx={{ letterSpacing: 1, display: "block", lineHeight: 1.2 }}
-            >
+          <div style={{ minWidth: 0 }}>
+            <p className="cds--type-label-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
               Workspace
-            </Typography>
-            <Typography
-              variant="h5"
-              component="h1"
-              sx={{ fontWeight: 600, lineHeight: 1.15, mt: 0.25, wordBreak: "break-word" }}
-            >
+            </p>
+            <h1 className="cds--type-heading-04" style={{ margin: "0.25rem 0 0", wordBreak: "break-word" }}>
               {title}
-            </Typography>
+            </h1>
             {description && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mt: 0.5, wordBreak: "break-word" }}
+              <p
+                className="cds--type-body-01"
+                style={{ margin: "0.5rem 0 0", color: "var(--cds-text-secondary)", wordBreak: "break-word" }}
               >
                 {description}
-              </Typography>
+              </p>
             )}
-          </Box>
+          </div>
 
-          {/* Orchestration lives in the rail — visible only while ESTI is working. */}
+          {/* Orchestration status — visible only while ESTI is working. */}
           <EstiOrchestrationStatus />
 
           {tabs}
           {aside && (
-            <Box sx={{ minWidth: 0, width: 1, flex: "1 1 auto", overflowY: "auto" }}>
-              {aside}
-            </Box>
+            <div style={{ minWidth: 0, width: "100%", flex: "1 1 auto", overflowY: "auto" }}>{aside}</div>
           )}
 
           {actions && (
-            <Box
-              sx={{
-                mt: { xs: 2, md: "auto" },
-                pt: 1,
-                display: "flex",
-                flexDirection: "column",
-                gap: 1,
-              }}
-            >
+            <div style={{ marginTop: "auto", paddingTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {actions}
-            </Box>
+            </div>
           )}
-        </Box>
+        </aside>
 
-        {/* ── STAGE (80%) ────────────────────────────────────────────── */}
-        <Box
-          className="esti-dash-stage"
-          sx={{
+        {/* Content */}
+        <main
+          style={{
             flex: 1,
             minWidth: 0,
             minHeight: 0,
-            height: { md: "100%" },
-            overflowY: { xs: "visible", md: "auto" },
             display: "flex",
             flexDirection: "column",
-            gap: 2,
+            gap: "1rem",
+            overflowY: "auto",
           }}
         >
           {children}
-        </Box>
-      </Box>
-    </Box>
+        </main>
+      </div>
+    </CarbonScope>
   );
 }

@@ -1,11 +1,11 @@
-import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { Stack, Tab, TabList, Tabs } from "@carbon/react";
+import { Download } from "@carbon/icons-react";
 import { formatINR } from "@esti/contracts";
 import type { PeriodFilterInput } from "@esti/contracts";
 import { useState } from "react";
 import { useScreenActions } from "@hcw/ui-kit";
-import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
+import { CarbonScope } from "../carbon/CarbonScope.js";
+import { DataGrid, PageBreadcrumb, type GridColDef } from "../carbon/adapters/index.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { PeriodFilter } from "../components/PeriodFilter.js";
 import { downloadXlsx } from "../lib/exportXlsx.js";
@@ -41,10 +41,7 @@ export function Filing() {
 
   const gst = trpc.reports.gstAbstract.useQuery({ period });
   const tds = trpc.reports.tdsAbstract.useQuery({ period });
-  const exportQ = trpc.reports.invoiceRegisterExport.useQuery(
-    { period },
-    { enabled: false },
-  );
+  const exportQ = trpc.reports.invoiceRegisterExport.useQuery({ period }, { enabled: false });
 
   const gstRows = (gst.data?.periods ?? []).map((p) => ({
     id: p.period,
@@ -77,7 +74,7 @@ export function Filing() {
             zone: "right",
             tone: "primary",
             label: "Export register",
-            icon: <FileDownloadIcon />,
+            icon: <Download />,
             onClick: () => void exportRegister(),
           },
         ]
@@ -89,60 +86,42 @@ export function Filing() {
     <RailLayout
       title="Filing abstracts"
       description="GST output tax (GSTR-1 / GSTR-3B) and TDS deducted u/s 194J, aggregated by month from issued and paid invoices."
-      tabs={
-        <Tabs
-          orientation="vertical"
-          value={tab}
-          onChange={(_e, v: number) => setTab(v)}
-          aria-label="Filing tabs"
-        >
-          <Tab label="GST abstract" />
-          <Tab label="TDS abstract" />
-        </Tabs>
-      }
       aside={
-        <Stack spacing={1.5}>
+        <Stack gap={4}>
           <PeriodFilter value={period} onChange={setPeriod} />
           {gst.data && (
-            <Box sx={{ p: 2 }}>
-              <Typography variant="body2">
-                <strong>{gst.data.label}</strong> · {gst.data.from} to {gst.data.to}
-              </Typography>
-            </Box>
+            <p className="cds--type-body-01" style={{ margin: 0 }}>
+              <strong>{gst.data.label}</strong> · {gst.data.from} to {gst.data.to}
+            </p>
           )}
         </Stack>
       }
     >
-      <PageBreadcrumb items={[{ label: "Office" }, { label: "Financial Reports" }]} />
-      {tab === 0 && (
-        <Box>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>GST by month</Typography>
-          <DataGrid
-            rows={gstRows}
-            columns={gstColumns}
-            loading={gst.isLoading}
-            density="compact"
-            disableRowSelectionOnClick
-            hideFooter
-            autoHeight
-          />
-        </Box>
-      )}
-
-      {tab === 1 && (
-        <Box>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>TDS by month</Typography>
-          <DataGrid
-            rows={tdsRows}
-            columns={tdsColumns}
-            loading={tds.isLoading}
-            density="compact"
-            disableRowSelectionOnClick
-            hideFooter
-            autoHeight
-          />
-        </Box>
-      )}
+      <CarbonScope>
+        <PageBreadcrumb items={[{ label: "Office" }, { label: "Financial Reports" }]} />
+        <Tabs selectedIndex={tab} onChange={({ selectedIndex }) => setTab(selectedIndex)}>
+          <TabList aria-label="Filing tabs" contained>
+            <Tab>GST abstract</Tab>
+            <Tab>TDS abstract</Tab>
+          </TabList>
+        </Tabs>
+        {tab === 0 && (
+          <div style={{ marginTop: "1rem" }}>
+            <p className="cds--type-heading-compact-01" style={{ margin: "0 0 0.5rem" }}>
+              GST by month
+            </p>
+            <DataGrid rows={gstRows} columns={gstColumns} loading={gst.isLoading} density="compact" autoHeight hideFooter disableRowSelectionOnClick />
+          </div>
+        )}
+        {tab === 1 && (
+          <div style={{ marginTop: "1rem" }}>
+            <p className="cds--type-heading-compact-01" style={{ margin: "0 0 0.5rem" }}>
+              TDS by month
+            </p>
+            <DataGrid rows={tdsRows} columns={tdsColumns} loading={tds.isLoading} density="compact" autoHeight hideFooter disableRowSelectionOnClick />
+          </div>
+        )}
+      </CarbonScope>
     </RailLayout>
   );
 }

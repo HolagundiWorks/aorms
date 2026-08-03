@@ -401,8 +401,15 @@ The governing rule settles these; recorded here for traceability.
 2. **Glass & soft layers** — **dropped everywhere**, marketing included. Flat
    `Layer`/`Tile` only.
 3. **Type** — **IBM Plex** (Carbon default). Urbanist retired.
-4. **Spatial model** — **Carbon UI Shell** (`Header`/`SideNav`/`HeaderGlobalBar`).
-   Rail · Stage · Dock and `ActionDock` are retired, not reskinned.
+4. **Spatial model** — **Carbon design principles with side-nav bars** (owner
+   directive 2026-08-02). Rail · Stage · glass geometry is **omitted**, not
+   reskinned. **Executed:** `RailLayout` (the shared authenticated-screen shell)
+   reimplemented flat on Carbon tokens — a bordered side-nav column (heading ·
+   section nav · filters · actions) beside a scrolling content area, no glass, no
+   MUI. Local **vertical rail tabs move to horizontal Carbon `Tabs` in the
+   content** (Carbon convention) — e.g. `Filing`. `ActionDock`/`useScreenActions`
+   stay as plumbing until the global UI-Shell pass. ⚠️ This changes every
+   authenticated screen's shell at once — **needs browser QA**.
 5. **Monorepo** — retire `hcwux`/`vendor/hcw-ui-kit`; keep only a **thin adapter
    layer** (`frontend/src/carbon/`) that renders stock Carbon. No successor kit,
    no custom component library.
