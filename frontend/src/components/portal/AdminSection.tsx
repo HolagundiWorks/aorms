@@ -1,7 +1,8 @@
-import { Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { Stack } from "@carbon/react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
 
-/** Standard header + body for an admin console section. */
+/** Standard header + body for an admin console section. Wave 3 (Carbon). */
 export function AdminSection({
   title,
   description,
@@ -14,31 +15,37 @@ export function AdminSection({
   children: ReactNode;
 }) {
   return (
-    <Stack spacing={2} sx={{ height: "100%", minHeight: 0 }}>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={1}
-        sx={{ alignItems: { sm: "flex-start" }, justifyContent: "space-between" }}
-      >
-        <Stack spacing={0.5}>
-          <Typography variant="h6" component="h2">
-            {title}
-          </Typography>
-          {description && (
-            <Typography variant="body2" color="text.secondary">
-              {description}
-            </Typography>
+    <CarbonScope>
+      <Stack gap={5} style={{ height: "100%", minHeight: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+            <h2 className="cds--type-heading-03" style={{ margin: 0 }}>
+              {title}
+            </h2>
+            {description && (
+              <p className="cds--type-body-01" style={{ margin: "0.25rem 0 0" }}>
+                {description}
+              </p>
+            )}
+          </div>
+          {actions && (
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", flexShrink: 0 }}>
+              {actions}
+            </div>
           )}
+        </div>
+        <Stack gap={5} style={{ flex: 1, minHeight: 0 }}>
+          {children}
         </Stack>
-        {actions && (
-          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", flexShrink: 0 }}>
-            {actions}
-          </Stack>
-        )}
       </Stack>
-      <Stack spacing={2} sx={{ flex: 1, minHeight: 0 }}>
-        {children}
-      </Stack>
-    </Stack>
+    </CarbonScope>
   );
 }

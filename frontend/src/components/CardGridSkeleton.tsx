@@ -1,18 +1,29 @@
-import { Grid, Skeleton } from "@mui/material";
+import { SkeletonPlaceholder } from "@carbon/react";
+import { CarbonScope } from "../carbon/CarbonScope.js";
 
 /**
- * Loading skeleton for tile/card grids (mirrors the roster grid's columns).
- * Pass to `DataState`'s `skeleton` prop so card-grid screens get the same
- * loading treatment table screens get. Material UI (Carbon → MUI migration).
+ * Loading skeleton for tile/card grids. Pass to `DataState`'s `skeleton` prop.
+ * Wave 3 (Carbon): stock `SkeletonPlaceholder` in a CSS grid; was MUI
+ * `Grid` + `Skeleton`.
  */
 export function CardGridSkeleton({ count = 8 }: { count?: number }) {
   return (
-    <Grid container spacing={1}>
-      {Array.from({ length: count }).map((_, i) => (
-        <Grid key={i} size={{ xs: 6, md: 3, lg: 2 }}>
-          <Skeleton variant="rectangular" height={96} className="esti-card-skeleton" />
-        </Grid>
-      ))}
-    </Grid>
+    <CarbonScope>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+          gap: "0.25rem",
+        }}
+      >
+        {Array.from({ length: count }).map((_, i) => (
+          <SkeletonPlaceholder
+            key={i}
+            className="esti-card-skeleton"
+            style={{ width: "100%", height: 96 }}
+          />
+        ))}
+      </div>
+    </CarbonScope>
   );
 }

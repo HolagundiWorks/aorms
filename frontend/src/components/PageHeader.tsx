@@ -1,11 +1,11 @@
-import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { CarbonScope } from "../carbon/CarbonScope.js";
 
 /**
  * Standard staff-route page title block — title, optional lead, optional actions.
  *
- * Reference for the MUI System standard: layout via `Box` + `sx`, type via
- * `Typography` (h4 scale, semantic `component="h1"`). No Carbon, no raw h1/p.
+ * Wave 3 (Carbon): stock type classes on semantic tags + flex layout; the accent
+ * bar uses the Carbon interactive border token. Was MUI `Box`/`Typography`.
  * API unchanged so all call sites keep working.
  */
 export function PageHeader({
@@ -18,18 +18,27 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, flexWrap: "wrap" }}>
-      <Box sx={{ flex: 1, minWidth: 0, borderLeft: 3, borderLeftColor: "primary.main", pl: 1.5 }}>
-        <Typography variant="h4" component="h1">
-          {title}
-        </Typography>
-        {description && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            {description}
-          </Typography>
-        )}
-      </Box>
-      {actions && <Box sx={{ flexShrink: 0 }}>{actions}</Box>}
-    </Box>
+    <CarbonScope>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            borderLeft: "3px solid var(--cds-border-interactive)",
+            paddingLeft: "0.75rem",
+          }}
+        >
+          <h1 className="cds--type-heading-04" style={{ margin: 0 }}>
+            {title}
+          </h1>
+          {description && (
+            <p className="cds--type-body-01" style={{ margin: "0.25rem 0 0" }}>
+              {description}
+            </p>
+          )}
+        </div>
+        {actions && <div style={{ flexShrink: 0 }}>{actions}</div>}
+      </div>
+    </CarbonScope>
   );
 }
