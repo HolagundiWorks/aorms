@@ -287,8 +287,16 @@ emitted Carbon's typography utility classes (`.cds--type-*`) in `carbon-tree.scs
 `ErrorBoundary`, `AuthStageCanvas`, `EstiOrchestrationStatus` (glass `Surface`→
 `Tile`), `StudioBreath` (native `useMediaQuery`), `RowActionsMenu` (→ Carbon
 `OverflowMenu`), `DemoAdminUnlock` (→ Carbon `Modal`/`PasswordInput`), `WellnessReminderBanner`
-(→ Carbon `Button` + icons), `StretchGuide`, `EyeExerciseGuide` (de-MUI'd) — 20
-total, all stock Carbon, no MUI/kit imports remaining, tsc+eslint+build green.
+(→ Carbon `Button` + icons), `StretchGuide`, `EyeExerciseGuide` (de-MUI'd), `PdfActionButtons`,
+`ReleaseMetadataPanel` — 22 total, all stock Carbon, no MUI/kit imports
+remaining, tsc+eslint+build green.
+
+**Deferred to a dedicated overlay pass:** `HeaderPomodoro`, `AiCarbon`, and
+`ProjectRailNav`. The first two rely on a **portaled** MUI `Popover` to escape
+the dock's `overflow`/`transform` clipping — Carbon `Popover`/`Toggletip` render
+in-place and need clipping verification in a browser first. `ProjectRailNav` is
+a restyled vertical nav that belongs with the shell/`GlassRail` sub-tranche
+(don't restyle `Button` off-spec per §0).
 `select`/`overflow-menu` added to `carbon-tree.scss`; `CarbonScope` now forwards
 `as`/`className`/`style` for inline call-sites; `lib/useMediaQuery.ts` is the
 MUI-free media-query hook. Remaining tranche-1 components follow the same recipe.
