@@ -1,7 +1,7 @@
-import { Button, Stack, TextField } from "@mui/material";
+import { Button, Stack, TextArea } from "@carbon/react";
 import { useState } from "react";
-import { DataState } from "./DataState.js";
-import { StatusDot } from "./StatusTag.js";
+import { CarbonScope } from "../carbon/CarbonScope.js";
+import { DataState, StatusDot } from "../carbon/adapters/index.js";
 
 export interface ThreadMessage {
   id: string;
@@ -19,8 +19,7 @@ const SIDE_TAG: Record<string, "blue" | "teal" | "purple"> = {
 
 /**
  * Presentational conversation thread for a portal/consultant submission.
- * The parent owns the query + reply mutation and passes data/handlers in.
- * Material UI.
+ * The parent owns the query + reply mutation and passes data/handlers in. Wave 3 (Carbon).
  */
 export function SubmissionThread({
   messages,
@@ -36,53 +35,59 @@ export function SubmissionThread({
   const [body, setBody] = useState("");
 
   return (
-    <Stack spacing={2}>
-      <DataState
-        loading={loading}
-        isEmpty={messages.length === 0}
-        columnCount={1}
-        empty={{ title: "No messages yet", description: "Start the conversation below." }}
-      >
-        <Stack spacing={2}>
-          {messages.map((m) => {
-            const color = SIDE_TAG[m.authorSide] ?? "gray";
-            return (
-              <Stack key={m.id} spacing={1}>
-                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                  <StatusDot color={color} label={m.authorName ?? m.authorSide} />
-                  <span className="esti-label esti-label--helper">
-                    {new Date(m.createdAt as string).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
-                  </span>
-                </Stack>
-                <p>{m.body}</p>
-              </Stack>
-            );
-          })}
-        </Stack>
-      </DataState>
-
-      <Stack spacing={1}>
-        <TextField
-          id="thread-reply"
-          label="Reply"
-          multiline
-          minRows={2}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          fullWidth
-        />
-        <Button
-          variant="contained"
-          size="small"
-          disabled={!body.trim() || pending}
-          onClick={() => {
-            onReply(body.trim());
-            setBody("");
-          }}
+    <CarbonScope>
+      <Stack gap={5}>
+        <DataState
+          loading={loading}
+          isEmpty={messages.length === 0}
+          columnCount={1}
+          empty={{ title: "No messages yet", description: "Start the conversation below." }}
         >
-          {pending ? "Sending…" : "Send reply"}
-        </Button>
+          <Stack gap={5}>
+            {messages.map((m) => {
+              const color = SIDE_TAG[m.authorSide] ?? "gray";
+              return (
+                <Stack key={m.id} gap={3}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <StatusDot color={color} label={m.authorName ?? m.authorSide} />
+                    <span className="esti-label esti-label--helper">
+                      {new Date(m.createdAt as string).toLocaleString("en-IN", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </span>
+                  </div>
+                  <p className="cds--type-body-01" style={{ margin: 0 }}>
+                    {m.body}
+                  </p>
+                </Stack>
+              );
+            })}
+          </Stack>
+        </DataState>
+
+        <Stack gap={3}>
+          <TextArea
+            id="thread-reply"
+            labelText="Reply"
+            rows={2}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+          />
+          <div>
+            <Button
+              size="sm"
+              disabled={!body.trim() || pending}
+              onClick={() => {
+                onReply(body.trim());
+                setBody("");
+              }}
+            >
+              {pending ? "Sending…" : "Send reply"}
+            </Button>
+          </div>
+        </Stack>
       </Stack>
-    </Stack>
+    </CarbonScope>
   );
 }

@@ -6,16 +6,16 @@ import {
   TableBody,
   TableCell,
   TableHead,
+  TableHeader,
   TableRow,
-  TextField,
-  Typography,
-} from "@mui/material";
+  TextInput,
+} from "@carbon/react";
 import { formatINR } from "@esti/contracts";
-import { StatusDot } from "../StatusTag.js";
-import { DataState } from "../DataState.js";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { DataState, StatusDot } from "../../carbon/adapters/index.js";
 import { trpc } from "../../lib/trpc.js";
 
-/** Cross-vendor rate comparison for one material — cheapest quote per vendor. Material UI. */
+/** Cross-vendor rate comparison for one material — cheapest quote per vendor. Wave 3 (Carbon). */
 export function VendorRateCompare() {
   const [term, setTerm] = useState("");
   const [material, setMaterial] = useState<string | null>(null);
@@ -26,66 +26,63 @@ export function VendorRateCompare() {
   const rows = compareQ.data ?? [];
 
   return (
-    <Stack spacing={2}>
-      <Typography variant="h6" component="h4">Compare vendor rates</Typography>
-      <Stack direction="row" spacing={1} sx={{ alignItems: "flex-start" }}>
-        <TextField
-          id="vrc-search"
-          label="Material"
-          placeholder="Material name (exact, as quoted) — e.g. OPC 53 cement"
-          value={term}
-          onChange={(e) => setTerm(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && term.trim()) setMaterial(term.trim());
-          }}
-          sx={{ flex: 1 }}
-        />
-        <Button
-          variant="contained"
-          sx={{ height: 56 }}
-          onClick={() => term.trim() && setMaterial(term.trim())}
-          disabled={!term.trim()}
-        >
-          Compare
-        </Button>
-      </Stack>
+    <CarbonScope>
+      <Stack gap={5}>
+        <h4 className="cds--type-heading-03" style={{ margin: 0 }}>
+          Compare vendor rates
+        </h4>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "flex-end" }}>
+          <div style={{ flex: 1 }}>
+            <TextInput
+              id="vrc-search"
+              labelText="Material"
+              placeholder="Material name (exact, as quoted) — e.g. OPC 53 cement"
+              value={term}
+              onChange={(e) => setTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && term.trim()) setMaterial(term.trim());
+              }}
+            />
+          </div>
+          <Button onClick={() => term.trim() && setMaterial(term.trim())} disabled={!term.trim()}>
+            Compare
+          </Button>
+        </div>
 
-      {material && (
-        <DataState
-          loading={compareQ.isLoading}
-          isEmpty={!compareQ.isLoading && rows.length === 0}
-          empty={{ title: "No quotes", description: `No vendor quotes found for “${material}”.` }}
-          columnCount={5}
-        >
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Vendor</TableCell>
-                <TableCell>Quote</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Unit</TableCell>
-                <TableCell>Rate</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((r) => (
-                <TableRow key={r.vendorId}>
-                  <TableCell>{r.vendorName}</TableCell>
-                  <TableCell>{r.quoteRef}</TableCell>
-                  <TableCell>{r.quoteDate}</TableCell>
-                  <TableCell>{r.unit}</TableCell>
-                  <TableCell>
-                    {formatINR(r.ratePaise)}{" "}
-                    {r.isLowest && (
-                      <StatusDot color="green" label="lowest" />
-                    )}
-                  </TableCell>
+        {material && (
+          <DataState
+            loading={compareQ.isLoading}
+            isEmpty={!compareQ.isLoading && rows.length === 0}
+            empty={{ title: "No quotes", description: `No vendor quotes found for “${material}”.` }}
+            columnCount={5}
+          >
+            <Table size="sm">
+              <TableHead>
+                <TableRow>
+                  <TableHeader>Vendor</TableHeader>
+                  <TableHeader>Quote</TableHeader>
+                  <TableHeader>Date</TableHeader>
+                  <TableHeader>Unit</TableHeader>
+                  <TableHeader>Rate</TableHeader>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </DataState>
-      )}
-    </Stack>
+              </TableHead>
+              <TableBody>
+                {rows.map((r) => (
+                  <TableRow key={r.vendorId}>
+                    <TableCell>{r.vendorName}</TableCell>
+                    <TableCell>{r.quoteRef}</TableCell>
+                    <TableCell>{r.quoteDate}</TableCell>
+                    <TableCell>{r.unit}</TableCell>
+                    <TableCell>
+                      {formatINR(r.ratePaise)} {r.isLowest && <StatusDot color="green" label="lowest" />}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </DataState>
+        )}
+      </Stack>
+    </CarbonScope>
   );
 }
