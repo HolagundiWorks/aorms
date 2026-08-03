@@ -1,20 +1,9 @@
-import {
-  Alert,
-  Box,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import ClearIcon from "@mui/icons-material/Clear";
+import { Button, InlineNotification, Modal, Select, SelectItem, Stack, TextInput } from "@carbon/react";
+import { Close, Filter } from "@carbon/icons-react";
 import { useState } from "react";
 import { useScreenActions } from "@hcw/ui-kit";
+import { CarbonScope } from "../carbon/CarbonScope.js";
+import { DataGrid, type GridColDef } from "../carbon/adapters/index.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
 import { trpc } from "../lib/trpc.js";
@@ -24,13 +13,22 @@ const PAGE_SIZES = [10, 25, 50, 100];
 type Filters = { search: string; entity: string; action: string };
 
 function jsonDetail(value: unknown) {
-  return value === null || value === undefined
-    ? "No snapshot recorded"
-    : JSON.stringify(value, null, 2);
+  return value === null || value === undefined ? "No snapshot recorded" : JSON.stringify(value, null, 2);
 }
 
 const fmtTime = (v: string | number | Date) =>
   new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(v));
+
+const PRE_STYLE: React.CSSProperties = {
+  margin: 0,
+  padding: "0.75rem",
+  fontFamily: "'IBM Plex Mono', monospace",
+  fontSize: 12,
+  whiteSpace: "pre-wrap",
+  overflowX: "auto",
+  background: "var(--cds-layer)",
+  border: "1px solid var(--cds-border-subtle)",
+};
 
 export function AuditLog({ embedded = false }: { embedded?: boolean }) {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 });
@@ -63,22 +61,8 @@ export function AuditLog({ embedded = false }: { embedded?: boolean }) {
     embedded
       ? []
       : [
-          {
-            id: "clear-filters",
-            zone: "left",
-            tone: "danger",
-            label: "Clear",
-            icon: <ClearIcon />,
-            onClick: clearFilters,
-          },
-          {
-            id: "apply-filters",
-            zone: "right",
-            tone: "primary",
-            label: "Apply filters",
-            icon: <FilterListIcon />,
-            onClick: applyFilters,
-          },
+          { id: "clear-filters", zone: "left", tone: "danger", label: "Clear", icon: <Close />, onClick: clearFilters },
+          { id: "apply-filters", zone: "right", tone: "primary", label: "Apply filters", icon: <Filter />, onClick: applyFilters },
         ],
     [embedded, filters],
   );
@@ -101,74 +85,76 @@ export function AuditLog({ embedded = false }: { embedded?: boolean }) {
       sortable: false,
       filterable: false,
       width: 100,
-      renderCell: (p) => (
-        <RowActionsMenu actions={[{ label: "View", onClick: () => setSelectedId(p.row.id) }]} />
-      ),
+      renderCell: (p) => <RowActionsMenu actions={[{ label: "View", onClick: () => setSelectedId(p.row.id) }]} />,
     },
   ];
 
   const filterFields = (
-    <Stack spacing={1.5} direction={embedded ? "row" : "column"} sx={{ flexWrap: "wrap" }}>
-      <TextField
-        id="audit-search"
-        label="Search actor, entity, or action"
-        value={filters.search}
-        onChange={(e) => setFilters((c) => ({ ...c, search: e.target.value }))}
-        onKeyDown={(e) => e.key === "Enter" && applyFilters()}
-        fullWidth={!embedded}
-        size="small"
-        sx={embedded ? { minWidth: 200, flex: 1 } : undefined}
-      />
-      <TextField
-        id="audit-entity"
-        select
-        label="Entity"
-        value={filters.entity}
-        onChange={(e) => setFilters((c) => ({ ...c, entity: e.target.value }))}
-        fullWidth={!embedded}
-        size="small"
-        sx={embedded ? { minWidth: 140 } : undefined}
-      >
-        <MenuItem value="">All entities</MenuItem>
-        {(list.data?.filters.entities ?? []).map((entity) => (
-          <MenuItem key={entity} value={entity}>
-            {entity}
-          </MenuItem>
-        ))}
-      </TextField>
-      <TextField
-        id="audit-action"
-        select
-        label="Action"
-        value={filters.action}
-        onChange={(e) => setFilters((c) => ({ ...c, action: e.target.value }))}
-        fullWidth={!embedded}
-        size="small"
-        sx={embedded ? { minWidth: 140 } : undefined}
-      >
-        <MenuItem value="">All actions</MenuItem>
-        {(list.data?.filters.actions ?? []).map((action) => (
-          <MenuItem key={action} value={action}>
-            {action}
-          </MenuItem>
-        ))}
-      </TextField>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: embedded ? "row" : "column",
+        flexWrap: "wrap",
+        gap: "0.75rem",
+        alignItems: embedded ? "flex-end" : "stretch",
+      }}
+    >
+      <div style={embedded ? { minWidth: 200, flex: 1 } : undefined}>
+        <TextInput
+          id="audit-search"
+          labelText="Search actor, entity, or action"
+          size="sm"
+          value={filters.search}
+          onChange={(e) => setFilters((c) => ({ ...c, search: e.target.value }))}
+          onKeyDown={(e) => e.key === "Enter" && applyFilters()}
+        />
+      </div>
+      <div style={embedded ? { minWidth: 140 } : undefined}>
+        <Select
+          id="audit-entity"
+          labelText="Entity"
+          size="sm"
+          value={filters.entity}
+          onChange={(e) => setFilters((c) => ({ ...c, entity: e.target.value }))}
+        >
+          <SelectItem value="" text="All entities" />
+          {(list.data?.filters.entities ?? []).map((entity) => (
+            <SelectItem key={entity} value={entity} text={entity} />
+          ))}
+        </Select>
+      </div>
+      <div style={embedded ? { minWidth: 140 } : undefined}>
+        <Select
+          id="audit-action"
+          labelText="Action"
+          size="sm"
+          value={filters.action}
+          onChange={(e) => setFilters((c) => ({ ...c, action: e.target.value }))}
+        >
+          <SelectItem value="" text="All actions" />
+          {(list.data?.filters.actions ?? []).map((action) => (
+            <SelectItem key={action} value={action} text={action} />
+          ))}
+        </Select>
+      </div>
       {embedded && (
         <>
-          <Button variant="outlined" size="small" startIcon={<ClearIcon />} onClick={clearFilters}>
+          <Button kind="secondary" size="sm" renderIcon={Close} onClick={clearFilters}>
             Clear
           </Button>
-          <Button variant="contained" size="small" startIcon={<FilterListIcon />} onClick={applyFilters}>
+          <Button size="sm" renderIcon={Filter} onClick={applyFilters}>
             Apply filters
           </Button>
         </>
       )}
-    </Stack>
+    </div>
   );
 
   const grid = (
     <>
-      {list.error && <Alert severity="error">{list.error.message}</Alert>}
+      {list.error && (
+        <InlineNotification kind="error" lowContrast hideCloseButton title="Couldn't load audit log" subtitle={list.error.message} />
+      )}
       <DataGrid
         rows={rows}
         columns={columns}
@@ -187,18 +173,20 @@ export function AuditLog({ embedded = false }: { embedded?: boolean }) {
   return (
     <>
       {embedded ? (
-        <Box sx={{ p: 2 }}>
-          <Stack spacing={2}>
-            <Typography variant="h6" component="h2">
-              Audit log
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Append-only record of security-sensitive and operational changes.
-            </Typography>
-            {filterFields}
-            {grid}
-          </Stack>
-        </Box>
+        <CarbonScope>
+          <div style={{ padding: "0.5rem" }}>
+            <Stack gap={5}>
+              <h2 className="cds--type-heading-03" style={{ margin: 0 }}>
+                Audit log
+              </h2>
+              <p className="cds--type-body-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
+                Append-only record of security-sensitive and operational changes.
+              </p>
+              {filterFields}
+              {grid}
+            </Stack>
+          </div>
+        </CarbonScope>
       ) : (
         <RailLayout
           title="Audit log"
@@ -209,42 +197,34 @@ export function AuditLog({ embedded = false }: { embedded?: boolean }) {
         </RailLayout>
       )}
 
-      <Dialog aria-labelledby="audit-log-details-title" open={selected !== null} onClose={() => setSelectedId(null)} fullWidth maxWidth="md">
-        <DialogTitle id="audit-log-details-title">{selected ? `${selected.entity} · ${selected.action}` : "Audit details"}</DialogTitle>
-        {selected && (
-          <DialogContent>
-            <Stack spacing={2}>
-              <Typography variant="body2">
+      <CarbonScope>
+        <Modal
+          open={selected !== null}
+          passiveModal
+          size="lg"
+          modalHeading={selected ? `${selected.entity} · ${selected.action}` : "Audit details"}
+          onRequestClose={() => setSelectedId(null)}
+        >
+          {selected && (
+            <Stack gap={4}>
+              <p className="cds--type-body-01" style={{ margin: 0 }}>
                 Record: {selected.entityId ?? "Not associated with a domain record"}
-              </Typography>
-              <Typography variant="body2">
+              </p>
+              <p className="cds--type-body-01" style={{ margin: 0 }}>
                 Actor: {selected.actorName ?? selected.actorEmail ?? selected.actorId ?? "System"}
-              </Typography>
+              </p>
               {(["before", "after"] as const).map((k) => (
-                <Stack spacing={1} key={k}>
-                  <Typography variant="subtitle2" sx={{ textTransform: "capitalize" }}>{k}</Typography>
-                  <Box
-                    component="pre"
-                    sx={{
-                      m: 0,
-                      p: 1.5,
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 12,
-                      whiteSpace: "pre-wrap",
-                      overflowX: "auto",
-                      bgcolor: "background.paper",
-                      border: 1,
-                      borderColor: "divider",
-                    }}
-                  >
-                    {jsonDetail(selected[k])}
-                  </Box>
+                <Stack gap={2} key={k}>
+                  <p className="cds--type-heading-compact-01" style={{ margin: 0, textTransform: "capitalize" }}>
+                    {k}
+                  </p>
+                  <pre style={PRE_STYLE}>{jsonDetail(selected[k])}</pre>
                 </Stack>
               ))}
             </Stack>
-          </DialogContent>
-        )}
-      </Dialog>
+          )}
+        </Modal>
+      </CarbonScope>
     </>
   );
 }

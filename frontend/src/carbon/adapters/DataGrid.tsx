@@ -70,6 +70,8 @@ export type DataGridProps<R = any> = {
   loading?: boolean;
   className?: string;
   pagination?: boolean;
+  paginationMode?: "client" | "server";
+  rowCount?: number;
   pageSizeOptions?: number[];
   paginationModel?: { page: number; pageSize: number };
   onPaginationModelChange?: (model: { page: number; pageSize: number }) => void;
@@ -102,6 +104,8 @@ export function DataGrid<R extends Record<string, any> = any>({
   loading = false,
   className,
   pagination = false,
+  paginationMode = "client",
+  rowCount,
   pageSizeOptions = [25, 50, 100],
   paginationModel,
   onPaginationModelChange,
@@ -132,12 +136,17 @@ export function DataGrid<R extends Record<string, any> = any>({
       return null;
     });
 
-  // ── Pagination (client-side, opt-in) ─────────────────────────────────────
+  // ── Pagination (client- or server-mode, opt-in) ──────────────────────────
+  const paginationOn = pagination || !!paginationModel || rowCount != null;
+  const server = paginationMode === "server";
   const [internal, setInternal] = useState({ page: 0, pageSize: pageSizeOptions[0] ?? 25 });
   const pageModel = paginationModel ?? internal;
-  const pagedRows = pagination
-    ? sortedRows.slice(pageModel.page * pageModel.pageSize, (pageModel.page + 1) * pageModel.pageSize)
-    : sortedRows;
+  // In server mode `rows` is already the current page — never slice it again.
+  const pagedRows =
+    paginationOn && !server
+      ? sortedRows.slice(pageModel.page * pageModel.pageSize, (pageModel.page + 1) * pageModel.pageSize)
+      : sortedRows;
+  const totalItems = server ? rowCount ?? sortedRows.length : sortedRows.length;
 
   if (loading) {
     return (
@@ -222,12 +231,12 @@ export function DataGrid<R extends Record<string, any> = any>({
           </Table>
         </div>
       </TableContainer>
-      {pagination && (
+      {paginationOn && (
         <Pagination
           page={pageModel.page + 1}
           pageSize={pageModel.pageSize}
           pageSizes={pageSizeOptions}
-          totalItems={sortedRows.length}
+          totalItems={totalItems}
           onChange={({ page, pageSize }) => {
             const next = { page: page - 1, pageSize };
             if (onPaginationModelChange) onPaginationModelChange(next);

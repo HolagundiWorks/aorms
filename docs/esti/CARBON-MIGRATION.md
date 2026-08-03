@@ -319,7 +319,10 @@ don't break the swap. First consumer migrated: `ProjectInvoicesPanel`
 (tsc+eslint+build green). `pagination` added to `carbon-tree.scss`.
 **Still needs browser QA** (sort behaviour, column widths/flex, pagination)
 before rolling across the remaining files. Migrated so far via the adapter:
-`ProjectInvoicesPanel`, `Tenders`, `Filing`, `MasterPlanLibrary` (4/62). Files with **vertical rail `Tabs`**
+`ProjectInvoicesPanel`, `Tenders`, `Filing`, `MasterPlanLibrary`, `AuditLog`
+(5/62). The adapter now also supports **server-mode pagination**
+(`paginationMode="server"` + `rowCount` + controlled `paginationModel`) — proven
+on AuditLog, which also moved its details `Dialog` → Carbon `Modal`. Files with **vertical rail `Tabs`**
 (e.g. `Filing`) or `useScreenActions` are deferred to the shell/nav sub-tranche —
 Carbon core has no vertical tab component.
 `text-area`/`toggle`/`number-input`/`checkbox` added to `carbon-tree.scss`.
