@@ -1,27 +1,22 @@
-import {
-  Alert,
-  Button,
-  MenuItem,
-  Stack,
-  TextField,
-  styled,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import AddIcon from "@mui/icons-material/Add";
+import { Button, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
+import { Add } from "@carbon/icons-react";
 import { MasterPlanCategory } from "@esti/contracts";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useScreenActions } from "@hcw/ui-kit";
-import { StatusDot } from "../components/StatusTag.js";
-import { DataState } from "../components/DataState.js";
-import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
+import { CarbonScope } from "../carbon/CarbonScope.js";
+import {
+  DataGrid,
+  DataState,
+  PageBreadcrumb,
+  StatusDot,
+  type GridColDef,
+} from "../carbon/adapters/index.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
 import { useUploadAuth } from "../lib/uploadAuth.js";
 import { trpc } from "../lib/trpc.js";
 
-const HiddenFileInput = styled("input")({ display: "none" });
-
-/** Studio › Libraries › Master Plan Library — PDF / DWG / zoning / development files. */
+/** Studio › Libraries › Master Plan Library — PDF / DWG / zoning / development files. Wave 3 (Carbon). */
 export function MasterPlanLibrary() {
   const utils = trpc.useUtils();
   const listQ = trpc.masterPlans.list.useQuery();
@@ -36,6 +31,7 @@ export function MasterPlanLibrary() {
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   async function upload() {
     if (!file) return;
@@ -67,7 +63,7 @@ export function MasterPlanLibrary() {
         zone: "center",
         tone: "primary",
         label: busy ? "Uploading…" : "Upload",
-        icon: <AddIcon />,
+        icon: <Add />,
         disabled: !file || busy,
         onClick: upload,
       },
@@ -81,9 +77,7 @@ export function MasterPlanLibrary() {
       field: "category",
       headerName: "Category",
       width: 160,
-      renderCell: (p) => (
-        <StatusDot color="gray" label={p.row.category} />
-      ),
+      renderCell: (p) => <StatusDot color="gray" label={p.row.category} />,
     },
     {
       field: "fileName",
@@ -125,57 +119,57 @@ export function MasterPlanLibrary() {
       title="Master Plan Library"
       description="Reference master plans — PDF, DWG, zoning and development plans."
       aside={
-        <Stack spacing={1.5}>
-          <TextField
+        <Stack gap={4}>
+          <TextInput
             id="mp-name"
-            label="Name"
+            labelText="Name"
             placeholder="e.g. Whitefield zoning plan"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            fullWidth
           />
-          <TextField
+          <Select
             id="mp-cat"
-            select
-            label="Category"
+            labelText="Category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            fullWidth
           >
             {MasterPlanCategory.options.map((c) => (
-              <MenuItem key={c} value={c}>{c}</MenuItem>
+              <SelectItem key={c} value={c} text={c} />
             ))}
-          </TextField>
-          <Button variant="outlined" component="label" fullWidth>
+          </Select>
+          <Button kind="tertiary" onClick={() => fileRef.current?.click()}>
             {file ? file.name : "Choose file"}
-            <HiddenFileInput
-              type="file"
-              accept=".pdf,.dwg,.dxf"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            />
           </Button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".pdf,.dwg,.dxf"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            style={{ display: "none" }}
+          />
           {error && (
-            <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>
+            <InlineNotification
+              kind="error"
+              lowContrast
+              title="Upload failed"
+              subtitle={error}
+              onCloseButtonClick={() => setError(null)}
+            />
           )}
         </Stack>
       }
     >
-      <PageBreadcrumb items={[{ label: "Library" }, { label: "Master Plans" }]} />
-      <DataState
-        loading={listQ.isLoading}
-        isEmpty={(listQ.data ?? []).length === 0}
-        columnCount={4}
-        empty={{ title: "No master plans", description: "Upload a PDF or DWG reference plan." }}
-      >
-        <DataGrid
-          rows={listQ.data ?? []}
-          columns={columns}
-          density="compact"
-          disableRowSelectionOnClick
-          hideFooter
-          autoHeight
-        />
-      </DataState>
+      <CarbonScope>
+        <PageBreadcrumb items={[{ label: "Library" }, { label: "Master Plans" }]} />
+        <DataState
+          loading={listQ.isLoading}
+          isEmpty={(listQ.data ?? []).length === 0}
+          columnCount={4}
+          empty={{ title: "No master plans", description: "Upload a PDF or DWG reference plan." }}
+        >
+          <DataGrid rows={listQ.data ?? []} columns={columns} density="compact" disableRowSelectionOnClick hideFooter autoHeight />
+        </DataState>
+      </CarbonScope>
     </RailLayout>
   );
 }
