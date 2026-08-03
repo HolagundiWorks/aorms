@@ -1,8 +1,9 @@
-import Check from "@mui/icons-material/Check";
-import { Alert, AlertTitle, Box, Stack, Typography } from "@mui/material";
+import { Checkmark } from "@carbon/icons-react";
+import { InlineNotification, Stack } from "@carbon/react";
 import { STANDARD_LICENCE_LABEL, type LicenseStatus } from "@esti/contracts";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { StatusDot } from "../../carbon/adapters/index.js";
 import { trpc } from "../../lib/trpc.js";
-import { StatusDot } from "../StatusTag.js";
 
 const STATUS_TAG: Record<LicenseStatus, "green" | "teal" | "red" | "gray"> = {
   VALID: "green",
@@ -20,7 +21,7 @@ const STATUS_LABEL: Record<LicenseStatus, string> = {
   SUSPENDED: "Suspended",
 };
 
-/** Standard AORMS licence summary — one product, no upgrade funnel. */
+/** Standard AORMS licence summary — one product, no upgrade funnel. Wave 3 (Carbon). */
 export function UpgradeToPro() {
   const licenseQ = trpc.license.status.useQuery();
   const view = licenseQ.data;
@@ -30,33 +31,41 @@ export function UpgradeToPro() {
   const active = status === "VALID" || status === "GRACE";
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Stack spacing={1.5}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          {active && <Check fontSize="small" />}
-          <Typography variant="h6" component="h3" sx={{ flex: 1 }}>
-            {STANDARD_LICENCE_LABEL}
-          </Typography>
-          <StatusDot color={STATUS_TAG[status]} label={STATUS_LABEL[status]} />
+    <CarbonScope>
+      <div style={{ padding: "1rem" }}>
+        <Stack gap={4}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            {active && <Checkmark size={16} />}
+            <h3 className="cds--type-heading-03" style={{ flex: 1, margin: 0 }}>
+              {STANDARD_LICENCE_LABEL}
+            </h3>
+            <StatusDot color={STATUS_TAG[status]} label={STATUS_LABEL[status]} />
+          </div>
+          <p className="cds--type-body-01" style={{ margin: 0 }}>
+            One standard AORMS licence — full workspace, unlimited users, 5 GB storage
+            included. Extra storage and hosted AI are usage-billed; you can add your own
+            API key under Company → AI.
+          </p>
+          {status === "GRACE" && view.graceDaysLeft != null && (
+            <InlineNotification
+              kind="warning"
+              lowContrast
+              hideCloseButton
+              title="Licence in grace period"
+              subtitle={`${view.graceDaysLeft} day(s) remaining — renew in Company → Licence.`}
+            />
+          )}
+          {status === "EXPIRED" && (
+            <InlineNotification
+              kind="error"
+              lowContrast
+              hideCloseButton
+              title="Licence expired"
+              subtitle="Activate a current key in Company → Licence to restore writes."
+            />
+          )}
         </Stack>
-        <Typography variant="body2" color="text.secondary">
-          One standard AORMS licence — full workspace, unlimited users, 5 GB storage
-          included. Extra storage and hosted AI are usage-billed; you can add your own
-          API key under Company → AI.
-        </Typography>
-        {status === "GRACE" && view.graceDaysLeft != null && (
-          <Alert severity="warning">
-            <AlertTitle>Licence in grace period</AlertTitle>
-            {`${view.graceDaysLeft} day(s) remaining — renew in Company → Licence.`}
-          </Alert>
-        )}
-        {status === "EXPIRED" && (
-          <Alert severity="error">
-            <AlertTitle>Licence expired</AlertTitle>
-            Activate a current key in Company → Licence to restore writes.
-          </Alert>
-        )}
-      </Stack>
-    </Box>
+      </div>
+    </CarbonScope>
   );
 }

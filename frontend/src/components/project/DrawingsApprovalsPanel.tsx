@@ -1,5 +1,6 @@
-import { Box, Tab, Tabs } from "@mui/material";
+import { Tab, TabList, Tabs } from "@carbon/react";
 import { useEffect, useState } from "react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { ProjectApprovals } from "../ProjectApprovals.js";
 import { ProjectDrawings } from "../ProjectDrawings.js";
 import { ProjectTransmittals } from "../ProjectTransmittals.js";
@@ -14,7 +15,7 @@ function subTabIndex(tab: DrawingsSubTab): number {
 
 /**
  * Progressive disclosure for the former concatenated Drawings + Transmittals +
- * Approvals stack (Hick / Serial Position). One tab at a time.
+ * Approvals stack (Hick / Serial Position). One tab at a time. Wave 3 (Carbon).
  */
 export function DrawingsApprovalsPanel({
   projectId,
@@ -31,24 +32,21 @@ export function DrawingsApprovalsPanel({
     setSub(subTabIndex(initialSubTab));
   }, [initialSubTab, projectId]);
   return (
-    <Box>
-      <Tabs
-        value={sub}
-        onChange={(_e, v: number) => setSub(v)}
-        variant="scrollable"
-        scrollButtons="auto"
-        aria-label="Drawings, transmittals, and approvals"
-        sx={{ mb: 1, borderBottom: 1, borderColor: "divider" }}
-      >
-        <Tab label="Drawings" />
-        <Tab label="Transmittals" />
-        <Tab label="Approvals" />
-      </Tabs>
+    <div>
+      <CarbonScope>
+        <Tabs selectedIndex={sub} onChange={({ selectedIndex }) => setSub(selectedIndex)}>
+          <TabList aria-label="Drawings, transmittals, and approvals" contained scrollIntoView>
+            <Tab>Drawings</Tab>
+            <Tab>Transmittals</Tab>
+            <Tab>Approvals</Tab>
+          </TabList>
+        </Tabs>
+      </CarbonScope>
       {sub === 0 && <ProjectDrawings projectId={projectId} />}
       {sub === 1 && <ProjectTransmittals projectId={projectId} />}
       {sub === 2 && (
         <ProjectApprovals projectId={projectId} focusApprovalId={focusApprovalId} />
       )}
-    </Box>
+    </div>
   );
 }

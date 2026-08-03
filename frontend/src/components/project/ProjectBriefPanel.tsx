@@ -1,12 +1,13 @@
-import { Box, Tab, Tabs } from "@mui/material";
+import { Tab, TabList, Tabs } from "@carbon/react";
 import { useState } from "react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { ProjectCpi } from "../ProjectCpi.js";
 import { ProjectInfo } from "../ProjectInfo.js";
 import { ProjectPipeline } from "../ProjectPipeline.js";
 import { ProjectProgram } from "../ProjectProgram.js";
 import { ProjectPreconPanel } from "./ProjectPreconPanel.js";
 
-/** Progressive disclosure for Setup: Info · Pipeline · Program · R&O · CPI. */
+/** Progressive disclosure for Setup: Info · Pipeline · Program · R&O · CPI. Wave 3 (Carbon). */
 export function ProjectBriefPanel({
   projectId,
   showCpi,
@@ -27,20 +28,17 @@ export function ProjectBriefPanel({
   const safe = Math.min(sub, tabs.length - 1);
 
   return (
-    <Box>
-      <Tabs
-        value={safe}
-        onChange={(_e, v: number) => setSub(v)}
-        variant="scrollable"
-        scrollButtons="auto"
-        aria-label="Project brief sections"
-        sx={{ mb: 1, borderBottom: 1, borderColor: "divider" }}
-      >
-        {tabs.map((t) => (
-          <Tab key={t.label} label={t.label} />
-        ))}
-      </Tabs>
+    <div>
+      <CarbonScope>
+        <Tabs selectedIndex={safe} onChange={({ selectedIndex }) => setSub(selectedIndex)}>
+          <TabList aria-label="Project brief sections" contained scrollIntoView>
+            {tabs.map((t) => (
+              <Tab key={t.label}>{t.label}</Tab>
+            ))}
+          </TabList>
+        </Tabs>
+      </CarbonScope>
       {tabs[safe]?.panel}
-    </Box>
+    </div>
   );
 }

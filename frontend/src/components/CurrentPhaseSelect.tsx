@@ -1,9 +1,13 @@
-import { MenuItem, TextField } from "@mui/material";
+import { Select, SelectItem } from "@carbon/react";
+import { CarbonScope } from "../carbon/CarbonScope.js";
 import { trpc } from "../lib/trpc.js";
 
 type PhaseRow = { id: string; label: string };
 
-/** Single dropdown — sets current delivery stage; earlier stages are implicitly complete. */
+/**
+ * Single dropdown — sets current delivery stage; earlier stages are implicitly
+ * complete. Wave 3 (Carbon): stock `Select`; was MUI `TextField select`.
+ */
 export function CurrentPhaseSelect({
   projectId,
   phases,
@@ -37,26 +41,24 @@ export function CurrentPhaseSelect({
   }
 
   return (
-    <TextField
-      id={id}
-      select
-      label={labelText}
-      helperText={helperText}
-      value={value}
-      disabled={setCurrent.isPending}
-      onChange={(e) => {
-        const phaseId = e.target.value;
-        if (phaseId && phaseId !== currentPhaseId) {
-          setCurrent.mutate({ projectId, phaseId });
-        }
-      }}
-      fullWidth
-    >
-      {phases.map((ph) => (
-        <MenuItem key={ph.id} value={ph.id}>
-          {ph.label}
-        </MenuItem>
-      ))}
-    </TextField>
+    <CarbonScope>
+      <Select
+        id={id}
+        labelText={labelText}
+        helperText={helperText}
+        value={value}
+        disabled={setCurrent.isPending}
+        onChange={(e) => {
+          const phaseId = e.target.value;
+          if (phaseId && phaseId !== currentPhaseId) {
+            setCurrent.mutate({ projectId, phaseId });
+          }
+        }}
+      >
+        {phases.map((ph) => (
+          <SelectItem key={ph.id} value={ph.id} text={ph.label} />
+        ))}
+      </Select>
+    </CarbonScope>
   );
 }

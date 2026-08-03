@@ -1,5 +1,6 @@
-import { Box, Tab, Tabs } from "@mui/material";
+import { Tab, TabList, Tabs } from "@carbon/react";
 import { useState } from "react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { ProjectCommunicationsLog } from "../ProjectCommunicationsLog.js";
 import { ProjectMinutes } from "../ProjectMinutes.js";
 import { ProjectSiteVisits } from "../ProjectSiteVisits.js";
@@ -13,32 +14,29 @@ import { ProjectSnags } from "./ProjectSnags.js";
 import { ProjectSteelCertification } from "./ProjectSteelCertification.js";
 import { ProjectSteelReconciliation } from "./ProjectSteelReconciliation.js";
 
-/** Full AProc / Studio Delivery spine. */
+/** Full AProc / Studio Delivery spine. Wave 3 (Carbon). */
 export function ProjectDeliveryPanel({ projectId }: { projectId: string }) {
   const [sub, setSub] = useState(0);
   return (
-    <Box>
-      <Tabs
-        value={sub}
-        onChange={(_e, v: number) => setSub(v)}
-        variant="scrollable"
-        scrollButtons="auto"
-        aria-label="Delivery and site coordination"
-        sx={{ mb: 1, borderBottom: 1, borderColor: "divider" }}
-      >
-        <Tab label="Site Progress" />
-        <Tab label="Communications" />
-        <Tab label="Minutes" />
-        <Tab label="Snags" />
-        <Tab label="Progress reports" />
-        <Tab label="Programme" />
-        <Tab label="Packages" />
-        <Tab label="RA certification" />
-        <Tab label="Steel certification" />
-        <Tab label="BBS" />
-        <Tab label="Steel recon" />
-        <Tab label="Phase stages" />
-      </Tabs>
+    <div>
+      <CarbonScope>
+        <Tabs selectedIndex={sub} onChange={({ selectedIndex }) => setSub(selectedIndex)}>
+          <TabList aria-label="Delivery and site coordination" contained scrollIntoView>
+            <Tab>Site Progress</Tab>
+            <Tab>Communications</Tab>
+            <Tab>Minutes</Tab>
+            <Tab>Snags</Tab>
+            <Tab>Progress reports</Tab>
+            <Tab>Programme</Tab>
+            <Tab>Packages</Tab>
+            <Tab>RA certification</Tab>
+            <Tab>Steel certification</Tab>
+            <Tab>BBS</Tab>
+            <Tab>Steel recon</Tab>
+            <Tab>Phase stages</Tab>
+          </TabList>
+        </Tabs>
+      </CarbonScope>
       {sub === 0 && <ProjectSiteVisits projectId={projectId} />}
       {sub === 1 && <ProjectCommunicationsLog projectId={projectId} />}
       {sub === 2 && <ProjectMinutes projectId={projectId} />}
@@ -51,6 +49,6 @@ export function ProjectDeliveryPanel({ projectId }: { projectId: string }) {
       {sub === 9 && <ProjectBbs projectId={projectId} />}
       {sub === 10 && <ProjectSteelReconciliation projectId={projectId} />}
       {sub === 11 && <ProjectPhaseProgress projectId={projectId} />}
-    </Box>
+    </div>
   );
 }
