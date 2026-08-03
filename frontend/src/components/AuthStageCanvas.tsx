@@ -1,4 +1,3 @@
-import { Box, Typography } from "@mui/material";
 import { AORMS_PORTALS, AORMS_STUDIO } from "../lib/product-nomenclature.js";
 import { AormsLogo } from "./AormsLogo.js";
 import { LandingContours } from "./landing/LandingContours.js";
@@ -24,22 +23,22 @@ const COPY: Record<AuthStageVariant, { headline: string; subline: string }> = {
   },
 };
 
-/** Editorial stage canvas for auth screens — brand moment, no interactive fields. */
+/**
+ * Editorial stage canvas for auth screens — brand moment, no interactive fields.
+ * Wave 3 (Carbon): de-MUI'd to semantic markup on the existing editorial
+ * classes (final marketing styling is Wave 5). Was MUI `Box`/`Typography`.
+ */
 export function AuthStageCanvas({ variant = "workspace" }: { variant?: AuthStageVariant }) {
   const copy = COPY[variant];
 
   return (
-    <Box className="esti-auth-stage" aria-hidden>
+    <div className="esti-auth-stage" aria-hidden>
       <LandingContours />
-      <Box className="esti-auth-stage__inner">
+      <div className="esti-auth-stage__inner">
         <AormsLogo variant="hero" />
-        <Typography variant="h4" component="p" className="esti-auth-stage__headline">
-          {copy.headline}
-        </Typography>
-        <Typography variant="body1" component="p" className="esti-auth-stage__subline">
-          {copy.subline}
-        </Typography>
-      </Box>
-    </Box>
+        <p className="esti-auth-stage__headline">{copy.headline}</p>
+        <p className="esti-auth-stage__subline">{copy.subline}</p>
+      </div>
+    </div>
   );
 }

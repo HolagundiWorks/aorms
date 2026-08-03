@@ -280,13 +280,14 @@ emitted Carbon's typography utility classes (`.cds--type-*`) in `carbon-tree.scs
    the file to confirm none remain.
 5. Add any newly-used Carbon component to `carbon-tree.scss`.
 
-**Tranche-1 progress (2026-08-02):** 11 shared leaves migrated — `PortalLicenceCard`,
+**Tranche-1 progress (2026-08-02):** 14 shared leaves migrated — `PortalLicenceCard`,
 `PageHeader`, `AdminSection`, `CardGridSkeleton`, `DocumentsSpecsPanel`,
 `ProjectBriefPanel`, `DrawingsApprovalsPanel`, `ProjectDeliveryPanel`,
-`CurrentPhaseSelect` (→ Carbon `Select`), `UpgradeToPro`, `GoogleIconCircle` — all
-stock Carbon, no MUI/kit imports remaining, tsc+eslint+build green. `select` added
-to `carbon-tree.scss`. Remaining tranche-1 components follow the same recipe in
-small batched PRs.
+`CurrentPhaseSelect` (→ Carbon `Select`), `UpgradeToPro`, `GoogleIconCircle`,
+`ErrorBoundary`, `AuthStageCanvas`, `EstiOrchestrationStatus` (glass `Surface`→
+`Tile`) — all stock Carbon, no MUI/kit imports remaining, tsc+eslint+build green.
+`select` added to `carbon-tree.scss`. Remaining tranche-1 components follow the
+same recipe in small batched PRs.
 
 ### Wave 4 — Icons (1 sprint, can overlap Wave 3)
 Swap `@mui/icons-material` → `@carbon/icons-react` across the 93 files (mostly
