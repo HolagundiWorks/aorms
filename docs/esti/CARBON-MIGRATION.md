@@ -294,9 +294,10 @@ emitted Carbon's typography utility classes (`.cds--type-*`) in `carbon-tree.scs
 `VendorRateCompare`, `SubmissionThread` (both → Carbon `Table`/`TextInput`/
 `TextArea` + adapters), `ContextualComments`, `ActivityTab` (→ Carbon `Select`/
 `TextArea` + adapters), `EscalationSettingsPanel` (→ Carbon `NumberInput`/
-`Toggle`) — 31 total, all stock Carbon, no MUI/kit imports remaining,
-tsc+eslint+build green. `text-area`/`toggle`/`number-input` added to
-`carbon-tree.scss`.
+`Toggle`), `WorkloadCalendarSync` (→ Carbon `TextInput readOnly`/`Select` + icons),
+`TaskBoardTab` (→ Carbon `Grid`/`Column`/`Checkbox`/`Select` + adapters) — 33
+total, all stock Carbon, no MUI/kit imports remaining, tsc+eslint+build green.
+`text-area`/`toggle`/`number-input`/`checkbox` added to `carbon-tree.scss`.
 
 **Deferred to a dedicated overlay pass:** `HeaderPomodoro`, `AiCarbon`, and
 `ProjectRailNav`. The first two rely on a **portaled** MUI `Popover` to escape

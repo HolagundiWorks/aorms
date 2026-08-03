@@ -1,17 +1,8 @@
-import {
-  Alert,
-  AlertTitle,
-  Box,
-  Button,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import CalendarMonth from "@mui/icons-material/CalendarMonth";
-import ContentCopy from "@mui/icons-material/ContentCopy";
+import { Button, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
+import { Calendar, Copy } from "@carbon/icons-react";
 import type { WorkloadCalendarScope } from "@esti/contracts";
 import { useState } from "react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { trpc } from "../../lib/trpc.js";
 
 export function WorkloadCalendarSync() {
@@ -39,80 +30,85 @@ export function WorkloadCalendarSync() {
     "Google Calendar → Other calendars → + → From URL → paste the HTTPS link below.";
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Stack spacing={2}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <CalendarMonth sx={{ fontSize: 20 }} aria-hidden />
-          <Typography variant="h6">Sync with Google Calendar</Typography>
+    <CarbonScope>
+      <div style={{ padding: "0.5rem" }}>
+        <Stack gap={5}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Calendar size={20} aria-hidden />
+            <h3 className="cds--type-heading-03" style={{ margin: 0 }}>
+              Sync with Google Calendar
+            </h3>
+          </div>
+          <p className="cds--type-body-01" style={{ margin: 0 }}>
+            Subscribe to your open task due dates as an iCal feed. Google refreshes subscribed
+            calendars about once per hour.
+          </p>
+
+          {canOffice && (
+            <Select
+              id="cal-scope"
+              labelText="Calendar scope"
+              value={scope}
+              onChange={(e) => setScope(e.target.value as WorkloadCalendarScope)}
+            >
+              <SelectItem value="mine" text="My tasks" />
+              <SelectItem value="office" text="Whole office (all due tasks)" />
+            </Select>
+          )}
+
+          <TextInput
+            id="cal-https"
+            labelText="Subscription URL (HTTPS)"
+            helperText={googleHelp}
+            value={httpsUrl}
+            readOnly
+          />
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+            <Button
+              kind="secondary"
+              size="sm"
+              renderIcon={Copy}
+              onClick={() => {
+                if (!httpsUrl) return;
+                void navigator.clipboard.writeText(httpsUrl).then(() => setCopied(true));
+              }}
+            >
+              {copied ? "Copied" : "Copy URL"}
+            </Button>
+            <Button
+              kind="secondary"
+              size="sm"
+              disabled={!webcalUrl}
+              onClick={() => window.open(webcalUrl, "_blank", "noopener,noreferrer")}
+            >
+              Open webcal link
+            </Button>
+            <Button
+              kind="ghost"
+              size="sm"
+              disabled={regenerate.isPending}
+              onClick={() => regenerate.mutate()}
+            >
+              {regenerate.isPending ? "Rotating…" : "Rotate link"}
+            </Button>
+          </div>
+
+          {copied && (
+            <InlineNotification
+              kind="success"
+              lowContrast
+              title="Link copied"
+              subtitle="Paste it in Google Calendar under Other calendars → From URL."
+              onCloseButtonClick={() => setCopied(false)}
+            />
+          )}
+
+          <p className="esti-label--secondary">
+            Rotating the link revokes the old URL. Keep this link private — anyone with it can
+            read task titles and due dates in the feed scope you chose.
+          </p>
         </Stack>
-        <Typography variant="body2">
-          Subscribe to your open task due dates as an iCal feed. Google refreshes
-          subscribed calendars about once per hour.
-        </Typography>
-
-        {canOffice && (
-          <TextField
-            id="cal-scope"
-            select
-            label="Calendar scope"
-            value={scope}
-            onChange={(e) => setScope(e.target.value as WorkloadCalendarScope)}
-          >
-            <MenuItem value="mine">My tasks</MenuItem>
-            <MenuItem value="office">Whole office (all due tasks)</MenuItem>
-          </TextField>
-        )}
-
-        <TextField
-          id="cal-https"
-          label="Subscription URL (HTTPS)"
-          helperText={googleHelp}
-          value={httpsUrl}
-          slotProps={{ input: { readOnly: true }, inputLabel: { shrink: true } }}
-        />
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<ContentCopy />}
-            aria-label="Copy subscription URL"
-            onClick={() => {
-              if (!httpsUrl) return;
-              void navigator.clipboard.writeText(httpsUrl).then(() => setCopied(true));
-            }}
-          >
-            {copied ? "Copied" : "Copy URL"}
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            disabled={!webcalUrl}
-            onClick={() => window.open(webcalUrl, "_blank", "noopener,noreferrer")}
-          >
-            Open webcal link
-          </Button>
-          <Button
-            variant="text"
-            size="small"
-            disabled={regenerate.isPending}
-            onClick={() => regenerate.mutate()}
-          >
-            {regenerate.isPending ? "Rotating…" : "Rotate link"}
-          </Button>
-        </Stack>
-
-        {copied && (
-          <Alert severity="success" onClose={() => setCopied(false)}>
-            <AlertTitle>Link copied</AlertTitle>
-            Paste it in Google Calendar under Other calendars → From URL.
-          </Alert>
-        )}
-
-        <p className="esti-label--secondary">
-          Rotating the link revokes the old URL. Keep this link private — anyone
-          with it can read task titles and due dates in the feed scope you chose.
-        </p>
-      </Stack>
-    </Box>
+      </div>
+    </CarbonScope>
   );
 }
