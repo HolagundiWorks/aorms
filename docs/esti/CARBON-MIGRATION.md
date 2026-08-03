@@ -318,7 +318,10 @@ pagination); `GridColDef`/props carry an index signature so unhandled MUI props
 don't break the swap. First consumer migrated: `ProjectInvoicesPanel`
 (tsc+eslint+build green). `pagination` added to `carbon-tree.scss`.
 **Still needs browser QA** (sort behaviour, column widths/flex, pagination)
-before rolling across the other 61 files.
+before rolling across the remaining files. Migrated so far via the adapter:
+`ProjectInvoicesPanel`, `Tenders` (2/62). Files with **vertical rail `Tabs`**
+(e.g. `Filing`) or `useScreenActions` are deferred to the shell/nav sub-tranche —
+Carbon core has no vertical tab component.
 `text-area`/`toggle`/`number-input`/`checkbox` added to `carbon-tree.scss`.
 
 `AuthRailLayout` deferred to the shell/marketing sub-tranche (glass-rail auth
