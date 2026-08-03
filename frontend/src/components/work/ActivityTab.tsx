@@ -1,9 +1,9 @@
-import { Alert, Box, Button, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { Button, InlineNotification, Select, SelectItem, Stack } from "@carbon/react";
 import { ACTIVITY_DOMAIN_TAG, activityDomain } from "@esti/contracts";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { DataState } from "../DataState.js";
-import { StatusDot } from "../StatusTag.js";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { DataState, StatusDot } from "../../carbon/adapters/index.js";
 import { trpc } from "../../lib/trpc.js";
 import { formatWhen } from "./workHelpers.js";
 
@@ -16,63 +16,89 @@ export function ActivityTab() {
   const items = listQ.data?.pages.flatMap((page) => page.rows) ?? [];
 
   return (
-    <Stack spacing={3}>
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-        <Typography variant="body2" sx={{ flex: 1 }}>Office-wide timeline for changes and notes.</Typography>
-        <TextField
-          id="act-vis"
-          select
-          size="small"
-          label="Visibility"
-          value={visibility}
-          onChange={(e) => setVisibility(e.target.value as "STAFF" | "ALL")}
-          sx={{ minWidth: 160 }}
+    <CarbonScope>
+      <Stack gap={6}>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: "1rem" }}>
+          <p className="cds--type-body-01" style={{ flex: 1, margin: 0 }}>
+            Office-wide timeline for changes and notes.
+          </p>
+          <div style={{ minWidth: 160 }}>
+            <Select
+              id="act-vis"
+              labelText="Visibility"
+              size="sm"
+              value={visibility}
+              onChange={(e) => setVisibility(e.target.value as "STAFF" | "ALL")}
+            >
+              <SelectItem value="STAFF" text="Staff activity" />
+              <SelectItem value="ALL" text="All activity" />
+            </Select>
+          </div>
+        </div>
+
+        {listQ.error && (
+          <InlineNotification
+            kind="error"
+            lowContrast
+            hideCloseButton
+            title="Couldn't load activity"
+            subtitle={listQ.error.message}
+          />
+        )}
+
+        <DataState
+          loading={listQ.isLoading && items.length === 0}
+          isEmpty={!listQ.error && items.length === 0}
+          columnCount={4}
+          empty={{ title: "No activity yet", description: "Project changes and internal notes will appear here." }}
         >
-          <MenuItem value="STAFF">Staff activity</MenuItem>
-          <MenuItem value="ALL">All activity</MenuItem>
-        </TextField>
-      </Stack>
-
-      {listQ.error && <Alert severity="error">{listQ.error.message}</Alert>}
-
-      <DataState
-        loading={listQ.isLoading && items.length === 0}
-        isEmpty={!listQ.error && items.length === 0}
-        columnCount={4}
-        empty={{ title: "No activity yet", description: "Project changes and internal notes will appear here." }}
-      >
-        <Stack spacing={2}>
-          {items.map((item) => {
-            const domain = activityDomain(item.eventType);
-            const dcolor = ACTIVITY_DOMAIN_TAG[domain];
-            return (
-              <Box key={item.id} sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
-                <Stack spacing={1}>
-                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                    <StatusDot color={dcolor} label={domain} />
-                    <StatusDot color="gray" label={item.eventType} />
-                    <Typography variant="caption" color="text.secondary">
-                      {formatWhen(item.createdAt as unknown as string)}
-                    </Typography>
+          <Stack gap={5}>
+            {items.map((item) => {
+              const domain = activityDomain(item.eventType);
+              const dcolor = ACTIVITY_DOMAIN_TAG[domain];
+              return (
+                <div
+                  key={item.id}
+                  style={{ padding: "0.5rem 0", borderBottom: "1px solid var(--cds-border-subtle)" }}
+                >
+                  <Stack gap={3}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                      <StatusDot color={dcolor} label={domain} />
+                      <StatusDot color="gray" label={item.eventType} />
+                      <span className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        {formatWhen(item.createdAt as unknown as string)}
+                      </span>
+                    </div>
+                    <p style={{ margin: 0 }}>{item.summary}</p>
+                    <p style={{ margin: 0 }}>
+                      {item.actorName ?? "System"}
+                      {item.projectId && (
+                        <>
+                          {" · "}
+                          <Link to={`/projects/${item.projectId}`}>
+                            {item.projectRef ?? item.projectTitle ?? "Project"}
+                          </Link>
+                        </>
+                      )}
+                    </p>
                   </Stack>
-                  <p>{item.summary}</p>
-                  <p>
-                    {item.actorName ?? "System"}
-                    {item.projectId && (
-                      <> · <Link to={`/projects/${item.projectId}`}>{item.projectRef ?? item.projectTitle ?? "Project"}</Link></>
-                    )}
-                  </p>
-                </Stack>
-              </Box>
-            );
-          })}
-          {listQ.hasNextPage && (
-            <Button variant="outlined" disabled={listQ.isFetchingNextPage} onClick={() => listQ.fetchNextPage()}>
-              {listQ.isFetchingNextPage ? "Loading…" : "Load older"}
-            </Button>
-          )}
-        </Stack>
-      </DataState>
-    </Stack>
+                </div>
+              );
+            })}
+            {listQ.hasNextPage && (
+              <div>
+                <Button
+                  kind="secondary"
+                  disabled={listQ.isFetchingNextPage}
+                  onClick={() => listQ.fetchNextPage()}
+                >
+                  {listQ.isFetchingNextPage ? "Loading…" : "Load older"}
+                </Button>
+              </div>
+            )}
+          </Stack>
+        </DataState>
+      </Stack>
+    </CarbonScope>
   );
 }
