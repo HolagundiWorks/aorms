@@ -296,8 +296,10 @@ emitted Carbon's typography utility classes (`.cds--type-*`) in `carbon-tree.scs
 `TextArea` + adapters), `EscalationSettingsPanel` (→ Carbon `NumberInput`/
 `Toggle`), `WorkloadCalendarSync` (→ Carbon `TextInput readOnly`/`Select` + icons),
 `TaskBoardTab` (→ Carbon `Grid`/`Column`/`Checkbox`/`Select` + adapters),
-`ProjectSiteReference` (→ Carbon `Table`/`InlineNotification` + adapters) — 34
-total, all stock Carbon, no MUI/kit imports remaining, tsc+eslint+build green.
+`ProjectSiteReference` (→ Carbon `Table`/`InlineNotification` + adapters),
+`PeriodFilter` (shared FY filter → Carbon `Select`/`TextInput`), `PlanPdfCanvas`
+(de-MUI'd canvas) — 36 total, all stock Carbon, no MUI/kit imports remaining,
+tsc+eslint+build green.
 `text-area`/`toggle`/`number-input`/`checkbox` added to `carbon-tree.scss`.
 
 `AuthRailLayout` deferred to the shell/marketing sub-tranche (glass-rail auth

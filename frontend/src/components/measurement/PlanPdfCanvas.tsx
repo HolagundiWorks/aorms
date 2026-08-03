@@ -1,5 +1,4 @@
 /// <reference types="vite/client" />
-import { Box, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 
@@ -77,27 +76,26 @@ export function PlanPdfCanvas({ base64, pageNo = 0, onPageSize }: Props) {
   }, [base64, pageNo]);
 
   return (
-    <Box sx={{ width: "100%", position: "relative" }}>
+    <div style={{ width: "100%", position: "relative" }}>
       {loading && (
-        <Typography variant="body2" sx={{ p: 2 }}>
+        <p className="cds--type-body-01" style={{ padding: "0.5rem" }}>
           Rendering PDF plan…
-        </Typography>
+        </p>
       )}
       {error && (
-        <Typography variant="body2" color="error" sx={{ p: 2 }}>
+        <p className="cds--type-body-01" style={{ padding: "0.5rem", color: "var(--cds-text-error)" }}>
           {error}
-        </Typography>
+        </p>
       )}
-      <Box
-        component="canvas"
+      <canvas
         ref={canvasRef}
-        sx={{
+        style={{
           display: loading || error ? "none" : "block",
           width: "100%",
           height: "auto",
           maxHeight: "70vh",
         }}
       />
-    </Box>
+    </div>
   );
 }
