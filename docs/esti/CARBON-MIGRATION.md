@@ -265,6 +265,21 @@ tranches (each = its own PR, green before the next):
 **Exit per tranche:** typecheck+lint green, visual baselines updated, no MUI
 imports left in that tranche.
 
+**Started 2026-08-02** — reference migration `components/portal/PortalLicenceCard.tsx`
+(kit `Surface` + MUI `Stack`/`Typography` + kit `StatusDot` → stock Carbon
+`Tile`/`Stack` + the `StatusDot` adapter, self-wrapped in `CarbonScope`). Also
+emitted Carbon's typography utility classes (`.cds--type-*`) in `carbon-tree.scss`
+— v11 ships none by default. **Per-file recipe** (tranche 1):
+1. Swap kit primitives to `../carbon/adapters` (StatusDot/DataState/ConfirmModal/
+   PageBreadcrumb) by import.
+2. Replace MUI components with stock Carbon (§ 4.2 map); `Typography`→`.cds--type-*`
+   on semantic tags; `Box`/`Stack` layout→Carbon `Stack` or a flex `div`.
+3. Wrap the component's root in `<CarbonScope>` so it themes while its host is
+   still on the kit (nested scopes are fine once the host migrates).
+4. Remove all `@mui/*` and `@hcw/ui-kit` imports; `tsc` + `eslint` green; grep
+   the file to confirm none remain.
+5. Add any newly-used Carbon component to `carbon-tree.scss`.
+
 ### Wave 4 — Icons (1 sprint, can overlap Wave 3)
 Swap `@mui/icons-material` → `@carbon/icons-react` across the 93 files (mostly
 mechanical name mapping). **Exit:** no `@mui/icons-material` imports remain.

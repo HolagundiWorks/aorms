@@ -1,11 +1,17 @@
 import { STANDARD_LICENCE_LABEL } from "@esti/contracts";
-import { Surface } from "@hcw/ui-kit";
-import { Stack, Typography } from "@mui/material";
-import { StatusDot } from "../StatusTag.js";
+import { Stack, Tile } from "@carbon/react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { StatusDot } from "../../carbon/adapters/index.js";
 import type { MyLicense } from "../../platform-admin/lib/auth.js";
-import { portalPaperSx } from "./PortalChrome.js";
 
-/** Licence summary card for account / company portals. */
+/**
+ * Licence summary card for account / company portals.
+ *
+ * Wave 3 tranche 1 reference migration (docs/esti/CARBON-MIGRATION.md): stock
+ * Carbon `Tile`/`Stack` + the `StatusDot` adapter, self-wrapped in `CarbonScope`
+ * so it themes correctly while its portal host is still on the kit. Was
+ * `Surface` + MUI `Stack`/`Typography` + kit `StatusDot`.
+ */
 export function PortalLicenceCard({
   title = "Licence",
   license,
@@ -14,28 +20,37 @@ export function PortalLicenceCard({
   license: MyLicense;
 }) {
   return (
-    <Surface layer="flat" sx={portalPaperSx}>
-      <Stack spacing={1.5}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
-          <Typography variant="h6" component="h2" className="esti-grow">
-            {title}
-          </Typography>
-          <StatusDot
-            color={license.status === "ACTIVE" ? "green" : "gray"}
-            label={STANDARD_LICENCE_LABEL}
-          />
+    <CarbonScope>
+      <Tile>
+        <Stack gap={4}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              flexWrap: "wrap",
+            }}
+          >
+            <h2 className="cds--type-heading-03" style={{ flex: 1, margin: 0 }}>
+              {title}
+            </h2>
+            <StatusDot
+              color={license.status === "ACTIVE" ? "green" : "gray"}
+              label={STANDARD_LICENCE_LABEL}
+            />
+          </div>
+          <p className="cds--type-body-01" style={{ margin: 0 }}>
+            Seats: {license.seats == null ? "Unlimited" : license.seats}
+            {" · "}
+            Devices: {license.deviceLimit == null ? "Unlimited" : license.deviceLimit}
+          </p>
+          <p className="cds--type-body-01" style={{ margin: 0 }}>
+            {license.expiresAt
+              ? `Renews / expires ${new Date(license.expiresAt).toLocaleDateString()}`
+              : "Perpetual — no expiry"}
+          </p>
         </Stack>
-        <Typography variant="body2" color="text.secondary">
-          Seats: {license.seats == null ? "Unlimited" : license.seats}
-          {" · "}
-          Devices: {license.deviceLimit == null ? "Unlimited" : license.deviceLimit}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {license.expiresAt
-            ? `Renews / expires ${new Date(license.expiresAt).toLocaleDateString()}`
-            : "Perpetual — no expiry"}
-        </Typography>
-      </Stack>
-    </Surface>
+      </Tile>
+    </CarbonScope>
   );
 }
