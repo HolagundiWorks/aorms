@@ -285,9 +285,12 @@ emitted Carbon's typography utility classes (`.cds--type-*`) in `carbon-tree.scs
 `ProjectBriefPanel`, `DrawingsApprovalsPanel`, `ProjectDeliveryPanel`,
 `CurrentPhaseSelect` (→ Carbon `Select`), `UpgradeToPro`, `GoogleIconCircle`,
 `ErrorBoundary`, `AuthStageCanvas`, `EstiOrchestrationStatus` (glass `Surface`→
-`Tile`) — all stock Carbon, no MUI/kit imports remaining, tsc+eslint+build green.
-`select` added to `carbon-tree.scss`. Remaining tranche-1 components follow the
-same recipe in small batched PRs.
+`Tile`), `StudioBreath` (native `useMediaQuery`), `RowActionsMenu` (→ Carbon
+`OverflowMenu`), `DemoAdminUnlock` (→ Carbon `Modal`/`PasswordInput`) — 17 total,
+all stock Carbon, no MUI/kit imports remaining, tsc+eslint+build green.
+`select`/`overflow-menu` added to `carbon-tree.scss`; `CarbonScope` now forwards
+`as`/`className`/`style` for inline call-sites; `lib/useMediaQuery.ts` is the
+MUI-free media-query hook. Remaining tranche-1 components follow the same recipe.
 
 ### Wave 4 — Icons (1 sprint, can overlap Wave 3)
 Swap `@mui/icons-material` → `@carbon/icons-react` across the 93 files (mostly

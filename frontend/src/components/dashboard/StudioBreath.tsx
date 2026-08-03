@@ -1,4 +1,4 @@
-import { useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "../../lib/useMediaQuery.js";
 
 /**
  * Studio Intelligence ambient background — faint **topographic contour** lines

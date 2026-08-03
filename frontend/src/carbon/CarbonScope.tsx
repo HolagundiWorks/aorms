@@ -1,8 +1,10 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { Theme } from "@carbon/react";
 
 /** Carbon theme schemes (Wave 1 maps app light/dark → these). */
 export type CarbonTheme = "white" | "g10" | "g90" | "g100";
+
+type ThemeExtra = Omit<ComponentProps<typeof Theme>, "theme" | "children">;
 
 /**
  * The single sanctioned entry point for a Carbon subtree during the migration.
@@ -16,14 +18,17 @@ export type CarbonTheme = "white" | "g10" | "g90" | "g100";
  * Carbon's component CSS is loaded once, globally, in a cascade layer via
  * `carbon.css` (imported in main.tsx) so the app's own styles always win.
  *
- * Usage — a migrated screen renders:  <CarbonScope><MyCarbonScreen /></CarbonScope>
+ * Forwards `as`/`className`/`style` to `<Theme>` so inline call-sites can use
+ * `as="span"` and avoid breaking a flex/inline row.
  */
 export function CarbonScope({
   theme = "g10",
   children,
-}: {
-  theme?: CarbonTheme;
-  children: ReactNode;
-}) {
-  return <Theme theme={theme}>{children}</Theme>;
+  ...rest
+}: { theme?: CarbonTheme; children: ReactNode } & ThemeExtra) {
+  return (
+    <Theme theme={theme} {...rest}>
+      {children}
+    </Theme>
+  );
 }
