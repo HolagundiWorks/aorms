@@ -288,8 +288,10 @@ emitted Carbon's typography utility classes (`.cds--type-*`) in `carbon-tree.scs
 `Tile`), `StudioBreath` (native `useMediaQuery`), `RowActionsMenu` (→ Carbon
 `OverflowMenu`), `DemoAdminUnlock` (→ Carbon `Modal`/`PasswordInput`), `WellnessReminderBanner`
 (→ Carbon `Button` + icons), `StretchGuide`, `EyeExerciseGuide` (de-MUI'd), `PdfActionButtons`,
-`ReleaseMetadataPanel` — 22 total, all stock Carbon, no MUI/kit imports
-remaining, tsc+eslint+build green.
+`ReleaseMetadataPanel`, `AccountsCarryForward`, `ProjectAppointment` (→ Carbon
+`TextInput`/`TextArea`, `Button as={Link}`) — 24 total, all stock Carbon, no
+MUI/kit imports remaining, tsc+eslint+build green. `text-area` added to
+`carbon-tree.scss`.
 
 **Deferred to a dedicated overlay pass:** `HeaderPomodoro`, `AiCarbon`, and
 `ProjectRailNav`. The first two rely on a **portaled** MUI `Popover` to escape
