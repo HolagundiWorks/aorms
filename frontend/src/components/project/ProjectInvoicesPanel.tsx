@@ -1,10 +1,4 @@
-import {
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import { Select, SelectItem } from "@carbon/react";
 import {
   INVOICE_STATUS_TAG,
   InvoiceStatus,
@@ -12,11 +6,11 @@ import {
   type InvoiceStatus as InvoiceStatusT,
 } from "@esti/contracts";
 import { useEffect, useMemo } from "react";
+import { DataGrid, DataState, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
 import { InvoicePdfCell } from "../InvoicePdfCell.js";
-import { DataState } from "../DataState.js";
-import { StatusTag } from "../StatusTag.js";
 import { trpc } from "../../lib/trpc.js";
 
+/** Project invoices table. Wave 3 sub-tranche 3b — first DataGrid-adapter migration. */
 export function ProjectInvoicesPanel({
   projectId,
   highlightInvoiceId,
@@ -52,6 +46,7 @@ export function ProjectInvoicesPanel({
         headerName: "Taxable",
         flex: 1,
         minWidth: 120,
+        type: "number",
         renderCell: (p) => formatINR(p.row.taxablePaise, { paise: false }),
       },
       {
@@ -59,6 +54,7 @@ export function ProjectInvoicesPanel({
         headerName: "GST",
         flex: 1,
         minWidth: 110,
+        type: "number",
         renderCell: (p) => formatINR(p.row.gstTotalPaise, { paise: false }),
       },
       {
@@ -66,6 +62,7 @@ export function ProjectInvoicesPanel({
         headerName: "Net",
         flex: 1,
         minWidth: 110,
+        type: "number",
         renderCell: (p) => formatINR(p.row.netReceivablePaise, { paise: false }),
       },
       {
@@ -75,35 +72,29 @@ export function ProjectInvoicesPanel({
         minWidth: 180,
         sortable: false,
         renderCell: (iv) => (
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center", height: 1 }}>
-            <TextField
-              id={`pinv-st-${iv.row.id}`}
-              select
-              size="small"
-              variant="standard"
-              value={iv.row.status}
-              disabled={
-                !canManage ||
-                iv.row.status === "PAID" ||
-                iv.row.status === "CANCELLED"
-              }
-              onChange={(e) =>
-                updateStatus.mutate({
-                  id: iv.row.id,
-                  status: e.target.value as (typeof InvoiceStatus.options)[number],
-                })
-              }
-              sx={{ minWidth: 110 }}
-              slotProps={{ htmlInput: { "aria-label": "Invoice status" } }}
-            >
-              {InvoiceStatus.options.map((st) => (
-                <MenuItem key={st} value={st}>
-                  {st}
-                </MenuItem>
-              ))}
-            </TextField>
-            <StatusTag value={iv.row.status as InvoiceStatusT} map={INVOICE_STATUS_TAG} />
-          </Stack>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div style={{ minWidth: 110 }}>
+              <Select
+                id={`pinv-st-${iv.row.id}`}
+                labelText="Invoice status"
+                hideLabel
+                size="sm"
+                value={iv.row.status}
+                disabled={!canManage || iv.row.status === "PAID" || iv.row.status === "CANCELLED"}
+                onChange={(e) =>
+                  updateStatus.mutate({
+                    id: iv.row.id,
+                    status: e.target.value as (typeof InvoiceStatus.options)[number],
+                  })
+                }
+              >
+                {InvoiceStatus.options.map((st) => (
+                  <SelectItem key={st} value={st} text={st} />
+                ))}
+              </Select>
+            </div>
+            <StatusDot color={INVOICE_STATUS_TAG[iv.row.status as InvoiceStatusT] ?? "gray"} label={iv.row.status} />
+          </div>
         ),
       },
       {
@@ -114,11 +105,7 @@ export function ProjectInvoicesPanel({
         sortable: false,
         filterable: false,
         renderCell: (iv) => (
-          <InvoicePdfCell
-            invoiceId={iv.row.id}
-            initialStatus={iv.row.pdfStatus}
-            canManage={canManage}
-          />
+          <InvoicePdfCell invoiceId={iv.row.id} initialStatus={iv.row.pdfStatus} canManage={canManage} />
         ),
       },
     ],
@@ -139,18 +126,12 @@ export function ProjectInvoicesPanel({
         rows={listQ.data ?? []}
         columns={columns}
         density="compact"
-        getRowHeight={() => "auto"}
-        disableRowSelectionOnClick
-        hideFooter
-        autoHeight
-        getRowClassName={(p) =>
-          p.id === highlightInvoiceId ? "esti-row-highlight" : ""
-        }
+        getRowClassName={(p) => (p.id === highlightInvoiceId ? "esti-row-highlight" : "")}
       />
       {highlightInvoiceId && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+        <p className="cds--type-caption-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
           Highlighting invoice selected from Studio Intelligence.
-        </Typography>
+        </p>
       )}
     </DataState>
   );

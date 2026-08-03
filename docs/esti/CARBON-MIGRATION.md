@@ -306,12 +306,19 @@ adapters), `EomsCompliancePanel` (→ Carbon `Select`(helperText)/`TextInput`/
 `TextInput`/`InlineNotification`/`Button`) — 41 total, all stock Carbon, no
 MUI/kit imports remaining, tsc+eslint+build green.
 
-**Sub-tranche 3b — DataGrid (dedicated):** **62 of the remaining ~157 MUI files
-use `@mui/x-data-grid`** — the single biggest lever left. `DataGrid` →
-Carbon `DataTable` is a real rewrite (columns/render-cells/sorting/row-highlight),
-so it needs a **shared `DataGrid`→`DataTable` adapter** built and **verified in a
-browser** once, then rolled across the 62 files — not blind per-file swaps.
-Track it as its own sub-tranche after a visual-QA checkpoint on the 41 shipped.
+**Sub-tranche 3b — DataGrid (adapter built 2026-08-02):** **62 of the remaining
+MUI files use `@mui/x-data-grid`** — the single biggest lever left.
+`frontend/src/carbon/adapters/DataGrid.tsx` is a drop-in `DataGrid` + `GridColDef`
+over stock Carbon `Table`/`TableHeader`/… so call-sites migrate by import swap
+(`@mui/x-data-grid` → `../carbon/adapters`). It honours the MUI X **v9** signatures
+(`valueGetter(value, row)`, `valueFormatter(value, row)`, `renderCell({row,id,value,field})`)
+and the surveyed feature set (flex/width/minWidth/sortable/filterable/type/align,
+getRowId, getRowClassName, onRowClick, density, loading, client-side sort +
+pagination); `GridColDef`/props carry an index signature so unhandled MUI props
+don't break the swap. First consumer migrated: `ProjectInvoicesPanel`
+(tsc+eslint+build green). `pagination` added to `carbon-tree.scss`.
+**Still needs browser QA** (sort behaviour, column widths/flex, pagination)
+before rolling across the other 61 files.
 `text-area`/`toggle`/`number-input`/`checkbox` added to `carbon-tree.scss`.
 
 `AuthRailLayout` deferred to the shell/marketing sub-tranche (glass-rail auth

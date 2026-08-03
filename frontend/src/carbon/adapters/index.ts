@@ -18,3 +18,9 @@ export {
   type ConfirmModalProps,
 } from "./ConfirmModal.js";
 export { PageBreadcrumb, type Crumb } from "./PageBreadcrumb.js";
+export {
+  DataGrid,
+  type GridColDef,
+  type GridRenderCellParams,
+  type DataGridProps,
+} from "./DataGrid.js";
