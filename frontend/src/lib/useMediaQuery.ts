@@ -1,8 +1,8 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * Native `matchMedia` hook — MUI-free replacement for `@mui/material`'s
- * `useMediaQuery` during the Carbon migration. SSR/no-`matchMedia` returns
+ * Native `matchMedia` hook — the MUI-free replacement for the old MUI
+ * useMediaQuery, used during the Carbon migration. SSR/no-`matchMedia` returns
  * `false`.
  */
 export function useMediaQuery(query: string): boolean {

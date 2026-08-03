@@ -1,4 +1,3 @@
-import { Box, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { pushToast } from "../../lib/toast.js";
 import { EYE_ROUTINE } from "./wellnessExercises.js";
@@ -50,22 +49,25 @@ export function EyeExerciseGuide({
   const step = EYE_ROUTINE[stepIdx]!;
 
   return (
-    <Box sx={{ display: "grid", placeItems: "center", py: 1, width: 1 }}>
-      <Box
+    <div style={{ display: "grid", placeItems: "center", padding: "0.5rem 0", width: "100%" }}>
+      <div
         className={`esti-eye-glyph esti-eye-glyph--${step.key}${running ? " esti-eye-glyph--active" : ""}`}
         aria-hidden
       >
         <span className="esti-eye-glyph__iris" />
-      </Box>
-      <Typography variant="subtitle2" sx={{ mt: 1.5, textAlign: "center" }}>
+      </div>
+      <p className="cds--type-heading-compact-01" style={{ marginTop: "0.75rem", textAlign: "center" }}>
         {step.name}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", px: 1 }}>
+      </p>
+      <p
+        className="cds--type-body-01"
+        style={{ textAlign: "center", padding: "0 0.5rem", color: "var(--cds-text-secondary)" }}
+      >
         {step.cue}
-      </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+      </p>
+      <p className="cds--type-caption-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
         {running ? `${left}s · step ${stepIdx + 1}/${EYE_ROUTINE.length}` : "Press play to begin"}
-      </Typography>
-    </Box>
+      </p>
+    </div>
   );
 }

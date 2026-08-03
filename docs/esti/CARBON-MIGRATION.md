@@ -286,8 +286,9 @@ emitted Carbon's typography utility classes (`.cds--type-*`) in `carbon-tree.scs
 `CurrentPhaseSelect` (→ Carbon `Select`), `UpgradeToPro`, `GoogleIconCircle`,
 `ErrorBoundary`, `AuthStageCanvas`, `EstiOrchestrationStatus` (glass `Surface`→
 `Tile`), `StudioBreath` (native `useMediaQuery`), `RowActionsMenu` (→ Carbon
-`OverflowMenu`), `DemoAdminUnlock` (→ Carbon `Modal`/`PasswordInput`) — 17 total,
-all stock Carbon, no MUI/kit imports remaining, tsc+eslint+build green.
+`OverflowMenu`), `DemoAdminUnlock` (→ Carbon `Modal`/`PasswordInput`), `WellnessReminderBanner`
+(→ Carbon `Button` + icons), `StretchGuide`, `EyeExerciseGuide` (de-MUI'd) — 20
+total, all stock Carbon, no MUI/kit imports remaining, tsc+eslint+build green.
 `select`/`overflow-menu` added to `carbon-tree.scss`; `CarbonScope` now forwards
 `as`/`className`/`style` for inline call-sites; `lib/useMediaQuery.ts` is the
 MUI-free media-query hook. Remaining tranche-1 components follow the same recipe.

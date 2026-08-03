@@ -1,8 +1,7 @@
-import Close from "@mui/icons-material/Close";
-import FitnessCenter from "@mui/icons-material/FitnessCenter";
-import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
-import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
+import { Close, Run, View } from "@carbon/icons-react";
+import { Button } from "@carbon/react";
 import { useEffect, useState } from "react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
 import {
   openWellness,
   WELLNESS_REMINDER_EVENT,
@@ -10,8 +9,9 @@ import {
 } from "./wellnessExercises.js";
 
 /**
- * Animated nudge above the taskbar — stretch or eye break. Pulses gently until
- * dismissed or the user taps Start (opens the wellness panel on the right tab).
+ * Animated nudge above the taskbar — stretch or eye break. Wave 3 (Carbon):
+ * stock `Button` + `@carbon/icons-react`; keeps the editorial banner classes.
+ * Was MUI `Box`/`Button`/`IconButton`/`Typography`.
  */
 export function WellnessReminderBanner() {
   const [active, setActive] = useState<WellnessReminderPayload | null>(null);
@@ -27,30 +27,29 @@ export function WellnessReminderBanner() {
 
   if (!active) return null;
 
-  const Icon = active.kind === "stretch" ? FitnessCenter : RemoveRedEye;
+  const Icon = active.kind === "stretch" ? Run : View;
   const section = active.kind === "stretch" ? "stretch" : "eyes";
 
   return (
-    <Box
+    <CarbonScope
       className={`esti-wellness-reminder esti-wellness-reminder--${active.kind}`}
       role="status"
       aria-live="polite"
     >
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-        <Box className="esti-wellness-reminder__icon-wrap" aria-hidden>
-          <Icon fontSize="small" />
-        </Box>
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography variant="subtitle2" sx={{ lineHeight: 1.2 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <span className="esti-wellness-reminder__icon-wrap" aria-hidden>
+          <Icon size={16} />
+        </span>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <p className="cds--type-heading-compact-01" style={{ margin: 0 }}>
             {active.title}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
+          </p>
+          <p className="cds--type-caption-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
             {active.subtitle}
-          </Typography>
-        </Box>
+          </p>
+        </div>
         <Button
-          size="small"
-          variant="contained"
+          size="sm"
           onClick={() => {
             openWellness(section);
             setActive(null);
@@ -58,10 +57,15 @@ export function WellnessReminderBanner() {
         >
           Start
         </Button>
-        <IconButton size="small" aria-label="Dismiss reminder" onClick={() => setActive(null)}>
-          <Close fontSize="small" />
-        </IconButton>
-      </Stack>
-    </Box>
+        <Button
+          hasIconOnly
+          renderIcon={Close}
+          iconDescription="Dismiss reminder"
+          kind="ghost"
+          size="sm"
+          onClick={() => setActive(null)}
+        />
+      </div>
+    </CarbonScope>
   );
 }
