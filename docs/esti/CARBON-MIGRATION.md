@@ -302,8 +302,16 @@ emitted Carbon's typography utility classes (`.cds--type-*`) in `carbon-tree.scs
 `TextInput`/`PasswordInput`/`InlineNotification`), `ProjectPhaseProgress`,
 `LicensePanel` (→ Carbon `Grid`/`Select`/`TextInput`/`InlineNotification` +
 adapters), `EomsCompliancePanel` (→ Carbon `Select`(helperText)/`TextInput`/
-`InlineNotification` + adapter) — 40 total, all stock Carbon, no MUI/kit imports
-remaining, tsc+eslint+build green.
+`InlineNotification` + adapter), `ProjectStructuralDefaultsPanel` (→ Carbon
+`TextInput`/`InlineNotification`/`Button`) — 41 total, all stock Carbon, no
+MUI/kit imports remaining, tsc+eslint+build green.
+
+**Sub-tranche 3b — DataGrid (dedicated):** **62 of the remaining ~157 MUI files
+use `@mui/x-data-grid`** — the single biggest lever left. `DataGrid` →
+Carbon `DataTable` is a real rewrite (columns/render-cells/sorting/row-highlight),
+so it needs a **shared `DataGrid`→`DataTable` adapter** built and **verified in a
+browser** once, then rolled across the 62 files — not blind per-file swaps.
+Track it as its own sub-tranche after a visual-QA checkpoint on the 41 shipped.
 `text-area`/`toggle`/`number-input`/`checkbox` added to `carbon-tree.scss`.
 
 `AuthRailLayout` deferred to the shell/marketing sub-tranche (glass-rail auth
