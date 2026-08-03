@@ -301,8 +301,9 @@ emitted Carbon's typography utility classes (`.cds--type-*`) in `carbon-tree.scs
 (de-MUI'd canvas), `StorageSettingsPanel` (BYOS form → Carbon `Select`/
 `TextInput`/`PasswordInput`/`InlineNotification`), `ProjectPhaseProgress`,
 `LicensePanel` (→ Carbon `Grid`/`Select`/`TextInput`/`InlineNotification` +
-adapters) — 39 total, all stock Carbon, no MUI/kit imports remaining,
-tsc+eslint+build green.
+adapters), `EomsCompliancePanel` (→ Carbon `Select`(helperText)/`TextInput`/
+`InlineNotification` + adapter) — 40 total, all stock Carbon, no MUI/kit imports
+remaining, tsc+eslint+build green.
 `text-area`/`toggle`/`number-input`/`checkbox` added to `carbon-tree.scss`.
 
 `AuthRailLayout` deferred to the shell/marketing sub-tranche (glass-rail auth
