@@ -1,17 +1,13 @@
 import {
-  Alert,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
+  InlineNotification,
+  Modal,
+  Select,
+  SelectItem,
   Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import AddIcon from "@mui/icons-material/Add";
+  TextInput,
+} from "@carbon/react";
+import { Add } from "@carbon/icons-react";
 import {
   STEEL_RECON_STATUS_LABEL,
   STEEL_RECON_STATUS_TAG,
@@ -22,9 +18,11 @@ import {
 } from "@esti/contracts";
 import { pushToast, useScreenActions } from "@hcw/ui-kit";
 import { useState } from "react";
-import { DataState } from "../DataState.js";
-import { StatusTag } from "../StatusTag.js";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { DataGrid, DataState, StatusTag, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../../lib/trpc.js";
+
+const SUBTLE: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
 
 /** Project › Steel — scheduled (BBS) vs issued vs consumed by diameter. */
 export function ProjectSteelReconciliation({ projectId }: { projectId: string }) {
@@ -57,7 +55,7 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
             zone: "center",
             tone: "primary",
             label: "New reconciliation",
-            icon: <AddIcon />,
+            icon: <Add />,
             onClick: () => setCreateOpen(true),
           },
         ],
@@ -124,8 +122,11 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
         width: 120,
         renderCell: (p) =>
           draft ? (
-            <TextField
-              size="small"
+            <TextInput
+              id={`issued-${p.row.id}`}
+              labelText="Issued"
+              hideLabel
+              size="sm"
               type="number"
               defaultValue={p.row.issuedKg}
               onBlur={(e) =>
@@ -146,8 +147,11 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
         width: 120,
         renderCell: (p) =>
           draft ? (
-            <TextField
-              size="small"
+            <TextInput
+              id={`consumed-${p.row.id}`}
+              labelText="Consumed"
+              hideLabel
+              size="sm"
               type="number"
               defaultValue={p.row.consumedKg}
               onBlur={(e) =>
@@ -170,7 +174,7 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
         renderCell: (p) => {
           const v = steelReconLineVariance(p.row);
           return (
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span>
                 {v.wastageKg.toFixed(2)} kg ({v.wastagePct}%)
               </span>
@@ -179,7 +183,7 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
                 map={STEEL_WASTAGE_SEVERITY_TAG}
                 label={STEEL_WASTAGE_SEVERITY_LABEL[v.severity]}
               />
-            </Stack>
+            </div>
           );
         },
       },
@@ -187,205 +191,178 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
 
     return (
       <>
-        <Stack spacing={1.5}>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
-            <Button size="small" variant="text" onClick={() => setOpenId(null)}>
-              ← All
-            </Button>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              {detail.ref} — {detail.title}
-            </Typography>
-            <StatusTag
-              value={detail.status as SteelReconStatus}
-              map={STEEL_RECON_STATUS_TAG}
-              label={STEEL_RECON_STATUS_LABEL[detail.status as SteelReconStatus]}
+        <CarbonScope>
+          <Stack gap={4}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+              <Button size="sm" kind="ghost" onClick={() => setOpenId(null)}>
+                ← All
+              </Button>
+              <span className="cds--type-heading-compact-01">{detail.ref} — {detail.title}</span>
+              <StatusTag
+                value={detail.status as SteelReconStatus}
+                map={STEEL_RECON_STATUS_TAG}
+                label={STEEL_RECON_STATUS_LABEL[detail.status as SteelReconStatus]}
+              />
+              <span className="cds--type-body-01" style={SUBTLE}>
+                Σ {detail.totals.scheduledKg} sched · {detail.totals.issuedKg} issued ·{" "}
+                {detail.totals.consumedKg} consumed · {detail.totals.wastageKg} wastage kg
+              </span>
+            </div>
+
+            {draft && (
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem", flexWrap: "wrap" }}>
+                <div style={{ minWidth: 220 }}>
+                  <Select id="seed-bbs" size="sm" labelText="Seed from BBS" value={bbsId} onChange={(e) => setBbsId(e.target.value)}>
+                    <SelectItem value="" text="Select…" />
+                    {(bbsQ.data ?? []).map((b) => (
+                      <SelectItem key={b.id} value={b.id} text={`${b.ref} — ${b.title}`} />
+                    ))}
+                  </Select>
+                </div>
+                <Button size="sm" kind="tertiary" disabled={!bbsId || seed.isPending} onClick={() => seed.mutate({ reconciliationId: detail.id, bbsId })}>
+                  Seed
+                </Button>
+                <Button size="sm" kind="tertiary" onClick={() => setLineOpen(true)}>
+                  Add diameter
+                </Button>
+                <Button size="sm" disabled={finalize.isPending || detail.lines.length === 0} onClick={() => finalize.mutate({ id: detail.id })}>
+                  Finalize
+                </Button>
+              </div>
+            )}
+            {finalize.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={finalize.error.message} />}
+
+            <DataGrid
+              rows={detail.lines}
+              columns={cols}
+              density="compact"
+              autoHeight
+              hideFooter
+              disableRowSelectionOnClick
+              getRowHeight={() => "auto"}
             />
-            <Typography variant="body2" color="text.secondary">
-              Σ {detail.totals.scheduledKg} sched · {detail.totals.issuedKg} issued ·{" "}
-              {detail.totals.consumedKg} consumed · {detail.totals.wastageKg} wastage kg
-            </Typography>
           </Stack>
+        </CarbonScope>
 
-          {draft && (
-            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-              <TextField
-                select
-                size="small"
-                label="Seed from BBS"
-                value={bbsId}
-                onChange={(e) => setBbsId(e.target.value)}
-                sx={{ minWidth: 220 }}
-              >
-                {(bbsQ.data ?? []).map((b) => (
-                  <MenuItem key={b.id} value={b.id}>
-                    {b.ref} — {b.title}
-                  </MenuItem>
-                ))}
-              </TextField>
-              <Button
-                size="small"
-                variant="outlined"
-                disabled={!bbsId || seed.isPending}
-                onClick={() =>
-                  seed.mutate({ reconciliationId: detail.id, bbsId })
-                }
-              >
-                Seed
-              </Button>
-              <Button size="small" variant="outlined" onClick={() => setLineOpen(true)}>
-                Add diameter
-              </Button>
-              <Button
-                size="small"
-                variant="contained"
-                disabled={finalize.isPending || detail.lines.length === 0}
-                onClick={() => finalize.mutate({ id: detail.id })}
-              >
-                Finalize
-              </Button>
-            </Stack>
-          )}
-          {finalize.error && <Alert severity="error">{finalize.error.message}</Alert>}
-
-          <DataGrid
-            rows={detail.lines}
-            columns={cols}
-            density="compact"
-            autoHeight
-            hideFooter
-            disableRowSelectionOnClick
-            getRowHeight={() => "auto"}
-          />
-        </Stack>
-
-        <Dialog open={lineOpen} onClose={() => setLineOpen(false)} fullWidth maxWidth="xs">
-          <DialogTitle>Add diameter line</DialogTitle>
-          <DialogContent>
-            <Stack spacing={2} sx={{ mt: 1 }}>
+        <CarbonScope>
+          <Modal
+            open={lineOpen}
+            size="xs"
+            modalHeading="Add diameter line"
+            primaryButtonText="Add"
+            secondaryButtonText="Cancel"
+            onRequestClose={() => setLineOpen(false)}
+            onRequestSubmit={() =>
+              addLine.mutate({
+                reconciliationId: detail.id,
+                diaMm: Number(line.diaMm),
+                scheduledKg: Number(line.scheduledKg) || 0,
+                issuedKg: Number(line.issuedKg) || 0,
+                consumedKg: Number(line.consumedKg) || 0,
+              })
+            }
+          >
+            <Stack gap={5}>
               {(["diaMm", "scheduledKg", "issuedKg", "consumedKg"] as const).map((k) => (
-                <TextField
+                <TextInput
                   key={k}
-                  label={k}
+                  id={`line-${k}`}
+                  labelText={k}
                   value={line[k]}
                   onChange={(e) => setLine({ ...line, [k]: e.target.value })}
                 />
               ))}
             </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setLineOpen(false)}>Cancel</Button>
-            <Button
-              variant="contained"
-              onClick={() =>
-                addLine.mutate({
-                  reconciliationId: detail.id,
-                  diaMm: Number(line.diaMm),
-                  scheduledKg: Number(line.scheduledKg) || 0,
-                  issuedKg: Number(line.issuedKg) || 0,
-                  consumedKg: Number(line.consumedKg) || 0,
-                })
-              }
-            >
-              Add
-            </Button>
-          </DialogActions>
-        </Dialog>
+          </Modal>
+        </CarbonScope>
       </>
     );
   }
 
   return (
     <>
-      <Stack spacing={1.5}>
-        <Typography variant="body2" color="text.secondary">
-          Compare BBS scheduled steel with issued and consumed quantities by diameter. Wastage =
-          issued − consumed (warn &gt;3%, exceed &gt;5%).
-        </Typography>
-        <DataState
-          loading={listQ.isLoading}
-          isEmpty={rows.length === 0}
-          columnCount={3}
-          empty={{
-            title: "No steel reconciliations",
-            description: "Create one and seed diameters from a project BBS.",
-            action: (
-              <Button size="small" variant="outlined" onClick={() => setCreateOpen(true)}>
-                New reconciliation
-              </Button>
-            ),
-          }}
-        >
-          <DataGrid
-            rows={rows}
-            columns={[
-              { field: "ref", headerName: "Ref", width: 140 },
-              { field: "title", headerName: "Title", flex: 1 },
-              {
-                field: "status",
-                headerName: "Status",
-                width: 120,
-                renderCell: (p) => (
-                  <StatusTag
-                    value={p.row.status as SteelReconStatus}
-                    map={STEEL_RECON_STATUS_TAG}
-                    label={STEEL_RECON_STATUS_LABEL[p.row.status as SteelReconStatus]}
-                  />
-                ),
-              },
-              {
-                field: "wastageKg",
-                headerName: "Wastage kg",
-                width: 120,
-                valueGetter: (_v, row) => Number(row.wastageKg).toFixed(2),
-              },
-            ]}
-            density="compact"
-            autoHeight
-            hideFooter
-            onRowClick={(p) => setOpenId(p.row.id)}
-            sx={{ "& .MuiDataGrid-row": { cursor: "pointer" } }}
-          />
-        </DataState>
-      </Stack>
-
-      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>New steel reconciliation</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField label="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-            <TextField
-              select
-              label="Seed from BBS (optional)"
-              value={bbsId}
-              onChange={(e) => setBbsId(e.target.value)}
-            >
-              <MenuItem value="">— none —</MenuItem>
-              {(bbsQ.data ?? []).map((b) => (
-                <MenuItem key={b.id} value={b.id}>
-                  {b.ref} — {b.title}
-                </MenuItem>
-              ))}
-            </TextField>
-            {create.error && <Alert severity="error">{create.error.message}</Alert>}
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={!title || create.isPending}
-            onClick={() =>
-              create.mutate({
-                projectId,
-                title,
-                bbsId: bbsId || undefined,
-              })
-            }
+      <CarbonScope>
+        <Stack gap={4}>
+          <p className="cds--type-body-01" style={SUBTLE}>
+            Compare BBS scheduled steel with issued and consumed quantities by diameter. Wastage =
+            issued − consumed (warn &gt;3%, exceed &gt;5%).
+          </p>
+          <DataState
+            loading={listQ.isLoading}
+            isEmpty={rows.length === 0}
+            columnCount={3}
+            empty={{
+              title: "No steel reconciliations",
+              description: "Create one and seed diameters from a project BBS.",
+              action: (
+                <Button size="sm" kind="tertiary" onClick={() => setCreateOpen(true)}>
+                  New reconciliation
+                </Button>
+              ),
+            }}
           >
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DataGrid
+              rows={rows}
+              columns={[
+                { field: "ref", headerName: "Ref", width: 140 },
+                { field: "title", headerName: "Title", flex: 1 },
+                {
+                  field: "status",
+                  headerName: "Status",
+                  width: 120,
+                  renderCell: (p) => (
+                    <StatusTag
+                      value={p.row.status as SteelReconStatus}
+                      map={STEEL_RECON_STATUS_TAG}
+                      label={STEEL_RECON_STATUS_LABEL[p.row.status as SteelReconStatus]}
+                    />
+                  ),
+                },
+                {
+                  field: "wastageKg",
+                  headerName: "Wastage kg",
+                  width: 120,
+                  valueGetter: (_v, row) => Number(row.wastageKg).toFixed(2),
+                },
+              ]}
+              density="compact"
+              autoHeight
+              hideFooter
+              onRowClick={(p) => setOpenId(p.row.id as string)}
+            />
+          </DataState>
+        </Stack>
+      </CarbonScope>
+
+      <CarbonScope>
+        <Modal
+          open={createOpen}
+          size="sm"
+          modalHeading="New steel reconciliation"
+          primaryButtonText="Create"
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={!title || create.isPending}
+          onRequestClose={() => setCreateOpen(false)}
+          onRequestSubmit={() =>
+            create.mutate({
+              projectId,
+              title,
+              bbsId: bbsId || undefined,
+            })
+          }
+        >
+          <Stack gap={5}>
+            <TextInput id="sr-title" labelText="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Select id="sr-bbs" labelText="Seed from BBS (optional)" value={bbsId} onChange={(e) => setBbsId(e.target.value)}>
+              <SelectItem value="" text="— none —" />
+              {(bbsQ.data ?? []).map((b) => (
+                <SelectItem key={b.id} value={b.id} text={`${b.ref} — ${b.title}`} />
+              ))}
+            </Select>
+            {create.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={create.error.message} />}
+          </Stack>
+        </Modal>
+      </CarbonScope>
     </>
   );
 }
