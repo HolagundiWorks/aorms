@@ -1,18 +1,15 @@
 import { useEffect, useState } from "react";
 import {
-  Alert,
-  Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
+  InlineNotification,
+  Modal,
+  Select,
+  SelectItem,
   Stack,
-  TextField,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { StatusDot } from "../../components/StatusTag.js";
+  TextInput,
+} from "@carbon/react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { DataGrid, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../lib/trpc";
 
 type Keys = Awaited<ReturnType<typeof trpc.admin.apiKeys.list.query>>;
@@ -106,7 +103,7 @@ export default function ApiKeysTab() {
       width: 110,
       renderCell: (p) =>
         p.row.status === "ACTIVE" ? (
-          <Button variant="text" color="error" size="small" onClick={() => revoke(p.row.id)}>
+          <Button kind="danger--ghost" size="sm" onClick={() => revoke(p.row.id)}>
             Revoke
           </Button>
         ) : null,
@@ -114,89 +111,73 @@ export default function ApiKeysTab() {
   ];
 
   return (
-    <Stack spacing={2}>
-      <Box>
-        <Button
-          variant="contained"
-          onClick={() => {
-            setGenerated(null);
-            setError(null);
-            setOpen(true);
-          }}
+    <CarbonScope>
+      <Stack gap={5}>
+        <div>
+          <Button
+            onClick={() => {
+              setGenerated(null);
+              setError(null);
+              setOpen(true);
+            }}
+          >
+            Generate API key
+          </Button>
+        </div>
+
+        {generated && (
+          <InlineNotification
+            kind="success"
+            lowContrast
+            title="API key created"
+            subtitle={`Copy it now (shown once): ${generated}`}
+            onCloseButtonClick={() => setGenerated(null)}
+          />
+        )}
+
+        <DataGrid
+          rows={keys}
+          columns={columns}
+          getRowId={(r) => r.id}
+          density="compact"
+          disableRowSelectionOnClick
+          hideFooter
+          autoHeight
+        />
+
+        <Modal
+          open={open}
+          size="sm"
+          modalHeading="Generate API key"
+          primaryButtonText="Generate"
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={!productId || !label}
+          onRequestClose={() => setOpen(false)}
+          onRequestSubmit={generate}
         >
-          Generate API key
-        </Button>
-      </Box>
-
-      {generated && (
-        <Alert severity="success" onClose={() => setGenerated(null)}>
-          API key created — copy it now (shown once): {generated}
-        </Alert>
-      )}
-
-      <DataGrid
-        rows={keys}
-        columns={columns}
-        getRowId={(r) => r.id}
-        density="compact"
-        disableRowSelectionOnClick
-        hideFooter
-        autoHeight
-      />
-
-      <Dialog aria-labelledby="api-keys-tab-generate-title" open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle id="api-keys-tab-generate-title">Generate API key</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
-              id="ak-product"
-              select
-              label="Product"
-              value={productId}
-              onChange={(e) => setProductId(e.target.value)}
-              fullWidth
-            >
+          <Stack gap={5}>
+            <Select id="ak-product" labelText="Product" value={productId} onChange={(e) => setProductId(e.target.value)}>
               {products.map((p) => (
-                <MenuItem key={p.id} value={p.id}>
-                  {p.name}
-                </MenuItem>
+                <SelectItem key={p.id} value={p.id} text={p.name} />
               ))}
-            </TextField>
-            <TextField
+            </Select>
+            <Select
               id="ak-org"
-              select
-              label="Bind to organization"
+              labelText="Bind to organization"
               helperText="Recommended for a per-install key — it can then only act for this customer. Leave as product-wide only for a shared/legacy key."
               value={orgId}
               onChange={(e) => setOrgId(e.target.value)}
-              fullWidth
             >
-              <MenuItem value="">Product-wide (no org binding)</MenuItem>
+              <SelectItem value="" text="Product-wide (no org binding)" />
               {orgs.map((o) => (
-                <MenuItem key={o.id} value={o.id}>
-                  {o.name}
-                </MenuItem>
+                <SelectItem key={o.id} value={o.id} text={o.name} />
               ))}
-            </TextField>
-            <TextField
-              id="ak-label"
-              label="Label"
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              fullWidth
-            />
-            {error && <Alert severity="error">{error}</Alert>}
+            </Select>
+            <TextInput id="ak-label" labelText="Label" value={label} onChange={(e) => setLabel(e.target.value)} />
+            {error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={error} />}
           </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button variant="contained" disabled={!productId || !label} onClick={generate}>
-            Generate
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Stack>
+        </Modal>
+      </Stack>
+    </CarbonScope>
   );
 }
