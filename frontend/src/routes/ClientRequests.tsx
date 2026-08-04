@@ -1,19 +1,13 @@
 import {
-  Alert,
-  Button,
   Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  MenuItem,
-  Paper,
+  InlineNotification,
+  Modal,
+  Select,
+  SelectItem,
   Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+  TextArea,
+  Tile,
+} from "@carbon/react";
 import {
   PORTAL_SUBMISSION_KIND_LABEL,
   PORTAL_SUBMISSION_STATUS_LABEL,
@@ -27,10 +21,16 @@ import {
 } from "@esti/contracts";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { DataState } from "../components/DataState.js";
+import { CarbonScope } from "../carbon/CarbonScope.js";
+import {
+  DataGrid,
+  DataState,
+  StatusDot,
+  StatusTag,
+  type GridColDef,
+} from "../carbon/adapters/index.js";
 import { PageHeader } from "../components/PageHeader.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
-import { StatusDot, StatusTag } from "../components/StatusTag.js";
 import { SubmissionThread } from "../components/SubmissionThread.js";
 import { trpc } from "../lib/trpc.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
@@ -40,6 +40,8 @@ const KIND_TAG: Record<string, "purple" | "blue" | "teal"> = {
   CHANGE_REQUEST: "purple",
   FEEDBACK: "blue",
 };
+
+const HELPER: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
 
 export function ClientRequests({ embedded = false }: { embedded?: boolean }) {
   const utils = trpc.useUtils();
@@ -135,29 +137,29 @@ export function ClientRequests({ embedded = false }: { embedded?: boolean }) {
       renderCell: (p) => {
         const r = p.row;
         return (
-          <Stack spacing={0.25} sx={{ py: 1 }}>
-            <Typography variant="body2">{r.subject}</Typography>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "0.5rem 0" }}>
+            <span className="cds--type-body-01">{r.subject}</span>
             {r.body && (
-              <Typography variant="caption" className="esti-label esti-label--secondary" color="text.secondary">
+              <span className="esti-label esti-label--secondary" style={{ color: "var(--cds-text-secondary)" }}>
                 {r.body}
-              </Typography>
+              </span>
             )}
             {r.rating != null && (
-              <Typography variant="caption" className="esti-label esti-label--helper" color="text.secondary">
+              <span className="esti-label esti-label--helper" style={{ color: "var(--cds-text-secondary)" }}>
                 Rating: {r.rating}/5
-              </Typography>
+              </span>
             )}
             {r.refDrawingRef && (
-              <Typography variant="caption" className="esti-label esti-label--helper" color="text.secondary">
+              <span className="esti-label esti-label--helper" style={{ color: "var(--cds-text-secondary)" }}>
                 Ref drawing: {r.refDrawingRef}{r.refDrawingTitle ? ` — ${r.refDrawingTitle}` : ""}
-              </Typography>
+              </span>
             )}
             {r.attentionToId && (
-              <Typography variant="caption" className="esti-label esti-label--helper" color="text.secondary">
+              <span className="esti-label esti-label--helper" style={{ color: "var(--cds-text-secondary)" }}>
                 Attn: {(r as { submittedBy?: string | null }).submittedBy ?? r.attentionToId}
-              </Typography>
+              </span>
             )}
-          </Stack>
+          </div>
         );
       },
     },
@@ -166,7 +168,7 @@ export function ClientRequests({ embedded = false }: { embedded?: boolean }) {
       headerName: "Project",
       flex: 1,
       minWidth: 120,
-      renderCell: (p) => <Link to={`/projects/${p.row.projectId}`}>{p.row.projectRef}</Link>,
+      renderCell: (p) => <Link to={`/projects/${p.row.projectId}`} className="cds--link">{p.row.projectRef}</Link>,
     },
     {
       field: "clientName",
@@ -183,20 +185,20 @@ export function ClientRequests({ embedded = false }: { embedded?: boolean }) {
       renderCell: (p) => {
         const r = p.row;
         return (
-          <Stack spacing={0.5} sx={{ py: 1 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", padding: "0.5rem 0" }}>
             <StatusTag
               value={r.status as PortalSubmissionStatusT}
               map={PORTAL_SUBMISSION_STATUS_TAG}
               label={PORTAL_SUBMISSION_STATUS_LABEL[r.status as PortalSubmissionStatusT] ?? r.status}
             />
             {(r.affectsCosting || r.affectsTimeline || r.isBillable) && (
-              <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
                 {r.affectsCosting && <StatusDot color="red" label="Cost" />}
                 {r.affectsTimeline && <StatusDot color="magenta" label="Time" />}
                 {r.isBillable && <StatusDot color="purple" label="Billable" />}
-              </Stack>
+              </div>
             )}
-          </Stack>
+          </div>
         );
       },
     },
@@ -251,221 +253,203 @@ export function ClientRequests({ embedded = false }: { embedded?: boolean }) {
   ];
 
   return (
-    <Stack spacing={3}>
-      {!embedded && (
-        <PageHeader
-          title="Client requests"
-          description={`Acknowledgements, change requests and feedback raised from the ${AORMS_PORTALS.client.label.toLowerCase()}.`}
-        />
-      )}
+    <CarbonScope>
+      <Stack gap={6}>
+        {!embedded && (
+          <PageHeader
+            title="Client requests"
+            description={`Acknowledgements, change requests and feedback raised from the ${AORMS_PORTALS.client.label.toLowerCase()}.`}
+          />
+        )}
 
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }}>
-        <TextField
-          id="cr-status"
-          select
-          size="small"
-          label="Status"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          sx={{ minWidth: 180 }}
+        <div style={{ display: "flex", alignItems: "flex-end", gap: "1rem", flexWrap: "wrap" }}>
+          <div style={{ minWidth: 180 }}>
+            <Select
+              id="cr-status"
+              size="sm"
+              labelText="Status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+            >
+              <SelectItem value="" text="All statuses" />
+              {PortalSubmissionStatus.options.map((s) => (
+                <SelectItem key={s} value={s} text={PORTAL_SUBMISSION_STATUS_LABEL[s]} />
+              ))}
+            </Select>
+          </div>
+          <div style={{ minWidth: 180 }}>
+            <Select
+              id="cr-kind"
+              size="sm"
+              labelText="Kind"
+              value={kind}
+              onChange={(e) => setKind(e.target.value)}
+            >
+              <SelectItem value="" text="All kinds" />
+              {PortalSubmissionKind.options.map((k) => (
+                <SelectItem key={k} value={k} text={PORTAL_SUBMISSION_KIND_LABEL[k]} />
+              ))}
+            </Select>
+          </div>
+        </div>
+
+        {listQ.error && (
+          <InlineNotification kind="error" lowContrast hideCloseButton title="Could not load client requests" subtitle={listQ.error.message} />
+        )}
+
+        <DataState
+          loading={listQ.isLoading}
+          isEmpty={rows.length === 0}
+          columnCount={7}
+          empty={{ title: "No client requests", description: `Items raised from the ${AORMS_PORTALS.client.label.toLowerCase()} appear here.` }}
         >
-          <MenuItem value="">All statuses</MenuItem>
-          {PortalSubmissionStatus.options.map((s) => (
-            <MenuItem key={s} value={s}>{PORTAL_SUBMISSION_STATUS_LABEL[s]}</MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          id="cr-kind"
-          select
-          size="small"
-          label="Kind"
-          value={kind}
-          onChange={(e) => setKind(e.target.value)}
-          sx={{ minWidth: 180 }}
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            getRowHeight={() => "auto"}
+            density="compact"
+            disableRowSelectionOnClick
+            hideFooter
+            autoHeight
+          />
+        </DataState>
+
+        {/* ── Impact Assessment modal ──────────────────────────────────────── */}
+        <Modal
+          open={impact !== null}
+          size="sm"
+          modalHeading={impact ? `Impact assessment — ${impact.subject}` : "Impact assessment"}
+          primaryButtonText={sendImpact.isPending ? "Sending…" : "Send to client"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={sendImpact.isPending}
+          onRequestClose={() => setImpact(null)}
+          onRequestSubmit={() =>
+            impact &&
+            sendImpact.mutate({
+              submissionId: impact.id,
+              affectsCosting: impact.affectsCosting,
+              affectsTimeline: impact.affectsTimeline,
+              isBillable: impact.isBillable,
+              architectComment: impact.architectComment || undefined,
+            })
+          }
         >
-          <MenuItem value="">All kinds</MenuItem>
-          {PortalSubmissionKind.options.map((k) => (
-            <MenuItem key={k} value={k}>{PORTAL_SUBMISSION_KIND_LABEL[k]}</MenuItem>
-          ))}
-        </TextField>
-      </Stack>
-
-      {listQ.error && (
-        <Alert severity="error">Could not load client requests — {listQ.error.message}</Alert>
-      )}
-
-      <DataState
-        loading={listQ.isLoading}
-        isEmpty={rows.length === 0}
-        columnCount={7}
-        empty={{ title: "No client requests", description: `Items raised from the ${AORMS_PORTALS.client.label.toLowerCase()} appear here.` }}
-      >
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          getRowHeight={() => "auto"}
-          density="compact"
-          disableRowSelectionOnClick
-          hideFooter
-          autoHeight
-        />
-      </DataState>
-
-      {/* ── Impact Assessment dialog ─────────────────────────────────────── */}
-      <Dialog aria-labelledby="client-requests-impact-title" open={impact !== null} onClose={() => setImpact(null)} fullWidth maxWidth="sm">
-        <DialogTitle id="client-requests-impact-title">{impact ? `Impact assessment — ${impact.subject}` : "Impact assessment"}</DialogTitle>
-        <DialogContent>
           {impact && (
-            <Stack spacing={2} sx={{ mt: 1 }}>
+            <Stack gap={5}>
               {impact.body && (
-                <Paper className="esti-neu-inset" sx={{ p: 2 }}>
-                  <Typography variant="caption" color="text.secondary">Client's request</Typography>
-                  <Typography variant="body2">{impact.body}</Typography>
+                <Tile>
+                  <p className="cds--type-label-01" style={HELPER}>Client&apos;s request</p>
+                  <p className="cds--type-body-01" style={{ margin: "0.25rem 0 0" }}>{impact.body}</p>
                   {impact.refDrawingRef && (
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+                    <p className="cds--type-label-01" style={{ ...HELPER, marginTop: "0.5rem" }}>
                       Reference drawing: {impact.refDrawingRef}{impact.refDrawingTitle ? ` — ${impact.refDrawingTitle}` : ""}
-                    </Typography>
+                    </p>
                   )}
-                </Paper>
+                </Tile>
               )}
-              <Typography variant="body2">Tick all that apply to this change:</Typography>
-              <Stack spacing={1.5}>
-                <Stack spacing={0}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        id="ia-costing"
-                        checked={impact.affectsCosting}
-                        onChange={(e) => setImpact({ ...impact, affectsCosting: e.target.checked })}
-                      />
-                    }
-                    label="Affects costing"
+              <p className="cds--type-body-01" style={{ margin: 0 }}>Tick all that apply to this change:</p>
+              <Stack gap={4}>
+                <div>
+                  <Checkbox
+                    id="ia-costing"
+                    checked={impact.affectsCosting}
+                    onChange={(_e, { checked }) => setImpact({ ...impact, affectsCosting: checked })}
+                    labelText="Affects costing"
                   />
-                  <Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
+                  <p className="cds--type-label-01" style={{ ...HELPER, marginLeft: "1.5rem" }}>
                     This change will require a revised fee or additional costing.
-                  </Typography>
-                </Stack>
-                <Stack spacing={0}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        id="ia-timeline"
-                        checked={impact.affectsTimeline}
-                        onChange={(e) => setImpact({ ...impact, affectsTimeline: e.target.checked })}
-                      />
-                    }
-                    label="Affects timeline / delivery schedule"
+                  </p>
+                </div>
+                <div>
+                  <Checkbox
+                    id="ia-timeline"
+                    checked={impact.affectsTimeline}
+                    onChange={(_e, { checked }) => setImpact({ ...impact, affectsTimeline: checked })}
+                    labelText="Affects timeline / delivery schedule"
                   />
-                  <Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
+                  <p className="cds--type-label-01" style={{ ...HELPER, marginLeft: "1.5rem" }}>
                     This change will extend or shift the project delivery dates.
-                  </Typography>
-                </Stack>
-                <Stack spacing={0}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        id="ia-billable"
-                        checked={impact.isBillable}
-                        onChange={(e) => setImpact({ ...impact, isBillable: e.target.checked })}
-                      />
-                    }
-                    label="Billable additional work"
+                  </p>
+                </div>
+                <div>
+                  <Checkbox
+                    id="ia-billable"
+                    checked={impact.isBillable}
+                    onChange={(_e, { checked }) => setImpact({ ...impact, isBillable: checked })}
+                    labelText="Billable additional work"
                   />
-                  <Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
+                  <p className="cds--type-label-01" style={{ ...HELPER, marginLeft: "1.5rem" }}>
                     This change is outside the original scope and will be billed separately.
-                  </Typography>
-                </Stack>
+                  </p>
+                </div>
               </Stack>
-              <TextField
+              <TextArea
                 id="ia-comment"
-                label="Your comment to the client (optional)"
+                labelText="Your comment to the client (optional)"
                 helperText="Explain the impact in plain terms. The client will see this before approving."
-                multiline
                 rows={4}
                 value={impact.architectComment}
                 onChange={(e) => setImpact({ ...impact, architectComment: e.target.value })}
               />
               {sendImpact.error && (
-                <Alert severity="error">Could not send — {sendImpact.error.message}</Alert>
+                <InlineNotification kind="error" lowContrast hideCloseButton title="Could not send" subtitle={sendImpact.error.message} />
               )}
             </Stack>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setImpact(null)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={sendImpact.isPending}
-            onClick={() =>
-              impact &&
-              sendImpact.mutate({
-                submissionId: impact.id,
-                affectsCosting: impact.affectsCosting,
-                affectsTimeline: impact.affectsTimeline,
-                isBillable: impact.isBillable,
-                architectComment: impact.architectComment || undefined,
-              })
-            }
-          >
-            {sendImpact.isPending ? "Sending…" : "Send to client"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
 
-      {/* ── Triage dialog ────────────────────────────────────────────────── */}
-      <Dialog aria-labelledby="client-requests-triage-title" open={triage !== null} onClose={() => setTriage(null)} fullWidth maxWidth="sm">
-        <DialogTitle id="client-requests-triage-title">{triage ? `Triage — ${triage.subject}` : "Triage"}</DialogTitle>
-        <DialogContent>
+        {/* ── Triage modal ─────────────────────────────────────────────────── */}
+        <Modal
+          open={triage !== null}
+          size="sm"
+          modalHeading={triage ? `Triage — ${triage.subject}` : "Triage"}
+          primaryButtonText={setStatusM.isPending ? "Saving…" : "Save"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={setStatusM.isPending}
+          onRequestClose={() => setTriage(null)}
+          onRequestSubmit={() =>
+            triage &&
+            setStatusM.mutate({
+              id: triage.id,
+              status: triage.status,
+              responseNote: triage.responseNote || undefined,
+            })
+          }
+        >
           {triage && (
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <TextField
+            <Stack gap={5}>
+              <Select
                 id="tr-status"
-                select
-                label="Status"
+                labelText="Status"
                 value={triage.status}
                 onChange={(e) => setTriage({ ...triage, status: e.target.value as PortalSubmissionStatusT })}
               >
                 {PortalSubmissionStatus.options.map((s) => (
-                  <MenuItem key={s} value={s}>{PORTAL_SUBMISSION_STATUS_LABEL[s]}</MenuItem>
+                  <SelectItem key={s} value={s} text={PORTAL_SUBMISSION_STATUS_LABEL[s]} />
                 ))}
-              </TextField>
-              <TextField
+              </Select>
+              <TextArea
                 id="tr-note"
-                label="Response to client (optional)"
-                multiline
+                labelText="Response to client (optional)"
                 rows={3}
                 value={triage.responseNote}
                 onChange={(e) => setTriage({ ...triage, responseNote: e.target.value })}
               />
               {setStatusM.error && (
-                <Alert severity="error">Could not save — {setStatusM.error.message}</Alert>
+                <InlineNotification kind="error" lowContrast hideCloseButton title="Could not save" subtitle={setStatusM.error.message} />
               )}
             </Stack>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setTriage(null)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={setStatusM.isPending}
-            onClick={() =>
-              triage &&
-              setStatusM.mutate({
-                id: triage.id,
-                status: triage.status,
-                responseNote: triage.responseNote || undefined,
-              })
-            }
-          >
-            {setStatusM.isPending ? "Saving…" : "Save"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
 
-      {/* ── Thread dialog ────────────────────────────────────────────────── */}
-      <Dialog aria-labelledby="client-requests-conversation-title" open={threadFor !== null} onClose={() => setThreadFor(null)} fullWidth maxWidth="sm">
-        <DialogTitle id="client-requests-conversation-title">{threadFor ? `Conversation — ${threadFor.subject}` : "Conversation"}</DialogTitle>
-        <DialogContent>
+        {/* ── Thread modal ─────────────────────────────────────────────────── */}
+        <Modal
+          open={threadFor !== null}
+          size="sm"
+          passiveModal
+          modalHeading={threadFor ? `Conversation — ${threadFor.subject}` : "Conversation"}
+          onRequestClose={() => setThreadFor(null)}
+        >
           {threadFor && (
             <SubmissionThread
               messages={threadQ.data ?? []}
@@ -474,11 +458,8 @@ export function ClientRequests({ embedded = false }: { embedded?: boolean }) {
               onReply={(body) => reply.mutate({ id: threadFor.id, body })}
             />
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setThreadFor(null)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-    </Stack>
+        </Modal>
+      </Stack>
+    </CarbonScope>
   );
 }
