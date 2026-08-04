@@ -1,18 +1,14 @@
 import {
-  Alert,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
+  InlineNotification,
+  Modal,
+  NumberInput,
+  Select,
+  SelectItem,
   Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import Add from "@mui/icons-material/Add";
+  TextArea,
+  TextInput,
+} from "@carbon/react";
+import { Add } from "@carbon/icons-react";
 import {
   VENDOR_CATEGORIES,
   VendorCategory,
@@ -22,10 +18,15 @@ import {
 } from "@esti/contracts";
 import { useState } from "react";
 import { useScreenActions } from "@hcw/ui-kit";
-import { ConfirmModal } from "../components/ConfirmModal.js";
-import { DataState } from "../components/DataState.js";
-import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
-import { StatusDot } from "../components/StatusTag.js";
+import { CarbonScope } from "../carbon/CarbonScope.js";
+import {
+  ConfirmModal,
+  DataGrid,
+  DataState,
+  PageBreadcrumb,
+  StatusDot,
+  type GridColDef,
+} from "../carbon/adapters/index.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
 import { VendorQuotes } from "../components/vendor/VendorQuotes.js";
@@ -57,6 +58,8 @@ function scoreTag(score: number): "green" | "teal" | "blue" | "gray" {
   if (score > 0) return "blue";
   return "gray";
 }
+
+const SUBTEXT: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
 
 export function Vendors() {
   const utils = trpc.useUtils();
@@ -142,18 +145,18 @@ export function Vendors() {
       renderCell: (p) => {
         const v = p.row;
         return (
-          <Stack spacing={0.25} sx={{ justifyContent: "center", height: 1, py: 0.5 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "0.25rem 0" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span>{v.name}</span>
               {!v.active && <StatusDot color="gray" label="Inactive" />}
-            </Box>
-            {v.companyName && <Typography variant="caption" color="text.secondary">{v.companyName}</Typography>}
+            </div>
+            {v.companyName && <span className="cds--type-label-01" style={SUBTEXT}>{v.companyName}</span>}
             {(v.city || v.state) && (
-              <Typography variant="caption" color="text.secondary">
+              <span className="cds--type-label-01" style={SUBTEXT}>
                 {[v.city, v.state].filter(Boolean).join(", ")}
-              </Typography>
+              </span>
             )}
-          </Stack>
+          </div>
         );
       },
     },
@@ -173,11 +176,11 @@ export function Vendors() {
       renderCell: (p) => {
         const v = p.row;
         return (
-          <Stack spacing={0.25} sx={{ justifyContent: "center", height: 1, py: 0.5 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "0.25rem 0" }}>
             <span>{v.contactPerson ?? "—"}</span>
-            {v.phone && <Typography variant="caption" color="text.secondary">{v.phone}</Typography>}
-            {v.email && <Typography variant="caption" color="text.secondary">{v.email}</Typography>}
-          </Stack>
+            {v.phone && <span className="cds--type-label-01" style={SUBTEXT}>{v.phone}</span>}
+            {v.email && <span className="cds--type-label-01" style={SUBTEXT}>{v.email}</span>}
+          </div>
         );
       },
     },
@@ -190,10 +193,10 @@ export function Vendors() {
       renderCell: (p) => {
         const v = p.row;
         return (
-          <Stack spacing={0.25} sx={{ justifyContent: "center", height: 1, py: 0.5 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "0.25rem 0" }}>
             <span>{v.gstin ?? "—"}</span>
-            {v.pan && <Typography variant="caption" color="text.secondary">{v.pan}</Typography>}
-          </Stack>
+            {v.pan && <span className="cds--type-label-01" style={SUBTEXT}>{v.pan}</span>}
+          </div>
         );
       },
     },
@@ -295,222 +298,201 @@ export function Vendors() {
         title="Vendors"
         description="Material supplier directory — categories, statutory ids, ratings and pricing history."
         aside={
-          <Stack spacing={1.5}>
-            <TextField
+          <CarbonScope>
+            <Select
               id="vn-cat"
-              select
-              size="small"
-              label="Category"
+              labelText="Category"
+              size="sm"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              fullWidth
             >
-              <MenuItem value="">All categories</MenuItem>
+              <SelectItem value="" text="All categories" />
               {VendorCategory.options.map((c) => (
-                <MenuItem key={c} value={c}>{VENDOR_CATEGORIES[c]}</MenuItem>
+                <SelectItem key={c} value={c} text={VENDOR_CATEGORIES[c]} />
               ))}
-            </TextField>
-          </Stack>
+            </Select>
+          </CarbonScope>
         }
       >
       <PageBreadcrumb items={[{ label: "Third Parties" }, { label: "Vendors" }]} />
-      {listQ.error && (
-        <Alert severity="error">
-          <strong>Could not load vendors</strong> — {listQ.error.message}
-        </Alert>
-      )}
+      <CarbonScope>
+        <Stack gap={5}>
+          {listQ.error && (
+            <InlineNotification kind="error" lowContrast hideCloseButton title="Could not load vendors" subtitle={listQ.error.message} />
+          )}
 
-      <DataState
-        loading={listQ.isLoading}
-        isEmpty={rows.length === 0}
-        columnCount={6}
-        empty={{ title: "No vendors yet", description: "Add a material supplier to track contacts, ratings and pricing." }}
-      >
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          density="compact"
-          getRowHeight={() => "auto"}
-          disableRowSelectionOnClick
-          hideFooter
-          autoHeight
-          onRowClick={(params) => setSelectedId(selectedId === params.id ? null : (params.id as string))}
-          getRowClassName={(params) => (params.id === selectedId ? "esti-vendor-selected" : "")}
-          sx={{
-            "& .MuiDataGrid-row": { cursor: "pointer" },
-            "& .esti-vendor-selected": { backgroundColor: "var(--cds-layer-selected)" },
-          }}
-        />
-      </DataState>
-
-      {/* Pricing history for the selected vendor */}
-      {selected && (
-        <Stack spacing={2}>
-          <Box className="esti-row-between">
-            <Typography variant="h6" component="h4">{selected.name} — Pricing history</Typography>
-          </Box>
           <DataState
-            loading={pricesQ.isLoading}
-            isEmpty={!pricesQ.isLoading && (pricesQ.data?.length ?? 0) === 0}
-            empty={{ title: "No price records", description: "Record a quoted or invoiced rate for a material from this vendor." }}
+            loading={listQ.isLoading}
+            isEmpty={rows.length === 0}
             columnCount={6}
+            empty={{ title: "No vendors yet", description: "Add a material supplier to track contacts, ratings and pricing." }}
           >
             <DataGrid
-              rows={pricesQ.data ?? []}
-              columns={priceColumns}
+              rows={rows}
+              columns={columns}
               density="compact"
+              getRowHeight={() => "auto"}
               disableRowSelectionOnClick
               hideFooter
               autoHeight
+              onRowClick={(params) => setSelectedId(selectedId === params.id ? null : (params.id as string))}
             />
           </DataState>
 
-          <VendorQuotes vendorId={selected.id} />
-        </Stack>
-      )}
+          {/* Pricing history for the selected vendor */}
+          {selected && (
+            <Stack gap={4}>
+              <h4 className="cds--type-heading-03" style={{ margin: 0 }}>{selected.name} — Pricing history</h4>
+              <DataState
+                loading={pricesQ.isLoading}
+                isEmpty={!pricesQ.isLoading && (pricesQ.data?.length ?? 0) === 0}
+                empty={{ title: "No price records", description: "Record a quoted or invoiced rate for a material from this vendor." }}
+                columnCount={6}
+              >
+                <DataGrid
+                  rows={pricesQ.data ?? []}
+                  columns={priceColumns}
+                  density="compact"
+                  disableRowSelectionOnClick
+                  hideFooter
+                  autoHeight
+                />
+              </DataState>
 
-      <VendorRateCompare />
+              <VendorQuotes vendorId={selected.id} />
+            </Stack>
+          )}
+
+          <VendorRateCompare />
+        </Stack>
+      </CarbonScope>
       </RailLayout>
 
-      {/* create / edit vendor */}
-      <Dialog aria-labelledby="vendors-form-title" open={form !== null} onClose={() => setForm(null)} fullWidth maxWidth="sm">
-        <DialogTitle id="vendors-form-title">{form?.id ? "Edit vendor" : "New vendor"}</DialogTitle>
-        <DialogContent>
+      <CarbonScope>
+        {/* create / edit vendor */}
+        <Modal
+          open={form !== null}
+          size="sm"
+          modalHeading={form?.id ? "Edit vendor" : "New vendor"}
+          primaryButtonText={saving ? "Saving…" : form?.id ? "Save" : "Create"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={!form?.name || saving}
+          onRequestClose={() => setForm(null)}
+          onRequestSubmit={submit}
+        >
           {form && (
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <TextField id="vn-name" label="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-              <TextField id="vn-fcat" select label="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value as VendorCategoryCode })}>
-                {VendorCategory.options.map((c) => <MenuItem key={c} value={c}>{VENDOR_CATEGORIES[c]}</MenuItem>)}
-              </TextField>
-              <TextField id="vn-company" label="Company (optional)" value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
-              <Stack direction="row" spacing={2}>
-                <TextField id="vn-contact" label="Contact person" value={form.contactPerson} onChange={(e) => setForm({ ...form, contactPerson: e.target.value })} sx={{ flex: 1 }} />
-                <TextField id="vn-phone" label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} sx={{ flex: 1 }} />
-              </Stack>
-              <TextField id="vn-email" label="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              <Stack direction="row" spacing={2}>
-                <TextField id="vn-gstin" label="GSTIN" value={form.gstin} onChange={(e) => setForm({ ...form, gstin: e.target.value.toUpperCase() })} sx={{ flex: 1 }} />
-                <TextField id="vn-pan" label="PAN" value={form.pan} onChange={(e) => setForm({ ...form, pan: e.target.value.toUpperCase() })} sx={{ flex: 1 }} />
-              </Stack>
-              <Stack direction="row" spacing={2}>
-                <TextField id="vn-city" label="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} sx={{ flex: 1 }} />
-                <TextField id="vn-state" label="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} sx={{ flex: 1 }} />
-              </Stack>
+            <Stack gap={5}>
+              <TextInput id="vn-name" labelText="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Select id="vn-fcat" labelText="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value as VendorCategoryCode })}>
+                {VendorCategory.options.map((c) => <SelectItem key={c} value={c} text={VENDOR_CATEGORIES[c]} />)}
+              </Select>
+              <TextInput id="vn-company" labelText="Company (optional)" value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <TextInput id="vn-contact" labelText="Contact person" value={form.contactPerson} onChange={(e) => setForm({ ...form, contactPerson: e.target.value })} />
+                <TextInput id="vn-phone" labelText="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              </div>
+              <TextInput id="vn-email" labelText="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <TextInput id="vn-gstin" labelText="GSTIN" value={form.gstin} onChange={(e) => setForm({ ...form, gstin: e.target.value.toUpperCase() })} />
+                <TextInput id="vn-pan" labelText="PAN" value={form.pan} onChange={(e) => setForm({ ...form, pan: e.target.value.toUpperCase() })} />
+              </div>
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <TextInput id="vn-city" labelText="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+                <TextInput id="vn-state" labelText="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+              </div>
               {err && (
-                <Alert severity="error">
-                  <strong>Could not save</strong> — {err.message}
-                </Alert>
+                <InlineNotification kind="error" lowContrast hideCloseButton title="Could not save" subtitle={err.message} />
               )}
             </Stack>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setForm(null)}>Cancel</Button>
-          <Button variant="contained" disabled={!form?.name || saving} onClick={submit}>
-            {saving ? "Saving…" : form?.id ? "Save" : "Create"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
 
-      {/* rating */}
-      <Dialog aria-labelledby="vendors-rate-title" open={rating !== null} onClose={() => setRating(null)} fullWidth maxWidth="sm">
-        <DialogTitle id="vendors-rate-title">{rating ? `Rate — ${rating.name}` : "Rate"}</DialogTitle>
-        <DialogContent>
+        {/* rating */}
+        <Modal
+          open={rating !== null}
+          size="sm"
+          modalHeading={rating ? `Rate — ${rating.name}` : "Rate"}
+          primaryButtonText={setRatingM.isPending ? "Saving…" : "Save rating"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={setRatingM.isPending}
+          onRequestClose={() => setRating(null)}
+          onRequestSubmit={() => rating && setRatingM.mutate({
+            id: rating.id,
+            qualityRating: rating.quality ? Number(rating.quality) : undefined,
+            reliabilityRating: rating.reliability ? Number(rating.reliability) : undefined,
+            pricingRating: rating.pricing ? Number(rating.pricing) : undefined,
+            notes: rating.notes || undefined,
+          })}
+        >
           {rating && (
-            <Stack spacing={2} sx={{ mt: 1 }}>
+            <Stack gap={5}>
               {([["quality", "Quality"], ["reliability", "Reliability"], ["pricing", "Pricing"]] as const).map(([k, label]) => (
-                <TextField key={k} id={`vn-r-${k}`} select label={label} value={rating[k]}
+                <Select key={k} id={`vn-r-${k}`} labelText={label} value={rating[k]}
                   onChange={(e) => setRating({ ...rating, [k]: e.target.value })}>
-                  <MenuItem value="">— not rated —</MenuItem>
-                  {[5, 4, 3, 2, 1].map((n) => <MenuItem key={n} value={String(n)}>{`${n} / 5`}</MenuItem>)}
-                </TextField>
+                  <SelectItem value="" text="— not rated —" />
+                  {[5, 4, 3, 2, 1].map((n) => <SelectItem key={n} value={String(n)} text={`${n} / 5`} />)}
+                </Select>
               ))}
-              <TextField id="vn-r-notes" label="Notes (optional)" multiline rows={3} value={rating.notes}
+              <TextArea id="vn-r-notes" labelText="Notes (optional)" rows={3} value={rating.notes}
                 onChange={(e) => setRating({ ...rating, notes: e.target.value })} />
               {setRatingM.error && (
-                <Alert severity="error">
-                  <strong>Could not save</strong> — {setRatingM.error.message}
-                </Alert>
+                <InlineNotification kind="error" lowContrast hideCloseButton title="Could not save" subtitle={setRatingM.error.message} />
               )}
             </Stack>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setRating(null)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={setRatingM.isPending}
-            onClick={() => rating && setRatingM.mutate({
-              id: rating.id,
-              qualityRating: rating.quality ? Number(rating.quality) : undefined,
-              reliabilityRating: rating.reliability ? Number(rating.reliability) : undefined,
-              pricingRating: rating.pricing ? Number(rating.pricing) : undefined,
-              notes: rating.notes || undefined,
-            })}
-          >
-            {setRatingM.isPending ? "Saving…" : "Save rating"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
 
-      {/* add price */}
-      <Dialog aria-labelledby="vendors-price-title" open={priceForm !== null} onClose={() => setPriceForm(null)} fullWidth maxWidth="sm">
-        <DialogTitle id="vendors-price-title">{`Add price${selected ? ` — ${selected.name}` : ""}`}</DialogTitle>
-        <DialogContent>
+        {/* add price */}
+        <Modal
+          open={priceForm !== null}
+          size="sm"
+          modalHeading={`Add price${selected ? ` — ${selected.name}` : ""}`}
+          primaryButtonText={addPrice.isPending ? "Saving…" : "Add"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={addPrice.isPending || !priceForm?.materialName || !priceForm?.unit || (priceForm?.rateRupees ?? 0) <= 0}
+          onRequestClose={() => setPriceForm(null)}
+          onRequestSubmit={() => {
+            if (!priceForm || !selectedId) return;
+            addPrice.mutate({
+              vendorId: selectedId,
+              materialName: priceForm.materialName,
+              unit: priceForm.unit,
+              ratePaise: Math.round(priceForm.rateRupees * 100),
+              effectiveDate: priceForm.effectiveDate,
+              source: priceForm.source,
+              notes: priceForm.notes || undefined,
+            });
+          }}
+        >
           {priceForm && (
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <TextField id="vp-mat" label="Material" placeholder="OPC 53 grade cement" value={priceForm.materialName}
+            <Stack gap={5}>
+              <TextInput id="vp-mat" labelText="Material" placeholder="OPC 53 grade cement" value={priceForm.materialName}
                 onChange={(e) => setPriceForm({ ...priceForm, materialName: e.target.value })} />
-              <Stack direction="row" spacing={2}>
-                <TextField id="vp-unit" label="Unit" placeholder="bag" value={priceForm.unit}
-                  onChange={(e) => setPriceForm({ ...priceForm, unit: e.target.value })} sx={{ flex: 1 }} />
-                <TextField id="vp-rate" label="Rate (₹)" type="number" value={priceForm.rateRupees}
-                  slotProps={{ htmlInput: { min: 0, step: 0.5 } }}
-                  onChange={(e) => setPriceForm({ ...priceForm, rateRupees: Number(e.target.value) })} sx={{ flex: 1 }} />
-              </Stack>
-              <Stack direction="row" spacing={2}>
-                <TextField id="vp-date" label="Effective date" type="date" value={priceForm.effectiveDate}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  onChange={(e) => setPriceForm({ ...priceForm, effectiveDate: e.target.value })} sx={{ flex: 1 }} />
-                <TextField id="vp-src" select label="Source" value={priceForm.source}
-                  onChange={(e) => setPriceForm({ ...priceForm, source: e.target.value as "QUOTE" | "INVOICE" | "MANUAL" })} sx={{ flex: 1 }}>
-                  <MenuItem value="MANUAL">Manual</MenuItem>
-                  <MenuItem value="QUOTE">Quote</MenuItem>
-                  <MenuItem value="INVOICE">Invoice</MenuItem>
-                </TextField>
-              </Stack>
-              <TextField id="vp-notes" label="Notes (optional)" value={priceForm.notes}
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <TextInput id="vp-unit" labelText="Unit" placeholder="bag" value={priceForm.unit}
+                  onChange={(e) => setPriceForm({ ...priceForm, unit: e.target.value })} />
+                <NumberInput id="vp-rate" label="Rate (₹)" min={0} step={0.5} value={priceForm.rateRupees}
+                  onChange={(_e, { value }) => setPriceForm({ ...priceForm, rateRupees: Number(value) || 0 })} />
+              </div>
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <TextInput id="vp-date" labelText="Effective date" type="date" value={priceForm.effectiveDate}
+                  onChange={(e) => setPriceForm({ ...priceForm, effectiveDate: e.target.value })} />
+                <Select id="vp-src" labelText="Source" value={priceForm.source}
+                  onChange={(e) => setPriceForm({ ...priceForm, source: e.target.value as "QUOTE" | "INVOICE" | "MANUAL" })}>
+                  <SelectItem value="MANUAL" text="Manual" />
+                  <SelectItem value="QUOTE" text="Quote" />
+                  <SelectItem value="INVOICE" text="Invoice" />
+                </Select>
+              </div>
+              <TextInput id="vp-notes" labelText="Notes (optional)" value={priceForm.notes}
                 onChange={(e) => setPriceForm({ ...priceForm, notes: e.target.value })} />
               {addPrice.error && (
-                <Alert severity="error">
-                  <strong>Could not save</strong> — {addPrice.error.message}
-                </Alert>
+                <InlineNotification kind="error" lowContrast hideCloseButton title="Could not save" subtitle={addPrice.error.message} />
               )}
             </Stack>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setPriceForm(null)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={addPrice.isPending || !priceForm?.materialName || !priceForm?.unit || (priceForm?.rateRupees ?? 0) <= 0}
-            onClick={() => {
-              if (!priceForm || !selectedId) return;
-              addPrice.mutate({
-                vendorId: selectedId,
-                materialName: priceForm.materialName,
-                unit: priceForm.unit,
-                ratePaise: Math.round(priceForm.rateRupees * 100),
-                effectiveDate: priceForm.effectiveDate,
-                source: priceForm.source,
-                notes: priceForm.notes || undefined,
-              });
-            }}
-          >
-            {addPrice.isPending ? "Saving…" : "Add"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
+      </CarbonScope>
 
       <ConfirmModal
         open={!!confirmId} heading="Remove vendor?" body="This permanently removes the vendor and all its price records."
