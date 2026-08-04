@@ -10,7 +10,7 @@
  * (ActionDock, GlassRail, KpiStrip, HealthGlassOrb, …) are NOT shimmed here;
  * their call-sites are rewritten onto Carbon patterns in Waves 3/5.
  */
-export { StatusDot, statusShapeFor, type StatusShape } from "./StatusDot.js";
+export { StatusDot, StatusTag, statusShapeFor, type StatusShape } from "./StatusDot.js";
 export { DataState } from "./DataState.js";
 export {
   ConfirmModal,
