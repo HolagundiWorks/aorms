@@ -1,20 +1,9 @@
-import {
-  Box,
-  Button,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import {
-  ATTENDANCE_STATUS,
-  type AttendanceStatusCode,
-} from "@esti/contracts";
+import { Button, Select, SelectItem, Stack, TextInput } from "@carbon/react";
+import { ATTENDANCE_STATUS, type AttendanceStatusCode } from "@esti/contracts";
 import { useEffect, useState } from "react";
-import { DataState } from "../DataState.js";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { DataGrid, DataState, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
 import { RowActionsMenu } from "../RowActionsMenu.js";
-import { StatusDot } from "../StatusTag.js";
 import { trpc } from "../../lib/trpc.js";
 import { toISO } from "./workHelpers.js";
 
@@ -74,24 +63,22 @@ export function AttendanceTab() {
       renderCell: (p) => {
         const status = statusFor(p.row.teamMemberId as string, p.row.status as string | null);
         return (
-          <TextField
-            id={`att-${p.row.teamMemberId}`}
-            select
-            size="small"
-            sx={{ minWidth: 150 }}
-            value={status}
-            onChange={(e) =>
-              setDraft((d) => ({
-                ...d,
-                [p.row.teamMemberId as string]: e.target.value as AttendanceStatusCode,
-              }))
-            }
-            slotProps={{ htmlInput: { "aria-label": "Status" } }}
-          >
-            {(Object.keys(ATTENDANCE_STATUS) as AttendanceStatusCode[]).map((k) => (
-              <MenuItem key={k} value={k}>{ATTENDANCE_STATUS[k]}</MenuItem>
-            ))}
-          </TextField>
+          <div style={{ minWidth: 150 }}>
+            <Select
+              id={`att-${p.row.teamMemberId}`}
+              labelText="Status"
+              hideLabel
+              size="sm"
+              value={status}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, [p.row.teamMemberId as string]: e.target.value as AttendanceStatusCode }))
+              }
+            >
+              {(Object.keys(ATTENDANCE_STATUS) as AttendanceStatusCode[]).map((k) => (
+                <SelectItem key={k} value={k} text={ATTENDANCE_STATUS[k]} />
+              ))}
+            </Select>
+          </div>
         );
       },
     },
@@ -105,81 +92,79 @@ export function AttendanceTab() {
       renderCell: (p) => {
         const status = statusFor(p.row.teamMemberId as string, p.row.status as string | null);
         return (
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <StatusDot color={STATUS_TAG[status]} label={ATTENDANCE_STATUS[status]} />
             <RowActionsMenu
               actions={[
                 {
                   label: "Save",
                   disabled: mark.isPending,
-                  onClick: () =>
-                    mark.mutate({
-                      teamMemberId: p.row.teamMemberId as string,
-                      attendanceDate: date,
-                      status,
-                    }),
+                  onClick: () => mark.mutate({ teamMemberId: p.row.teamMemberId as string, attendanceDate: date, status }),
                 },
               ]}
             />
-          </Stack>
+          </div>
         );
       },
     },
   ];
 
   return (
-    <Stack spacing={2}>
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-        <TextField
-          id="att-date"
-          label="Date"
-          type="date"
-          size="small"
-          value={date}
-          slotProps={{ inputLabel: { shrink: true } }}
-          onChange={(e) => setDate(e.target.value)}
-        />
-        <Button
-          variant="outlined"
-          disabled={saveAll.isPending || rows.length === 0}
-          onClick={() =>
-            saveAll.mutate({
-              date,
-              entries: rows.map((r) => ({
-                teamMemberId: r.teamMemberId,
-                status: draft[r.teamMemberId] ?? "PRESENT",
-              })),
-            })
-          }
-        >
-          Save register
-        </Button>
-      </Stack>
-      <Typography variant="body2">Daily office attendance — present, absent, half-day, WFH, or on leave. Architecture firms use a simple register, not hourly timesheets.</Typography>
+    <CarbonScope>
+      <Stack gap={5}>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: "1rem", flexWrap: "wrap" }}>
+          <div>
+            <TextInput
+              id="att-date"
+              labelText="Date"
+              type="date"
+              size="sm"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
+          <Button
+            kind="secondary"
+            disabled={saveAll.isPending || rows.length === 0}
+            onClick={() =>
+              saveAll.mutate({
+                date,
+                entries: rows.map((r) => ({
+                  teamMemberId: r.teamMemberId,
+                  status: draft[r.teamMemberId] ?? "PRESENT",
+                })),
+              })
+            }
+          >
+            Save register
+          </Button>
+        </div>
+        <p className="cds--type-body-01" style={{ margin: 0 }}>
+          Daily office attendance — present, absent, half-day, WFH, or on leave. Architecture firms
+          use a simple register, not hourly timesheets.
+        </p>
 
-      <DataState
-        loading={registerQ.isLoading}
-        isEmpty={rows.length === 0}
-        columnCount={4}
-        empty={{
-          title: "No team members",
-          description: "Add staff in Team before marking attendance.",
-        }}
-      >
-        <Box>
-          <Typography variant="h6" sx={{ p: 2, pb: 1 }}>{`Attendance · ${date}`}</Typography>
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            getRowId={(r) => r.teamMemberId}
-            getRowHeight={() => "auto"}
-            density="compact"
-            disableRowSelectionOnClick
-            hideFooter
-            autoHeight
-          />
-        </Box>
-      </DataState>
-    </Stack>
+        <DataState
+          loading={registerQ.isLoading}
+          isEmpty={rows.length === 0}
+          columnCount={4}
+          empty={{ title: "No team members", description: "Add staff in Team before marking attendance." }}
+        >
+          <div>
+            <p className="cds--type-heading-compact-01" style={{ margin: "0 0 0.5rem" }}>{`Attendance · ${date}`}</p>
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              getRowId={(r) => r.teamMemberId}
+              getRowHeight={() => "auto"}
+              density="compact"
+              disableRowSelectionOnClick
+              hideFooter
+              autoHeight
+            />
+          </div>
+        </DataState>
+      </Stack>
+    </CarbonScope>
   );
 }

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Stack } from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import { Button, InlineNotification } from "@carbon/react";
 import { licensingPlanLabel } from "@esti/contracts";
-import { StatusDot } from "../../components/StatusTag.js";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { DataGrid, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../lib/trpc";
 
 type Requests = Awaited<ReturnType<typeof trpc.admin.requests.list.query>>;
@@ -59,13 +59,7 @@ export default function RequestsTab() {
   }
 
   const columns: GridColDef<Requests[number]>[] = [
-    {
-      field: "createdAt",
-      headerName: "Requested",
-      flex: 1.2,
-      minWidth: 180,
-      renderCell: (p) => fmt(p.row.createdAt),
-    },
+    { field: "createdAt", headerName: "Requested", flex: 1.2, minWidth: 180, renderCell: (p) => fmt(p.row.createdAt) },
     { field: "email", headerName: "Email", flex: 1.4, minWidth: 200 },
     {
       field: "planCode",
@@ -80,9 +74,7 @@ export default function RequestsTab() {
       headerName: "Status",
       flex: 0.8,
       minWidth: 120,
-      renderCell: (p) => (
-        <StatusDot color={STATUS_TAG[p.row.status] ?? "gray"} label={p.row.status} />
-      ),
+      renderCell: (p) => <StatusDot color={STATUS_TAG[p.row.status] ?? "gray"} label={p.row.status} />,
     },
     {
       field: "actions",
@@ -92,45 +84,32 @@ export default function RequestsTab() {
       width: 220,
       renderCell: (p) =>
         p.row.status === "PENDING" ? (
-          <Stack direction="row" spacing={1}>
-            <Button
-              variant="contained"
-              size="small"
-              disabled={busy === p.row.id}
-              onClick={() => fulfil(p.row.id)}
-            >
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <Button size="sm" disabled={busy === p.row.id} onClick={() => fulfil(p.row.id)}>
               Approve &amp; email
             </Button>
-            <Button
-              variant="text"
-              size="small"
-              disabled={busy === p.row.id}
-              onClick={() => reject(p.row.id)}
-            >
+            <Button kind="ghost" size="sm" disabled={busy === p.row.id} onClick={() => reject(p.row.id)}>
               Reject
             </Button>
-          </Stack>
+          </div>
         ) : null,
     },
   ];
 
   return (
-    <Stack spacing={2}>
-      {note && (
-        <Alert severity={note.kind} onClose={() => setNote(null)}>
-          {note.text}
-        </Alert>
-      )}
-
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        getRowId={(r) => r.id}
-        density="compact"
-        disableRowSelectionOnClick
-        hideFooter
-        autoHeight
-      />
-    </Stack>
+    <CarbonScope>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        {note && (
+          <InlineNotification
+            kind={note.kind}
+            lowContrast
+            title={note.kind === "error" ? "Error" : "Done"}
+            subtitle={note.text}
+            onCloseButtonClick={() => setNote(null)}
+          />
+        )}
+        <DataGrid rows={rows} columns={columns} getRowId={(r) => r.id} density="compact" disableRowSelectionOnClick hideFooter autoHeight />
+      </div>
+    </CarbonScope>
   );
 }
