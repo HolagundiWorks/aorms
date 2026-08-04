@@ -1,19 +1,13 @@
 import {
-  Alert,
-  Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  MenuItem,
+  InlineNotification,
+  Modal,
+  Select,
+  SelectItem,
   Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import AddIcon from "@mui/icons-material/Add";
+  TextInput,
+} from "@carbon/react";
+import { Add } from "@carbon/icons-react";
 import {
   BBS_ELEMENT_LABEL,
   BBS_STATUS_LABEL,
@@ -29,12 +23,15 @@ import {
 } from "@esti/contracts";
 import { pushToast, useScreenActions } from "@hcw/ui-kit";
 import { useState } from "react";
-import { ConfirmModal } from "../ConfirmModal.js";
-import { DataState } from "../DataState.js";
-import { StatusTag } from "../StatusTag.js";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { ConfirmModal, DataGrid, DataState, StatusTag, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../../lib/trpc.js";
 
 type MemberKind = BbsElement;
+
+const SUBTLE: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
+const OVERLINE: React.CSSProperties = { ...SUBTLE, textTransform: "uppercase", letterSpacing: "0.02em" };
+const ROW: React.CSSProperties = { display: "flex", gap: "0.5rem" };
 
 const emptyColumn = () => ({
   mark: "",
@@ -139,7 +136,7 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
             zone: "center",
             tone: "primary",
             label: "New BBS",
-            icon: <AddIcon />,
+            icon: <Add />,
             onClick: () => setCreateOpen(true),
           },
         ],
@@ -260,7 +257,7 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
       width: 90,
       sortable: false,
       renderCell: (p) => (
-        <Button size="small" color="inherit" onClick={() => removeItem.mutate({ id: p.row.id })}>
+        <Button kind="ghost" size="sm" onClick={() => removeItem.mutate({ id: p.row.id })}>
           Remove
         </Button>
       ),
@@ -366,640 +363,312 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
     });
   };
 
+  const memberModal = (
+    <Modal
+      open={memberOpen}
+      size="sm"
+      modalHeading="Add member"
+      primaryButtonText={addMember.isPending ? "Computing…" : "Compute & add"}
+      secondaryButtonText="Cancel"
+      primaryButtonDisabled={addMember.isPending}
+      onRequestClose={() => setMemberOpen(false)}
+      onRequestSubmit={submitMember}
+    >
+      <Stack gap={5}>
+        <Select
+          id="bbs-elem"
+          labelText="Element"
+          value={memberKind}
+          onChange={(e) => setMemberKind(e.target.value as MemberKind)}
+        >
+          {(Object.keys(BBS_ELEMENT_LABEL) as BbsElement[]).map((k) => (
+            <SelectItem key={k} value={k} text={BBS_ELEMENT_LABEL[k]} />
+          ))}
+        </Select>
+
+        {memberKind === "COLUMN" && (
+          <>
+            <TextInput id="c-mark" labelText="Mark" value={columnForm.mark} onChange={(e) => setColumnForm({ ...columnForm, mark: e.target.value })} />
+            <div style={ROW}>
+              <TextInput id="c-w" labelText="Width mm" value={columnForm.widthMm} onChange={(e) => setColumnForm({ ...columnForm, widthMm: e.target.value })} />
+              <TextInput id="c-d" labelText="Depth mm" value={columnForm.depthMm} onChange={(e) => setColumnForm({ ...columnForm, depthMm: e.target.value })} />
+              <TextInput id="c-h" labelText="Height mm" value={columnForm.heightMm} onChange={(e) => setColumnForm({ ...columnForm, heightMm: e.target.value })} />
+            </div>
+            <div style={ROW}>
+              <TextInput id="c-cov" labelText="Cover mm" value={columnForm.coverMm} onChange={(e) => setColumnForm({ ...columnForm, coverMm: e.target.value })} />
+              <Select id="c-tie" labelText="Tie Ø" value={columnForm.stirrupDiaMm} onChange={(e) => setColumnForm({ ...columnForm, stirrupDiaMm: e.target.value })}>
+                {STANDARD_BAR_DIAMETERS_MM.map((d) => <SelectItem key={d} value={String(d)} text={String(d)} />)}
+              </Select>
+              <TextInput id="c-sp" labelText="Spacing mm" value={columnForm.spacingMm} onChange={(e) => setColumnForm({ ...columnForm, spacingMm: e.target.value })} />
+            </div>
+            <div style={ROW}>
+              <Select id="c-hook" labelText="Hook" value={columnForm.hookAngle} onChange={(e) => setColumnForm({ ...columnForm, hookAngle: e.target.value })}>
+                {[90, 135, 180].map((a) => <SelectItem key={a} value={String(a)} text={`${a}°`} />)}
+              </Select>
+              <Select id="c-tt" labelText="Tie type" value={columnForm.tieType} onChange={(e) => setColumnForm({ ...columnForm, tieType: e.target.value as typeof columnForm.tieType })}>
+                {ColumnTieType.options.map((t) => <SelectItem key={t} value={t} text={t} />)}
+              </Select>
+            </div>
+            <div style={ROW}>
+              <Select id="c-md" labelText="Main Ø" value={columnForm.mainDiaMm} onChange={(e) => setColumnForm({ ...columnForm, mainDiaMm: e.target.value })}>
+                {STANDARD_BAR_DIAMETERS_MM.map((d) => <SelectItem key={d} value={String(d)} text={String(d)} />)}
+              </Select>
+              <TextInput id="c-mn" labelText="Main nos" value={columnForm.mainCount} onChange={(e) => setColumnForm({ ...columnForm, mainCount: e.target.value })} />
+            </div>
+          </>
+        )}
+
+        {memberKind === "BEAM" && (
+          <>
+            <TextInput id="b-mark" labelText="Mark" value={beamForm.mark} onChange={(e) => setBeamForm({ ...beamForm, mark: e.target.value })} />
+            <div style={ROW}>
+              <TextInput id="b-span" labelText="Clear span mm" value={beamForm.clearSpanMm} onChange={(e) => setBeamForm({ ...beamForm, clearSpanMm: e.target.value })} />
+              <TextInput id="b-b" labelText="b mm" value={beamForm.widthMm} onChange={(e) => setBeamForm({ ...beamForm, widthMm: e.target.value })} />
+              <TextInput id="b-D" labelText="D mm" value={beamForm.depthMm} onChange={(e) => setBeamForm({ ...beamForm, depthMm: e.target.value })} />
+            </div>
+            <div style={ROW}>
+              <Select id="b-conc" labelText="Concrete" value={beamForm.concreteGrade} onChange={(e) => setBeamForm({ ...beamForm, concreteGrade: e.target.value as typeof beamForm.concreteGrade })}>
+                {ConcreteGrade.options.map((g) => <SelectItem key={g} value={g} text={g} />)}
+              </Select>
+              <Select id="b-steel" labelText="Steel" value={beamForm.steelGrade} onChange={(e) => setBeamForm({ ...beamForm, steelGrade: e.target.value as typeof beamForm.steelGrade })}>
+                {SteelGrade.options.map((g) => <SelectItem key={g} value={g} text={g} />)}
+              </Select>
+              <Select id="b-top" labelText="Top bars" value={beamForm.topBarType} onChange={(e) => setBeamForm({ ...beamForm, topBarType: e.target.value as typeof beamForm.topBarType })}>
+                {BeamTopBarType.options.map((t) => <SelectItem key={t} value={t} text={t} />)}
+              </Select>
+            </div>
+            <div style={ROW}>
+              <TextInput id="b-ss" labelText="Stirrup spacing support" value={beamForm.spacingSupportMm} onChange={(e) => setBeamForm({ ...beamForm, spacingSupportMm: e.target.value })} />
+              <TextInput id="b-sm" labelText="Middle" value={beamForm.spacingMiddleMm} onChange={(e) => setBeamForm({ ...beamForm, spacingMiddleMm: e.target.value })} />
+              <Select id="b-legs" labelText="Legs" value={beamForm.stirrupLegs} onChange={(e) => setBeamForm({ ...beamForm, stirrupLegs: e.target.value })}>
+                <SelectItem value="2" text="2" />
+                <SelectItem value="4" text="4" />
+              </Select>
+            </div>
+            <div style={ROW}>
+              <TextInput id="b-td" labelText="Top Ø / nos" value={beamForm.topDiaMm} onChange={(e) => setBeamForm({ ...beamForm, topDiaMm: e.target.value })} />
+              <TextInput id="b-tn" labelText="Top nos" hideLabel value={beamForm.topCount} onChange={(e) => setBeamForm({ ...beamForm, topCount: e.target.value })} />
+              <TextInput id="b-bd" labelText="Bot Ø / nos" value={beamForm.bottomDiaMm} onChange={(e) => setBeamForm({ ...beamForm, bottomDiaMm: e.target.value })} />
+              <TextInput id="b-bn" labelText="Bot nos" hideLabel value={beamForm.bottomCount} onChange={(e) => setBeamForm({ ...beamForm, bottomCount: e.target.value })} />
+            </div>
+          </>
+        )}
+
+        {memberKind === "SLAB" && (
+          <>
+            <TextInput id="s-mark" labelText="Mark" value={slabForm.mark} onChange={(e) => setSlabForm({ ...slabForm, mark: e.target.value })} />
+            <div style={ROW}>
+              <TextInput id="s-x" labelText="Span X mm" value={slabForm.spanXMm} onChange={(e) => setSlabForm({ ...slabForm, spanXMm: e.target.value })} />
+              <TextInput id="s-y" labelText="Span Y mm" value={slabForm.spanYMm} onChange={(e) => setSlabForm({ ...slabForm, spanYMm: e.target.value })} />
+              <TextInput id="s-t" labelText="Thickness" value={slabForm.thicknessMm} onChange={(e) => setSlabForm({ ...slabForm, thicknessMm: e.target.value })} />
+            </div>
+            <div style={ROW}>
+              <Select id="s-type" labelText="Type" value={slabForm.slabType} onChange={(e) => setSlabForm({ ...slabForm, slabType: e.target.value as typeof slabForm.slabType })}>
+                {SlabType.options.map((t) => <SelectItem key={t} value={t} text={t} />)}
+              </Select>
+              <Select id="s-conc" labelText="Concrete" value={slabForm.concreteGrade} onChange={(e) => setSlabForm({ ...slabForm, concreteGrade: e.target.value as typeof slabForm.concreteGrade })}>
+                {ConcreteGrade.options.map((g) => <SelectItem key={g} value={g} text={g} />)}
+              </Select>
+              <Select id="s-steel" labelText="Steel" value={slabForm.steelGrade} onChange={(e) => setSlabForm({ ...slabForm, steelGrade: e.target.value as typeof slabForm.steelGrade })}>
+                {SteelGrade.options.map((g) => <SelectItem key={g} value={g} text={g} />)}
+              </Select>
+            </div>
+            <div style={ROW}>
+              <TextInput id="s-dx" labelText="ØX / c/c" value={slabForm.diaXMm} onChange={(e) => setSlabForm({ ...slabForm, diaXMm: e.target.value })} />
+              <TextInput id="s-spx" labelText="c/c X" hideLabel value={slabForm.spacingXMm} onChange={(e) => setSlabForm({ ...slabForm, spacingXMm: e.target.value })} />
+              <TextInput id="s-dy" labelText="ØY / c/c" value={slabForm.diaYMm} onChange={(e) => setSlabForm({ ...slabForm, diaYMm: e.target.value })} />
+              <TextInput id="s-spy" labelText="c/c Y" hideLabel value={slabForm.spacingYMm} onChange={(e) => setSlabForm({ ...slabForm, spacingYMm: e.target.value })} />
+            </div>
+          </>
+        )}
+
+        {memberKind === "FOOTING" && (
+          <>
+            <TextInput id="f-mark" labelText="Mark" value={footingForm.mark} onChange={(e) => setFootingForm({ ...footingForm, mark: e.target.value })} />
+            <div style={ROW}>
+              <TextInput id="f-l" labelText="L mm" value={footingForm.lengthMm} onChange={(e) => setFootingForm({ ...footingForm, lengthMm: e.target.value })} />
+              <TextInput id="f-b" labelText="B mm" value={footingForm.widthMm} onChange={(e) => setFootingForm({ ...footingForm, widthMm: e.target.value })} />
+              <TextInput id="f-d" labelText="Depth" value={footingForm.depthMm} onChange={(e) => setFootingForm({ ...footingForm, depthMm: e.target.value })} />
+            </div>
+            <div style={ROW}>
+              <TextInput id="f-cl" labelText="Col L" value={footingForm.columnLengthMm} onChange={(e) => setFootingForm({ ...footingForm, columnLengthMm: e.target.value })} />
+              <TextInput id="f-cb" labelText="Col B" value={footingForm.columnWidthMm} onChange={(e) => setFootingForm({ ...footingForm, columnWidthMm: e.target.value })} />
+              <TextInput id="f-cov" labelText="Cover" value={footingForm.coverMm} onChange={(e) => setFootingForm({ ...footingForm, coverMm: e.target.value })} />
+            </div>
+            <div style={ROW}>
+              <TextInput id="f-dl" labelText="ØL / c/c" value={footingForm.diaLMm} onChange={(e) => setFootingForm({ ...footingForm, diaLMm: e.target.value })} />
+              <TextInput id="f-spl" labelText="c/c L" hideLabel value={footingForm.spacingLMm} onChange={(e) => setFootingForm({ ...footingForm, spacingLMm: e.target.value })} />
+              <TextInput id="f-db" labelText="ØB / c/c" value={footingForm.diaBMm} onChange={(e) => setFootingForm({ ...footingForm, diaBMm: e.target.value })} />
+              <TextInput id="f-spb" labelText="c/c B" hideLabel value={footingForm.spacingBMm} onChange={(e) => setFootingForm({ ...footingForm, spacingBMm: e.target.value })} />
+            </div>
+          </>
+        )}
+
+        {addMember.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={addMember.error.message} />}
+      </Stack>
+    </Modal>
+  );
+
+  const manualModal = (
+    <Modal
+      open={manualOpen}
+      size="sm"
+      modalHeading="Manual bar line"
+      primaryButtonText="Add"
+      secondaryButtonText="Cancel"
+      primaryButtonDisabled={!manual.barMark || !manual.cuttingLengthMm || addItem.isPending}
+      onRequestClose={() => setManualOpen(false)}
+      onRequestSubmit={() =>
+        openId &&
+        addItem.mutate({
+          bbsId: openId,
+          barMark: manual.barMark,
+          member: manual.member || undefined,
+          diaMm: Number(manual.diaMm),
+          noOfMembers: Number(manual.noOfMembers) || 1,
+          barsPerMember: Number(manual.barsPerMember) || 1,
+          cuttingLengthMm: Number(manual.cuttingLengthMm),
+        })
+      }
+    >
+      <Stack gap={5}>
+        <TextInput id="m-mark" labelText="Bar mark" value={manual.barMark} onChange={(e) => setManual({ ...manual, barMark: e.target.value })} />
+        <TextInput id="m-member" labelText="Member" value={manual.member} onChange={(e) => setManual({ ...manual, member: e.target.value })} />
+        <div style={ROW}>
+          <Select id="m-dia" labelText="Ø mm" value={manual.diaMm} onChange={(e) => setManual({ ...manual, diaMm: e.target.value })}>
+            {STANDARD_BAR_DIAMETERS_MM.map((d) => <SelectItem key={d} value={String(d)} text={String(d)} />)}
+          </Select>
+          <TextInput id="m-nos" labelText="Members" value={manual.noOfMembers} onChange={(e) => setManual({ ...manual, noOfMembers: e.target.value })} />
+          <TextInput id="m-bpm" labelText="Bars / member" value={manual.barsPerMember} onChange={(e) => setManual({ ...manual, barsPerMember: e.target.value })} />
+        </div>
+        <TextInput id="m-cut" labelText="Cutting length mm" value={manual.cuttingLengthMm} onChange={(e) => setManual({ ...manual, cuttingLengthMm: e.target.value })} />
+        {addItem.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={addItem.error.message} />}
+      </Stack>
+    </Modal>
+  );
+
   if (openId && detail) {
     const s = detail.schedule;
     return (
       <>
-        <Stack spacing={1.5}>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
-            <Button size="small" variant="text" onClick={() => setOpenId(null)}>
-              ← All schedules
-            </Button>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              {s.ref} — {s.title}
-            </Typography>
-            <StatusTag
-              value={s.status as BbsStatus}
-              map={BBS_STATUS_TAG}
-              label={BBS_STATUS_LABEL[s.status as BbsStatus] ?? s.status}
-            />
-            <Box sx={{ flex: 1 }} />
-            {s.status === "DRAFT" && (
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={() => setStatus.mutate({ id: s.id, status: "ISSUED" })}
-              >
-                Mark issued
+        <CarbonScope>
+          <Stack gap={4}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+              <Button size="sm" kind="ghost" onClick={() => setOpenId(null)}>
+                ← All schedules
               </Button>
-            )}
-            <Button size="small" variant="outlined" onClick={() => setMemberOpen(true)}>
-              Add member
-            </Button>
-            <Button size="small" variant="outlined" onClick={() => setManualOpen(true)}>
-              Manual line
-            </Button>
-            <Button size="small" color="error" onClick={() => setConfirmId(s.id)}>
-              Delete
-            </Button>
-          </Stack>
+              <span className="cds--type-heading-compact-01">{s.ref} — {s.title}</span>
+              <StatusTag
+                value={s.status as BbsStatus}
+                map={BBS_STATUS_TAG}
+                label={BBS_STATUS_LABEL[s.status as BbsStatus] ?? s.status}
+              />
+              <div style={{ flex: 1 }} />
+              {s.status === "DRAFT" && (
+                <Button size="sm" kind="tertiary" onClick={() => setStatus.mutate({ id: s.id, status: "ISSUED" })}>
+                  Mark issued
+                </Button>
+              )}
+              <Button size="sm" kind="tertiary" onClick={() => setMemberOpen(true)}>
+                Add member
+              </Button>
+              <Button size="sm" kind="tertiary" onClick={() => setManualOpen(true)}>
+                Manual line
+              </Button>
+              <Button size="sm" kind="danger--ghost" onClick={() => setConfirmId(s.id)}>
+                Delete
+              </Button>
+            </div>
 
-          <Typography variant="body2" color="text.secondary">
-            Enter column / beam / slab / footing geometry to compute cutting lengths (IS 456).
-            Weight uses d²/162 kg/m. Advisory Ast and anchorage checks appear below when relevant.
-          </Typography>
+            <p className="cds--type-body-01" style={SUBTLE}>
+              Enter column / beam / slab / footing geometry to compute cutting lengths (IS 456).
+              Weight uses d²/162 kg/m. Advisory Ast and anchorage checks appear below when relevant.
+            </p>
 
-          {(detail.members.length > 0 || detail.checks.length > 0) && (
-            <Stack spacing={1}>
-              <Typography variant="overline" color="text.secondary">
-                Members
-              </Typography>
-              {detail.members.map((m) => (
-                <Stack
-                  key={m.id}
-                  direction="row"
-                  spacing={1}
-                  sx={{ alignItems: "center", borderBottom: 1, borderColor: "divider", py: 0.5 }}
-                >
-                  <Typography variant="body2" sx={{ flex: 1 }}>
-                    {BBS_ELEMENT_LABEL[m.element as BbsElement] ?? m.element} — {m.mark ?? "—"}
-                  </Typography>
-                  <Button
-                    size="small"
-                    color="inherit"
-                    onClick={() => removeMember.mutate({ id: m.id })}
+            {(detail.members.length > 0 || detail.checks.length > 0) && (
+              <Stack gap={3}>
+                <p className="cds--type-label-01" style={OVERLINE}>Members</p>
+                {detail.members.map((m) => (
+                  <div
+                    key={m.id}
+                    style={{ display: "flex", alignItems: "center", gap: "0.5rem", borderBottom: "1px solid var(--cds-border-subtle)", padding: "0.25rem 0" }}
                   >
-                    Remove
-                  </Button>
-                </Stack>
-              ))}
-              {detail.checks.length > 0 && (
-                <>
-                  <Typography variant="overline" color="text.secondary">
-                    Checks
-                  </Typography>
-                  {detail.checks.map((c, i) => (
-                    <Alert key={`${c.mark}-${c.label}-${i}`} severity={c.ok ? "success" : "warning"}>
-                      {c.mark}: {c.label} — {c.value} vs min {c.limit} — {c.message}
-                    </Alert>
-                  ))}
-                </>
-              )}
-            </Stack>
-          )}
-
-          <Divider />
-
-          <Typography variant="overline" color="text.secondary">
-            Schedule ({detail.items.length} lines · {detail.totalWeightKg.toFixed(2)} kg)
-          </Typography>
-          <DataState
-            loading={detailQ.isLoading}
-            isEmpty={detail.items.length === 0}
-            columnCount={8}
-            empty={{
-              title: "No bars yet",
-              description: "Add a structural member or a manual line.",
-            }}
-          >
-            <DataGrid
-              rows={detail.items}
-              columns={itemCols}
-              density="compact"
-              autoHeight
-              hideFooter
-              disableRowSelectionOnClick
-            />
-          </DataState>
-
-          {detail.summary.length > 0 && (
-            <Box>
-              <Typography variant="overline" color="text.secondary">
-                Steel summary by diameter
-              </Typography>
-              <Stack spacing={0.5} sx={{ mt: 0.5 }}>
-                {detail.summary.map((r) => (
-                  <Typography key={r.diaMm} variant="body2">
-                    Ø{r.diaMm} — {r.nos} nos · {r.totalLengthM.toFixed(2)} m · {r.weightKg.toFixed(2)}{" "}
-                    kg
-                  </Typography>
+                    <span className="cds--type-body-01" style={{ flex: 1 }}>
+                      {BBS_ELEMENT_LABEL[m.element as BbsElement] ?? m.element} — {m.mark ?? "—"}
+                    </span>
+                    <Button size="sm" kind="ghost" onClick={() => removeMember.mutate({ id: m.id })}>
+                      Remove
+                    </Button>
+                  </div>
                 ))}
+                {detail.checks.length > 0 && (
+                  <>
+                    <p className="cds--type-label-01" style={OVERLINE}>Checks</p>
+                    {detail.checks.map((c, i) => (
+                      <InlineNotification
+                        key={`${c.mark}-${c.label}-${i}`}
+                        kind={c.ok ? "success" : "warning"}
+                        lowContrast
+                        hideCloseButton
+                        title={`${c.mark}: ${c.label}`}
+                        subtitle={`${c.value} vs min ${c.limit} — ${c.message}`}
+                      />
+                    ))}
+                  </>
+                )}
               </Stack>
-            </Box>
-          )}
-        </Stack>
+            )}
 
-        <Dialog open={memberOpen} onClose={() => setMemberOpen(false)} fullWidth maxWidth="sm">
-          <DialogTitle>Add member</DialogTitle>
-          <DialogContent>
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <TextField
-                select
-                label="Element"
-                value={memberKind}
-                onChange={(e) => setMemberKind(e.target.value as MemberKind)}
-              >
-                {(Object.keys(BBS_ELEMENT_LABEL) as BbsElement[]).map((k) => (
-                  <MenuItem key={k} value={k}>
-                    {BBS_ELEMENT_LABEL[k]}
-                  </MenuItem>
-                ))}
-              </TextField>
+            <hr style={{ border: 0, borderTop: "1px solid var(--cds-border-subtle)", margin: 0 }} />
 
-              {memberKind === "COLUMN" && (
-                <>
-                  <TextField
-                    label="Mark"
-                    value={columnForm.mark}
-                    onChange={(e) => setColumnForm({ ...columnForm, mark: e.target.value })}
-                  />
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      label="Width mm"
-                      value={columnForm.widthMm}
-                      onChange={(e) => setColumnForm({ ...columnForm, widthMm: e.target.value })}
-                    />
-                    <TextField
-                      label="Depth mm"
-                      value={columnForm.depthMm}
-                      onChange={(e) => setColumnForm({ ...columnForm, depthMm: e.target.value })}
-                    />
-                    <TextField
-                      label="Height mm"
-                      value={columnForm.heightMm}
-                      onChange={(e) => setColumnForm({ ...columnForm, heightMm: e.target.value })}
-                    />
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      label="Cover mm"
-                      value={columnForm.coverMm}
-                      onChange={(e) => setColumnForm({ ...columnForm, coverMm: e.target.value })}
-                    />
-                    <TextField
-                      select
-                      label="Tie Ø"
-                      value={columnForm.stirrupDiaMm}
-                      onChange={(e) =>
-                        setColumnForm({ ...columnForm, stirrupDiaMm: e.target.value })
-                      }
-                      sx={{ minWidth: 100 }}
-                    >
-                      {STANDARD_BAR_DIAMETERS_MM.map((d) => (
-                        <MenuItem key={d} value={String(d)}>
-                          {d}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                    <TextField
-                      label="Spacing mm"
-                      value={columnForm.spacingMm}
-                      onChange={(e) => setColumnForm({ ...columnForm, spacingMm: e.target.value })}
-                    />
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      select
-                      label="Hook"
-                      value={columnForm.hookAngle}
-                      onChange={(e) => setColumnForm({ ...columnForm, hookAngle: e.target.value })}
-                    >
-                      {[90, 135, 180].map((a) => (
-                        <MenuItem key={a} value={String(a)}>
-                          {a}°
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                    <TextField
-                      select
-                      label="Tie type"
-                      value={columnForm.tieType}
-                      onChange={(e) =>
-                        setColumnForm({
-                          ...columnForm,
-                          tieType: e.target.value as typeof columnForm.tieType,
-                        })
-                      }
-                      sx={{ flex: 1 }}
-                    >
-                      {ColumnTieType.options.map((t) => (
-                        <MenuItem key={t} value={t}>
-                          {t}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      select
-                      label="Main Ø"
-                      value={columnForm.mainDiaMm}
-                      onChange={(e) => setColumnForm({ ...columnForm, mainDiaMm: e.target.value })}
-                    >
-                      {STANDARD_BAR_DIAMETERS_MM.map((d) => (
-                        <MenuItem key={d} value={String(d)}>
-                          {d}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                    <TextField
-                      label="Main nos"
-                      value={columnForm.mainCount}
-                      onChange={(e) => setColumnForm({ ...columnForm, mainCount: e.target.value })}
-                    />
-                  </Stack>
-                </>
-              )}
-
-              {memberKind === "BEAM" && (
-                <>
-                  <TextField
-                    label="Mark"
-                    value={beamForm.mark}
-                    onChange={(e) => setBeamForm({ ...beamForm, mark: e.target.value })}
-                  />
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      label="Clear span mm"
-                      value={beamForm.clearSpanMm}
-                      onChange={(e) => setBeamForm({ ...beamForm, clearSpanMm: e.target.value })}
-                    />
-                    <TextField
-                      label="b mm"
-                      value={beamForm.widthMm}
-                      onChange={(e) => setBeamForm({ ...beamForm, widthMm: e.target.value })}
-                    />
-                    <TextField
-                      label="D mm"
-                      value={beamForm.depthMm}
-                      onChange={(e) => setBeamForm({ ...beamForm, depthMm: e.target.value })}
-                    />
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      select
-                      label="Concrete"
-                      value={beamForm.concreteGrade}
-                      onChange={(e) =>
-                        setBeamForm({
-                          ...beamForm,
-                          concreteGrade: e.target.value as typeof beamForm.concreteGrade,
-                        })
-                      }
-                    >
-                      {ConcreteGrade.options.map((g) => (
-                        <MenuItem key={g} value={g}>
-                          {g}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                    <TextField
-                      select
-                      label="Steel"
-                      value={beamForm.steelGrade}
-                      onChange={(e) =>
-                        setBeamForm({
-                          ...beamForm,
-                          steelGrade: e.target.value as typeof beamForm.steelGrade,
-                        })
-                      }
-                    >
-                      {SteelGrade.options.map((g) => (
-                        <MenuItem key={g} value={g}>
-                          {g}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                    <TextField
-                      select
-                      label="Top bars"
-                      value={beamForm.topBarType}
-                      onChange={(e) =>
-                        setBeamForm({
-                          ...beamForm,
-                          topBarType: e.target.value as typeof beamForm.topBarType,
-                        })
-                      }
-                    >
-                      {BeamTopBarType.options.map((t) => (
-                        <MenuItem key={t} value={t}>
-                          {t}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      label="Stirrup spacing support"
-                      value={beamForm.spacingSupportMm}
-                      onChange={(e) =>
-                        setBeamForm({ ...beamForm, spacingSupportMm: e.target.value })
-                      }
-                    />
-                    <TextField
-                      label="Middle"
-                      value={beamForm.spacingMiddleMm}
-                      onChange={(e) =>
-                        setBeamForm({ ...beamForm, spacingMiddleMm: e.target.value })
-                      }
-                    />
-                    <TextField
-                      select
-                      label="Legs"
-                      value={beamForm.stirrupLegs}
-                      onChange={(e) => setBeamForm({ ...beamForm, stirrupLegs: e.target.value })}
-                    >
-                      <MenuItem value="2">2</MenuItem>
-                      <MenuItem value="4">4</MenuItem>
-                    </TextField>
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      label="Top Ø / nos"
-                      value={beamForm.topDiaMm}
-                      onChange={(e) => setBeamForm({ ...beamForm, topDiaMm: e.target.value })}
-                    />
-                    <TextField
-                      value={beamForm.topCount}
-                      onChange={(e) => setBeamForm({ ...beamForm, topCount: e.target.value })}
-                    />
-                    <TextField
-                      label="Bot Ø / nos"
-                      value={beamForm.bottomDiaMm}
-                      onChange={(e) => setBeamForm({ ...beamForm, bottomDiaMm: e.target.value })}
-                    />
-                    <TextField
-                      value={beamForm.bottomCount}
-                      onChange={(e) => setBeamForm({ ...beamForm, bottomCount: e.target.value })}
-                    />
-                  </Stack>
-                </>
-              )}
-
-              {memberKind === "SLAB" && (
-                <>
-                  <TextField
-                    label="Mark"
-                    value={slabForm.mark}
-                    onChange={(e) => setSlabForm({ ...slabForm, mark: e.target.value })}
-                  />
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      label="Span X mm"
-                      value={slabForm.spanXMm}
-                      onChange={(e) => setSlabForm({ ...slabForm, spanXMm: e.target.value })}
-                    />
-                    <TextField
-                      label="Span Y mm"
-                      value={slabForm.spanYMm}
-                      onChange={(e) => setSlabForm({ ...slabForm, spanYMm: e.target.value })}
-                    />
-                    <TextField
-                      label="Thickness"
-                      value={slabForm.thicknessMm}
-                      onChange={(e) => setSlabForm({ ...slabForm, thicknessMm: e.target.value })}
-                    />
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      select
-                      label="Type"
-                      value={slabForm.slabType}
-                      onChange={(e) =>
-                        setSlabForm({
-                          ...slabForm,
-                          slabType: e.target.value as typeof slabForm.slabType,
-                        })
-                      }
-                    >
-                      {SlabType.options.map((t) => (
-                        <MenuItem key={t} value={t}>
-                          {t}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                    <TextField
-                      select
-                      label="Concrete"
-                      value={slabForm.concreteGrade}
-                      onChange={(e) =>
-                        setSlabForm({
-                          ...slabForm,
-                          concreteGrade: e.target.value as typeof slabForm.concreteGrade,
-                        })
-                      }
-                    >
-                      {ConcreteGrade.options.map((g) => (
-                        <MenuItem key={g} value={g}>
-                          {g}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                    <TextField
-                      select
-                      label="Steel"
-                      value={slabForm.steelGrade}
-                      onChange={(e) =>
-                        setSlabForm({
-                          ...slabForm,
-                          steelGrade: e.target.value as typeof slabForm.steelGrade,
-                        })
-                      }
-                    >
-                      {SteelGrade.options.map((g) => (
-                        <MenuItem key={g} value={g}>
-                          {g}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      label="ØX / c/c"
-                      value={slabForm.diaXMm}
-                      onChange={(e) => setSlabForm({ ...slabForm, diaXMm: e.target.value })}
-                    />
-                    <TextField
-                      value={slabForm.spacingXMm}
-                      onChange={(e) => setSlabForm({ ...slabForm, spacingXMm: e.target.value })}
-                    />
-                    <TextField
-                      label="ØY / c/c"
-                      value={slabForm.diaYMm}
-                      onChange={(e) => setSlabForm({ ...slabForm, diaYMm: e.target.value })}
-                    />
-                    <TextField
-                      value={slabForm.spacingYMm}
-                      onChange={(e) => setSlabForm({ ...slabForm, spacingYMm: e.target.value })}
-                    />
-                  </Stack>
-                </>
-              )}
-
-              {memberKind === "FOOTING" && (
-                <>
-                  <TextField
-                    label="Mark"
-                    value={footingForm.mark}
-                    onChange={(e) => setFootingForm({ ...footingForm, mark: e.target.value })}
-                  />
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      label="L mm"
-                      value={footingForm.lengthMm}
-                      onChange={(e) =>
-                        setFootingForm({ ...footingForm, lengthMm: e.target.value })
-                      }
-                    />
-                    <TextField
-                      label="B mm"
-                      value={footingForm.widthMm}
-                      onChange={(e) => setFootingForm({ ...footingForm, widthMm: e.target.value })}
-                    />
-                    <TextField
-                      label="Depth"
-                      value={footingForm.depthMm}
-                      onChange={(e) => setFootingForm({ ...footingForm, depthMm: e.target.value })}
-                    />
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      label="Col L"
-                      value={footingForm.columnLengthMm}
-                      onChange={(e) =>
-                        setFootingForm({ ...footingForm, columnLengthMm: e.target.value })
-                      }
-                    />
-                    <TextField
-                      label="Col B"
-                      value={footingForm.columnWidthMm}
-                      onChange={(e) =>
-                        setFootingForm({ ...footingForm, columnWidthMm: e.target.value })
-                      }
-                    />
-                    <TextField
-                      label="Cover"
-                      value={footingForm.coverMm}
-                      onChange={(e) => setFootingForm({ ...footingForm, coverMm: e.target.value })}
-                    />
-                  </Stack>
-                  <Stack direction="row" spacing={1}>
-                    <TextField
-                      label="ØL / c/c"
-                      value={footingForm.diaLMm}
-                      onChange={(e) => setFootingForm({ ...footingForm, diaLMm: e.target.value })}
-                    />
-                    <TextField
-                      value={footingForm.spacingLMm}
-                      onChange={(e) =>
-                        setFootingForm({ ...footingForm, spacingLMm: e.target.value })
-                      }
-                    />
-                    <TextField
-                      label="ØB / c/c"
-                      value={footingForm.diaBMm}
-                      onChange={(e) => setFootingForm({ ...footingForm, diaBMm: e.target.value })}
-                    />
-                    <TextField
-                      value={footingForm.spacingBMm}
-                      onChange={(e) =>
-                        setFootingForm({ ...footingForm, spacingBMm: e.target.value })
-                      }
-                    />
-                  </Stack>
-                </>
-              )}
-
-              {addMember.error && <Alert severity="error">{addMember.error.message}</Alert>}
-            </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button variant="text" onClick={() => setMemberOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="contained" disabled={addMember.isPending} onClick={submitMember}>
-              {addMember.isPending ? "Computing…" : "Compute & add"}
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        <Dialog open={manualOpen} onClose={() => setManualOpen(false)} fullWidth maxWidth="sm">
-          <DialogTitle>Manual bar line</DialogTitle>
-          <DialogContent>
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <TextField
-                label="Bar mark"
-                value={manual.barMark}
-                onChange={(e) => setManual({ ...manual, barMark: e.target.value })}
-              />
-              <TextField
-                label="Member"
-                value={manual.member}
-                onChange={(e) => setManual({ ...manual, member: e.target.value })}
-              />
-              <Stack direction="row" spacing={1}>
-                <TextField
-                  select
-                  label="Ø mm"
-                  value={manual.diaMm}
-                  onChange={(e) => setManual({ ...manual, diaMm: e.target.value })}
-                  sx={{ minWidth: 100 }}
-                >
-                  {STANDARD_BAR_DIAMETERS_MM.map((d) => (
-                    <MenuItem key={d} value={String(d)}>
-                      {d}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <TextField
-                  label="Members"
-                  value={manual.noOfMembers}
-                  onChange={(e) => setManual({ ...manual, noOfMembers: e.target.value })}
-                />
-                <TextField
-                  label="Bars / member"
-                  value={manual.barsPerMember}
-                  onChange={(e) => setManual({ ...manual, barsPerMember: e.target.value })}
-                />
-              </Stack>
-              <TextField
-                label="Cutting length mm"
-                value={manual.cuttingLengthMm}
-                onChange={(e) => setManual({ ...manual, cuttingLengthMm: e.target.value })}
-              />
-              {addItem.error && <Alert severity="error">{addItem.error.message}</Alert>}
-            </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button variant="text" onClick={() => setManualOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              disabled={!manual.barMark || !manual.cuttingLengthMm || addItem.isPending}
-              onClick={() =>
-                openId &&
-                addItem.mutate({
-                  bbsId: openId,
-                  barMark: manual.barMark,
-                  member: manual.member || undefined,
-                  diaMm: Number(manual.diaMm),
-                  noOfMembers: Number(manual.noOfMembers) || 1,
-                  barsPerMember: Number(manual.barsPerMember) || 1,
-                  cuttingLengthMm: Number(manual.cuttingLengthMm),
-                })
-              }
+            <p className="cds--type-label-01" style={OVERLINE}>
+              Schedule ({detail.items.length} lines · {detail.totalWeightKg.toFixed(2)} kg)
+            </p>
+            <DataState
+              loading={detailQ.isLoading}
+              isEmpty={detail.items.length === 0}
+              columnCount={8}
+              empty={{
+                title: "No bars yet",
+                description: "Add a structural member or a manual line.",
+              }}
             >
-              Add
-            </Button>
-          </DialogActions>
-        </Dialog>
+              <DataGrid
+                rows={detail.items}
+                columns={itemCols}
+                density="compact"
+                autoHeight
+                hideFooter
+                disableRowSelectionOnClick
+              />
+            </DataState>
+
+            {detail.summary.length > 0 && (
+              <div>
+                <p className="cds--type-label-01" style={OVERLINE}>Steel summary by diameter</p>
+                <Stack gap={2} style={{ marginTop: "0.25rem" }}>
+                  {detail.summary.map((r) => (
+                    <p key={r.diaMm} className="cds--type-body-01" style={{ margin: 0 }}>
+                      Ø{r.diaMm} — {r.nos} nos · {r.totalLengthM.toFixed(2)} m · {r.weightKg.toFixed(2)} kg
+                    </p>
+                  ))}
+                </Stack>
+              </div>
+            )}
+          </Stack>
+        </CarbonScope>
+
+        <CarbonScope>
+          {memberModal}
+          {manualModal}
+        </CarbonScope>
 
         <ConfirmModal
           open={!!confirmId}
           heading="Delete BBS?"
           body="Removes the schedule, members, and all bar lines."
           confirmText="Delete"
+          danger
           pending={remove.isPending}
           onConfirm={() => confirmId && remove.mutate({ id: confirmId })}
           onClose={() => setConfirmId(null)}
@@ -1010,64 +679,56 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
 
   return (
     <>
-      <Stack spacing={1.5}>
-        <Typography variant="body2" color="text.secondary">
-          Project bar bending schedules — compute cutting lengths from member geometry, or enter
-          lines manually. Consultancy quantities only (no site steel reconciliation).
-        </Typography>
-        <DataState
-          loading={listQ.isLoading}
-          isEmpty={rows.length === 0}
-          columnCount={3}
-          empty={{
-            title: "No BBS yet",
-            description: "Create a schedule, then add columns, beams, slabs, or footings.",
-            action: (
-              <Button size="small" variant="outlined" onClick={() => setCreateOpen(true)}>
-                New BBS
-              </Button>
-            ),
-          }}
-        >
-          <DataGrid
-            rows={rows}
-            columns={scheduleCols}
-            density="compact"
-            autoHeight
-            hideFooter
-            disableRowSelectionOnClick
-            onRowClick={(p) => setOpenId(p.row.id)}
-            sx={{ "& .MuiDataGrid-row": { cursor: "pointer" } }}
-          />
-        </DataState>
-      </Stack>
-
-      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>New BBS</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
-              label="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ground floor RCC"
-            />
-            {create.error && <Alert severity="error">{create.error.message}</Alert>}
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setCreateOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            disabled={!title || create.isPending}
-            onClick={() => create.mutate({ projectId, title })}
+      <CarbonScope>
+        <Stack gap={4}>
+          <p className="cds--type-body-01" style={SUBTLE}>
+            Project bar bending schedules — compute cutting lengths from member geometry, or enter
+            lines manually. Consultancy quantities only (no site steel reconciliation).
+          </p>
+          <DataState
+            loading={listQ.isLoading}
+            isEmpty={rows.length === 0}
+            columnCount={3}
+            empty={{
+              title: "No BBS yet",
+              description: "Create a schedule, then add columns, beams, slabs, or footings.",
+              action: (
+                <Button size="sm" kind="tertiary" onClick={() => setCreateOpen(true)}>
+                  New BBS
+                </Button>
+              ),
+            }}
           >
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DataGrid
+              rows={rows}
+              columns={scheduleCols}
+              density="compact"
+              autoHeight
+              hideFooter
+              disableRowSelectionOnClick
+              onRowClick={(p) => setOpenId(p.row.id as string)}
+            />
+          </DataState>
+        </Stack>
+      </CarbonScope>
+
+      <CarbonScope>
+        <Modal
+          open={createOpen}
+          size="sm"
+          modalHeading="New BBS"
+          primaryButtonText="Create"
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={!title || create.isPending}
+          onRequestClose={() => setCreateOpen(false)}
+          onRequestSubmit={() => create.mutate({ projectId, title })}
+        >
+          <Stack gap={5}>
+            <TextInput id="bbs-title" labelText="Title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ground floor RCC" />
+            {create.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={create.error.message} />}
+          </Stack>
+        </Modal>
+      </CarbonScope>
     </>
   );
 }
