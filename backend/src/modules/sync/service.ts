@@ -3,9 +3,14 @@ import { type SyncEntity, type SyncIngestBody } from "@esti/contracts";
 import { and, desc, eq } from "drizzle-orm";
 import type { DB } from "../../db/index.js";
 import { licenseInstalls, licenses, syncRecords } from "../../db/schema.js";
+import { getObjectBuffer, putObject } from "../../lib/storage.js";
 
 function sha256(s: string): string {
   return createHash("sha256").update(s).digest("hex");
+}
+
+function sha256buf(buf: Buffer): string {
+  return createHash("sha256").update(buf).digest("hex");
 }
 
 /** Resolve a node's raw sync bearer to the hub-assigned firm id, or null. */
@@ -18,6 +23,40 @@ export async function firmFromSyncToken(db: DB, bearer: string | undefined): Pro
     .where(eq(licenseInstalls.syncTokenHash, sha256(bearer)))
     .limit(1);
   return row?.firmId ?? null;
+}
+
+/**
+ * Best-effort mirror of object keys into hub storage. Skips when contentHash
+ * matches the existing record (bandwidth optimisation).
+ */
+async function mirrorFiles(
+  fileKeys: string[],
+  contentHash: string | undefined,
+  existingHash: string | null | undefined,
+): Promise<string | null> {
+  if (!fileKeys.length) return contentHash ?? null;
+  if (contentHash && existingHash && contentHash === existingHash) return existingHash;
+
+  let lastHash: string | null = contentHash ?? null;
+  for (const key of fileKeys) {
+    try {
+      const buf = await getObjectBuffer(key);
+      lastHash = sha256buf(buf);
+      if (contentHash && existingHash && contentHash === existingHash) continue;
+      // Re-put under the same key into hub storage (S3/FS as configured).
+      const ext = key.includes(".") ? key.slice(key.lastIndexOf(".")) : "";
+      const ctype =
+        ext === ".pdf"
+          ? "application/pdf"
+          : ext === ".svg"
+            ? "image/svg+xml"
+            : "application/octet-stream";
+      await putObject(key, buf, ctype);
+    } catch (e) {
+      console.warn(`mirrorFiles(${key}) failed:`, String(e));
+    }
+  }
+  return lastHash;
 }
 
 /** Upsert (or delete) a published record into the per-firm hub store. Returns the remote id. */
@@ -33,11 +72,22 @@ export async function ingestRecord(db: DB, firmId: string, body: SyncIngestBody)
     return "";
   }
 
-  const [existing] = await db.select({ id: syncRecords.id }).from(syncRecords).where(where).limit(1);
+  const [existing] = await db.select().from(syncRecords).where(where).limit(1);
+  const hash = await mirrorFiles(
+    body.fileKeys ?? [],
+    body.contentHash,
+    existing?.contentHash,
+  );
+
   if (existing) {
     await db
       .update(syncRecords)
-      .set({ payload: body.payload, fileKeys: body.fileKeys, updatedAt: new Date() })
+      .set({
+        payload: body.payload,
+        fileKeys: body.fileKeys,
+        contentHash: hash,
+        updatedAt: new Date(),
+      })
       .where(eq(syncRecords.id, existing.id));
     return existing.id;
   }
@@ -49,6 +99,7 @@ export async function ingestRecord(db: DB, firmId: string, body: SyncIngestBody)
       entityId: body.entityId,
       payload: body.payload,
       fileKeys: body.fileKeys,
+      contentHash: hash,
     })
     .returning({ id: syncRecords.id });
   return created!.id;
@@ -65,4 +116,35 @@ export async function publishedForFirm(db: DB, firmId: string, entity?: SyncEnti
     ? and(eq(syncRecords.firmId, firmId), eq(syncRecords.entity, entity))
     : eq(syncRecords.firmId, firmId);
   return db.select().from(syncRecords).where(where).orderBy(desc(syncRecords.updatedAt));
+}
+
+/** Published records whose payload matches a JSON key (clientId / projectId / …). */
+export async function publishedWherePayload(
+  db: DB,
+  firmId: string,
+  entity: SyncEntity,
+  key: string,
+  value: string,
+) {
+  const rows = await publishedForFirm(db, firmId, entity);
+  return rows.filter((r) => {
+    const p = r.payload as Record<string, unknown>;
+    return p?.[key] === value;
+  });
+}
+
+/**
+ * Hub portal helper: list published artifacts for a project across firms
+ * (entity ids are UUIDs; payload.projectId scopes the portal view).
+ */
+export async function publishedForProject(db: DB, entity: SyncEntity, projectId: string) {
+  const rows = await db
+    .select()
+    .from(syncRecords)
+    .where(eq(syncRecords.entity, entity))
+    .orderBy(desc(syncRecords.updatedAt));
+  return rows.filter((r) => {
+    const p = r.payload as Record<string, unknown>;
+    return p?.projectId === projectId;
+  });
 }

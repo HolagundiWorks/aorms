@@ -1,0 +1,79 @@
+import {
+  FREE_DESKTOP_CAPABILITIES,
+  LICENSED_DESKTOP_CAPABILITIES,
+  type RuntimeCapabilities,
+  type RuntimeHost,
+  WEB_PARITY_CAPABILITIES,
+} from "@esti/contracts";
+import { useAuth } from "./auth.js";
+import { trpc } from "./trpc.js";
+
+/**
+ * Web parity / desktop capability matrix.
+ *
+ * Build-time: `VITE_RUNTIME_HOST=desktop|web` (desktop shell sets this).
+ * Runtime: `trpc.sync.capabilities` is authoritative when signed in.
+ */
+
+export function buildTimeHost(): RuntimeHost {
+  const h = import.meta.env.VITE_RUNTIME_HOST;
+  if (h === "desktop" || h === "hub") return h;
+  return "web";
+}
+
+/** Static fallback before the capabilities query resolves. */
+export function defaultCapabilities(): RuntimeCapabilities {
+  const host = buildTimeHost();
+  if (host === "desktop") return { ...FREE_DESKTOP_CAPABILITIES };
+  if (host === "hub") return { ...WEB_PARITY_CAPABILITIES, host: "hub" };
+  return { ...WEB_PARITY_CAPABILITIES };
+}
+
+/**
+ * Hook: live capabilities from the backend (degrades AI/worker on web parity;
+ * enables meta/artifact sync when licensed + hub-bound).
+ */
+export function useRuntimeCapabilities() {
+  const { user } = useAuth();
+  const host = buildTimeHost();
+  const q = trpc.sync.capabilities.useQuery(undefined, {
+    enabled: Boolean(user),
+    retry: false,
+    staleTime: 60_000,
+  });
+  const caps: RuntimeCapabilities = q.data ?? defaultCapabilities();
+  return {
+    ...caps,
+    host: q.data?.host ?? host,
+    isLoading: q.isLoading,
+    /** Web staff SPA: local Ollama/EOMS unavailable — use hub/BYO AI. */
+    aiDegraded: !caps.localAi,
+    /** Web: heavy jobs run on hub worker, not the browser machine. */
+    workerDegraded: !caps.localWorker,
+    canOfflineAuthor: caps.offlineAuthoring,
+    licensedDesktopSync:
+      caps.host === "desktop" && caps.metaSync && caps.artifactSync
+        ? LICENSED_DESKTOP_CAPABILITIES
+        : null,
+  };
+}
+
+/** Sync / offline queue strip for app chrome (pending artifact + meta counts). */
+export function useSyncStatus() {
+  const { user } = useAuth();
+  const q = trpc.sync.status.useQuery(undefined, {
+    enabled: Boolean(user),
+    retry: false,
+    refetchInterval: 30_000,
+  });
+  const pending = (q.data?.pending ?? 0) + (q.data?.metaPending ?? 0);
+  const failed = q.data?.failed ?? 0;
+  return {
+    ...q,
+    pending,
+    failed,
+    hubConfigured: q.data?.hubConfigured ?? false,
+    metaLastSeq: q.data?.metaLastSeq ?? null,
+    hasOfflineQueue: pending > 0 || failed > 0,
+  };
+}

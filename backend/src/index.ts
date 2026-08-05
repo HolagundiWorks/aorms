@@ -195,7 +195,7 @@ if (env.ESTI_ROLE === "node" && (env.ESTI_HUB_URL || env.ESTI_LICENSE_API_URL)) 
   void refreshTick();
   setInterval(() => void refreshTick(), env.LICENSE_REFRESH_HOURS * 3600_000).unref();
 
-  // Drain the publish outbox to the hub on boot + periodically (best-effort).
+  // Drain the publish outbox + metadata queue to the hub on boot + periodically.
   if (env.ESTI_HUB_URL) {
     const drainTick = async () => {
       try {
@@ -203,6 +203,13 @@ if (env.ESTI_ROLE === "node" && (env.ESTI_HUB_URL || env.ESTI_LICENSE_API_URL)) 
         if (r.sent || r.failed) app.log.info(r, "sync outbox drained");
       } catch (err) {
         app.log.warn(err, "sync outbox drain failed");
+      }
+      try {
+        const { drainMetaOutbox } = await import("./lib/sync/metadata.js");
+        const m = await drainMetaOutbox(db);
+        if (m.sent || m.failed) app.log.info(m, "meta outbox drained");
+      } catch (err) {
+        app.log.warn(err, "meta outbox drain failed");
       }
     };
     void drainTick();

@@ -77,6 +77,12 @@ const Env = z.object({
   /** Stable per-install identifier (desktop supplies this; web derives one once). */
   INSTALL_ID: z.string().default(""),
   /**
+   * When "1"/true, treat this process as the packaged desktop node for runtime
+   * capability resolution (local AI/worker + offline authoring). Also implied by
+   * INSTALL_ID or STORAGE_DRIVER=fs.
+   */
+  ESTI_DESKTOP: envBool(),
+  /**
    * Licence-free standalone plan. When set, the backend pins `orgSettings.plan` to
    * this on boot (desktop = LITE, self-hosted firm = its tier). A verified licence
    * overrides it at runtime. Unset → the plan column is left as-is.

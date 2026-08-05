@@ -3,6 +3,8 @@ interface ImportMetaEnv {
   readonly VITE_PUBLIC_SITE?: string;
   readonly VITE_ADMIN_URL?: string;
   readonly VITE_PLAUSIBLE_DOMAIN?: string;
+  /** `desktop` | `web` | `hub` — build-time host hint for local-first parity. */
+  readonly VITE_RUNTIME_HOST?: "desktop" | "web" | "hub";
 }
 
 interface ImportMeta {

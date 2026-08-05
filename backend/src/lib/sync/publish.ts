@@ -4,23 +4,24 @@ import type { DB } from "../../db/index.js";
 import {
   approvals,
   drawings,
+  feasibilityReports,
   inspections,
   invoices,
+  progressReports,
+  runningBills,
   siteVisits,
+  tenders,
   transmittals,
 } from "../../db/schema.js";
 import { enqueuePublish } from "./outbox.js";
 
-type Dto = { payload: Record<string, unknown>; fileKeys: string[] };
+type Dto = { payload: Record<string, unknown>; fileKeys: string[]; contentHash?: string };
 
 /**
  * Build the portal-shaped DTO for a finalized record. The payload carries the
  * scoping keys the hub portals filter on (projectId / clientId / contractorId)
  * plus the fields the portal renders; `fileKeys` are object keys to mirror to
- * hub storage.
- *
- * Covers the publishable set; running-bill + site-reference DTOs are added with
- * their portal cutover.
+ * hub storage when available.
  */
 async function buildDto(db: DB, entity: SyncEntity, id: string): Promise<Dto | null> {
   switch (entity) {
@@ -122,6 +123,70 @@ async function buildDto(db: DB, entity: SyncEntity, id: string): Promise<Dto | n
         fileKeys: [],
       };
     }
+    case "tender": {
+      const [r] = await db.select().from(tenders).where(eq(tenders.id, id)).limit(1);
+      if (!r) return null;
+      return {
+        payload: {
+          projectId: r.projectId,
+          title: r.title,
+          category: r.category,
+          status: r.status,
+          dueDate: r.dueDate,
+          awardedContractorId: r.awardedContractorId,
+        },
+        fileKeys: [],
+      };
+    }
+    case "runningBill": {
+      const [r] = await db.select().from(runningBills).where(eq(runningBills.id, id)).limit(1);
+      if (!r) return null;
+      return {
+        payload: {
+          ref: r.ref,
+          projectId: r.projectId,
+          contractorId: r.contractorId,
+          title: r.title,
+          billType: r.billType,
+          status: r.status,
+          measurementDate: r.measurementDate,
+          totalPaise: r.totalPaise,
+          netPayablePaise: r.netPayablePaise,
+        },
+        fileKeys: [],
+      };
+    }
+    case "siteReference": {
+      const [r] = await db
+        .select()
+        .from(feasibilityReports)
+        .where(eq(feasibilityReports.id, id))
+        .limit(1);
+      if (!r) return null;
+      return {
+        payload: {
+          projectId: r.projectId,
+          pdfStatus: r.pdfStatus,
+          generatedAt: r.generatedAt,
+        },
+        fileKeys: r.pdfKey ? [r.pdfKey] : [],
+      };
+    }
+    case "progressReport": {
+      const [r] = await db.select().from(progressReports).where(eq(progressReports.id, id)).limit(1);
+      if (!r) return null;
+      return {
+        payload: {
+          projectId: r.projectId,
+          status: r.status,
+          periodStart: r.periodStart,
+          periodEnd: r.periodEnd,
+          physicalProgressPct: r.physicalProgressPct,
+          pdfStatus: r.pdfStatus,
+        },
+        fileKeys: r.pdfKey ? [r.pdfKey] : [],
+      };
+    }
     default:
       return null;
   }
@@ -140,6 +205,7 @@ export async function publishEntity(db: DB, entity: SyncEntity, id: string): Pro
       entityId: id,
       payload: dto.payload,
       fileKeys: dto.fileKeys,
+      contentHash: dto.contentHash,
     });
   } catch (e) {
     console.warn(`publishEntity(${entity}, ${id}) failed:`, String(e));

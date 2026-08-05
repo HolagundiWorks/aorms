@@ -30,6 +30,7 @@ import { detectSurface } from "../../lib/aorms-surface-urls.js";
 import { AORMS_CONSULTANCY, AORMS_PMC } from "../../lib/product-nomenclature.js";
 import { OfficeHealthGlyph } from "./OfficeHealthGlyph.js";
 import { useOfficeHealth } from "./useOfficeHealth.js";
+import { SyncQueueChip } from "../SyncQueueChip.js";
 
 /**
  * Taskbar footer — glassmorphic bar (HCW-UI-Kit spatial model). Launcher
@@ -262,6 +263,7 @@ export function AppFooterBar({
       {/* RIGHT — system tray */}
       <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flex: 1, justifyContent: "flex-end", minWidth: 0 }}>
         <TrayClock />
+        <SyncQueueChip />
         <AlertsBell />
         <DemoAdminUnlock />
         <UserIdCard />

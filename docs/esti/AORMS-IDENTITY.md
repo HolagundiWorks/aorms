@@ -10,8 +10,10 @@
 > start (§8, open decision 4); a real merge is a live-data migration across every
 > customer's database and needs its own sign-off before any build starts. Remaining
 > runtime work: point the firm app at the live platform as the identity authority.
-> (The "hybrid desktop offline-cache" follow-up is **dropped** — AORMS went
-> web-only on 2026-07-19, so there is no desktop client to cache a session.)
+> **Local-first (2026-08):** desktop node is first-class again — see
+> [`LOCAL-FIRST.md`](LOCAL-FIRST.md); hybrid offline password grace (§10) remains the
+> login fallback when the hub is unreachable; desktop session cache is back on the
+> roadmap with the Tauri shell (`desktop/`).
 > Delivery: phased to `main`, each phase additive so existing logins keep working.
 > Supersedes the ad-hoc split between
 > the licensing-platform accounts (`hlp_*`) and the firm-app users (`esti_user`).
@@ -220,9 +222,12 @@ which needs a deployed platform + a couple of product decisions:
   turned on (`backend/src/modules/auth/router.ts`). *To enable: mint a product API key
   at `/platform-admin`, set the three env vars, pilot on one install before flipping it
   on widely.*
-- **Hybrid desktop offline cache** — cache the last successful online login so the desktop
-  opens offline after first sign-in (a `desktop/src-tauri` change). Chosen model: online
-  identity, locally-cached session.
+- **Hybrid desktop offline cache** — ✅ *structured (2026-08).* Desktop node packaging
+  stub lives under `desktop/` (Tauri shell → loopback SPA). Login still uses the
+  **hybrid offline password grace** above when `ESTI_IDENTITY_DELEGATE` is on. A native
+  session-token cache in `desktop/src-tauri` (last successful online login so the shell
+  opens offline after first sign-in) is the remaining packaging-wave item — chosen model
+  unchanged: online identity, locally-cached session. See [`LOCAL-FIRST.md`](LOCAL-FIRST.md).
 - **ASPRF → growth** — call `recordGrowth(accountPublicId, …)` from the firm ASPRF/LXOS
   pipelines so performance + learning accrue to the linked person. The seam exists
   (`modules/portable/service.ts`); wiring it touches ASPRF hot paths, deferred deliberately.

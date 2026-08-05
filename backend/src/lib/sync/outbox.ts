@@ -4,6 +4,7 @@ import type { DB } from "../../db/index.js";
 import { syncOutbox } from "../../db/schema.js";
 import { env } from "../../env.js";
 import { getOrgSettings } from "../settings.js";
+import { metaLastAppliedSeq, metaOutboxPendingCount } from "./metadata.js";
 
 const MAX_ATTEMPTS = 5;
 const BATCH = 100;
@@ -12,6 +13,7 @@ const BATCH = 100;
  * Enqueue a finalized record for publication to the hub. Called from
  * finalize/issue mutations (after commit); the drainer ships it. `payload` is the
  * portal-shaped DTO the hub stores; `fileKeys` are object keys to mirror later.
+ * `contentHash` lets the hub skip re-copying unchanged file bytes.
  */
 export async function enqueuePublish(
   db: DB,
@@ -21,6 +23,7 @@ export async function enqueuePublish(
     op?: SyncOp;
     payload?: Record<string, unknown>;
     fileKeys?: string[];
+    contentHash?: string;
   },
 ): Promise<void> {
   await db.insert(syncOutbox).values({
@@ -29,6 +32,7 @@ export async function enqueuePublish(
     op: args.op ?? "UPSERT",
     payload: args.payload ?? {},
     fileKeys: args.fileKeys ?? [],
+    contentHash: args.contentHash ?? null,
   });
 }
 
@@ -58,6 +62,7 @@ export async function drainOutbox(db: DB): Promise<{ sent: number; failed: numbe
           op: row.op,
           payload: row.payload,
           fileKeys: row.fileKeys,
+          contentHash: row.contentHash ?? undefined,
         }),
         signal: AbortSignal.timeout(30_000),
       });
@@ -84,18 +89,21 @@ export async function drainOutbox(db: DB): Promise<{ sent: number; failed: numbe
   return { sent, failed };
 }
 
-/** Outbox counts for the office UI. */
+/** Outbox counts for the office UI (artifacts + metadata queue). */
 export async function outboxStatus(db: DB): Promise<SyncStatusView> {
   const rows = await db
     .select({ state: syncOutbox.state, n: sql<number>`count(*)::int` })
     .from(syncOutbox)
     .groupBy(syncOutbox.state);
   const by = (s: string) => rows.find((r) => r.state === s)?.n ?? 0;
-  // PENDING includes rows that exhausted retries (state FAILED) — surface separately.
+  const metaPending = await metaOutboxPendingCount(db);
+  const metaLastSeq = await metaLastAppliedSeq(db);
   return {
     pending: by("PENDING"),
     synced: by("SYNCED"),
     failed: by("FAILED"),
     hubConfigured: Boolean(env.ESTI_HUB_URL),
+    metaPending,
+    metaLastSeq,
   };
 }

@@ -1,0 +1,3 @@
+# Placeholder for the Tauri/Cargo project. Packaging wave will run
+# `npm create tauri-app` / `cargo` here and point the window at the loopback SPA.
+# See ../README.md and docs/esti/LOCAL-FIRST.md.
