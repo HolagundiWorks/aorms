@@ -26,7 +26,7 @@ CREATE INDEX IF NOT EXISTS esti_cons_opportunity_status_idx ON esti_cons_opportu
 CREATE TABLE IF NOT EXISTS esti_cons_phase_gate (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   engagement_id uuid NOT NULL REFERENCES esti_cons_engagement(id) ON DELETE CASCADE,
-  phase_id uuid REFERENCES esti_cons_phase(id) ON DELETE SET NULL,
+  phase_id uuid REFERENCES esti_cons_engagement_phase(id) ON DELETE SET NULL,
   gate_key text NOT NULL,
   checklist jsonb NOT NULL DEFAULT '{}'::jsonb,
   decision text NOT NULL DEFAULT 'PENDING',
