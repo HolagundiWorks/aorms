@@ -1,17 +1,13 @@
 import {
-  Alert,
-  Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
+  InlineNotification,
+  Modal,
+  Select,
+  SelectItem,
   Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+  TextArea,
+  TextInput,
+} from "@carbon/react";
 import {
   TENDER_INVITATION_STATUS_LABEL,
   TENDER_INVITATION_STATUS_TAG,
@@ -22,12 +18,14 @@ import {
   type TenderInvitationStatus,
   type TenderStatus,
 } from "@esti/contracts";
-import AddIcon from "@mui/icons-material/Add";
+import { Add } from "@carbon/icons-react";
 import { pushToast, useScreenActions } from "@hcw/ui-kit";
 import { useState } from "react";
-import { DataState } from "../DataState.js";
-import { StatusTag } from "../StatusTag.js";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { DataGrid, DataState, StatusTag, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../../lib/trpc.js";
+
+const SUBTLE: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
 
 /**
  * Project › Tenders — firm issues tenders; invited contractors bid in the portal.
@@ -56,7 +54,7 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
             zone: "center",
             tone: "primary",
             label: "New tender",
-            icon: <AddIcon />,
+            icon: <Add />,
             onClick: () => setCreateOpen(true),
           },
         ],
@@ -143,139 +141,104 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
 
   return (
     <>
-      <Stack spacing={1.5}>
-        <Typography variant="body2" color="text.secondary">
-          Issue a tender to invited contractors. They bid in the contractor portal; amounts stay
-          sealed until you close the tender.
-        </Typography>
-        <DataState
-          loading={listQ.isLoading}
-          isEmpty={rows.length === 0}
-          columnCount={4}
-          empty={{
-            title: "No tenders yet",
-            description: "Draft a tender, invite contractors, then open bidding.",
-            action: (
-              <Button size="small" variant="outlined" onClick={() => setCreateOpen(true)}>
-                New tender
-              </Button>
-            ),
-          }}
-        >
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            density="compact"
-            autoHeight
-            hideFooter
-            disableRowSelectionOnClick
-            onRowClick={(p) => setDetailId(p.row.id)}
-            sx={{ "& .MuiDataGrid-row": { cursor: "pointer" } }}
-          />
-        </DataState>
-      </Stack>
-
-      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>New tender</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
-              label="Title"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-            />
-            <TextField
-              label="Category (optional)"
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              placeholder="Civil · Structural · MEP…"
-            />
-            <TextField
-              type="date"
-              label="Due date"
-              slotProps={{ inputLabel: { shrink: true } }}
-              value={form.dueDate}
-              onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-            />
-            <TextField
-              label="Scope"
-              multiline
-              rows={3}
-              value={form.scope}
-              onChange={(e) => setForm({ ...form, scope: e.target.value })}
-            />
-            <TextField
-              label="Instructions to bidders"
-              multiline
-              rows={2}
-              value={form.instructions}
-              onChange={(e) => setForm({ ...form, instructions: e.target.value })}
-            />
-            {create.error && <Alert severity="error">{create.error.message}</Alert>}
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setCreateOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            disabled={!form.title || create.isPending}
-            onClick={() =>
-              create.mutate({
-                projectId,
-                title: form.title,
-                category: form.category || undefined,
-                dueDate: form.dueDate || undefined,
-                scope: form.scope || undefined,
-                instructions: form.instructions || undefined,
-              })
-            }
+      <CarbonScope>
+        <Stack gap={4}>
+          <p className="cds--type-body-01" style={SUBTLE}>
+            Issue a tender to invited contractors. They bid in the contractor portal; amounts stay
+            sealed until you close the tender.
+          </p>
+          <DataState
+            loading={listQ.isLoading}
+            isEmpty={rows.length === 0}
+            columnCount={4}
+            empty={{
+              title: "No tenders yet",
+              description: "Draft a tender, invite contractors, then open bidding.",
+              action: (
+                <Button size="sm" kind="tertiary" onClick={() => setCreateOpen(true)}>
+                  New tender
+                </Button>
+              ),
+            }}
           >
-            {create.isPending ? "Saving…" : "Create draft"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              density="compact"
+              autoHeight
+              hideFooter
+              disableRowSelectionOnClick
+              onRowClick={(p) => setDetailId(p.row.id as string)}
+            />
+          </DataState>
+        </Stack>
+      </CarbonScope>
 
-      <Dialog
-        open={!!detailId}
-        onClose={() => setDetailId(null)}
-        fullWidth
-        maxWidth="md"
-        aria-labelledby="tender-detail-title"
-      >
-        <DialogTitle id="tender-detail-title">
-          {tender?.title ?? "Tender"}
-        </DialogTitle>
-        <DialogContent>
-          {detailQ.isLoading || !tender ? (
-            <Typography variant="body2">Loading…</Typography>
+      <CarbonScope>
+        <Modal
+          open={createOpen}
+          size="sm"
+          modalHeading="New tender"
+          primaryButtonText={create.isPending ? "Saving…" : "Create draft"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={!form.title || create.isPending}
+          onRequestClose={() => setCreateOpen(false)}
+          onRequestSubmit={() =>
+            create.mutate({
+              projectId,
+              title: form.title,
+              category: form.category || undefined,
+              dueDate: form.dueDate || undefined,
+              scope: form.scope || undefined,
+              instructions: form.instructions || undefined,
+            })
+          }
+        >
+          <Stack gap={5}>
+            <TextInput id="tn-title" labelText="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            <TextInput id="tn-cat" labelText="Category (optional)" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Civil · Structural · MEP…" />
+            <TextInput id="tn-due" type="date" labelText="Due date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />
+            <TextArea id="tn-scope" labelText="Scope" rows={3} value={form.scope} onChange={(e) => setForm({ ...form, scope: e.target.value })} />
+            <TextArea id="tn-instr" labelText="Instructions to bidders" rows={2} value={form.instructions} onChange={(e) => setForm({ ...form, instructions: e.target.value })} />
+            {create.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={create.error.message} />}
+          </Stack>
+        </Modal>
+
+        <Modal
+          open={!!detailId}
+          size="md"
+          passiveModal
+          modalHeading={tender?.title ?? "Tender"}
+          onRequestClose={() => setDetailId(null)}
+        >
+          {detailQ.isLoading || !tender || !detail ? (
+            <p className="cds--type-body-01" style={{ margin: 0 }}>Loading…</p>
           ) : (
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+            <Stack gap={5}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
                 <StatusTag
                   value={tender.status as TenderStatus}
                   map={TENDER_STATUS_TAG}
                   label={TENDER_STATUS_LABEL[tender.status as TenderStatus]}
                 />
-                <Typography variant="body2" color="text.secondary">
+                <span className="cds--type-body-01" style={SUBTLE}>
                   Due {tender.dueDate ?? "—"}
                   {tender.category ? ` · ${tender.category}` : ""}
-                </Typography>
-              </Stack>
+                </span>
+              </div>
               {tender.scope && (
-                <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
+                <p className="cds--type-body-01" style={{ margin: 0, whiteSpace: "pre-wrap" }}>
                   {tender.scope}
-                </Typography>
+                </p>
               )}
 
-              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                 {(["OPEN", "CLOSED", "CANCELLED"] as TenderStatus[]).map((s) =>
                   canTransitionTenderStatus(tender.status, s) && s !== tender.status ? (
                     <Button
                       key={s}
-                      size="small"
-                      variant={s === "OPEN" ? "contained" : "outlined"}
+                      size="sm"
+                      kind={s === "OPEN" ? "primary" : "tertiary"}
                       disabled={setStatus.isPending}
                       onClick={() => setStatus.mutate({ id: tender.id, status: s })}
                     >
@@ -283,61 +246,53 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
                     </Button>
                   ) : null,
                 )}
-              </Stack>
+              </div>
               {tender.status === "CLOSED" && (
-                <Typography variant="caption" color="text.secondary">
+                <p className="cds--type-label-01" style={SUBTLE}>
                   Award a contractor with a submitted bid below — do not mark awarded without a
                   winner.
-                </Typography>
+                </p>
               )}
-              {setStatus.error && <Alert severity="error">{setStatus.error.message}</Alert>}
+              {setStatus.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={setStatus.error.message} />}
 
-              <Box>
-                <Typography variant="overline" color="text.secondary">
-                  Invitations
-                </Typography>
-                <Stack direction="row" spacing={1} sx={{ mt: 1, mb: 1 }}>
-                  <TextField
-                    select
-                    size="small"
-                    label="Contractor"
-                    value={inviteId}
-                    onChange={(e) => setInviteId(e.target.value)}
-                    sx={{ minWidth: 220 }}
-                    disabled={tender.status === "AWARDED" || tender.status === "CANCELLED"}
-                  >
-                    {(contractorsQ.data ?? []).map((c) => (
-                      <MenuItem key={c.id} value={c.id}>
-                        {c.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+              <div>
+                <p className="cds--type-label-01" style={{ ...SUBTLE, textTransform: "uppercase", letterSpacing: "0.02em" }}>Invitations</p>
+                <div style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem", margin: "0.5rem 0" }}>
+                  <div style={{ minWidth: 220 }}>
+                    <Select
+                      id="tn-invite"
+                      size="sm"
+                      labelText="Contractor"
+                      value={inviteId}
+                      onChange={(e) => setInviteId(e.target.value)}
+                      disabled={tender.status === "AWARDED" || tender.status === "CANCELLED"}
+                    >
+                      <SelectItem value="" text="Select…" />
+                      {(contractorsQ.data ?? []).map((c) => (
+                        <SelectItem key={c.id} value={c.id} text={c.name} />
+                      ))}
+                    </Select>
+                  </div>
                   <Button
-                    size="small"
-                    variant="outlined"
+                    size="sm"
+                    kind="tertiary"
                     disabled={!inviteId || invite.isPending}
-                    onClick={() =>
-                      invite.mutate({ tenderId: tender.id, contractorId: inviteId })
-                    }
+                    onClick={() => invite.mutate({ tenderId: tender.id, contractorId: inviteId })}
                   >
                     Invite
                   </Button>
-                </Stack>
-                {invite.error && <Alert severity="error">{invite.error.message}</Alert>}
-                <Stack spacing={0.75}>
+                </div>
+                {invite.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={invite.error.message} />}
+                <Stack gap={2}>
                   {detail.invitations.map((i) => (
-                    <Stack
+                    <div
                       key={i.id}
-                      direction="row"
-                      spacing={1}
-                      sx={{ alignItems: "center", py: 0.5, borderBottom: 1, borderColor: "divider" }}
+                      style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.25rem 0", borderBottom: "1px solid var(--cds-border-subtle)" }}
                     >
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2">{i.contractorName}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {i.contractorCategory ?? "—"}
-                        </Typography>
-                      </Box>
+                      <div style={{ flex: 1 }}>
+                        <p className="cds--type-body-01" style={{ margin: 0 }}>{i.contractorName}</p>
+                        <p className="cds--type-label-01" style={SUBTLE}>{i.contractorCategory ?? "—"}</p>
+                      </div>
                       <StatusTag
                         value={i.status as TenderInvitationStatus}
                         map={TENDER_INVITATION_STATUS_TAG}
@@ -348,69 +303,55 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
                       />
                       {tender.status === "CLOSED" && i.status === "SUBMITTED" && (
                         <Button
-                          size="small"
-                          onClick={() =>
-                            award.mutate({
-                              tenderId: tender.id,
-                              contractorId: i.contractorId,
-                            })
-                          }
+                          size="sm"
+                          onClick={() => award.mutate({ tenderId: tender.id, contractorId: i.contractorId })}
                         >
                           Award
                         </Button>
                       )}
-                    </Stack>
+                    </div>
                   ))}
                   {detail.invitations.length === 0 && (
-                    <Typography variant="body2" color="text.secondary">
-                      No contractors invited yet.
-                    </Typography>
+                    <p className="cds--type-body-01" style={SUBTLE}>No contractors invited yet.</p>
                   )}
                 </Stack>
-              </Box>
+              </div>
 
-              <Box>
-                <Typography variant="overline" color="text.secondary">
+              <div>
+                <p className="cds--type-label-01" style={{ ...SUBTLE, textTransform: "uppercase", letterSpacing: "0.02em" }}>
                   Bids {detail.bidsSealed ? "(sealed until close)" : ""}
-                </Typography>
+                </p>
                 {detail.bids.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    No bids submitted yet.
-                  </Typography>
+                  <p className="cds--type-body-01" style={{ ...SUBTLE, marginTop: "0.25rem" }}>No bids submitted yet.</p>
                 ) : (
-                  <Stack spacing={0.75} sx={{ mt: 0.5 }}>
+                  <Stack gap={2} style={{ marginTop: "0.25rem" }}>
                     {detail.bids.map((b) => {
                       const invRow = detail.invitations.find((i) => i.id === b.invitationId);
                       return (
-                        <Typography key={b.id} variant="body2">
+                        <p key={b.id} className="cds--type-body-01" style={{ margin: 0 }}>
                           {invRow?.contractorName ?? "Contractor"} —{" "}
                           {b.sealed || b.amountPaise == null
                             ? "sealed"
                             : formatINR(b.amountPaise)}
                           {b.completionWeeks != null ? ` · ${b.completionWeeks} weeks` : ""}
                           {!b.sealed && b.notes ? ` · ${b.notes}` : ""}
-                        </Typography>
+                        </p>
                       );
                     })}
                   </Stack>
                 )}
                 {detail.bidsSealed && detail.bids.length > 0 && (
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
+                  <p className="cds--type-label-01" style={{ ...SUBTLE, marginTop: "0.25rem" }}>
                     {detail.bids.length} bid(s) received — amounts stay sealed until you close the
                     tender.
-                  </Typography>
+                  </p>
                 )}
-              </Box>
-              {award.error && <Alert severity="error">{award.error.message}</Alert>}
+              </div>
+              {award.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={award.error.message} />}
             </Stack>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setDetailId(null)}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
+      </CarbonScope>
     </>
   );
 }

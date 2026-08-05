@@ -1,17 +1,13 @@
 import {
-  Alert,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
+  InlineNotification,
+  Modal,
+  Select,
+  SelectItem,
   Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import AddIcon from "@mui/icons-material/Add";
+  TextArea,
+  TextInput,
+} from "@carbon/react";
+import { Add } from "@carbon/icons-react";
 import {
   CONSULTANT_SUBMISSION_KIND_LABEL,
   CONSULTANT_SUBMISSION_KIND_TAG,
@@ -24,10 +20,15 @@ import {
 import { useState } from "react";
 import { useScreenActions } from "@hcw/ui-kit";
 import { Link } from "react-router-dom";
-import { DataState } from "../components/DataState.js";
+import { CarbonScope } from "../carbon/CarbonScope.js";
+import {
+  DataGrid,
+  DataState,
+  StatusTag,
+  type GridColDef,
+} from "../carbon/adapters/index.js";
 import { PageHeader } from "../components/PageHeader.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
-import { StatusTag } from "../components/StatusTag.js";
 import { SubmissionThread } from "../components/SubmissionThread.js";
 import { trpc } from "../lib/trpc.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
@@ -94,7 +95,7 @@ export function ConsultantRequests({ embedded = false }: { embedded?: boolean })
         zone: "center",
         tone: "primary",
         label: "Assign task",
-        icon: <AddIcon />,
+        icon: <Add />,
         onClick: () => setAssignOpen(true),
       },
     ],
@@ -122,14 +123,14 @@ export function ConsultantRequests({ embedded = false }: { embedded?: boolean })
       minWidth: 220,
       sortable: false,
       renderCell: (p) => (
-        <Stack spacing={0.25} sx={{ py: 1 }}>
-          <Typography variant="body2">{p.row.subject}</Typography>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "0.5rem 0" }}>
+          <span className="cds--type-body-01">{p.row.subject}</span>
           {p.row.body && (
-            <Typography variant="caption" className="esti-label esti-label--secondary" color="text.secondary">
+            <span className="esti-label esti-label--secondary" style={{ color: "var(--cds-text-secondary)" }}>
               {p.row.body}
-            </Typography>
+            </span>
           )}
-        </Stack>
+        </div>
       ),
     },
     {
@@ -137,7 +138,7 @@ export function ConsultantRequests({ embedded = false }: { embedded?: boolean })
       headerName: "Project",
       flex: 1,
       minWidth: 120,
-      renderCell: (p) => <Link to={`/projects/${p.row.projectId}`}>{p.row.projectRef}</Link>,
+      renderCell: (p) => <Link to={`/projects/${p.row.projectId}`} className="cds--link">{p.row.projectRef}</Link>,
     },
     {
       field: "consultant",
@@ -190,120 +191,117 @@ export function ConsultantRequests({ embedded = false }: { embedded?: boolean })
   ];
 
   return (
-    <Stack spacing={3}>
-      {!embedded && (
-        <PageHeader
-          title="Consultant requests"
-          description="Deliverables, RFIs and notes raised by engaged consultants — and tasks you assign to them."
-        />
-      )}
+    <CarbonScope>
+      <Stack gap={6}>
+        {!embedded && (
+          <PageHeader
+            title="Consultant requests"
+            description="Deliverables, RFIs and notes raised by engaged consultants — and tasks you assign to them."
+          />
+        )}
 
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }}>
-        <TextField
-          id="cnr-status"
-          select
-          size="small"
-          label="Status"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          sx={{ minWidth: 180 }}
+        <div style={{ display: "flex", alignItems: "flex-end", gap: "1rem", flexWrap: "wrap" }}>
+          <div style={{ minWidth: 180 }}>
+            <Select
+              id="cnr-status"
+              size="sm"
+              labelText="Status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+            >
+              <SelectItem value="" text="All statuses" />
+              {ConsultantSubmissionStatus.options.map((s) => (
+                <SelectItem key={s} value={s} text={CONSULTANT_SUBMISSION_STATUS_LABEL[s]} />
+              ))}
+            </Select>
+          </div>
+          <div style={{ minWidth: 180 }}>
+            <Select
+              id="cnr-kind"
+              size="sm"
+              labelText="Kind"
+              value={kind}
+              onChange={(e) => setKind(e.target.value)}
+            >
+              <SelectItem value="" text="All kinds" />
+              {ConsultantSubmissionKind.options.map((k) => (
+                <SelectItem key={k} value={k} text={CONSULTANT_SUBMISSION_KIND_LABEL[k]} />
+              ))}
+            </Select>
+          </div>
+        </div>
+
+        {listQ.error && (
+          <InlineNotification kind="error" lowContrast hideCloseButton title="Could not load consultant requests" subtitle={listQ.error.message} />
+        )}
+
+        <DataState
+          loading={listQ.isLoading}
+          isEmpty={rows.length === 0}
+          columnCount={6}
+          empty={{ title: "No consultant requests", description: `Items raised from the ${AORMS_PORTALS.consultant.alias.toLowerCase()} appear here.` }}
         >
-          <MenuItem value="">All statuses</MenuItem>
-          {ConsultantSubmissionStatus.options.map((s) => (
-            <MenuItem key={s} value={s}>{CONSULTANT_SUBMISSION_STATUS_LABEL[s]}</MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          id="cnr-kind"
-          select
-          size="small"
-          label="Kind"
-          value={kind}
-          onChange={(e) => setKind(e.target.value)}
-          sx={{ minWidth: 180 }}
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            getRowHeight={() => "auto"}
+            density="compact"
+            disableRowSelectionOnClick
+            hideFooter
+            autoHeight
+          />
+        </DataState>
+
+        <Modal
+          open={triage !== null}
+          size="sm"
+          modalHeading={triage ? `Triage — ${triage.subject}` : "Triage"}
+          primaryButtonText={setStatusM.isPending ? "Saving…" : "Save"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={setStatusM.isPending}
+          onRequestClose={() => setTriage(null)}
+          onRequestSubmit={() =>
+            triage &&
+            setStatusM.mutate({
+              id: triage.id,
+              status: triage.status,
+              responseNote: triage.responseNote || undefined,
+            })
+          }
         >
-          <MenuItem value="">All kinds</MenuItem>
-          {ConsultantSubmissionKind.options.map((k) => (
-            <MenuItem key={k} value={k}>{CONSULTANT_SUBMISSION_KIND_LABEL[k]}</MenuItem>
-          ))}
-        </TextField>
-      </Stack>
-
-      {listQ.error && (
-        <Alert severity="error">
-          Could not load consultant requests — {listQ.error.message}
-        </Alert>
-      )}
-
-      <DataState
-        loading={listQ.isLoading}
-        isEmpty={rows.length === 0}
-        columnCount={6}
-        empty={{ title: "No consultant requests", description: `Items raised from the ${AORMS_PORTALS.consultant.alias.toLowerCase()} appear here.` }}
-      >
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          getRowHeight={() => "auto"}
-          density="compact"
-          disableRowSelectionOnClick
-          hideFooter
-          autoHeight
-        />
-      </DataState>
-
-      <Dialog aria-labelledby="consultant-requests-triage-title" open={triage !== null} onClose={() => setTriage(null)} fullWidth maxWidth="sm">
-        <DialogTitle id="consultant-requests-triage-title">{triage ? `Triage — ${triage.subject}` : "Triage"}</DialogTitle>
-        <DialogContent>
           {triage && (
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <TextField
+            <Stack gap={5}>
+              <Select
                 id="cnr-tr-status"
-                select
-                label="Status"
+                labelText="Status"
                 value={triage.status}
                 onChange={(e) => setTriage({ ...triage, status: e.target.value as SubmissionStatus })}
               >
                 {ConsultantSubmissionStatus.options.map((s) => (
-                  <MenuItem key={s} value={s}>{CONSULTANT_SUBMISSION_STATUS_LABEL[s]}</MenuItem>
+                  <SelectItem key={s} value={s} text={CONSULTANT_SUBMISSION_STATUS_LABEL[s]} />
                 ))}
-              </TextField>
-              <TextField
+              </Select>
+              <TextArea
                 id="cnr-tr-note"
-                label="Response to consultant (optional)"
-                multiline
+                labelText="Response to consultant (optional)"
                 rows={3}
                 value={triage.responseNote}
                 onChange={(e) => setTriage({ ...triage, responseNote: e.target.value })}
               />
               {setStatusM.error && (
-                <Alert severity="error">Could not save — {setStatusM.error.message}</Alert>
+                <InlineNotification kind="error" lowContrast hideCloseButton title="Could not save" subtitle={setStatusM.error.message} />
               )}
             </Stack>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setTriage(null)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={setStatusM.isPending}
-            onClick={() =>
-              triage &&
-              setStatusM.mutate({
-                id: triage.id,
-                status: triage.status,
-                responseNote: triage.responseNote || undefined,
-              })
-            }
-          >
-            {setStatusM.isPending ? "Saving…" : "Save"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
 
-      <Dialog aria-labelledby="consultant-requests-conversation-title" open={threadFor !== null} onClose={() => setThreadFor(null)} fullWidth maxWidth="sm">
-        <DialogTitle id="consultant-requests-conversation-title">{threadFor ? `Conversation — ${threadFor.subject}` : "Conversation"}</DialogTitle>
-        <DialogContent>
+        <Modal
+          open={threadFor !== null}
+          size="sm"
+          passiveModal
+          modalHeading={threadFor ? `Conversation — ${threadFor.subject}` : "Conversation"}
+          onRequestClose={() => setThreadFor(null)}
+        >
           {threadFor && (
             <SubmissionThread
               messages={threadQ.data ?? []}
@@ -312,81 +310,69 @@ export function ConsultantRequests({ embedded = false }: { embedded?: boolean })
               onReply={(body) => reply.mutate({ id: threadFor.id, body })}
             />
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setThreadFor(null)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
 
-      <Dialog aria-labelledby="consultant-requests-assign-title" open={assignOpen} onClose={() => setAssignOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle id="consultant-requests-assign-title">Assign a task to a consultant</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
+        <Modal
+          open={assignOpen}
+          size="sm"
+          modalHeading="Assign a task to a consultant"
+          primaryButtonText={assignM.isPending ? "Assigning…" : "Assign"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={!assign.projectId || !assign.consultantId || !assign.subject || assignM.isPending}
+          onRequestClose={() => setAssignOpen(false)}
+          onRequestSubmit={() =>
+            assignM.mutate({
+              projectId: assign.projectId,
+              consultantId: assign.consultantId,
+              subject: assign.subject,
+              body: assign.body || undefined,
+            })
+          }
+        >
+          <Stack gap={5}>
+            <Select
               id="as-proj"
-              select
-              label="Project"
+              labelText="Project"
               value={assign.projectId}
               onChange={(e) => setAssign((a) => ({ ...a, projectId: e.target.value, consultantId: "" }))}
             >
-              <MenuItem value="">— select a project —</MenuItem>
+              <SelectItem value="" text="— select a project —" />
               {(projectsQ.data ?? []).map((p) => (
-                <MenuItem key={p.id} value={p.id}>{`${p.ref} ${p.title}`}</MenuItem>
+                <SelectItem key={p.id} value={p.id} text={`${p.ref} ${p.title}`} />
               ))}
-            </TextField>
-            <TextField
+            </Select>
+            <Select
               id="as-cons"
-              select
-              label="Consultant"
+              labelText="Consultant"
               disabled={!assign.projectId || (engagementsQ.data?.rows ?? []).length === 0}
               helperText={noEngagements ? "No consultants engaged on this project" : undefined}
               value={assign.consultantId}
               onChange={(e) => setAssign((a) => ({ ...a, consultantId: e.target.value }))}
             >
-              <MenuItem value="">— select a consultant —</MenuItem>
+              <SelectItem value="" text="— select a consultant —" />
               {(engagementsQ.data?.rows ?? []).map((en) => (
-                <MenuItem key={en.consultantId} value={en.consultantId}>
-                  {en.consultantName ?? en.consultantId}
-                </MenuItem>
+                <SelectItem key={en.consultantId} value={en.consultantId} text={en.consultantName ?? en.consultantId} />
               ))}
-            </TextField>
-            <TextField
+            </Select>
+            <TextInput
               id="as-subject"
-              label="Task"
+              labelText="Task"
               value={assign.subject}
               onChange={(e) => setAssign((a) => ({ ...a, subject: e.target.value }))}
             />
-            <TextField
+            <TextArea
               id="as-body"
-              label="Details (optional)"
-              multiline
+              labelText="Details (optional)"
               rows={3}
               value={assign.body}
               onChange={(e) => setAssign((a) => ({ ...a, body: e.target.value }))}
             />
             {assignM.error && (
-              <Alert severity="error">Could not assign — {assignM.error.message}</Alert>
+              <InlineNotification kind="error" lowContrast hideCloseButton title="Could not assign" subtitle={assignM.error.message} />
             )}
           </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setAssignOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={!assign.projectId || !assign.consultantId || !assign.subject || assignM.isPending}
-            onClick={() =>
-              assignM.mutate({
-                projectId: assign.projectId,
-                consultantId: assign.consultantId,
-                subject: assign.subject,
-                body: assign.body || undefined,
-              })
-            }
-          >
-            {assignM.isPending ? "Assigning…" : "Assign"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Stack>
+        </Modal>
+      </Stack>
+    </CarbonScope>
   );
 }

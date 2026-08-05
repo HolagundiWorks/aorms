@@ -47,4 +47,29 @@ export function statusShapeFor(severity: string): StatusShape {
   return "circle";
 }
 
+/**
+ * Wave 3 adapter — kit `StatusTag` API → Carbon `<Tag>` (via {@link StatusDot}).
+ *
+ * Every status/enum column renders through this so colour choices live in a
+ * single shared map (in `@esti/contracts`). Unknown values fall back to `gray`.
+ * The kit `severity`/`shape` channel is accepted for parity; Carbon Tag has no
+ * shape channel, so it is a no-op here.
+ */
+export function StatusTag<T extends string>({
+  value,
+  map,
+  label,
+  size = "sm",
+  severity,
+}: {
+  value: T;
+  map: Record<T, string>;
+  label?: ReactNode;
+  size?: "sm" | "md";
+  severity?: "ok" | "watch" | "critical" | "inactive";
+}) {
+  const shape = severity ? statusShapeFor(severity) : undefined;
+  return <StatusDot color={map[value] ?? "gray"} label={label ?? value} size={size} shape={shape} />;
+}
+
 export default StatusDot;

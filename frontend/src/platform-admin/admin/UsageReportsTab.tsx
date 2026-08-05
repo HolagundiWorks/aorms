@@ -3,23 +3,18 @@
  */
 import { useEffect, useState } from "react";
 import {
-  Alert,
-  Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Menu,
-  MenuItem,
+  InlineNotification,
+  Modal,
+  Select,
+  SelectItem,
   Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import MoreVert from "@mui/icons-material/MoreVert";
-import { StatusDot } from "../../components/StatusTag.js";
+  TextArea,
+  TextInput,
+} from "@carbon/react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { DataGrid, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
+import { RowActionsMenu } from "../../components/RowActionsMenu.js";
 import { trpc } from "../lib/trpc";
 
 type Rows = Awaited<ReturnType<typeof trpc.admin.usageReports.list.query>>;
@@ -51,7 +46,6 @@ export default function UsageReportsTab() {
   const [billed, setBilled] = useState<"all" | "billed" | "unbilled">("all");
   const [rows, setRows] = useState<Rows>([]);
   const [error, setError] = useState<string | null>(null);
-  const [menu, setMenu] = useState<{ anchor: HTMLElement; row: Rows[number] } | null>(null);
   const [noteFor, setNoteFor] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [suspendFor, setSuspendFor] = useState<string | null>(null);
@@ -154,143 +148,122 @@ export default function UsageReportsTab() {
       width: 70,
       align: "right",
       renderCell: (p) => (
-        <IconButton
-          aria-label="Usage report actions"
-          size="small"
-          onClick={(e) => setMenu({ anchor: e.currentTarget, row: p.row })}
-        >
-          <MoreVert fontSize="small" />
-        </IconButton>
+        <RowActionsMenu
+          actions={[
+            !p.row.billedAt && {
+              label: "Mark billed…",
+              onClick: () => {
+                setNoteFor(p.row.id);
+                setNote("");
+              },
+            },
+            !!p.row.billedAt && {
+              label: "Clear billed mark",
+              onClick: () => void markUnbilled(p.row.id),
+            },
+            {
+              label: "Suspend for non-payment…",
+              onClick: () => {
+                setSuspendFor(p.row.id);
+                setSuspendNote(`Non-payment — ${p.row.orgName} · ${p.row.periodStart}`);
+              },
+              danger: true,
+            },
+          ]}
+        />
       ),
     },
   ];
 
   return (
-    <Stack spacing={2}>
-      <Typography variant="body2" color="text.secondary">
-        Manual India invoice path — export CSV for offline GST billing, then mark rows billed.
-        Stripe is not wired.
-      </Typography>
-      {error && <Alert severity="error">{error}</Alert>}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { sm: "center" } }}>
-        <TextField
-          size="small"
-          type="date"
-          label="Period start"
-          value={periodStart}
-          onChange={(e) => setPeriodStart(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
-        <TextField
-          select
-          size="small"
-          label="Filter"
-          value={billed}
-          onChange={(e) => setBilled(e.target.value as typeof billed)}
-          sx={{ minWidth: 140 }}
-        >
-          <MenuItem value="all">All</MenuItem>
-          <MenuItem value="unbilled">Unbilled</MenuItem>
-          <MenuItem value="billed">Billed</MenuItem>
-        </TextField>
-        <Box className="esti-grow" />
-        <Button variant="outlined" onClick={() => void exportCsv()}>
-          Export CSV
-        </Button>
-      </Stack>
-      <Box sx={{ height: 420, width: "100%" }}>
+    <CarbonScope>
+      <Stack gap={5}>
+        <p className="cds--type-body-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
+          Manual India invoice path — export CSV for offline GST billing, then mark rows billed.
+          Stripe is not wired.
+        </p>
+        {error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={error} />}
+        <div style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem", flexWrap: "wrap" }}>
+          <TextInput
+            id="ur-period"
+            size="sm"
+            type="date"
+            labelText="Period start"
+            value={periodStart}
+            onChange={(e) => setPeriodStart(e.target.value)}
+          />
+          <div style={{ minWidth: 140 }}>
+            <Select
+              id="ur-filter"
+              size="sm"
+              labelText="Filter"
+              value={billed}
+              onChange={(e) => setBilled(e.target.value as typeof billed)}
+            >
+              <SelectItem value="all" text="All" />
+              <SelectItem value="unbilled" text="Unbilled" />
+              <SelectItem value="billed" text="Billed" />
+            </Select>
+          </div>
+          <div style={{ flex: 1 }} />
+          <Button kind="secondary" size="sm" onClick={() => void exportCsv()}>
+            Export CSV
+          </Button>
+        </div>
         <DataGrid
           rows={rows}
           columns={columns}
           getRowId={(r) => r.id}
+          density="compact"
           disableRowSelectionOnClick
           pageSizeOptions={[25, 50]}
-          initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
+          paginationModel={{ page: 0, pageSize: 25 }}
+          autoHeight
         />
-      </Box>
 
-      <Menu
-        open={!!menu}
-        anchorEl={menu?.anchor}
-        onClose={() => setMenu(null)}
-      >
-        {menu && !menu.row.billedAt && (
-          <MenuItem
-            onClick={() => {
-              setNoteFor(menu.row.id);
-              setNote("");
-              setMenu(null);
-            }}
-          >
-            Mark billed…
-          </MenuItem>
-        )}
-        {menu?.row.billedAt && (
-          <MenuItem
-            onClick={() => {
-              void markUnbilled(menu.row.id);
-              setMenu(null);
-            }}
-          >
-            Clear billed mark
-          </MenuItem>
-        )}
-        {menu && (
-          <MenuItem
-            onClick={() => {
-              setSuspendFor(menu.row.id);
-              setSuspendNote(`Non-payment — ${menu.row.orgName} · ${menu.row.periodStart}`);
-              setMenu(null);
-            }}
-          >
-            Suspend for non-payment…
-          </MenuItem>
-        )}
-      </Menu>
-
-      <Dialog open={!!noteFor} onClose={() => setNoteFor(null)} fullWidth maxWidth="xs">
-        <DialogTitle>Mark usage billed</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            sx={{ mt: 1 }}
-            label="Billing note (invoice ref)"
+        <Modal
+          open={!!noteFor}
+          size="xs"
+          modalHeading="Mark usage billed"
+          primaryButtonText="Mark billed"
+          secondaryButtonText="Cancel"
+          onRequestClose={() => setNoteFor(null)}
+          onRequestSubmit={() => void markBilled()}
+        >
+          <TextInput
+            id="ur-note"
+            labelText="Billing note (invoice ref)"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="e.g. INV-2026-07-014"
           />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setNoteFor(null)}>Cancel</Button>
-          <Button variant="contained" onClick={() => void markBilled()}>
-            Mark billed
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
 
-      <Dialog open={!!suspendFor} onClose={() => setSuspendFor(null)} fullWidth maxWidth="xs">
-        <DialogTitle>Suspend for non-payment</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 1 }}>
-            Sets the org&apos;s product licence to SUSPENDED. The workspace blocks writes on its
-            next licence refresh. Reinstate from Licences when payment clears.
-          </Typography>
-          <TextField
-            fullWidth
-            label="Note"
-            value={suspendNote}
-            onChange={(e) => setSuspendNote(e.target.value)}
-            multiline
-            minRows={2}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setSuspendFor(null)}>Cancel</Button>
-          <Button color="warning" variant="contained" onClick={() => void suspendForNonPayment()}>
-            Suspend licence
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Stack>
+        <Modal
+          open={!!suspendFor}
+          size="xs"
+          danger
+          modalHeading="Suspend for non-payment"
+          primaryButtonText="Suspend licence"
+          secondaryButtonText="Cancel"
+          onRequestClose={() => setSuspendFor(null)}
+          onRequestSubmit={() => void suspendForNonPayment()}
+        >
+          <Stack gap={4}>
+            <p className="cds--type-body-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
+              Sets the org&apos;s product licence to SUSPENDED. The workspace blocks writes on its
+              next licence refresh. Reinstate from Licences when payment clears.
+            </p>
+            <TextArea
+              id="ur-suspend-note"
+              labelText="Note"
+              value={suspendNote}
+              onChange={(e) => setSuspendNote(e.target.value)}
+              rows={2}
+            />
+          </Stack>
+        </Modal>
+      </Stack>
+    </CarbonScope>
   );
 }

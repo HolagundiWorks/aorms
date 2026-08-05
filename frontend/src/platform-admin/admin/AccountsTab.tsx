@@ -5,19 +5,14 @@ import {
   type AccountStatus,
 } from "@esti/contracts";
 import {
-  Alert,
-  Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  InlineNotification,
+  Modal,
   Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { StatusDot } from "../../components/StatusTag.js";
+  TextInput,
+} from "@carbon/react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { DataGrid, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../lib/trpc";
 
 type AccountRow = {
@@ -202,25 +197,24 @@ export default function AccountsTab() {
         const row = p.row;
         if (row.status === "DELETED") return null;
         return (
-          <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap" }}>
-            <Button variant="text" size="small" onClick={() => openReset(row.email)}>
+          <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
+            <Button kind="ghost" size="sm" onClick={() => openReset(row.email)}>
               Reset PW
             </Button>
             {row.status === "ACTIVE" && !row.isPlatformAdmin && (
-              <Button variant="text" size="small" color="warning" onClick={() => setStatus(row, "SUSPENDED")}>
+              <Button kind="ghost" size="sm" onClick={() => setStatus(row, "SUSPENDED")}>
                 Suspend
               </Button>
             )}
             {row.status === "SUSPENDED" && (
-              <Button variant="text" size="small" color="success" onClick={() => setStatus(row, "ACTIVE")}>
+              <Button kind="ghost" size="sm" onClick={() => setStatus(row, "ACTIVE")}>
                 Reactivate
               </Button>
             )}
             {!row.isPlatformAdmin && (
               <Button
-                variant="text"
-                size="small"
-                color="error"
+                kind="danger--ghost"
+                size="sm"
                 onClick={() => {
                   setRemove(row);
                   setConfirmEmail("");
@@ -230,108 +224,100 @@ export default function AccountsTab() {
                 Delete
               </Button>
             )}
-          </Stack>
+          </div>
         );
       },
     },
   ];
 
   return (
-    <Stack spacing={2}>
-      {note && (
-        <Alert severity={note.kind} onClose={() => setNote(null)}>
-          {note.text}
-        </Alert>
-      )}
+    <CarbonScope>
+      <Stack gap={5}>
+        {note && (
+          <InlineNotification kind={note.kind} lowContrast title={note.kind === "error" ? "Error" : "Done"} subtitle={note.text} onCloseButtonClick={() => setNote(null)} />
+        )}
 
-      <Box component="form" onSubmit={doSearch}>
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-          <TextField
-            id="account-search"
-            label="Search accounts"
-            placeholder="email · AORMS-U · firm · mobile"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            fullWidth
-          />
-          <Button type="submit" variant="outlined" disabled={busy}>
-            Search
-          </Button>
-        </Stack>
-      </Box>
+        <form onSubmit={doSearch}>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem", flexWrap: "wrap" }}>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <TextInput
+                id="account-search"
+                labelText="Search accounts"
+                placeholder="email · AORMS-U · firm · mobile"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <Button type="submit" kind="secondary" disabled={busy}>
+              Search
+            </Button>
+          </div>
+        </form>
 
-      <DataGrid
-        rows={accounts.filter((a) => a.status !== "DELETED")}
-        columns={columns}
-        getRowId={(r) => r.id}
-        density="compact"
-        disableRowSelectionOnClick
-        hideFooter
-        autoHeight
-      />
+        <DataGrid
+          rows={accounts.filter((a) => a.status !== "DELETED")}
+          columns={columns}
+          getRowId={(r) => r.id}
+          density="compact"
+          disableRowSelectionOnClick
+          hideFooter
+          autoHeight
+        />
 
-      <Dialog aria-labelledby="accounts-tab-reset-title" open={reset !== null} onClose={() => setReset(null)} fullWidth maxWidth="sm">
-        <DialogTitle id="accounts-tab-reset-title">{`Reset password — ${reset?.email ?? ""}`}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <Typography variant="body2">
+        <Modal
+          open={reset !== null}
+          size="sm"
+          modalHeading={`Reset password — ${reset?.email ?? ""}`}
+          primaryButtonText={busy ? "Saving…" : "Reset"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={newPassword.length < 8 || busy}
+          onRequestClose={() => setReset(null)}
+          onRequestSubmit={doReset}
+        >
+          <Stack gap={5}>
+            <p className="cds--type-body-01" style={{ margin: 0 }}>
               Sets a new password immediately. Copy it and send it to the person yourself —
               this does not email them automatically.
-            </Typography>
-            <TextField
+            </p>
+            <TextInput
               id="reset-pw"
-              label="New password"
+              labelText="New password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               helperText="Pre-filled with a random password — edit if you prefer your own."
-              fullWidth
             />
           </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" onClick={() => setReset(null)}>
-            Cancel
-          </Button>
-          <Button variant="contained" disabled={newPassword.length < 8 || busy} onClick={doReset}>
-            {busy ? "Saving…" : "Reset"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
 
-      <Dialog aria-labelledby="accounts-tab-delete-title" open={remove !== null} onClose={() => setRemove(null)} fullWidth maxWidth="sm">
-        <DialogTitle id="accounts-tab-delete-title">Delete account</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <Typography variant="body2">
+        <Modal
+          open={remove !== null}
+          size="sm"
+          danger
+          modalHeading="Delete account"
+          primaryButtonText={busy ? "Deleting…" : "Delete account"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={
+            busy ||
+            !remove ||
+            confirmEmail.trim().toLowerCase() !== remove.email.toLowerCase()
+          }
+          onRequestClose={() => setRemove(null)}
+          onRequestSubmit={doRemove}
+        >
+          <Stack gap={5}>
+            <p className="cds--type-body-01" style={{ margin: 0 }}>
               Soft-deletes <strong>{remove?.email}</strong>, revokes their licences, and frees the
               email for a future signup. Type the account email to confirm.
-            </Typography>
-            <TextField
-              label="Confirm email"
+            </p>
+            <TextInput
+              id="confirm-email"
+              labelText="Confirm email"
               value={confirmEmail}
               onChange={(e) => setConfirmEmail(e.target.value)}
-              fullWidth
             />
           </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" onClick={() => setRemove(null)}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            disabled={
-              busy ||
-              !remove ||
-              confirmEmail.trim().toLowerCase() !== remove.email.toLowerCase()
-            }
-            onClick={doRemove}
-          >
-            {busy ? "Deleting…" : "Delete account"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Stack>
+        </Modal>
+      </Stack>
+    </CarbonScope>
   );
 }

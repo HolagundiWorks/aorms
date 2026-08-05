@@ -1,21 +1,14 @@
 import {
-  Alert,
-  Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  MenuItem,
+  InlineNotification,
+  Modal,
+  PasswordInput,
+  Select,
+  SelectItem,
   Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import AddIcon from "@mui/icons-material/Add";
-import SyncIcon from "@mui/icons-material/Sync";
+  TextInput,
+} from "@carbon/react";
+import { Add, Renew } from "@carbon/icons-react";
 import {
   ASSIGNABLE_STAFF_ROLES,
   GENERAL_STAFF_ROLES,
@@ -29,9 +22,10 @@ import {
 import { useState } from "react";
 import { pushToast, useScreenActions } from "@hcw/ui-kit";
 import { useAuth } from "../lib/auth.js";
+import { CarbonScope } from "../carbon/CarbonScope.js";
+import { DataGrid, StatusDot, type GridColDef } from "../carbon/adapters/index.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
-import { StatusDot } from "../components/StatusTag.js";
 import { trpc } from "../lib/trpc.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
 
@@ -48,6 +42,8 @@ const TYPE_TAG_COLOR: Record<string, "purple" | "gray" | "blue" | "teal" | "cyan
   CONSULTANT: "teal",
   CONTRACTOR: "cyan",
 };
+
+const LABEL_STYLE: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
 
 export function Users({ embedded = false }: { embedded?: boolean }) {
   const { user } = useAuth();
@@ -155,14 +151,14 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
             zone: "center",
             tone: "primary",
             label: "Add staff login",
-            icon: <AddIcon />,
+            icon: <Add />,
             onClick: () => setAddOpen(true),
           },
           {
             id: "resync-identity-types",
             zone: "right",
             label: resync.isPending ? "Syncing…" : "Resync identity types",
-            icon: <SyncIcon />,
+            icon: <Renew />,
             disabled: resync.isPending,
             onClick: () => resync.mutate(),
           },
@@ -217,26 +213,25 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
               : "";
         if (!isSelf && u.role !== "OWNER" && !u.clientId && !u.consultantId) {
           return (
-            <TextField
-              select
-              size="small"
-              variant="standard"
-              value={isStaffRole(u.role) ? u.role : "ASSOCIATE"}
-              onChange={(e) =>
-                setRole.mutate({
-                  id: u.id,
-                  role: e.target.value as (typeof ASSIGNABLE_STAFF_ROLES)[number],
-                })
-              }
-              sx={{ minWidth: 150 }}
-              slotProps={{ htmlInput: { "aria-label": "User role" } }}
-            >
-              {roleOptions.map((r) => (
-                <MenuItem key={r} value={r}>
-                  {STAFF_ROLE_LABEL[r]}
-                </MenuItem>
-              ))}
-            </TextField>
+            <div style={{ minWidth: 150 }}>
+              <Select
+                id={`role-${u.id}`}
+                labelText="User role"
+                hideLabel
+                size="sm"
+                value={isStaffRole(u.role) ? u.role : "ASSOCIATE"}
+                onChange={(e) =>
+                  setRole.mutate({
+                    id: u.id,
+                    role: e.target.value as (typeof ASSIGNABLE_STAFF_ROLES)[number],
+                  })
+                }
+              >
+                {roleOptions.map((r) => (
+                  <SelectItem key={r} value={r} text={STAFF_ROLE_LABEL[r]} />
+                ))}
+              </Select>
+            </div>
           );
         }
         return (
@@ -297,37 +292,31 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
   ];
 
   const body = (
-    <>
-      <Box sx={{ p: embedded ? 0 : 3 }}>
-        <Stack spacing={2}>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <Typography variant="subtitle1" component="h3" className="esti-label">Active logins</Typography>
+    <CarbonScope>
+      <Stack gap={5}>
+        <Stack gap={3}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <h3 className="cds--type-heading-compact-01" style={{ margin: 0 }}>Active logins</h3>
             <StatusDot color="blue" label={STANDARD_LICENCE_LABEL} />
-          </Stack>
-          <Grid container spacing={2}>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem" }}>
             {seats.map((s) => (
-              <Grid key={s.label} size={{ xs: 12, sm: 6, lg: 3 }}>
-                <Stack spacing={0.5}>
-                  <Typography variant="body2" className="esti-label">{s.label}</Typography>
-                  <Typography variant="body2">{s.used} active · Unlimited</Typography>
-                </Stack>
-              </Grid>
+              <div key={s.label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <span className="cds--type-label-01" style={LABEL_STYLE}>{s.label}</span>
+                <span className="cds--type-body-01">{s.used} active · Unlimited</span>
+              </div>
             ))}
-          </Grid>
+          </div>
         </Stack>
-      </Box>
 
-      {msg && (
-        <Alert severity="success" onClose={() => setMsg(null)}>
-          {msg}
-        </Alert>
-      )}
+        {msg && (
+          <InlineNotification kind="success" lowContrast title="Done" subtitle={msg} onCloseButtonClick={() => setMsg(null)} />
+        )}
 
-      <Divider sx={{ my: 2 }} />
+        <hr style={{ border: 0, borderTop: "1px solid var(--cds-border-subtle)", margin: 0 }} />
 
-      <Box sx={{ p: embedded ? 0 : 3, pt: embedded ? 2 : undefined }}>
-        <Stack spacing={2}>
-          <Typography variant="subtitle1" component="h3">Logins</Typography>
+        <Stack gap={3}>
+          <h3 className="cds--type-heading-compact-01" style={{ margin: 0 }}>Logins</h3>
           <DataGrid
             rows={rows}
             columns={columns}
@@ -339,39 +328,35 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
             autoHeight
           />
         </Stack>
-      </Box>
-    </>
+      </Stack>
+    </CarbonScope>
   );
 
   return (
     <>
       {embedded ? (
-        <Box sx={{ p: 2 }}>
-          <Stack spacing={2}>
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
-              <Typography variant="h6" component="h2" className="esti-grow">
-                Users & access
-              </Typography>
-              <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={() => setAddOpen(true)}>
-                Add staff login
-              </Button>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<SyncIcon />}
-                disabled={resync.isPending}
-                onClick={() => resync.mutate()}
-              >
-                {resync.isPending ? "Syncing…" : "Resync identity types"}
-              </Button>
+        <CarbonScope>
+          <div style={{ padding: "0.5rem" }}>
+            <Stack gap={5}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                <h2 className="cds--type-heading-03" style={{ margin: 0, flex: 1 }}>
+                  Users &amp; access
+                </h2>
+                <Button size="sm" renderIcon={Add} onClick={() => setAddOpen(true)}>
+                  Add staff login
+                </Button>
+                <Button kind="secondary" size="sm" renderIcon={Renew} disabled={resync.isPending} onClick={() => resync.mutate()}>
+                  {resync.isPending ? "Syncing…" : "Resync identity types"}
+                </Button>
+              </div>
+              <p className="cds--type-body-01" style={LABEL_STYLE}>
+                Owner / staff / portal logins. {AORMS_PORTALS.client.label} and{" "}
+                {AORMS_PORTALS.consultant.label.toLowerCase()} logins are created from their records.
+              </p>
+              {body}
             </Stack>
-            <Typography variant="body2" color="text.secondary">
-              Owner / staff / portal logins. {AORMS_PORTALS.client.label} and{" "}
-              {AORMS_PORTALS.consultant.label.toLowerCase()} logins are created from their records.
-            </Typography>
-            {body}
-          </Stack>
-        </Box>
+          </div>
+        </CarbonScope>
       ) : (
         <RailLayout
           title="Users & access"
@@ -381,37 +366,46 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
         </RailLayout>
       )}
 
-      <Dialog open={addOpen} onClose={() => setAddOpen(false)} fullWidth maxWidth="sm" aria-labelledby="users-add-title">
-        <DialogTitle id="users-add-title">Add staff login</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <Typography variant="body2">Creates an office staff login at the chosen seniority tier.</Typography>
-            <TextField
+      <CarbonScope>
+        <Modal
+          open={addOpen}
+          size="sm"
+          modalHeading="Add staff login"
+          primaryButtonText={createStaff.isPending ? "Creating…" : "Create"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={
+            !form.email ||
+            form.fullName.length < 2 ||
+            form.password.length < 8 ||
+            createStaff.isPending
+          }
+          onRequestClose={() => setAddOpen(false)}
+          onRequestSubmit={() => createStaff.mutate(form)}
+        >
+          <Stack gap={5}>
+            <p className="cds--type-body-01" style={{ margin: 0 }}>Creates an office staff login at the chosen seniority tier.</p>
+            <TextInput
               id="u-name"
-              label="Full name"
+              labelText="Full name"
               autoComplete="name"
               value={form.fullName}
               onChange={(e) => setForm((f) => ({ ...f, fullName: e.target.value }))}
-              helperText={
-                form.fullName.length > 0 && form.fullName.trim().length < 2
-                  ? "At least 2 characters."
-                  : "Shown on ID cards and assignments."
-              }
-              error={form.fullName.length > 0 && form.fullName.trim().length < 2}
+              helperText="Shown on ID cards and assignments."
+              invalid={form.fullName.length > 0 && form.fullName.trim().length < 2}
+              invalidText="At least 2 characters."
             />
-            <TextField
+            <TextInput
               id="u-email"
-              label="Login email"
+              labelText="Login email"
               type="email"
               autoComplete="email"
               value={form.email}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
               helperText={!form.email.trim() ? "Required for sign-in." : undefined}
             />
-            <TextField
+            <Select
               id="u-role"
-              select
-              label="Role (seniority tier)"
+              labelText="Role (seniority tier)"
               value={form.role}
               onChange={(e) =>
                 setForm((f) => ({
@@ -421,110 +415,77 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
               }
             >
               {roleOptions.map((r) => (
-                <MenuItem key={r} value={r}>{STAFF_ROLE_LABEL[r]}</MenuItem>
+                <SelectItem key={r} value={r} text={STAFF_ROLE_LABEL[r]} />
               ))}
-            </TextField>
-            <TextField
+            </Select>
+            <PasswordInput
               id="u-pw"
-              label="Temporary password (min 8 chars)"
-              type="password"
+              labelText="Temporary password (min 8 chars)"
               autoComplete="new-password"
               value={form.password}
               onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              helperText={
-                form.password.length > 0 && form.password.length < 8
-                  ? "Use at least 8 characters."
-                  : "They can change this after first login."
-              }
-              error={form.password.length > 0 && form.password.length < 8}
+              helperText="They can change this after first login."
+              invalid={form.password.length > 0 && form.password.length < 8}
+              invalidText="Use at least 8 characters."
             />
             {createBlockedReason && !createStaff.isPending && (
-              <Typography variant="caption" color="text.secondary">
-                {createBlockedReason}
-              </Typography>
+              <p className="cds--type-label-01" style={LABEL_STYLE}>{createBlockedReason}</p>
             )}
             {createStaff.error && (
-              <Alert severity="error">{createStaff.error.message}</Alert>
+              <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={createStaff.error.message} />
             )}
           </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setAddOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={
-              !form.email ||
-              form.fullName.length < 2 ||
-              form.password.length < 8 ||
-              createStaff.isPending
-            }
-            onClick={() => createStaff.mutate(form)}
-          >
-            {createStaff.isPending ? "Creating…" : "Create"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
 
-      <Dialog open={reset !== null} onClose={() => setReset(null)} fullWidth maxWidth="sm" aria-labelledby="users-reset-title">
-        <DialogTitle id="users-reset-title">Reset password — {reset?.email ?? ""}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ mt: 1 }}>
-            <TextField
-              id="u-reset"
-              label="New password (min 8 chars)"
-              type="password"
-              fullWidth
-              value={resetPw}
-              onChange={(e) => setResetPw(e.target.value)}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setReset(null)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={resetPw.length < 8 || resetPassword.isPending}
-            onClick={() => reset && resetPassword.mutate({ id: reset.id, password: resetPw })}
-          >
-            {resetPassword.isPending ? "Saving…" : "Reset"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <Modal
+          open={reset !== null}
+          size="sm"
+          modalHeading={`Reset password — ${reset?.email ?? ""}`}
+          primaryButtonText={resetPassword.isPending ? "Saving…" : "Reset"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={resetPw.length < 8 || resetPassword.isPending}
+          onRequestClose={() => setReset(null)}
+          onRequestSubmit={() => reset && resetPassword.mutate({ id: reset.id, password: resetPw })}
+        >
+          <PasswordInput
+            id="u-reset"
+            labelText="New password (min 8 chars)"
+            value={resetPw}
+            onChange={(e) => setResetPw(e.target.value)}
+          />
+        </Modal>
 
-      <Dialog open={link !== null} onClose={() => setLink(null)} fullWidth maxWidth="sm" aria-labelledby="users-link-title">
-        <DialogTitle id="users-link-title">Link identity — {link?.email ?? ""}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <Typography variant="body2">
+        <Modal
+          open={link !== null}
+          size="sm"
+          modalHeading={`Link identity — ${link?.email ?? ""}`}
+          primaryButtonText={linkIdentity.isPending ? "Saving…" : "Save"}
+          secondaryButtonText="Cancel"
+          primaryButtonDisabled={linkIdentity.isPending}
+          onRequestClose={() => setLink(null)}
+          onRequestSubmit={() =>
+            link &&
+            linkIdentity.mutate({ id: link.id, accountPublicId: linkVal.trim() || null })
+          }
+        >
+          <Stack gap={5}>
+            <p className="cds--type-body-01" style={{ margin: 0 }}>
               Link this firm login to a person&apos;s portable AORMS-U identity so their
               certifications and growth follow them. Leave blank to unlink.
-            </Typography>
-            <TextField
+            </p>
+            <TextInput
               id="u-link"
-              label="AORMS-U handle"
+              labelText="AORMS-U handle"
               placeholder="AORMS-U-2K4P9F"
               value={linkVal}
               onChange={(e) => setLinkVal(e.target.value)}
             />
             {linkIdentity.error && (
-              <Alert severity="error">{linkIdentity.error.message}</Alert>
+              <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={linkIdentity.error.message} />
             )}
           </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="text" onClick={() => setLink(null)}>Cancel</Button>
-          <Button
-            variant="contained"
-            disabled={linkIdentity.isPending}
-            onClick={() =>
-              link &&
-              linkIdentity.mutate({ id: link.id, accountPublicId: linkVal.trim() || null })
-            }
-          >
-            {linkIdentity.isPending ? "Saving…" : "Save"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Modal>
+      </CarbonScope>
     </>
   );
 }

@@ -320,11 +320,30 @@ don't break the swap. First consumer migrated: `ProjectInvoicesPanel`
 **Still needs browser QA** (sort behaviour, column widths/flex, pagination)
 before rolling across the remaining files. Migrated so far via the adapter:
 `ProjectInvoicesPanel`, `Tenders`, `Filing`, `MasterPlanLibrary`, `AuditLog`,
-`Payroll`, `RequestsTab`, `AttendanceTab` (8/62). The adapter now also supports **server-mode pagination**
+`Payroll`, `RequestsTab`, `AttendanceTab`, `Alerts`, `Vendors`, `Users`, `Leads`,
+`Letters`, `Contracts`, `ClientRequests`, `ConsultantRequests`, `DocumentsRegister`,
+`OfficeExpenses`/`CashBook`, all six **platform-admin tabs** (`ApiKeysTab`,
+`AccountsTab`, `OrgsTab`, `LicensesTab`, `DashboardTab`, `UsageReportsTab`),
+`StandardsLibrary`, `ComplianceLibrary`, and the **project Delivery panels**
+`ProjectTenders`, `ProjectBbs`, `ProjectSteelReconciliation` —
+(29/62). The admin tabs also replaced MUI `Menu`/`IconButton` row menus with the
+Carbon `RowActionsMenu` (OverflowMenu), MUI `Chip`→Carbon `Tag`/`StatusDot`,
+`LinearProgress`→Carbon `ProgressBar` (`progress-bar` added to the tree), and
+`Paper` KPIs→Carbon `Tile`. `StandardsLibrary`/`ComplianceLibrary` moved their
+two-level **vertical rail `Tabs`** onto horizontal contained Carbon `Tabs` (gating
+each panel's rail `openSignal` to the active index so hidden panels don't fire),
+and swapped MUI `styled` hidden-file-input + `component="label"` uploads for
+ref-triggered hidden `<input>`s behind Carbon `Button`s. The adapter now also supports **server-mode pagination**
 (`paginationMode="server"` + `rowCount` + controlled `paginationModel`) — proven
-on AuditLog, which also moved its details `Dialog` → Carbon `Modal`. Files with **vertical rail `Tabs`**
-(e.g. `Filing`) or `useScreenActions` are deferred to the shell/nav sub-tranche —
-Carbon core has no vertical tab component.
+on AuditLog, which also moved its details `Dialog` → Carbon `Modal`. The
+`Vendors`/`Users`/`Leads`/`Letters`/`Contracts` migrations moved their create/edit
+`Dialog`s → Carbon `Modal`, MUI `TextField`/`Select`/`Checkbox` → Carbon
+`TextInput`/`Select`/`PasswordInput`/`TextArea`/`NumberInput`/`Checkbox`, and inline
+row `TextField select`s → Carbon `Select` (hideLabel). A **`StatusTag` adapter**
+(→ Carbon `Tag` via `StatusDot`) was added to `carbon/adapters` for enum/status
+columns. Files whose **vertical rail `Tabs`** were the only blocker now move their
+sections to a **horizontal contained Carbon `Tabs`** in the content area (proven on
+`Filing`, `Leads`); `useScreenActions` stays as plumbing (bucket-2).
 `text-area`/`toggle`/`number-input`/`checkbox` added to `carbon-tree.scss`.
 
 `AuthRailLayout` deferred to the shell/marketing sub-tranche (glass-rail auth

@@ -1,9 +1,14 @@
-import { Box, Divider, Link, Skeleton, Stack, Typography } from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import { SkeletonPlaceholder, SkeletonText, Stack } from "@carbon/react";
 import { Link as RouterLink } from "react-router-dom";
-import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
+import { CarbonScope } from "../carbon/CarbonScope.js";
+import {
+  DataGrid,
+  DataState,
+  PageBreadcrumb,
+  StatusDot,
+  type GridColDef,
+} from "../carbon/adapters/index.js";
 import { RailLayout } from "../components/RailLayout.js";
-import { StatusDot } from "../components/StatusTag.js";
 import { trpc } from "../lib/trpc.js";
 
 const KIND_LABEL: Record<string, string> = {
@@ -28,20 +33,10 @@ type AlertRow = {
   date: string | null;
 };
 
-// Preserve exact Carbon tag colours by mapping severity to the `--cds-tag-*`
-// token vars (still defined by the Carbon token layer).
 const SEVERITY_COLOR: Record<string, string> = {
   high: "red",
   medium: "magenta",
 };
-
-function NoRowsOverlay() {
-  return (
-    <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
-      <Typography variant="body2" color="text.secondary">Nothing in this view.</Typography>
-    </Stack>
-  );
-}
 
 function AlertTable({ title, alerts }: { title: string; alerts: AlertRow[] }) {
   const columns: GridColDef<AlertRow>[] = [
@@ -66,10 +61,12 @@ function AlertTable({ title, alerts }: { title: string; alerts: AlertRow[] }) {
       flex: 2,
       minWidth: 240,
       renderCell: (p) => (
-        <Box sx={{ py: 0.5 }}>
-          <Typography variant="body2">{p.row.title}</Typography>
-          <Typography variant="caption" color="text.secondary">{p.row.detail}</Typography>
-        </Box>
+        <div style={{ padding: "0.25rem 0" }}>
+          <p className="cds--type-body-01" style={{ margin: 0 }}>{p.row.title}</p>
+          <p className="cds--type-label-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
+            {p.row.detail}
+          </p>
+        </div>
       ),
     },
     {
@@ -78,7 +75,9 @@ function AlertTable({ title, alerts }: { title: string; alerts: AlertRow[] }) {
       width: 140,
       renderCell: (p) =>
         p.row.projectId && p.row.projectRef ? (
-          <Link component={RouterLink} to={`/projects/${p.row.projectId}`}>{p.row.projectRef}</Link>
+          <RouterLink to={`/projects/${p.row.projectId}`} className="cds--link">
+            {p.row.projectRef}
+          </RouterLink>
         ) : (
           "—"
         ),
@@ -92,18 +91,24 @@ function AlertTable({ title, alerts }: { title: string; alerts: AlertRow[] }) {
   ];
 
   return (
-    <Stack spacing={1}>
-      <Typography variant="subtitle2">{title}</Typography>
-      <DataGrid
-        rows={alerts}
-        columns={columns}
-        getRowHeight={() => "auto"}
-        density="compact"
-        disableRowSelectionOnClick
-        hideFooter
-        autoHeight
-        slots={{ noRowsOverlay: NoRowsOverlay }}
-      />
+    <Stack gap={3}>
+      <p className="cds--type-heading-compact-01" style={{ margin: 0 }}>{title}</p>
+      <DataState
+        loading={false}
+        isEmpty={alerts.length === 0}
+        columnCount={5}
+        empty={{ title: "Nothing in this view", description: "No alerts to show here." }}
+      >
+        <DataGrid
+          rows={alerts}
+          columns={columns}
+          getRowHeight={() => "auto"}
+          density="compact"
+          disableRowSelectionOnClick
+          hideFooter
+          autoHeight
+        />
+      </DataState>
     </Stack>
   );
 }
@@ -131,10 +136,12 @@ export function Alerts() {
         description="Immediate items needing action, plus a daily digest of lower-priority follow-ups."
       >
         <PageBreadcrumb items={[{ label: "Alerts" }]} />
-        <Stack spacing={1.5} aria-busy="true" aria-label="Loading alerts">
-          <Skeleton variant="text" width={180} height={28} />
-          <Skeleton variant="rectangular" height={220} />
-        </Stack>
+        <CarbonScope>
+          <Stack gap={5} aria-busy="true" aria-label="Loading alerts">
+            <SkeletonText width="180px" heading />
+            <SkeletonPlaceholder style={{ height: 220, width: "100%" }} />
+          </Stack>
+        </CarbonScope>
       </RailLayout>
     );
   }
@@ -145,26 +152,27 @@ export function Alerts() {
       description="Immediate items needing action, plus a daily digest of lower-priority follow-ups."
     >
       <PageBreadcrumb items={[{ label: "Alerts" }]} />
-      <AlertTable title={`Immediate action (${alerts.length})`} alerts={alerts} />
+      <CarbonScope>
+        <Stack gap={6}>
+          <AlertTable title={`Immediate action (${alerts.length})`} alerts={alerts} />
 
-      {digest && (
-        <>
-          <Divider sx={{ my: 2 }} />
-          <Box sx={{ p: 2 }}>
-            <Stack spacing={2}>
-              <Typography variant="h6" component="h3">Daily digest · {digest.date}</Typography>
-              <Typography variant="body2">
-                Medium-priority follow-ups and upcoming leave — configured in Company → Alert
-                escalation.
-              </Typography>
-              <AlertTable
-                title={`Digest items (${digest.count})`}
-                alerts={digest.items}
-              />
-            </Stack>
-          </Box>
-        </>
-      )}
+          {digest && (
+            <>
+              <hr style={{ border: 0, borderTop: "1px solid var(--cds-border-subtle)", margin: 0 }} />
+              <Stack gap={4}>
+                <h3 className="cds--type-heading-03" style={{ margin: 0 }}>
+                  Daily digest · {digest.date}
+                </h3>
+                <p className="cds--type-body-01" style={{ margin: 0 }}>
+                  Medium-priority follow-ups and upcoming leave — configured in Company → Alert
+                  escalation.
+                </p>
+                <AlertTable title={`Digest items (${digest.count})`} alerts={digest.items} />
+              </Stack>
+            </>
+          )}
+        </Stack>
+      </CarbonScope>
     </RailLayout>
   );
 }
