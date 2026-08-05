@@ -51,8 +51,9 @@ commerce, warehouse, labour, subcontractor-accounting, and contractor execution
 systems are out of scope.
 
 **User guide:** [aorms.in/wiki](https://aorms.in/wiki) · **Licence:** one standard
-cloud workspace ([PLANS-AND-TIERS](docs/esti/PLANS-AND-TIERS.md)) — AORMS is
-**web-only**; there are no desktop apps or installers.
+licence ([PLANS-AND-TIERS](docs/esti/PLANS-AND-TIERS.md)) — **desktop preferred**
++ web parity ([LOCAL-FIRST](docs/esti/LOCAL-FIRST.md)); legacy Manager / separate
+Estimate installers stay retired.
 
 ## Fixed India profile
 

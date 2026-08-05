@@ -50,7 +50,7 @@ An immutable audit log, an activity timeline, threaded comments and critical not
 
 ### 8. Data ownership
 
-For a firm, client drawings and fee data are sensitive. AORMS is a **web-only browser workspace** (no desktop apps) at aorms.in / studio.aorms.in, with role-based access. Firms that need on-prem ops can self-host the same web stack on a VPS — there is no offline desktop install.
+For a firm, client drawings and fee data are sensitive. AORMS is a **desktop-preferred workspace with web parity** at aorms.in / studio.aorms.in (local-first node or browser), with role-based access. Drafts and AI can stay on the machine; finalized documents publish to the hub. Firms that need on-prem ops can self-host the same stack on a VPS.
 
 ## Why purpose-built wins
 
@@ -83,7 +83,7 @@ AORMS produces COA-aligned fee proposals and GST-correct invoices with the right
 
 ### Can I keep my firm's data private?
 
-Yes. AORMS is a **web-only** cloud workspace at aorms.in / studio.aorms.in — no desktop apps. Role-based access keeps drawings and fee data inside the firm; optional VPS self-host is available for ops teams that need it.
+Yes. AORMS is a **desktop + web** workspace at aorms.in / studio.aorms.in. Role-based access keeps drawings and fee data inside the firm; optional VPS self-host and local-first desktop are available for ops teams that need them.
 
 ### How do I evaluate it against my current tools?
 

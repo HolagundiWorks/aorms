@@ -219,11 +219,12 @@ export const ReportUsageInput = z.object({
 });
 export type ReportUsageInput = z.infer<typeof ReportUsageInput>;
 
-// --- Component manifest (legacy desktop Manager ⇄ hub — retired 2026-07-19) ---
+// --- Component manifest (legacy Manager ⇄ hub — schema retained) ---
 //
-// Kept as schema for historical signed manifests / admin tooling. AORMS is
-// **web-only** — there is no desktop Manager bootstrapper. New product surfaces
-// must not depend on these types for install/update flows.
+// Kept for historical signed manifests / admin tooling. The Community/Manager
+// bootstrapper is retired. The **local-first desktop node** does not use these
+// types for install/update — see docs/esti/LOCAL-FIRST.md and desktop/.
+// New product surfaces must not depend on ManifestComponent for shipping builds.
 
 /** Which dependency layer a component belongs to. LITE pulls only `core`. */
 export const ComponentKind = z.enum(["core", "ai", "worker"]);

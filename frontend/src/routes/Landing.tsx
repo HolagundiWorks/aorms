@@ -165,7 +165,7 @@ const FAQ = [
   },
   {
     q: "How much does it cost?",
-    a: `One Standard licence — unlimited users, full workspace, 5 GB storage included. You pay only for extra storage and hosted AI usage (or bring your own API key). No Lite/Pro tiers, no desktop SKU. See Pricing below.`,
+    a: `One Standard licence — unlimited users, full workspace, 5 GB cloud storage included. You pay only for extra storage and hosted AI usage (or bring your own API key). Desktop node (local-first) + web parity share the same licence; no Lite/Pro tiers. See Pricing below.`,
   },
   {
     q: "Who should start with AORMS first?",

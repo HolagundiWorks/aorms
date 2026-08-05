@@ -9,7 +9,7 @@ author: Human Centric Works
 Older AORMS messaging talked about Lite, Pro, and desktop Manager builds. That
 language is gone. The live model is simpler:
 
-**One Standard licence** for the company, **web-only** workspaces, and metering
+**One Standard licence** for the company, **desktop + web** workspaces, and metering
 that matches how a consultancy actually burns cost — **storage** and **AI usage** —
 not which installer you downloaded.
 
@@ -35,6 +35,6 @@ now match that: **sign up / demo in the browser**, not `/download`.
 
 ## Read next
 
-- [AORMS is web-only](/blog/aorms-is-web-only)
+- [AORMS local-first](/blog/aorms-local-first)
 - [Introducing AORMS](/blog/introducing-aorms)
 - [Platform home](https://aorms.in/)

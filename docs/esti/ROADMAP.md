@@ -1,15 +1,23 @@
 # AORMS Implementation Roadmap
 
-**Status:** COMPLETE · **Updated:** 2026-07-25  
+**Status:** ACTIVE · **Updated:** 2026-08-05  
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
 **Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
-**AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)
+**AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)  
+**Local-first waves:** LF0–LF2 ✅ · LF3–LF6 open — see [LOCAL-FIRST.md](LOCAL-FIRST.md)
 
 Phases 0–28 are **engineering-complete** for **AStudio**. **AConsulting**
 is **live**. **AProc** (PMC) Waves **0–5 are shipped** (preview product —
 owner-side BBS/steel recon + P6 XER milestone import; not a contractor CPM ERP).
 Stripe auto-billing remains **deferred by choice**. Market-fit Waves 1–3 are
 **shipped**; Wave 4 (integrations) stays phase-2 by design.
+
+**Active delivery (2026-08):** local-first desktop node + cloud hub metadata /
+artifact planes, with full web parity and shared `@hcw/ui-kit` chrome. The
+2026-07-19 **web-only** product law is **superseded** for runtime shape
+([PLANS-AND-TIERS.md](PLANS-AND-TIERS.md), [LOCAL-FIRST.md](LOCAL-FIRST.md)).
+Legacy Community / Manager installers and a separate Estimate desktop app stay
+**retired**.
 
 This is the **single** delivery roadmap. Superseded autopilot / audit / fix-plan
 docs were removed 2026-07-24 (Git history retains them).
@@ -20,8 +28,10 @@ docs were removed 2026-07-24 (Git history retains them).
 | --- | --- |
 | [UNIFIED-ARCHITECTURE-V4.md](UNIFIED-ARCHITECTURE-V4.md) | **System state** — modules live vs removed |
 | [NAVIGATION.md](NAVIGATION.md) | Canonical sidebar IA |
+| [LOCAL-FIRST.md](LOCAL-FIRST.md) | **Local-first + hub sync** — planes, APIs, LF waves |
+| [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) | Desktop ↔ web UX consistency |
 | [MARKET-FIT.md](MARKET-FIT.md) | **GTM + market-fit backlog** (ICP, competitors, waves) |
-| [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) | Standard licence law |
+| [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) | Standard licence law (desktop + web) |
 | [AORMS-PLATFORM-NOMENCLATURE.md](AORMS-PLATFORM-NOMENCLATURE.md) | Naming (platform · apps · EOMS · ESTI) |
 | [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md) | Host / path map |
 | [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md) | **AProc** product law + delivery waves |
@@ -36,9 +46,28 @@ docs were removed 2026-07-24 (Git history retains them).
 
 | App | Status |
 | --- | --- |
-| **AStudio** (*Accelerated Studio*, architecture) | **Live** — `studio.aorms.in` |
+| **AStudio** (*Accelerated Studio*, architecture) | **Live** — `studio.aorms.in` · desktop node in progress |
 | **AConsulting** (*Accelerated Consulting*, engineering) | **Live** — `consultancy.aorms.in` (P9.V ✅ · P9.M ✅) |
 | **AProc** (*Accelerated Project Management*, PMC) | **Preview · Waves 0–5 ✅** — `proc.aorms.in` · `/pmc` · [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md) |
+
+## Local-first delivery waves
+
+Canonical plan: **[LOCAL-FIRST.md](LOCAL-FIRST.md)** · UX: **[DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md)**.
+
+| Wave | Focus | Status |
+| --- | --- | --- |
+| **LF0** | Contracts: sync planes, meta schemas, capability presets | ✅ 2026-08 |
+| **LF1** | Hub meta event log + catch-up + WS; node meta outbox/cursor | ✅ 2026-08 |
+| **LF2** | Artifact content-hash; publish DTOs; portal-from-hub reads; desktop stub; product-law docs | ✅ 2026-08 |
+| **LF3** | Domain metadata enqueue/apply (tasks, estimate totals, phase progress) | 🔲 |
+| **LF4** | Signed Tauri installer + first-run licence / hub bind | 🔲 |
+| **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | 🔲 |
+| **LF6** | UX parity checklist + inspector/AI right-slot; Figma ↔ kit tokens | 🔲 |
+
+**Namespaces / seams:** `sync` (tRPC + REST) · `esti_meta_*` · `esti_sync_*` ·
+`packages/contracts` sync · `desktop/` · `trpc.sync.capabilities`.
+
+**Migration:** `0226_local_first_sync`.
 
 ## AProc delivery waves
 
@@ -110,12 +139,13 @@ Canonical brief: **[MARKET-FIT.md](MARKET-FIT.md)**.
 | M5 | GTM packaging | Consistent story · pricing · Ask ESTI truth |
 | M6 | Consultancy GTM | Chrome · demos · references |
 | M7 | Integrations | Phase 2 |
+| M8 | Local-first GTM | Desktop preferred story · hub sync · web parity (align copy with LOCAL-FIRST) |
 
-## Completed tracks (2026-07)
+## Completed tracks (2026-07 → 2026-08)
 
 | Track | Outcome |
 | --- | --- |
-| Product pivot P0–P10 | One Standard licence · storage + AI · web-only · BYO AI key · browser takeoff · hygiene/rebrand/deps |
+| Product pivot P0–P10 | One Standard licence · storage + AI · BYO AI key · browser takeoff · hygiene/rebrand/deps *(web-only law later superseded by local-first)* |
 | **P7 billing** | Multi-tenant usage · CSV + mark-billed · suspend-for-non-payment (Stripe auto deferred) |
 | **P9 Consultancy** | Engagements · reliance · fees · SOP · enquiry · fee-stage invoices · intelligence (`0214`–`0219`) |
 | **P9.V / P9.M** | Walkthrough signed · marketing live |
@@ -126,17 +156,21 @@ Canonical brief: **[MARKET-FIT.md](MARKET-FIT.md)**.
 | **HCW License Manager** | In-tree (`admin.aorms.in`) |
 | **Market fit W1–W3** | GTM scrub · portal · fee recovery · onboarding · capacity · digests · consultancy chrome · demo seed · packaging |
 | **AProc W0–W5** | Chrome · Delivery · tenders · RA/steel cert · BBS + steel recon · CSV/XER · digest · ESTI (`0220`–`0224`) |
+| **Local-first LF0–LF2** | Sync planes · meta log/WS · artifact hash · portal hub reads · desktop stub · product-law restore (`0226`) |
 
 ## Deferred (by choice — not blocking)
 
 1. **Stripe auto-billing / auto-suspend** — manual India usage-billing path is the shipping path  
-2. **Desktop apps / direct cloud DB clients** — web-only system of record  
+2. **Direct cloud DB clients / third-party desktop ERP shells** — firm data stays behind AORMS APIs; the **AORMS desktop node** is first-class ([LOCAL-FIRST.md](LOCAL-FIRST.md)), not a generic DB GUI  
 3. **Contractor labour / plant ERP · full P6 CPM engine** — outside AProc (owner-side cert + milestone import only)  
 4. **Market-fit W4 integrations** (Tally / Drive / WhatsApp capture) — phase 2 after first paying firms  
+5. **Legacy Community / Manager installers · separate Estimate desktop app** — permanently retired; estimating stays in-product  
 
 ## Change rule
 
 Material feature changes update **PRD**, **NAVIGATION** (if IA moves),
 [MARKET-FIT.md](MARKET-FIT.md) (if GTM priority moves), [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)
-(if AProc waves move), and **this file** in the same pull request. **Do not** keep
-superseded specs in the tree — delete them; Git history is the archive.
+(if AProc waves move), [LOCAL-FIRST.md](LOCAL-FIRST.md) (if sync/desktop waves move),
+and **this file** in the same pull request. **Do not** keep superseded specs in
+the tree — delete them; Git history is the archive. Contradictory **web-only**
+claims in marketing or wiki must be scrubbed when product law moves (M8).

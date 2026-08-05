@@ -167,7 +167,7 @@ export function injectLandingJsonLd(): void {
         offers: {
           "@type": "Offer",
           name: `${AORMS_PLATFORM.name} platform`,
-          description: `Pre-release platform. ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title} shipping; ${AORMS_PMC.title} in preview — standard licence (web-only).`,
+          description: `Pre-release platform. ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title} shipping; ${AORMS_PMC.title} in preview — standard licence (desktop + web).`,
           url: `https://aorms.in/login`,
         },
         publisher: { "@id": "https://aorms.in/#organization" },

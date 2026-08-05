@@ -50,7 +50,7 @@ Three apps on one platform:
 - **AProc** (*Accelerated Project Management*) — PMC firms; programme, packages,
   certification (preview at `proc.aorms.in`)
 
-Workspaces are **web-only** (browser); there is no desktop shell.
+Workspaces are **desktop preferred with web parity** (same SPA); see [AORMS local-first](/blog/aorms-local-first).
 
 ## Read next
 

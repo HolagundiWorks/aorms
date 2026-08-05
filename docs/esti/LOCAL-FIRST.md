@@ -1,57 +1,102 @@
 # AORMS local-first desktop + cloud hub
 
-> **Status (2026-08):** Structure shipped — contracts, hub metadata event log + WS,
-> artifact outbox/content-hash, portal-from-hub reads, desktop packaging stub,
-> runtime capabilities, product-law update. Packaging a signed installer and
-> domain-level metadata apply hooks land in follow-up waves.
+> **Canonical implementation doc** for the dual-runtime product.  
+> **Status (2026-08):** Structure (LF0–LF2 seams) **shipped** on branch
+> `cursor/local-first-cloud-hub`. Packaging, domain apply hooks, and UX parity
+> waves remain open — tracked in [ROADMAP.md](ROADMAP.md) § Local-first.  
+> **Product law:** [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) · **UX parity:**
+> [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) · **Identity:**
+> [AORMS-IDENTITY.md](AORMS-IDENTITY.md) §10.
 
-## Decisions
+This document supersedes the 2026-07-19 **web-only** product law for runtime
+shape. Estimating remains **in-product** (no separate Estimate desktop app).
+Legacy Community / Manager installers stay retired.
+
+## Decisions (locked)
 
 | # | Choice |
 | --- | --- |
-| Firm sync | **Cloud hub** is the realtime authority — every desktop is a peer under AORMS cloud (no LAN firm-server required) |
-| Online surface | **Full web parity** long-term — same SPA on desktop (preferred/offline) and browser (degraded local AI/worker) |
+| Firm sync | **Cloud hub** is the realtime metadata authority — every desktop is a peer (no LAN firm-server) |
+| Online surface | **Full web parity** — same SPA on desktop (preferred / offline) and browser (degraded local AI/worker) |
+| Design system | **`@hcw/ui-kit` only** — one chrome on both hosts ([DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md)) |
 
 ## Three planes
 
 | Plane | Moves | Transport |
 | --- | --- | --- |
 | **Work / localOnly** | Drafts, BOQ lines, measurements, AI chats | Stay on the node until promote |
-| **Metadata** | Tasks, status, cost scalars, progress % | Hub `esti_meta_event` log + WS `/api/sync/meta/ws` |
+| **Metadata** | Tasks, status, cost scalars, progress % | Hub `esti_meta_event` + WS `/api/sync/meta/ws` |
 | **Artifacts** | Issued PDFs, READY drawings, etc. | `esti_sync_outbox` → `POST /api/sync/ingest` |
 
 Classification + field maps: [`packages/contracts/src/sync.ts`](../../packages/contracts/src/sync.ts).
 
+```mermaid
+flowchart LR
+  subgraph node [Desktop_or_node]
+    Work[localOnly_work]
+    MetaQ[meta_outbox]
+    ArtQ[sync_outbox]
+  end
+  subgraph hub [Cloud_hub]
+    MetaLog[esti_meta_event]
+    ArtStore[esti_sync_record]
+    Portals[external_portals]
+    WebSPA[staff_web_SPA]
+  end
+  MetaQ -->|POST_/api/sync/meta| MetaLog
+  ArtQ -->|POST_/api/sync/ingest| ArtStore
+  MetaLog -->|WS_catch-up| node
+  ArtStore --> Portals
+  MetaLog --> WebSPA
+```
+
 ## Runtimes
 
-```
-Desktop node (ESTI_ROLE=node, ESTI_DESKTOP=true, STORAGE_DRIVER=fs)
-  └─ local Postgres · worker · Ollama · EOMS · SPA@loopback
-Cloud hub (ESTI_ROLE=hub)
-  └─ metadata log · published artifacts · portals · staff web SPA
-```
+| Runtime | Role | Key env |
+| --- | --- | --- |
+| **Desktop node** | Preferred authoring path | `ESTI_ROLE=node`, `ESTI_DESKTOP=true`, `STORAGE_DRIVER=fs`, `INSTALL_ID`, local Ollama/EOMS |
+| **Cloud hub** | Metadata SoT + published artifacts + portals + web SPA | `ESTI_ROLE=hub`, S3, licensing platform |
+| **Web staff SPA** | Parity path (same SPA, hub API) | Browser → hub; AI/worker on hub or BYO |
 
-Desktop packaging stub: [`desktop/`](../../desktop/). Env template: `desktop/env.desktop.example`.
+Packaging stub: [`desktop/`](../../desktop/) · env: `desktop/env.desktop.example`.
 
-## Licence scope
+## Licence / sync scope
 
 | Mode | Local AI / worker | Metadata sync | Artifact push |
 | --- | --- | --- | --- |
-| **Free desktop** (no hub bind / inactive licence) | Yes | No | No |
-| **Licensed desktop** (ACTIVE + `ESTI_HUB_URL` + syncToken) | Yes | Yes | Yes |
-| **Web parity** (browser → hub) | Hub / BYO | Yes | Yes (server-side) |
+| Free / unbound desktop | Yes | No | No |
+| Licensed desktop (`VALID`/`GRACE` + hub + syncToken) | Yes | Yes | Yes |
+| Web parity | Hub / BYO | Yes | Server-side |
 
-Resolved at runtime by `trpc.sync.capabilities` / [`frontend/src/lib/runtimeCapabilities.ts`](../../frontend/src/lib/runtimeCapabilities.ts).
+Runtime resolution: `trpc.sync.capabilities` ·
+[`frontend/src/lib/runtimeCapabilities.ts`](../../frontend/src/lib/runtimeCapabilities.ts).
 
-## Key APIs
+## Implementation waves
 
-| Endpoint / procedure | Role |
+| Wave | Focus | Status |
+| --- | --- | --- |
+| **LF0** | Contracts: planes, `MetaEntity`, field maps, capability presets, tests | ✅ |
+| **LF1** | Hub `esti_meta_event` + catch-up REST + WS; node meta outbox/cursor; drain tick | ✅ |
+| **LF2** | Artifact content-hash; publish DTOs (tender/RA/siteReference/progressReport); portal-from-hub reads | ✅ |
+| **LF3** | Domain enqueue of metadata (tasks, estimate totals, phase progress) + apply hooks on pull | 🔲 |
+| **LF4** | Signed desktop installer (Tauri + bundled/sidecar Postgres·worker·Ollama); first-run licence bind | 🔲 |
+| **LF5** | Web parity polish: capability badges, degraded AI UX, shared keymap / Help | 🔲 |
+| **LF6** | UX parity checklist + inspector/AI right-slot; Figma token sync to kit | 🔲 |
+
+**Migration:** `0226_local_first_sync.sql`.
+
+## Key APIs & modules
+
+| Surface | Path |
 | --- | --- |
-| `POST /api/sync/ingest` | Hub — artifact upsert (+ content-hash skip) |
-| `POST /api/sync/meta` | Hub — append metadata event |
-| `GET /api/sync/meta/catch-up` | Hub — seq catch-up |
-| `GET /api/sync/meta/ws` | Hub — live push (`?token=`) |
-| `trpc.sync.status` / `flush` / `enqueueMeta` / `pullMeta` / `capabilities` | Node office controls |
+| Artifact ingest | `POST /api/sync/ingest` — [`routes.ts`](../../backend/src/modules/sync/routes.ts) |
+| Meta append / catch-up / WS | `/api/sync/meta*` — same |
+| Node tRPC | `sync.status` · `flush` · `enqueueMeta` · `pullMeta` · `capabilities` · `hubConfigured` |
+| Meta lib | [`backend/src/lib/sync/metadata.ts`](../../backend/src/lib/sync/metadata.ts) |
+| Artifact outbox | [`backend/src/lib/sync/outbox.ts`](../../backend/src/lib/sync/outbox.ts) |
+| Publish DTOs | [`backend/src/lib/sync/publish.ts`](../../backend/src/lib/sync/publish.ts) |
+| Hub portal reads | [`backend/src/lib/sync/hubPortal.ts`](../../backend/src/lib/sync/hubPortal.ts) |
+| Sync queue chrome | [`SyncQueueChip.tsx`](../../frontend/src/components/SyncQueueChip.tsx) |
 
 ## Conflict policy
 
@@ -64,8 +109,16 @@ Resolved at runtime by `trpc.sync.capabilities` / [`frontend/src/lib/runtimeCapa
 - Measurement scratch / nested estimate lines (until finalize)
 - Draft drawings and unissued PDFs
 
+## Operator notes
+
+- Empty `ESTI_HUB_URL` = offline-only node (no meta/artifact push).
+- Hub portals prefer `esti_sync_record` when `ESTI_ROLE=hub`; nodes keep live-table reads.
+- File mirror on ingest is best-effort when node and hub share object keys; content-hash skips unchanged bytes.
+
 ## Related
 
-- [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) — desktop SKU restored
-- [AORMS-IDENTITY.md](AORMS-IDENTITY.md) §10 — offline grace + desktop session cache
-- Phase B outbox: `backend/src/lib/sync/outbox.ts`, `backend/src/modules/sync/`
+- [ROADMAP.md](ROADMAP.md) § Local-first  
+- [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md)  
+- [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md)  
+- [AORMS-IDENTITY.md](AORMS-IDENTITY.md) §10  
+- [ARCHITECTURE.md](ARCHITECTURE.md)  

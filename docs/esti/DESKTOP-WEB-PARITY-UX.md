@@ -1,0 +1,52 @@
+# Desktop ↔ web UX parity
+
+> **Law:** one design language, two hosts — only **platform behaviour** diverges.  
+> **Design system:** [`@hcw/ui-kit`](HCW-UI-KIT.md) (Urbanist · Radiant Orange · flat/soft/glass · Rail · Stage · Taskbar · ActionDock).  
+> **Runtime:** [LOCAL-FIRST.md](LOCAL-FIRST.md). Do **not** introduce a second typeface, palette, or ERP chrome for desktop.
+
+## Shell mapping (same IA both hosts)
+
+```text
+┌─ Optional thin OS menu (desktop only: Project · Edit · View · AI · Help) ─┐
+├─ GlassRail (modules) ── Stage (workspace) ── Inspector / Ask ESTI ────────┤
+├─ ActionDock (destroy · create · commit) ──────────────────────────────────┤
+└─ TaskbarFooter (calc · launchers · tray: clock · sync · alerts · ID) ─────┘
+```
+
+| Role | Primitive | Rule |
+| --- | --- | --- |
+| Modules | `GlassRail` — expanded ~280px / collapsed ~72px | Never move module nav to a web-only top bar |
+| Workspace | Stage | Same routes + [05-TEMPLATES](../hcw-kit/05-TEMPLATES.md) |
+| Inspector / AI | One right slot (properties ↔ Ask ESTI) | AI never menu-only |
+| Status | Taskbar + `SyncQueueChip` | Same tray order |
+
+Desktop may add a **thin native menu** that invokes the **same command IDs** as the web Command Palette — it does not replace GlassRail.
+
+## Shared (must not fork)
+
+- Tokens, typography (Urbanist), icons (one MUI/kit set), 8pt spacing, layers, dialogs, forms (visible labels), tables (one DataGrid adapter), toasts, loading skeletons
+- Keyboard map (Ctrl+S / Ctrl+F / Ctrl+K …) — one `keymap` module for both hosts
+- Module screens assembled from kit + templates — no per-module button skins or brand colours
+
+## Platform-only deltas
+
+| Concern | Desktop | Web |
+| --- | --- | --- |
+| Windows | Multi-window (AI / inspector / drawing) | Tabs + docked panels |
+| Files | Native dialogs + FS | Browser picker + drag-drop |
+| Print | Native / system PDF | Browser print |
+| AI compute | Local Ollama | Hub / BYO — **same panel**, badge Local vs Hosted |
+| Sync | Offline queue in tray | Same chip; usually idle when fully online |
+
+## PR checklist
+
+- [ ] Screenshot same route on loopback desktop flags and web  
+- [ ] No new hex / font / icon pack  
+- [ ] Template cited from `05-TEMPLATES.md`  
+- [ ] Shortcuts unchanged in Help  
+- [ ] Kit-first if shared chrome changed  
+
+## Related
+
+- [HCW-UI-KIT.md](HCW-UI-KIT.md) · [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md)  
+- [LOCAL-FIRST.md](LOCAL-FIRST.md) · [ROADMAP.md](ROADMAP.md) § Local-first  

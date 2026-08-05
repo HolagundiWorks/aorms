@@ -1495,7 +1495,9 @@ jobs:
 
 **Frontend**
 - [ ] Mobile app (iOS/Android)
-- [x] ~~Desktop app (Electron/Tauri)~~  **cancelled**; AORMS is web-only (2026-07-19)
+- [x] ~~Legacy Manager / Community desktop installers~~ — **retired** (2026-07)
+- [ ] **Local-first desktop node** (Tauri + same SPA) — LF4 open; see `docs/esti/LOCAL-FIRST.md` / ROADMAP § Local-first
+- [x] ~~Separate Estimate desktop app~~ — **cancelled**; estimating is in-product (Rate Books + BOQ)
 - [ ] Advanced reporting UI
 
 ### Phase 4: AEC apps & growth (Year 2)

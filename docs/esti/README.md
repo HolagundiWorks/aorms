@@ -1,6 +1,6 @@
 # AORMS Documentation
 
-**Status:** Canonical index · **Owner:** Human Centric Works (HCW) · **Reviewed:** 2026-07-24
+**Status:** Canonical index · **Owner:** Human Centric Works (HCW) · **Reviewed:** 2026-08-05
 
 > **Nomenclature:** **AORMS** = platform (AEC consulting firms). **AORMS-Studio** =
 > architecture app (this repo). **AORMS-Consultancy** = engineering app (code-complete;
@@ -20,10 +20,10 @@ use Git history for old versions.
 2. [UNIFIED-ARCHITECTURE-V4](UNIFIED-ARCHITECTURE-V4.md) — live system state
 3. [NAVIGATION](NAVIGATION.md) — sidebar IA (Canonical V3)
 4. [PLANS-AND-TIERS](PLANS-AND-TIERS.md) + [ACCESS-HIERARCHY](ACCESS-HIERARCHY.md) — licence + roles
-5. [LOCAL-FIRST](LOCAL-FIRST.md) — desktop node + cloud hub sync planes
-5. [HCW-UI-KIT](HCW-UI-KIT.md) + [HCW-UI-UX-PRINCIPLES](HCW-UI-UX-PRINCIPLES.md) — design system
-6. [ROADMAP](ROADMAP.md) — delivery status (COMPLETE — Studio + Consultancy live)
-7. [PRD](PRD.md) — requirements
+5. [LOCAL-FIRST](LOCAL-FIRST.md) + [DESKTOP-WEB-PARITY-UX](DESKTOP-WEB-PARITY-UX.md) — desktop node + hub + UX parity
+6. [HCW-UI-KIT](HCW-UI-KIT.md) + [HCW-UI-UX-PRINCIPLES](HCW-UI-UX-PRINCIPLES.md) — design system
+7. [ROADMAP](ROADMAP.md) — delivery status (ACTIVE — local-first LF3–LF6 open)
+8. [PRD](PRD.md) — requirements
 
 Repo agent entry: [`CLAUDE.md`](../../CLAUDE.md).
 
@@ -39,6 +39,7 @@ Repo agent entry: [`CLAUDE.md`](../../CLAUDE.md).
 | Market fit / GTM | [MARKET-FIT](MARKET-FIT.md) |
 | Licence | [PLANS-AND-TIERS](PLANS-AND-TIERS.md) |
 | Local-first desktop + hub | [LOCAL-FIRST](LOCAL-FIRST.md) |
+| Desktop ↔ web UX parity | [DESKTOP-WEB-PARITY-UX](DESKTOP-WEB-PARITY-UX.md) |
 | Design system | [HCW-UI-KIT](HCW-UI-KIT.md) |
 | UX laws | [HCW-UI-UX-PRINCIPLES](HCW-UI-UX-PRINCIPLES.md) |
 | Design debt | [DESIGN-DEBT-REGISTER](../hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md) |

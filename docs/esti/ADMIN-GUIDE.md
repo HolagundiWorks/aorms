@@ -198,19 +198,22 @@ The installer/`update.sh` builds the frontend with Vite (4 GB heap) inside the `
 build-only container and atomic-swaps `frontend/dist`, served statically by nginx.
 `VITE_*` values are **build-time** — changing them requires a rebuild (`deploy/update.sh`).
 
-### 6b. Desktop apps (removed)
+### 6b. Desktop node (local-first)
 
-AORMS is **web-only**. The Lite/Pro/Manager desktop installers and the
-`/download` portal were retired 2026-07, and the packaging itself
-(`desktop/`, `.github/workflows/desktop.yml`, `deploy/fetch-installers.sh`) was
-deleted 2026-07-19. `/download` permanently redirects to the landing page.
+AORMS ships a **local-first desktop node** (same SPA + local Postgres/worker/Ollama)
+that syncs metadata and finalized artifacts to the cloud hub — see
+[LOCAL-FIRST.md](LOCAL-FIRST.md) and [`desktop/`](../../desktop/). Packaging
+waves (signed Tauri installer) are tracked in [ROADMAP.md](ROADMAP.md) § Local-first.
 
-The planned standalone **AORMS Estimate** desktop app is **cancelled** —
-estimating runs in the browser inside the project **Estimation** tab, priced by
-firm Rate Books. See [NAVIGATION.md](NAVIGATION.md) § Estimation.
+**Permanently retired (do not revive):**
+
+- Lite / Pro / Community **Manager** installers and the `/download` portal
+  (removed 2026-07; `/download` redirects to the landing page)
+- Standalone **AORMS Estimate** desktop app — estimating stays in-product
+  (Library → Rate Books + project Estimation tab)
 
 Operators on pre-2026-07 VPS layouts: `deploy/cleanup-vps.sh` removes leftover
-installer files and `VITE_*_DOWNLOAD_URL` entries from a live host.
+Manager installer files and `VITE_*_DOWNLOAD_URL` entries from a live host.
 
 ---
 

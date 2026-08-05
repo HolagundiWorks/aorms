@@ -66,17 +66,20 @@ DOMAIN=demo.aorms.in ADMIN_EMAIL=ops@aorms.in sudo -E bash deploy/install-demo.s
 | `deploy/backup.sh` / `restore.sh` | Postgres + MinIO backup / restore |
 | `deploy/nginx-proxy.conf` | nginx vhost template |
 
-## Desktop installers (retired 2026-07)
+## Desktop packaging
 
-Full AORMS Lite/Pro/Manager `/download` hosting was **retired**. AORMS is
-**web-only** — browser workspace at aorms.in / studio.aorms.in; `/download`
-redirects to the wiki. `desktop/`, `desktop.yml`, and `fetch-installers.sh`
-were **removed** (2026-07-19); do not restore them.
+**Local-first node (active):** see [`desktop/`](../desktop/) and
+[docs/esti/LOCAL-FIRST.md](../docs/esti/LOCAL-FIRST.md). Signed installer waves
+are on [ROADMAP.md](../docs/esti/ROADMAP.md) § Local-first.
 
-The separate **AORMS Estimate** desktop app was **cancelled**. Estimation ships
-as the in-browser project Estimation tab (see
-[docs/esti/NAVIGATION.md](../docs/esti/NAVIGATION.md) § Estimation). The **ESE**
-subdomain service is also **retired** (no `ese/` package in repo).
+**Permanently retired (do not restore):**
+
+- Lite / Pro / Community **Manager** `/download` hosting, `desktop.yml`,
+  `fetch-installers.sh` (removed 2026-07-19); `/download` redirects to the landing
+- Standalone **AORMS Estimate** desktop app — estimation stays in-product
+  ([NAVIGATION.md](../docs/esti/NAVIGATION.md) § Estimation)
+
+The **ESE** subdomain service is also **retired** (no `ese/` package in repo).
 
 ## Before a first install
 

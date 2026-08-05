@@ -10,7 +10,7 @@ coverImage: /esti-logo.png
 **AORMS** is the platform  operational and design frameworks for **AEC consulting
 firms** (architecture and engineering practices that advise clients), with **EOMS**
 as the knowledge bank and **ESTI** as the internal agent. **AStudio** is the
-live architecture app (web-only); **AConsulting** for engineering consultancies
+live architecture app (desktop + web); **AConsulting** for engineering consultancies
 shares the same spine and is live. This post is about what **AStudio**
 does best for Indian architecture practices.
 

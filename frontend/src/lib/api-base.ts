@@ -1,10 +1,11 @@
 /**
  * Runtime API base URL.
  *
- * AORMS is web-only (2026-07-19): every call is same-origin and relative
- * (`/trpc`, `/upload/...`), served via Vite's dev proxy or Nginx, authenticated
- * with the session cookie. The former desktop (Tauri) bearer-token path was
- * removed with the desktop apps.
+ * Default: same-origin relative paths (`/trpc`, `/upload/...`) via Vite proxy or
+ * Nginx, session cookie auth — used by the web SPA and by the desktop shell when
+ * it loads the SPA against loopback. Desktop packaging may later set a non-empty
+ * base for alternate bind addresses; keep paths relative unless that lands.
+ * See docs/esti/LOCAL-FIRST.md.
  */
 export const API_BASE = "";
 

@@ -7,11 +7,11 @@
 **Companion doc:** [`INSTAGRAM-CAMPAIGN.md`](INSTAGRAM-CAMPAIGN.md) — shared product
 truth, brand voice and content rules apply here too.
 
-> ## Product law (canonical — 2026-07-22)
+> ## Product law (canonical — 2026-08-05)
 >
-> - **Web-only.** No desktop apps, installers, or offline Manager. Workspace runs in the browser.
-> - **One AORMS Standard licence** — no Lite/Pro split, no free tier, no trial. Unlimited users; **5 GB** included; storage + hosted AI metered (or BYO key).
-> - **CTA:** `aorms.in` signup / demo — never `/download` or “Lite forever”.
+> - **Desktop preferred + web parity.** Same SPA on a local-first desktop node and in the browser. See [LOCAL-FIRST.md](../esti/LOCAL-FIRST.md).
+> - **One AORMS Standard licence** — no Lite/Pro split, no free tier, no trial. Unlimited users; **5 GB** cloud included; storage + hosted AI metered (or BYO key).
+> - **CTA:** `aorms.in` signup / demo — never legacy `/download` Manager installers or “Lite forever”.
 > - Law: [PLANS-AND-TIERS.md](../esti/PLANS-AND-TIERS.md). Companion IG doc shares the same product truth.
 
 ---
@@ -46,7 +46,7 @@ operations, because that is what this audience opens LinkedIn for.
 2. Product screenshots only from the demo workspace.
 3. Plan claims must match product law: one **AORMS Standard** licence — full
    browser workspace (GST, HR/payroll, revision intelligence, AI Studio,
-   unlimited seats). **No desktop app. No free tier.**
+   unlimited seats). Desktop + web parity. **No free tier.**
 4. AI claims stay honest: *deterministic systems create the score; ESTI
    explains it.* No "AI will run your firm" hype.
 
@@ -147,7 +147,7 @@ followed by people who haven't bought anything yet)
 **P6 — Build-in-public / founder notes** (highest-reach pillar on LinkedIn)
 - Why I'm building an OS for Indian architecture practices — the origin post.
 - Design-decision posts: why revisions carry a source field; why we stayed
-  web-only (no desktop installers); why we won't invent testimonials.
+  desktop + web (no legacy Manager installers); why we won't invent testimonials.
 - Monthly changelog: "What shipped in AORMS this month" (company page +
   founder repost).
 - Honest struggle posts perform disproportionately well — "what we got wrong
@@ -216,7 +216,7 @@ but low-competition — good for reflective P6 posts. Test and re-tune monthly.
 > practices actually work: COA fee stages, SAC codes, 26AS reconciliation,
 > client approvals that carry a timestamp instead of a scroll position.
 >
-> Everything runs in the browser — no desktop install, no offline Manager.
+> Desktop preferred + web parity — same SPA; no legacy Manager installers.
 > One standard licence, full workspace, start at aorms.in. A two-person studio
 > in its first year needs a real record more than anyone; we kept the product
 > one licence deep so the offer stays honest.
@@ -413,7 +413,7 @@ signs up outweighs 10,000 impressions.
 | Day | Surface | Post |
 |---|---|---|
 | Tue W1, 9 am | Founder | §5.1 origin post (campaign opener) |
-| Wed W1, 12:30 pm | Company | Page launch post: what AORMS is + web-only Standard licence |
+| Wed W1, 12:30 pm | Company | Page launch post: what AORMS is + Standard licence (desktop + web) |
 | Thu W1, 9 am | Founder | §5.3 COA fee-stages document post |
 | Fri W1, 9 am | Company | Repost Thursday's document with added context |
 | Sat W1, 11 am | Founder | §5.5 "Why you can't buy our ID" |

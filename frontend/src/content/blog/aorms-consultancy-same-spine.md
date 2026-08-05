@@ -23,7 +23,7 @@ and design frameworks, identity, licensing, and AI posture:
 
 - **EOMS** for authoritative codes and knowledge-bank intake
 - **ESTI**-class internal intelligence against validated firm data
-- Web-only browser workspace (no desktop SKU)
+- Desktop preferred + web parity (same SPA; no legacy Manager SKU)
 - One Standard licence model (storage + AI usage)
 
 What changes is the **workspace profile** — engineering enquiry → engagement →
@@ -45,4 +45,4 @@ shell.
 
 - [AORMS platform frameworks](/blog/aorms-platform-operational-design-frameworks)
 - [Fee stages to Studio invoices](/blog/fee-stages-to-studio-invoices)
-- [AORMS is web-only](/blog/aorms-is-web-only)
+- [AORMS local-first](/blog/aorms-local-first)

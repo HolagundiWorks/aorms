@@ -190,7 +190,7 @@ Studio Intelligence (\`/\`), Ask ESTI (taskbar), ESTI Pulse signals, and MoM-to-
 
 ### Do I need a desktop install?
 
-No. AORMS runs entirely in the browser — there are no desktop apps or installers.
+No. AORMS is desktop-preferred with web parity — the same SPA on a local-first node or in the browser. Legacy Manager installers are retired; estimating stays in-product.
 
 ---
 
@@ -893,5 +893,5 @@ This wiki is organised in **four domains**:
 
 **AORMS** (**Accelerated Operational Resources Management System**) is the platform for **AEC consulting firms**. Two apps share one spine: **AORMS-Studio** (architecture — shipping from this repository) and **AORMS-Consultancy** (engineering — live).
 
-Sign in at [aorms.in/login](https://aorms.in/login). One standard licence ? unlimited users, **5 GB** included storage, no desktop installs.
+Sign in at [aorms.in/login](https://aorms.in/login) or the desktop node. One standard licence — unlimited users, **5 GB** included cloud storage; desktop preferred + web parity.
 `;

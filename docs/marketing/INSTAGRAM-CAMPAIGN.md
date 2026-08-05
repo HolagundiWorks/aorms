@@ -5,11 +5,11 @@
 **Audience geography:** India (primary: Bengaluru, then metro + tier-2 practice hubs)
 **Prepared:** July 2026
 
-> ## Product law (canonical — 2026-07-22)
+> ## Product law (canonical — 2026-08-05)
 >
-> - **Web-only.** No desktop apps, installers, or offline Manager. Workspace runs in the browser at `studio.aorms.in`.
-> - **One AORMS Standard licence** — no Lite/Pro/Enterprise, no free tier, no trial. Unlimited users; **5 GB** storage included; pay for storage overage + hosted AI (or BYO key).
-> - **CTA destination:** `aorms.in` / signup / demo — **never** `/download`.
+> - **Desktop preferred + web parity.** Same SPA on a local-first desktop node and in the browser (`studio.aorms.in`). See [LOCAL-FIRST.md](../esti/LOCAL-FIRST.md).
+> - **One AORMS Standard licence** — no Lite/Pro/Enterprise, no free tier, no trial. Unlimited users; **5 GB** cloud storage included; pay for storage overage + hosted AI (or BYO key). Local desktop AI is not metered.
+> - **CTA destination:** `aorms.in` / signup / demo — **never** legacy `/download` Manager installers.
 > - Law: [PLANS-AND-TIERS.md](../esti/PLANS-AND-TIERS.md).
 
 ---
@@ -22,10 +22,10 @@
   practices**. Not a generic ERP, not a construction PM tool.
 - Core promise: *"Run every project the same way — and stop losing fees to revisions
   you never agreed to."*
-- **AORMS Standard** — one paid licence, full **AORMS-Studio** browser workspace:
+- **AORMS Standard** — one paid licence, full **AORMS-Studio** workspace (desktop node + browser):
   GST invoicing, HR & payroll, revision intelligence, AI Studio, client/consultant
-  portals, unlimited seats. **5 GB** storage included; storage + hosted AI metered
-  (or bring your own API key). **No desktop app.**
+  portals, unlimited seats. **5 GB** cloud storage included; storage + hosted AI metered
+  (or bring your own API key). Local-first desktop optional; no legacy Manager installers.
 - **ESTI** (Embedded Studio Intelligence) — the AI layer that reads the workspace:
   Ask ESTI, the deterministic office-health score (ESTI Pulse), the cognition engine.
 - India-native financial logic: GST, TDS, 26AS / AIS / GSTR reconciliation, Indian FY.
@@ -39,7 +39,7 @@
    *"AORMS is early. Rather than invent testimonials, here is honestly what it
    replaces."* Instagram follows the same rule. Honest before/after framing only.
 2. No screenshots containing real client data — use the demo workspace.
-3. Price/plan claims must match product law: one **AORMS Standard** licence, web-only, no free tier.
+3. Price/plan claims must match product law: one **AORMS Standard** licence, desktop + web parity, no free tier.
 4. Tone: a senior architect talking to another architect. Never "SaaS growth-bro."
    Dry wit is fine; hype is not.
 

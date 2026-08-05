@@ -9,12 +9,11 @@ office record — projects, fees, CRIF, documents, coordination, and traceabilit
 See also [PRODUCT-VISION](PRODUCT-VISION.md), [ROADMAP](ROADMAP.md), and
 [ARCHITECTURE](ARCHITECTURE.md).
 
-> **Browser-geometry ban LIFTED (2026-07-19).** ESTICAD is retired and AORMS is
-> web-only, so measuring in the browser is now the *only* way to take off
-> quantities — and it is explicitly supported. Note this rule had already
-> drifted from the code: on-canvas calibrate/measure/markup shipped in
-> `PlanReaderPanel.tsx` under Plan Measurement Phases 1–3 while the charter
-> still forbade it. The rule below is corrected to match reality.
+> **Browser-geometry ban LIFTED (2026-07-19).** ESTICAD is retired; plan
+> measurement / takeoff runs **in the SPA** (desktop node or web) via
+> `PlanReaderPanel.tsx`. Local-first runtime: [LOCAL-FIRST.md](LOCAL-FIRST.md).
+> Note this rule had already drifted from the code while the charter still
+> forbade canvas measure — the rule below matches reality.
 
 ---
 

@@ -1,6 +1,6 @@
 # AORMS System Architecture
 
-**Status:** Canonical · **Owner:** Holagundi Consulting Works (HCW) · **Reviewed:** 2026-07-10
+**Status:** Canonical · **Owner:** Holagundi Consulting Works (HCW) · **Reviewed:** 2026-08-05
 
 > **Scope:** This describes **AORMS-Studio** — the workspace shipped from this
 > monorepo. Platform north-star: [AORMS-DEVELOPMENT-SPEC.md](AORMS-DEVELOPMENT-SPEC.md).
@@ -11,19 +11,21 @@
 **AORMS-Studio** is a single-firm, India-first application:
 
 ```text
-Carbon React SPA
+React SPA (@hcw/ui-kit) — browser and/or desktop shell (loopback)
        |
        | tRPC + restricted REST uploads/downloads
        v
 Fastify/TypeScript backend ---- PostgreSQL (system of record)
        |        |
-       |        +---- MinIO/S3 (content-addressed binaries)
+       |        +---- MinIO/S3 or local FS (binaries)
        |
        +---- Redis Streams ---- Python worker (DXF, PDF, imports)
+       +---- Ollama (local AI) · optional EOMS companion
 ```
 
-Every client is a browser — there are no desktop or companion clients
-(ESTICAD retired 2026-07-19).
+Clients are the **same SPA** in the browser (web parity) or in the desktop
+node shell (`desktop/` → loopback). ESTICAD / companion CAD is retired
+(2026-07-19). Sync planes: [LOCAL-FIRST.md](LOCAL-FIRST.md).
 
 The TypeScript backend owns domain rules, authorization, state transitions,
 money/tax, numbering, audit, and activity. The Python worker owns no
@@ -44,25 +46,25 @@ One monorepo (pnpm workspaces); surfaces are build targets, not repos.
 - `backend`: Fastify, tRPC, Drizzle, PostgreSQL domain modules and REST routes.
 - `frontend`: React/Vite SPA on HCW-UI-Kit (MUI), including the landing page.
 - `worker`: Redis consumer for DXF, PDF, and reconciliation processing.
-- `ese`: the Estimation Specification Engine — its own Fastify service that turns
-  the CPWD schedule into sealed Rate Library Packs (deploys at `ese.aorms.in`).
+- `desktop`: Tauri packaging stub for the local-first node (same SPA + local stack).
 - `docs/esti`: canonical product and engineering documentation.
 
-> **Web-only (2026-07-19).** AORMS ships no desktop application. The former
-> `desktop/` Tauri shell and the planned standalone `estimate/` app are both
-> retired — see [PLANS-AND-TIERS](PLANS-AND-TIERS.md).
+> **Local-first (2026-08).** Desktop node + cloud hub is first-class —
+> [LOCAL-FIRST.md](LOCAL-FIRST.md), [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md).
+> The 2026-07-19 **web-only** law is superseded for runtime shape. Legacy
+> Community / Manager installers and a standalone Estimate desktop app remain
+> **retired** — estimating runs in-product (Rate Books + project Estimation tab).
 
 ### Surfaces And Access Topology
 
-Estimation is accessed **inside a project (Cost Management)** of the
-workspace — same session, nav, permissions, and Carbon shell — not a subdomain.
+Estimation is accessed **inside a project** of the workspace — same session,
+nav, permissions, and HCW-UI-Kit shell — not a subdomain.
 **ESE** is the one true subdomain (`ese.aorms.in`): different users (`kbteam`),
 different cadence (yearly SR), publishing into the system across a versioned,
-checksummed seam. **Estimating itself runs in the browser** as part of Cost
-Management (rate books + BOQ estimates) — there is no desktop estimator and no
-`.aormsest` interchange file. Full topology, the
-subdomain-vs-extension test, and the shared seams:
+checksummed seam. **Estimating itself** runs in the SPA (desktop or web) as
+part of Cost / Estimation — there is no separate Estimate installer.
 Host / surface map: [AORMS-SURFACE-URLS](AORMS-SURFACE-URLS.md).
+Desktop ↔ web chrome: [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md).
 
 ## Architecture Decisions
 
