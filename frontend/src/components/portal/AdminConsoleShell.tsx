@@ -20,7 +20,9 @@ export type AdminSectionKey =
   | "orgs"
   | "products"
   | "apikeys"
-  | "usage";
+  | "usage"
+  | "certifications"
+  | "components";
 
 const SECTIONS: { key: AdminSectionKey; label: string }[] = [
   { key: "dashboard", label: "Dashboard" },
@@ -31,6 +33,8 @@ const SECTIONS: { key: AdminSectionKey; label: string }[] = [
   { key: "orgs", label: "Organizations" },
   { key: "products", label: "Products & plans" },
   { key: "apikeys", label: "API keys" },
+  { key: "certifications", label: "Certifications" },
+  { key: "components", label: "Component releases" },
 ];
 
 /** Licensing console — left nav + content stage inside the portal shell. */
