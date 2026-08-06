@@ -1,11 +1,11 @@
 /**
- * Canonical list of keyword landing-page slugs. Kept as a tiny static module
- * (no markdown imports) so App.tsx can gate the public router without pulling the
- * full markdown bundle into the main chunk — the content itself loads lazily via
- * landing-pages.ts inside the SeoLanding route chunk.
+ * Canonical list of legacy keyword landing-page slugs. Kept as a tiny static
+ * module (no markdown imports) so App.tsx can gate the public router.
  *
- * Every slug here MUST have a matching `src/content/landing/<slug>.md`, and every
- * such file's slug MUST appear here. The build verifies this in prerender-blog.mjs.
+ * The standalone SEO landing pages were retired in the desktop-first trim: these
+ * slugs now serve two purposes only — `isLandingSlug` lets App.tsx 301 old
+ * `/<keyword>` URLs home instead of 404ing, and `LANDING_NAV` supplies short link
+ * labels for the blog's related-links map (see blog-related.ts).
  */
 import { AORMS_PORTALS } from "./product-nomenclature.js";
 
