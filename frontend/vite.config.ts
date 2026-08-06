@@ -65,12 +65,11 @@ export default defineConfig({
         admin: path.join(frontendDir, "admin.html"),
       },
       output: {
-        // Split the heavy libraries into their own cacheable chunks. charts and xlsx
-        // are only reached from lazy (authenticated) routes, so they stay off the
-        // landing's critical path; carbon (the design system) is one shared chunk.
+        // Split the heavy libraries into their own cacheable chunks. xlsx is only
+        // reached from lazy (authenticated) routes, so it stays off the landing's
+        // critical path; carbon (the design system) is one shared chunk.
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
-          if (id.includes("@carbon/charts")) return "vendor-charts";
           if (id.includes("xlsx")) return "vendor-xlsx";
           if (id.includes("@carbon")) return "vendor-carbon";
         },
