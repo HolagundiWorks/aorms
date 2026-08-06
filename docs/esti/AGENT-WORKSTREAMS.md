@@ -88,8 +88,8 @@ flowchart TB
 - [x] Host toolchain + Docker stack up  
 - [x] Local `0227` verified  
 - [x] WinUI publish runs against local SPA (process up)  
-- [x] ACO **dev**-signed artifact + sha256 recorded (SmartScreen trust still open)  
-- [x] `hasSyncToken` bind confirmed (API smoke · VALID · metaSync)  
+- [x] ACO **dev**-signed artifact + sha256 recorded (SmartScreen trust still open) — evening rebuild hash `57774D65…` in [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)  
+- [x] `hasSyncToken` bind confirmed (API smoke · VALID · metaSync) — re-smoke 2026-08-06 evening  
 - [x] `sync.pullMeta` clean on colocated loopback (`ESTI_COLOCATED_HUB=true`)  
 - [x] Manifest honesty gate (`web_fallback` until SmartScreen + HTTPS)  
 - [ ] HTTPS handoff fields ready (or still gated)  

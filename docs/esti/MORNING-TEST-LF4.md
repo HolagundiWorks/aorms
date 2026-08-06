@@ -124,16 +124,18 @@ Get-FileHash -Algorithm SHA256 $exe | Format-List
 | Version | — | matching `version` |
 | Gate | `VITE_PORTAL_USE_RELEASE_INSTALLERS=true` | `status: available` |
 
-**Handoff status (Bhoomi2 solo 2026-08-06):**
+**Handoff status (Bhoomi2 solo 2026-08-06 evening re-smoke):**
 
 | Field | Value |
 | --- | --- |
 | Local artifact | `desktop/artifacts/winui/AStudio.Shell.exe` |
-| Signed | ✅ ACO **dev** (`CN=Human Centric Works`) + DigiCert timestamp — root **not** trusted by SmartScreen; **not** for portal flip |
-| SHA-256 | `E25E266725E100C3B4D268DA027D9EA29DD4D5302A091DA2EF8E808E3B0A6CB0` |
-| Public HTTPS URL | 🔲 pending host/upload |
-| Bind verified | ✅ autopilot — `license.status=VALID`, `hasSyncToken=true`, `syncReady=true`, `metaSync`+`artifactSync`, `sync.flush` ok, **`sync.pullMeta` ok** (empty catch-up). Local Ed25519 via `LICENSE_SIGNING_KEY_FILE` + `LICENSE_PANEL_PUBLIC_KEY_SPKI_B64`; key `HLP-5JNZ-445W-M59T`. Colocated loopback needs `ESTI_COLOCATED_HUB=true` so `/api/sync/*` mounts on a `node` process. |
-| Local hub `0227` | ✅ applied on `esti-db` (`sync_firm_id` · `sync_token_hash`) |
+| Signed | ✅ ACO **dev** (`CN=Human Centric Works`, thumbprint `DE6594C4…`) + DigiCert timestamp — root **not** trusted by SmartScreen; **not** for portal flip |
+| SHA-256 | `57774D65212B249A20CFA9DF712B317F6ECDA7BA4308E65B43A5BD1D5A4099DD` *(rebuilt + re-signed 2026-08-06; prior morning hash `E25E2667…` superseded)* |
+| Public HTTPS URL | 🔲 pending SmartScreen-trusted cert + release host |
+| Bind verified | ✅ re-smoke — `hasSyncToken=true`, `syncReady=true`, `role=node`, `metaSync`+`artifactSync`, `sync.flush` ok, `sync.pullMeta` empty catch-up. Colocated: `ESTI_ROLE=node` + `ESTI_COLOCATED_HUB=true`. Demo login `principal@demo.aorms.in`. |
+| Local hub `0227` | ✅ applied on `esti-db` |
+
+**Next operator gate (cannot invent):** purchase/install a **SmartScreen-trusted** Authenticode cert (or EV), re-sign, upload HTTPS, then fill manifests / `VITE_*_INSTALLER_URL`. Keep `status: web_fallback` until then.
 
 ---
 
