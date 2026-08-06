@@ -42,7 +42,7 @@ export const ARCHITECTURE_LANDING_FAQ = [
   {
     question: "Is there a desktop app?",
     answer:
-      "No. The workspace runs entirely in your browser — projects, finance, drawings and portals in one cloud account.",
+      "Yes — desktop preferred with web parity. The same workspace runs as a local-first desktop node or in the browser; drafts and AI can stay on the machine, and finalized documents publish to the hub. Signed installers appear on aorms.in/downloads when packaging ships; until then, use the web workspace.",
   },
   {
     question: "Where is the documentation?",

@@ -1,13 +1,14 @@
 # AORMS — Market fit brief
 
-**Status:** Canonical GTM + product priority · **Updated:** 2026-07-24  
+**Status:** Canonical GTM + product priority · **Updated:** 2026-08-06  
 **Owner:** Human Centric Works (HCW)
 
 Companion to [ROADMAP.md](ROADMAP.md) (delivery queue) and
 [PRODUCT-VISION.md](PRODUCT-VISION.md) (boundary). This file records **market
 research conclusions** and what we must ship for paying firms.
 
-**Delivery status:** Market-fit Waves **W1–W3 shipped**; **W4 integrations deferred**.
+**Delivery status:** Market-fit Waves **W1–W3 shipped**; **W4 integrations deferred**;
+**M8 local-first GTM** in progress ([WEB-PORTAL.md](WEB-PORTAL.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md)).
 
 ---
 
@@ -35,7 +36,7 @@ revision control, site supervision, and GST on one spine.
 | Architecture tools ignore engineering (and vice versa) | Same spine: **AORMS-Studio** + **AORMS-Consultancy** |
 | Scope creep into construction ERP | Explicit teardown — **advise, don’t deliver** |
 | Fragmented external access | Client / consultant / contractor / site portals |
-| Desktop install friction | Web-only · one Standard licence · storage + AI usage |
+| Desktop install friction | Desktop preferred + web parity · one Standard licence · storage + AI usage |
 
 ---
 
@@ -102,11 +103,29 @@ Implementation status lives on [ROADMAP.md](ROADMAP.md) § Market fit.
 Tally / Zoho Books deepen · Drive for drawings · WhatsApp capture — not day-one.
 
 ### Explicitly defer
-Desktop app · raw cloud DB clients · **contractor** tenders (issue/award) / RA bills / BBS ·
-“AI that designs the building.” · W4 integrations.
+Raw cloud DB clients / third-party desktop ERP shells · **contractor** labour ERP /
+full P6 CPM · “AI that designs the building.” · W4 integrations.
 
 **In scope (shipped):** project **Tenders** — firm issues; contractors bid in portal
 (`/office/tenders`, Project → Tenders).
+
+**In scope (local-first):** desktop node preferred + web parity ([LOCAL-FIRST.md](LOCAL-FIRST.md)) —
+signed installer URL on `/downloads` stays open until Bhoomi signs (M8 item 4).
+
+### M8 — Local-first GTM
+
+Align public story with desktop-preferred product law. Delivery checklist:
+
+| # | Item | Status |
+|---|---|---|
+| 1 | Product / blog / FAQ: desktop preferred + web parity (no “web-only / no desktop”) | ✅ 2026-08-06 |
+| 2 | `/downloads` portal with honest `web_fallback` CTAs | ✅ prep |
+| 3 | Update manifests + env one-line fill documented ([WEB-PORTAL.md](WEB-PORTAL.md)) | ✅ prep |
+| 4 | Live signed installer URL + sha256 for AStudio / AConsulting | 🔲 until Bhoomi publishes |
+| 5 | LF6 Figma ↔ kit token sync notes / stub ([FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md)) | ✅ stub |
+| 6 | Hub sync / bind story consistent with LOCAL-FIRST (Gagan) | 🔲 Gagan lane |
+
+Agent lane: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) § Aakash.
 
 ---
 

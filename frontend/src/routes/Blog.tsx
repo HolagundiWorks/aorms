@@ -30,7 +30,7 @@ export function Blog() {
           <p className="lp2-section-head__body">
             Platform notes (frameworks, EOMS, ESTI) and <strong>{AORMS_STUDIO.title}</strong>{" "}
             advisory operations for Indian architecture consultancies — revisions, approvals,
-            billing, and workflows. Browser workspaces only.
+            billing, and workflows. Desktop preferred with web parity.
           </p>
           <p className="lp2-blog-links">
             <Link to="/">AORMS platform</Link>
