@@ -63,12 +63,13 @@ export async function activate(db: DB, key: string): Promise<LicenseView> {
 
   if (env.ESTI_LICENSE_API_URL) {
     // HCW License Manager path: activate against /v1 and store the panel token
-    // (licenseState understands both manager and legacy hub formats).
-    const licenseToken = await activateViaPanel(key, installId);
+    // + sync bearer (LF4) so meta/artifact outbox can reach the hub.
+    const panel = await activateViaPanel(key, installId);
     await db
       .update(orgSettings)
       .set({
-        licenseToken,
+        licenseToken: panel.licenseToken,
+        syncToken: panel.syncToken ?? null,
         installId,
         licenceStatus: "ACTIVE",
         licenseCheckedAt: new Date(),
@@ -98,8 +99,11 @@ export async function activate(db: DB, key: string): Promise<LicenseView> {
 }
 
 /** Activate a key against the HCW License Manager `/v1/activate`; returns the
- *  signed panel license token. Throws on a bad key or an unreachable manager. */
-export async function activateViaPanel(key: string, deviceId: string): Promise<string> {
+ *  signed panel license token and optional hub sync bearer. */
+export async function activateViaPanel(
+  key: string,
+  deviceId: string,
+): Promise<{ licenseToken: string; syncToken?: string }> {
   const base = env.ESTI_LICENSE_API_URL.replace(/\/+$/, "");
   let res: Response;
   try {
@@ -125,7 +129,8 @@ export async function activateViaPanel(key: string, deviceId: string): Promise<s
     }
     throw new TRPCError({ code: "BAD_REQUEST", message });
   }
-  return (JSON.parse(text) as { licenseToken: string }).licenseToken;
+  const body = JSON.parse(text) as { licenseToken: string; syncToken?: string };
+  return { licenseToken: body.licenseToken, syncToken: body.syncToken };
 }
 
 /** Re-fetch a fresh token from the hub (extends grace). Returns false if not possible/offline. */
@@ -167,11 +172,12 @@ export async function refreshNow(db: DB): Promise<boolean> {
         }
         return false;
       }
-      const data = JSON.parse(text) as { licenseToken: string };
+      const data = JSON.parse(text) as { licenseToken: string; syncToken?: string };
       await db
         .update(orgSettings)
         .set({
           licenseToken: data.licenseToken,
+          ...(data.syncToken ? { syncToken: data.syncToken } : {}),
           licenceStatus: "ACTIVE",
           licenseCheckedAt: new Date(),
           updatedAt: new Date(),

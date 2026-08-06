@@ -36,11 +36,18 @@ export function LicensePanel() {
       setKey("");
       void utils.license.status.invalidate();
       void utils.settings.get.invalidate();
+      void utils.sync.capabilities.invalidate();
+      void utils.sync.hubConfigured.invalidate();
+      void utils.sync.status.invalidate();
     },
   });
   const refresh = trpc.license.refresh.useMutation({
     meta: { errorTitle: "Couldn't refresh the license" },
-    onSuccess: () => void utils.license.status.invalidate(),
+    onSuccess: () => {
+      void utils.license.status.invalidate();
+      void utils.sync.capabilities.invalidate();
+      void utils.sync.hubConfigured.invalidate();
+    },
   });
 
   const view = q.data;

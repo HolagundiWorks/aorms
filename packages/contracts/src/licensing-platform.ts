@@ -122,6 +122,8 @@ export type ActivateInput = z.infer<typeof ActivateInput>;
 
 export const ActivateResult = z.object({
   licenseToken: z.string(),
+  /** Install bearer for hub sync (`Authorization: Bearer`); hashed on the device row. */
+  syncToken: z.string().min(1).optional(),
   entitlement: Entitlement,
 });
 export type ActivateResult = z.infer<typeof ActivateResult>;

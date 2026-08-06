@@ -16,6 +16,7 @@ import {
   enqueueMetaEvent,
   pullMetaCatchUp,
 } from "../../lib/sync/metadata.js";
+import { applyDomainMetaEvents } from "../../lib/sync/domainMeta.js";
 import { drainOutbox, outboxStatus } from "../../lib/sync/outbox.js";
 import { ownerProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
 
@@ -93,7 +94,7 @@ export const syncRouter = router({
     return { queued: true as const };
   }),
 
-  /** Pull hub catch-up and advance cursor (domain apply is caller's follow-up). */
+  /** Pull hub catch-up, run LF3 domain merge, advance cursor. */
   pullMeta: protectedProcedure
     .input(
       z
@@ -106,14 +107,16 @@ export const syncRouter = router({
     .mutation(async ({ ctx, input }) => {
       const stream = input?.stream ?? META_STREAM_FIRM;
       const payload = await pullMetaCatchUp(ctx.db, stream, input?.limit ?? 100);
-      if (!payload) return { events: [], latestSeq: 0, stream };
+      if (!payload) return { events: [], latestSeq: 0, stream, apply: null };
+      const apply =
+        payload.events.length > 0 ? applyDomainMetaEvents(payload.events).result : null;
       if (payload.events.length) {
         const last = payload.events[payload.events.length - 1]!;
         await advanceMetaCursor(ctx.db, stream, last.seq);
       } else if (payload.latestSeq > 0) {
         await advanceMetaCursor(ctx.db, stream, payload.latestSeq);
       }
-      return payload;
+      return { ...payload, apply };
     }),
 
   hubConfigured: protectedProcedure.query(async ({ ctx }) => {

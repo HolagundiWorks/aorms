@@ -3,6 +3,7 @@ import { type SyncEntity, type SyncIngestBody } from "@esti/contracts";
 import { and, desc, eq } from "drizzle-orm";
 import type { DB } from "../../db/index.js";
 import { licenseInstalls, licenses, syncRecords } from "../../db/schema.js";
+import * as hlp from "../../db/schema/licensing-platform.js";
 import { getObjectBuffer, putObject } from "../../lib/storage.js";
 
 function sha256(s: string): string {
@@ -13,16 +14,28 @@ function sha256buf(buf: Buffer): string {
   return createHash("sha256").update(buf).digest("hex");
 }
 
-/** Resolve a node's raw sync bearer to the hub-assigned firm id, or null. */
+/** Resolve a node's raw sync bearer to the hub-assigned firm id, or null.
+ *  Checks legacy `esti_license_install` first, then HCW License Manager devices
+ *  (LF4 panel path — firm namespace is the platform organisation id). */
 export async function firmFromSyncToken(db: DB, bearer: string | undefined): Promise<string | null> {
   if (!bearer) return null;
-  const [row] = await db
+  const hash = sha256(bearer);
+
+  const [legacy] = await db
     .select({ firmId: licenses.firmId })
     .from(licenseInstalls)
     .innerJoin(licenses, eq(licenses.id, licenseInstalls.licenseId))
-    .where(eq(licenseInstalls.syncTokenHash, sha256(bearer)))
+    .where(eq(licenseInstalls.syncTokenHash, hash))
     .limit(1);
-  return row?.firmId ?? null;
+  if (legacy?.firmId) return legacy.firmId;
+
+  const [panel] = await db
+    .select({ orgId: hlp.licenses.orgId })
+    .from(hlp.devices)
+    .innerJoin(hlp.licenses, eq(hlp.licenses.id, hlp.devices.licenseId))
+    .where(and(eq(hlp.devices.syncTokenHash, hash), eq(hlp.devices.status, "ACTIVE")))
+    .limit(1);
+  return panel?.orgId ?? null;
 }
 
 /**

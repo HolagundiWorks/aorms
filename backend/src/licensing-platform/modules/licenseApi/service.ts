@@ -7,6 +7,7 @@ import {
   type Plan,
   type ValidateResult,
 } from "@esti/contracts";
+import { createHash, randomBytes } from "node:crypto";
 import { and, count, eq } from "drizzle-orm";
 import { db, schema } from "../../db/client.js";
 import { loadSigningKey } from "../../env.js";
@@ -17,6 +18,14 @@ const TOKEN_TTL_S = 30 * 24 * 3600;
 
 export type ApiResult<T> = { ok: true; data: T } | { ok: false; status: number; error: string };
 const fail = (status: number, error: string): ApiResult<never> => ({ ok: false, status, error });
+
+function sha256(s: string): string {
+  return createHash("sha256").update(s).digest("hex");
+}
+
+function mintSyncToken(): string {
+  return randomBytes(32).toString("base64url");
+}
 
 type LicenseRow = typeof schema.licenses.$inferSelect;
 type PlanRow = typeof schema.plans.$inferSelect;
@@ -130,11 +139,15 @@ async function writeEvent(
   await db.insert(schema.licenseEvents).values({ id: newId("evt"), licenseId, type, actor, meta });
 }
 
-/** Bind/refresh a device row; enforces the effective device limit for new devices. */
+/** Bind/refresh a device row; enforces the effective device limit for new devices.
+ *  Mints a sync bearer (hashed on the row) for hub meta/artifact ingest. */
 async function bindDevice(
   ctx: LicenseCtx,
   input: ActivateInput,
-): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
+): Promise<{ ok: true; syncToken: string } | { ok: false; status: number; error: string }> {
+  const syncToken = mintSyncToken();
+  const syncTokenHash = sha256(syncToken);
+
   const [dev] = await db
     .select()
     .from(schema.devices)
@@ -149,9 +162,10 @@ async function bindDevice(
         lastSeenAt: new Date(),
         fingerprint: input.fingerprint ?? dev.fingerprint,
         name: input.deviceName ?? dev.name,
+        syncTokenHash,
       })
       .where(eq(schema.devices.id, dev.id));
-    return { ok: true };
+    return { ok: true, syncToken };
   }
 
   const limit = effective(ctx.lic.deviceLimit, ctx.plan.deviceLimit);
@@ -170,8 +184,9 @@ async function bindDevice(
     name: input.deviceName ?? null,
     status: "ACTIVE",
     lastSeenAt: new Date(),
+    syncTokenHash,
   });
-  return { ok: true };
+  return { ok: true, syncToken };
 }
 
 // --- Public API used by the /v1 routes ---
@@ -203,7 +218,7 @@ export async function activate(
   const entitlement = await buildEntitlement(ctx);
   const licenseToken = signEntitlement(entitlement, input.deviceId);
   await writeEvent(ctx.lic.id, "ACTIVATE", productCode, { deviceId: input.deviceId });
-  return { ok: true, data: { licenseToken, entitlement } };
+  return { ok: true, data: { licenseToken, syncToken: bound.syncToken, entitlement } };
 }
 
 export async function validate(productId: string, token: string): Promise<ValidateResult> {
@@ -248,12 +263,16 @@ export async function refresh(
     .where(and(eq(schema.devices.licenseId, ctx.lic.id), eq(schema.devices.deviceId, deviceId)))
     .limit(1);
   if (!dev || dev.status !== "ACTIVE") return fail(403, "device_revoked");
-  await db.update(schema.devices).set({ lastSeenAt: new Date() }).where(eq(schema.devices.id, dev.id));
+  const syncToken = mintSyncToken();
+  await db
+    .update(schema.devices)
+    .set({ lastSeenAt: new Date(), syncTokenHash: sha256(syncToken) })
+    .where(eq(schema.devices.id, dev.id));
 
   const entitlement = await buildEntitlement(ctx);
   const licenseToken = signEntitlement(entitlement, deviceId);
   await writeEvent(ctx.lic.id, "REFRESH", productCode, { deviceId });
-  return { ok: true, data: { licenseToken, entitlement } };
+  return { ok: true, data: { licenseToken, syncToken, entitlement } };
 }
 
 export async function entitlement(
