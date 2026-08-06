@@ -289,7 +289,7 @@ Three material languages stack by visual depth. Pick a layer by **role**, not ta
 | **Taskbar footer** | Calculator � launcher cluster � tray (clock, alerts, ID, sign out) |
 | **ActionDock** (floating, bottom-centre) | Context-aware screen actions via \`useScreenActions\` � left destroy � centre create � right commit |
 
-Login and auth forms sit in the **rail**, not on the stage.
+Login and auth forms use a **centered soft-neu card** (not the stage canvas).
 
 ## Key primitives
 
