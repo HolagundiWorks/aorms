@@ -27,10 +27,10 @@ Prefer launching desktop work on env **`bhoomi`** (`env.name=bhoomi` via Cloud A
 ```mermaid
 flowchart TB
   Vish[Vishwakarma_CTO]
-  subgraph local [Bhoomi_local]
-    LF4[LF4_sign_install_bind]
-    Tauri[Tauri_MSVC_rebuild]
-    Smoke[Physical_Setup.exe_gate]
+  subgraph local [Bhoomi_env_bhoomi]
+    LF4[LF4_WinUI_sign_bind]
+    WinUI[AStudio_Shell_WebView2]
+    Smoke[Physical_installer_gate]
   end
   subgraph gagan [Gagan_cloud_hub]
     Hub[Hub_API_fidelity]
