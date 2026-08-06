@@ -4,7 +4,7 @@
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
 **Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
 **AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)  
-**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 (WinUI #49 · sign/bind open) · LF5 ✅ (#51) · LF6 ✅ right-slot (#54) — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
+**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 (WinUI shell on `main` · Windows sign/bind open) · LF5 ✅ · LF6 ✅ — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
 
 **Crew:** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) (Vishwakarma · Bhoomi · Gagan · Aakash)
 
@@ -14,11 +14,12 @@ owner-side BBS/steel recon + P6 XER milestone import; not a contractor CPM ERP).
 Stripe auto-billing remains **deferred by choice**. Market-fit Waves 1–3 are
 **shipped**; Wave 4 (integrations) stays phase-2 by design.
 
-**Active delivery (2026-08-06):** hub `0227` + panel `syncToken` ✅ · hub bind
-readiness ✅ (Gagan #53) · CI lint ✅ (#55) · worker ruff ✅ (#56) · LF5 ✅ (#51) ·
-LF6 right-slot ✅ (#54) · portal `/downloads` placeholders ✅ · LF4 **WinUI 3**
-shell 🚧 (Bhoomi #49 — Linux validate ✅ · Windows sign + physical bind per
-[MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)). Live installer URLs stay gated.
+**Active delivery (2026-08-06):** code merge wave ✅ (#55/#56/#51/#53/#54/#49) ·
+LF5 ✅ · LF6 ✅ · hub bind readiness ✅ · LF4 **WinUI 3** shell on `main` 🚧
+physical gate only (Windows `build-winui.ps1` → Authenticode → hub **0227**
+confirm → `hasSyncToken` bind · then Aakash live `/downloads` URL). See
+[MORNING-TEST-LF4.md](MORNING-TEST-LF4.md). Live installer URLs stay gated until
+signed HTTPS URL + sha256.
 The 2026-07-19 **web-only** product law is **superseded** for runtime shape
 ([PLANS-AND-TIERS.md](PLANS-AND-TIERS.md), [LOCAL-FIRST.md](LOCAL-FIRST.md)).
 Legacy Community / Manager installers and a separate Estimate desktop app stay
@@ -68,7 +69,7 @@ Canonical plan: **[LOCAL-FIRST.md](LOCAL-FIRST.md)** · UX: **[DESKTOP-WEB-PARIT
 | **LF1** | Hub meta event log + catch-up + WS; node meta outbox/cursor | ✅ 2026-08 |
 | **LF2** | Artifact content-hash; publish DTOs; portal-from-hub reads; desktop stub; product-law docs | ✅ 2026-08 |
 | **LF3** | Domain metadata enqueue/apply (tasks, estimate totals, phase progress) + panel `syncToken` | ✅ Gagan 2026-08 |
-| **LF4** | Signed **WinUI 3** installer + first-run licence / hub bind | 🚧 Bhoomi — `desktop/AStudio.Shell` + `DesktopLicenceBind` · sign/bind ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); Tauri legacy |
+| **LF4** | Signed **WinUI 3** installer + first-run licence / hub bind | 🚧 code ✅ (#49) · Windows sign + physical bind + hub `0227` prod ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); Tauri legacy |
 | **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | ✅ Aakash 2026-08 — `CapabilityBadge` · `keymap` · `/help` · web-parity `localAi` fix |
 | **LF6** | UX parity checklist + inspector/AI right-slot; Figma ↔ kit tokens | ✅ Aakash — token stub ✅ · right-slot ✅ (`RightSlot` Properties ↔ Ask ESTI) |
 

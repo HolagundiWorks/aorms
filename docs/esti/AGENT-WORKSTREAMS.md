@@ -63,12 +63,13 @@ flowchart TB
 | CI lint · worker ruff | **Vishwakarma** | **#55/#56** ✅ | On `main` |
 | LF5 badges/keymap/Help | **Aakash** | **#51** ✅ | On `main` |
 | LF6 right-slot | **Aakash** | **#54** ✅ | On `main` |
-| **WinUI 3** shell · sign · bind | **Bhoomi** | **#49** 🚧 | Code ready · Windows sign/bind open |
+| **WinUI 3** shell · sign · bind | **Bhoomi** | **#49** ✅ code | On `main` · Windows sign/bind + sha256 handoff open |
 | Portal WinUI wording | **Aakash** | **#50** | Independent · `web_fallback` |
 
-**Merge wave (2026-08-06):** **#55 → #56 → #51 → #53 → #54** ✅ on `main`. Remaining:
-land **#49** (WinUI), then Bhoomi Windows sign + hub **0227** prod confirm → Aakash
-live download URL. Gagan does **not** own `desktop/` packaging.
+**Merge wave (2026-08-06):** **#55 → #56 → #51 → #53 → #54 → #49** ✅ on `main`.
+Remaining human gates: hub **0227** on prod · Windows Authenticode sign · physical
+`hasSyncToken` bind · Aakash live download URL (after signed HTTPS + sha256).
+Gagan does **not** own `desktop/` packaging.
 
 ---
 
