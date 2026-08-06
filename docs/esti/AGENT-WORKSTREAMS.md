@@ -71,16 +71,14 @@ flowchart TB
 
 | Surface | Owner | PR / branch | Notes |
 | --- | --- | --- | --- |
-| Hub `syncToken` mint · `firmFromSyncToken` · `0227` · LF3 `domainMeta` · `@esti/contracts` | **Gagan** | **#45** `cursor/hub-sync-contracts-9937` | Merge to `main` **first** |
-| Tauri / installer / signing · first-run bind UX (`DesktopLicenceBind`) | **Bhoomi** | `orch/lf4-sync-bind-installer` | Rebase after #45; **drop duplicate hub/sync/docs** |
-| Portal Downloads / GTM / LF5–LF6 | **Aakash** | portal lanes | Waits on signed Setup.exe from Bhoomi |
+| Hub `syncToken` mint · `firmFromSyncToken` · `0227` · LF3 `domainMeta` · `@esti/contracts` | **Gagan** | **#45** ✅ on `main` | Re-verify bind path for Bhoomi morning |
+| WinUI 3 Fluent 2 shell · installer · licence bind | **Bhoomi** | **#49** `orch/winui3-fluent2-shell` | Env **`bhoomi`**; sign + physical bind still open |
+| Portal Downloads / GTM / LF5–LF6 | **Aakash** | **#46** ✅ · **#51** LF5 · **#50** WinUI wording | Live URL waits on signed Setup.exe; LF6 right-slot open |
 
-**Merge order (Vishwakarma):** land **#45** (Gagan hub/sync/contracts) before the LF4
-desktop branch. LF4 will rebase onto `main` and drop overlapping hub files
-(`licenseApi/service.ts`, `license/consumer.ts`, `sync/*`, contracts
-`licensing-platform.ts`, HUB-API / LOCAL-FIRST / ROADMAP / AGENT-WORKSTREAMS /
-DESKTOP-REPOS). Gagan does **not** own `desktop/` packaging or
-`DesktopLicenceBind`.
+**Merge order (Vishwakarma):** **#45** already on `main`. Prefer **#51** (LF5) then
+Gagan re-verify docs, then **#49** LF4 WinUI (rebase; drop any leftover hub
+dupes). **#50** Aakash wording can land independently. Do **not** flip live
+installer URLs until Bhoomi signs. Gagan does **not** own `desktop/` packaging.
 
 ---
 
@@ -109,14 +107,15 @@ roadmap status accuracy.
 
 ## Bhoomi — Local desktop
 
-**Owns:** LF4 physical gate · Tauri / installer · morning operator checklist.  
-**Chat:** this session.
+**Owns:** LF4 physical gate · WinUI 3 shell / installer · morning operator checklist.  
+**Runtime:** Cursor env **`bhoomi`** (desktop/VNC) for cloud desktop work; Windows host for code-sign / UAC.  
+**Chat:** [Bhoomi LF4](https://cursor.com/agents/bc-37815831-e258-5dd6-b6b4-44f4717ec224) · env setup [Bhoomi setup](https://cursor.com/agents/bc-da18314e-6c4a-4a57-b1e4-102cfd7ff440).
 
 ### Goals
 
-1. Prefer **MSVC** toolchain (VS Build Tools → Desktop C++) over WinLibs when UAC allows; rebuild Studio Setup.exe.
-2. **Code-sign** `desktop/artifacts/AORMS-Studio_0.1.0_x64-setup.exe` (or rebuilt artifact).
-3. Run [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) physical install: admin sign-in → panel activate → `hasSyncToken` → sync flush.
+1. Advance **WinUI 3** shell (`desktop/AStudio.Shell`, PR **#49**) as LF4 canonical; Tauri only via legacy flag if still needed.
+2. **Code-sign** the Studio installer artifact on the Windows host (SmartScreen).
+3. Run [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) physical install: admin sign-in → panel activate → `hasSyncToken` → sync flush (hub needs `0227`).
 4. Optional: rebuild **CONSULTANCY** profile installer once Studio path is green.
 5. Hand signed asset URL + sha256 to **Aakash** for portal wire-up (do not publish unsigned).
 
@@ -129,12 +128,12 @@ roadmap status accuracy.
 
 ### Key paths
 
-- `desktop/` · `desktop/scripts/build-installer.ps1` · `desktop/src-tauri/`
+- `desktop/AStudio.Shell` · `desktop/scripts/build-winui.ps1` · `build-installer.ps1`
 - `MORNING-TEST-LF4.md` · [LOCAL-FIRST.md](LOCAL-FIRST.md) LF4
 
 ### Done when
 
-- [ ] Signed Studio Setup.exe exists and installs on this Windows host  
+- [ ] Signed Studio installer exists and installs on the Windows host  
 - [ ] First-run licence bind yields hub `syncToken` + meta sync works  
 - [ ] Artifact path + sha256 noted for Aakash  
 - [ ] Vishwakarma has merged the LF4 code PR (unsigned artifact ok in branch; URLs stay gated)

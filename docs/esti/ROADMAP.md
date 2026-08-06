@@ -4,7 +4,7 @@
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
 **Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
 **AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)  
-**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 (unsigned Setup.exe + bind UI) · LF5–LF6 open — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
+**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 (WinUI #49 · env `bhoomi`) · LF5 🚧 (#51) · LF6 🔲 — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
 **Crew:** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) (Vishwakarma · Bhoomi · Gagan · Aakash)
 
 Phases 0–28 are **engineering-complete** for **AStudio**. **AConsulting**
