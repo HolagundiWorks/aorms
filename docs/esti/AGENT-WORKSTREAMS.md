@@ -12,6 +12,19 @@ Four agents. Call them by name in handoffs and PRs.
 | **Gagan** | Cloud hub / sync | Cloud | `syncToken` · hub APIs · `@esti/contracts` |
 | **Aakash** | Cloud portal / GTM | Cloud | Downloads · M8 · LF6 · empty scaffolds |
 
+### Live roster (2026-08-06 — crew on Claude Opus 4.8 High)
+
+| Name | Agent | Focus now |
+| --- | --- | --- |
+| **Vishwakarma** | [Roadmap orchestrator](https://cursor.com/agents/bc-dedaa2fa-3738-47a0-9d7b-3f477239445f) | Merge queue · roadmap truth |
+| **Bhoomi** | [Bhoomi](https://cursor.com/agents/bc-e0ff0191-1bc6-589b-9c9a-5e87f0551b20) | LF4 WinUI · Windows sign + physical bind |
+| **Gagan** | [Gagan](https://cursor.com/agents/bc-a60a5bde-f8ab-5c12-9257-2500e372c385) | Hub bind readiness · `0227` verify |
+| **Aakash** | [Aakash](https://cursor.com/agents/bc-0ecc1c8f-732c-5c84-9439-c6f40b094465) | Portal `/downloads` wire-up on signed handoff |
+
+Merge wave **#55 → #56 → #51 → #53 → #54 → #49 → #57** is on `main`. LF5/LF6 +
+hub bind complete; LF4 remaining gates are human/ops (Windows sign, hub `0227`
+prod, signed URL + sha256 → Aakash).
+
 ```mermaid
 flowchart TB
   Vish[Vishwakarma_CTO]
