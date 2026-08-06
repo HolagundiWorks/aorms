@@ -21,7 +21,7 @@ use Git history for old versions.
 3. [NAVIGATION](NAVIGATION.md) — sidebar IA (Canonical V3)
 4. [PLANS-AND-TIERS](PLANS-AND-TIERS.md) + [ACCESS-HIERARCHY](ACCESS-HIERARCHY.md) — licence + roles
 5. [LOCAL-FIRST](LOCAL-FIRST.md) + [DESKTOP-WEB-PARITY-UX](DESKTOP-WEB-PARITY-UX.md) — desktop node + hub + UX parity
-6. [WEB-PORTAL](WEB-PORTAL.md) + [AGENT-WORKSTREAMS](AGENT-WORKSTREAMS.md) — `/downloads` + agent lanes
+6. [WEB-PORTAL](WEB-PORTAL.md) — public `/downloads` + signed-installer fill  
 7. [HCW-UI-KIT](HCW-UI-KIT.md) + [HCW-UI-UX-PRINCIPLES](HCW-UI-UX-PRINCIPLES.md) — design system
 8. [ROADMAP](ROADMAP.md) — delivery status (ACTIVE — local-first LF3–LF6 open)
 9. [PRD](PRD.md) — requirements
@@ -42,7 +42,6 @@ Repo agent entry: [`CLAUDE.md`](../../CLAUDE.md).
 | Local-first desktop + hub | [LOCAL-FIRST](LOCAL-FIRST.md) |
 | Desktop ↔ web UX parity | [DESKTOP-WEB-PARITY-UX](DESKTOP-WEB-PARITY-UX.md) |
 | Public downloads portal | [WEB-PORTAL](WEB-PORTAL.md) |
-| Agent workstreams | [AGENT-WORKSTREAMS](AGENT-WORKSTREAMS.md) |
 | Figma ↔ kit tokens (LF6) | [FIGMA-TOKEN-SYNC](FIGMA-TOKEN-SYNC.md) |
 | Design system | [HCW-UI-KIT](HCW-UI-KIT.md) |
 | UX laws | [HCW-UI-UX-PRINCIPLES](HCW-UI-UX-PRINCIPLES.md) |

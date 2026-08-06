@@ -81,7 +81,7 @@ Runtime resolution: `trpc.sync.capabilities` ·
 | **LF3** | Domain enqueue of metadata (tasks, estimate totals, phase progress) + apply hooks on pull | 🔲 |
 | **LF4** | Signed desktop installer (Tauri + bundled/sidecar Postgres·worker·Ollama); first-run licence bind | 🔲 |
 | **LF5** | Web parity polish: capability badges, degraded AI UX, shared keymap / Help | 🔲 |
-| **LF6** | UX parity checklist + inspector/AI right-slot; Figma token sync to kit | ◐ — [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) stub ✅ · right-slot 🔲 |
+| **LF6** | UX parity checklist + inspector/AI right-slot; Figma token sync to kit | 🔲 |
 
 **Migration:** `0226_local_first_sync.sql`.
 
@@ -120,7 +120,5 @@ Runtime resolution: `trpc.sync.capabilities` ·
 - [ROADMAP.md](ROADMAP.md) § Local-first  
 - [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md)  
 - [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md)  
-- [WEB-PORTAL.md](WEB-PORTAL.md) · [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)  
-- [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) · [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)  
 - [AORMS-IDENTITY.md](AORMS-IDENTITY.md) §10  
 - [ARCHITECTURE.md](ARCHITECTURE.md)  

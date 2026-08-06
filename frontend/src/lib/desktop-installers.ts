@@ -2,8 +2,9 @@
  * Desktop installer resolution for the public `/downloads` portal.
  *
  * Honesty rule: never offer a download button until a **signed** URL is wired.
- * Placeholders stay in `web_fallback` until Bhoomi publishes LF4 artefacts
- * (see docs/esti/WEB-PORTAL.md · docs/esti/MORNING-TEST-LF4.md).
+ * Placeholders stay in `web_fallback` until Bhoomi publishes a **signed**
+ * installer URL + sha256 (see docs/esti/WEB-PORTAL.md). Never wire
+ * `desktop/artifacts/` unsigned overnight builds.
  */
 import {
   AORMS_CONSULTANCY,

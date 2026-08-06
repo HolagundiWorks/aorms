@@ -45,6 +45,7 @@ Never hand-edit `dist/`. Re-vendor per [KITS.md](../KITS.md) after upstream toke
 
 ## Related
 
-- [ROADMAP.md](ROADMAP.md) § Local-first LF6  
-- [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) § Aakash A3  
-- [HCW-UI-KIT.md](HCW-UI-KIT.md)  
+- [ROADMAP.md](ROADMAP.md) § Local-first LF6 (status: Vishwakarma)  
+- [WEB-PORTAL.md](WEB-PORTAL.md) · [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md)  
+- [HCW-UI-KIT.md](HCW-UI-KIT.md) · kit [02-TOKEN-EXPORT.md](../hcw-kit/02-TOKEN-EXPORT.md)  
+

@@ -123,9 +123,9 @@ Align public story with desktop-preferred product law. Delivery checklist:
 | 3 | Update manifests + env one-line fill documented ([WEB-PORTAL.md](WEB-PORTAL.md)) | ✅ prep |
 | 4 | Live signed installer URL + sha256 for AStudio / AConsulting | 🔲 until Bhoomi publishes |
 | 5 | LF6 Figma ↔ kit token sync notes / stub ([FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md)) | ✅ stub |
-| 6 | Hub sync / bind story consistent with LOCAL-FIRST (Gagan) | 🔲 Gagan lane |
 
-Agent lane: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) § Aakash.
+Portal fill fields: [WEB-PORTAL.md](WEB-PORTAL.md). Crew status tables: Vishwakarma
+([AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) after orch merge). Hub bind: Gagan.
 
 ---
 

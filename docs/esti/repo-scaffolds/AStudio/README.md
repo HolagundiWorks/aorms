@@ -27,6 +27,7 @@
 
 ## Policy
 
-- No app code move until the DESKTOP-REPOS gate is green (`esti/docs/esti/DESKTOP-REPOS.md`).  
+- No app code move until the sibling-repo / contracts gate is green (Vish/Gagan).  
+
 - Shared types stay in `@esti/contracts` inside the monorepo — do not invent a second contracts package here.  
 - Signed installers are published by Local packaging; the web portal wires URL + sha256 only after signing.

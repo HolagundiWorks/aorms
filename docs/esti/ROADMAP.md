@@ -1,11 +1,10 @@
 # AORMS Implementation Roadmap
 
-**Status:** ACTIVE · **Updated:** 2026-08-06  
+**Status:** ACTIVE · **Updated:** 2026-08-05  
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
 **Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
 **AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)  
-**Local-first waves:** LF0–LF2 ✅ · LF3–LF5 open · LF6 ◐ (token stub) — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
-**Crew:** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) (Vishwakarma · Bhoomi · Gagan · Aakash)
+**Local-first waves:** LF0–LF2 ✅ · LF3–LF6 open — see [LOCAL-FIRST.md](LOCAL-FIRST.md)
 
 Phases 0–28 are **engineering-complete** for **AStudio**. **AConsulting**
 is **live**. **AProc** (PMC) Waves **0–5 are shipped** (preview product —
@@ -31,10 +30,6 @@ docs were removed 2026-07-24 (Git history retains them).
 | [NAVIGATION.md](NAVIGATION.md) | Canonical sidebar IA |
 | [LOCAL-FIRST.md](LOCAL-FIRST.md) | **Local-first + hub sync** — planes, APIs, LF waves |
 | [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) | Desktop ↔ web UX consistency |
-| [WEB-PORTAL.md](WEB-PORTAL.md) | Public `/downloads` + installer manifest / env fill |
-| [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) | Local / Cloud B / Cloud C lanes + checkboxes |
-| [DESKTOP-REPOS.md](DESKTOP-REPOS.md) | Sibling-repo gate · portal → installer wiring |
-| [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) | LF6 Figma ↔ kit token sync stub |
 | [MARKET-FIT.md](MARKET-FIT.md) | **GTM + market-fit backlog** (ICP, competitors, waves) |
 | [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) | Standard licence law (desktop + web) |
 | [AORMS-PLATFORM-NOMENCLATURE.md](AORMS-PLATFORM-NOMENCLATURE.md) | Naming (platform · apps · EOMS · ESTI) |
@@ -67,24 +62,12 @@ Canonical plan: **[LOCAL-FIRST.md](LOCAL-FIRST.md)** · UX: **[DESKTOP-WEB-PARIT
 | **LF3** | Domain metadata enqueue/apply (tasks, estimate totals, phase progress) | 🔲 |
 | **LF4** | Signed Tauri installer + first-run licence / hub bind | 🔲 |
 | **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | 🔲 |
-| **LF6** | UX parity checklist + inspector/AI right-slot; Figma ↔ kit tokens | ◐ token stub ✅ · right-slot 🔲 |
+| **LF6** | UX parity checklist + inspector/AI right-slot; Figma ↔ kit tokens | 🔲 |
 
 **Namespaces / seams:** `sync` (tRPC + REST) · `esti_meta_*` · `esti_sync_*` ·
 `packages/contracts` sync · `desktop/` · `trpc.sync.capabilities`.
 
 **Migration:** `0226_local_first_sync`.
-
-### Crew (active delivery)
-
-| Name | Focus | Status doc |
-| --- | --- | --- |
-| **Vishwakarma** | CTO / merge to main | — |
-| **Bhoomi** | Signed Tauri installer · morning bind | [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) |
-| **Gagan** | syncToken · hub APIs · contracts gate | [HUB-API.md](HUB-API.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md) |
-| **Aakash** | `/downloads` · M8 copy · LF6 tokens | [WEB-PORTAL.md](WEB-PORTAL.md) · [MARKET-FIT.md](MARKET-FIT.md) § M8 |
-
-Download URL live-wire items stay **🔲** until Bhoomi publishes a signed URL
-([WEB-PORTAL.md](WEB-PORTAL.md)).
 
 ## AProc delivery waves
 
@@ -156,7 +139,7 @@ Canonical brief: **[MARKET-FIT.md](MARKET-FIT.md)**.
 | M5 | GTM packaging | Consistent story · pricing · Ask ESTI truth |
 | M6 | Consultancy GTM | Chrome · demos · references |
 | M7 | Integrations | Phase 2 |
-| M8 | Local-first GTM | Desktop preferred story · hub sync · web parity — checklist in [MARKET-FIT.md](MARKET-FIT.md) § M8 · portal [WEB-PORTAL.md](WEB-PORTAL.md) |
+| M8 | Local-first GTM | Desktop preferred story · hub sync · web parity (align copy with LOCAL-FIRST) |
 
 ## Completed tracks (2026-07 → 2026-08)
 
