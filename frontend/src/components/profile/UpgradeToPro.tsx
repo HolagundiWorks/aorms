@@ -43,8 +43,8 @@ export function UpgradeToPro() {
           </div>
           <p className="cds--type-body-01" style={{ margin: 0 }}>
             One standard AORMS licence — full workspace, unlimited users, 5 GB storage
-            included. Extra storage and hosted AI are usage-billed; you can add your own
-            API key under Company → AI.
+            included. Only cloud storage above 5 GB is billed; AI is unmetered — local
+            on desktop, hub Hosted AI on web.
           </p>
           {status === "GRACE" && view.graceDaysLeft != null && (
             <InlineNotification

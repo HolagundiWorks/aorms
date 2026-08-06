@@ -144,24 +144,12 @@ export default function DashboardTab({ onGoTo }: { onGoTo: (section: "licenses" 
                     ` (incl. ${fmtBytes(usage.storagePurchasedBytes)} add-on)`}
                 </p>
               </Tile>
-              <Tile style={{ height: "100%" }}>
-                <p className="cds--type-body-01" style={SUBTLE}>Hosted AI tokens this month</p>
-                <p className="cds--type-productive-heading-05" style={{ margin: "0.25rem 0" }}>{usage.aiTokensThisMonth.toLocaleString()}</p>
-                <p className="cds--type-body-01" style={{ ...SUBTLE, marginTop: "0.5rem" }}>
-                  BYO-API calls are billed by your provider and excluded here.
-                </p>
-                <p className="cds--type-body-01" style={SUBTLE}>
-                  {usage.source === "reports"
-                    ? `Period ${usage.periodStart}`
-                    : `Metering since ${fmtDate(usage.aiTokensMonthStart)}`}
-                </p>
-              </Tile>
             </div>
             {usage.source === "reports" && usage.reports.length > 1 && (
               <Stack gap={2} style={{ marginTop: "0.75rem" }}>
                 {usage.reports.slice(0, 8).map((r) => (
                   <p key={`${r.orgId}-${r.productCode}`} className="cds--type-body-01" style={SUBTLE}>
-                    {`${r.orgName}: ${fmtBytes(r.storageUsedBytes)} · ${r.aiTokensThisMonth.toLocaleString()} tokens`}
+                    {`${r.orgName}: ${fmtBytes(r.storageUsedBytes)}`}
                   </p>
                 ))}
               </Stack>

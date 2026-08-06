@@ -1,7 +1,7 @@
 ---
 title: One Standard licence — storage and AI, not product tiers
 date: 2026-07-22
-excerpt: AORMS licences the company on a Standard plan — usage is storage and AI, not Lite vs Pro desktop SKUs. Desktop + web share the same licence; BYO AI keys remain supported.
+excerpt: AORMS licences the company on a Standard plan — the only usage that scales is cloud storage, not Lite vs Pro desktop SKUs. Desktop + web share the same licence; AI is unmetered (local on desktop, hub Hosted AI on web).
 tags: Product, Platform, Practice
 author: Human Centric Works
 ---
@@ -10,8 +10,9 @@ Older AORMS messaging talked about Lite, Pro, and desktop Manager builds. That
 language is gone. The live model is simpler:
 
 **One Standard licence** for the company, **desktop + web** workspaces, and metering
-that matches how a consultancy actually burns cost — **storage** and **AI usage** —
-not which installer you downloaded.
+on the one thing that scales with a consultancy's cost — **cloud storage** —
+not which installer you downloaded. AI is **unmetered**: local Ollama on the desktop
+node, and the hub ("Hosted AI") on web parity.
 
 ## What you get
 
@@ -19,12 +20,12 @@ not which installer you downloaded.
   preview — same licence spine)
 - Client / consultant / contractor portals on the same platform
 - Identity and company licensing through the AORMS account hub
-- ESTI and related AI features with **BYO API key** support where configured
+- ESTI and related AI features — **local on desktop (unmetered)**, hub Hosted AI on web
 
 What you do **not** get — because we do not ship them — is a separate offline
 desktop SKU or a feature gate that unlocks “Pro drawings” versus “Lite drawings.”
 Drawings, fees, revisions, and R&O live on the operational spine for licensed
-firms; limits are about capacity and AI spend, not a second product line.
+firms; limits are about storage capacity, not a second product line.
 
 ## Why this is clearer for principals
 

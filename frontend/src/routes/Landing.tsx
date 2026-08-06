@@ -115,7 +115,7 @@ const BENEFITS = [
   {
     icon: <DnsOutlined fontSize="small" />,
     title: "Runs on your server",
-    body: "Firm data stays in your environment. No external API keys required, and nothing is used to train third-party models.",
+    body: "Firm data stays in your environment, and nothing is used to train third-party models. AI runs on your own infrastructure — local on desktop, the hub on web.",
   },
 ] as const;
 
@@ -153,7 +153,7 @@ const FAQ = [
   },
   {
     q: "Is my data used to train external models?",
-    a: `No. ${ESTI.name} answers only from your validated firm repositories, running on your server — no external API keys required.`,
+    a: `No. ${ESTI.name} answers only from your validated firm repositories, running on your own infrastructure — nothing is sent to or used to train third-party models.`,
   },
   {
     q: "What is the difference between EOMS and ESTI?",
@@ -165,7 +165,7 @@ const FAQ = [
   },
   {
     q: "How much does it cost?",
-    a: `One Standard licence — unlimited users, full workspace, 5 GB cloud storage included. You pay only for extra storage and hosted AI usage (or bring your own API key). Desktop node (local-first) + web parity share the same licence; no Lite/Pro tiers. See Pricing below.`,
+    a: `One Standard licence — unlimited users, full workspace, 5 GB cloud storage included. You pay only for cloud storage above 5 GB. AI is unmetered — it runs locally on your desktop node, and on the hub for web parity (no per-token billing, no bring-your-own key). Desktop node (local-first) + web parity share the same licence; no Lite/Pro tiers. See Pricing below.`,
   },
   {
     q: "Who should start with AORMS first?",
@@ -432,8 +432,8 @@ export function Landing() {
                 >
                   <StatusDot color="green" label="" size="sm" />
                   <Typography variant="caption" color="text.secondary">
-                    Two apps live on one spine · runs on your server · no external API keys
-                    required
+                    Two apps live on one spine · runs on your server · AI runs local,
+                    unmetered
                   </Typography>
                 </Stack>
               </Grid>
@@ -709,7 +709,7 @@ export function Landing() {
             <SectionHead
               eyebrow="Pricing"
               title="One Standard licence."
-              lead="No tiers. Unlimited users. Pay for storage overage and hosted AI — or bring your own key."
+              lead="No tiers. Unlimited users. Pay only for cloud storage over 5 GB — AI is unmetered (local on desktop, hub on web)."
             />
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 4 }}>
@@ -741,11 +741,12 @@ export function Landing() {
                 <Surface layer="soft" sx={{ p: 3, height: "100%" }}>
                   <Typography variant="overline" color="primary">AI</Typography>
                   <Typography variant="h6" component="h3" sx={{ mt: 1, fontWeight: 700 }}>
-                    Hosted or BYO key
+                    Local & unmetered
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
-                    Hosted {ESTI.name} is metered. Bring an OpenAI-compatible API key and hosted
-                    inference is not billed for that firm.
+                    {ESTI.name} runs locally on your desktop node — unmetered, no per-token
+                    billing. On web it runs on the hub (Hosted AI), also unmetered. No
+                    bring-your-own key needed.
                   </Typography>
                 </Surface>
               </Grid>
