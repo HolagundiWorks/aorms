@@ -13,7 +13,7 @@ empty GitHub shells for **AStudio** / **AConsulting** are README-only scaffolds 
 | Choice | Detail |
 | --- | --- |
 | **Single contracts package** | `@esti/contracts` in this monorepo — **do not** invent a second contracts repo |
-| **Desktop shell in-tree** | `desktop/` (Tauri scaffold + env + start scripts) |
+| **Desktop shell in-tree** | `desktop/AStudio.Shell` (**WinUI 3** + WebView2) — Tauri under `src-tauri/` is **legacy** |
 | **Same SPA** | Desktop loads `frontend/` against loopback backend |
 
 ## Gate checklist
@@ -23,8 +23,8 @@ empty GitHub shells for **AStudio** / **AConsulting** are README-only scaffolds 
 | D1 | `@esti/contracts` versioned + consumer README (`0.1.0` / hub **2026-08**) | Gagan | ✅ |
 | D2 | Hub sync bearer from panel activate/refresh (`syncToken` + `hlp_device`) | Gagan | ✅ |
 | D3 | `firmFromSyncToken` legacy + `hlp_device` → `sync_firm_id` | Gagan | ✅ |
-| D4 | Node `sync.*` documented for `ESTI_ROLE=node` ([HUB-API.md](HUB-API.md)); caps ↔ `syncToken` aligned | Gagan | ✅ |
-| D5 | Signed Tauri installer + first-run licence bind (LF4) | Bhoomi | 🚧 unsigned Setup.exe + `DesktopLicenceBind` · sign morning |
+| D4 | Node `sync.*` documented for `ESTI_ROLE=node` ([HUB-API.md](HUB-API.md)); caps ↔ `syncToken` aligned | Gagan | ✅ (#53) |
+| D5 | Signed **WinUI 3** installer + first-run licence bind (LF4) | Bhoomi | 🚧 #49 · Linux validate ✅ · Windows sign/bind 🔲 |
 | D6 | Portal / marketing download manifests | Aakash | ✅ prep · live URL 🔲 |
 | D7 | Code signing + update channel | Bhoomi | 🔲 |
 
@@ -33,7 +33,7 @@ empty GitHub shells for **AStudio** / **AConsulting** are README-only scaffolds 
 ```text
 Bhoomi (Local)                    Aakash (Portal)
 ──────────────                    ───────────────
-signed Setup.exe ──url+sha256──►  VITE_*_INSTALLER_URL
+signed WinUI publish ──url+sha256──►  VITE_*_INSTALLER_URL
                                   or update-manifests/*.json
                                   + VITE_PORTAL_USE_RELEASE_INSTALLERS=true
                                            │

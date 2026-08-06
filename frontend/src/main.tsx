@@ -32,6 +32,14 @@ import { newRequestId } from "./lib/request-id.js";
 import { apiUrl } from "./lib/api-base.js";
 import { initAnalytics, trackEvent } from "./lib/analytics.js";
 import { trpc } from "./lib/trpc.js";
+import {
+  handleNativeShellCommand,
+  installDesktopNativeBridge,
+  onNativeShellCommand,
+} from "./lib/desktopNativeBridge.js";
+
+installDesktopNativeBridge();
+onNativeShellCommand(handleNativeShellCommand);
 
 /** Per-call toast context (Nielsen #9 — errors say WHAT failed):
  *  `meta: { errorTitle: "Couldn't save the lead" }` on any query/mutation gives

@@ -59,6 +59,8 @@ frontend/public/downloads/
 # Desktop installer build outputs (unsigned overnight artifacts)
 desktop/artifacts/
 desktop/src-tauri/target/
+desktop/AStudio.Shell/bin/
+desktop/AStudio.Shell/obj/
 
 # Editor / agent metadata
 .cursor/
