@@ -1,6 +1,8 @@
 import Close from "@mui/icons-material/Close";
 import Send from "@mui/icons-material/Send";
 import {
+  Alert,
+  AlertTitle,
   Box,
   Button,
   CircularProgress,
@@ -12,8 +14,11 @@ import {
 } from "@mui/material";
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useLocation } from "react-router-dom";
+import { CapabilityBadge } from "./CapabilityBadge.js";
 import { useAuth } from "../lib/auth.js";
 import { setEstiActivity } from "../lib/esti-activity.js";
+import { matchShellKey } from "../lib/keymap.js";
+import { useRuntimeCapabilities } from "../lib/runtimeCapabilities.js";
 import { trpc } from "../lib/trpc.js";
 
 type ChatTurn = { role: "user" | "assistant"; text: string };
@@ -27,11 +32,12 @@ export const ASK_ESTI_EVENT = "esti:ask";
  * returns here.** The conversation is kept as *session-scoped memory* but **hidden** —
  * surfaced on demand via "session history", never a growing transcript. Floats above
  * the dock (neumorphic `esti-neu`), opens from the dock ESTI button (`ASK_ESTI_EVENT`)
- * or Alt+A; Esc / backdrop closes.
+ * or Alt+A (shared keymap); Esc / backdrop closes.
  */
 export function AiAgentCommand() {
   const { user } = useAuth();
   const { pathname } = useLocation();
+  const caps = useRuntimeCapabilities();
   const canUseAgent =
     !!user &&
     user.role !== "CLIENT" &&
@@ -81,15 +87,15 @@ export function AiAgentCommand() {
     if (open) endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [turns, generate.isPending, open]);
 
-  // Open/toggle from the dock ESTI button, plus Alt+A / Esc.
+  // Open/toggle from the dock ESTI button, plus shared keymap Alt+A / Esc.
   useEffect(() => {
     const onAsk = () => setOpen((o) => !o);
     const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.altKey && (e.key === "a" || e.key === "A")) {
-        e.preventDefault();
-        setOpen((o) => !o);
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
       }
-      if (e.key === "Escape") setOpen(false);
+      matchShellKey(e, { askEsti: () => setOpen((o) => !o) });
     };
     window.addEventListener(ASK_ESTI_EVENT, onAsk);
     window.addEventListener("keydown", onKey);
@@ -188,6 +194,7 @@ export function AiAgentCommand() {
               onKeyDown={handleInputKey}
               disabled={generate.isPending || settingsQ.isLoading}
             />
+            <CapabilityBadge />
             <IconButton
               className="esti-neu-btn"
               color="primary"
@@ -205,6 +212,14 @@ export function AiAgentCommand() {
               <Close fontSize="small" />
             </IconButton>
           </Stack>
+
+          {caps.aiDegraded && (
+            <Alert severity="info" sx={{ py: 0.5 }}>
+              <AlertTitle>Hosted AI</AlertTitle>
+              Running on the hub or your BYO key — local Ollama is not on this
+              machine. Same Ask ESTI panel as desktop.
+            </Alert>
+          )}
 
           {/* Working state — the command is being orchestrated; the answer returns below. */}
           {generate.isPending && (

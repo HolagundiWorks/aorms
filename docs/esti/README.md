@@ -23,7 +23,7 @@ use Git history for old versions.
 5. [LOCAL-FIRST](LOCAL-FIRST.md) + [DESKTOP-WEB-PARITY-UX](DESKTOP-WEB-PARITY-UX.md) — desktop node + hub + UX parity
 6. [WEB-PORTAL](WEB-PORTAL.md) — public `/downloads` + signed-installer fill  
 7. [HCW-UI-KIT](HCW-UI-KIT.md) + [HCW-UI-UX-PRINCIPLES](HCW-UI-UX-PRINCIPLES.md) — design system
-8. [ROADMAP](ROADMAP.md) — delivery status (ACTIVE — local-first LF3–LF6 open)
+8. [ROADMAP](ROADMAP.md) — delivery status (ACTIVE — LF4 bind · LF5 ✅ · LF6 right-slot)
 9. [PRD](PRD.md) — requirements
 
 Repo agent entry: [`CLAUDE.md`](../../CLAUDE.md).

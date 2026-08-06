@@ -21,12 +21,14 @@ import { AI_DRAFT_KIND_LABEL, AiDraftKind, can } from "@esti/contracts";
 import { useState } from "react";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import { useScreenActions, type DockAction } from "@hcw/ui-kit";
+import { CapabilityBadge } from "./CapabilityBadge.js";
 import { EstiAiExplainLabel } from "./AiCarbon.js";
 import { PageBreadcrumb } from "./PageBreadcrumb.js";
 import { RailLayout } from "./RailLayout.js";
 import { trpc } from "../lib/trpc.js";
 import { useAuth } from "../lib/auth.js";
 import { setEstiActivity } from "../lib/esti-activity.js";
+import { useRuntimeCapabilities } from "../lib/runtimeCapabilities.js";
 
 const DRAFT_KINDS = AiDraftKind.options;
 
@@ -267,6 +269,7 @@ export function AiDraftPanel({ projectId, defaultKind = "SUMMARY", compact }: Pr
 
 export function AiStudioPage() {
   const { user } = useAuth();
+  const caps = useRuntimeCapabilities();
   const runsQ = trpc.ai.listRuns.useQuery({ limit: 25 });
   const settingsQ = trpc.ai.settings.useQuery();
 
@@ -277,6 +280,9 @@ export function AiStudioPage() {
         description="Permission-filtered drafts with source tracking and human approval"
       >
         <PageBreadcrumb items={[{ label: "Office" }, { label: "AI Studio" }]} />
+        <Stack direction="row" spacing={1} sx={{ mb: 1, alignItems: "center" }}>
+          <CapabilityBadge showHost />
+        </Stack>
         <Alert severity="info">
           <AlertTitle>Document drafts unavailable on demo</AlertTitle>
           Press Alt+A anywhere in AORMS to open ESTI — it reads live data and suggests next steps (no uploads or auto-actions).
@@ -285,18 +291,32 @@ export function AiStudioPage() {
     );
   }
 
+  const aiAside = (
+    <Stack spacing={1}>
+      <CapabilityBadge showHost />
+      {caps.aiDegraded && (
+        <Alert severity="info">
+          <AlertTitle>Hosted AI</AlertTitle>
+          Drafts run on the hub or your BYO key. Desktop uses local Ollama — same panel.
+        </Alert>
+      )}
+      {!settingsQ.data?.enabled ? (
+        <Alert severity="warning">
+          <AlertTitle>AI Studio is off</AlertTitle>
+          Enable under Company settings.
+          {caps.aiCompute === "local"
+            ? " Uses local Ollama — no API keys."
+            : " Uses hub AI or a BYO key."}
+        </Alert>
+      ) : null}
+    </Stack>
+  );
+
   return (
     <RailLayout
       title="AI Studio"
       description="Permission-filtered drafts with source tracking and human approval"
-      aside={
-        !settingsQ.data?.enabled ? (
-          <Alert severity="warning">
-            <AlertTitle>AI Studio is off</AlertTitle>
-            Enable under Company settings. Uses Ollama on your server — no API keys.
-          </Alert>
-        ) : undefined
-      }
+      aside={aiAside}
     >
       <PageBreadcrumb items={[{ label: "Office" }, { label: "AI Studio" }]} />
       <Grid container spacing={2}>

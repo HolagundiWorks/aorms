@@ -61,7 +61,7 @@ flowchart TB
 | --- | --- | --- | --- |
 | Hub `syncToken` mint · `firmFromSyncToken` · `0227` · LF3 `domainMeta` · `@esti/contracts` | **Gagan** | **#45** `cursor/hub-sync-contracts-9937` | Merge to `main` **first** |
 | Tauri / installer / signing · first-run bind UX (`DesktopLicenceBind`) | **Bhoomi** | `orch/lf4-sync-bind-installer` | Rebase after #45; **drop duplicate hub/sync/docs** |
-| Portal Downloads / GTM / LF5–LF6 | **Aakash** | portal lanes | Waits on signed Setup.exe from Bhoomi |
+| Portal Downloads / GTM / LF5–LF6 | **Aakash** | `#46` ✅ · LF5 lane | Live URL waits on Bhoomi signed Setup.exe; LF6 right-slot open |
 
 **Merge order (Vishwakarma):** land **#45** (Gagan hub/sync/contracts) before the LF4
 desktop branch. LF4 will rebase onto `main` and drop overlapping hub files
@@ -188,6 +188,7 @@ roadmap status accuracy.
    `docs/esti/repo-scaffolds/` READMEs only — **no app code move**.
 5. Align [WEB-PORTAL.md](WEB-PORTAL.md) / MARKET-FIT M8 item 4 status with Bhoomi’s
    publish signal (leave 🔲 until signed URL exists).
+6. **LF5** web parity polish: capability badges, degraded AI UX, shared keymap / Help.
 
 ### Out of scope
 
@@ -200,8 +201,9 @@ roadmap status accuracy.
 
 - `frontend/src/routes/Downloads.tsx` · `DocsHub.tsx` · `AccountPortal.tsx`  
 - `frontend/src/lib/portal-downloads.ts` · `frontend/public/update-manifests/`  
+- `frontend/src/lib/keymap.ts` · `CapabilityBadge.tsx` · `routes/Help.tsx`  
 - `frontend/src/content/blog/` · landing SEO / nomenclature imports  
-- `docs/esti/repo-scaffolds/` · [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) LF6
+- `docs/esti/repo-scaffolds/` · [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) LF5–LF6
 
 ### Done when
 
@@ -210,8 +212,10 @@ roadmap status accuracy.
 - [x] LF6 Figma/token item advanced or explicitly scoped with next step  
 - [x] Optional empty GitHub scaffolds created without app code (`docs/esti/repo-scaffolds/`)  
 - [x] PR opened for Vishwakarma to merge — **#46 merged**  
+- [x] LF5 capability badges · Hosted AI UX · shared keymap + `/help`  
 
-**Still 🔲:** live download URL flip (wait on Bhoomi signed Setup.exe + sha256).
+**Still 🔲:** live download URL flip (wait on Bhoomi signed Setup.exe + sha256).  
+**Still 🔲:** LF6 inspector / Ask ESTI right-slot polish.
 
 ---
 
