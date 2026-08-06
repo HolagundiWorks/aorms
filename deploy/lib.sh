@@ -274,8 +274,8 @@ VITE_PUBLIC_SITE=${PUBLIC_SITE}
 # Standalone licensing console origin (its own repo, deployed at admin.DOMAIN).
 # Set → aorms.in/platform-admin redirects there; empty → embedded console.
 VITE_ADMIN_URL=${VITE_ADMIN_URL:-}
-# Local-first signed installers for /downloads (LF4). Empty = web_fallback CTAs.
-# See docs/esti/WEB-PORTAL.md — do not wire unsigned overnight Setup.exe.
+# Local-first signed WinUI installers for /downloads (LF4). Empty = web_fallback CTAs.
+# See docs/esti/WEB-PORTAL.md — do not wire Tauri NSIS or unsigned desktop/artifacts/.
 VITE_ASTUDIO_INSTALLER_URL=${VITE_ASTUDIO_INSTALLER_URL:-}
 VITE_ACONSULTING_INSTALLER_URL=${VITE_ACONSULTING_INSTALLER_URL:-}
 VITE_PORTAL_USE_RELEASE_INSTALLERS=${VITE_PORTAL_USE_RELEASE_INSTALLERS:-}

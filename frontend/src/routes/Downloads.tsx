@@ -17,8 +17,9 @@ import {
 
 /**
  * Public `/downloads` portal — local-first desktop installers for AStudio /
- * AConsulting. CTAs stay on web_fallback until a signed URL + sha256 is wired
- * (docs/esti/WEB-PORTAL.md). Legacy Lite/Pro Manager SKUs stay retired.
+ * AConsulting. CTAs stay on web_fallback until a signed **WinUI** URL + sha256
+ * is wired (docs/esti/WEB-PORTAL.md). Do not link Tauri NSIS artifacts.
+ * Legacy Lite/Pro Manager SKUs stay retired.
  */
 export function Downloads() {
   const [offers, setOffers] = useState<DesktopInstallerOffer[] | null>(null);
