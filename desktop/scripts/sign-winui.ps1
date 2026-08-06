@@ -40,11 +40,17 @@ param(
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
-$OutDir = Join-Path $RepoRoot "desktop\artifacts\winui"
+$profileDir = if ($Profile -eq "CONSULTANCY") { "consultancy" } else { "studio" }
+$OutDir = Join-Path $RepoRoot "desktop\artifacts\winui\$profileDir"
+$legacyOutDir = Join-Path $RepoRoot "desktop\artifacts\winui"
 $exeName = if ($Profile -eq "CONSULTANCY") { "AConsulting.Shell.exe" } else { "AStudio.Shell.exe" }
 
 if (-not $ExePath) {
   $ExePath = Join-Path $OutDir $exeName
+  if (-not (Test-Path -LiteralPath $ExePath)) {
+    $legacy = Join-Path $legacyOutDir $exeName
+    if (Test-Path -LiteralPath $legacy) { $ExePath = $legacy }
+  }
 }
 if (-not (Test-Path -LiteralPath $ExePath)) {
   throw "Exe not found: $ExePath - run desktop/scripts/build-winui.ps1 -Profile $Profile first."
@@ -68,22 +74,22 @@ function Find-SignTool {
 }
 
 function Resolve-DefaultThumbprint {
-  $certs = @(
+  $all = @(
     Get-ChildItem Cert:\CurrentUser\My -ErrorAction SilentlyContinue
     Get-ChildItem Cert:\LocalMachine\My -ErrorAction SilentlyContinue
-  ) | Where-Object {
-    $_.HasPrivateKey -and (
-      $_.Subject -eq "CN=Human Centric Works" -or
-      ($_.EnhancedKeyUsageList | Where-Object { $_.FriendlyName -eq "Code Signing" })
-    )
-  } | Sort-Object {
-    # Prefer exact HCW subject; deprioritize the misspelled "Centic" test cert.
-    if ($_.Subject -eq "CN=Human Centric Works") { 0 }
-    elseif ($_.Subject -match "Centic") { 2 }
-    else { 1 }
-  }, NotAfter -Descending
+  ) | Where-Object { $_.HasPrivateKey }
 
-  $pick = $certs | Select-Object -First 1
+  $pick = $all | Where-Object { $_.Subject -eq "CN=Human Centric Works" } |
+    Sort-Object NotAfter -Descending |
+    Select-Object -First 1
+
+  if (-not $pick) {
+    $pick = $all | Where-Object {
+      ($_.EnhancedKeyUsageList | Where-Object { $_.FriendlyName -eq "Code Signing" }) -and
+      ($_.Subject -notmatch "Centic")
+    } | Sort-Object NotAfter -Descending | Select-Object -First 1
+  }
+
   if (-not $pick) {
     throw "No code-signing cert in store and AORMS_CODESIGN_PFX unset."
   }
@@ -201,3 +207,6 @@ if (-not $chainTrusted) {
 } else {
   Write-Host "Chain trusted - upload exe to HTTPS, then fill manifest url + status=available (WEB-PORTAL.md)." -ForegroundColor Green
 }
+
+# Always exit 0 on successful sign+handoff (signtool verify /pa may leave LASTEXITCODE=1 on ACO-dev).
+exit 0

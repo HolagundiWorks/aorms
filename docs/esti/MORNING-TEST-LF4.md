@@ -56,7 +56,7 @@ powershell -NoProfile -File desktop/scripts/start-node.ps1
 $env:VITE_RUNTIME_HOST = "desktop"
 $env:ESTI_DESKTOP = "true"
 powershell -NoProfile -File desktop/scripts/build-winui.ps1 -Profile STUDIO
-# Output: desktop/artifacts/winui/AStudio.Shell.exe  (gitignored)
+# Output: desktop/artifacts/winui/studio/AStudio.Shell.exe  (gitignored)
 ```
 
 ### 2. Code-sign (operator cert — fill YOUR paths)
@@ -69,13 +69,13 @@ edits manifests):
 $env:AORMS_CODESIGN_PFX = "C:\path\to\codesign.pfx"
 $env:AORMS_CODESIGN_PFX_PASSWORD = "…"
 powershell -NoProfile -File desktop/scripts/sign-winui.ps1 -Profile STUDIO -RequireTrustedChain -Version 1.0.0
-# → desktop/artifacts/winui/handoff-studio.json
+# → desktop/artifacts/winui/studio/handoff-studio.json
 ```
 
 Or raw `signtool`:
 
 ```powershell
-$exe = (Resolve-Path "desktop/artifacts/winui/AStudio.Shell.exe").Path
+$exe = (Resolve-Path "desktop/artifacts/winui/studio/AStudio.Shell.exe").Path
 # PFX on operator machine only — never commit certs/passwords.
 # $env:AORMS_CODESIGN_PFX = "C:\path\to\codesign.pfx"
 # $env:AORMS_CODESIGN_PFX_PASSWORD = "…"   # session env; do not log
@@ -120,7 +120,7 @@ sync.pullMeta  → catch-up ok (or empty when cursor current)
 ### 6. Measure sha256 + hand to Aakash (only after HTTPS host)
 
 ```powershell
-$exe = (Resolve-Path "desktop/artifacts/winui/AStudio.Shell.exe").Path
+$exe = (Resolve-Path "desktop/artifacts/winui/studio/AStudio.Shell.exe").Path
 Get-FileHash -Algorithm SHA256 $exe | Format-List
 # Upload the SIGNED binary to your HTTPS release host, then fill:
 #   version  = product version you ship
@@ -141,7 +141,7 @@ Get-FileHash -Algorithm SHA256 $exe | Format-List
 
 | Field | Value |
 | --- | --- |
-| Local artifact | `desktop/artifacts/winui/AStudio.Shell.exe` |
+| Local artifact | `desktop/artifacts/winui/studio/AStudio.Shell.exe` (Consultancy: `…/consultancy/AConsulting.Shell.exe`) |
 | Signed | ✅ ACO **dev** (`CN=Human Centric Works`, thumbprint `DE6594C4…`) + DigiCert timestamp — root **not** trusted by SmartScreen; **not** for portal flip |
 | SHA-256 | `57774D65212B249A20CFA9DF712B317F6ECDA7BA4308E65B43A5BD1D5A4099DD` *(rebuilt + re-signed 2026-08-06; prior morning hash `E25E2667…` superseded)* |
 | Public HTTPS URL | 🔲 pending SmartScreen-trusted cert + release host |

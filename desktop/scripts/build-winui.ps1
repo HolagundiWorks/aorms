@@ -26,7 +26,8 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $ShellDir = Join-Path $RepoRoot "desktop\AStudio.Shell"
 $Frontend = Join-Path $RepoRoot "frontend"
-$OutDir = Join-Path $RepoRoot "desktop\artifacts\winui"
+$profileDir = if ($Profile -eq "CONSULTANCY") { "consultancy" } else { "studio" }
+$OutDir = Join-Path $RepoRoot "desktop\artifacts\winui\$profileDir"
 
 Write-Host "=== AORMS WinUI 3 shell ($Profile) ===" -ForegroundColor Cyan
 Write-Host "Repo: $RepoRoot"

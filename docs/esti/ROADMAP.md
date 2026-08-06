@@ -96,7 +96,8 @@ Canonical plan: **[LOCAL-FIRST.md](LOCAL-FIRST.md)** Â· UX: **[DESKTOP-WEB-PAR
 | **LF1** | Hub meta event log + catch-up + WS; node meta outbox/cursor | âœ… 2026-08 |
 | **LF2** | Artifact content-hash; publish DTOs; portal-from-hub reads; desktop stub; product-law docs | âœ… 2026-08 |
 | **LF3** | Domain metadata enqueue/apply (tasks, estimate totals, phase progress) + panel `syncToken` | âœ… Gagan 2026-08 |
-| **LF4** | Signed **WinUI 3** installer + first-run licence / hub bind | ðŸš§ **Bhoomi2 solo** â€” code âœ… (#49) Â· local bind âœ… Â· SmartScreen/prod URL ðŸ”² ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); Tauri removed (#64) || **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | âœ… Aakash 2026-08 â€” `CapabilityBadge` Â· `keymap` Â· `/help` Â· web-parity `localAi` fix |
+| **LF4** | Signed **WinUI 3** installer + first-run licence / hub bind | ðŸš§ **Bhoomi2 solo** â€” code âœ… (#49) Â· local bind âœ… Â· SmartScreen/prod URL ðŸ”² ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); Tauri removed (#64) |
+| **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | âœ… Aakash 2026-08 â€” `CapabilityBadge` Â· `keymap` Â· `/help` Â· web-parity `localAi` fix |
 | **LF6** | UX parity checklist + inspector/AI right-slot; Figma â†” kit tokens | âœ… Aakash â€” token stub âœ… Â· right-slot âœ… (`RightSlot` Properties â†” Ask ESTI) |
 
 **Namespaces / seams:** `sync` (tRPC + REST) Â· `esti_meta_*` Â· `esti_sync_*` Â·

@@ -48,10 +48,15 @@ after their PRs). This file owns **portal fill fields only**.
 
 ## One-line fill (after Bhoomi signs)
 
-Bhoomi produces `desktop/artifacts/winui/handoff-studio.json` (and
-`handoff-consultancy.json`) via `desktop/scripts/sign-winui.ps1`. Copy `sha256` /
+Bhoomi produces `desktop/artifacts/winui/studio/handoff-studio.json` (and
+`…/consultancy/handoff-consultancy.json`) via `desktop/scripts/sign-winui.ps1`. Copy `sha256` /
 `version` from that file; set `url` only after HTTPS upload. Flip `status` to
 `available` only when handoff `chainTrusted` / `smartScreenReady` is **true**.
+
+**HTTPS host (interim):** GitHub Releases on `HolagundiWorks/aorms` via
+`desktop/scripts/publish-winui-release.ps1` (refuses ACO-dev unless
+`-ForceDraftUntrusted`; `-FillManifests` only when trusted). Do **not** reuse
+legacy Estimate / Community / Manager release assets.
 
 ### Option A — env (preferred for prod rebuild)
 
