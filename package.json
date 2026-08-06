@@ -17,7 +17,8 @@
     "db:generate": "pnpm --filter @esti/backend db:generate",
     "db:migrate": "pnpm --filter @esti/backend db:migrate",
     "seed:demo": "pnpm --filter @esti/backend seed:demo",
-    "licenses": "node scripts/licenses.mjs"
+    "licenses": "node scripts/licenses.mjs",
+    "figma-token-sync-check": "node scripts/figma-token-sync-check.mjs"
   },
   "pnpm": {
     "overrides": {

@@ -276,14 +276,19 @@ Legacy `FIRM_PLAN=CORE` / `FIRM_PLAN=ENTERPRISE` values still resolve to Pro.
 
 ---
 
-## 9a. Desktop installers (retired)
+## 9a. Desktop installers
 
-The Windows Lite/Pro/Enterprise `/download` portal and `fetch-installers.sh` flow
-were **retired 2026-07**. New deployments serve the **cloud workspace** only.
-`/download` on the marketing site redirects to the wiki.
+**Retired forever:** Lite / Pro / Community Manager SKUs and `fetch-installers.sh`.
 
-Operators on legacy VPS layouts may still have `frontend/dist/downloads/` from an
-older install — safe to delete. See [ADMIN-GUIDE](ADMIN-GUIDE.md) §6b.
+**Local-first (LF4):** public `/downloads` serves signed AStudio / AConsulting
+installers when wired — see [WEB-PORTAL.md](WEB-PORTAL.md). Leave
+`VITE_ASTUDIO_INSTALLER_URL` / `VITE_ACONSULTING_INSTALLER_URL` empty (or keep
+manifests at `web_fallback`) until Bhoomi publishes a **code-signed** binary.
+Legacy `/download` redirects to `/downloads`.
+
+Operators on pre-2026-07 VPS layouts may still have leftover Manager binaries under
+`frontend/dist/downloads/` — safe to delete via `deploy/cleanup-vps.sh`.
+See [ADMIN-GUIDE](ADMIN-GUIDE.md) §6b.
 
 ---
 

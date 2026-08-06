@@ -10,13 +10,13 @@ import { z } from "zod";
 import { env } from "../../env.js";
 import { licenseState } from "../../lib/plan.js";
 import { getOrgSettings } from "../../lib/settings.js";
+import { applyDomainMetaEvents } from "../../lib/sync/domainMeta.js";
 import {
   advanceMetaCursor,
   drainMetaOutbox,
   enqueueMetaEvent,
   pullMetaCatchUp,
 } from "../../lib/sync/metadata.js";
-import { applyDomainMetaEvents } from "../../lib/sync/domainMeta.js";
 import { drainOutbox, outboxStatus } from "../../lib/sync/outbox.js";
 import { ownerProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
 
@@ -75,9 +75,23 @@ export const syncRouter = router({
 
   capabilities: protectedProcedure.query(({ ctx }) => resolveRuntimeCapabilities(ctx.db)),
 
+  /**
+   * Drain artifact + meta outboxes to the hub.
+   * No-op (zeros) when `ESTI_ROLE!=node`, hub URL empty, or syncToken missing.
+   */
   flush: ownerProcedure.mutation(async ({ ctx }) => {
-    const artifacts = await drainOutbox(ctx.db);
-    const meta = await drainMetaOutbox(ctx.db);
+    const caps = await resolveRuntimeCapabilities(ctx.db);
+    if (!caps.metaSync && !caps.artifactSync) {
+      return {
+        artifacts: { sent: 0, failed: 0 },
+        meta: { sent: 0, failed: 0 },
+        skipped: "sync_disabled" as const,
+      };
+    }
+    const artifacts = caps.artifactSync
+      ? await drainOutbox(ctx.db)
+      : { sent: 0, failed: 0 };
+    const meta = caps.metaSync ? await drainMetaOutbox(ctx.db) : { sent: 0, failed: 0 };
     return { artifacts, meta };
   }),
 
@@ -94,7 +108,10 @@ export const syncRouter = router({
     return { queued: true as const };
   }),
 
-  /** Pull hub catch-up, run LF3 domain merge, advance cursor. */
+  /**
+   * Pull hub catch-up, apply LF3 domain patches (task / estimateTotals / phaseProgress),
+   * then advance the local cursor. Returns empty when hub/syncToken unavailable.
+   */
   pullMeta: protectedProcedure
     .input(
       z
@@ -106,17 +123,27 @@ export const syncRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const stream = input?.stream ?? META_STREAM_FIRM;
-      const payload = await pullMetaCatchUp(ctx.db, stream, input?.limit ?? 100);
-      if (!payload) return { events: [], latestSeq: 0, stream, apply: null };
-      const apply =
-        payload.events.length > 0 ? applyDomainMetaEvents(payload.events).result : null;
+      const caps = await resolveRuntimeCapabilities(ctx.db);
+      if (!caps.metaSync) {
+        return { events: [], latestSeq: 0, stream, applied: 0, skipped: 0 };
+      }
+      let payload: Awaited<ReturnType<typeof pullMetaCatchUp>>;
+      try {
+        payload = await pullMetaCatchUp(ctx.db, stream, input?.limit ?? 100);
+      } catch (e) {
+        // Hub unreachable / 401 — surface empty rather than failing the SPA tick.
+        console.warn("sync.pullMeta catch-up failed:", String(e));
+        return { events: [], latestSeq: 0, stream, applied: 0, skipped: 0, error: "hub_unreachable" as const };
+      }
+      if (!payload) return { events: [], latestSeq: 0, stream, applied: 0, skipped: 0 };
+      const apply = await applyDomainMetaEvents(ctx.db, payload.events);
       if (payload.events.length) {
         const last = payload.events[payload.events.length - 1]!;
         await advanceMetaCursor(ctx.db, stream, last.seq);
       } else if (payload.latestSeq > 0) {
         await advanceMetaCursor(ctx.db, stream, payload.latestSeq);
       }
-      return { ...payload, apply };
+      return { ...payload, applied: apply.applied, skipped: apply.skipped };
     }),
 
   hubConfigured: protectedProcedure.query(async ({ ctx }) => {
@@ -124,9 +151,13 @@ export const syncRouter = router({
     const hub = env.ESTI_HUB_URL.replace(/\/+$/, "");
     return {
       hubUrl: hub || null,
+      /** License Manager base (`…/platform`) — distinct from sync hub origin. */
+      licenseApiUrl: env.ESTI_LICENSE_API_URL.replace(/\/+$/, "") || null,
       wsUrl: hub ? `${hub.replace(/^http/, "ws")}/api/sync/meta/ws` : null,
       hasSyncToken: Boolean(syncToken),
       role: env.ESTI_ROLE,
+      /** Ready for morning bind: hub URL + sync bearer both present. */
+      syncReady: Boolean(hub && syncToken),
     };
   }),
 });

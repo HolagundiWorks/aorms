@@ -1,5 +1,6 @@
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import ArchitectureOutlinedIcon from "@mui/icons-material/ArchitectureOutlined";
+import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import EngineeringOutlinedIcon from "@mui/icons-material/EngineeringOutlined";
 import GavelOutlinedIcon from "@mui/icons-material/GavelOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -20,6 +21,7 @@ const RAIL_ICONS: Record<MarketingRailIcon, typeof HomeOutlinedIcon> = {
   consultancy: EngineeringOutlinedIcon,
   wiki: MenuBookOutlinedIcon,
   blog: ArticleOutlinedIcon,
+  downloads: DownloadOutlinedIcon,
   about: InfoOutlinedIcon,
   legal: GavelOutlinedIcon,
   "design-system": PaletteOutlinedIcon,

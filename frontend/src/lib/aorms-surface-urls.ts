@@ -8,6 +8,7 @@ export const AORMS_DOMAIN = "aorms.in" as const;
 /** Path-only surfaces on the platform apex (aorms.in). */
 export const AORMS_PLATFORM_PAGES = {
   wiki: { path: "/wiki", label: "AORMS Wiki" },
+  downloads: { path: "/downloads", label: "Downloads" },
   externalAccess: { path: "/access", label: "External portals" },
   account: { path: "/account", label: "AORMS account" },
   companyAccount: { path: "/company-account", label: "Company account" },

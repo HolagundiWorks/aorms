@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from "node:crypto";
 import {
   asPlan,
   type ActivateInput,
@@ -7,17 +8,11 @@ import {
   type Plan,
   type ValidateResult,
 } from "@esti/contracts";
-import { createHash, randomBytes } from "node:crypto";
 import { and, count, eq } from "drizzle-orm";
 import { db, schema } from "../../db/client.js";
 import { loadSigningKey } from "../../env.js";
 import { signToken, verifyToken } from "../../lib/license.js";
 import { newId } from "../../lib/ids.js";
-
-const TOKEN_TTL_S = 30 * 24 * 3600;
-
-export type ApiResult<T> = { ok: true; data: T } | { ok: false; status: number; error: string };
-const fail = (status: number, error: string): ApiResult<never> => ({ ok: false, status, error });
 
 function sha256(s: string): string {
   return createHash("sha256").update(s).digest("hex");
@@ -26,6 +21,11 @@ function sha256(s: string): string {
 function mintSyncToken(): string {
   return randomBytes(32).toString("base64url");
 }
+
+const TOKEN_TTL_S = 30 * 24 * 3600;
+
+export type ApiResult<T> = { ok: true; data: T } | { ok: false; status: number; error: string };
+const fail = (status: number, error: string): ApiResult<never> => ({ ok: false, status, error });
 
 type LicenseRow = typeof schema.licenses.$inferSelect;
 type PlanRow = typeof schema.plans.$inferSelect;
@@ -139,15 +139,20 @@ async function writeEvent(
   await db.insert(schema.licenseEvents).values({ id: newId("evt"), licenseId, type, actor, meta });
 }
 
-/** Bind/refresh a device row; enforces the effective device limit for new devices.
- *  Mints a sync bearer (hashed on the row) for hub meta/artifact ingest. */
+type BindDeviceOk = { ok: true; syncToken: string; rotated: boolean };
+type BindDeviceFail = { ok: false; status: number; error: string };
+
+/**
+ * Bind/refresh a device row; enforces the effective device limit for new devices.
+ * Always returns a fresh `syncToken` on first bind or when the device had none;
+ * on re-activate of an existing hashed device, rotates the sync bearer (same
+ * behaviour as legacy `esti_license_install` activate).
+ */
 async function bindDevice(
   ctx: LicenseCtx,
   input: ActivateInput,
-): Promise<{ ok: true; syncToken: string } | { ok: false; status: number; error: string }> {
-  const syncToken = mintSyncToken();
-  const syncTokenHash = sha256(syncToken);
-
+  opts: { rotateSyncToken: boolean },
+): Promise<BindDeviceOk | BindDeviceFail> {
   const [dev] = await db
     .select()
     .from(schema.devices)
@@ -155,6 +160,8 @@ async function bindDevice(
     .limit(1);
 
   if (dev) {
+    const shouldMint = opts.rotateSyncToken || !dev.syncTokenHash;
+    const syncToken = shouldMint ? mintSyncToken() : "";
     await db
       .update(schema.devices)
       .set({
@@ -162,10 +169,14 @@ async function bindDevice(
         lastSeenAt: new Date(),
         fingerprint: input.fingerprint ?? dev.fingerprint,
         name: input.deviceName ?? dev.name,
-        syncTokenHash,
+        ...(shouldMint ? { syncTokenHash: sha256(syncToken) } : {}),
       })
       .where(eq(schema.devices.id, dev.id));
-    return { ok: true, syncToken };
+    if (!shouldMint) {
+      // Caller must not echo a token we no longer know — node keeps its own.
+      return { ok: true, syncToken: "", rotated: false };
+    }
+    return { ok: true, syncToken, rotated: true };
   }
 
   const limit = effective(ctx.lic.deviceLimit, ctx.plan.deviceLimit);
@@ -176,6 +187,7 @@ async function bindDevice(
       .where(and(eq(schema.devices.licenseId, ctx.lic.id), eq(schema.devices.status, "ACTIVE")));
     if (Number(row?.c ?? 0) >= limit) return { ok: false, status: 409, error: "device_limit_reached" };
   }
+  const syncToken = mintSyncToken();
   await db.insert(schema.devices).values({
     id: newId("dev"),
     licenseId: ctx.lic.id,
@@ -184,9 +196,9 @@ async function bindDevice(
     name: input.deviceName ?? null,
     status: "ACTIVE",
     lastSeenAt: new Date(),
-    syncTokenHash,
+    syncTokenHash: sha256(syncToken),
   });
-  return { ok: true, syncToken };
+  return { ok: true, syncToken, rotated: true };
 }
 
 // --- Public API used by the /v1 routes ---
@@ -212,13 +224,16 @@ export async function activate(
   const u = usability(ctx.lic);
   if (!u.ok) return fail(403, u.reason!);
 
-  const bound = await bindDevice(ctx, input);
+  const bound = await bindDevice(ctx, input, { rotateSyncToken: true });
   if (!bound.ok) return fail(bound.status, bound.error);
 
   const entitlement = await buildEntitlement(ctx);
   const licenseToken = signEntitlement(entitlement, input.deviceId);
   await writeEvent(ctx.lic.id, "ACTIVATE", productCode, { deviceId: input.deviceId });
-  return { ok: true, data: { licenseToken, syncToken: bound.syncToken, entitlement } };
+  return {
+    ok: true,
+    data: { licenseToken, entitlement, syncToken: bound.syncToken },
+  };
 }
 
 export async function validate(productId: string, token: string): Promise<ValidateResult> {
@@ -263,16 +278,27 @@ export async function refresh(
     .where(and(eq(schema.devices.licenseId, ctx.lic.id), eq(schema.devices.deviceId, deviceId)))
     .limit(1);
   if (!dev || dev.status !== "ACTIVE") return fail(403, "device_revoked");
-  const syncToken = mintSyncToken();
-  await db
-    .update(schema.devices)
-    .set({ lastSeenAt: new Date(), syncTokenHash: sha256(syncToken) })
-    .where(eq(schema.devices.id, dev.id));
+
+  // Do not rotate an existing sync bearer on refresh (node keeps its copy).
+  // Devices activated before 2026-08 may lack a hash — mint once and return it.
+  let syncToken: string | undefined;
+  if (!dev.syncTokenHash) {
+    syncToken = mintSyncToken();
+    await db
+      .update(schema.devices)
+      .set({ lastSeenAt: new Date(), syncTokenHash: sha256(syncToken) })
+      .where(eq(schema.devices.id, dev.id));
+  } else {
+    await db.update(schema.devices).set({ lastSeenAt: new Date() }).where(eq(schema.devices.id, dev.id));
+  }
 
   const entitlement = await buildEntitlement(ctx);
   const licenseToken = signEntitlement(entitlement, deviceId);
   await writeEvent(ctx.lic.id, "REFRESH", productCode, { deviceId });
-  return { ok: true, data: { licenseToken, syncToken, entitlement } };
+  return {
+    ok: true,
+    data: { licenseToken, entitlement, ...(syncToken ? { syncToken } : {}) },
+  };
 }
 
 export async function entitlement(

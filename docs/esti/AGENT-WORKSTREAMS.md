@@ -147,10 +147,12 @@ roadmap status accuracy.
 
 ### Done when
 
-- [ ] Activate → syncToken path reviewed / fixed; documented in HUB-API if behaviour changed  
-- [ ] Contracts publish path for node clients clear (script, version, or OpenAPI stub)  
-- [ ] ROADMAP / DESKTOP-REPOS gate checkbox updated if contracts item lands  
-- [ ] PR opened for Vishwakarma to merge  
+- [x] Activate → syncToken path reviewed / fixed; documented in HUB-API if behaviour changed — **merged #45**  
+- [x] Contracts publish path for node clients clear (`@esti/contracts` `0.1.0` + README)  
+- [x] ROADMAP / DESKTOP-REPOS gate checkbox updated (`0227` on `main`)  
+- [x] PR opened for Vishwakarma to merge — **#45 merged**  
+
+**Deploy note for Bhoomi:** hub must apply migration `0227_hlp_org_sync_firm.sql` before morning bind.
 
 ---
 
@@ -188,11 +190,13 @@ roadmap status accuracy.
 
 ### Done when
 
-- [ ] Manifest / env wiring ready for signed assets (placeholders documented)  
-- [ ] M8 copy honesty pass complete  
-- [ ] LF6 Figma/token item advanced or explicitly scoped with next step  
-- [ ] Optional empty GitHub scaffolds created without app code  
-- [ ] PR opened for Vishwakarma to merge  
+- [x] Manifest / env wiring ready for signed assets (placeholders documented) — **merged #46**  
+- [x] M8 copy honesty pass complete  
+- [x] LF6 Figma/token item advanced or explicitly scoped with next step  
+- [x] Optional empty GitHub scaffolds created without app code (`docs/esti/repo-scaffolds/`)  
+- [x] PR opened for Vishwakarma to merge — **#46 merged**  
+
+**Still 🔲:** live download URL flip (wait on Bhoomi signed Setup.exe + sha256).
 
 ---
 

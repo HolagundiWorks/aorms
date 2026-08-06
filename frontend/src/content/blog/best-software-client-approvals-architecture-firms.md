@@ -68,7 +68,8 @@ In the cloud workspace:
 - **Decisions / revision intelligence** captures scope impact when approval implies change.
 - **Studio Intelligence Approval zone** surfaces blockers across projects.
 
-No separate desktop install — sign in at [aorms.in](https://aorms.in). Setup guide:
+Desktop preferred with web parity — sign in at [aorms.in](https://aorms.in) or use
+the local-first node when packaging ships ([downloads](/downloads)). Setup guide:
 [wiki getting started](https://aorms.in/wiki/getting-started).
 
 ## Comparison mindset (not a feature checklist)

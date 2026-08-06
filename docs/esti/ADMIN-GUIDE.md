@@ -53,7 +53,8 @@ All on your one domain (`https://<domain>`), TLS-terminated by nginx.
 | `/platform/auth/*` | Platform auth: `resolve-company`, `login`, `switch-company`, `create/join/leave-company`, `request-plan`, `my-request`, `my-credentials` | — |
 | `/platform/v1` | **Product Licence API** — a firm node activates/refreshes its licence here | product API key |
 | `/platform/auth/google/callback` | Google OAuth redirect (if Google sign-in enabled) | — |
-| `/download` | **Retired** — redirects to `/wiki/getting-started` | public |
+| `/downloads` | **Desktop installers** — local-first portal (`web_fallback` until signed URL wired) | public |
+| `/download` | Legacy Manager path — redirects to `/downloads` | public |
 | `/health`, `/readyz` | Liveness / readiness (proxied to backend) | public |
 | `/trpc`, `/upload`, `/storage`, `/calendar` | Firm app API + file routes (proxied) | firm session |
 
@@ -207,13 +208,19 @@ waves (signed Tauri installer) are tracked in [ROADMAP.md](ROADMAP.md) § Local-
 
 **Permanently retired (do not revive):**
 
-- Lite / Pro / Community **Manager** installers and the `/download` portal
-  (removed 2026-07; `/download` redirects to the landing page)
+- Lite / Pro / Community **Manager** installers (SKU matrix; removed 2026-07)
 - Standalone **AORMS Estimate** desktop app — estimating stays in-product
   (Library → Rate Books + project Estimation tab)
 
+**Local-first downloads (new):** public `/downloads` +
+`frontend/public/update-manifests/{astudio,aconsulting}.json` — wire
+`VITE_ASTUDIO_INSTALLER_URL` / `VITE_ACONSULTING_INSTALLER_URL` (or manifests +
+`VITE_PORTAL_USE_RELEASE_INSTALLERS=true`) only after a **code-signed** Setup.exe
+exists (Bhoomi). See [WEB-PORTAL.md](WEB-PORTAL.md). Legacy `/download` redirects to
+`/downloads`.
+
 Operators on pre-2026-07 VPS layouts: `deploy/cleanup-vps.sh` removes leftover
-Manager installer files and `VITE_*_DOWNLOAD_URL` entries from a live host.
+Manager installer files and retired `VITE_*_DOWNLOAD_URL` entries from a live host.
 
 ---
 
@@ -367,7 +374,7 @@ Then open `https://<domain>`, log in as the owner. Profile 2 → `/demo`. Licens
 | `esti-db is unhealthy` | stale volume → `docker compose -f compose.prod.yaml down -v`, re-run installer |
 | Demo login 401 | `SEED_DEMO_PASSWORD` ≠ `demo1234` → reset, re-run `seedDemo.js` |
 | Landing only shows when logged in | `VITE_PUBLIC_SITE=false` → set `true`, `update.sh` |
-| `/download` | Retired — redirects to `/wiki/getting-started`; no installer fetch needed |
+| `/downloads` | Local-first portal — web_fallback until signed URL env/manifest filled ([WEB-PORTAL.md](WEB-PORTAL.md)) |
 | Node won't license | `ESTI_PRODUCT_API_KEY` empty/invalid, or `aorms.in` unreachable → set key, check egress |
 
 ---

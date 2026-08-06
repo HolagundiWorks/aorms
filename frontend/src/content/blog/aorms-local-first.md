@@ -18,8 +18,12 @@ AORMS is still **one Standard licence** and **one SPA** — now on two hosts:
 
 ## What stayed retired
 
-- Lite / Pro / Community **Manager** installers and `/download`
+- Lite / Pro / Community **Manager** installers (SKU matrix)
 - A separate **Estimate** desktop app (estimating stays in-product: Rate Books + project Estimation)
+
+Signed local-first installers (when packaging ships) are listed at
+[`/downloads`](/downloads) — until then the page keeps honest web-workspace CTAs.
+Legacy `/download` redirects there.
 
 ## Why local-first
 
@@ -27,5 +31,6 @@ Indian practices need low latency and reliable work when the WAN is poor.
 Keeping drafts, measurements, and AI on the machine — while sharing tasks,
 progress, and issued PDFs through the hub — matches how firms already operate.
 
-Sign in at [studio.aorms.in](https://studio.aorms.in) or the desktop node when
-packaging ships ([ROADMAP](https://github.com/HolagundiWorks/esti) § Local-first).
+Sign in at [studio.aorms.in](https://studio.aorms.in), check
+[downloads](/downloads) for the signed desktop node when it ships, or follow
+Local-first notes in the repo roadmap.

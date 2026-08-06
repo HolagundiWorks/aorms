@@ -1,145 +1,113 @@
-# AORMS hub API — desktop node contract
+# Hub API (sync + licence bind) — **2026-08**
 
-**API version:** `2026-08`  
-**Status:** Canonical · **Updated:** 2026-08-06  
-**Audience:** Desktop / firm **node** clients (`ESTI_ROLE=node`) talking to the cloud **hub**.
+> **Canonical wire contract** for desktop `ESTI_ROLE=node` ↔ cloud hub.  
+> Implementation: `backend/src/modules/sync/*`, `backend/src/licensing-platform/routes/v1.ts`,  
+> `backend/src/modules/license/consumer.ts`. Product law: [LOCAL-FIRST.md](LOCAL-FIRST.md).
 
-Sync plane schemas live in [`packages/contracts/src/sync.ts`](../../packages/contracts/src/sync.ts).  
-Licence grant DTOs: [`packages/contracts/src/license.ts`](../../packages/contracts/src/license.ts) · panel DTOs: [`licensing-platform.ts`](../../packages/contracts/src/licensing-platform.ts).
+**Version tag:** `2026-08` (matches `@esti/contracts` `0.1.0`).
 
-Related: [LOCAL-FIRST.md](LOCAL-FIRST.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [HCW-LICENSE-MANAGER.md](HCW-LICENSE-MANAGER.md) · [ROADMAP.md](ROADMAP.md).
+Breaking changes to paths, auth, or required response fields **must** bump this
+version tag, `@esti/contracts`, and the agent checklist in
+[AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) § Gagan in the same PR.
 
----
+## Auth planes
 
-## Roles
-
-| Role | `ESTI_ROLE` | What it mounts |
+| Plane | Header / query | Issues / stores |
 | --- | --- | --- |
-| **Hub** | `hub` | Licence authority REST, sync ingest/meta/WS, portals, SPA |
-| **Node** | `node` (default) | Local DB + SPA; activates licence; drains outbox to hub |
+| **Product License API** | `Authorization: Bearer <ESTI_PRODUCT_API_KEY>` | `/platform/v1/*` on the hub |
+| **Sync bearer** | `Authorization: Bearer <syncToken>` (WS may use `?token=`) | Issued at activate; hub stores `sha256` only |
 
-Hub-only REST is a no-op when `ESTI_ROLE !== "hub"` (`registerLicenseRoutes` / `registerSyncRoutes`).
-
----
-
-## Auth / session (workspace)
-
-High level — firm staff SPA and desktop WebView use the **same** workspace session:
-
-| Piece | Detail |
+| Env (node) | Role |
 | --- | --- |
-| Cookie | `esti_session` (opaque; SHA-256 hash stored server-side) |
-| TTL | 8 hours (`backend/src/auth/session.ts`) |
-| Login | tRPC `auth.login` (and related) sets the cookie; credentials include cookies on `/trpc` |
-| Gate | `protectedProcedure` / `ownerProcedure` require a live cookie user |
-| Licence recovery | Even when licence-blocked, `license.activate` / `license.refresh` / `auth.logout` stay allowed |
+| `ESTI_LICENSE_API_URL` | Panel base, e.g. `https://aorms.in/platform` |
+| `ESTI_PRODUCT_API_KEY` | Product API key for `/v1/*` |
+| `ESTI_HUB_URL` | Sync origin, e.g. `https://aorms.in` (no `/platform` suffix) |
+| `INSTALL_ID` | Stable device id (persisted as `org_settings.install_id`) |
 
-Machine routes (`/api/license/*`, `/api/sync/*`, `/platform/v1/*`) are **not** cookie-auth; they use bearer tokens / product API keys (see below). Distinct from platform admin cookie `hlp_session` under `/platform`.
+`sync.hubConfigured` exposes `hubUrl`, `licenseApiUrl`, `hasSyncToken`, `syncReady`.
 
----
+## Licence activate / refresh → sync bearer
 
-## Licence
+### `POST /platform/v1/activate`
 
-Two server paths; node picks one via env (see [Env](#env)).
+Body (`ActivateInput`): `{ licenseKey, deviceId, fingerprint?, deviceName? }`
 
-### A — Hub role REST (`ESTI_ROLE=hub`)
+Response (`ActivateResult`):
 
-Source: [`backend/src/modules/licensing/routes.ts`](../../backend/src/modules/licensing/routes.ts).
+```json
+{
+  "licenseToken": "<signed entitlement>",
+  "entitlement": { "...": "..." },
+  "syncToken": "<opaque bearer — ALWAYS present on activate>"
+}
+```
 
-| Method | Path | Body | Success |
-| --- | --- | --- | --- |
-| `POST` | `/api/license/activate` | `{ key, installId, fingerprint? }` | `LicenseGrant` — `licenseToken`, **`syncToken`**, `installId` |
-| `POST` | `/api/license/refresh` | `{ installId, licenseToken }` | `{ licenseToken, installId }` (sync token **not** rotated) |
+Hub side:
 
-Auth: none (rate-limited). Errors: `400` / `429`.
+1. Bind/refresh `hlp_device` for `(licenseId, deviceId)`.
+2. Mint `syncToken`, store `sha256(syncToken)` on `hlp_device.sync_token_hash`.
+3. Firm sync scope = `hlp_organization.sync_firm_id` (UUID).
 
-Node consumer (when `ESTI_LICENSE_API_URL` is empty):  
-[`backend/src/modules/license/consumer.ts`](../../backend/src/modules/license/consumer.ts) → `POST {ESTI_HUB_URL}/api/license/activate|refresh`, persists `licenseToken` **and** `syncToken` on `org_settings`.
+Node side (`license.activate` → `activateViaPanel`):
 
-### B — HCW License Manager (Product License API)
+- Persist `licenseToken` **and** `syncToken` on `esti_org_settings`.
+- Without `syncToken`, meta/artifact flush cannot authenticate.
 
-Mounted at `/platform` → [`backend/src/licensing-platform/routes/v1.ts`](../../backend/src/licensing-platform/routes/v1.ts).
+### `POST /platform/v1/refresh`
 
-| Method | Path | Auth | Body |
-| --- | --- | --- | --- |
-| `POST` | `/platform/v1/activate` | `Authorization: Bearer <ESTI_PRODUCT_API_KEY>` | `{ licenseKey, deviceId, fingerprint?, deviceName? }` |
-| `POST` | `/platform/v1/refresh` | same | `{ token, deviceId }` |
+Body (`RefreshInput`): `{ token, deviceId }`
 
-Response: `{ licenseToken, syncToken?, entitlement }` (`ActivateResult`). Activate and
-refresh mint a sync bearer, store `sha256(syncToken)` on `hlp_device`, and return
-`syncToken` to the node (LF4 — 2026-08-06).
+Response: `{ licenseToken, entitlement, syncToken? }`
 
-Node consumer when `ESTI_LICENSE_API_URL` is set: calls `{ESTI_LICENSE_API_URL}/v1/activate|refresh` and persists **`licenseToken`** and **`syncToken`** (when the panel returns one).
+- Does **not** rotate an existing sync bearer (node keeps its copy).
+- If the device has no `sync_token_hash` (pre-2026-08 activation), mints once and
+  returns `syncToken` so the node can catch up without re-entering the key.
 
-### C — Node tRPC (SPA / desktop UI)
+### Legacy hub path (still supported)
 
-Source: [`backend/src/modules/license/router.ts`](../../backend/src/modules/license/router.ts).
+`POST {ESTI_HUB_URL}/api/license/activate` → `LicenseGrant` `{ licenseToken, syncToken, installId }`  
+Hash on `esti_license_install.sync_token_hash` → firm id `esti_license.firm_id`.
 
-| Procedure | Access | Role |
+## `firmFromSyncToken`
+
+Hub sync routes resolve the bearer to a UUID firm id:
+
+1. **Legacy:** `esti_license_install.sync_token_hash` → `esti_license.firm_id`
+2. **Panel:** `hlp_device.sync_token_hash` + `status=ACTIVE` → `hlp_organization.sync_firm_id`
+
+Used by `/api/sync/ingest`, `/api/sync/meta`, `/api/sync/meta/catch-up`, WS.
+
+## Sync REST / WS (hub only, `ESTI_ROLE=hub`)
+
+| Method | Path | Body / query |
 | --- | --- | --- |
-| `license.status` | authenticated | Effective `LicenseView` (no secrets) |
-| `license.activate` | owner | `{ key }` → hub or panel per env |
-| `license.refresh` | owner | Force refresh |
+| `POST` | `/api/sync/ingest` | `SyncIngestBody` |
+| `POST` | `/api/sync/meta` | `MetaEventBody` |
+| `GET` | `/api/sync/meta/catch-up` | `stream`, `afterSeq`, `limit` |
+| `GET` | `/api/sync/meta/ws` | `?token=` + subscribe frames |
 
-### `syncToken` (LF4)
+## Node tRPC `sync.*` (`ESTI_ROLE=node`)
 
-- Hub activate grant includes **`syncToken`** — the install bearer for all sync REST/WS (`Authorization: Bearer …`, or WS query `?token=`).
-- Outbox drain and meta pull read `org_settings.syncToken` ([`outbox.ts`](../../backend/src/lib/sync/outbox.ts) · [`metadata.ts`](../../backend/src/lib/sync/metadata.ts)).
-- **Panel path:** `/platform/v1/activate|refresh` returns `syncToken`; node `license.activate` persists it. Hub `firmFromSyncToken` resolves legacy `esti_license_install` **and** `hlp_device.syncTokenHash` (firm namespace = platform `orgId`).
-- First-run SPA: `DesktopLicenceBind` when `VITE_RUNTIME_HOST=desktop`.
+| Procedure | Behaviour |
+| --- | --- |
+| `status` | Artifact + meta outbox counts |
+| `capabilities` | Desktop free vs licensed matrix; hub role returns web-parity+ |
+| `flush` | Drains artifact + meta outboxes; skips when sync capabilities off |
+| `enqueueMeta` | Queues one meta event (no-op if `metaSync` false) |
+| `pullMeta` | Catch-up → **LF3 domain apply** (task / estimateTotals / phaseProgress) → advance cursor; empty on hub down |
+| `hubConfigured` | `{ hubUrl, licenseApiUrl, wsUrl, hasSyncToken, role, syncReady }` |
 
----
+## Morning bind checklist (Bhoomi)
 
-## Sync
+1. Node: `ESTI_HUB_URL` + `ESTI_LICENSE_API_URL` + `ESTI_PRODUCT_API_KEY` + `INSTALL_ID`
+2. Owner runs `license.activate` with a live key
+3. `sync.hubConfigured.syncReady === true`
+4. `sync.flush` / `sync.pullMeta` succeed against hub
 
-Hub REST/WS — [`backend/src/modules/sync/routes.ts`](../../backend/src/modules/sync/routes.ts).  
-Auth: `Authorization: Bearer <syncToken>` (WS also accepts `?token=`).
+**Owner:** Gagan lands the hub wire; Bhoomi runs the bind test after Vishwakarma merges.
 
-| Method | Path | Body / query | Response |
-| --- | --- | --- | --- |
-| `POST` | `/api/sync/ingest` | `SyncIngestBody` | `{ remoteId }` |
-| `POST` | `/api/sync/meta` | `MetaEventBody` | `{ event }` (`MetaEventRecord`) |
-| `GET` | `/api/sync/meta/catch-up` | `stream`, `afterSeq`, `limit` | `MetaCatchUpResponse` |
-| `GET` | `/api/sync/meta/ws` | WebSocket; client frames `subscribe` \| `ping` | `event` \| `catchup` \| `pong` \| `error` |
+## Related
 
-Contracts: `SyncIngestBody`, `MetaEventBody`, `MetaCatchUpQuery`, `MetaWsClientMessage` / `MetaWsServerMessage` in `packages/contracts`.
-
-### Node tRPC
-
-Source: [`backend/src/modules/sync/router.ts`](../../backend/src/modules/sync/router.ts).
-
-| Procedure | Access | Role |
-| --- | --- | --- |
-| `sync.status` | auth | Outbox counts (`SyncStatusView`) |
-| `sync.flush` | owner | Drain artifact + meta outbox to hub |
-| `sync.enqueueMeta` | auth | Queue `MetaEventBody` (no-op if `metaSync` off) |
-| `sync.pullMeta` | auth | Hub catch-up + LF3 domain apply + cursor advance |
-| `sync.capabilities` | auth | `RuntimeCapabilities` (desktop free vs licensed) |
-| `sync.hubConfigured` | auth | `{ hubUrl, wsUrl, hasSyncToken, role }` |
-
-Empty `ESTI_HUB_URL` ⇒ offline-only node (no push/pull).
-
----
-
-## Env
-
-| Variable | Who | Purpose |
-| --- | --- | --- |
-| `ESTI_ROLE` | both | `node` \| `hub` |
-| `ESTI_HUB_URL` | node | Hub base (e.g. `https://aorms.in`) — licence (legacy path) + sync |
-| `ESTI_LICENSE_API_URL` | node | Panel base (e.g. `https://aorms.in/platform`); when set, activate/refresh use `/v1` |
-| `INSTALL_ID` | node / desktop | Stable install id (else minted into `org_settings`) |
-| `ESTI_DESKTOP` | node | Treat as packaged desktop for capability resolution |
-| `ESTI_PRODUCT_API_KEY` | node | Bearer for `/platform/v1/*` (required with panel URL) |
-
-Defined in [`backend/src/env.ts`](../../backend/src/env.ts). Desktop example: `desktop/env.desktop.example`.
-
----
-
-## Client checklist (desktop node)
-
-1. Set `ESTI_ROLE=node`, `ESTI_DESKTOP=true`, `STORAGE_DRIVER=fs`, mint/`INSTALL_ID`.
-2. Point `ESTI_HUB_URL` at the hub; optionally `ESTI_LICENSE_API_URL` + product API key for License Manager.
-3. Sign in (cookie session) → owner `license.activate` → confirm `sync.hubConfigured.hasSyncToken`.
-4. `sync.flush` / drain tick pushes meta + artifacts; `sync.pullMeta` applies hub events.
-5. Do not invent extra REST paths — extend `@esti/contracts` and bump this doc’s **API version** date when the wire format changes.
+- [LOCAL-FIRST.md](LOCAL-FIRST.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [HCW-LICENSE-MANAGER.md](HCW-LICENSE-MANAGER.md)  
+- Contracts: `packages/contracts` · consumer notes: `packages/contracts/README.md`  
+- Crew: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)

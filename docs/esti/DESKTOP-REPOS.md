@@ -1,79 +1,69 @@
-# Desktop product repos — extraction law
+# Desktop sibling repos + portal installer wiring
 
-**Status:** Canonical · **Updated:** 2026-08-06 · **Owner:** HCW  
-**Do not extract Studio/Consultancy app code until the gate below is green.**
+**Status:** Canonical gate notes · **Updated:** 2026-08-06  
+**Product law:** [LOCAL-FIRST.md](LOCAL-FIRST.md) · **Portal:** [WEB-PORTAL.md](WEB-PORTAL.md)  
+**Agent split:** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)
 
-## Target end-state
+Packaging lives in-monorepo (`desktop/`) until signed installers ship. Optional
+empty GitHub shells for **AStudio** / **AConsulting** are README-only scaffolds —
+**no SPA extraction** in this wave.
 
-| Repo | Owns |
+## Decision (locked)
+
+| Choice | Detail |
 | --- | --- |
-| **[esti](https://github.com/HolagundiWorks/esti)** | Web Portal · hub API · License Manager · sync · `@esti/contracts` · shared SPA SoT |
-| **AStudio** (`HolagundiWorks/AStudio`) | Studio desktop shell + Studio-native extras (calls hub) |
-| **AConsulting** (`HolagundiWorks/AConsulting`) | Consultancy desktop shell (calls hub) |
-| **[AQC](https://github.com/HolagundiWorks/AQC)** | Construction QA desktop (already separate) |
-| **[AADT](https://github.com/HolagundiWorks/AADT)** | AI drafting (already separate) |
-| **[shilpidb](https://github.com/HolagundiWorks/shilpidb)** | Geometry-native vector DB |
+| **Single contracts package** | `@esti/contracts` in this monorepo — **do not** invent a second contracts repo |
+| **Desktop shell in-tree** | `desktop/` (Tauri scaffold + env + start scripts) |
+| **Same SPA** | Desktop loads `frontend/` against loopback backend |
 
-Until extraction, Studio and Consultancy **desktop flavors** ship from
-[`desktop/`](../../desktop/) inside esti (LF4), with workspace profile
-`STUDIO` | `CONSULTANCY`.
+## Gate checklist
 
-## Extraction gate (all required)
+| # | Item | Owner | Status |
+| --- | --- | --- | --- |
+| D1 | `@esti/contracts` versioned + consumer README (`0.1.0` / hub **2026-08**) | Gagan | ✅ |
+| D2 | Hub sync bearer from panel activate/refresh (`syncToken` + `hlp_device`) | Gagan | ✅ |
+| D3 | `firmFromSyncToken` legacy + `hlp_device` → `sync_firm_id` | Gagan | ✅ |
+| D4 | Node `sync.*` documented for `ESTI_ROLE=node` ([HUB-API.md](HUB-API.md)) | Gagan | ✅ |
+| D5 | Signed Tauri installer + first-run licence bind (LF4) | Bhoomi | 🚧 unsigned Setup.exe + `DesktopLicenceBind` · sign morning |
+| D6 | Portal / marketing download manifests | Aakash | ✅ prep · live URL 🔲 |
+| D7 | Code signing + update channel | Bhoomi | 🔲 |
 
-- [x] **WP1** — `/downloads` hub live with accurate product status  
-- [ ] **LF4** — signed AStudio-branded Windows installer installs, signs in, binds licence, syncs meta on a test firm *(SPA bind + syncToken path ready — [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md))*  
-- [x] Hub APIs versioned and documented: auth, licence activate, `sync.*` — [HUB-API.md](HUB-API.md) (`2026-08`)  
-- [ ] `@esti/contracts` (or OpenAPI) published for node clients  
-- [ ] Portal `/download/astudio` points at a real Setup.exe (not web app fallback)
+## Portal → installer wiring
 
-## What always stays in esti
+```text
+Bhoomi (Local)                    Aakash (Portal)
+──────────────                    ───────────────
+signed Setup.exe ──url+sha256──►  VITE_*_INSTALLER_URL
+                                  or update-manifests/*.json
+                                  + VITE_PORTAL_USE_RELEASE_INSTALLERS=true
+                                           │
+                                           ▼
+                                  aorms.in/downloads  (web_fallback until then)
+```
 
-- Backend, Drizzle migrations, Redis jobs, Python worker (hub role)  
-- HCW License Manager (`backend/src/licensing-platform/`, `frontend/src/platform-admin/`)  
-- Portal SPA routes (landing, downloads, account, docs, blog)  
-- Sync hub (`esti_meta_*`, `esti_sync_*`)  
-- Shared contracts package
+| Gate | Owner | Status |
+| --- | --- | --- |
+| Signed binary URL published | Bhoomi | 🔲 |
+| Manifest / env filled on hub deploy | Aakash | 🔲 (prep ✅ #46) |
+| Empty `AStudio` / `AConsulting` GitHub shells | Optional · human | 🔲 — READMEs in [repo-scaffolds/](repo-scaffolds/) |
 
-## Extraction procedure (when gate is green)
+## Consuming contracts from a node client
 
-1. Create `HolagundiWorks/AStudio` and `HolagundiWorks/AConsulting` with README pointing at esti hub.  
-2. CI builds Tauri (or thin wrapper) consuming esti SPA artifact **or** submodule of `frontend` + local node compose.  
-3. Releases publish `AStudio-Setup-*.exe` / `AConsulting-Setup-*.exe`.  
-4. Update portal download URLs (like AQC today).  
-5. esti keeps portal + hub; do **not** fork migrations or License Manager.
+Prefer the workspace dependency (desktop stays in this repo):
 
-## Anti-patterns
+```json
+{ "dependencies": { "@esti/contracts": "workspace:*" } }
+```
 
-- Splitting backend or contracts out of esti early  
-- Re-splitting License Manager  
-- Greenfield Electron/WinUI Studio clients before LF4 proves licence + sync bind  
-- Empty “marketing-only” forks that drift from hub APIs
+See [`packages/contracts/README.md`](../../packages/contracts/README.md).
 
-## Scaffold placeholders (Phase 3 — no app code)
+## Sibling repo policy
 
-Org placeholders live under [`docs/esti/repo-scaffolds/`](repo-scaffolds/):
-
-| Path | GitHub target |
-| --- | --- |
-| [`AStudio/README.md`](repo-scaffolds/AStudio/README.md) | `HolagundiWorks/AStudio` |
-| [`AConsulting/README.md`](repo-scaffolds/AConsulting/README.md) | `HolagundiWorks/AConsulting` |
-
-Create empty public repos with those READMEs when convenient (`gh repo create … --source=…`). **Do not move app code** until the gate above is green. This workspace had no `gh` CLI at scaffold time — operators create the remotes from the folders above.
-
-## Portal → installer wiring (pre-extraction)
-
-After LF4 publishes Setup.exe to esti Releases:
-
-1. Set `VITE_ASTUDIO_INSTALLER_URL` / `VITE_ACONSULTING_INSTALLER_URL` to the asset URLs, **or**  
-2. Set `VITE_PORTAL_USE_RELEASE_INSTALLERS=true` to use product `installerUrl` (esti `/releases/latest`).  
-3. Fill `url` + `sha256` in `frontend/public/update-manifests/{astudio,aconsulting}.json`.
-
-Until then `/download/astudio` and `/download/aconsulting` remain **web_fallback** (browser workspace).
+1. Scaffolds under `docs/esti/repo-scaffolds/{AStudio,AConsulting}/README.md` only.  
+2. Do **not** move app code until DESKTOP-REPOS gate + contracts consumer path are green.  
+3. Creating empty GitHub repos is optional and requires write access outside read-only agent `gh`.
 
 ## Related
 
-- [HUB-API.md](HUB-API.md) — versioned hub contract for desktop nodes  
-- [WEB-PORTAL.md](WEB-PORTAL.md)  
-- [LOCAL-FIRST.md](LOCAL-FIRST.md)  
-- [AORMS-ECOSYSTEM-ARCHITECTURE.md](AORMS-ECOSYSTEM-ARCHITECTURE.md)  
-- [ROADMAP.md](ROADMAP.md)
+- [WEB-PORTAL.md](WEB-PORTAL.md) · [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) · [HUB-API.md](HUB-API.md)  
+- [LOCAL-FIRST.md](LOCAL-FIRST.md) · [ROADMAP.md](ROADMAP.md) § Local-first · [desktop/README.md](../../desktop/README.md)
