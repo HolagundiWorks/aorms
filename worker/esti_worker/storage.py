@@ -12,7 +12,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import boto3
 from botocore.client import Config
@@ -42,9 +42,9 @@ def s3():
 @dataclass
 class Backend:
     kind: str  # "default" | "fs" | "s3"
-    root: Optional[str] = None
-    client: Optional[Any] = None
-    bucket: Optional[str] = None
+    root: str | None = None
+    client: Any | None = None
+    bucket: str | None = None
 
 
 def backend_from_settings(cfg: dict[str, Any]) -> Backend:
@@ -65,7 +65,7 @@ def backend_from_settings(cfg: dict[str, Any]) -> Backend:
     return Backend(kind="default")
 
 
-_cached: Optional[Backend] = None
+_cached: Backend | None = None
 _cached_at: float = 0.0
 _TTL = 10.0  # seconds — pick up config changes within 10s, reuse within a job
 

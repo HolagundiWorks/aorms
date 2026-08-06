@@ -61,8 +61,7 @@ def _to_paise(value: Any) -> int | None:
         raw.startswith("-")
         or (raw.startswith("(") and raw.endswith(")"))
         or raw.endswith("-")
-        or low.endswith(" dr")
-        or low.endswith("dr")
+        or low.endswith((" dr", "dr"))
     )
     s = re.sub(r"[^0-9.]", "", raw)  # magnitude only; sign handled above
     if s in ("", "."):
@@ -204,7 +203,7 @@ def reconcile_import(payload: dict[str, Any]) -> dict[str, Any]:
             "matched": matched,
         }
 
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         log.exception("reconcile failed for %s", reconcile_id)
         update_reconcile(reconcile_id, status="FAILED", error_text=str(exc)[:500])
         return {"status": "error", "reconcileId": reconcile_id, "error": str(exc)}

@@ -57,7 +57,7 @@ def _render_svg(doc, msp) -> str | None:
         Frontend(RenderContext(doc), backend, config=cfg).draw_layout(msp, finalize=True)
         page = layout.Page(0, 0, layout.Units.mm)
         return backend.get_string(page)
-    except Exception:  # noqa: BLE001
+    except Exception:
         log.exception("svg render failed; continuing with takeoff only")
         return None
 
@@ -127,7 +127,7 @@ def dxf_to_svg(payload: dict[str, Any]) -> dict[str, Any]:
         )
         return {"status": "ok", "drawingId": drawing_id, "entities": total, "layers": len(layers)}
 
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         log.exception("dxf takeoff failed for %s", drawing_id)
         update_drawing(drawing_id, status="FAILED", error_text=str(exc)[:500])
         return {"status": "error", "drawingId": drawing_id, "error": str(exc)}
