@@ -166,6 +166,10 @@ roadmap status accuracy.
 - [x] Contracts publish path for node clients clear (`@esti/contracts` `0.1.0` + README)  
 - [x] ROADMAP / DESKTOP-REPOS gate checkbox updated (`0227` on `main`)  
 - [x] PR opened for Vishwakarma to merge — **#45 merged**  
+- [x] Morning re-verify: activate/refresh/`firmFromSyncToken`/`license.activate` match HUB-API `2026-08`  
+- [x] `sync.*` hardened for node (flush/pullMeta skip reasons · caps require `syncToken`)  
+- [x] LF3 `domainMeta` spot-check — no regression  
+- [x] Deploy note for `0227` restated in HUB-API + MORNING-TEST-LF4  
 
 **Deploy note for Bhoomi:** hub must apply migration `0227_hlp_org_sync_firm.sql` before morning bind.
 

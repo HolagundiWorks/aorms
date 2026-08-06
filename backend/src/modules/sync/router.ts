@@ -13,7 +13,13 @@ import { drainOutbox, outboxStatus } from "../../lib/sync/outbox.js";
 import { resolveRuntimeCapabilities } from "../../lib/sync/runtimeCapabilities.js";
 import { ownerProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
 
-export { resolveRuntimeCapabilities } from "../../lib/sync/runtimeCapabilities.js";
+export { resolveRuntimeCapabilities };
+
+type FlushSkip =
+  | "sync_disabled"
+  | "not_node"
+  | "hub_unconfigured"
+  | "missing_sync_token";
 
 /** Node-side sync controls — outbox status, flush, metadata enqueue/pull, capabilities. */
 export const syncRouter = router({
@@ -23,16 +29,22 @@ export const syncRouter = router({
 
   /**
    * Drain artifact + meta outboxes to the hub.
-   * No-op (zeros) when `ESTI_ROLE!=node`, hub URL empty, or syncToken missing.
+   * No-op when not a node, hub URL empty, syncToken missing, or caps disable sync.
    */
   flush: ownerProcedure.mutation(async ({ ctx }) => {
+    const empty = (skipped: FlushSkip) => ({
+      artifacts: { sent: 0, failed: 0 },
+      meta: { sent: 0, failed: 0 },
+      skipped,
+    });
+    if (env.ESTI_ROLE !== "node") return empty("not_node");
+    if (!env.ESTI_HUB_URL) return empty("hub_unconfigured");
+    const { syncToken } = await getOrgSettings(ctx.db);
+    if (!syncToken) return empty("missing_sync_token");
+
     const caps = await resolveRuntimeCapabilities(ctx.db);
     if (!caps.metaSync && !caps.artifactSync) {
-      return {
-        artifacts: { sent: 0, failed: 0 },
-        meta: { sent: 0, failed: 0 },
-        skipped: "sync_disabled" as const,
-      };
+      return empty("sync_disabled");
     }
     const artifacts = caps.artifactSync
       ? await drainOutbox(ctx.db)
@@ -69,9 +81,27 @@ export const syncRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const stream = input?.stream ?? META_STREAM_FIRM;
+      const empty = (skippedReason: string) => ({
+        events: [] as Array<never>,
+        latestSeq: 0,
+        stream,
+        applied: 0,
+        skipped: 0,
+        skippedReason,
+      });
+      if (env.ESTI_ROLE !== "node") {
+        return empty("not_node");
+      }
+      if (!env.ESTI_HUB_URL) {
+        return empty("hub_unconfigured");
+      }
+      const { syncToken } = await getOrgSettings(ctx.db);
+      if (!syncToken) {
+        return empty("missing_sync_token");
+      }
       const caps = await resolveRuntimeCapabilities(ctx.db);
       if (!caps.metaSync) {
-        return { events: [], latestSeq: 0, stream, applied: 0, skipped: 0 };
+        return empty("meta_sync_disabled");
       }
       let payload: Awaited<ReturnType<typeof pullMetaCatchUp>>;
       try {
@@ -81,7 +111,9 @@ export const syncRouter = router({
         console.warn("sync.pullMeta catch-up failed:", String(e));
         return { events: [], latestSeq: 0, stream, applied: 0, skipped: 0, error: "hub_unreachable" as const };
       }
-      if (!payload) return { events: [], latestSeq: 0, stream, applied: 0, skipped: 0 };
+      if (!payload) {
+        return { events: [], latestSeq: 0, stream, applied: 0, skipped: 0 };
+      }
       const apply = await applyDomainMetaEvents(ctx.db, payload.events);
       if (payload.events.length) {
         const last = payload.events[payload.events.length - 1]!;
@@ -102,8 +134,8 @@ export const syncRouter = router({
       wsUrl: hub ? `${hub.replace(/^http/, "ws")}/api/sync/meta/ws` : null,
       hasSyncToken: Boolean(syncToken),
       role: env.ESTI_ROLE,
-      /** Ready for morning bind: hub URL + sync bearer both present. */
-      syncReady: Boolean(hub && syncToken),
+      /** Ready for morning bind: hub URL + sync bearer both present (node role expected). */
+      syncReady: Boolean(hub && syncToken && env.ESTI_ROLE === "node"),
     };
   }),
 });
