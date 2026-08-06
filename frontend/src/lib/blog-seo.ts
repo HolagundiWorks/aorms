@@ -40,7 +40,7 @@ function setLinkRel(rel: string, href: string, extra?: { type?: string; title?: 
 export function applyBlogListSeo(): void {
   const title = `Blog — ${SITE_NAME}`;
   const description =
-    "Notes on the AORMS platform — AStudio (architecture), AConsulting (engineering), and AProc (PMC preview) — with EOMS knowledge bank and ESTI. Revisions, fees, GST, programme certification, and advisory practice operations.";
+    "Notes on the AORMS platform — desktop preferred with web parity, pure neumorphism, AStudio, AConsulting, and AProc — with EOMS knowledge bank and ESTI. Revisions, fees, GST, and advisory practice operations.";
   document.title = title;
   setMeta('meta[name="description"]', "content", description);
   setMeta('meta[property="og:title"]', "content", title);

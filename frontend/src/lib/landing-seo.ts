@@ -11,15 +11,15 @@ import {
 export const LANDING_SEO = {
   title: `AORMS | ${AORMS_PLATFORM.expansion}`,
   description:
-    "Operational and design frameworks for AEC consulting and PMC firms — architecture, engineering, and project management consultancies on one spine with EOMS intelligence.",
+    "Operational and design frameworks for AEC consulting and PMC firms — desktop preferred with web parity, pure neumorphic chrome, EOMS intelligence, and ESTI on one spine.",
   keywords:
-    "AORMS, EOMS, AEC consulting, AStudio, AConsulting, AProc, architecture consultancy software, engineering consultancy software, PMC software, operational framework, design framework, workflow consolidation",
+    "AORMS, EOMS, AEC consulting, AStudio, AConsulting, AProc, desktop local-first, WinUI, architecture consultancy software, engineering consultancy software, PMC software, neumorphism, operational framework, design framework",
   ogTitle: `AORMS — ${AORMS_PLATFORM.heroHeadline[0]} ${AORMS_PLATFORM.heroHeadline[1]}`,
   ogDescription:
-    "Accelerated Operational Resources Management System: three apps — AStudio (architecture), AConsulting (engineering), AProc (PMC). One spine.",
+    "Accelerated Operational Resources Management System: three apps — AStudio, AConsulting, AProc. Desktop node + web parity. One spine.",
   twitterTitle: "AORMS — frameworks for AEC consultancies",
   twitterDescription:
-    `Operational + design frameworks for architecture, engineering, and PMC consultancies. ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title} live; ${AORMS_PMC.title} in preview.`,
+    `Desktop preferred + web parity for architecture, engineering, and PMC consultancies. ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title} live; ${AORMS_PMC.title} in preview.`,
   headline: `${AORMS_PLATFORM.heroHeadline[0]} ${AORMS_PLATFORM.heroHeadline[1]}`,
   footerBlurb: `${AORMS_PLATFORM.name} (${AORMS_PLATFORM.expansion}).`,
   canonical: "https://aorms.in/",
@@ -77,6 +77,11 @@ export const LANDING_FAQ = [
     question: "Is this documentation the shipped product?",
     answer:
       `This page is the live platform home. Browser workspaces at ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")} and ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")} are live; ${AORMS_PMC.title} is in preview at ${AORMS_PMC.appUrl.replace(/^https:\/\//, "")}.`,
+  },
+  {
+    question: "Is there a desktop app?",
+    answer:
+      `Yes. AORMS is desktop preferred with web parity — a local-first WinUI node plus the same SPA in the browser. Signed installers list at aorms.in/downloads when packaging ships; until then use the web workspace. Legacy Manager Lite/Pro installers stay retired.`,
   },
 ] as const;
 
@@ -154,11 +159,11 @@ export function injectLandingJsonLd(): void {
           ESTI.expansion,
         ],
         applicationCategory: "BusinessApplication",
-        operatingSystem: "Web",
+        operatingSystem: "Windows, Web",
         url: "https://aorms.in/",
         description: LANDING_SEO.description,
         featureList:
-          "operational framework, design framework, collaboration, review and approval, audit and compliance, knowledge base, analytics dashboards, EOMS knowledge bank, ESTI internal AI agent",
+          "operational framework, design framework, local-first desktop node, web parity, pure neumorphism UI, collaboration, review and approval, audit and compliance, knowledge base, analytics dashboards, EOMS knowledge bank, ESTI internal AI agent",
         audience: {
           "@type": "Audience",
           audienceType:

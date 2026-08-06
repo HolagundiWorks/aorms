@@ -24,7 +24,8 @@ AStudio capabilities:
 - COA fee proposals and GST invoicing with reconciliation
 - Studio Intelligence dashboard and Ask ESTI (BYO API key supported)
 - **EOMS** — Emergent Object Management System (knowledge bank); **ESTI** — internal AI agent
-- **Web-only** browser workspace — one Standard licence, unlimited users, included storage; no desktop apps
+- **Desktop preferred + web parity** — WinUI local-first node and browser SPA; one Standard licence; AI unmetered (local on desktop, hub on web)
+- **Pure neumorphism** UI (`@hcw/ui-kit` 1.5.0) — opaque soft chrome, 8px radius; signed installers at /downloads when packaging ships
 
 AProc capabilities (owner-side PMC governance — not contractor labour ERP):
 - Master programme milestones (CSV + Primavera P6 XER import)
@@ -37,7 +38,11 @@ https://aorms.in
 
 ## Public Pages
 - [AORMS platform home](https://aorms.in/)
+- [Desktop downloads](https://aorms.in/downloads)
 - [AStudio — sign in](https://aorms.in/login)
 - [AConsulting — engineering app](https://consultancy.aorms.in/)
 - [AProc — PMC app](https://proc.aorms.in/)
 - [AORMS Blog](https://aorms.in/blog/)
+- [Pure neumorphism UI](https://aorms.in/blog/pure-neumorphism-ui)
+- [Desktop installers](https://aorms.in/blog/desktop-installers-winui)
+- [Local-first](https://aorms.in/blog/aorms-local-first)

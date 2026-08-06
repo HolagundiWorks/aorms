@@ -11209,3 +11209,24 @@ $lp2-rail-ink-faint: var(--lp2-ink-faint, rgba(20, 21, 23, 0.48));
 .esti-neu {
   border-radius: 8px !important;
 }
+
+/* Marketing neu frame — top ribbon + stage (left SoftRail retired) */
+.esti-lp-neu,
+.esti-mkt-topbar {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.esti-lp-neu-hero {
+  max-width: 40rem;
+}
+.esti-mkt-analogue-clock {
+  filter: drop-shadow(4px 4px 10px rgba(20, 21, 23, 0.14));
+}
+@media (max-width: 600px) {
+  .esti-mkt-analogue-clock {
+    transform: scale(0.85);
+    transform-origin: bottom right;
+    bottom: 72px !important;
+    right: 12px !important;
+  }
+}

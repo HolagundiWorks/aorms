@@ -29,13 +29,13 @@ import LayersOutlined from "@mui/icons-material/LayersOutlined";
 import RuleOutlined from "@mui/icons-material/RuleOutlined";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import {
-  SoftRail,
   KpiStrip,
   SectionDock,
   StatusDot,
   Surface,
   type SectionDockLink,
 } from "@hcw/ui-kit";
+import { MarketingNeuFrame } from "../components/landing/MarketingTopBar.js";
 import { AormsLogo } from "../components/AormsLogo.js";
 import {
   AORMS_PLATFORM,
@@ -150,6 +150,10 @@ const FAQ = [
   {
     q: "Who is AORMS for?",
     a: `${AORMS_PLATFORM.audience}.`,
+  },
+  {
+    q: "Is there a desktop app?",
+    a: `Yes — desktop preferred with web parity. The local-first WinUI node keeps drafts and AI on your machine; the same SPA runs in the browser. Signed installers appear on /downloads when packaging ships; until then use the web workspace. Legacy Manager Lite/Pro installers stay retired.`,
   },
   {
     q: "Is my data used to train external models?",
@@ -322,131 +326,104 @@ export function Landing() {
     return () => window.cancelAnimationFrame(raf);
   }, [hash]);
 
-  const rail = (
-    <Stack sx={{ height: "100%", minHeight: { md: "calc(100vh - 32px)" } }} spacing={3}>
-      <Box>
-        <RouterLink to="/" aria-label="AORMS home" style={{ display: "inline-block" }}>
-          <AormsLogo variant="rail" />
-        </RouterLink>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          component="p"
-          sx={{ mt: 1, letterSpacing: "0.04em" }}
-        >
-          {AORMS_PLATFORM.expansion}
-        </Typography>
-      </Box>
-
-      <Typography variant="body2" color="text.secondary">
-        {AORMS_PLATFORM.tagline}. One governed system for how your office runs and how
-        engagements are delivered.
-      </Typography>
-
-      <Button
-        component={RouterLink}
-        to="/login"
-        variant="contained"
-        endIcon={<ArrowForward />}
-        sx={{ alignSelf: "flex-start" }}
-      >
-        Sign in
-      </Button>
-
-      <Box sx={{ flex: 1 }} />
-
-      <Stack spacing={0.5}>
-        <Divider sx={{ mb: 1 }} />
-        <Typography variant="caption" color="text.secondary">
-          {HUMAN_CENTRIC_WORKS.attribution}
-        </Typography>
-        {visitCount != null ? (
-          <Typography variant="caption" color="text.disabled">
-            {visitCount.toLocaleString()} visits
-          </Typography>
-        ) : null}
-      </Stack>
-    </Stack>
-  );
-
   return (
-    <>
-      <SoftRail mainId="lp-main" rail={rail} railAriaLabel="AORMS">
-        <Container maxWidth="lg" disableGutters sx={{ pb: 12 }}>
-          {/* Hero — two-column: copy + workspace preview */}
-          <Box id="top" component="section" sx={{ pt: { xs: 4, md: 8 }, pb: { xs: 6, md: 9 } }}>
-            <Grid container spacing={{ xs: 5, md: 6 }} sx={{ alignItems: "center" }}>
-              <Grid size={{ xs: 12, md: 7 }}>
-                <Box sx={{ mb: 2 }}>
-                  <AormsLogo variant="hero" />
-                </Box>
-                <Typography variant="overline" color="primary" sx={{ letterSpacing: "0.14em" }}>
-                  The operating system for AEC consulting
-                </Typography>
-                <Typography
-                  variant="h1"
-                  sx={{
-                    mt: 2,
-                    fontWeight: 800,
-                    fontSize: { xs: "2.4rem", md: "3.4rem" },
-                    lineHeight: 1.05,
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  {AORMS_PLATFORM.heroHeadline[0]}
-                  <Box component="span" sx={{ display: "block", color: "text.secondary" }}>
-                    {AORMS_PLATFORM.heroHeadline[1]}
-                  </Box>
-                </Typography>
-                <Typography
-                  variant="h6"
-                  component="p"
-                  color="text.secondary"
-                  sx={{ mt: 3, maxWidth: 560, fontWeight: 400 }}
-                >
-                  Architecture and engineering practices advise clients across dozens of
-                  disconnected tools. AORMS consolidates the operational and design frameworks
-                  of the whole office into one governed workspace, with dual-tier AI.
-                </Typography>
+    <MarketingNeuFrame>
+        <Container maxWidth="lg" disableGutters sx={{ px: { xs: 2, md: 3 }, pb: 14 }}>
+          {/* Hero — brand-first, one composition */}
+          <Box
+            id="top"
+            component="section"
+            className="esti-lp-neu-hero"
+            sx={{
+              pt: { xs: 5, md: 8 },
+              pb: { xs: 6, md: 10 },
+              minHeight: { md: "min(72vh, 640px)" },
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
+            <Typography
+              variant="h1"
+              sx={{
+                fontWeight: 800,
+                fontSize: { xs: "2.75rem", md: "4.25rem" },
+                lineHeight: 0.95,
+                letterSpacing: "-0.03em",
+                color: "text.primary",
+                mb: 1,
+              }}
+            >
+              {AORMS_PLATFORM.name}
+            </Typography>
+            <Typography
+              variant="h2"
+              sx={{
+                fontWeight: 500,
+                fontSize: { xs: "1.35rem", md: "1.75rem" },
+                lineHeight: 1.25,
+                color: "text.secondary",
+                maxWidth: 560,
+                mb: 2,
+              }}
+            >
+              {AORMS_PLATFORM.heroHeadline[0]} {AORMS_PLATFORM.heroHeadline[1]}
+            </Typography>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ maxWidth: 480, mb: 3 }}
+            >
+              Pure neumorphic workspace for AEC consultancies — desktop-first with web
+              parity. Opaque soft chrome, Radiant Orange accent, local AI.
+            </Typography>
+            <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap", gap: 1.5 }}>
+              <Button
+                component={RouterLink}
+                to="/login"
+                variant="contained"
+                endIcon={<ArrowForward />}
+                sx={{ textTransform: "none", fontWeight: 700, borderRadius: "8px", minHeight: 44 }}
+              >
+                Sign in
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/downloads"
+                variant="outlined"
+                sx={{ textTransform: "none", fontWeight: 600, borderRadius: "8px", minHeight: 44 }}
+              >
+                Desktop installers
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/blog"
+                variant="text"
+                sx={{ textTransform: "none", fontWeight: 600, borderRadius: "8px", minHeight: 44 }}
+              >
+                Blog
+              </Button>
+            </Stack>
+          </Box>
 
-                <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mt: 4 }}>
-                  <Button
-                    component={RouterLink}
-                    to="/login"
-                    variant="contained"
-                    size="large"
-                    endIcon={<ArrowForward />}
-                  >
-                    Sign in to {AORMS_STUDIO.title}
-                  </Button>
-                  <Button component="a" href="#how" variant="outlined" size="large">
-                    See how it works
-                  </Button>
-                </Stack>
+          {/* Workspace preview — soft neu specimen below the fold */}
+          <Box sx={{ mb: { xs: 6, md: 9 } }}>
+            <WorkspacePreview />
+          </Box>
 
-                {/* Trust indicator */}
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  sx={{ mt: 3, alignItems: "center", flexWrap: "wrap", rowGap: 1 }}
-                >
-                  <StatusDot color="green" label="" size="sm" />
-                  <Typography variant="caption" color="text.secondary">
-                    Two apps live on one spine · runs on your server · AI runs local,
-                    unmetered
-                  </Typography>
-                </Stack>
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 5 }}>
-                <Box sx={{ height: { xs: 340, md: 400 } }}>
-                  <WorkspacePreview />
-                </Box>
-              </Grid>
-            </Grid>
-
-            {/* From fragmented tools → one system. */}
-            <Surface layer="soft" sx={{ mt: { xs: 6, md: 8 }, p: { xs: 2.5, md: 3 } }}>
+          {/* From fragmented tools → one system. */}
+          <Box component="section" sx={{ pb: { xs: 4, md: 6 } }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{ mb: 2, alignItems: "center", flexWrap: "wrap", rowGap: 1 }}
+            >
+              <StatusDot color="green" label="" size="sm" />
+              <Typography variant="caption" color="text.secondary">
+                Two apps live on one spine · desktop + web · AI unmetered
+              </Typography>
+            </Stack>
+            <Surface layer="soft" sx={{ p: { xs: 2.5, md: 3 } }}>
               <Typography variant="overline" color="text.secondary">
                 Replaces the sprawl
               </Typography>
@@ -893,9 +870,8 @@ export function Landing() {
             </Typography>
           </Box>
         </Container>
-      </SoftRail>
 
       <SectionDock links={SECTIONS} pathname={pathname} hash={hash} aria-label="Page sections" />
-    </>
+    </MarketingNeuFrame>
   );
 }

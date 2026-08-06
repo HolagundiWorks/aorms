@@ -10,7 +10,7 @@ const COMING_NEXT = [
   "COA stage-wise fee structures — a billing guide for Indian architects",
   "Transmittal anatomy — what every drawing issue record should contain",
   "ASPRF in the wild — reading a studio score without gaming it",
-  "Knowledge Bank portal — EOMS textbooks into ESTI answers",
+  "Signed installer release notes — when /downloads flips off web_fallback",
 ];
 
 export function Blog() {

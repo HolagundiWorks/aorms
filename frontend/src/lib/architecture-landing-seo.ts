@@ -107,7 +107,7 @@ export function injectArchitectureLandingJsonLd(): void {
         name: AORMS_STUDIO.title,
         alternateName: [AORMS_PLATFORM.expansion, ESTI.name, ESTI.expansion, ...AORMS_STUDIO.legacySlugs],
         applicationCategory: "BusinessApplication",
-        operatingSystem: "Web",
+        operatingSystem: "Windows, Web",
         url: AORMS_STUDIO.appUrl,
         description: ARCHITECTURE_LANDING_SEO.description,
         audience: {
