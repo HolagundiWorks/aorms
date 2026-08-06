@@ -236,13 +236,13 @@ export function ContractorPortal() {
                   pushToast({ kind: "error", title: "Weeks must be a positive number" });
                   return;
                 }
-                openId &&
-                  submit.mutate({
-                    invitationId: openId,
-                    amountPaise: paise,
-                    completionWeeks: w,
-                    notes: notes || undefined,
-                  });
+                if (!openId) return;
+                submit.mutate({
+                  invitationId: openId,
+                  amountPaise: paise,
+                  completionWeeks: w,
+                  notes: notes || undefined,
+                });
               }}
             >
               {submit.isPending ? "Submitting…" : detail.bid ? "Update bid" : "Submit bid"}
