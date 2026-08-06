@@ -26,6 +26,21 @@ Stripe/W4, or edit `frontend/src/routes/Projects.tsx` / `Clients.tsx`.
 | **Gagan** | This § Gagan · [HUB-API.md](HUB-API.md) · DESKTOP-REPOS D1–D4 |
 | **Aakash** | LF5–LF6 · portal / GTM surfaces |
 
+## Crew sync matrix
+
+| Surface | Owner | PR / branch | Notes |
+| --- | --- | --- | --- |
+| Hub `syncToken` mint · `firmFromSyncToken` · `0227` · LF3 `domainMeta` · `@esti/contracts` | **Gagan** | **#45** `cursor/hub-sync-contracts-9937` | Merge to `main` **first** |
+| Tauri / installer / signing · first-run bind UX (`DesktopLicenceBind`) | **Bhoomi** | `orch/lf4-sync-bind-installer` | Rebase after #45; **drop duplicate hub/sync/docs** |
+| Portal Downloads / GTM / LF5–LF6 | **Aakash** | portal lanes | Waits on signed Setup.exe from Bhoomi |
+
+**Merge order (Vishwakarma):** land **#45** (Gagan hub/sync/contracts) before the LF4
+desktop branch. LF4 will rebase onto `main` and drop overlapping hub files
+(`licenseApi/service.ts`, `license/consumer.ts`, `sync/*`, contracts
+`licensing-platform.ts`, HUB-API / LOCAL-FIRST / ROADMAP / AGENT-WORKSTREAMS /
+DESKTOP-REPOS). Gagan does **not** own `desktop/` packaging or
+`DesktopLicenceBind`.
+
 ---
 
 ## Gagan — Hub / sync / contracts
