@@ -10,6 +10,17 @@ from esti_worker import storage
 class EnsureBucketTests(unittest.TestCase):
     def setUp(self) -> None:
         storage._ensured_buckets.clear()
+        # resolve_backend() caches across calls — reset so each test resolves fresh.
+        storage._cached = None
+        storage._cached_at = 0.0
+        # ensure_bucket/put_bytes resolve the backend via fetch_storage_settings(),
+        # which opens a live psycopg connection. These are unit tests of the
+        # DEFAULT-mode S3 branch, so stub that read to keep them Postgres-free.
+        settings_patch = patch.object(
+            storage, "fetch_storage_settings", return_value={"mode": "DEFAULT"}
+        )
+        self.addCleanup(settings_patch.stop)
+        settings_patch.start()
 
     def test_skips_when_exists(self) -> None:
         client = MagicMock()
