@@ -36,7 +36,7 @@ export function defaultCapabilities(): RuntimeCapabilities {
 
 /**
  * Where AI compute runs for this SPA host (LF5 badge).
- * Desktop + server `localAi` → Local; otherwise Hosted (hub / BYO).
+ * Desktop + server `localAi` → Local; otherwise Hosted (hub).
  */
 export function resolveAiCompute(
   clientHost: RuntimeHost,
