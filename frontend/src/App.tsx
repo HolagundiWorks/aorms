@@ -149,6 +149,7 @@ const Lxos = lazyRoute(() => import("./routes/Lxos.js"), "Lxos");
 const SystemAdmin = lazyRoute(() => import("./routes/SystemAdmin.js"), "SystemAdmin");
 const Blog = lazyRoute(() => import("./routes/Blog.js"), "Blog");
 const BlogPost = lazyRoute(() => import("./routes/BlogPost.js"), "BlogPost");
+const Downloads = lazyRoute(() => import("./routes/Downloads.js"), "Downloads");
 
 
 // ─── App ──────────────────────────────────────────────────────────────────────
@@ -274,15 +275,26 @@ function AppWorkspace() {
     }
   }
 
-  // Blog is a live public surface again (2026-07-22). Other former marketing
+  // Blog + /downloads are live public surfaces. Other former marketing
   // sub-pages — wiki, SEO keyword landings, design-system, investors, legal,
-  // about/contact, download, and per-app marketing slugs — still redirect home.
+  // about/contact, and per-app marketing slugs — still redirect home.
+  // Legacy `/download` (Manager portal) redirects to `/downloads` (local-first).
   if (publicMarketing && (pathname === "/blog" || pathname.startsWith("/blog/")))
     return (
       <Routes>
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
       </Routes>
+    );
+
+  if (publicMarketing && pathname === "/download")
+    return <Navigate to="/downloads" replace />;
+
+  if (publicMarketing && pathname === "/downloads")
+    return (
+      <Suspense fallback={<Box sx={{ position: "fixed", inset: 0, display: "grid", placeItems: "center" }}><CircularProgress aria-label="Loading downloads" /></Box>}>
+        <Downloads />
+      </Suspense>
     );
 
   if (publicMarketing && pathname === "/demo")
@@ -298,7 +310,6 @@ function AppWorkspace() {
       pathname === "/legal" ||
       pathname === "/contact" ||
       pathname === "/about" ||
-      pathname === "/download" ||
       isLandingSlug(pathname) ||
       slug === AORMS_STUDIO.slug ||
       isAormsStudioLegacySlug(slug);

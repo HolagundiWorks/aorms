@@ -271,12 +271,15 @@ BETA_REQUEST_NOTIFY_TO=${BETA_REQUEST_NOTIFY_TO:-hi@${DOMAIN}}
 # SEED_DEMO gates the demo workspace seed, FIRM_PLAN sets the plan tier.
 DEPLOY_PROFILE=${PROFILE}
 VITE_PUBLIC_SITE=${PUBLIC_SITE}
-# AORMS installer download URLs (/download portal). Set each to e.g.
-# /downloads/aorms-lite-setup.exe once you host the built installers under
-# frontend/dist/downloads/; empty = that edition shows "Coming soon".
 # Standalone licensing console origin (its own repo, deployed at admin.DOMAIN).
 # Set → aorms.in/platform-admin redirects there; empty → embedded console.
 VITE_ADMIN_URL=${VITE_ADMIN_URL:-}
+# Local-first signed installers for /downloads (LF4). Empty = web_fallback CTAs.
+# See docs/esti/WEB-PORTAL.md — do not wire unsigned overnight Setup.exe.
+VITE_ASTUDIO_INSTALLER_URL=${VITE_ASTUDIO_INSTALLER_URL:-}
+VITE_ACONSULTING_INSTALLER_URL=${VITE_ACONSULTING_INSTALLER_URL:-}
+VITE_PORTAL_USE_RELEASE_INSTALLERS=${VITE_PORTAL_USE_RELEASE_INSTALLERS:-}
+# Retired Lite/Pro/Community Manager SKUs (cleanup-vps.sh may still strip these).
 VITE_LITE_DOWNLOAD_URL=${VITE_LITE_DOWNLOAD_URL:-}
 VITE_PRO_DOWNLOAD_URL=${VITE_PRO_DOWNLOAD_URL:-}
 VITE_COMMUNITY_DOWNLOAD_URL=${VITE_COMMUNITY_DOWNLOAD_URL:-}

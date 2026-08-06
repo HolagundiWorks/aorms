@@ -1,0 +1,15 @@
+{
+  "$schemaComment": "AStudio desktop update manifest — fill after Bhoomi publishes a signed Setup.exe. Do NOT point url at unsigned overnight builds.",
+  "app": "astudio",
+  "product": "AStudio",
+  "channel": "stable",
+  "platform": "windows-x86_64",
+  "version": "",
+  "url": "",
+  "sha256": "",
+  "sizeBytes": 0,
+  "signature": "",
+  "publishedAt": "",
+  "status": "web_fallback",
+  "notes": "Leave status=web_fallback until a code-signed installer URL + sha256 are set. Set VITE_ASTUDIO_INSTALLER_URL (or enable VITE_PORTAL_USE_RELEASE_INSTALLERS after filling this file) to go live."
+}
