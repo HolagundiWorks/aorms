@@ -226,6 +226,8 @@ export async function activate(
 
   const bound = await bindDevice(ctx, input, { rotateSyncToken: true });
   if (!bound.ok) return fail(bound.status, bound.error);
+  // Hub API 2026-08: activate always returns a usable sync bearer (never empty).
+  if (!bound.syncToken) return fail(500, "sync_token_mint_failed");
 
   const entitlement = await buildEntitlement(ctx);
   const licenseToken = signEntitlement(entitlement, input.deviceId);

@@ -2,6 +2,22 @@
 
 Operator checklist after the overnight agent pass.
 
+## Hub deploy gate (before bind) — **required**
+
+On the **cloud hub** DB, apply migration **`0227_hlp_org_sync_firm.sql`** before
+morning licence bind. It adds `hlp_organization.sync_firm_id` (UUID) used by
+`firmFromSyncToken` for panel `hlp_device` bearers. Idempotent — safe to re-run:
+
+```bash
+docker cp backend/drizzle/0227_hlp_org_sync_firm.sql esti-db:/tmp/0227_hlp_org_sync_firm.sql
+docker exec esti-db sh -lc "psql -U esti -d esti -f /tmp/0227_hlp_org_sync_firm.sql"
+```
+
+(Or rely on backend boot `runMigrations()` after deploy/update.) Without `0227`,
+activate may mint `syncToken` but hub ingest/meta firm resolve fails.
+
+Wire contract: [HUB-API.md](HUB-API.md) (`2026-08`).
+
 ## What landed overnight (code)
 
 1. **Panel activate → syncToken** — `/platform/v1/activate` + refresh mint a hub
@@ -16,6 +32,9 @@ Operator checklist after the overnight agent pass.
 5. **HUB-API.md** — versioned hub contract (DESKTOP-REPOS gate doc item).
 6. **MUI v6 slotProps** — `DesktopLicenceBind` + `LandingCalculator` fixed;
    frontend + backend `tsc --noEmit` clean.
+7. **Gagan hub readiness** — `sync.*` skip reasons + desktop caps require
+   `syncToken`; `ActivateResult` duplicate field fixed; `runtimeCapabilities`
+   extracted under `backend/src/lib/sync/`.
 
 ## Unsigned installer built overnight ✅
 
@@ -48,10 +67,13 @@ powershell -File desktop/scripts/build-installer.ps1 -Profile STUDIO
 
 ## Physical install gate
 
-1. Run `desktop/artifacts/AORMS-Studio_0.1.0_x64-setup.exe` (SmartScreen may warn — unsigned).
-2. Sign in as firm admin → activate with panel key → confirm `hasSyncToken`.
-3. Confirm sync flush / capabilities after activate.
-4. Manual landing/wellbeing QA as planned earlier.
+1. Confirm hub has **`0227`** applied (see deploy gate above).
+2. Run `desktop/artifacts/AORMS-Studio_0.1.0_x64-setup.exe` (SmartScreen may warn — unsigned).
+3. Sign in as firm admin → activate with panel key → confirm `sync.hubConfigured`
+   (`hasSyncToken` + `syncReady`, `role=node`).
+4. Confirm `sync.capabilities.metaSync` / `artifactSync` true; `sync.flush` /
+   `sync.pullMeta` succeed (no `skipped` / `skippedReason`).
+5. Manual landing/wellbeing QA as planned earlier.
 
 ## Quick SPA test without Tauri
 

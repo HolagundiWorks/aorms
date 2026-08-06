@@ -70,7 +70,9 @@ Packaging stub: [`desktop/`](../../desktop/) · env: `desktop/env.desktop.exampl
 | Web parity | Hub / BYO | Yes | Server-side |
 
 Runtime resolution: `trpc.sync.capabilities` ·
-[`frontend/src/lib/runtimeCapabilities.ts`](../../frontend/src/lib/runtimeCapabilities.ts).
+[`backend/src/lib/sync/runtimeCapabilities.ts`](../../backend/src/lib/sync/runtimeCapabilities.ts)
+(server) · [`frontend/src/lib/runtimeCapabilities.ts`](../../frontend/src/lib/runtimeCapabilities.ts)
+(SPA badges / host). Desktop sync caps require licence + hub URL + `syncToken`.
 
 ## Implementation waves
 
@@ -95,6 +97,7 @@ Runtime resolution: `trpc.sync.capabilities` ·
 | Meta append / catch-up / WS | `/api/sync/meta*` — same |
 | Node tRPC | `sync.status` · `flush` · `enqueueMeta` · `pullMeta` · `capabilities` · `hubConfigured` |
 | Panel activate → sync bearer | `/platform/v1/activate` · `license.activate` ([HUB-API.md](HUB-API.md)) |
+| Capability resolution | [`backend/src/lib/sync/runtimeCapabilities.ts`](../../backend/src/lib/sync/runtimeCapabilities.ts) |
 | Meta lib | [`backend/src/lib/sync/metadata.ts`](../../backend/src/lib/sync/metadata.ts) |
 | LF3 domain enqueue/apply | [`backend/src/lib/sync/domainMeta.ts`](../../backend/src/lib/sync/domainMeta.ts) |
 | Artifact outbox | [`backend/src/lib/sync/outbox.ts`](../../backend/src/lib/sync/outbox.ts) |
