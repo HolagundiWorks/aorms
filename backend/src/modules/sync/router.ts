@@ -1,14 +1,6 @@
-import {
-  FREE_DESKTOP_CAPABILITIES,
-  LICENSED_DESKTOP_CAPABILITIES,
-  META_STREAM_FIRM,
-  MetaEventBody,
-  type RuntimeCapabilities,
-  WEB_PARITY_CAPABILITIES,
-} from "@esti/contracts";
+import { META_STREAM_FIRM, MetaEventBody } from "@esti/contracts";
 import { z } from "zod";
 import { env } from "../../env.js";
-import { licenseState } from "../../lib/plan.js";
 import { getOrgSettings } from "../../lib/settings.js";
 import { applyDomainMetaEvents } from "../../lib/sync/domainMeta.js";
 import {
@@ -18,56 +10,10 @@ import {
   pullMetaCatchUp,
 } from "../../lib/sync/metadata.js";
 import { drainOutbox, outboxStatus } from "../../lib/sync/outbox.js";
+import { resolveRuntimeCapabilities } from "../../lib/sync/runtimeCapabilities.js";
 import { ownerProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
 
-/**
- * Resolve runtime capabilities for this install (desktop node vs web/hub parity).
- * Free/unlicensed desktop keeps local AI/worker but does not sync to the hub.
- */
-export async function resolveRuntimeCapabilities(
-  db: Parameters<typeof licenseState>[0],
-): Promise<RuntimeCapabilities> {
-  const hubConfigured = Boolean(env.ESTI_HUB_URL);
-  if (env.ESTI_ROLE === "hub") {
-    return {
-      ...WEB_PARITY_CAPABILITIES,
-      host: "hub",
-      localAi: true,
-      localWorker: true,
-      metaSync: true,
-      artifactSync: true,
-    };
-  }
-
-  const looksDesktop =
-    Boolean(env.INSTALL_ID) || env.STORAGE_DRIVER === "fs" || env.ESTI_DESKTOP;
-
-  if (!looksDesktop) {
-    return {
-      ...WEB_PARITY_CAPABILITIES,
-      metaSync: hubConfigured,
-      artifactSync: hubConfigured,
-      localAi: true,
-      localWorker: true,
-    };
-  }
-
-  const lic = await licenseState(db).catch(() => null);
-  const licensed = Boolean(
-    lic &&
-      lic.managed &&
-      (lic.status === "VALID" || lic.status === "GRACE") &&
-      hubConfigured,
-  );
-  const base = licensed ? LICENSED_DESKTOP_CAPABILITIES : FREE_DESKTOP_CAPABILITIES;
-  return {
-    ...base,
-    localAi: true,
-    localWorker: true,
-    metaSync: licensed,
-    artifactSync: licensed,
-  };
-}
+export { resolveRuntimeCapabilities } from "../../lib/sync/runtimeCapabilities.js";
 
 /** Node-side sync controls — outbox status, flush, metadata enqueue/pull, capabilities. */
 export const syncRouter = router({

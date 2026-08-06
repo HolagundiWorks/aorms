@@ -2,6 +2,7 @@ import TimerOutlined from "@mui/icons-material/TimerOutlined";
 import { IconButton, Popover, Stack, Tooltip, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { fmtPomTime, usePomodoro } from "../contexts/PomodoroContext.js";
+import { bindingFor, matchShellKey } from "../lib/keymap.js";
 import { PomodoroRing } from "./PomodoroRing.js";
 
 /**
@@ -18,10 +19,7 @@ export function HeaderPomodoro() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.altKey && (e.key === "t" || e.key === "T")) {
-        e.preventDefault();
-        setOpen((o) => !o);
-      }
+      matchShellKey(e, { pomodoro: () => setOpen((o) => !o) });
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -29,7 +27,9 @@ export function HeaderPomodoro() {
 
   return (
     <>
-      <Tooltip title={`Focus timer${pomActive ? ` · ${fmtPomTime(pom.timeLeft)}` : ""} (Alt+T)`}>
+      <Tooltip
+        title={`Focus timer${pomActive ? ` · ${fmtPomTime(pom.timeLeft)}` : ""} (${bindingFor("pomodoro").chord})`}
+      >
         <IconButton
           ref={btnRef}
           color={open ? "primary" : "default"}

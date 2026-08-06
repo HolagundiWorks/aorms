@@ -4,7 +4,7 @@
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
 **Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
 **AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)  
-**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 (unsigned Setup.exe + bind UI) · LF5–LF6 open — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
+**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 (unsigned Setup.exe + bind UI) · LF5 ✅ (Aakash) · LF6 ◐ — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
 **Crew:** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) (Vishwakarma · Bhoomi · Gagan · Aakash)
 
 Phases 0–28 are **engineering-complete** for **AStudio**. **AConsulting**
@@ -14,9 +14,11 @@ Stripe auto-billing remains **deferred by choice**. Market-fit Waves 1–3 are
 **shipped**; Wave 4 (integrations) stays phase-2 by design.
 
 **Active delivery (2026-08-06):** hub `0227` + panel `syncToken` ✅ (Gagan #45) ·
-portal `/downloads` placeholders ✅ (Aakash #46) · LF4 Tauri scaffold +
+portal `/downloads` placeholders ✅ (Aakash #46) · LF5 web parity polish ✅
+(capability badges · degraded AI · shared keymap `/help`) · LF4 Tauri scaffold +
 `DesktopLicenceBind` 🚧 (Bhoomi — sign + physical bind per
 [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)). Live installer URLs stay gated.
+LF6 right-slot still open.
 The 2026-07-19 **web-only** product law is **superseded** for runtime shape
 ([PLANS-AND-TIERS.md](PLANS-AND-TIERS.md), [LOCAL-FIRST.md](LOCAL-FIRST.md)).
 Legacy Community / Manager installers and a separate Estimate desktop app stay
@@ -67,7 +69,7 @@ Canonical plan: **[LOCAL-FIRST.md](LOCAL-FIRST.md)** · UX: **[DESKTOP-WEB-PARIT
 | **LF2** | Artifact content-hash; publish DTOs; portal-from-hub reads; desktop stub; product-law docs | ✅ 2026-08 |
 | **LF3** | Domain metadata enqueue/apply (tasks, estimate totals, phase progress) + panel `syncToken` | ✅ Gagan 2026-08 |
 | **LF4** | Signed Tauri installer + first-run licence / hub bind | 🚧 Bhoomi — unsigned Studio Setup.exe + `DesktopLicenceBind` · sign/bind morning ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)) |
-| **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | 🔲 Aakash |
+| **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | ✅ Aakash 2026-08 — `CapabilityBadge` · `keymap` · `/help` · web-parity `localAi` fix |
 | **LF6** | UX parity checklist + inspector/AI right-slot; Figma ↔ kit tokens | ◐ Aakash — token stub ✅ · right-slot 🔲 |
 
 **Namespaces / seams:** `sync` (tRPC + REST) · `esti_meta_*` · `esti_sync_*` ·
@@ -164,6 +166,7 @@ Canonical brief: **[MARKET-FIT.md](MARKET-FIT.md)**.
 | **Market fit W1–W3** | GTM scrub · portal · fee recovery · onboarding · capacity · digests · consultancy chrome · demo seed · packaging |
 | **AProc W0–W5** | Chrome · Delivery · tenders · RA/steel cert · BBS + steel recon · CSV/XER · digest · ESTI (`0220`–`0224`) |
 | **Local-first LF0–LF3** | Sync planes · meta log/WS · artifact hash · portal hub reads · desktop stub · panel `syncToken` · domain meta (`0226`–`0227`) |
+| **Local-first LF5** | Capability badges · Hosted AI empty states · shared `keymap` + `/help` · web-parity capabilities fix |
 
 ## Deferred (by choice — not blocking)
 

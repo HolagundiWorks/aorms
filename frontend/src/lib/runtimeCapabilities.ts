@@ -13,7 +13,12 @@ import { trpc } from "./trpc.js";
  *
  * Build-time: `VITE_RUNTIME_HOST=desktop|web` (desktop shell sets this).
  * Runtime: `trpc.sync.capabilities` is authoritative when signed in.
+ *
+ * AI Local vs Hosted badges key off the **client** host (`buildTimeHost`), not
+ * the hub process — a browser SPA against `ESTI_ROLE=hub` still shows Hosted AI.
  */
+
+export type AiComputeLocation = "local" | "hosted";
 
 export function buildTimeHost(): RuntimeHost {
   const h = import.meta.env.VITE_RUNTIME_HOST;
@@ -30,29 +35,45 @@ export function defaultCapabilities(): RuntimeCapabilities {
 }
 
 /**
+ * Where AI compute runs for this SPA host (LF5 badge).
+ * Desktop + server `localAi` → Local; otherwise Hosted (hub / BYO).
+ */
+export function resolveAiCompute(
+  clientHost: RuntimeHost,
+  localAi: boolean,
+): AiComputeLocation {
+  return clientHost === "desktop" && localAi ? "local" : "hosted";
+}
+
+/**
  * Hook: live capabilities from the backend (degrades AI/worker on web parity;
  * enables meta/artifact sync when licensed + hub-bound).
  */
 export function useRuntimeCapabilities() {
   const { user } = useAuth();
-  const host = buildTimeHost();
+  const clientHost = buildTimeHost();
   const q = trpc.sync.capabilities.useQuery(undefined, {
     enabled: Boolean(user),
     retry: false,
     staleTime: 60_000,
   });
   const caps: RuntimeCapabilities = q.data ?? defaultCapabilities();
+  const aiCompute = resolveAiCompute(clientHost, caps.localAi);
   return {
     ...caps,
-    host: q.data?.host ?? host,
+    /** Server-reported host (may be `hub` for cloud API). */
+    host: q.data?.host ?? clientHost,
+    /** SPA build host — use for Local/Hosted AI chrome. */
+    clientHost,
+    aiCompute,
     isLoading: q.isLoading,
-    /** Web staff SPA: local Ollama/EOMS unavailable — use hub/BYO AI. */
-    aiDegraded: !caps.localAi,
+    /** Web / unbound: local Ollama unavailable on this machine. */
+    aiDegraded: aiCompute === "hosted",
     /** Web: heavy jobs run on hub worker, not the browser machine. */
-    workerDegraded: !caps.localWorker,
+    workerDegraded: clientHost !== "desktop" || !caps.localWorker,
     canOfflineAuthor: caps.offlineAuthoring,
     licensedDesktopSync:
-      caps.host === "desktop" && caps.metaSync && caps.artifactSync
+      clientHost === "desktop" && caps.metaSync && caps.artifactSync
         ? LICENSED_DESKTOP_CAPABILITIES
         : null,
   };

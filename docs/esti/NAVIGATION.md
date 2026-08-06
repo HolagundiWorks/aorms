@@ -84,7 +84,7 @@ Footer home launcher on PMC host opens `/pmc`.
 | **Admin** | Archived projects · System (system admin) |
 
 ### Taskbar footer (centre launchers)
-Studio Intelligence (`/`) · Tasks (`/tasks`) · **Search** (`/search`, Ctrl/Cmd+K) · Ask ESTI · Wellness · Pomodoro. Tray: clock · alerts · ID card · sign out.
+Studio Intelligence (`/`) · Tasks (`/tasks`) · **Search** (`/search`, Ctrl/Cmd+K) · Ask ESTI · Wellness · Pomodoro. Tray: clock · sync · **Help** (`/help`, Ctrl+/) · alerts · ID card · sign out.
 
 ### Not in ribbon (by design)
 | Destination | How to reach |
@@ -184,10 +184,12 @@ sections. Community Exchange · Professional Identity remain 🔲 behind a singl
 | Utility | Status | Today |
 |---|---|---|
 | Global Search | ✅ | Footer Search + Ctrl/Cmd+K → `/search` |
+| Keyboard Help | ✅ | Tray Help + Ctrl+/ → `/help` (shared `keymap`) |
 | Skip to main | ✅ | `.esti-skip-link` → `#esti-main` |
 | Notifications | ✅ | `AlertsBell` → `/alerts` |
 | User Profile | ✅ | Footer ID card → `/account#profile` |
 | Calculator | ✅ | Footer · Alt+C |
+| AI compute badge | ✅ | Local vs Hosted on Ask ESTI + AI Studio (LF5) |
 
 ---
 

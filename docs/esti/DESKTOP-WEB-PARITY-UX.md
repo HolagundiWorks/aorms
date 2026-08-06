@@ -25,7 +25,9 @@ Desktop may add a **thin native menu** that invokes the **same command IDs** as 
 ## Shared (must not fork)
 
 - Tokens, typography (Urbanist), icons (one MUI/kit set), 8pt spacing, layers, dialogs, forms (visible labels), tables (one DataGrid adapter), toasts, loading skeletons
-- Keyboard map (Ctrl+S / Ctrl+F / Ctrl+K …) — one `keymap` module for both hosts
+- Keyboard map (Ctrl+K / Alt+A / Alt+C / Alt+T / Ctrl+/) — one
+  [`frontend/src/lib/keymap.ts`](../../frontend/src/lib/keymap.ts) for both hosts;
+  Help at `/help`
 - Module screens assembled from kit + templates — no per-module button skins or brand colours
 
 ## Platform-only deltas
@@ -35,8 +37,8 @@ Desktop may add a **thin native menu** that invokes the **same command IDs** as 
 | Windows | Multi-window (AI / inspector / drawing) | Tabs + docked panels |
 | Files | Native dialogs + FS | Browser picker + drag-drop |
 | Print | Native / system PDF | Browser print |
-| AI compute | Local Ollama | Hub / BYO — **same panel**, badge Local vs Hosted |
-| Sync | Offline queue in tray | Same chip; usually idle when fully online |
+| AI compute | Local Ollama — badge **Local AI** | Hub / BYO — **same panel**, badge **Hosted AI** (`CapabilityBadge`) |
+| Sync | Offline queue in tray | Same chip; usually idle when fully online · tray “Web” hint |
 
 ## PR checklist
 

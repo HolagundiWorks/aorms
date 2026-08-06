@@ -138,6 +138,7 @@ const ProjectDetail = lazyRoute(() => import("./routes/ProjectDetail.js"), "Proj
 const Projects = lazyRoute(() => import("./routes/Projects.js"), "Projects");
 const Reconcile = lazyRoute(() => import("./routes/Reconcile.js"), "Reconcile");
 const SearchPage = lazyRoute(() => import("./routes/Search.js"), "SearchPage");
+const HelpPage = lazyRoute(() => import("./routes/Help.js"), "HelpPage");
 const AiStudioPage = lazyRoute(() => import("./components/AiStudio.js"), "AiStudioPage");
 const Work = lazyRoute(() => import("./routes/Work.js"), "Work");
 const Team = lazyRoute(() => import("./routes/Team.js"), "Team");
@@ -673,6 +674,7 @@ function AppWorkspace() {
                 <Route path="/lxos" element={<Lxos />} />
                 <Route path="/leos" element={<Navigate to="/lxos" replace />} />
                 <Route path="/search" element={<SearchPage />} />
+                <Route path="/help" element={<HelpPage />} />
                 {can(user.role, "invoice:manage") && (
                   <Route path="/invoices" element={<Invoices />} />
                 )}

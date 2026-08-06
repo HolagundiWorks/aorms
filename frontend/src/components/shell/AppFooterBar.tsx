@@ -1,6 +1,7 @@
 import AutoAwesome from "@mui/icons-material/AutoAwesome";
 import CalculateOutlined from "@mui/icons-material/CalculateOutlined";
 import Engineering from "@mui/icons-material/Engineering";
+import HelpOutlined from "@mui/icons-material/HelpOutlined";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
 import SearchOutlined from "@mui/icons-material/SearchOutlined";
 import SelfImprovement from "@mui/icons-material/SelfImprovement";
@@ -17,6 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ASK_ESTI_EVENT } from "../AiAgentCommand.js";
 import { AlertsBell } from "../AlertsBell.js";
+import { RuntimeHostTrayHint } from "../CapabilityBadge.js";
 import { FloatingCalculator } from "../FloatingCalculator.js";
 import { HeaderPomodoro } from "../HeaderPomodoro.js";
 import { UserIdCard } from "../UserIdCard.js";
@@ -27,6 +29,7 @@ import { useWellnessReminders } from "../wellness/useWellnessReminders.js";
 import type { WellnessSection } from "../wellness/wellnessExercises.js";
 import { WELLNESS_OPEN_EVENT } from "../wellness/wellnessExercises.js";
 import { detectSurface } from "../../lib/aorms-surface-urls.js";
+import { matchShellKey, tooltipWithChord } from "../../lib/keymap.js";
 import { AORMS_CONSULTANCY, AORMS_PMC } from "../../lib/product-nomenclature.js";
 import { OfficeHealthGlyph } from "./OfficeHealthGlyph.js";
 import { useOfficeHealth } from "./useOfficeHealth.js";
@@ -114,22 +117,14 @@ export function AppFooterBar({
       ? "var(--cds-support-warning)"
       : "var(--cds-support-success)";
 
-  // Alt+C calculator · Ctrl/Cmd+K global search.
+  // Shared LF5 keymap — calculator · search · help (Ask ESTI / Pomodoro own their IDs).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.altKey && (e.key === "c" || e.key === "C")) {
-        e.preventDefault();
-        setShowCalc((o) => !o);
-        return;
-      }
-      if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
-        const tag = (e.target as HTMLElement | null)?.tagName;
-        if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) {
-          return;
-        }
-        e.preventDefault();
-        navigate("/search");
-      }
+      matchShellKey(e, {
+        calculator: () => setShowCalc((o) => !o),
+        search: () => navigate("/search"),
+        help: () => navigate("/help"),
+      });
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -143,7 +138,7 @@ export function AppFooterBar({
     >
       {/* LEFT — calculator · office health */}
       <Box sx={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 1 }}>
-        <Tooltip title="Calculator (Alt+C)">
+        <Tooltip title={tooltipWithChord("Calculator", "calculator")}>
           <IconButton
             ref={calcTriggerRef}
             color={showCalc ? "primary" : "default"}
@@ -225,7 +220,7 @@ export function AppFooterBar({
             <TaskAltOutlined />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Search (Ctrl+K)">
+        <Tooltip title={tooltipWithChord("Search", "search")}>
           <IconButton
             onClick={() => navigate("/search")}
             aria-label="Search"
@@ -236,7 +231,7 @@ export function AppFooterBar({
             <SearchOutlined />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Ask ESTI (Alt+A)">
+        <Tooltip title={tooltipWithChord("Ask ESTI", "askEsti")}>
           <IconButton
             className="esti-app-footer__esti"
             onClick={() => window.dispatchEvent(new CustomEvent(ASK_ESTI_EVENT))}
@@ -263,7 +258,19 @@ export function AppFooterBar({
       {/* RIGHT — system tray */}
       <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flex: 1, justifyContent: "flex-end", minWidth: 0 }}>
         <TrayClock />
+        <RuntimeHostTrayHint />
         <SyncQueueChip />
+        <Tooltip title={tooltipWithChord("Keyboard shortcuts", "help")}>
+          <IconButton
+            onClick={() => navigate("/help")}
+            aria-label="Keyboard shortcuts"
+            aria-current={pathname.startsWith("/help") ? "page" : undefined}
+            color={pathname.startsWith("/help") ? "primary" : "default"}
+            sx={chromeIconSx}
+          >
+            <HelpOutlined fontSize="small" />
+          </IconButton>
+        </Tooltip>
         <AlertsBell />
         <DemoAdminUnlock />
         <UserIdCard />
