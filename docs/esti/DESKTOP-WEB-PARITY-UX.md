@@ -57,6 +57,11 @@ Automation stub: `node scripts/figma-token-sync-check.mjs`.
 Inspector / Ask ESTI share **one right slot** on both hosts (properties ↔ AI) —
 do not add a menu-only AI path on desktop.
 
+**Shipped (LF6, Aakash 2026-08):** `frontend/src/components/shell/RightSlot.tsx` —
+Properties ↔ Ask ESTI tabs; Ask ESTI opens via taskbar / `esti:ask` / Alt+A into
+this slot (`AskEstiPanel`); screens may `publishInspector()` / dispatch
+`esti:inspect`. No floating second AI chrome.
+
 ## Related
 
 - [HCW-UI-KIT.md](HCW-UI-KIT.md) · [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md)  

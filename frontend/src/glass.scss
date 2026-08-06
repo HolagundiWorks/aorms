@@ -480,6 +480,12 @@ $neu-input-radius: 0;
   --esti-shell-gutter: 16px;
   --esti-footer-height: 56px; // 44px min-height + 12px bottom pad
   --esti-dock-stack: 0px;     // raised when ActionDock is visible (see ActionDock.tsx)
+  // LF6 — Inspector / Ask ESTI right slot width (0 when closed).
+  --esti-right-slot-width: 0px;
+}
+
+.esti-app-shell2--right-slot-open {
+  --esti-right-slot-width: min(360px, 28vw);
 }
 
 .esti-app-shell2--studio-home {
@@ -731,9 +737,82 @@ $neu-input-radius: 0;
 .esti-app-content2 {
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: var(--esti-header-height, 48px) var(--esti-shell-gutter, 16px) calc(
-    var(--esti-footer-height, 56px) + var(--esti-dock-stack, 0px) + var(--esti-shell-gutter, 16px)
+  padding: var(--esti-header-height, 48px)
+    calc(var(--esti-shell-gutter, 16px) + var(--esti-right-slot-width, 0px))
+    calc(
+      var(--esti-footer-height, 56px) + var(--esti-dock-stack, 0px) + var(--esti-shell-gutter, 16px)
+    )
+    var(--esti-shell-gutter, 16px);
+  transition: padding-right 160ms ease;
+}
+
+// LF6 — Inspector / Ask ESTI one right slot (DESKTOP-WEB-PARITY-UX).
+.esti-right-slot__backdrop {
+  display: none;
+}
+
+.esti-right-slot {
+  position: fixed;
+  z-index: 1205;
+  top: var(--esti-rail-inset-top, 0px);
+  right: var(--esti-shell-gutter, 16px);
+  // Own width — shell `--esti-right-slot-width` only reserves stage padding.
+  width: min(360px, 28vw);
+  height: calc(
+    100vh - var(--esti-rail-inset-top, 0px) - var(--esti-footer-height, 56px) -
+      var(--esti-shell-gutter, 16px)
   );
+  max-height: calc(
+    100vh - var(--esti-rail-inset-top, 0px) - var(--esti-footer-height, 56px) -
+      var(--esti-shell-gutter, 16px)
+  );
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.esti-right-slot__surface {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 10px 24px rgba(20, 21, 23, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.esti-right-slot__chrome {
+  height: 100%;
+  min-height: 0;
+}
+
+.esti-right-slot__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+@media (max-width: 900px) {
+  .esti-app-shell2--right-slot-open {
+    --esti-right-slot-width: 0px; // overlay; do not shrink stage padding
+  }
+
+  .esti-right-slot__backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1204;
+    background: rgba(20, 21, 23, 0.28);
+  }
+
+  .esti-right-slot {
+    top: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    z-index: 1205;
+  }
 }
 
 .esti-app-shell2--dock-visible {

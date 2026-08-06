@@ -61,7 +61,7 @@ flowchart TB
 | --- | --- | --- | --- |
 | Hub `syncToken` mint · `firmFromSyncToken` · `0227` · LF3 `domainMeta` · `@esti/contracts` | **Gagan** | **#45** `cursor/hub-sync-contracts-9937` | Merge to `main` **first** |
 | Tauri / installer / signing · first-run bind UX (`DesktopLicenceBind`) | **Bhoomi** | `orch/lf4-sync-bind-installer` | Rebase after #45; **drop duplicate hub/sync/docs** |
-| Portal Downloads / GTM / LF5–LF6 | **Aakash** | `#46` ✅ · LF5 lane | Live URL waits on Bhoomi signed Setup.exe; LF6 right-slot open |
+| Portal Downloads / GTM / LF5–LF6 | **Aakash** | LF5 **#51** · LF6 **#54** · CI lint **#55** · WinUI wording **#50** | Live URL waits on Bhoomi signed Setup.exe |
 
 **Merge order (Vishwakarma):** land **#45** (Gagan hub/sync/contracts) before the LF4
 desktop branch. LF4 will rebase onto `main` and drop overlapping hub files
@@ -204,8 +204,10 @@ roadmap status accuracy.
 ### Key paths
 
 - `frontend/src/routes/Downloads.tsx` · `DocsHub.tsx` · `AccountPortal.tsx`  
-- `frontend/src/lib/portal-downloads.ts` · `frontend/public/update-manifests/`  
+- `frontend/src/lib/desktop-installers.ts` · `frontend/public/update-manifests/`  
 - `frontend/src/lib/keymap.ts` · `CapabilityBadge.tsx` · `routes/Help.tsx`  
+- `frontend/src/components/shell/RightSlot.tsx` · `AskEstiPanel.tsx` · `lib/right-slot.ts`  
+
 - `frontend/src/content/blog/` · landing SEO / nomenclature imports  
 - `docs/esti/repo-scaffolds/` · [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) LF5–LF6
 
@@ -217,9 +219,11 @@ roadmap status accuracy.
 - [x] Optional empty GitHub scaffolds created without app code (`docs/esti/repo-scaffolds/`)  
 - [x] PR opened for Vishwakarma to merge — **#46 merged**  
 - [x] LF5 capability badges · Hosted AI UX · shared keymap + `/help`  
+- [x] LF6 Inspector / Ask ESTI **one right slot** — `RightSlot` + `AskEstiPanel` + `lib/right-slot.ts` (Properties ↔ Ask; `CapabilityBadge` in Ask tab; rebased on #51).  
 
-**Still 🔲:** live download URL flip (wait on Bhoomi signed Setup.exe + sha256).  
-**Still 🔲:** LF6 inspector / Ask ESTI right-slot polish.
+**Still 🔲:** live download URL flip (wait on Bhoomi signed Setup.exe + sha256).
+
+**Status (2026-08-06, Aakash):** LF6 #54 rebased on LF5 tip; download URL flip still gated; CI lint green-up in #55.
 
 ---
 

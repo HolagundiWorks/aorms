@@ -51,6 +51,7 @@ import { useAuth } from "./lib/auth.js";
 import { trpc } from "./lib/trpc.js";
 import { LegacyModuleRedirect } from "./components/LegacyModuleRedirect.js";
 import { AiAgentCommand } from "./components/AiAgentCommand.js";
+import { RightSlot } from "./components/shell/RightSlot.js";
 import { ActionDock, ActionDockProvider, ActionOutcomeBanner } from "@hcw/ui-kit";
 import { AppRibbon } from "./components/shell/AppRibbon.js";
 import { AppFooterBar } from "./components/shell/AppFooterBar.js";
@@ -823,6 +824,8 @@ function AppWorkspace() {
             </main>
           </div>
           <UsageIdentity />
+          {/* LF6 — one right slot (Properties ↔ Ask ESTI); AiAgentCommand wires Alt+A. */}
+          <RightSlot />
           <AiAgentCommand />
           {/* LF4 desktop first-run — licence / hub syncToken bind (no-op on web). */}
           <DesktopLicenceBind />
