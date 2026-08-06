@@ -145,8 +145,9 @@ consequence-based priority bands (CRITICAL / ACTION TODAY / WATCH / NORMAL /
 BACKLOG), and an auditable priority log. Scheduled standup cycles ask targeted,
 role-routed questions and collect typed responses; the standup agent is
 stage-gated (read-only → draft → approval-based → limited auto) and must never
-emit generic update-nag notifications. Deterministic scoring is available on
-every edition; agent/LLM features are Pro-gated.
+emit generic update-nag notifications. Deterministic scoring is always available;
+agent/LLM features run on the local desktop AI (Ollama) or hub **Hosted AI** once
+AI is enabled — **unmetered**, with no edition gate and no bring-your-own cloud key.
 
 ## Documents And Coordination
 

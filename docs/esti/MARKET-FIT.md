@@ -60,7 +60,8 @@ Biggest competitor: **inertia**, not any single SaaS.
 **Not viable as** a horizontal AI/PM platform.
 
 Path: land **Studio** (architects) → expand **Consultancy** (engineers) → upsell
-storage / hosted AI + multi-company licensing.
+cloud storage + multi-company licensing. (AI is unmetered — local Ollama or hub
+**Hosted AI** — so it is a capability, not a usage upsell.)
 
 Risks to manage: GTM consistency, time→WIP UX depth vs global PSA, reference
 customers, “boring reliability” (invoice PDF / GST) before ESTI storytelling.
