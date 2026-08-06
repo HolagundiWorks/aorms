@@ -47,7 +47,7 @@ export function RuntimeHostTrayHint() {
       variant="caption"
       color="text.secondary"
       sx={{ px: 0.5, display: { xs: "none", md: "inline" } }}
-      title="Web parity — AI and heavy jobs run on the hub or BYO"
+      title="Web parity — AI and heavy jobs run on the hub"
     >
       Web
     </Typography>

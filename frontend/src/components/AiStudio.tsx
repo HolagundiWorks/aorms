@@ -297,7 +297,7 @@ export function AiStudioPage() {
       {caps.aiDegraded && (
         <Alert severity="info">
           <AlertTitle>Hosted AI</AlertTitle>
-          Drafts run on the hub or your BYO key. Desktop uses local Ollama — same panel.
+          Drafts run on the hub. Desktop uses local Ollama — same panel.
         </Alert>
       )}
       {!settingsQ.data?.enabled ? (
@@ -306,7 +306,7 @@ export function AiStudioPage() {
           Enable under Company settings.
           {caps.aiCompute === "local"
             ? " Uses local Ollama — no API keys."
-            : " Uses hub AI or a BYO key."}
+            : " Uses hub AI."}
         </Alert>
       ) : null}
     </Stack>
@@ -335,7 +335,6 @@ export function AiStudioPage() {
                   <TableCell>Kind</TableCell>
                   <TableCell>Provider</TableCell>
                   <TableCell>State</TableCell>
-                  <TableCell>External</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -346,7 +345,6 @@ export function AiStudioPage() {
                       {r.provider}/{r.model}
                     </TableCell>
                     <TableCell>{r.approvalState}</TableCell>
-                    <TableCell>{r.usedExternalApi === "true" ? "Yes" : "No"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
