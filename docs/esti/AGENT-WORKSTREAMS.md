@@ -71,14 +71,16 @@ flowchart TB
 
 | Surface | Owner | PR / branch | Notes |
 | --- | --- | --- | --- |
-| Hub `syncToken` mint · `firmFromSyncToken` · `0227` · LF3 `domainMeta` · `@esti/contracts` | **Gagan** | **#45** ✅ on `main` | Re-verify bind path for Bhoomi morning |
-| WinUI 3 Fluent 2 shell · installer · licence bind | **Bhoomi** | **#49** `orch/winui3-fluent2-shell` | Env **`bhoomi`**; sign + physical bind still open |
-| Portal Downloads / GTM / LF5–LF6 | **Aakash** | **#46** ✅ · **#51** LF5 · **#50** WinUI wording | Live URL waits on signed Setup.exe; LF6 right-slot open |
+| CI lint (main blockers) | **Vishwakarma** | **#55** `cursor/ci-lint-portal-445f` | Land first — installers hooks + ContractorPortal |
+| Hub bind morning · syncToken gate | **Gagan** | **#53** | Rebase vs **#51**; keep syncToken gate |
+| WinUI 3 shell · sign · bind | **Bhoomi** | **#49** | Env **`bhoomi`**; rebase · Windows sign still open |
+| LF5 · LF6 right-slot · portal wording | **Aakash** | **#51** · **#54** · **#50** | Rebase #54 after #51; URLs gated |
 
-**Merge order (Vishwakarma):** **#45** already on `main`. Prefer **#51** (LF5) then
-Gagan re-verify docs, then **#49** LF4 WinUI (rebase; drop any leftover hub
-dupes). **#50** Aakash wording can land independently. Do **not** flip live
-installer URLs until Bhoomi signs. Gagan does **not** own `desktop/` packaging.
+**Next assignments (running):** Gagan rebase #53 · Bhoomi rebase #49 · Aakash
+rebase #54 (+ skip lint if #55 already landed).
+
+**Merge order:** **#55** → **#51** → **#53** → **#49** → **#54** · **#50**
+independent. No live installer URLs until Bhoomi signs.
 
 ---
 
