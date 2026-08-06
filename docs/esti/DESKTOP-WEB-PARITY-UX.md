@@ -38,7 +38,7 @@ Desktop may add a **thin native menu** that invokes the **same command IDs** as 
 | Windows | Multi-window (AI / inspector / drawing) | Tabs + docked panels |
 | Files | Native dialogs + FS | Browser picker + drag-drop |
 | Print | Native / system PDF | Browser print |
-| AI compute | Local Ollama — badge **Local AI** | Hub / BYO — **same panel**, badge **Hosted AI** (`CapabilityBadge`) |
+| AI compute | Local Ollama — badge **Local AI** | Hub Ollama — **same panel**, badge **Hosted AI** (`CapabilityBadge`); unmetered, no BYO |
 | Sync | Offline queue in tray | Same chip; usually idle when fully online · tray “Web” hint |
 
 ## PR checklist

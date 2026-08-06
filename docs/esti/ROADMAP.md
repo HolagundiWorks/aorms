@@ -163,7 +163,7 @@ Canonical brief: **[MARKET-FIT.md](MARKET-FIT.md)**.
 
 | Track | Outcome |
 | --- | --- |
-| Product pivot P0–P10 | One Standard licence · storage + AI · BYO AI key · browser takeoff · hygiene/rebrand/deps *(web-only law later superseded by local-first)* |
+| Product pivot P0–P10 | One Standard licence · storage + AI · browser takeoff · hygiene/rebrand/deps *(BYO AI key + hosted token metering and the web-only law later superseded by local-first, local-only unmetered AI — #63)* |
 | **P7 billing** | Multi-tenant usage · CSV + mark-billed · suspend-for-non-payment (Stripe auto deferred) |
 | **P9 Consultancy** | Engagements · reliance · fees · SOP · enquiry · fee-stage invoices · intelligence (`0214`–`0219`) |
 | **P9.V / P9.M** | Walkthrough signed · marketing live |

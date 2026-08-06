@@ -143,9 +143,12 @@ export const aiRouter = router({
       })
       .returning();
 
-    // Local-first AI is unmetered — the hosted token counter
-    // (org_settings.ai_tokens_this_month / ai_tokens_month_start) is no longer
-    // written. The columns are left in place for platform-admin back-compat.
+    // AI is unmetered — both local desktop Ollama and hub "Hosted AI" (web
+    // parity) run on Ollama with no per-token billing and no bring-your-own
+    // cloud key (that tier was removed in #63). Cloud storage is the only usage
+    // meter. The hosted token counter (org_settings.ai_tokens_this_month /
+    // ai_tokens_month_start) is therefore no longer written; the columns are
+    // left in place for platform-admin read back-compat.
 
     await writeAudit(ctx.db, {
       entity: "ai_run",

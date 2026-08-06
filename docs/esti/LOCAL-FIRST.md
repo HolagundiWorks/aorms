@@ -58,7 +58,7 @@ flowchart LR
 | --- | --- | --- |
 | **Desktop node** | Preferred authoring path | `ESTI_ROLE=node`, `ESTI_DESKTOP=true`, `STORAGE_DRIVER=fs`, `INSTALL_ID`, local Ollama/EOMS |
 | **Cloud hub** | Metadata SoT + published artifacts + portals + web SPA | `ESTI_ROLE=hub`, S3, licensing platform |
-| **Web staff SPA** | Parity path (same SPA, hub API) | Browser → hub; AI/worker on hub or BYO |
+| **Web staff SPA** | Parity path (same SPA, hub API) | Browser → hub; AI/worker on hub (Hosted AI, unmetered) |
 
 Packaging stub: [`desktop/`](../../desktop/) · env: `desktop/env.desktop.example`.
 
@@ -68,7 +68,7 @@ Packaging stub: [`desktop/`](../../desktop/) · env: `desktop/env.desktop.exampl
 | --- | --- | --- | --- |
 | Free / unbound desktop | Yes | No | No |
 | Licensed desktop (`VALID`/`GRACE` + hub + syncToken) | Yes | Yes | Yes |
-| Web parity | Hub / BYO | Yes | Server-side |
+| Web parity | Hub (Hosted AI) | Yes | Server-side |
 
 Runtime resolution: `trpc.sync.capabilities` ·
 [`backend/src/lib/sync/runtimeCapabilities.ts`](../../backend/src/lib/sync/runtimeCapabilities.ts)
