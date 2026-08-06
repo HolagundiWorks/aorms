@@ -2,22 +2,17 @@ import {
   AiGenerateInput,
   AiRunUpdate,
   AiSettings,
-  MAX_CLOUD_API_KEY_CHARS,
-  cloudAiConfigError,
   parseAiSettings,
-  toPublicAiSettings,
 } from "@esti/contracts";
 import { can } from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { sql } from "drizzle-orm";
 import { aiRuns, orgSettings } from "../../db/schema.js";
 import { writeAudit } from "../../lib/audit.js";
 import { runAiGateway } from "../../lib/ai/gateway.js";
 import { redactPii } from "../../lib/ai/redact.js";
 import { getOrgSettings } from "../../lib/settings.js";
-import { sealSecret } from "../../lib/secretBox.js";
 import { demoBlocksAiDraft, demoBlocksAiSettings, DEMO_AI_DRAFT_MESSAGE, DEMO_AI_SETTINGS_MESSAGE } from "../../lib/demo-policy.js";
 import { assertPlanFeature } from "../../lib/plan.js";
 import { ownerProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
@@ -31,8 +26,8 @@ export const aiRouter = router({
     const org = await getOrgSettings(ctx.db);
     const parsed = parseAiSettings(org.aiSettings);
     return {
-      // Redact the cloud BYO-API secret — expose only a configured flag.
-      ...toPublicAiSettings(parsed),
+      // Local-only AI: no secret to redact.
+      ...parsed,
       /** ESTI agent (Alt+A) — read-only Q&A from live AORMS data. */
       agentEnabled: parsed.enabled,
       /** AI Studio document drafts — off on demo. */
@@ -51,54 +46,12 @@ export const aiRouter = router({
       throw new TRPCError({ code: "FORBIDDEN", message: DEMO_AI_SETTINGS_MESSAGE });
     }
     const org = await getOrgSettings(ctx.db);
-    const prev = parseAiSettings(org.aiSettings);
 
-    if (input.cloudApiKey && input.cloudApiKey.length > MAX_CLOUD_API_KEY_CHARS) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: `That API key is longer than ${MAX_CLOUD_API_KEY_CHARS} characters — check it was pasted correctly.`,
-      });
-    }
-
-    // Preserve the stored cloud key when the form leaves it blank.
-    //
-    // `prev.cloudApiKey` is the OPENED key. If it could not be opened (a rotated
-    // SESSION_SECRET), getOrgSettings reports it absent — and blindly carrying
-    // that "absent" forward would destroy ciphertext that a restored secret
-    // could still recover. So only treat a blank submission as "keep" when
-    // there is genuinely nothing stored, and otherwise make the user re-enter.
-    const storedRaw = (org.aiSettings as { cloudApiKey?: unknown } | null)?.cloudApiKey;
-    const hasUnreadableKey = typeof storedRaw === "string" && !prev.cloudApiKey;
-    if (hasUnreadableKey && !input.cloudApiKey?.trim() && input.provider === "cloud") {
-      throw new TRPCError({
-        code: "PRECONDITION_FAILED",
-        message:
-          "The stored API key can no longer be decrypted (SESSION_SECRET changed). Re-enter the key to continue using a cloud provider.",
-      });
-    }
-
-    const toStore = {
-      ...input,
-      cloudApiKey: input.cloudApiKey?.trim() ? input.cloudApiKey : prev.cloudApiKey,
-    };
-
-    // The cloud (bring-your-own-API) provider is open to every account but needs full config.
-    if (toStore.provider === "cloud") {
-      const cerr = cloudAiConfigError(toStore);
-      if (cerr) throw new TRPCError({ code: "BAD_REQUEST", message: cerr });
-      if (!toStore.cloudApiKey?.trim()) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "An API key is required for a cloud provider." });
-      }
-    }
-
-    // Seal the BYO key at rest; getOrgSettings opens it on read.
-    const sealed = {
-      ...toStore,
-      cloudApiKey: toStore.cloudApiKey?.trim() ? sealSecret(toStore.cloudApiKey) : undefined,
-    };
+    // Desktop-first, local-only AI: provider is `ollama` or `mock`, so there is
+    // no external endpoint or secret key to validate or seal.
     const [row] = await ctx.db
       .update(orgSettings)
-      .set({ aiSettings: sealed })
+      .set({ aiSettings: input })
       .where(eq(orgSettings.id, org.id))
       .returning();
     await writeAudit(ctx.db, {
@@ -106,9 +59,9 @@ export const aiRouter = router({
       entityId: org.id,
       action: "AI_SETTINGS",
       actorId: ctx.user.id,
-      after: { ...toPublicAiSettings(toStore) },
+      after: { ...input },
     });
-    return toPublicAiSettings(parseAiSettings(row!.aiSettings));
+    return parseAiSettings(row!.aiSettings);
   }),
 
   listRuns: protectedProcedure
@@ -190,29 +143,9 @@ export const aiRouter = router({
       })
       .returning();
 
-    // P3.4 — increment monthly hosted token counter (BYO-API calls excluded).
-    if (!result.usedExternalApi && result.tokenEstimate) {
-      const now = new Date();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      await ctx.db
-        .update(orgSettings)
-        .set({
-          aiTokensThisMonth: sql`
-            CASE
-              WHEN "ai_tokens_month_start" IS NULL
-                OR date_trunc('month', "ai_tokens_month_start") < date_trunc('month', now())
-              THEN ${result.tokenEstimate}
-              ELSE "ai_tokens_this_month" + ${result.tokenEstimate}
-            END`,
-          aiTokensMonthStart: sql`
-            CASE
-              WHEN "ai_tokens_month_start" IS NULL
-                OR date_trunc('month', "ai_tokens_month_start") < date_trunc('month', now())
-              THEN ${monthStart.toISOString()}::timestamptz
-              ELSE "ai_tokens_month_start"
-            END`,
-        });
-    }
+    // Local-first AI is unmetered — the hosted token counter
+    // (org_settings.ai_tokens_this_month / ai_tokens_month_start) is no longer
+    // written. The columns are left in place for platform-admin back-compat.
 
     await writeAudit(ctx.db, {
       entity: "ai_run",

@@ -1,34 +1,14 @@
 import { TRPCError } from "@trpc/server";
 import type { DB } from "../db/index.js";
 import { orgSettings } from "../db/schema.js";
-import { openSecret } from "./secretBox.js";
 
 /**
- * The BYO cloud API key inside ai_settings is sealed at rest (secretBox);
- * consumers of getOrgSettings always see plaintext. A key that no longer
- * opens (rotated SESSION_SECRET) is dropped so the firm re-enters it.
+ * Read the singleton org-settings row, creating it on first access.
+ *
+ * Desktop-first AI is local-only: there is no BYO cloud API key to decrypt.
+ * Any legacy sealed `cloudApiKey` still stored in ai_settings is ignored and
+ * stripped by `normalizeAiSettingsRaw` when the settings are parsed.
  */
-function withOpenAiKey(row: typeof orgSettings.$inferSelect): typeof orgSettings.$inferSelect {
-  const s = row.aiSettings as { cloudApiKey?: unknown } | null;
-  if (s && typeof s === "object" && typeof s.cloudApiKey === "string") {
-    try {
-      s.cloudApiKey = openSecret(s.cloudApiKey);
-    } catch {
-      // Almost always a rotated SESSION_SECRET. Report the key as absent so
-      // nothing calls a provider with garbage — but say so loudly: silence
-      // here reads downstream as "no key configured", and a later save would
-      // then persist that absence over still-recoverable ciphertext.
-      console.warn(
-        "[ai] stored cloud API key could not be decrypted (SESSION_SECRET changed?) — " +
-          "treating as unset; the firm must re-enter it.",
-      );
-      delete s.cloudApiKey;
-    }
-  }
-  return row;
-}
-
-/** Read the singleton org-settings row, creating it on first access. */
 export async function getOrgSettings(db: DB): Promise<typeof orgSettings.$inferSelect> {
   const [row] = await db.select().from(orgSettings).limit(1);
   if (row) {
@@ -37,9 +17,9 @@ export async function getOrgSettings(db: DB): Promise<typeof orgSettings.$inferS
         .update(orgSettings)
         .set({ hrEnabled: true, orgMode: "STUDIO", updatedAt: new Date() })
         .returning();
-      return withOpenAiKey(updated!);
+      return updated!;
     }
-    return withOpenAiKey(row);
+    return row;
   }
   const [created] = await db.insert(orgSettings).values({ hrEnabled: true, orgMode: "STUDIO" }).returning();
   return created!;

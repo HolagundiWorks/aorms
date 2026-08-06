@@ -95,44 +95,14 @@ function mockEomsResult(rawText: string, title: string): EomsRepoResult {
   };
 }
 
+// Desktop-first, local-only: EOMS rephrasing runs on a local Ollama model, or
+// the deterministic mock template. No external/BYO provider.
 async function callEomsChat(
   settings: AiSettings,
   userPrompt: string,
 ): Promise<{ text: string; provider: string; model: string }> {
   const model = settings.model || ollamaModelFromEnv();
   const baseUrl = settings.ollamaBaseUrl?.trim() || ollamaBaseUrlFromEnv();
-
-  if (
-    settings.provider === "cloud" &&
-    settings.cloudBaseUrl?.trim() &&
-    settings.cloudApiKey?.trim() &&
-    settings.cloudModel?.trim()
-  ) {
-    const url = `${settings.cloudBaseUrl.trim().replace(/\/+$/, "")}/chat/completions`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${settings.cloudApiKey.trim()}`,
-      },
-      body: JSON.stringify({
-        model: settings.cloudModel.trim(),
-        messages: [
-          { role: "system", content: EOMS_REPO_SYSTEM },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.15,
-      }),
-      signal: AbortSignal.timeout(120_000),
-    });
-    if (!res.ok) throw new Error(`cloud ${res.status}`);
-    const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-    return {
-      text: json.choices?.[0]?.message?.content ?? "",
-      provider: "cloud",
-      model: settings.cloudModel.trim(),
-    };
-  }
 
   if (settings.provider === "mock") {
     return { text: "", provider: "mock", model: "template" };

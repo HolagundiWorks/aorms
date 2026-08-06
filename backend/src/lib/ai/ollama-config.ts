@@ -43,9 +43,9 @@ export async function ensureOllamaAiSettings(db: DB): Promise<AiSettings> {
   const [row] = await db.select().from(orgSettings).limit(1);
   if (!row) return defaultOllamaAiSettings();
 
-  // Preserve everything the firm configured — provider choice and the BYO
-  // cloud settings (cloudApiKey stays sealed; this write must not touch it).
-  // Only normalize the Ollama endpoint/model for the Docker dev environment.
+  // Preserve everything the firm configured — the provider choice (local
+  // Ollama or mock). Only normalize the Ollama endpoint/model for the Docker
+  // dev environment.
   const current = parseAiSettings(row.aiSettings);
   const next: AiSettings = {
     ...current,

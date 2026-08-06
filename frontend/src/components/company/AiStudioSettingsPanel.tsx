@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import { DEFAULT_AI_SETTINGS, type AiSettings } from "@esti/contracts";
 import { useEffect, useState } from "react";
-import { TYPE_SCALE } from "@hcw/ui-kit";
 import { EstiAiExplainLabel } from "../AiCarbon.js";
 import { trpc } from "../../lib/trpc.js";
 
@@ -20,7 +19,6 @@ export function AiStudioSettingsPanel({ isEnterprise: _isEnterprise = false }: {
   const utils = trpc.useUtils();
   const settingsQ = trpc.ai.settings.useQuery();
   const [form, setForm] = useState<AiSettings>(DEFAULT_AI_SETTINGS);
-  const [secretConfigured, setSecretConfigured] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
@@ -32,12 +30,8 @@ export function AiStudioSettingsPanel({ isEnterprise: _isEnterprise = false }: {
         provider: d.provider,
         model: d.model,
         ollamaBaseUrl: d.ollamaBaseUrl ?? undefined,
-        cloudBaseUrl: d.cloudBaseUrl ?? undefined,
-        cloudModel: d.cloudModel ?? undefined,
-        cloudApiKey: undefined, // never returned — blank means "keep stored"
         redactPii: d.redactPii,
       });
-      setSecretConfigured(d.cloudApiKeyConfigured);
     }
   }, [settingsQ.data]);
 
@@ -51,10 +45,6 @@ export function AiStudioSettingsPanel({ isEnterprise: _isEnterprise = false }: {
     onError: (e) => { setErr(e.message); setMsg(null); },
   });
 
-  const isCloud = form.provider === "cloud";
-  // BYO API is available to all accounts (no tier gate).
-  const showCloudOption = true;
-
   return (
     <Box className="esti-ai-settings-tile" sx={{ p: 3, maxWidth: 760 }}>
       <Stack spacing={2}>
@@ -63,20 +53,11 @@ export function AiStudioSettingsPanel({ isEnterprise: _isEnterprise = false }: {
           <EstiAiExplainLabel scope="draft" />
         </Stack>
         <Typography variant="body2">
-          Drafts run on <strong>Ollama</strong> on your server by default. Every account can
-          plug in a <strong>BYO API key</strong> for any{" "}
-          <strong>OpenAI-compatible provider</strong> (OpenAI, Azure OpenAI, Groq, Together AI,
-          LM Studio, Ollama with{" "}
-          <code>/v1</code>, etc.) — no extra tier required. Hosted Ollama usage is metered
-          monthly; BYO-API calls are billed directly by your provider.
+          AORMS is <strong>desktop-first</strong> and AI runs <strong>locally</strong>.
+          Drafts use a local <strong>Ollama</strong> model on this node; when Ollama is
+          unavailable, ESTI falls back to a deterministic <strong>template</strong>. There is
+          no hosted or bring-your-own cloud provider, and local AI is <strong>unmetered</strong>.
         </Typography>
-        <Alert severity="info" sx={{ fontSize: TYPE_SCALE.body2 }}>
-          <AlertTitle>OpenAI-compatible endpoint format</AlertTitle>
-          Set the base URL to the path ending in <code>/v1</code>, e.g.{" "}
-          <code>https://api.openai.com/v1</code> or{" "}
-          <code>http://localhost:11434/v1</code> (Ollama). The API key field
-          accepts any bearer token your provider issues.
-        </Alert>
         <Alert severity="info">
           <AlertTitle>Ollama endpoint</AlertTitle>
           {settingsQ.data?.ollamaDefaultUrl ?? "http://127.0.0.1:11434"}
@@ -100,65 +81,26 @@ export function AiStudioSettingsPanel({ isEnterprise: _isEnterprise = false }: {
           onChange={(e) => setForm((f) => ({ ...f, provider: e.target.value as AiSettings["provider"] }))}
           fullWidth
         >
-          <MenuItem value="ollama">Ollama (on-server)</MenuItem>
+          <MenuItem value="ollama">Ollama (local model)</MenuItem>
           <MenuItem value="mock">Template only (offline / demo)</MenuItem>
-          {showCloudOption && <MenuItem value="cloud">Cloud — bring your own API (OpenAI-compatible)</MenuItem>}
         </TextField>
 
-        {!isCloud && (
-          <>
-            <TextField
-              id="ai-ollama-url"
-              label="Ollama base URL"
-              helperText="Docker service name, e.g. http://ollama:11434"
-              value={form.ollamaBaseUrl ?? ""}
-              onChange={(e) => setForm((f) => ({ ...f, ollamaBaseUrl: e.target.value.trim() || undefined }))}
-              fullWidth
-            />
-            <TextField
-              id="ai-model"
-              label="Ollama model name"
-              helperText="Must match a model pulled on the server, e.g. llama3.2"
-              value={form.model}
-              onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
-              fullWidth
-            />
-          </>
-        )}
-
-        {isCloud && (
-          <>
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-              <span className="esti-label--secondary">Bring-your-own AI provider (OpenAI-compatible)</span>
-            </Stack>
-            <TextField
-              id="ai-cloud-url"
-              label="Endpoint URL"
-              helperText="OpenAI-compatible base ending in /v1, e.g. https://api.openai.com/v1"
-              value={form.cloudBaseUrl ?? ""}
-              onChange={(e) => setForm((f) => ({ ...f, cloudBaseUrl: e.target.value.trim() || undefined }))}
-              fullWidth
-            />
-            <TextField
-              id="ai-cloud-model"
-              label="Model id"
-              helperText="e.g. gpt-4o-mini"
-              value={form.cloudModel ?? ""}
-              onChange={(e) => setForm((f) => ({ ...f, cloudModel: e.target.value.trim() || undefined }))}
-              fullWidth
-            />
-            <TextField
-              id="ai-cloud-key"
-              type="password"
-              label="API key"
-              helperText={secretConfigured ? "A key is stored — leave blank to keep it." : "Stored at rest; never shown again."}
-              value={form.cloudApiKey ?? ""}
-              onChange={(e) => setForm((f) => ({ ...f, cloudApiKey: e.target.value || undefined }))}
-              autoComplete="new-password"
-              fullWidth
-            />
-          </>
-        )}
+        <TextField
+          id="ai-ollama-url"
+          label="Ollama base URL"
+          helperText="Docker service name, e.g. http://ollama:11434"
+          value={form.ollamaBaseUrl ?? ""}
+          onChange={(e) => setForm((f) => ({ ...f, ollamaBaseUrl: e.target.value.trim() || undefined }))}
+          fullWidth
+        />
+        <TextField
+          id="ai-model"
+          label="Ollama model name"
+          helperText="Must match a model pulled on the server, e.g. llama3.2"
+          value={form.model}
+          onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
+          fullWidth
+        />
 
         <FormControlLabel
           control={
@@ -173,7 +115,7 @@ export function AiStudioSettingsPanel({ isEnterprise: _isEnterprise = false }: {
           <Button
             variant="contained"
             disabled={save.isPending}
-            onClick={() => save.mutate({ ...form, cloudApiKey: form.cloudApiKey?.trim() ? form.cloudApiKey : undefined })}
+            onClick={() => save.mutate(form)}
           >
             {save.isPending ? "Saving…" : "Save AI settings"}
           </Button>
