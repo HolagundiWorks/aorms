@@ -8,9 +8,21 @@ Four agents. Call them by name in handoffs and PRs.
 | Name | Role | Runtime | Owns |
 | --- | --- | --- | --- |
 | **Vishwakarma** | CTO / orchestrator | Cloud or local | Coordination · merge to `main` · roadmap truth |
-| **Bhoomi** | Local desktop | This Windows machine | LF4 sign · install · licence bind |
+| **Bhoomi** | Local desktop | Env **`bhoomi`** (desktop/VNC) + Windows host for sign | LF4 WinUI shell · sign · install · licence bind |
 | **Gagan** | Cloud hub / sync | Cloud | `syncToken` · hub APIs · `@esti/contracts` |
-| **Aakash** | Cloud portal / GTM | Cloud | Downloads · M8 · LF6 · empty scaffolds |
+| **Aakash** | Cloud portal / GTM | Cloud | Downloads · M8 · LF5–LF6 |
+
+### Live roster (2026-08-06 restart)
+
+| Name | Agent URL | Focus now |
+| --- | --- | --- |
+| **Vishwakarma** | [Roadmap initial setup](https://cursor.com/agents/bc-dedaa2fa-3738-47a0-9d7b-3f477239445f) | Orchestration · merge queue |
+| **Bhoomi** (env setup) | [Bhoomi setup](https://cursor.com/agents/bc-da18314e-6c4a-4a57-b1e4-102cfd7ff440) | Named env **`bhoomi`** guided setup (desktop/VNC) |
+| **Bhoomi** (LF4 work) | [Bhoomi](https://cursor.com/agents/bc-37815831-e258-5dd6-b6b4-44f4717ec224) | LF4 WinUI shell · PR #49 · morning bind |
+| **Gagan** | [Gagan](https://cursor.com/agents/bc-57db064c-b719-5d4f-94b8-b256b2e268ee) | Hub bind re-verify for morning test |
+| **Aakash** | [Aakash](https://cursor.com/agents/bc-789127f6-07dc-56e7-ad50-59526152c67d) | LF6 right-slot · portal honesty |
+
+Prefer launching desktop work on env **`bhoomi`** (`env.name=bhoomi` via Cloud Agents API / dashboard).
 
 ```mermaid
 flowchart TB

@@ -14,13 +14,13 @@ Stripe auto-billing remains **deferred by choice**. Market-fit Waves 1–3 are
 **shipped**; Wave 4 (integrations) stays phase-2 by design.
 
 **Active delivery (2026-08-06):** hub `0227` + panel `syncToken` ✅ (Gagan #45) ·
-portal `/downloads` placeholders ✅ (Aakash #46) · LF4 Tauri scaffold +
-`DesktopLicenceBind` 🚧 (Bhoomi — sign + physical bind per
-[MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)). Live installer URLs stay gated.
-The 2026-07-19 **web-only** product law is **superseded** for runtime shape
-([PLANS-AND-TIERS.md](PLANS-AND-TIERS.md), [LOCAL-FIRST.md](LOCAL-FIRST.md)).
-Legacy Community / Manager installers and a separate Estimate desktop app stay
-**retired**.
+portal `/downloads` placeholders ✅ (Aakash #46) · LF5 web parity polish 🚧
+(#51) · LF4 **WinUI 3** shell 🚧 (#49 · Bhoomi on env **`bhoomi`**) · LF6
+right-slot 🔲 (Aakash). Crew restarted — see [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)
+live roster. Live installer URLs stay gated. The 2026-07-19 **web-only** product
+law is **superseded** for runtime shape ([PLANS-AND-TIERS.md](PLANS-AND-TIERS.md),
+[LOCAL-FIRST.md](LOCAL-FIRST.md)). Legacy Community / Manager installers and a
+separate Estimate desktop app stay **retired**.
 
 This is the **single** delivery roadmap. Superseded autopilot / audit / fix-plan
 docs were removed 2026-07-24 (Git history retains them).
