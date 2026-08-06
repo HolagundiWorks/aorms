@@ -122,8 +122,9 @@ export function Downloads() {
             Estimation). Operators: wire signed URLs via{" "}
             <code>VITE_ASTUDIO_INSTALLER_URL</code> / <code>VITE_ACONSULTING_INSTALLER_URL</code>{" "}
             or fill <code>frontend/public/update-manifests/*.json</code> and set{" "}
-            <code>VITE_PORTAL_USE_RELEASE_INSTALLERS=true</code> — never point live CTAs at
-            unsigned overnight builds (wait on Bhoomi for signed URL + sha256).
+            <code>VITE_PORTAL_USE_RELEASE_INSTALLERS=true</code> — only for a
+            <strong>signed WinUI</strong> package (never Tauri NSIS / unsigned{" "}
+            <code>desktop/artifacts/</code>; wait on Bhoomi for URL + sha256 + version).
           </Typography>
         </Stack>
       </div>

@@ -1,5 +1,5 @@
 {
-  "$schemaComment": "AStudio desktop update manifest — fill after Bhoomi publishes a signed Setup.exe. Do NOT point url at unsigned overnight builds.",
+  "$schemaComment": "AStudio desktop update manifest — fill after Bhoomi publishes a code-signed WinUI 3 (WebView2) package. Do NOT point url at Tauri NSIS Setup.exe or unsigned desktop/artifacts/ builds.",
   "app": "astudio",
   "product": "AStudio",
   "channel": "stable",
@@ -11,5 +11,5 @@
   "signature": "",
   "publishedAt": "",
   "status": "web_fallback",
-  "notes": "Leave status=web_fallback until a code-signed installer URL + sha256 are set. Set VITE_ASTUDIO_INSTALLER_URL (or enable VITE_PORTAL_USE_RELEASE_INSTALLERS after filling this file) to go live."
+  "notes": "Leave status=web_fallback until a signed WinUI installer URL + sha256 + version are set (see docs/esti/WEB-PORTAL.md · MORNING-TEST-LF4.md). Set VITE_ASTUDIO_INSTALLER_URL or enable VITE_PORTAL_USE_RELEASE_INSTALLERS after filling this file."
 }
