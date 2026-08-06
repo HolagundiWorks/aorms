@@ -13,7 +13,7 @@ empty GitHub shells for **AStudio** / **AConsulting** are README-only scaffolds 
 | Choice | Detail |
 | --- | --- |
 | **Single contracts package** | `@esti/contracts` in this monorepo — **do not** invent a second contracts repo |
-| **Desktop shell in-tree** | `desktop/AStudio.Shell` (**WinUI 3** + WebView2) — Tauri under `src-tauri/` is **legacy** |
+| **Desktop shell in-tree** | `desktop/AStudio.Shell` (**WinUI 3** + WebView2) — the legacy Tauri scaffold was **removed; WinUI 3 is the only shell** |
 | **Same SPA** | Desktop loads `frontend/` against loopback backend |
 
 ## Gate checklist

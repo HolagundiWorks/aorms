@@ -8,7 +8,7 @@
 
 .NOTES
   Requires: .NET 8 SDK, Windows App SDK workloads, WebView2 runtime.
-  Tauri under desktop/src-tauri is non-canonical (legacy scaffold).
+  WinUI 3 is the only desktop shell (the legacy Tauri scaffold was removed).
 #>
 [CmdletBinding()]
 param(
