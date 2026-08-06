@@ -16,34 +16,34 @@ from ..config import settings
 from ..db import (
     fetch_drawing_full,
     fetch_engagement_full,
+    fetch_feasibility_report_full,
     fetch_feeproposal_full,
     fetch_inspection_full,
     fetch_invoice_full,
     fetch_letter_full,
     fetch_measurement_book_full,
     fetch_payslip_full,
+    fetch_pmc_ra_bill_full,
+    fetch_progress_report_full,
     fetch_proposal_full,
+    fetch_site_instruction_full,
     fetch_specsheet_full,
     fetch_transmittal_full,
-    fetch_progress_report_full,
-    fetch_feasibility_report_full,
-    fetch_site_instruction_full,
-    fetch_pmc_ra_bill_full,
     update_drawing,
     update_engagement,
+    update_feasibility_report,
     update_feeproposal,
     update_inspection,
     update_invoice,
     update_letter,
     update_measurement_book,
     update_payslip,
+    update_pmc_ra_bill,
     update_progress_report,
     update_proposal,
-    update_feasibility_report,
     update_site_instruction,
     update_specsheet,
     update_transmittal,
-    update_pmc_ra_bill,
 )
 from ..storage import get_bytes, put_bytes
 
@@ -968,7 +968,7 @@ def _render_drawing_issue(record_id: str, firm: dict[str, Any], watermark: str |
         put_bytes(settings.s3_bucket, pdf_key, pdf_bytes, "application/pdf")
         update_drawing(record_id, issue_pdf_key=pdf_key, issue_pdf_status="READY")
         return {"status": "ok", "id": record_id, "target": "drawing", "bytes": len(pdf_bytes)}
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         log.exception("drawing issue pdf failed for %s", record_id)
         update_drawing(record_id, issue_pdf_status="FAILED")
         return {"status": "error", "id": record_id, "error": str(exc)}
@@ -1004,7 +1004,7 @@ def render_pdf(payload: dict[str, Any]) -> dict[str, Any]:
         put_bytes(settings.s3_bucket, pdf_key, pdf_bytes, "application/pdf")
         update(record_id, pdf_key=pdf_key, pdf_status="READY")
         return {"status": "ok", "id": record_id, "target": target, "bytes": len(pdf_bytes)}
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         log.exception("pdf render failed for %s %s", target, record_id)
         update(record_id, pdf_status="FAILED")
         return {"status": "error", "id": record_id, "error": str(exc)}

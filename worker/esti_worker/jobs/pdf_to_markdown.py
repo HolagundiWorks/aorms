@@ -53,7 +53,7 @@ def pdf_to_markdown(payload: dict[str, Any]) -> dict[str, Any]:
     try:
         pdf_bytes = get_bytes(bucket, file_key)
         markdown = _convert_pdf_bytes(pdf_bytes)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         msg = str(exc)[:500]
         log.exception("pdf_to_markdown failed for %s", source_id)
         update_repo_source(

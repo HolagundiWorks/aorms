@@ -22,8 +22,9 @@ def fetch_storage_settings() -> dict[str, Any]:
             return val
         if isinstance(val, str):
             return json.loads(val)
-    except Exception:
-        pass
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        # Unreadable org settings — fall back to DEFAULT storage mode.
+        return {"mode": "DEFAULT"}
     return {"mode": "DEFAULT"}
 
 

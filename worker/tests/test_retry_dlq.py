@@ -19,7 +19,7 @@ class StubRedis:
     def xadd(self, _stream, fields):
         self.dead.append(fields)
 
-    def xpending_range(self, _stream, _group, min, max, count):  # noqa: A002
+    def xpending_range(self, _stream, _group, min, max, count):
         return [{"message_id": min, "times_delivered": self.times_delivered}]
 
 
