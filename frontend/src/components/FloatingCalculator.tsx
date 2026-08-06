@@ -5,8 +5,10 @@ import { useState, type RefObject } from "react";
 type FloatingCalculatorProps = {
   open: boolean;
   onClose: () => void;
-  /** Dock trigger — the popover anchors above it. */
+  /** Dock trigger — the popover anchors to it. */
   triggerRef: RefObject<HTMLElement | null>;
+  /** Footer calc opens above; marketing top-bar opens below. */
+  placement?: "above" | "below";
 };
 
 export type CalcOutputUnit = "metric" | "imperial";
@@ -28,7 +30,12 @@ const RESULT_MIN_H = INPUT_MIN_H * 2;
  * (no inset well), Radiant Orange pixel type at 2× input height. Bare numbers are
  * **meters**; imperial lengths convert before + − × ÷. m ↔ ft·in via Switch.
  */
-export function FloatingCalculator({ open, onClose, triggerRef }: FloatingCalculatorProps) {
+export function FloatingCalculator({
+  open,
+  onClose,
+  triggerRef,
+  placement = "above",
+}: FloatingCalculatorProps) {
   const [expr, setExpr] = useState("");
   const [outputUnit, setOutputUnit] = useState<CalcOutputUnit>("metric");
   const result = safeEval(expr);
@@ -44,13 +51,21 @@ export function FloatingCalculator({ open, onClose, triggerRef }: FloatingCalcul
       ? "—"
       : `= ${formatResult(result, outputUnit)}`;
 
+  const below = placement === "below";
+
   return (
     <Popover
       open={open}
       anchorEl={triggerRef.current}
       onClose={onClose}
-      anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      transformOrigin={{ vertical: "bottom", horizontal: "center" }}
+      anchorOrigin={{
+        vertical: below ? "bottom" : "top",
+        horizontal: "center",
+      }}
+      transformOrigin={{
+        vertical: below ? "top" : "bottom",
+        horizontal: "center",
+      }}
       slotProps={{
         paper: {
           className: "esti-neu esti-calc-panel",
