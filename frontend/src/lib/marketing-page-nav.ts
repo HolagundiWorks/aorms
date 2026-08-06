@@ -1,4 +1,4 @@
-/** Cross-page links for the marketing glass rail (not in-page section anchors). */
+/** Cross-page links for the marketing top ribbon (not in-page section anchors). */
 export type MarketingRailIcon =
   | "platform"
   | "architecture"

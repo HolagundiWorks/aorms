@@ -1,27 +1,29 @@
 # Desktop ↔ web UX parity
 
 > **Law:** one design language, two hosts — only **platform behaviour** diverges.  
-> **Design system:** [`@hcw/ui-kit`](HCW-UI-KIT.md) (Urbanist · Radiant Orange · flat/soft/glass · Rail · Stage · Taskbar · ActionDock).  
+> **Design system:** [`@hcw/ui-kit`](HCW-UI-KIT.md) (Urbanist · Radiant Orange · opaque soft neu · Top ribbon · Stage · Taskbar · ActionDock · AnalogueClock).  
 > **Runtime:** [LOCAL-FIRST.md](LOCAL-FIRST.md). Do **not** introduce a second typeface, palette, or ERP chrome for desktop.
 
 ## Shell mapping (same IA both hosts)
 
 ```text
 ┌─ Optional thin OS menu (desktop only: Project · Edit · View · AI · Help) ─┐
-├─ GlassRail (modules) ── Stage (workspace) ── Inspector / Ask ESTI ────────┤
+├─ Top ribbon / SoftRail (modules) ── Stage ── Inspector / Ask ESTI ───────┤
 ├─ ActionDock (destroy · create · commit) ──────────────────────────────────┤
-└─ TaskbarFooter (calc · launchers · tray: clock · sync · alerts · ID) ─────┘
+├─ TaskbarFooter (calc · launchers · tray: digital clock · sync · alerts) ──┤
+└─ AnalogueClock (fixed bottom-right — separate from tray digital clock) ───┘
 ```
 
 | Role | Primitive | Rule |
 | --- | --- | --- |
-| Modules | `GlassRail` — expanded ~280px / collapsed ~72px | Never move module nav to a web-only top bar |
+| Modules | Soft neu top ribbon / brief strip (staff); `SoftRail` on portals | Same IA on desktop + web — do not invent a second module tree |
+| Marketing | `MarketingNeuFrame` (top ribbon · stage · AnalogueClock) | Public Home/Blog/Downloads — no left SoftRail |
 | Workspace | Stage | Same routes + [05-TEMPLATES](../hcw-kit/05-TEMPLATES.md) |
 | Inspector / AI | One right slot (properties ↔ Ask ESTI) | AI never menu-only |
 | Native chrome | Thin **WinUI 3** Fluent 2 menu → SPA commands | AI never menu-only |
-| Status | Taskbar + `SyncQueueChip` | Same tray order |
+| Status | Taskbar + `SyncQueueChip` + AnalogueClock | Same tray order; analogue clock is decorative/ambient |
 
-Desktop may add a **thin native menu** that invokes the **same command IDs** as the web Command Palette — it does not replace GlassRail.
+Desktop may add a **thin native menu** that invokes the **same command IDs** as the web Command Palette — it does not replace the SPA module chrome.
 
 ## Shared (must not fork)
 

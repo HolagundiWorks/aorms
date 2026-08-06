@@ -38,10 +38,12 @@ browser-staff scope.
 | 6b | Colocated hub routes for local loopback (`ESTI_COLOCATED_HUB`) | âœ… â€” node can mount `/api/sync/*` for single-box smoke |
 | 7 | Public HTTPS URL + fill `/downloads` manifests (was Aakash) | ðŸ”² gated on **SmartScreen-trusted** cert + release host |
 | 8 | M8 live-installer honesty Â· keep `web_fallback` until 7 | âœ… manifests stay `web_fallback` (no invented sha256 / URL) |
+| 9 | Pure neumorphism marketing (`MarketingNeuFrame` Â· AnalogueClock Â· blog/SEO) | âœ… `8bad1e5c` â€” Home/Blog/Downloads top ribbon; web-only scrubbed |
 
 Canonical runbook: [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md). Do **not** invent
-sha256 or flip portal URLs unsigned. Landing morphic redesign (rail Â· stage Â·
-soft/glass Â· tray clock) stays as shipped â€” no revert.
+sha256 or flip portal URLs unsigned. Marketing uses **opaque soft neu** top ribbon
++ stage + fixed AnalogueClock (left SoftRail / glass marketing chrome retired).
+Staff shell: top ribbon Â· stage Â· taskbar Â· ActionDock Â· AnalogueClock.
 
 **Parked until crew returns:** multi-agent PR choreography, cloud hub prod `0227`
 (ops), Stripe/W4, AStudio/AConsulting code extraction.
@@ -184,9 +186,9 @@ Canonical brief: **[MARKET-FIT.md](MARKET-FIT.md)**.
 | **P9 Consultancy** | Engagements Â· reliance Â· fees Â· SOP Â· enquiry Â· fee-stage invoices Â· intelligence (`0214`â€“`0219`) |
 | **P9.V / P9.M** | Walkthrough signed Â· marketing live |
 | **Pre-con R&O** | Consultancy + Studio phase gates |
-| **UI shell U0â€“U6** | Glass rail Â· stage Â· ActionDock Â· marketing shell |
-| **@hcw/ui-kit 1.4.0** | Vendored + app shell adoption |
-| **Blog / SEO** | `/blog` live; feed/sitemap refreshed |
+| **UI shell U0â€“U6** | Soft neu chrome Â· stage Â· ActionDock Â· marketing shell |
+| **@hcw/ui-kit 1.5.0** | Pure neumorphism Â· SoftRail Â· AnalogueClock Â· marketing `MarketingNeuFrame` |
+| **Blog / SEO** | `/blog` live; neu + desktop posts; feed/sitemap/llms scrubbed web-only |
 | **HCW License Manager** | In-tree (`admin.aorms.in`) |
 | **Market fit W1â€“W3** | GTM scrub Â· portal Â· fee recovery Â· onboarding Â· capacity Â· digests Â· consultancy chrome Â· demo seed Â· packaging |
 | **AProc W0â€“W5** | Chrome Â· Delivery Â· tenders Â· RA/steel cert Â· BBS + steel recon Â· CSV/XER Â· digest Â· ESTI (`0220`â€“`0224`) |

@@ -122,8 +122,9 @@ Align public story with desktop-preferred product law. Delivery checklist:
 | 1 | Product / blog / FAQ: desktop preferred + web parity (no “web-only / no desktop”) | ✅ 2026-08-06 |
 | 2 | `/downloads` portal with honest `web_fallback` CTAs | ✅ prep |
 | 3 | Update manifests + env one-line fill documented ([WEB-PORTAL.md](WEB-PORTAL.md)) | ✅ prep |
-| 4 | Live signed installer URL + sha256 for AStudio / AConsulting | 🔲 until Bhoomi publishes |
+| 4 | Live signed installer URL + sha256 for AStudio / AConsulting | 🔲 until SmartScreen-trusted publish |
 | 5 | LF6 Figma ↔ kit token sync notes / stub ([FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md)) | ✅ stub |
+| 6 | Pure neumorphism marketing frame + blog/SEO scrub (`MarketingNeuFrame`) | ✅ 2026-08-06 |
 
 Portal fill fields: [WEB-PORTAL.md](WEB-PORTAL.md). Crew status tables: Vishwakarma
 ([AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) after orch merge). Hub bind: Gagan.

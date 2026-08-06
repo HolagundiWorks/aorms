@@ -215,11 +215,11 @@ These gates appear once and unblock the full workspace.
 
 ## 3. Understand the shell
 
-AORMS uses a fixed **glass rail** (left), a scrolling **stage** (centre), a **taskbar footer** (calculator, launcher, tray), and a **context ActionDock** (bottom-centre) for screen-specific actions.
+AORMS uses a soft-neu **top ribbon** (or portal SoftRail), a scrolling **stage** (centre), a **taskbar footer** (calculator, launcher, tray), a **context ActionDock** (bottom-centre) for screen-specific actions, and a fixed **AnalogueClock** (bottom-right).
 
 | Area | What it does |
 |------|----------------|
-| **Rail** | Module navigation � Studio Intelligence, Projects, Tasks, Library, Finance, and more |
+| **Top ribbon** | Module navigation — Studio Intelligence, Projects, Tasks, Library, Finance, and more |
 | **Stage** | The active screen � tables, forms, and project detail |
 | **ActionDock** | Create, save, and destroy actions for the current screen (replaces scattered page buttons) |
 | **Footer** | Calculator, app launcher, notifications tray |
@@ -284,7 +284,7 @@ Three material languages stack by visual depth. Pick a layer by **role**, not ta
 
 | Zone | Role |
 | --- | --- |
-| **Rail** (20%, fixed) | Navigation, filters, screen context � glass on marketing; glass dash rail in the app |
+| **Top ribbon / SoftRail** | Navigation and filters — soft-neu chrome (marketing uses MarketingNeuFrame; portals keep SoftRail) |
 | **Stage** (scrolls) | Primary work surface |
 | **Taskbar footer** | Calculator � launcher cluster � tray (clock, alerts, ID, sign out) |
 | **ActionDock** (floating, bottom-centre) | Context-aware screen actions via \`useScreenActions\` � left destroy � centre create � right commit |
@@ -315,7 +315,7 @@ No. \`@carbon/react\` was removed (2026-07). Legacy \`--cds-*\` CSS variables in
 
 ### Where do marketing pages get their layout?
 
-\`MarketingShell\` � glass rail (open or collapsed icon strip) + scrolling stage + SectionDock for in-page sections. Flat marketing content uses the \`lp2-ds\` class family.
+\`MarketingShell\` / \`MarketingNeuFrame\` — soft-neu top ribbon + scrolling stage + AnalogueClock; SectionDock for in-page sections on the platform home. Flat marketing content uses the \`lp2-ds\` class family.
 
 ### How do I add a screen action?
 

@@ -25,7 +25,8 @@ orchestration + LF4 + interim portal honesty until the crew restarts.
 | Vishwakarma · Gagan · Aakash · Bhoomi | Parked | Do not wait on them |
 
 Prior merge wave **#55 → #56 → #51 → #53 → #54 → #49 → #57** remains on `main`.
-Landing morphic redesign (rail · stage · soft/glass · tray clock) stays shipped.
+Pure neumorphism marketing (`MarketingNeuFrame` · AnalogueClock · blog/SEO) shipped
+(`8bad1e5c`); kit/app neu 1.5.0 on `42fb2eb5`.
 
 ```mermaid
 flowchart TB
