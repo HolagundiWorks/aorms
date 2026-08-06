@@ -18,6 +18,7 @@
 | Modules | `GlassRail` — expanded ~280px / collapsed ~72px | Never move module nav to a web-only top bar |
 | Workspace | Stage | Same routes + [05-TEMPLATES](../hcw-kit/05-TEMPLATES.md) |
 | Inspector / AI | One right slot (properties ↔ Ask ESTI) | AI never menu-only |
+| Native chrome | Thin **WinUI 3** Fluent 2 menu → SPA commands | AI never menu-only |
 | Status | Taskbar + `SyncQueueChip` | Same tray order |
 
 Desktop may add a **thin native menu** that invokes the **same command IDs** as the web Command Palette — it does not replace GlassRail.

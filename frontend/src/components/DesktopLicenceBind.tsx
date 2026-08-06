@@ -12,6 +12,7 @@ import {
 import { can } from "@esti/contracts";
 import { useState } from "react";
 import { useAuth } from "../lib/auth.js";
+import { isNativeDesktopShell } from "../lib/desktopNativeBridge.js";
 import { buildTimeHost, useRuntimeCapabilities } from "../lib/runtimeCapabilities.js";
 import { trpc } from "../lib/trpc.js";
 
@@ -49,8 +50,13 @@ export function DesktopLicenceBind() {
     },
   });
 
+  // WinUI WebView2 injects `__AORMS_NATIVE_SHELL__.host=desktop` even when Vite
+  // was not built with VITE_RUNTIME_HOST (dev URL against loopback).
   const isDesktop =
-    buildTimeHost() === "desktop" || caps.host === "desktop" || Boolean(import.meta.env.VITE_RUNTIME_HOST === "desktop");
+    buildTimeHost() === "desktop" ||
+    caps.host === "desktop" ||
+    Boolean(import.meta.env.VITE_RUNTIME_HOST === "desktop") ||
+    isNativeDesktopShell();
 
   if (!user || !can(user.role, "firm:admin") || !isDesktop || dismissed) return null;
 
