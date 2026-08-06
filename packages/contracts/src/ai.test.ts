@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   AI_DRAFT_KIND_LABEL,
   AiDraftKind,
+  AiProvider,
   parseAiSettings,
   parseMomRevisionSuggestions,
 } from "./ai.js";
@@ -15,6 +16,10 @@ describe("ai contracts", () => {
     expect(s.redactPii).toBe(true);
   });
 
+  it("offers only local providers (no hosted/cloud tier)", () => {
+    expect(AiProvider.options).toEqual(["mock", "ollama"]);
+  });
+
   it("migrates legacy cloud model names to llama3.2", () => {
     const s = parseAiSettings({
       enabled: true,
@@ -24,6 +29,31 @@ describe("ai contracts", () => {
     });
     expect(s.model).toBe("llama3.2");
     expect(s.provider).toBe("ollama");
+  });
+
+  it("migrates a legacy cloud provider to ollama and strips cloud fields", () => {
+    const s = parseAiSettings({
+      enabled: true,
+      provider: "cloud",
+      model: "gpt-4o",
+      cloudBaseUrl: "https://api.openai.com/v1",
+      cloudApiKey: "enc:v1:secret",
+      cloudModel: "gpt-4o",
+      redactPii: true,
+    });
+    expect(s.provider).toBe("ollama");
+    expect(s.model).toBe("llama3.2");
+    // Cloud fields no longer exist on AiSettings.
+    expect((s as Record<string, unknown>).cloudBaseUrl).toBeUndefined();
+    expect((s as Record<string, unknown>).cloudApiKey).toBeUndefined();
+    expect((s as Record<string, unknown>).cloudModel).toBeUndefined();
+  });
+
+  it("maps legacy openai / openai_compatible providers to ollama", () => {
+    for (const provider of ["openai", "openai_compatible"]) {
+      const s = parseAiSettings({ enabled: true, provider, model: "llama3.2" });
+      expect(s.provider).toBe("ollama");
+    }
   });
 
   it("labels every draft kind", () => {

@@ -119,7 +119,7 @@ function findJsonEnd(text: string, start: number): number {
   return text.length - 1;
 }
 
-export const AiProvider = z.enum(["mock", "ollama", "cloud"]);
+export const AiProvider = z.enum(["mock", "ollama"]);
 export type AiProvider = z.infer<typeof AiProvider>;
 
 export const AiApprovalState = z.enum(["DRAFT", "APPROVED", "REJECTED", "ISSUED"]);
@@ -135,55 +135,18 @@ export type AiSourceRef = z.infer<typeof AiSourceRef>;
 
 export const AiSettings = z.object({
   enabled: z.boolean().default(true),
-  /** ollama = on-server (Core+); cloud = bring-your-own OpenAI-compatible API (Enterprise). */
+  /**
+   * Desktop-first, local-only AI. `ollama` = a local model on the node;
+   * `mock` = deterministic template fallback. The hosted/cloud BYO-API tier
+   * was removed — there is no external provider.
+   */
   provider: AiProvider.default("ollama"),
   model: z.string().min(1).max(80).default("llama3.2"),
   /** Ollama HTTP base URL (no /api suffix). Falls back to OLLAMA_BASE_URL env. */
   ollamaBaseUrl: z.string().max(200).optional(),
-  // BYO-API (Enterprise) — an OpenAI-compatible cloud provider the firm supplies.
-  /** Base URL ending in /v1, e.g. https://api.openai.com/v1 or an OpenRouter/vLLM endpoint. */
-  cloudBaseUrl: z.string().max(300).optional(),
-  /**
-   * Secret API key — persisted but never returned by read APIs.
-   *
-   * This bound has to cover the value **as stored**, which is the sealed
-   * ciphertext (`enc:v1:` + base64 of IV + tag + body), roughly 4/3 of the
-   * plaintext plus 45 chars. A tighter bound here fails on read rather than on
-   * write: parseAiSettings falls back to DEFAULT_AI_SETTINGS, and the next boot
-   * writes those defaults back, destroying the firm's provider and key.
-   * MAX_CLOUD_API_KEY_CHARS is the limit applied to the plaintext on the way in.
-   */
-  cloudApiKey: z.string().max(4000).optional(),
-  /** Cloud model id, e.g. gpt-4o-mini. */
-  cloudModel: z.string().max(120).optional(),
   redactPii: z.boolean().default(true),
 });
 export type AiSettings = z.infer<typeof AiSettings>;
-
-/**
- * Longest plaintext API key accepted. Generous — Azure/vLLM bearer tokens and
- * JWT-style keys run long — while leaving ample headroom under the 4000-char
- * stored bound once sealed.
- */
-export const MAX_CLOUD_API_KEY_CHARS = 1024;
-
-/** AI settings with the cloud secret stripped + a configured flag — for read APIs. */
-export interface AiSettingsPublic extends Omit<AiSettings, "cloudApiKey"> {
-  cloudApiKeyConfigured: boolean;
-}
-
-export function toPublicAiSettings(s: AiSettings): AiSettingsPublic {
-  const { cloudApiKey, ...rest } = s;
-  return { ...rest, cloudApiKeyConfigured: !!cloudApiKey };
-}
-
-/** Cloud BYO-API config is complete enough to use. */
-export function cloudAiConfigError(s: AiSettings): string | null {
-  if (s.provider !== "cloud") return null;
-  if (!s.cloudBaseUrl?.trim()) return "A cloud endpoint URL (…/v1) is required.";
-  if (!s.cloudModel?.trim()) return "A cloud model id is required.";
-  return null;
-}
 
 export const DEFAULT_AI_SETTINGS: AiSettings = {
   enabled: true,
@@ -206,13 +169,19 @@ export function normalizeAiSettingsRaw(raw: unknown): unknown {
   if (!raw || typeof raw !== "object") return raw;
   const o = { ...(raw as Record<string, unknown>) };
   const p = o.provider;
-  if (p === "openai" || p === "openai_compatible") o.provider = "ollama";
+  // Desktop-first: the hosted/cloud BYO-API tier was removed. Any stored
+  // `cloud` (or legacy `openai` / `openai_compatible`) provider now resolves to
+  // local Ollama, and the orphaned cloud fields below are stripped.
+  if (p === "cloud" || p === "openai" || p === "openai_compatible") o.provider = "ollama";
   // Migration 0048 defaulted to mock — live installs use on-server Ollama when enabled.
   if (p === "mock" && o.enabled === true) o.provider = "ollama";
   const model = o.model;
   if (typeof model === "string" && LEGACY_CLOUD_MODELS.has(model)) {
     o.model = DEFAULT_AI_SETTINGS.model;
   }
+  delete o.cloudBaseUrl;
+  delete o.cloudApiKey;
+  delete o.cloudModel;
   delete o.allowExternalTransmit;
   delete o.allowPersonalApiKeys;
   return o;

@@ -24,9 +24,11 @@ export type GatewayResult = {
   tokenEstimate: number | null;
 };
 
+// Desktop-first, local-only: AI resolves to a local Ollama model or the
+// deterministic mock template. There is no external/cloud provider, so
+// usedExternalApi is always false.
 type RuntimeMode =
   | { mode: "ollama"; provider: "ollama"; model: string; baseUrl: string; usedExternalApi: false }
-  | { mode: "cloud"; provider: "cloud"; model: string; baseUrl: string; apiKey: string; usedExternalApi: true }
   | { mode: "mock"; provider: "mock"; model: "template"; usedExternalApi: false };
 
 function ollamaBaseUrl(settings: AiSettings): string {
@@ -35,23 +37,6 @@ function ollamaBaseUrl(settings: AiSettings): string {
 
 function resolveRuntime(settings: AiSettings): RuntimeMode {
   const model = settings.model || ollamaModelFromEnv();
-
-  // BYO-API (Enterprise): a firm-supplied OpenAI-compatible cloud provider.
-  if (
-    settings.provider === "cloud" &&
-    settings.cloudBaseUrl?.trim() &&
-    settings.cloudApiKey?.trim() &&
-    settings.cloudModel?.trim()
-  ) {
-    return {
-      mode: "cloud",
-      provider: "cloud",
-      model: settings.cloudModel.trim(),
-      baseUrl: settings.cloudBaseUrl.trim(),
-      apiKey: settings.cloudApiKey.trim(),
-      usedExternalApi: true,
-    };
-  }
 
   if (settings.provider === "mock") {
     return { mode: "mock", provider: "mock", model: "template", usedExternalApi: false };
@@ -66,39 +51,6 @@ function resolveRuntime(settings: AiSettings): RuntimeMode {
   };
 }
 
-/** Minimal OpenAI-compatible chat call (OpenAI, Azure, OpenRouter, Together, vLLM, …). */
-async function callCloudChat(opts: {
-  baseUrl: string;
-  apiKey: string;
-  model: string;
-  system: string;
-  user: string;
-}): Promise<{ text: string; tokens: number | null }> {
-  const url = `${opts.baseUrl.replace(/\/+$/, "")}/chat/completions`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${opts.apiKey}` },
-    body: JSON.stringify({
-      model: opts.model,
-      messages: [
-        { role: "system", content: opts.system },
-        { role: "user", content: opts.user },
-      ],
-      temperature: 0.2,
-    }),
-    signal: AbortSignal.timeout(60_000),
-  });
-  if (!res.ok) {
-    const detail = (await res.text().catch(() => "")).slice(0, 200);
-    throw new Error(`cloud provider ${res.status} ${detail}`);
-  }
-  const json = (await res.json()) as {
-    choices?: { message?: { content?: string } }[];
-    usage?: { total_tokens?: number };
-  };
-  return { text: json.choices?.[0]?.message?.content ?? "", tokens: json.usage?.total_tokens ?? null };
-}
-
 export async function runAiGateway(
   db: DB,
   user: { id: string; role: string; email?: string; fullName?: string; isDemo?: boolean },
@@ -111,40 +63,6 @@ export async function runAiGateway(
 
   const runtime = resolveRuntime(settings);
   const bundle = await assembleAiContext(db, user, input);
-
-  if (runtime.mode === "cloud") {
-    try {
-      const { text, tokens } = await callCloudChat({
-        baseUrl: runtime.baseUrl,
-        apiKey: runtime.apiKey,
-        model: runtime.model,
-        system: bundle.systemPrompt,
-        user: bundle.userPrompt,
-      });
-      return {
-        output: text,
-        sources: bundle.sources,
-        promptSummary: bundle.promptSummary,
-        provider: runtime.provider,
-        model: runtime.model,
-        usedExternalApi: true,
-        tokenEstimate: tokens,
-      };
-    } catch (err) {
-      const mock = await generateMockOutput(db, user, input);
-      const hint = err instanceof Error ? err.message : "Cloud provider unavailable";
-      const output = `${mock.output}\n\n---\n*Cloud provider fallback (${hint.slice(0, 120)})*`;
-      return {
-        output,
-        sources: mock.sources,
-        promptSummary: mock.promptSummary,
-        provider: "mock",
-        model: "template-fallback",
-        usedExternalApi: false,
-        tokenEstimate: null,
-      };
-    }
-  }
 
   if (runtime.mode === "ollama") {
     try {
