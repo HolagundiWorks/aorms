@@ -14,8 +14,8 @@ async function main(): Promise<void> {
   const key = process.env.TEST_LICENSE_KEY;
   if (!key) throw new Error("set TEST_LICENSE_KEY to an AORMS license key from the licensing console");
 
-  const token = await activateViaPanel(key, "test-install-001");
-  const v = verifyPanelToken(token);
+  const grant = await activateViaPanel(key, "test-install-001");
+  const v = verifyPanelToken(grant.licenseToken);
   if (!v.ok) throw new Error(`panel token verify failed: ${v.reason}`);
   const derived = panelDerived(v.payload);
 
@@ -27,6 +27,7 @@ async function main(): Promise<void> {
         derivedPlan: derived?.plan,
         staffSeats: derived?.seats.staff,
         firmId: derived?.firmId,
+        hasSyncToken: Boolean(grant.syncToken),
         verified: true,
       },
       null,

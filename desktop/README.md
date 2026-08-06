@@ -38,9 +38,15 @@ The shell does **not** fork the React app — it loads the same SPA as web
 ## Licence bind
 
 1. First run generates `INSTALL_ID` and opens the SPA login.
-2. Owner activates a licence against `ESTI_HUB_URL` / License Manager (`syncToken` stored in org settings).
-3. `sync.capabilities` then flips `metaSync` + `artifactSync` on for licensed desktops.
-4. Free / unbound desktop keeps local AI + worker; hub sync stays off.
+2. Owner activates a licence via `license.activate` against License Manager
+   (`ESTI_LICENSE_API_URL` + product API key). Panel returns `licenseToken` **and**
+   `syncToken` (hub API **2026-08** — see [HUB-API.md](../docs/esti/HUB-API.md)).
+3. Node persists both on org settings; hub hashes `syncToken` on `hlp_device`.
+4. `sync.hubConfigured.syncReady` is true when `ESTI_HUB_URL` + `syncToken` are set;
+   `sync.capabilities` flips `metaSync` + `artifactSync` on for licensed desktops.
+5. Free / unbound desktop keeps local AI + worker; hub sync stays off.
+
+**Bhoomi** owns the installer / first-run UX (LF4). **Gagan** owns the hub wire above.
 
 ## Dev without a native build
 

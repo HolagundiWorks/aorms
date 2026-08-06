@@ -1604,6 +1604,13 @@
       "when": 1785942000000,
       "tag": "0226_local_first_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 233,
+      "version": "7",
+      "when": 1785979000000,
+      "tag": "0227_hlp_org_sync_firm",
+      "breakpoints": true
     }
   ]
 }

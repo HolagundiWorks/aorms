@@ -123,6 +123,13 @@ export type ActivateInput = z.infer<typeof ActivateInput>;
 export const ActivateResult = z.object({
   licenseToken: z.string(),
   entitlement: Entitlement,
+  /**
+   * Opaque bearer for hub sync REST/WS (`Authorization: Bearer …` on `/api/sync/*`).
+   * Always present on `/v1/activate`. On `/v1/refresh`, present only when the
+   * device had no prior sync token (catch-up for nodes activated before 2026-08).
+   * Hub stores only `sha256(syncToken)` on `hlp_device.sync_token_hash`.
+   */
+  syncToken: z.string().min(1).optional(),
 });
 export type ActivateResult = z.infer<typeof ActivateResult>;
 

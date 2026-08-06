@@ -13,6 +13,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -77,6 +78,11 @@ export const organizations = pgTable(
     workspaceType: text("workspace_type").notNull().default("STUDIO"),
     billingEmail: text("billing_email"),
     ownerAccountId: text("owner_account_id").references(() => accounts.id),
+    /**
+     * Hub sync firm scope (UUID). Metadata/artifact sync rows key on this id.
+     * Distinct from the text `id` / AORMS-C handle — sync tables require uuid.
+     */
+    syncFirmId: uuid("sync_firm_id").notNull().defaultRandom(),
     createdAt,
     updatedAt,
   },
@@ -84,6 +90,7 @@ export const organizations = pgTable(
     slugIdx: uniqueIndex("hlp_organization_slug_idx").on(t.slug),
     publicIdIdx: uniqueIndex("hlp_organization_public_id_idx").on(t.publicId),
     loginDomainIdx: uniqueIndex("hlp_organization_login_domain_idx").on(t.loginDomain),
+    syncFirmIdx: uniqueIndex("hlp_organization_sync_firm_id_idx").on(t.syncFirmId),
   }),
 );
 

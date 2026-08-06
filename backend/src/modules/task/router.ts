@@ -13,6 +13,7 @@ import { assignments, projectOffices, tasks, teamMembers } from "../../db/schema
 import { writeActivity } from "../../lib/activity.js";
 import { writeAudit } from "../../lib/audit.js";
 import { isHrEnabled, resolveSoloTaskAssignee } from "../../lib/hrMode.js";
+import { enqueueTaskMeta } from "../../lib/sync/domainMeta.js";
 import { protectedProcedure, router } from "../../trpc/trpc.js";
 
 const withProject = {
@@ -175,6 +176,19 @@ export const taskRouter = router({
       });
       return created!;
     });
+    await enqueueTaskMeta(
+      ctx.db,
+      {
+        id: row.id,
+        title: row.title,
+        status: row.status,
+        assigneeId: row.assigneeId,
+        dueDate: row.dueDate,
+        priority: row.priority,
+        projectId: row.projectId,
+      },
+      ctx.user.id,
+    );
     return row;
   }),
 
@@ -274,6 +288,19 @@ export const taskRouter = router({
       });
       return updated!;
     });
+    await enqueueTaskMeta(
+      ctx.db,
+      {
+        id: row.id,
+        title: row.title,
+        status: row.status,
+        assigneeId: row.assigneeId,
+        dueDate: row.dueDate,
+        priority: row.priority,
+        projectId: row.projectId,
+      },
+      ctx.user.id,
+    );
     return row;
   }),
 
