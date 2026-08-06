@@ -48,6 +48,11 @@ after their PRs). This file owns **portal fill fields only**.
 
 ## One-line fill (after Bhoomi signs)
 
+Bhoomi produces `desktop/artifacts/winui/handoff-studio.json` (and
+`handoff-consultancy.json`) via `desktop/scripts/sign-winui.ps1`. Copy `sha256` /
+`version` from that file; set `url` only after HTTPS upload. Flip `status` to
+`available` only when handoff `chainTrusted` / `smartScreenReady` is **true**.
+
 ### Option A — env (preferred for prod rebuild)
 
 ```bash

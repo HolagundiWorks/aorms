@@ -61,6 +61,19 @@ powershell -NoProfile -File desktop/scripts/build-winui.ps1 -Profile STUDIO
 
 ### 2. Code-sign (operator cert — fill YOUR paths)
 
+Preferred: use the handoff script (writes sha256 + portal fill stub; **never**
+edits manifests):
+
+```powershell
+# CA / EV PFX (session env only)
+$env:AORMS_CODESIGN_PFX = "C:\path\to\codesign.pfx"
+$env:AORMS_CODESIGN_PFX_PASSWORD = "…"
+powershell -NoProfile -File desktop/scripts/sign-winui.ps1 -Profile STUDIO -RequireTrustedChain -Version 1.0.0
+# → desktop/artifacts/winui/handoff-studio.json
+```
+
+Or raw `signtool`:
+
 ```powershell
 $exe = (Resolve-Path "desktop/artifacts/winui/AStudio.Shell.exe").Path
 # PFX on operator machine only — never commit certs/passwords.

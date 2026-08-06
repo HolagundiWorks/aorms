@@ -17,7 +17,8 @@ desktop/
   env.desktop.example
   AStudio.Shell/            ← WinUI 3 project (canonical)
   scripts/
-    build-winui.ps1         ← canonical unsigned publish
+    build-winui.ps1         ← canonical publish (`-Sign` optional)
+    sign-winui.ps1          ← Authenticode + sha256 handoff JSON (no portal flip)
     build-installer.ps1     ← delegates to build-winui.ps1
     start-node.ps1 / .sh
   artifacts/winui/          ← publish output (gitignored)
@@ -31,8 +32,24 @@ powershell -File desktop/scripts/start-node.ps1
 
 # Publish WinUI shell (STUDIO | CONSULTANCY) — Windows-only
 powershell -File desktop/scripts/build-winui.ps1 -Profile STUDIO
-# equivalent: powershell -File desktop/scripts/build-installer.ps1 -Profile STUDIO
+# Sign + write handoff JSON (ACO-dev or CA PFX via env):
+powershell -File desktop/scripts/sign-winui.ps1 -Profile STUDIO
+# One-shot build+sign:
+powershell -File desktop/scripts/build-winui.ps1 -Profile STUDIO -Sign -SkipFrontendBuild
+# CA-only gate (fails on self-signed / ACO-dev):
+powershell -File desktop/scripts/sign-winui.ps1 -Profile STUDIO -RequireTrustedChain
+```
 
+```powershell
+# Preferred release signing (session env — never commit PFX/password)
+$env:AORMS_CODESIGN_PFX = "C:\path\to\codesign.pfx"
+$env:AORMS_CODESIGN_PFX_PASSWORD = "…"
+powershell -File desktop/scripts/sign-winui.ps1 -Profile STUDIO -RequireTrustedChain -Version 1.0.0
+# Then upload exe to HTTPS and fill WEB-PORTAL.md fields from
+# desktop/artifacts/winui/handoff-studio.json
+```
+
+```powershell
 # Dev: point WebView2 at Vite
 $env:AORMS_SPA_URL = "http://127.0.0.1:5173"
 $env:AORMS_REPO_ROOT = (Resolve-Path .).Path
@@ -53,6 +70,10 @@ Full PowerShell sequence (build → `signtool` → install → activate →
 
 **Missing on cloud Linux (this agent host):** `dotnet`, `pwsh`, Windows App SDK,
 WebView2, Windows SDK `signtool`, Authenticode cert.
+
+On a Windows host with VS / Windows SDK: use `sign-winui.ps1` (writes
+`handoff-*.json`). Portal manifests stay `web_fallback` until
+`chainTrusted=true` **and** a real HTTPS URL is filled ([WEB-PORTAL.md](../docs/esti/WEB-PORTAL.md)).
 
 Profiles: compile-time `AormsDesktopProfile=STUDIO|CONSULTANCY` (assembly title +
 `window.__AORMS_NATIVE_SHELL__.profile`).

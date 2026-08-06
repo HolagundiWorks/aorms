@@ -15,11 +15,20 @@ param(
   [ValidateSet("STUDIO", "CONSULTANCY")]
   [string] $Profile = "STUDIO",
   [switch] $SkipFrontendBuild,
-  [switch] $Run
+  [switch] $Run,
+  [switch] $Sign,
+  [string] $Version = "0.0.0-dev",
+  [switch] $RequireTrustedChain
 )
 
 $ErrorActionPreference = "Stop"
 $here = $PSScriptRoot
 
-& (Join-Path $here "build-winui.ps1") -Profile $Profile -SkipFrontendBuild:$SkipFrontendBuild -Run:$Run
+& (Join-Path $here "build-winui.ps1") `
+  -Profile $Profile `
+  -SkipFrontendBuild:$SkipFrontendBuild `
+  -Run:$Run `
+  -Sign:$Sign `
+  -Version $Version `
+  -RequireTrustedChain:$RequireTrustedChain
 exit $LASTEXITCODE

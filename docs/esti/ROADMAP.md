@@ -33,10 +33,10 @@ browser-staff scope.
 | 2 | Host toolchain (.NET 8 Â· WinAppRuntime 1.6 Â· WebView2 Â· Node/pnpm Â· Docker) | âœ… |
 | 3 | Apply hub migration **`0227`** on local DB Â· confirm activateâ†’`syncToken` | âœ… |
 | 4 | `build-winui.ps1 -Profile STUDIO` Â· run shell vs `http://127.0.0.1:5173` | âœ… |
-| 5 | Authenticode sign (operator cert) Â· measure sha256 | âœ… ACO **dev** re-signed 2026-08-06 evening Â· SmartScreen trust ðŸ”² |
+| 5 | Authenticode sign (operator cert) Â· measure sha256 | âœ… ACO **dev** Â· `sign-winui.ps1` handoff Â· SmartScreen trust ðŸ”² |
 | 6 | Physical bind: firm admin â†’ `DesktopLicenceBind` â†’ `hasSyncToken` | âœ… re-smoke (`hasSyncToken` Â· `syncReady` Â· `metaSync` Â· `flush` Â· `pullMeta`) |
 | 6b | Colocated hub routes for local loopback (`ESTI_COLOCATED_HUB`) | âœ… â€” node can mount `/api/sync/*` for single-box smoke |
-| 7 | Public HTTPS URL + fill `/downloads` manifests (was Aakash) | ðŸ”² gated on **SmartScreen-trusted** cert + release host |
+| 7 | Public HTTPS URL + fill `/downloads` manifests (was Aakash) | ðŸ”² gated on **SmartScreen-trusted** cert + release host (handoff JSON ready) |
 | 8 | M8 live-installer honesty Â· keep `web_fallback` until 7 | âœ… manifests stay `web_fallback` (no invented sha256 / URL) |
 | 9 | Pure neumorphism marketing (`MarketingNeuFrame` Â· AnalogueClock Â· blog/SEO) | âœ… `8bad1e5c` â€” Home/Blog/Downloads top ribbon; web-only scrubbed |
 
