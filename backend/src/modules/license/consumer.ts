@@ -63,12 +63,13 @@ export async function activate(db: DB, key: string): Promise<LicenseView> {
 
   if (env.ESTI_LICENSE_API_URL) {
     // HCW License Manager path: activate against /v1 and store the panel token
-    // (licenseState understands both manager and legacy hub formats).
-    const licenseToken = await activateViaPanel(key, installId);
+    // + sync bearer (licenseState understands both manager and legacy hub formats).
+    const grant = await activateViaPanel(key, installId);
     await db
       .update(orgSettings)
       .set({
-        licenseToken,
+        licenseToken: grant.licenseToken,
+        syncToken: grant.syncToken,
         installId,
         licenceStatus: "ACTIVE",
         licenseCheckedAt: new Date(),
@@ -97,9 +98,11 @@ export async function activate(db: DB, key: string): Promise<LicenseView> {
   return toLicenseView(await licenseState(db));
 }
 
+export type PanelActivateGrant = { licenseToken: string; syncToken: string };
+
 /** Activate a key against the HCW License Manager `/v1/activate`; returns the
- *  signed panel license token. Throws on a bad key or an unreachable manager. */
-export async function activateViaPanel(key: string, deviceId: string): Promise<string> {
+ *  signed panel license token + sync bearer. Throws on a bad key or an unreachable manager. */
+export async function activateViaPanel(key: string, deviceId: string): Promise<PanelActivateGrant> {
   const base = env.ESTI_LICENSE_API_URL.replace(/\/+$/, "");
   let res: Response;
   try {
@@ -125,7 +128,14 @@ export async function activateViaPanel(key: string, deviceId: string): Promise<s
     }
     throw new TRPCError({ code: "BAD_REQUEST", message });
   }
-  return (JSON.parse(text) as { licenseToken: string }).licenseToken;
+  const data = JSON.parse(text) as { licenseToken?: string; syncToken?: string };
+  if (!data.licenseToken || !data.syncToken) {
+    throw new TRPCError({
+      code: "BAD_GATEWAY",
+      message: "License service did not return a sync token (hub API 2026-08 required).",
+    });
+  }
+  return { licenseToken: data.licenseToken, syncToken: data.syncToken };
 }
 
 /** Re-fetch a fresh token from the hub (extends grace). Returns false if not possible/offline. */
@@ -167,11 +177,13 @@ export async function refreshNow(db: DB): Promise<boolean> {
         }
         return false;
       }
-      const data = JSON.parse(text) as { licenseToken: string };
+      const data = JSON.parse(text) as { licenseToken: string; syncToken?: string };
       await db
         .update(orgSettings)
         .set({
           licenseToken: data.licenseToken,
+          // Persist catch-up sync bearer when panel mints one for pre-2026-08 devices.
+          ...(data.syncToken ? { syncToken: data.syncToken } : {}),
           licenceStatus: "ACTIVE",
           licenseCheckedAt: new Date(),
           updatedAt: new Date(),

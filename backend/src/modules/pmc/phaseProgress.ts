@@ -4,6 +4,7 @@ import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "../../db/index.js";
 import { phaseProgress, phases } from "../../db/schema.js";
+import { enqueuePhaseProgressMeta } from "../../lib/sync/domainMeta.js";
 import { capabilityProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
 
 const manage = capabilityProcedure("write");
@@ -86,6 +87,16 @@ export const phaseProgressRouter = router({
       })
       .where(eq(phaseProgress.id, input.id))
       .returning();
+    await enqueuePhaseProgressMeta(
+      ctx.db,
+      {
+        id: row!.id,
+        projectId: joined.projectId,
+        phaseId: row!.phaseId,
+        status: row!.status,
+      },
+      ctx.user.id,
+    );
     return row!;
   }),
 });

@@ -4,7 +4,7 @@
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
 **Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
 **AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)  
-**Local-first waves:** LF0–LF2 ✅ · LF3–LF6 open — see [LOCAL-FIRST.md](LOCAL-FIRST.md)
+**Local-first waves:** LF0–LF3 ✅ · LF4–LF6 open — see [LOCAL-FIRST.md](LOCAL-FIRST.md) · crew [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)
 
 Phases 0–28 are **engineering-complete** for **AStudio**. **AConsulting**
 is **live**. **AProc** (PMC) Waves **0–5 are shipped** (preview product —
@@ -29,6 +29,9 @@ docs were removed 2026-07-24 (Git history retains them).
 | [UNIFIED-ARCHITECTURE-V4.md](UNIFIED-ARCHITECTURE-V4.md) | **System state** — modules live vs removed |
 | [NAVIGATION.md](NAVIGATION.md) | Canonical sidebar IA |
 | [LOCAL-FIRST.md](LOCAL-FIRST.md) | **Local-first + hub sync** — planes, APIs, LF waves |
+| [HUB-API.md](HUB-API.md) | Hub wire contract (`2026-08`) — activate→`syncToken`, sync REST/WS, node `sync.*` |
+| [DESKTOP-REPOS.md](DESKTOP-REPOS.md) | Desktop contracts gate · installer ownership |
+| [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) | Crew split — Vishwakarma · Bhoomi · Gagan · Aakash |
 | [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) | Desktop ↔ web UX consistency |
 | [MARKET-FIT.md](MARKET-FIT.md) | **GTM + market-fit backlog** (ICP, competitors, waves) |
 | [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) | Standard licence law (desktop + web) |
@@ -59,15 +62,16 @@ Canonical plan: **[LOCAL-FIRST.md](LOCAL-FIRST.md)** · UX: **[DESKTOP-WEB-PARIT
 | **LF0** | Contracts: sync planes, meta schemas, capability presets | ✅ 2026-08 |
 | **LF1** | Hub meta event log + catch-up + WS; node meta outbox/cursor | ✅ 2026-08 |
 | **LF2** | Artifact content-hash; publish DTOs; portal-from-hub reads; desktop stub; product-law docs | ✅ 2026-08 |
-| **LF3** | Domain metadata enqueue/apply (tasks, estimate totals, phase progress) | 🔲 |
-| **LF4** | Signed Tauri installer + first-run licence / hub bind | 🔲 |
-| **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | 🔲 |
-| **LF6** | UX parity checklist + inspector/AI right-slot; Figma ↔ kit tokens | 🔲 |
+| **LF3** | Domain metadata enqueue/apply (tasks, estimate totals, phase progress) + panel `syncToken` | ✅ Gagan 2026-08 |
+| **LF4** | Signed Tauri installer + first-run licence / hub bind | 🔲 Bhoomi |
+| **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | 🔲 Aakash |
+| **LF6** | UX parity checklist + inspector/AI right-slot; Figma ↔ kit tokens | 🔲 Aakash |
 
 **Namespaces / seams:** `sync` (tRPC + REST) · `esti_meta_*` · `esti_sync_*` ·
-`packages/contracts` sync · `desktop/` · `trpc.sync.capabilities`.
+`packages/contracts` sync · `desktop/` · `trpc.sync.capabilities` ·
+`/platform/v1/activate` → `syncToken` ([HUB-API.md](HUB-API.md)).
 
-**Migration:** `0226_local_first_sync`.
+**Migrations:** `0226_local_first_sync` · `0227_hlp_org_sync_firm`.
 
 ## AProc delivery waves
 
@@ -156,7 +160,7 @@ Canonical brief: **[MARKET-FIT.md](MARKET-FIT.md)**.
 | **HCW License Manager** | In-tree (`admin.aorms.in`) |
 | **Market fit W1–W3** | GTM scrub · portal · fee recovery · onboarding · capacity · digests · consultancy chrome · demo seed · packaging |
 | **AProc W0–W5** | Chrome · Delivery · tenders · RA/steel cert · BBS + steel recon · CSV/XER · digest · ESTI (`0220`–`0224`) |
-| **Local-first LF0–LF2** | Sync planes · meta log/WS · artifact hash · portal hub reads · desktop stub · product-law restore (`0226`) |
+| **Local-first LF0–LF3** | Sync planes · meta log/WS · artifact hash · portal hub reads · desktop stub · panel `syncToken` · domain meta (`0226`–`0227`) |
 
 ## Deferred (by choice — not blocking)
 

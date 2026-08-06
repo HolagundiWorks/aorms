@@ -32,6 +32,7 @@ import { writeActivity } from "../../lib/activity.js";
 import { writeAudit } from "../../lib/audit.js";
 import { nextRef } from "../../lib/numbering.js";
 import { requireDeletableStatus } from "../../lib/retention.js";
+import { enqueueEstimateTotalsForId } from "../../lib/sync/domainMeta.js";
 import { capabilityProcedure, router } from "../../trpc/trpc.js";
 
 // Estimates carry firm costing (rates, contingency) — same gate as fee proposals.
@@ -226,6 +227,7 @@ export const estimateRouter = router({
       before: { contingencyPct: before.contingencyPct, gstPct: before.gstPct, title: before.title },
       after: { contingencyPct: row!.contingencyPct, gstPct: row!.gstPct, title: row!.title },
     });
+    await enqueueEstimateTotalsForId(ctx.db, input.id, ctx.user.id);
     return row!;
   }),
 
@@ -253,6 +255,10 @@ export const estimateRouter = router({
         before: { status: before.status },
         after: { status: input.status },
       });
+      // Totals matter once an estimate is finalised / approved — enqueue for peers.
+      if (input.status === "FINALISED" || input.status === "APPROVED") {
+        await enqueueEstimateTotalsForId(ctx.db, input.id, ctx.user.id);
+      }
       return row!;
     }),
 

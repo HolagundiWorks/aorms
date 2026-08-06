@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ActivateResult } from "./licensing-platform.js";
 import {
   FREE_DESKTOP_CAPABILITIES,
   LICENSED_DESKTOP_CAPABILITIES,
@@ -66,5 +67,35 @@ describe("RuntimeCapabilities presets", () => {
     expect(FREE_DESKTOP_CAPABILITIES.artifactSync).toBe(false);
     expect(LICENSED_DESKTOP_CAPABILITIES.metaSync).toBe(true);
     expect(WEB_PARITY_CAPABILITIES.offlineAuthoring).toBe(false);
+  });
+});
+
+describe("ActivateResult hub API 2026-08 syncToken", () => {
+  const entitlement = {
+    licenseId: "lic_x",
+    orgId: "org_x",
+    orgName: "Acme",
+    productCode: "AORMS",
+    planCode: "PRO",
+    status: "ACTIVE" as const,
+    seats: 5,
+    deviceLimit: 2,
+    meterLimit: null,
+    features: [],
+    expiresAt: null,
+  };
+
+  it("accepts activate payload with syncToken", () => {
+    const r = ActivateResult.parse({
+      licenseToken: "tok",
+      entitlement,
+      syncToken: "sync-bearer",
+    });
+    expect(r.syncToken).toBe("sync-bearer");
+  });
+
+  it("allows refresh without syncToken (no rotation)", () => {
+    const r = ActivateResult.parse({ licenseToken: "tok", entitlement });
+    expect(r.syncToken).toBeUndefined();
   });
 });
