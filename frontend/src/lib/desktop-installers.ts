@@ -75,7 +75,8 @@ function envInstallerUrl(app: DesktopInstallerApp): string | undefined {
   return (import.meta.env.VITE_ACONSULTING_INSTALLER_URL as string | undefined)?.trim();
 }
 
-function useReleaseInstallers(): boolean {
+/** Env gate — not a React hook (name must not start with `use`). */
+function releaseInstallersEnabled(): boolean {
   return envFlagTrue(
     import.meta.env.VITE_PORTAL_USE_RELEASE_INSTALLERS as string | undefined,
   );
@@ -123,7 +124,7 @@ export function resolveInstallerOffer(
 
   // Manifest path — gated so empty/placeholder JSON never becomes a live CTA.
   if (
-    useReleaseInstallers() &&
+    releaseInstallersEnabled() &&
     manifestStatus === "available" &&
     manifestUrl &&
     looksLikeHttpsOrSitePath(manifestUrl) &&
