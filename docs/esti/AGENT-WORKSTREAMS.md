@@ -71,13 +71,16 @@ flowchart TB
 
 | Surface | Owner | PR / branch | Notes |
 | --- | --- | --- | --- |
-| CI lint (main blockers) | **Vishwakarma** | **#55** `cursor/ci-lint-portal-445f` | Land first — installers hooks + ContractorPortal |
-| Hub bind morning · syncToken gate | **Gagan** | **#53** | Rebase vs **#51**; keep syncToken gate |
-| WinUI 3 shell · sign · bind | **Bhoomi** | **#49** | Env **`bhoomi`**; rebase · Windows sign still open |
-| LF5 · LF6 right-slot · portal wording | **Aakash** | **#51** · **#54** · **#50** | Rebase #54 after #51; URLs gated |
+| CI lint (main blockers) | **Vishwakarma** | **#55** · tsc/eslint GREEN | Land first |
+| LF5 badges/keymap/Help | **Aakash** / orch | **#51** rebased onto #55 (`30b9238c`) | Ready after #55 |
+| Hub bind · syncToken gate | **Gagan** | **#53** | Rebase onto #51+#55 tip |
+| WinUI 3 shell · sign · bind | **Bhoomi** | **#49** | Rebase onto #55 lineage; Windows sign open |
+| LF6 right-slot | **Aakash** | **#54** | Rebase onto #51+#55; URLs gated |
+| Portal WinUI wording | **Aakash** | **#50** | Independent · `web_fallback` |
 
-**Next assignments (running):** Gagan rebase #53 · Bhoomi rebase #49 · Aakash
-rebase #54 (+ skip lint if #55 already landed).
+**Next assignments (running):** Gagan rebase #53 · Bhoomi rebase #49 onto #55 ·
+Aakash rebase #54 onto #51+#55. Audit / visual / worker CI still red on `main`
+(pre-existing) — only fix if lane-owned.
 
 **Merge order:** **#55** → **#51** → **#53** → **#49** → **#54** · **#50**
 independent. No live installer URLs until Bhoomi signs.
