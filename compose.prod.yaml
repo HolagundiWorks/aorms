@@ -152,6 +152,10 @@ services:
         VITE_PUBLIC_SITE: ${VITE_PUBLIC_SITE:-true}
         # Standalone licensing console origin (admin.DOMAIN, its own repo/deploy).
         VITE_ADMIN_URL: ${VITE_ADMIN_URL:-}
+        # Signed local-first installers for /downloads — leave empty until Bhoomi signs.
+        VITE_ASTUDIO_INSTALLER_URL: ${VITE_ASTUDIO_INSTALLER_URL:-}
+        VITE_ACONSULTING_INSTALLER_URL: ${VITE_ACONSULTING_INSTALLER_URL:-}
+        VITE_PORTAL_USE_RELEASE_INSTALLERS: ${VITE_PORTAL_USE_RELEASE_INSTALLERS:-}
     image: esti-frontend:prod
     # No entrypoint override needed — the runner stage nginx image is used only
     # as a build artefact holder; the container is never started as a daemon.

@@ -1,7 +1,7 @@
 ---
 title: One Standard licence — storage and AI, not product tiers
 date: 2026-07-22
-excerpt: AORMS licences the company on a Standard plan — usage is storage and AI, not Lite vs Pro desktop SKUs. Web workspaces only; BYO AI keys remain supported.
+excerpt: AORMS licences the company on a Standard plan — usage is storage and AI, not Lite vs Pro desktop SKUs. Desktop + web share the same licence; BYO AI keys remain supported.
 tags: Product, Platform, Practice
 author: Human Centric Works
 ---
@@ -31,7 +31,9 @@ firms; limits are about capacity and AI spend, not a second product line.
 Principals buy an office system, not a matrix of SKUs. When the invoice says
 Standard, and the workspace URL is the same for the whole team, procurement and
 IT stop arguing about which build the juniors need. Campaigns and investor copy
-now match that: **sign up / demo in the browser**, not `/download`.
+now match that: **sign up / demo in the browser** or the desktop node when packaging
+ships — never legacy Lite/Pro `/download` Manager installers. Live signed builds
+will appear at [`/downloads`](/downloads) (web fallback until then).
 
 ## Read next
 

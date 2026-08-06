@@ -34,7 +34,7 @@ portals.
 | Dual AI | **ESTI** (firm record) + **EOMS** (codes / knowledge bank) |
 | Two practices, one spine | **AORMS-Studio** + **AORMS-Consultancy** |
 | External proof | Client / consultant / contractor / site portals |
-| Switching cost | Web-only · one Standard licence |
+| Switching cost | Desktop preferred + web parity · one Standard licence |
 
 ---
 

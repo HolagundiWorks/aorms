@@ -11,7 +11,7 @@ truth, brand voice and content rules apply here too.
 >
 > - **Desktop preferred + web parity.** Same SPA on a local-first desktop node and in the browser. See [LOCAL-FIRST.md](../esti/LOCAL-FIRST.md).
 > - **One AORMS Standard licence** — no Lite/Pro split, no free tier, no trial. Unlimited users; **5 GB** cloud included; storage + hosted AI metered (or BYO key).
-> - **CTA:** `aorms.in` signup / demo — never legacy `/download` Manager installers or “Lite forever”.
+> - **CTA:** `aorms.in` signup / demo — or `/downloads` when signed installers ship; never legacy Manager SKUs or “Lite forever”.
 > - Law: [PLANS-AND-TIERS.md](../esti/PLANS-AND-TIERS.md). Companion IG doc shares the same product truth.
 
 ---
@@ -260,7 +260,7 @@ Page 1 (hook): **"You quoted a lump sum. COA gave you stages. This map is the
 difference between cash flow and hope."** Pages 2–8: each stage, its deliverable,
 and its invoice trigger. Page 9: "Earned but uninvoiced — the number most
 practices can't produce." Page 10: soft CTA — "AORMS tracks fee stages per
-project and shows earned-vs-invoiced per client. Web-only workspace at aorms.in.
+project and shows earned-vs-invoiced per client. Desktop preferred + web parity at aorms.in.
 Link in comments."
 
 ### 5.4 Text post — the honest-AI contrarian (P4)

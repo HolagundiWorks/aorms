@@ -207,7 +207,9 @@ Add `backup.sh` to root's crontab for daily dumps. Health check:
 
 ### VPS cleanup (retired installers, ESE, build cruft)
 
-Desktop `/downloads` and **ESE** (`esti-ese`) were retired (cloud-only; estimation teardown).
+Retired **Manager** installer binaries under `frontend/dist/downloads/` and **ESE**
+(`esti-ese`) are cleaned up here. The public `/downloads` **page** is the
+local-first portal (web_fallback until signed URLs — [WEB-PORTAL.md](../docs/esti/WEB-PORTAL.md)).
 On an existing box:
 
 ```bash

@@ -5,6 +5,19 @@ interface ImportMetaEnv {
   readonly VITE_PLAUSIBLE_DOMAIN?: string;
   /** `desktop` | `web` | `hub` — build-time host hint for local-first parity. */
   readonly VITE_RUNTIME_HOST?: "desktop" | "web" | "hub";
+  /**
+   * Signed AStudio / AConsulting Windows installer URLs for `/downloads`.
+   * Leave empty until Bhoomi publishes a code-signed Setup.exe (LF4).
+   * See docs/esti/WEB-PORTAL.md.
+   */
+  readonly VITE_ASTUDIO_INSTALLER_URL?: string;
+  readonly VITE_ACONSULTING_INSTALLER_URL?: string;
+  /**
+   * When `"true"`, `/downloads` may use `frontend/public/update-manifests/*.json`
+   * URLs if status=available and sha256 is a 64-hex digest. Default off so
+   * placeholder manifests never become live CTAs.
+   */
+  readonly VITE_PORTAL_USE_RELEASE_INSTALLERS?: string;
 }
 
 interface ImportMeta {

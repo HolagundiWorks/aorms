@@ -9,7 +9,7 @@
 >
 > - **Desktop preferred + web parity.** Same SPA on a local-first desktop node and in the browser (`studio.aorms.in`). See [LOCAL-FIRST.md](../esti/LOCAL-FIRST.md).
 > - **One AORMS Standard licence** — no Lite/Pro/Enterprise, no free tier, no trial. Unlimited users; **5 GB** cloud storage included; pay for storage overage + hosted AI (or BYO key). Local desktop AI is not metered.
-> - **CTA destination:** `aorms.in` / signup / demo — **never** legacy `/download` Manager installers.
+> - **CTA destination:** `aorms.in` / signup / demo — or `/downloads` for signed desktop when live; **never** legacy Lite/Pro Manager SKUs.
 > - Law: [PLANS-AND-TIERS.md](../esti/PLANS-AND-TIERS.md).
 
 ---
@@ -316,7 +316,7 @@ Exception: allowed on P5 brand-mythology posts where aesthetic spillover is fine
 5. **Cross-surface:** every Practice School carousel becomes a blog post on
    aorms.in (SEO) and a LinkedIn document post (principals live there too).
 6. **Bio:** `India's OS for architecture practices · Projects, fees, GST, revisions
-   — one browser record · Web-only ↓` + link to aorms.in (later a link-in-bio
+   — desktop + web · same record ↓` + link to aorms.in (later a link-in-bio
    page: signup / demo / Practice School index — never download).
 
 ---

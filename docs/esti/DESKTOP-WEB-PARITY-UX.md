@@ -46,7 +46,17 @@ Desktop may add a **thin native menu** that invokes the **same command IDs** as 
 - [ ] Shortcuts unchanged in Help  
 - [ ] Kit-first if shared chrome changed  
 
+## Figma ↔ kit tokens (LF6)
+
+Code → Figma Variables bridge: [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) ·
+kit export [02-TOKEN-EXPORT.md](../hcw-kit/02-TOKEN-EXPORT.md).  
+Automation stub: `node scripts/figma-token-sync-check.mjs`.
+
+Inspector / Ask ESTI share **one right slot** on both hosts (properties ↔ AI) —
+do not add a menu-only AI path on desktop.
+
 ## Related
 
 - [HCW-UI-KIT.md](HCW-UI-KIT.md) · [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md)  
 - [LOCAL-FIRST.md](LOCAL-FIRST.md) · [ROADMAP.md](ROADMAP.md) § Local-first  
+- [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) · [WEB-PORTAL.md](WEB-PORTAL.md)  

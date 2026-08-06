@@ -32,6 +32,7 @@ Same SPA bundle; no dedicated host.
 | `/login` | AStudio sign-in | Architecture marketing + workspace login |
 | `/wiki`, `/wiki/*` | AORMS Wiki | Public documentation |
 | `/blog`, `/blog/*` | Blog | Editorial |
+| `/downloads` | Desktop installers | Local-first signed Setup.exe (web_fallback until signed); legacy `/download` redirects here — [WEB-PORTAL.md](WEB-PORTAL.md) |
 | `/access` | External portals | Client, consultant, contractor, site sign-in |
 | `/account` | Personal account | Identity + licence hub |
 | `/company-account` | Company account | Firm owners |
