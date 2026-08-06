@@ -83,7 +83,7 @@ Runtime resolution: `trpc.sync.capabilities` ·
 | **LF1** | Hub `esti_meta_event` + catch-up REST + WS; node meta outbox/cursor; drain tick | ✅ |
 | **LF2** | Artifact content-hash; publish DTOs (tender/RA/siteReference/progressReport); portal-from-hub reads | ✅ |
 | **LF3** | Domain enqueue of metadata (tasks, estimate totals, phase progress) + apply hooks on pull | ✅ Gagan 2026-08 |
-| **LF4** | Signed desktop installer (**WinUI 3** Fluent 2 shell + WebView2 SPA; profile STUDIO\|CONSULTANCY); first-run licence bind | 🚧 **Bhoomi2 solo** — local `0227` ✅ · ACO-signed local exe · bind API smoke ✅ · SmartScreen/prod URL 🔲 ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); Tauri **removed** (#64) — WinUI 3 only || **LF5** | Web parity polish: capability badges, degraded AI UX, shared keymap / Help | ✅ Aakash — `CapabilityBadge` · `frontend/src/lib/keymap.ts` · `/help` · `resolveRuntimeCapabilities` web-parity fix |
+| **LF4** | Signed desktop installer (**WinUI 3** Fluent 2 shell + WebView2 SPA; profile STUDIO\|CONSULTANCY); first-run licence bind | 🚧 **Bhoomi2 solo** — local `0227` ✅ · ACO-signed local exe · bind + **`pullMeta`** ✅ · `ESTI_COLOCATED_HUB` for loopback · SmartScreen/prod URL 🔲 ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); Tauri **removed** (#64) — WinUI 3 only || **LF5** | Web parity polish: capability badges, degraded AI UX, shared keymap / Help | ✅ Aakash — `CapabilityBadge` · `frontend/src/lib/keymap.ts` · `/help` · `resolveRuntimeCapabilities` web-parity fix |
 | **LF6** | UX parity checklist + inspector/AI right-slot; Figma token sync to kit | ✅ Aakash — [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) stub ✅ · right-slot ✅ (`RightSlot`) |
 
 **Migrations:** `0226_local_first_sync.sql` · `0227_hlp_org_sync_firm.sql` (panel sync firm UUID).
@@ -119,6 +119,7 @@ Runtime resolution: `trpc.sync.capabilities` ·
 ## Operator notes
 
 - Empty `ESTI_HUB_URL` = offline-only node (no meta/artifact push).
+- Single-box smoke (`ESTI_HUB_URL` → same process): set `ESTI_COLOCATED_HUB=true` so `/api/sync/*` mounts on a `node` role (compose passes the env through).
 - Hub portals prefer `esti_sync_record` when `ESTI_ROLE=hub`; nodes keep live-table reads.
 - File mirror on ingest is best-effort when node and hub share object keys; content-hash skips unchanged bytes.
 

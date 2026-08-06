@@ -30,7 +30,8 @@ function bearerFromReq(req: { headers: { authorization?: string }; query?: unkno
  * - GET  /api/sync/meta/ws — live push (query ?token=)
  */
 export function registerSyncRoutes(app: FastifyInstance): void {
-  if (env.ESTI_ROLE !== "hub") return;
+  // Hub authority, or a colocated local smoke box (ESTI_COLOCATED_HUB=1 on a node).
+  if (env.ESTI_ROLE !== "hub" && !env.ESTI_COLOCATED_HUB) return;
 
   app.post("/api/sync/ingest", async (req, reply) => {
     const firmId = await firmFromSyncToken(db, bearerFromReq(req));

@@ -28,6 +28,12 @@ const Env = z.object({
    * authority + the multi-firm store that the external portals are served from.
    */
   ESTI_ROLE: z.enum(["node", "hub"]).default("node"),
+  /**
+   * When true on a **node** process, also mount hub sync REST/WS routes so a
+   * single-box local install can point `ESTI_HUB_URL` at itself (LF4 smoke).
+   * Production firm nodes leave this false and talk to the cloud hub.
+   */
+  ESTI_COLOCATED_HUB: envBool(),
   /** HUB ONLY — PKCS8 PEM Ed25519 private key used to sign licenses. Never in the repo. */
   LICENSE_SIGNING_KEY: z.string().default(""),
   /** NODE — base URL of the hub (e.g. https://aorms.in) for activation/refresh/sync. Empty = offline-only. */

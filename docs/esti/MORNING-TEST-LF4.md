@@ -132,7 +132,7 @@ Get-FileHash -Algorithm SHA256 $exe | Format-List
 | Signed | ✅ ACO **dev** (`CN=Human Centric Works`) + DigiCert timestamp — root **not** trusted by SmartScreen; **not** for portal flip |
 | SHA-256 | `E25E266725E100C3B4D268DA027D9EA29DD4D5302A091DA2EF8E808E3B0A6CB0` |
 | Public HTTPS URL | 🔲 pending host/upload |
-| Bind verified | ✅ autopilot — `license.status=VALID`, `hasSyncToken=true`, `syncReady=true`, `metaSync`+`artifactSync`, `sync.flush` ok (local Ed25519 via `LICENSE_SIGNING_KEY_FILE` + `LICENSE_PANEL_PUBLIC_KEY_SPKI_B64`; key `HLP-5JNZ-445W-M59T`). `pullMeta` may still say `hub_unreachable` on loopback — non-blocking for bind gate. |
+| Bind verified | ✅ autopilot — `license.status=VALID`, `hasSyncToken=true`, `syncReady=true`, `metaSync`+`artifactSync`, `sync.flush` ok, **`sync.pullMeta` ok** (empty catch-up). Local Ed25519 via `LICENSE_SIGNING_KEY_FILE` + `LICENSE_PANEL_PUBLIC_KEY_SPKI_B64`; key `HLP-5JNZ-445W-M59T`. Colocated loopback needs `ESTI_COLOCATED_HUB=true` so `/api/sync/*` mounts on a `node` process. |
 | Local hub `0227` | ✅ applied on `esti-db` (`sync_firm_id` · `sync_token_hash`) |
 
 ---

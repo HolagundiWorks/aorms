@@ -1,5 +1,5 @@
 {
-  "$schemaComment": "AConsulting desktop update manifest — fill after Bhoomi publishes a signed Setup.exe. Do NOT point url at unsigned overnight builds.",
+  "$schemaComment": "AConsulting desktop update manifest — fill after a SmartScreen-trusted WinUI publish is on HTTPS. Do NOT invent sha256 or point url at unsigned / ACO-dev builds.",
   "app": "aconsulting",
   "product": "AConsulting",
   "channel": "stable",
@@ -11,5 +11,5 @@
   "signature": "",
   "publishedAt": "",
   "status": "web_fallback",
-  "notes": "Leave status=web_fallback until a code-signed installer URL + sha256 are set. Set VITE_ACONSULTING_INSTALLER_URL (or enable VITE_PORTAL_USE_RELEASE_INSTALLERS after filling this file) to go live."
+  "notes": "Keep status=web_fallback until SmartScreen-trusted WinUI installer URL + measured sha256 are set (LF4 item 7). Local ACO-dev sign is not enough for portal flip. Set VITE_ACONSULTING_INSTALLER_URL (or VITE_PORTAL_USE_RELEASE_INSTALLERS after filling this file) only then."
 }

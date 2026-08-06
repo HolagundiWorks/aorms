@@ -89,9 +89,11 @@ flowchart TB
 - [x] WinUI publish runs against local SPA (process up)  
 - [x] ACO **dev**-signed artifact + sha256 recorded (SmartScreen trust still open)  
 - [x] `hasSyncToken` bind confirmed (API smoke · VALID · metaSync)  
+- [x] `sync.pullMeta` clean on colocated loopback (`ESTI_COLOCATED_HUB=true`)  
+- [x] Manifest honesty gate (`web_fallback` until SmartScreen + HTTPS)  
 - [ ] HTTPS handoff fields ready (or still gated)  
 - [ ] Production / SmartScreen-trusted cert (operator)  
-- [ ] `sync.pullMeta` clean against real hub URL (not loopback quirk)
+- [ ] `sync.pullMeta` against **production** hub URL (ops)
 
 ---
 

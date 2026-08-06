@@ -98,6 +98,8 @@ services:
       ESTI_ROLE: ${ESTI_ROLE:-hub}
       ESTI_DESKTOP: ${ESTI_DESKTOP:-}
       ESTI_HUB_URL: ${ESTI_HUB_URL:-}
+      # Single-box LF4 smoke: node also serves /api/sync/* when hub URL is loopback.
+      ESTI_COLOCATED_HUB: ${ESTI_COLOCATED_HUB:-}
       ESTI_LICENSE_API_URL: ${ESTI_LICENSE_API_URL:-}
       ESTI_PRODUCT_API_KEY: ${ESTI_PRODUCT_API_KEY:-}
       LICENSE_SIGNING_KEY: ${LICENSE_SIGNING_KEY:-}

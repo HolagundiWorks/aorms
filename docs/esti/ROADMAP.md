@@ -34,9 +34,10 @@ browser-staff scope.
 | 3 | Apply hub migration **`0227`** on local DB · confirm activate→`syncToken` | ✅ |
 | 4 | `build-winui.ps1 -Profile STUDIO` · run shell vs `http://127.0.0.1:5173` | ✅ |
 | 5 | Authenticode sign (operator cert) · measure sha256 | ✅ ACO **dev** · SmartScreen trust 🔲 |
-| 6 | Physical bind: firm admin → `DesktopLicenceBind` → `hasSyncToken` | ✅ local API smoke (`VALID` · `hasSyncToken` · `metaSync`) |
-| 7 | Public HTTPS URL + fill `/downloads` manifests (was Aakash) | 🔲 gated on production cert + host |
-| 8 | M8 item 4 live installer honesty · keep `web_fallback` until 7 | 🔲 |
+| 6 | Physical bind: firm admin → `DesktopLicenceBind` → `hasSyncToken` | ✅ local API smoke (`VALID` · `hasSyncToken` · `metaSync` · **`pullMeta`**) |
+| 6b | Colocated hub routes for local loopback (`ESTI_COLOCATED_HUB`) | ✅ — node can mount `/api/sync/*` for single-box smoke |
+| 7 | Public HTTPS URL + fill `/downloads` manifests (was Aakash) | 🔲 gated on **SmartScreen-trusted** cert + release host |
+| 8 | M8 live-installer honesty · keep `web_fallback` until 7 | ✅ manifests stay `web_fallback` (no invented sha256 / URL) |
 
 Canonical runbook: [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md). Do **not** invent
 sha256 or flip portal URLs unsigned. Landing morphic redesign (rail · stage ·
