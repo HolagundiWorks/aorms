@@ -1,4 +1,4 @@
-import { GlassRail } from "@hcw/ui-kit";
+import { SoftRail } from "@hcw/ui-kit";
 import {
   Box,
   Button,
@@ -53,7 +53,7 @@ export function PortalShell({
     <a href="#esti-main" className="esti-skip-link">
       Skip to main content
     </a>
-    <GlassRail
+    <SoftRail
       railAriaLabel="Account navigation"
       rail={
         <Stack spacing={2} sx={{ height: "100%" }}>
@@ -97,7 +97,7 @@ export function PortalShell({
       }
     >
       {children}
-    </GlassRail>
+    </SoftRail>
     </>
   );
 }

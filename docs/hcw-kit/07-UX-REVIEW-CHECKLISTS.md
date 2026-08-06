@@ -62,6 +62,12 @@ these are the **countable** audit items for the process **Evaluate** gate
 - [ ] Deduped; auto-dismiss ≥4s; dismissible; `role="status"` live region
 - [ ] Severity uses tinted-glass alerts only for error/warning (Layer 3 scarcity)
 
+## Voice & tone ([HCW-UX-VOICE.md](../HCW-UX-VOICE.md))
+- [ ] Ambient copy invitational (`VOICE` / `TRUST`); commanding only for P0 safety/regulatory
+- [ ] ConfirmModal cancel/pending use empathic defaults or documented override
+- [ ] No success theatre; judgment cue uses `TRUST.judgmentNeedsLabel`
+- [ ] `ux.fatigue_signal` → offer pause/calm — never hard-lock the session
+
 ## Wizards / multi-step
 - [ ] Progress indicator with step names (goal gradient)
 - [ ] Back never loses entered data

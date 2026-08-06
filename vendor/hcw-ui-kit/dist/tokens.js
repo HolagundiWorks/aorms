@@ -5,12 +5,11 @@
  * (`theme.ts`) is built entirely from these, and portals may import the raw tokens
  * for the rare edge case the theme doesn't cover.
  *
- * Design language: HYPER-MINIMALIST LIGHT with a RADIANT ORANGE accent —
- * Fog-Gray canvas, Pure-White cards, Coal-Black ink, square surfaces (0 radius),
- * flat borderless panels (definition from spacing + hairlines, not boxes).
- * **Rounded corners:** buttons `BUTTON_RADIUS` (4px), ActionDock `DOCK_PILL_RADIUS`
- * (capsule tray + dock buttons), dialogs `DIALOG_RADIUS` (8px).
- * Full spec: docs/esti/AORMS-BRANDING-KIT.md.
+ * Design language: **pure neumorphism** — Fog-Gray canvas, Pure-White / soft-neu
+ * fills, Coal-Black ink, **Radiant Orange** accent. No glassmorphism, no chrome
+ * transparency, no `backdrop-filter`. Global corner radius **8px**
+ * (`RADIUS` · `BUTTON_RADIUS` · `DOCK_PILL_RADIUS` · `DIALOG_RADIUS`).
+ * Full spec: docs/esti/AORMS-BRANDING-KIT.md · Constitution Article V.
  */
 /** Brand palette. Radiant Orange is the single accent: **fills** (CTAs, chips,
  *  brand marks — with `onAccent` ink) and **active/hover tints** on chrome glyphs
@@ -271,16 +270,19 @@ export const STATUS_COLORS = {
     "cool-gray": "#121619",
     "warm-gray": "#171414",
 };
-/** Surface / panel / input corner radius — square everywhere (0). */
-export const RADIUS = 0;
-/** Buttons (MuiButton) — rounded workspace controls. */
-export const BUTTON_RADIUS = 4;
-/** ActionDock tray + dock buttons — full capsule pill (not square NEU_RAISED). */
-export const DOCK_PILL_RADIUS = 9999;
-/** Dialogs (MuiDialog paper) — the only rounded surface panel in the workspace. */
+/** Surface / panel / input corner radius — pure neu global 8px. */
+export const RADIUS = 8;
+/** Buttons (MuiButton) — same 8px contract as surfaces. */
+export const BUTTON_RADIUS = 8;
+/**
+ * ActionDock tray + dock buttons — **8px** (no capsules).
+ * Name retained for API stability; value is no longer a pill.
+ */
+export const DOCK_PILL_RADIUS = 8;
+/** Dialogs (MuiDialog paper) — 8px. */
 export const DIALOG_RADIUS = 8;
-/** Marketing section carousel — rounded glass tray + chips (public landing only). */
-export const MARKETING_DOCK_RADIUS = 12;
+/** Marketing section carousel / SectionDock chips — 8px. */
+export const MARKETING_DOCK_RADIUS = 8;
 /** Selected tab accent — inset top rule (alert line), not a background fill. */
 export const TAB_ALERT_WIDTH = 3;
 // ── Scale tokens (the numeric ladders the theme + components build on) ─────────
@@ -373,14 +375,52 @@ export const COGA = {
     calmTypeStep: 1,
 };
 /**
+ * Product voice — empathic partner, not commander.
+ * Non-P0 chrome invites collaboration; safety/blocker copy may stay direct (precedence P0).
+ * Full grammar: docs/HCW-UX-VOICE.md
+ */
+export const VOICE = {
+    stance: "empathic-partner",
+    /** Prefer invitation over order in ambient / confirm / awareness copy. */
+    preferInvitation: true,
+    confirmHeadingSlip: "Just checking before we continue",
+    confirmHeadingMistake: "This needs a careful look",
+    cancelLabel: "Not now",
+    pendingLabel: "Working on it…",
+    /** Soft offer when fatigue signals fire — never force a break. */
+    fatiguePauseOffer: "You've been deciding a lot — a short pause may help",
+    fatigueCalmOffer: "Things are stacking up — calm mode can reduce the noise",
+};
+/**
  * AI trust calibration (Lee & See) — ESTI / orchestration copy grammar.
  * Overconfident success theatre is banned; judgment is the only interrupt cue.
+ * Labels stay invitational ({@link VOICE}).
  */
 export const TRUST = {
-    assumptionChipLabel: "Assumption",
-    judgmentNeedsLabel: "Needs your judgment",
+    assumptionChipLabel: "We're assuming",
+    judgmentNeedsLabel: "Your judgment would help here",
     /** Confidence is shown as a band/word, never a false-precision percent alone. */
     preferConfidenceBand: true,
+};
+/**
+ * Operational-load / fatigue *proxies* (not medical diagnosis).
+ * Products observe via `ux.fatigue_signal` and may offer
+ * {@link VOICE.fatiguePauseOffer} / COGA calm — never block work on these alone.
+ */
+export const FATIGUE = {
+    /** Judgment+blocker+error interrupts per active hour → watch. */
+    interruptPerHourWarn: 8,
+    /** Capacity warnings in {@link FATIGUE.capacityWarnWindowMs} → elevated. */
+    capacityWarnBurst: 3,
+    capacityWarnWindowMs: 10 * 60 * 1000,
+    /** Continuous session wall time → watch (suggest pause). */
+    sessionActiveMsWarn: 90 * 60 * 1000,
+    /** Concurrent pending decisions → watch. */
+    pendingDecisionsWarn: 5,
+    /** Single decision open longer than this → watch. */
+    longPendingDecisionMs: 30 * 60 * 1000,
+    /** Suppress repeat emissions of the same kind. */
+    signalCooldownMs: 15 * 60 * 1000,
 };
 /**
  * Preattentive status shapes (Treisman / Ware) — colour alone is never enough
@@ -495,7 +535,7 @@ export const FLAT_POP = {
     backgroundColor: "#ffffff",
     backgroundImage: "none",
     border: "none",
-    borderRadius: 0,
+    borderRadius: RADIUS,
     boxShadow: "0 8px 24px rgba(20, 21, 23, 0.14)",
 };
 // ── Flat text buttons ─────────────────────────────────────────────────────────
@@ -545,7 +585,7 @@ export const NEU_FILL = "#eceef2";
 export const NEU_INSET = "inset 2px 2px 4.5px rgba(20, 21, 23, 0.16), inset -2px -2px 4.5px rgba(255, 255, 255, 0.92)";
 export const NEU_INSET_FOCUS = `inset 2.5px 2.5px 5.5px rgba(20, 21, 23, 0.20), inset -2.5px -2.5px 5.5px rgba(255, 255, 255, 0.95), inset 0 0 0 1.5px ${hexToRgba(colors.accent, 0.45)}`;
 export const NEU_INSET_ERROR = `inset 2px 2px 4.5px rgba(20, 21, 23, 0.16), inset -2px -2px 4.5px rgba(255, 255, 255, 0.92), inset 0 0 0 1.5px ${hexToRgba(colors.supportError, 0.55)}`;
-export const NEU_INPUT_RADIUS = 0;
+export const NEU_INPUT_RADIUS = 8;
 /** Dropdowns (Select) — FLAT at rest, button-like on hover (white box + accent line). */
 export function ddFlatFor(scheme = colors) {
     return {
@@ -569,19 +609,20 @@ export function ddFlatFor(scheme = colors) {
 }
 /** Light-scheme default — prefer `ddFlatFor(scheme)` when scheme-aware. */
 export const DD_FLAT = ddFlatFor(colors);
-// ── The three depth layers (HCW-UI-Kit thesis: depth encodes importance) ───────
-// Layer 1 FLAT (hyperminimalist) — the resting plane: tables, text, inputs at
-// rest. No recipe: it IS the canvas + hairlines (see the theme's Paper/DataGrid).
-// Layer 2 SOFT (neumorphic) — contained objects you work within: widgets,
-// highlight cards, panels, dialogs. A same-material block extruded off the canvas.
+// ── Depth layers (pure neumorphism — Constitution Art. V, 2026-08) ─────────────
+// Layer 1 FLAT — information at rest: tables, text, hairlines on the canvas.
+// Layer 2 SOFT RAISED — objects / chrome: widgets, panels, dock tray, CTAs.
+// Layer 3 SOFT INSET / accent — wells, focus, alerts (stronger neu + solid accent).
+// Glass / blur / translucent chrome are **banned**. Legacy GLASS_* names below
+// are opaque neu aliases for one deprecation cycle.
 export const NEU_RAISED = {
     backgroundColor: NEU_FILL,
     backgroundImage: "none",
     border: "none",
-    borderRadius: 0,
+    borderRadius: RADIUS,
     boxShadow: "6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92)",
 };
-/** ActionDock floating tray — neumorphic raised capsule (Layer 2 shell for dock buttons). */
+/** ActionDock floating tray — neumorphic raised (8px). */
 export const ACTION_DOCK_TRAY = {
     ...NEU_RAISED,
     borderRadius: DOCK_PILL_RADIUS,
@@ -605,75 +646,69 @@ export const NEU_GROOVE_HORIZONTAL = {
     background: "transparent",
     boxShadow: "inset 0 1px 0 rgba(20, 21, 23, 0.12), inset 0 -1px 0 rgba(255, 255, 255, 0.72)",
 };
-// Layer 3 GLASS (glassmorphism) — the live, floating layer: hover, CTAs, the
-// action dock, priority alerts, active widgets. Translucent frosted glass that
-// visibly lifts above everything and pulls the eye. Reserved for what's actionable.
+/**
+ * @deprecated Opaque soft-raised alias — was frosted glass. Prefer `NEU_RAISED` / `LAYERS.soft`.
+ * Kept for one cycle so product `layer="glass"` keeps compiling without blur.
+ */
 export const GLASS_SURFACE = {
-    background: "rgba(255, 255, 255, 0.36)",
-    backdropFilter: "blur(28px) saturate(1.85)",
-    WebkitBackdropFilter: "blur(28px) saturate(1.85)",
-    border: "1px solid rgba(255, 255, 255, 0.48)",
-    borderRadius: 0,
-    boxShadow: "0 14px 42px rgba(20, 21, 23, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.62), inset 0 -1px 0 rgba(255, 255, 255, 0.18)",
+    ...NEU_RAISED,
+    backdropFilter: "none",
+    WebkitBackdropFilter: "none",
 };
 /**
- * Layer 3 variant — **liquid glass** for ActionDock buttons on hover/focus.
- * Crystal-clear frosted pill: gradient wash, high saturate blur, specular inset edges.
- * Flat pill at rest; liquid-glass capsule on hover/focus (`DOCK_PILL_RADIUS`).
- * Accent glow tracks the scheme accent (not a baked light-scheme hex).
+ * Dock / CTA hover — opaque neu raise + optional accent underline (no liquid glass).
+ * @deprecated Name kept; recipe is pure neu.
  */
 export function liquidGlassButtonFor(accent = colors.accent) {
     return {
-        background: "linear-gradient(165deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.18) 45%, rgba(255, 255, 255, 0.42) 100%)",
-        backdropFilter: "blur(36px) saturate(2.25) brightness(1.14)",
-        WebkitBackdropFilter: "blur(36px) saturate(2.25) brightness(1.14)",
-        border: "1px solid rgba(255, 255, 255, 0.72)",
+        backgroundColor: NEU_FILL,
+        backgroundImage: "none",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
+        border: "none",
         borderRadius: DOCK_PILL_RADIUS,
-        boxShadow: `0 12px 36px rgba(20, 21, 23, 0.11), 0 2px 10px ${hexToRgba(accent, 0.07)}, inset 0 1.5px 0 rgba(255, 255, 255, 0.92), inset 0 -1px 0 rgba(255, 255, 255, 0.28)`,
+        boxShadow: `${NEU_RAISED.boxShadow}, ${underlineAccent(accent)}`,
     };
 }
-/** Light-scheme default — prefer `liquidGlassButtonFor(scheme.accent)` when scheme-aware. */
+/** @deprecated Prefer neu hover recipes — opaque alias of liquidGlassButtonFor. */
 export const LIQUID_GLASS_BUTTON = liquidGlassButtonFor(colors.accent);
 /** ActionDock button hover/focus lift. */
-export const DOCK_BUTTON_LIFT = "translateY(-3px)";
+export const DOCK_BUTTON_LIFT = "translateY(-2px)";
 /**
- * Layer 3 variant — **clear glass** (marketing rail / section heading bands).
- * More translucent than `GLASS_SURFACE` so atmosphere (contours) stays readable.
- * Do **not** use on dense sub-cards — flat/transparent + hairlines instead.
+ * @deprecated Opaque soft rail alias — was clear glass.
  */
 export const CLEAR_GLASS_SURFACE = {
-    background: "linear-gradient(175deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 48%, rgba(255, 255, 255, 0.09) 100%)",
-    backdropFilter: "blur(26px) saturate(1.7) brightness(1.08)",
-    WebkitBackdropFilter: "blur(26px) saturate(1.7) brightness(1.08)",
-    border: "1px solid rgba(255, 255, 255, 0.38)",
-    borderRadius: 0,
-    boxShadow: "6px 0 32px rgba(20, 21, 23, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 1px 0 0 rgba(255, 255, 255, 0.28)",
+    ...NEU_RAISED,
+    backdropFilter: "none",
+    WebkitBackdropFilter: "none",
 };
 /**
- * SectionDock chips — clear liquid glass pills (marketing section carousel).
- * Translucent gradient + specular inset edges; pair with `MARKETING_DOCK_RADIUS`.
+ * SectionDock chips — opaque neu (was clear liquid glass).
+ * @deprecated Name kept for API stability.
  */
 export const SECTION_DOCK_CHIP_GLASS = {
-    background: "linear-gradient(175deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.07) 48%, rgba(255, 255, 255, 0.18) 100%)",
-    backdropFilter: "blur(28px) saturate(1.85) brightness(1.1)",
-    WebkitBackdropFilter: "blur(28px) saturate(1.85) brightness(1.1)",
-    border: "1px solid rgba(255, 255, 255, 0.58)",
-    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.72), inset 0 -1px 0 rgba(255, 255, 255, 0.24), 0 4px 14px rgba(20, 21, 23, 0.06)",
+    backgroundColor: NEU_FILL,
+    backgroundImage: "none",
+    backdropFilter: "none",
+    WebkitBackdropFilter: "none",
+    border: `1px solid ${colors.borderSubtle}`,
+    borderRadius: MARKETING_DOCK_RADIUS,
+    boxShadow: NEU_RAISED.boxShadow,
 };
 /**
- * Layer 3 variant — **heading glass** (full-width section openers on marketing).
- * Same clear recipe, stronger top edge; pairs with accent left rule in CSS.
+ * @deprecated Opaque heading band — was heading glass. Accent left rule retained.
  */
 export const HEADING_GLASS_SURFACE = {
-    background: "linear-gradient(155deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 55%, rgba(255, 255, 255, 0.10) 100%)",
-    backdropFilter: "blur(22px) saturate(1.55) brightness(1.06)",
-    WebkitBackdropFilter: "blur(22px) saturate(1.55) brightness(1.06)",
-    borderTop: "1px solid rgba(255, 255, 255, 0.55)",
-    borderRight: "1px solid rgba(20, 21, 23, 0.06)",
-    borderBottom: "1px solid rgba(20, 21, 23, 0.08)",
+    backgroundColor: NEU_FILL,
+    backgroundImage: "none",
+    backdropFilter: "none",
+    WebkitBackdropFilter: "none",
+    borderTop: `1px solid ${colors.borderSubtle}`,
+    borderRight: `1px solid ${colors.borderSubtle}`,
+    borderBottom: `1px solid ${colors.borderSubtle}`,
     borderLeft: `4px solid ${colors.accent}`,
-    borderRadius: 0,
-    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 24px rgba(20, 21, 23, 0.04)",
+    borderRadius: RADIUS,
+    boxShadow: NEU_RAISED.boxShadow,
 };
 const LIGHT_RECIPES = {
     POP_FILL,
@@ -702,26 +737,27 @@ export const DARK_RECIPES = {
         backgroundColor: "#191C21",
         backgroundImage: "none",
         border: "none",
-        borderRadius: 0,
+        borderRadius: RADIUS,
         boxShadow: "0 8px 24px rgba(0, 0, 0, 0.55)",
     },
     NEU_RAISED: {
         backgroundColor: "#1e222a",
         backgroundImage: "none",
         border: "none",
-        borderRadius: 0,
+        borderRadius: RADIUS,
         boxShadow: "6px 6px 14px rgba(0, 0, 0, 0.55), -6px -6px 14px rgba(255, 255, 255, 0.045)",
     },
     NEU_INSET: "inset 2px 2px 4.5px rgba(0, 0, 0, 0.55), inset -2px -2px 4.5px rgba(255, 255, 255, 0.05)",
     NEU_INSET_FOCUS: `inset 2.5px 2.5px 5.5px rgba(0, 0, 0, 0.62), inset -2.5px -2.5px 5.5px rgba(255, 255, 255, 0.06), inset 0 0 0 1.5px ${hexToRgba(DARK_SCHEME.accent, 0.5)}`,
     NEU_INSET_ERROR: `inset 2px 2px 4.5px rgba(0, 0, 0, 0.55), inset -2px -2px 4.5px rgba(255, 255, 255, 0.05), inset 0 0 0 1.5px ${hexToRgba(DARK_SCHEME.supportError, 0.55)}`,
     GLASS_SURFACE: {
-        background: "rgba(25, 28, 33, 0.5)",
-        backdropFilter: "blur(28px) saturate(1.6)",
-        WebkitBackdropFilter: "blur(28px) saturate(1.6)",
-        border: "1px solid rgba(255, 255, 255, 0.14)",
-        borderRadius: 0,
-        boxShadow: "0 14px 42px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.10), inset 0 -1px 0 rgba(255, 255, 255, 0.04)",
+        backgroundColor: "#1e222a",
+        backgroundImage: "none",
+        border: "none",
+        borderRadius: RADIUS,
+        boxShadow: "6px 6px 14px rgba(0, 0, 0, 0.55), -6px -6px 14px rgba(255, 255, 255, 0.045)",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
     },
 };
 export const HIGH_CONTRAST_RECIPES = {
@@ -739,26 +775,27 @@ export const HIGH_CONTRAST_RECIPES = {
         backgroundColor: "#FFFFFF",
         backgroundImage: "none",
         border: "2px solid #000000",
-        borderRadius: 0,
+        borderRadius: RADIUS,
         boxShadow: "none",
     },
     NEU_RAISED: {
         backgroundColor: "#FFFFFF",
         backgroundImage: "none",
         border: "2px solid #000000",
-        borderRadius: 0,
+        borderRadius: RADIUS,
         boxShadow: "none",
     },
     NEU_INSET: "inset 0 0 0 2px #000000",
     NEU_INSET_FOCUS: `inset 0 0 0 3px ${HIGH_CONTRAST_SCHEME.accent}`,
     NEU_INSET_ERROR: `inset 0 0 0 3px ${HIGH_CONTRAST_SCHEME.supportError}`,
     GLASS_SURFACE: {
-        background: "#FFFFFF",
+        backgroundColor: "#FFFFFF",
+        backgroundImage: "none",
+        border: "2px solid #000000",
+        borderRadius: RADIUS,
+        boxShadow: "none",
         backdropFilter: "none",
         WebkitBackdropFilter: "none",
-        border: "2px solid #000000",
-        borderRadius: 0,
-        boxShadow: "none",
     },
 };
 /** Surface recipes for a scheme — the theme factory resolves through this. */
@@ -770,20 +807,18 @@ export function recipesFor(scheme) {
     return LIGHT_RECIPES;
 }
 export const LAYERS = {
-    flat: { borderRadius: 0 },
+    flat: { borderRadius: RADIUS },
     soft: NEU_RAISED,
     glass: GLASS_SURFACE,
     clearGlass: CLEAR_GLASS_SURFACE,
     headingGlass: HEADING_GLASS_SURFACE,
 };
-/** Elevation ladder — depth-encodes-importance as numeric levels: 0 = flat
- *  (Layer 1) · 1–2 = neumorphic (Layer 2) · 3 = glass (Layer 3). Values are the
- *  box-shadow strings the recipes already use, exposed as one ordered scale. */
+/** Elevation ladder — 0 flat · 1–2 soft raised/pop · 3 soft raised (was glass). */
 export const ELEVATION = {
     0: "none",
     1: NEU_RAISED.boxShadow,
     2: NEU_POP.boxShadow,
-    3: GLASS_SURFACE.boxShadow,
+    3: NEU_RAISED.boxShadow,
 };
 /** The token bundle, handy for a one-shot import. */
 export const tokens = {
@@ -805,7 +840,9 @@ export const tokens = {
     CAPACITY,
     INTERRUPTION,
     COGA,
+    VOICE,
     TRUST,
+    FATIGUE,
     STATUS_SHAPE,
     BREAKPOINTS,
     Z_INDEX,

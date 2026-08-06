@@ -1,11 +1,7 @@
-# Adopting `@hcw/ui-kit`
+# Adopting `@hcw/ui-kit` (git dependency)
 
-How a consuming app pulls the kit from [hcwux](https://github.com/HolagundiWorks/hcwux).
-
-> **AORMS-Studio (`esti`) note:** this monorepo vendors a **built** copy at
-> `vendor/hcw-ui-kit/` (`"@hcw/ui-kit": "workspace:*"`). Re-vendor steps live in
-> [`KITS.md`](KITS.md) — do not switch esti to a live git dependency without an
-> explicit ops decision. The git-dependency flow below is for sibling apps.
+How a consuming app (AORMS-Studio `esti`, and siblings like `leos`, `ados`,
+`Contractor-OS`, `esticad`) pulls the kit from this repo.
 
 ## Install
 

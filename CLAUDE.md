@@ -77,10 +77,9 @@ via the repo’s wiki sync/build step.
 
 ## UI / design system — HCW-UI-KIT
 
-> **⚠️ CANONICAL (2026-07): `@hcw/ui-kit` v1.4.0** (*HCW-UI-Kit — Human Centric Works*,
+> **⚠️ CANONICAL (2026-08): `@hcw/ui-kit` v1.5.0** (*HCW-UI-Kit — Human Centric Works*,
 > vendored at `vendor/hcw-ui-kit` from [hcwux](https://github.com/HolagundiWorks/hcwux))
-> is the centralised, **layered** design system deployed against **every** surface —
-> **AStudio**, client/consultant portals, licensing console, and the landing page.
+> — **pure neumorphism** (no glassmorphism).
 > **`@carbon/react` was removed (2026-07).** Carbon *Sass* colours/type scale survive
 > only as a frozen `--cds-*` compat block in `frontend/src/styles.scss` — no Carbon
 > React components anywhere.
@@ -96,39 +95,30 @@ via the repo’s wiki sync/build step.
 > Living debt queue: [`DESIGN-DEBT-REGISTER.md`](docs/hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md).
 > Audit index: [`11-audits/README.md`](docs/hcw-kit/11-audits/README.md).
 >
-> **Thesis: depth encodes importance.** Three material languages stack by z-depth
-> — pick a layer by the element's ROLE, never by taste:
+> **Thesis: depth encodes importance.** Opaque **pure neumorphism** — pick a layer by
+> ROLE, never by taste. **No glass / blur / translucent chrome.** Global **8px** radius.
 >
-> 1. **Layer 1 — FLAT (hyperminimalist):** information at rest — data tables,
->    text, headings, surfaces. Fog Gray `#F2F4F7` canvas, Pure White cards, Coal
->    Black `#141517` ink, hairline rules, **Radiant Orange `#FF4F18`** the single
->    accent (fills carry white text; links use slate, never the accent).
-> 2. **Layer 2 — SOFT (neumorphic):** objects you work within — dialogs, panels,
->    widgets, highlight cards, text-entry wells (recessed). `<Surface layer="soft">`.
-> 3. **Layer 3 — GLASS (glassmorphism):** the live layer — **button hover, CTAs,
->    the ActionDock, priority (error/warning) alerts**. `<Surface layer="glass">`.
->    Marketing variants: `clearGlass` (rail over atmosphere) and `headingGlass`
->    (full-width section openers). Landing sub-cards stay **flat** — no glass on
->    every tile (see HCW-UI-KIT.md § Marketing shell).
+> 1. **Layer 1 — FLAT:** information at rest — tables, text, headings. Fog Gray
+>    `#F2F4F7`, Pure White cards, Coal Black `#141517`, **Radiant Orange `#FF4F18`**.
+> 2. **Layer 2 — SOFT RAISED:** objects / chrome — dialogs, ribbon, ActionDock,
+>    SoftRail. `<Surface layer="soft">`.
+> 3. **Layer 3 — SOFT ATTENTION:** wells, focus, alerts — inset neu + solid accent.
+>    Legacy `layer="glass"` aliases soft raised (deprecation cycle).
 >
-> **Spatial model — Rail · Stage · Taskbar footer · ActionDock:** glass **rail**
-> (20%, full viewport height, fixed) + **stage** (scrolls independently), **glass
-> taskbar footer** (calculator LEFT · launcher cluster CENTRE · tray RIGHT —
-> `AppFooterBar`), and a **global ActionDock** (LEFT destroy · CENTER create ·
-> RIGHT commit). Studio Intelligence (`/`) is the canonical glass-rail reference;
-> marketing uses the same model without a taskbar (dock-only CTAs). Rollout U0–U6 ✅:
-> [`ROADMAP.md`](docs/esti/ROADMAP.md).
-> **Login/auth forms sit in the rail, not on the stage.** Screen CTAs via
-> `useScreenActions` (publish `[]` while dialogs open).
+> **Spatial model — Top ribbon · Stage · Taskbar footer · ActionDock · AnalogueClock:**
+> ribbon (primary nav) + stage; **left glass rail removed**; footer taskbar
+> (`AppFooterBar`); global ActionDock; fixed bottom-right kit `AnalogueClock`
+> (separate from digital tray clock). Auth uses a centered soft-neu card.
+> Screen CTAs via `useScreenActions` (publish `[]` while dialogs open).
 >
 > **Brand font: Urbanist** (OFL) — `@fontsource/urbanist` in `main.tsx`, mirrored
-> in the kit theme.
+> in the kit theme. Calculator result uses **VT323** pixel face.
 >
 > **Colour / density / COGA:** `createHcwTheme({ scheme, density, coga })` —
 > schemes `light` (default) · `dark` · `highContrast`; density `comfortable` |
 > `compact`; COGA `default` | `calm`. `KitRoot` (app shim `MuiRoot`) wires the
 > provider; Settings → Appearance persists choices. Prefer HCW names over legacy
-> `createAormsTheme` / `MuiRoot` aliases.
+> `createAormsTheme` / `MuiRoot` aliases. Materials stay opaque neu in every scheme.
 
 **Governance chain:** [`HCW-DESIGN-PLAYBOOK.md`](docs/HCW-DESIGN-PLAYBOOK.md) (why) →
 [`HCW-UX.md`](docs/HCW-UX.md) (framework + process) →

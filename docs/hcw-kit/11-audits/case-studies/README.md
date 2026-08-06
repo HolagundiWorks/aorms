@@ -5,10 +5,12 @@
 
 Three before/after notes using the KPI vocabulary. Metrics are **studio-observed**
 (timed tasks + event logs on adopted surfaces), not lab A/B. Replicate with
-`setUxEventSink` + Process Evaluate.
+`setUxEventSink` + Process Evaluate. External studies: use [ext-TEMPLATE.md](ext-TEMPLATE.md)
+and [VALIDATION-PROTOCOL.md](../VALIDATION-PROTOCOL.md).
 
 | Study | Primary KPIs |
 | --- | --- |
 | [01 — Interrupt budget](01-interrupt-budget.md) | Interrupt density · Capacity breaches |
 | [02 — Dock purity & outcomes](02-dock-purity-outcomes.md) | Dock purity · Outcome coverage |
 | [03 — Mission orientation](03-mission-orientation.md) | Orientation · Decision latency · Mission success |
+| [ext-TEMPLATE](ext-TEMPLATE.md) | Full V1 protocol measures |

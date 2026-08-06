@@ -29,7 +29,7 @@ import LayersOutlined from "@mui/icons-material/LayersOutlined";
 import RuleOutlined from "@mui/icons-material/RuleOutlined";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import {
-  GlassRail,
+  SoftRail,
   KpiStrip,
   SectionDock,
   StatusDot,
@@ -242,7 +242,7 @@ function WorkspacePreview() {
       <Stack direction="row" spacing={1.5} sx={{ height: "100%" }}>
         {/* Rail */}
         <Surface
-          layer="glass"
+          layer="soft"
           sx={{
             width: 84,
             flexShrink: 0,
@@ -371,7 +371,7 @@ export function Landing() {
 
   return (
     <>
-      <GlassRail glass="clear" mainId="lp-main" rail={rail} railAriaLabel="AORMS">
+      <SoftRail mainId="lp-main" rail={rail} railAriaLabel="AORMS">
         <Container maxWidth="lg" disableGutters sx={{ pb: 12 }}>
           {/* Hero — two-column: copy + workspace preview */}
           <Box id="top" component="section" sx={{ pt: { xs: 4, md: 8 }, pb: { xs: 6, md: 9 } }}>
@@ -768,7 +768,7 @@ export function Landing() {
           </Box>
 
           {/* CTA band — the live (glass) layer. */}
-          <Surface layer="glass" component="section" sx={{ my: { xs: 6, md: 9 }, p: { xs: 4, md: 6 }, textAlign: "center" }}>
+          <Surface layer="soft" component="section" sx={{ my: { xs: 6, md: 9 }, p: { xs: 4, md: 6 }, textAlign: "center" }}>
             <Typography variant="h4" component="h2" sx={{ fontWeight: 800 }}>
               Bring your practice onto one system.
             </Typography>
@@ -893,7 +893,7 @@ export function Landing() {
             </Typography>
           </Box>
         </Container>
-      </GlassRail>
+      </SoftRail>
 
       <SectionDock links={SECTIONS} pathname={pathname} hash={hash} aria-label="Page sections" />
     </>

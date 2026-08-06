@@ -1,13 +1,14 @@
 # HCW UX Framework — Charter
 
-**Status:** Canonical UX **framework** (model) · **Adopted:** 2026-07-21 · **Version:** 1.2  
-**Type:** UX **framework** — principles, scope, diagram, KPIs  
+**Status:** Canonical UX **framework** (model) · **Adopted:** 2026-07-21 · **Version:** 1.4.1  
+**Type:** UX **framework** — principles, scope, diagram, KPIs, precedence  
 **Run it with:** [HCW-UX-PROCESS.md](HCW-UX-PROCESS.md) (the **process**) · **Index:** [HCW-UX.md](HCW-UX.md)  
-**Executable layer:** `@hcw/ui-kit` · **Laws:** [HCW-UI-UX-PRINCIPLES.md](esti/HCW-UI-UX-PRINCIPLES.md) · **AI module:** [HCW-AI-ORCHESTRATION-UX.md](esti/HCW-AI-ORCHESTRATION-UX.md) · **Construction overlay:** [HCW-UI-UX-PRINCIPLES.md](esti/HCW-UI-UX-PRINCIPLES.md)
+**Published score:** [HCW-UX-EVALUATION.md](HCW-UX-EVALUATION.md) (**88/100** industry-reference bar, 2026-07-22)  
+**Executable layer:** `@hcw/ui-kit` · **Laws:** [HCW-UI-UX-PRINCIPLES.md](esti/HCW-UI-UX-PRINCIPLES.md) · **AI module:** [HCW-AI-ORCHESTRATION-UX.md](esti/HCW-AI-ORCHESTRATION-UX.md) · **Construction overlay:** [HCW-CONSTRUCTION-UX-OVERLAY.md](esti/HCW-CONSTRUCTION-UX-OVERLAY.md) (construction-**aware**, not a CPM UX framework)
 
 | Framework (this doc) | Process |
 | --- | --- |
-| *What is true* — problem, seven principles, one diagram, KPIs | *What we do* — Plan → Design → Build → Evaluate → Improve |
+| *What is true* — problem, seven principles, precedence, one diagram, KPIs | *What we do* — Plan → Design → Build → Evaluate → Improve |
 | Rarely changes | Runs every change / sprint |
 
 This charter answers: *what problem we solve, for whom, with what structure, how we measure, and where we stop.* The process turns that model into repeatable team action. Everything else (tokens, components, checklists) implements both.
@@ -36,7 +37,7 @@ Existing design systems (Material, Carbon, Fluent…) optimise **component consi
 | Cognitive load, interruption, trust calibration, SA | Model training / agent internals |
 | AI *product* UX (mission-first supervision) | Coding-agent behaviour ([12-AI-AGENT-RULEBOOK](hcw-kit/12-AI-AGENT-RULEBOOK.md)) |
 | Domain-agnostic kit primitives | Domain business rules baked into kit |
-| Construction *overlay* (roles, lifecycle, field) | Full CPM / BIM authoring standards (integrate, don’t replace) |
+| Construction *overlay* (roles, lifecycle, field) — **aware**, not full CPM patterns | RFI/NCR/claims/permit UIs; full CPM / BIM authoring standards |
 
 ### Target users
 
@@ -64,6 +65,25 @@ Keep these seven; everything else is elaboration.
 | **5** | Cognitive role first | Interface serves the human’s job, not the system’s internals |
 | **6** | Mission over conversation | AI surfaces answer four questions in ≤30s |
 | **7** | UX law beats taste | When aesthetics and law conflict, law wins |
+
+**Voice (cross-cutting):** speak as an empathic partner — [HCW-UX-VOICE.md](HCW-UX-VOICE.md) · `VOICE` / `TRUST`. Operational load proxies: `FATIGUE` · `ux.fatigue_signal`.
+
+### 2.1 Precedence (when principles conflict)
+
+A mature framework declares **what wins**. Lower number wins over higher when they collide.
+
+| Rank | Rule | Beats |
+| --- | --- | --- |
+| **P0** | **Safety / regulatory judgment** — interrupt class that requires human ack | Calm scarcity, toast budget, progressive disclosure delay |
+| **P1** | **Capacity protection** — do not exceed `CAPACITY` / `INTERRUPTION` on concurrent chrome | “Show the whole mission at once,” vanity KPI strips, unbounded dock |
+| **P2** | **Mission orientation** — four questions answerable in ≤30s above the fold | Implementation-detail density, chat transcript as primary UI |
+| **P3** | **One geography** — Rail · Stage · Taskbar · Dock only | Novel fifth regions for one-screen convenience |
+| **P4** | **Depth-by-role** — flat / soft / glass assigned by role | Decorative lift, second accent |
+| **P5** | **Taste / brand atmosphere** | Nothing above — only dated product exceptions |
+
+**Worked conflict — Mission vs Capacity:** Mission completeness does **not** authorize breaking Cowan caps. Rank objectives (≤5), put pending decisions first, disclose detail in Stage. Concurrent chrome stays within capacity; mission *progresses* through disclosure and Decision ranking, not strip inflation.
+
+**Worked conflict — Calm vs Safety:** A safety blocker **may** interrupt even when the ambient budget is spent (P0). Ambient progress still never toasts.
 
 ### One diagram (the model)
 
@@ -115,7 +135,7 @@ This section is the **model checklist** for a single sitting. Roles, exit gates,
 2. Pick a **template** ([05-TEMPLATES.md](hcw-kit/05-TEMPLATES.md)) or T10 AI surface.
 3. Place content in **Rail / Stage / Dock / Taskbar** — nothing else.
 4. Choose **layer by role** (flat / soft / glass).
-5. Cap choices with **CAPACITY**; interrupts with **INTERRUPTION**.
+5. Cap choices with **CAPACITY**; interrupts with **INTERRUPTION** (respect §2.1 precedence).
 6. For AI: answer the **four questions** above the fold in the rail.
 7. Ship via process Evaluate → Improve (checklist + KPIs · [HCW-UX-KPI-INSTRUMENT.md](esti/HCW-UX-KPI-INSTRUMENT.md)).
 
@@ -149,6 +169,10 @@ Constitution articles + agent rules R1–R10 + catalog attributes → same geome
 
 Detail: [HCW-UX-KPI-INSTRUMENT.md](esti/HCW-UX-KPI-INSTRUMENT.md).
 
+### Validation honesty
+
+Internal / studio-observed case studies ([11-audits/case-studies/](hcw-kit/11-audits/case-studies/)) support **explanatory** maturity. They do **not** yet equal external multi-org validation. Predictive models (capacity × interrupt → latency deltas) are not published. See [HCW-UX-EVALUATION.md](HCW-UX-EVALUATION.md).
+
 ---
 
 ## 5. Adaptability
@@ -157,7 +181,7 @@ Detail: [HCW-UX-KPI-INSTRUMENT.md](esti/HCW-UX-KPI-INSTRUMENT.md).
 | --- | --- |
 | **Scale** | Same seven principles from a login rail to a multi-mission studio |
 | **Method fit** | Works inside Agile (sprint = dock commits + outcome banners), Waterfall (phase = Stage tabs), Lean (CAPACITY as WIP limit), Design Thinking (prototype against templates) |
-| **Industry** | **Kit = industry-agnostic.** Construction specialization is an **intentional overlay**, not baked into tokens |
+| **Industry** | **Kit = industry-agnostic.** Construction specialization is an **intentional overlay** (construction-aware UX), not a CPM interaction-pattern library |
 
 ---
 
@@ -179,25 +203,28 @@ Detail: [HCW-UX-KPI-INSTRUMENT.md](esti/HCW-UX-KPI-INSTRUMENT.md).
 | Need | Mechanism |
 | --- | --- |
 | Decision support | Dock LEFT/CENTER/RIGHT · recommendation-first Decision cards · freeze rules |
-| Risk awareness | HealthGlassOrb / STATUS_SHAPE · AI risk band · construction safety interrupt class |
+| Risk awareness | HealthGlassOrb / STATUS_SHAPE · AI risk band · construction safety interrupt class (P0) |
 | Continuous improvement | Debt register · audits · KPI instrument · changelog |
+| Explainability | Freeze archive · outcome banners · ConfirmModal reason · debt entries — product must persist audit |
 
-**Trade-off rule:** When taste conflicts with UX law, **law wins** unless a dated product exception is recorded (e.g. marketing atmosphere).
+**Trade-off rule:** When taste conflicts with UX law, **law wins** unless a dated product exception is recorded (e.g. marketing atmosphere). Full stack: §2.1.
 
 ---
 
-## 8. Evaluation checklist (self-score)
+## 8. Evaluation checklist (industry-reference bar)
 
-| # | Question | HCW answer (2026-07-21) |
+Canonical scored reaudit: **[HCW-UX-EVALUATION.md](HCW-UX-EVALUATION.md)** (weighted **88/100**, 2026-07-22).
+
+| # | Question | HCW answer |
 | --- | --- | --- |
 | 1 | Problem better than existing? | Yes — cognitive-role chrome + mission-first AI vs chat/DS-only |
-| 2 | Every component necessary? | Yes — CAPACITY/COGA/orchestration shipped; no spare shells |
-| 3 | Short intro success? | Yes — framework §3 + process §3 + T10 primitives |
-| 4 | Consistent across teams? | Designed for yes; enforce via R1–R10 + process gates |
-| 5 | Impact measurable? | KPIs + `logUxEvent` + case studies published |
-| 6 | Integrates workflows? | Yes with eng; overlay for CPM/BIM |
-| 7 | Scales? | Yes for screens; programmes via overlay |
-| 8 | Evidence / cases? | [case-studies/](hcw-kit/11-audits/case-studies/) (interrupt · dock · mission) |
+| 2 | Every component necessary? | Yes — F1–F5 closed; precedence prevents spare shells |
+| 3 | Short intro success? | Mostly — §3 + process; catalog depth still costs |
+| 4 | Consistent across teams? | Designed for yes via R1–R10 + gates; depends on adoption |
+| 5 | Impact measurable? | KPIs + `logUxEvent` exist; live consumer dashboards uneven |
+| 6 | Integrates workflows? | Yes with eng; overlay for CPM/BIM coexistence |
+| 7 | Scales? | Screens yes; programmes via overlay (domain patterns = product) |
+| 8 | Evidence / cases? | Theory strong; **external** validation still the limiter (5–6/10) |
 | 9 | One diagram? | Yes (§2) |
 | 10 | Adoption motive? | Reduces inventiveness tax **and** improves decision speed |
 
@@ -208,13 +235,15 @@ Detail: [HCW-UX-KPI-INSTRUMENT.md](esti/HCW-UX-KPI-INSTRUMENT.md).
 | Need | Document |
 | --- | --- |
 | **Index (framework + process)** | [HCW-UX.md](HCW-UX.md) |
+| **Published evaluation / score** | [HCW-UX-EVALUATION.md](HCW-UX-EVALUATION.md) |
+| **Voice & tone** | [HCW-UX-VOICE.md](HCW-UX-VOICE.md) |
 | Why (philosophy) | [HCW-DESIGN-PLAYBOOK.md](HCW-DESIGN-PLAYBOOK.md) |
 | Law | [hcw-kit/00-CONSTITUTION.md](hcw-kit/00-CONSTITUTION.md) |
 | This charter (framework) | **You are here** |
 | **How to run (process)** | [HCW-UX-PROCESS.md](HCW-UX-PROCESS.md) |
 | Heuristic → pattern | [esti/HCW-UI-UX-PRINCIPLES.md](esti/HCW-UI-UX-PRINCIPLES.md) |
 | AI module | [esti/HCW-AI-ORCHESTRATION-UX.md](esti/HCW-AI-ORCHESTRATION-UX.md) · [ai-orchestration-ux-framework.md](ai-orchestration-ux-framework.md) |
-| Construction | [esti/HCW-UI-UX-PRINCIPLES.md](esti/HCW-UI-UX-PRINCIPLES.md) |
+| Construction (aware overlay) | [esti/HCW-CONSTRUCTION-UX-OVERLAY.md](esti/HCW-CONSTRUCTION-UX-OVERLAY.md) |
 | KPIs | [esti/HCW-UX-KPI-INSTRUMENT.md](esti/HCW-UX-KPI-INSTRUMENT.md) |
 | Kit catalog | [hcw-kit/14-HCW-CATALOG.md](hcw-kit/14-HCW-CATALOG.md) |
 
@@ -222,14 +251,16 @@ Detail: [HCW-UX-KPI-INSTRUMENT.md](esti/HCW-UX-KPI-INSTRUMENT.md).
 
 ## 10. Framework gaps
 
-**Closed in 1.3.0** (see [DESIGN-DEBT-REGISTER.md](hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md) Retired):
+**Closed in 1.3.0** (kit): F1–F5 — see [DESIGN-DEBT-REGISTER.md](hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md).
 
-| ID | Was | Closed by |
+**Open at industry-reference bar** (not kit defects — empirical / product):
+
+| ID | Gap | Moves score |
 | --- | --- | --- |
-| F1 | Orchestration under-primitivized | `MissionHeader` · `ObjectiveList` · `PhaseStrip` · `DecisionQueue` · `FreezeTable` · `ConfidenceBand` + **T10** |
-| F2 | CAPACITY partial | `enforceCapacity` · ActionDock trim · `KpiStrip` |
-| F3 | COGA unused | `KitRoot({ coga })` / `createHcwTheme({ coga })` |
-| F4 | KPI telemetry unwired | `logUxEvent` / `setUxEventSink` + dock `outcome`/`track` |
-| F5 | No case studies | [11-audits/case-studies/](hcw-kit/11-audits/case-studies/) |
+| **V1** | External multi-org / multi-project validation | Validation → 8+ | [VALIDATION-PROTOCOL.md](hcw-kit/11-audits/VALIDATION-PROTOCOL.md) |
+| **V2** | Live KPI dashboards with before/after deltas | Measurable impact | [HCW-UX-ADOPTION-PLAYBOOK.md](esti/HCW-UX-ADOPTION-PLAYBOOK.md) |
+| **V3** | Calibrated predictive models | Predictive → 8+ | [HCW-UX-CALIBRATION.md](esti/HCW-UX-CALIBRATION.md) |
+| **V4** | Construction domain pattern library in product (RFI, NCR, claims…) | Domain completeness | [HCW-CONSTRUCTION-PATTERNS.md](esti/HCW-CONSTRUCTION-PATTERNS.md) |
+| **V5** | Long-lived decision/freeze audit persistence | Explainability → 9+ | `setDecisionAuditSink` · adoption §4 |
 
-New gaps: file as D- or F-items on the debt register — do not leave §10 stale.
+New kit defects: file on the debt register — do not leave this section stale.

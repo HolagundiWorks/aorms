@@ -45,6 +45,12 @@ silently obeyed.
 15. Always verify like an engineer: typecheck kit + consumers, run kit tests,
     boot what you changed; report results plainly, including what was NOT
     verified (e.g. visual QA pending).
+16. Always use invitational ambient copy (`VOICE` / `TRUST`) unless precedence P0
+    (safety/regulatory) requires direct language — see [HCW-UX-VOICE.md](../HCW-UX-VOICE.md).
+17. Always wire consequential freezes through `freezeDecision` / `recordFreezeAudit`
+    when touching decision UX; product must attach `setDecisionAuditSink`.
+18. Always prefer `HcwTelemetryRoot` / `FatigueOfferBanner` for load offers — never
+    lock the UI on fatigue proxies.
 
 ## Split responsibilities (role prompts)
 

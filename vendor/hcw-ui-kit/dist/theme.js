@@ -5,12 +5,10 @@
  *
  * The HCW-UI-Kit layer rules, encoded here so screens inherit them and never
  * re-specify them inline (full spec: docs/esti/HCW-UI-KIT.md):
- *  1. Layer 1 FLAT (hyperminimalist) — tables, text, surfaces at rest; square
- *     corners (0 radius). Rounded corners: buttons 4px, dialogs 8px.
- *  2. Layer 2 SOFT (neumorphic) — dialogs and text-entry wells; objects you work
- *     within.
- *  3. Layer 3 GLASS (glassmorphism) — the live layer: BUTTON HOVER takes the
- *     glass slab, and priority alerts (error/warning) read as tinted glass.
+ *  1. Layer 1 FLAT — tables, text, surfaces at rest; 8px radius.
+ *  2. Layer 2 SOFT RAISED — dialogs, chrome, dock; opaque neumorphism.
+ *  3. Layer 3 SOFT ATTENTION — button hover / priority alerts use stronger neu
+ *     + solid accent (no glass / blur / transparency).
  *
  * MUI is the rendering engine; HCW owns appearance and patterns
  * (see `LAYOUT` · `SPACING` · `DENSITY` · catalog).
@@ -179,27 +177,26 @@ export function createAormsTheme(options) {
                             boxShadow: "none",
                             // R7 — motion from tokens, never literals.
                             transition: `transform ${MOTION.duration.fast}ms ${MOTION.easing.standard}, box-shadow ${MOTION.duration.fast}ms ${MOTION.easing.standard}, color ${MOTION.duration.fast}ms ${MOTION.easing.standard}, background ${MOTION.duration.fast}ms ${MOTION.easing.standard}`,
-                            // HOVER = Layer 3 GLASS: the label lifts onto a frosted glass slab
-                            // (actionability itself glows), keeping the bottom accent line.
+                            // HOVER = soft raised neu + accent underline (no glass).
                             "&:hover": {
-                                background: R.GLASS_SURFACE.background,
-                                backdropFilter: R.GLASS_SURFACE.backdropFilter,
-                                WebkitBackdropFilter: R.GLASS_SURFACE.WebkitBackdropFilter,
+                                backgroundColor: R.NEU_FILL,
+                                background: R.NEU_FILL,
+                                backdropFilter: "none",
+                                WebkitBackdropFilter: "none",
                                 color: isError ? CDS.supportError : CDS.accentDark,
                                 transform: BTN_LIFT,
-                                boxShadow: `0 8px 24px ${hexToRgba(CDS.ink, 0.14)}, ${underline}`,
+                                boxShadow: `${R.NEU_RAISED.boxShadow}, ${underline}`,
                             },
-                            // Keyboard parity: a :focus-visible control lifts to the same Layer-3
-                            // glass slab as hover AND shows the accent focus ring, so keyboard
-                            // users see what's actionable (mouse-only :hover left them blind).
+                            // Keyboard parity: same soft-raised attention as hover + focus ring.
                             "&:focus-visible": {
                                 ...focusRingFor(CDS.accent),
-                                background: R.GLASS_SURFACE.background,
-                                backdropFilter: R.GLASS_SURFACE.backdropFilter,
-                                WebkitBackdropFilter: R.GLASS_SURFACE.WebkitBackdropFilter,
+                                backgroundColor: R.NEU_FILL,
+                                background: R.NEU_FILL,
+                                backdropFilter: "none",
+                                WebkitBackdropFilter: "none",
                                 color: isError ? CDS.supportError : CDS.accentDark,
                                 transform: BTN_LIFT,
-                                boxShadow: `0 8px 24px ${hexToRgba(CDS.ink, 0.14)}, ${underline}`,
+                                boxShadow: `${R.NEU_RAISED.boxShadow}, ${underline}`,
                             },
                             "&:active": {
                                 transform: "none",
@@ -247,7 +244,7 @@ export function createAormsTheme(options) {
                             // Saffron warning needs dark ink for AA; other support fills take on-color.
                             const ink = sev === "warning" ? CDS.ink : CDS.textOnColor;
                             return {
-                                borderRadius: 0,
+                                borderRadius: BTN_RADIUS,
                                 backgroundColor: fill,
                                 color: ink,
                                 border: `1px solid ${hexToRgba(fill, 0.35)}`,
@@ -257,14 +254,16 @@ export function createAormsTheme(options) {
                             return {};
                         if (sev === "error")
                             return {
-                                ...R.GLASS_SURFACE,
-                                background: hexToRgba(CDS.supportError, 0.1),
+                                ...R.NEU_RAISED,
+                                backgroundColor: hexToRgba(CDS.supportError, 0.12),
+                                background: hexToRgba(CDS.supportError, 0.12),
                                 border: `1px solid ${hexToRgba(CDS.supportError, 0.25)}`,
                             };
                         if (sev === "warning")
                             return {
-                                ...R.GLASS_SURFACE,
-                                background: hexToRgba(CDS.supportWarning, 0.12),
+                                ...R.NEU_RAISED,
+                                backgroundColor: hexToRgba(CDS.supportWarning, 0.14),
+                                background: hexToRgba(CDS.supportWarning, 0.14),
                                 border: `1px solid ${hexToRgba(CDS.supportWarning, 0.3)}`,
                             };
                         return {};

@@ -8,7 +8,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  */
 import { Box, Stack, Typography } from "@mui/material";
 import { enforceCapacity } from "./capacity.js";
-import { logUxEvent } from "./uxEvents.js";
+import { openDecision } from "./decisionAudit.js";
 import { Surface } from "./Surface.js";
 import { TRUST, TYPE_SCALE, colors, hexToRgba } from "./tokens.js";
 /* ─── Mission ─────────────────────────────────────────────────────────── */
@@ -116,7 +116,9 @@ export function DecisionQueue({ items, empty, }) {
         return empty ? (_jsx(Box, { role: "status", sx: { fontSize: TYPE_SCALE.body2, color: colors.textSecondary, py: 1 }, children: empty })) : null;
     }
     return (_jsx(Stack, { component: "section", "aria-label": "Pending decisions", spacing: 1.5, sx: { py: 0.5 }, children: items.map((item) => (_jsx(DecisionCard, { ...item, onOpen: () => {
-                logUxEvent("ux.decision", { id: item.id, state: "pending" });
+                openDecision(item.id, {
+                    question: typeof item.question === "string" ? item.question : undefined,
+                });
                 item.onOpen?.();
             } }, item.id))) }));
 }

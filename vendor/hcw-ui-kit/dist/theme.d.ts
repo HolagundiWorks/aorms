@@ -5,12 +5,10 @@
  *
  * The HCW-UI-Kit layer rules, encoded here so screens inherit them and never
  * re-specify them inline (full spec: docs/esti/HCW-UI-KIT.md):
- *  1. Layer 1 FLAT (hyperminimalist) — tables, text, surfaces at rest; square
- *     corners (0 radius). Rounded corners: buttons 4px, dialogs 8px.
- *  2. Layer 2 SOFT (neumorphic) — dialogs and text-entry wells; objects you work
- *     within.
- *  3. Layer 3 GLASS (glassmorphism) — the live layer: BUTTON HOVER takes the
- *     glass slab, and priority alerts (error/warning) read as tinted glass.
+ *  1. Layer 1 FLAT — tables, text, surfaces at rest; 8px radius.
+ *  2. Layer 2 SOFT RAISED — dialogs, chrome, dock; opaque neumorphism.
+ *  3. Layer 3 SOFT ATTENTION — button hover / priority alerts use stronger neu
+ *     + solid accent (no glass / blur / transparency).
  *
  * MUI is the rendering engine; HCW owns appearance and patterns
  * (see `LAYOUT` · `SPACING` · `DENSITY` · catalog).

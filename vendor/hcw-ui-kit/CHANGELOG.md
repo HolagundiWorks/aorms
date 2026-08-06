@@ -4,6 +4,72 @@ All notable changes to the HCW Design System package. Versioning follows semver;
 the package is workspace-consumed (source-only), so versions mark **design-contract**
 changes, not npm releases.
 
+## 1.5.0 — 2026-08-06
+
+### Changed (breaking visual contract)
+- **Pure neumorphism** — Constitution Article V: flat · soft raised · soft inset.
+  Glass / blur / translucent chrome **banned**. Legacy `GLASS_*` / `layer="glass"`
+  names map to opaque soft raised for one deprecation cycle.
+- **Global radius 8px** — `RADIUS` · `BUTTON_RADIUS` · `NEU_INPUT_RADIUS` ·
+  `DOCK_PILL_RADIUS` · `DIALOG_RADIUS` · `MARKETING_DOCK_RADIUS` (no capsules).
+- Theme button hover / priority alerts use soft neu + accent, not frosted glass.
+- ActionDock / SectionDock chips: opaque neu hover (liquid-glass recipes are
+  opaque aliases).
+
+### Added
+- **`SoftRail`** — opaque soft rail · stage shell; `GlassRail` is a deprecated alias.
+- **`AnalogueClock`** — recessed neu face, live hands (product mounts bottom-right).
+
+### Docs
+- Constitution amendment 2026-08-06; calculator pixel-font note (product loads
+  `@fontsource/vt323` for calc result).
+
+## 1.4.4 — 2026-07-22
+
+### Added
+- **`HcwTelemetryRoot`** — session start + optional `FatigueOfferBanner` under `KitRoot`.
+- **`freezeDecision` / `openDecision`** — paired KPI + audit helpers; DecisionQueue uses `openDecision`.
+- **CI `pnpm voice-lint`** · agent rules 16–18 · KB R11 · Evaluate gate voice/audit.
+- **External case-study template** (`ext-TEMPLATE.md`) for V1 studies.
+
+### Chore
+- Gzip size budget **50 → 56 KB** (voice · fatigue · audit · calibration · telemetry root).
+
+## 1.4.3 — 2026-07-22
+
+### Added
+- **`FatigueOfferBanner`** — soft pause/calm offer UI for `ux.fatigue_signal`.
+- **Decision audit contract** — `recordDecisionAudit` / `recordFreezeAudit` /
+  `setDecisionAuditSink` · `ux.audit` (V5 kit half); DecisionQueue records `opened`.
+- **Calibration heuristics** — `estimateOrientMultiplier` / `isLoadRisk` (explanatory priors).
+- **Product adoption playbook** · **construction pattern library (CP-01…11)** ·
+  **validation protocol (V1)** · **calibration doc (V3)**.
+- **`pnpm voice-lint`** — commanding-copy warnings; styleguide voice/fatigue specimens.
+
+### Docs
+- Debt register: kit halves for V2/V4/V5 wired; empirical fieldwork remains open.
+
+## 1.4.2 — 2026-07-22
+
+### Added
+- **`VOICE`** — empathic-partner copy tokens (confirm / cancel / pending / fatigue offers).
+- **`FATIGUE`** + `src/fatigue.ts` — operational-load proxies → `ux.fatigue_signal`
+  (interrupt density · capacity burst · session duration · decision backlog ·
+  orient slowing). Suggests pause/calm; never locks UI.
+- **[HCW-UX-VOICE.md](docs/HCW-UX-VOICE.md)** — tone grammar; ConfirmModal /
+  AwarenessStrip / TRUST defaults invitational.
+
+### Changed
+- `TRUST.judgmentNeedsLabel` → “Your judgment would help here”; assumption chip
+  invitational; ConfirmModal defaults use `VOICE` (not “Are you sure?” / “Cancel”).
+
+## 1.4.1 — 2026-07-22
+
+### Docs / governance
+- **[HCW-UX-EVALUATION.md](docs/HCW-UX-EVALUATION.md)** — published industry-reference scorecard (**88/100**); validation weighted harder than internal consistency; path to 90–95.
+- **Charter precedence** ([HCW-UX-FRAMEWORK.md](docs/HCW-UX-FRAMEWORK.md) §2.1) — P0 safety → P1 capacity → P2 mission → P3 geography → P4 depth → P5 taste; Mission vs Capacity / Calm vs Safety worked.
+- Construction overlay labeled **construction-aware** (~68), not a Construction UX Framework; V1–V5 empirical gaps on debt register.
+
 ## 1.4.0 — 2026-07-22
 
 ### Added

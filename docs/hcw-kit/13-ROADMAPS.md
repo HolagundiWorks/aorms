@@ -29,5 +29,8 @@
 1. Full i18n framework + string catalogs in esti
 2. Maintaining a Figma **component** library file against every kit primitive
 3. Continuous Variables sync ownership (DesignOps ritual)
+4. **Wire** [HCW-UX-ADOPTION-PLAYBOOK.md](../esti/HCW-UX-ADOPTION-PLAYBOOK.md) in esti (KPI sink, fatigue banner, audit DB)
+5. Implement [HCW-CONSTRUCTION-PATTERNS.md](../esti/HCW-CONSTRUCTION-PATTERNS.md) CP-01…11 in product
+6. Run [VALIDATION-PROTOCOL.md](11-audits/VALIDATION-PROTOCOL.md) studies; calibrate via [HCW-UX-CALIBRATION.md](../esti/HCW-UX-CALIBRATION.md)
 
-Track those outside the kit debt register Open queue.
+Track those outside the kit defect Open queue.

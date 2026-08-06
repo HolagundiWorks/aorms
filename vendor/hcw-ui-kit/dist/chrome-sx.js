@@ -58,7 +58,7 @@ export function typeScaleSx(key) {
         '[data-hcw-coga="calm"] &': { fontSize: TYPE_SCALE[calmKey] },
     };
 }
-/** ActionDock button — flat pill at rest, liquid-glass capsule on hover/focus. */
+/** ActionDock button — flat at rest, soft raised neu on hover/focus (8px). */
 export function actionDockButtonSx(ink, opts) {
     const fw = opts?.fontWeight ?? 600;
     return {
@@ -76,13 +76,13 @@ export function actionDockButtonSx(ink, opts) {
         transition: "transform 130ms ease, box-shadow 130ms ease, background 130ms ease, border-color 130ms ease",
         "&:hover": {
             ...LIQUID_GLASS_BUTTON,
-            color: ink,
+            color: colors.accent,
             transform: DOCK_BUTTON_LIFT,
         },
         "&:focus-visible": {
             ...LIQUID_GLASS_BUTTON,
             ...FOCUS_RING,
-            color: ink,
+            color: colors.accent,
             transform: DOCK_BUTTON_LIFT,
         },
         "&.Mui-disabled": { opacity: 0.4 },
@@ -93,30 +93,28 @@ export function actionDockButtonSx(ink, opts) {
         },
     };
 }
-/** SectionDock chip — clear liquid glass (marketing section carousel). */
+/** SectionDock chip — opaque neu (8px). */
 export function sectionDockChipSx(active) {
     return {
         ...SECTION_DOCK_CHIP_GLASS,
         borderRadius: `${MARKETING_DOCK_RADIUS}px`,
-        border: `1px solid ${active ? colors.accent : "rgba(255, 255, 255, 0.58)"}`,
-        borderTopColor: active ? colors.accentDark : "rgba(255, 255, 255, 0.72)",
+        border: `1px solid ${active ? colors.accent : colors.borderSubtle}`,
         color: active ? colors.accent : colors.ink,
         fontWeight: active ? 700 : 600,
         boxShadow: active
-            ? `inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 -1px 0 rgba(255, 255, 255, 0.28), 0 4px 16px ${hexToRgba(colors.accent, 0.14)}`
+            ? `${SECTION_DOCK_CHIP_GLASS.boxShadow}, 0 0 0 1px ${hexToRgba(colors.accent, 0.25)}`
             : SECTION_DOCK_CHIP_GLASS.boxShadow,
         transition: "color 0.14s ease, background 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease",
         "&:hover": {
             ...SECTION_DOCK_CHIP_GLASS,
             borderRadius: `${MARKETING_DOCK_RADIUS}px`,
-            border: `1px solid ${active ? colors.accent : "rgba(255, 255, 255, 0.72)"}`,
+            border: `1px solid ${active ? colors.accent : colors.borderStrong}`,
             color: active ? colors.accentDark : colors.accent,
-            background: "linear-gradient(175deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.1) 48%, rgba(255, 255, 255, 0.24) 100%)",
         },
         "&:focus-visible": { ...FOCUS_RING },
     };
 }
-/** Static specimen / label chip — liquid glass at rest (e.g. design-system legend). */
+/** Static specimen / label chip — soft neu at rest. */
 export function liquidGlassSpecimenSx(ink = colors.accent) {
     return {
         ...LIQUID_GLASS_BUTTON,

@@ -21,10 +21,10 @@
   --hcw-color-supportWarning: #FF9932;
   --hcw-color-supportError: #C8442E;
   --hcw-color-supportInfo: #3B5568;
-  --hcw-radius: 0px;
-  --hcw-button-radius: 4px;
+  --hcw-radius: 8px;
+  --hcw-button-radius: 8px;
   --hcw-dialog-radius: 8px;
-  --hcw-dock-pill-radius: 9999px;
+  --hcw-dock-pill-radius: 8px;
   --hcw-spacing-unit: 8px;
   --hcw-touch-target: 44px;
   --hcw-rail-width: 240px;

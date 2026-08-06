@@ -1,4 +1,5 @@
-import { Alert, Paper, Popover, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Alert, FormControlLabel, Popover, Stack, Switch, TextField, Typography } from "@mui/material";
+import { colors, RADIUS } from "@hcw/ui-kit";
 import { useState, type RefObject } from "react";
 
 type FloatingCalculatorProps = {
@@ -19,11 +20,13 @@ const FT2_PER_M2 = 10.7639104167;
 const M3_PER_FT3 = 0.0283168466;
 const FT3_PER_M3 = 35.314666721;
 
+const INPUT_MIN_H = 40;
+const RESULT_MIN_H = INPUT_MIN_H * 2;
+
 /**
- * Office-wide floating calculator — a portaled MUI Popover anchored above its dock
- * button. Bare numbers are **meters**; imperial lengths (`36'3"`, `3"`, `12'`) convert
- * to meters before + − × ÷. Area (`25m2`) and volume (`25m3`) tokens keep m²/m³;
- * imperial toggle shows ft²/ft³ for area/volume and feet/inches for length.
+ * Office-wide floating calculator — square soft-neu panel (8px). Result is flat
+ * (no inset well), Radiant Orange pixel type at 2× input height. Bare numbers are
+ * **meters**; imperial lengths convert before + − × ÷. m ↔ ft·in via Switch.
  */
 export function FloatingCalculator({ open, onClose, triggerRef }: FloatingCalculatorProps) {
   const [expr, setExpr] = useState("");
@@ -48,27 +51,59 @@ export function FloatingCalculator({ open, onClose, triggerRef }: FloatingCalcul
       onClose={onClose}
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
       transformOrigin={{ vertical: "bottom", horizontal: "center" }}
-      slotProps={{ paper: { className: "esti-neu", sx: { width: 280, p: 2 } } }}
+      slotProps={{
+        paper: {
+          className: "esti-neu esti-calc-panel",
+          sx: { width: 300, p: 2, borderRadius: `${RADIUS}px`, overflow: "hidden" },
+        },
+      }}
     >
       <Stack spacing={1.5}>
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between" }}>
-          <Typography variant="subtitle2">Calculator</Typography>
-          <ToggleButtonGroup
-            size="small"
-            exclusive
-            value={outputUnit}
-            onChange={(_e, v: CalcOutputUnit | null) => v && setOutputUnit(v)}
-            aria-label="Result unit"
-          >
-            <ToggleButton value="metric" aria-label="Metres">m</ToggleButton>
-            <ToggleButton value="imperial" aria-label="Feet and inches">ft·in</ToggleButton>
-          </ToggleButtonGroup>
-        </Stack>
-        <Paper className="esti-neu-inset" sx={{ p: 1.5, minHeight: 56, display: "flex", flexDirection: "column", alignItems: "flex-end", justifyContent: "flex-end" }}>
-          <Typography variant="h6" sx={{ textAlign: "right", width: "100%", wordBreak: "break-all" }}>
-            {displayResult}
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            Calculator
           </Typography>
-        </Paper>
+          <FormControlLabel
+            control={
+              <Switch
+                size="small"
+                checked={outputUnit === "imperial"}
+                onChange={(_, checked) => setOutputUnit(checked ? "imperial" : "metric")}
+                slotProps={{ input: { "aria-label": "Feet and inches output" } }}
+              />
+            }
+            label={
+              <Typography variant="caption" sx={{ fontWeight: 600, minWidth: 36 }}>
+                {outputUnit === "metric" ? "m" : "ft·in"}
+              </Typography>
+            }
+            labelPlacement="start"
+            sx={{ m: 0, gap: 0.75 }}
+          />
+        </Stack>
+        <Typography
+          component="div"
+          className="esti-calc-result"
+          sx={{
+            minHeight: RESULT_MIN_H,
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "flex-end",
+            textAlign: "right",
+            width: "100%",
+            wordBreak: "break-all",
+            fontFamily: "'VT323', 'Courier New', monospace",
+            fontSize: "2rem",
+            lineHeight: 1.1,
+            color: colors.accent,
+            border: "none",
+            boxShadow: "none",
+            background: "transparent",
+            p: 0,
+          }}
+        >
+          {displayResult}
+        </Typography>
         {showInvalid ? (
           <Alert severity="error">Invalid expression</Alert>
         ) : null}
@@ -84,6 +119,12 @@ export function FloatingCalculator({ open, onClose, triggerRef }: FloatingCalcul
             if (e.key === "Enter" && result !== null) setExpr(formatResultForInput(result, outputUnit));
           }}
           fullWidth
+          sx={{
+            "& .MuiInputBase-root": {
+              minHeight: INPUT_MIN_H,
+              borderRadius: `${RADIUS}px`,
+            },
+          }}
         />
         <Typography variant="caption" color="text.secondary">
           Input: bare numbers = m; area <code>m2</code>/<code>m²</code>; volume{" "}

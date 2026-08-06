@@ -15,7 +15,7 @@ import { MarketingFooter } from "./MarketingFooter.js";
 import { MarketingRailHeader, MarketingRailNav } from "./MarketingRailNav.js";
 
 /**
- * Marketing shell — studio glass rail + stage + ActionDock (conversion).
+ * Marketing shell — soft-neu rail + stage + ActionDock (conversion).
  */
 export function MarketingShell({
   children,
@@ -156,7 +156,7 @@ function MarketingShellInner({
       ) : null}
 
       <Box
-        className="esti-glass-dash lp2-glass-dash"
+        className="esti-neu-dash lp2-glass-dash"
         sx={{
           flex: 1,
           minHeight: 0,

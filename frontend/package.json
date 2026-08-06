@@ -21,6 +21,7 @@
     "@esti/backend": "workspace:*",
     "@esti/contracts": "workspace:*",
     "@fontsource/urbanist": "^5.2.7",
+    "@fontsource/vt323": "^5",
     "@hcw/ui-kit": "workspace:*",
     "@mui/icons-material": "^9.2.0",
     "@mui/material": "^9.2.0",

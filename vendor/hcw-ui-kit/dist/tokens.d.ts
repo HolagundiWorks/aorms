@@ -5,12 +5,11 @@
  * (`theme.ts`) is built entirely from these, and portals may import the raw tokens
  * for the rare edge case the theme doesn't cover.
  *
- * Design language: HYPER-MINIMALIST LIGHT with a RADIANT ORANGE accent —
- * Fog-Gray canvas, Pure-White cards, Coal-Black ink, square surfaces (0 radius),
- * flat borderless panels (definition from spacing + hairlines, not boxes).
- * **Rounded corners:** buttons `BUTTON_RADIUS` (4px), ActionDock `DOCK_PILL_RADIUS`
- * (capsule tray + dock buttons), dialogs `DIALOG_RADIUS` (8px).
- * Full spec: docs/esti/AORMS-BRANDING-KIT.md.
+ * Design language: **pure neumorphism** — Fog-Gray canvas, Pure-White / soft-neu
+ * fills, Coal-Black ink, **Radiant Orange** accent. No glassmorphism, no chrome
+ * transparency, no `backdrop-filter`. Global corner radius **8px**
+ * (`RADIUS` · `BUTTON_RADIUS` · `DOCK_PILL_RADIUS` · `DIALOG_RADIUS`).
+ * Full spec: docs/esti/AORMS-BRANDING-KIT.md · Constitution Article V.
  */
 /** Brand palette. Radiant Orange is the single accent: **fills** (CTAs, chips,
  *  brand marks — with `onAccent` ink) and **active/hover tints** on chrome glyphs
@@ -157,16 +156,19 @@ export type DensityMetrics = ReturnType<typeof densityFor>;
 /** Status hues for StatusDot/StatusTag — canonical kit-owned values (supersede the
  *  frozen `--cds-tag-*` compat layer for new code). */
 export declare const STATUS_COLORS: Record<string, string>;
-/** Surface / panel / input corner radius — square everywhere (0). */
-export declare const RADIUS = 0;
-/** Buttons (MuiButton) — rounded workspace controls. */
-export declare const BUTTON_RADIUS = 4;
-/** ActionDock tray + dock buttons — full capsule pill (not square NEU_RAISED). */
-export declare const DOCK_PILL_RADIUS = 9999;
-/** Dialogs (MuiDialog paper) — the only rounded surface panel in the workspace. */
+/** Surface / panel / input corner radius — pure neu global 8px. */
+export declare const RADIUS = 8;
+/** Buttons (MuiButton) — same 8px contract as surfaces. */
+export declare const BUTTON_RADIUS = 8;
+/**
+ * ActionDock tray + dock buttons — **8px** (no capsules).
+ * Name retained for API stability; value is no longer a pill.
+ */
+export declare const DOCK_PILL_RADIUS = 8;
+/** Dialogs (MuiDialog paper) — 8px. */
 export declare const DIALOG_RADIUS = 8;
-/** Marketing section carousel — rounded glass tray + chips (public landing only). */
-export declare const MARKETING_DOCK_RADIUS = 12;
+/** Marketing section carousel / SectionDock chips — 8px. */
+export declare const MARKETING_DOCK_RADIUS = 8;
 /** Selected tab accent — inset top rule (alert line), not a background fill. */
 export declare const TAB_ALERT_WIDTH = 3;
 /** Spacing base — 8px, matching MUI's default grid so existing layouts are
@@ -264,14 +266,52 @@ export declare const COGA: {
     readonly calmTypeStep: 1;
 };
 /**
+ * Product voice — empathic partner, not commander.
+ * Non-P0 chrome invites collaboration; safety/blocker copy may stay direct (precedence P0).
+ * Full grammar: docs/HCW-UX-VOICE.md
+ */
+export declare const VOICE: {
+    readonly stance: "empathic-partner";
+    /** Prefer invitation over order in ambient / confirm / awareness copy. */
+    readonly preferInvitation: true;
+    readonly confirmHeadingSlip: "Just checking before we continue";
+    readonly confirmHeadingMistake: "This needs a careful look";
+    readonly cancelLabel: "Not now";
+    readonly pendingLabel: "Working on it…";
+    /** Soft offer when fatigue signals fire — never force a break. */
+    readonly fatiguePauseOffer: "You've been deciding a lot — a short pause may help";
+    readonly fatigueCalmOffer: "Things are stacking up — calm mode can reduce the noise";
+};
+/**
  * AI trust calibration (Lee & See) — ESTI / orchestration copy grammar.
  * Overconfident success theatre is banned; judgment is the only interrupt cue.
+ * Labels stay invitational ({@link VOICE}).
  */
 export declare const TRUST: {
-    readonly assumptionChipLabel: "Assumption";
-    readonly judgmentNeedsLabel: "Needs your judgment";
+    readonly assumptionChipLabel: "We're assuming";
+    readonly judgmentNeedsLabel: "Your judgment would help here";
     /** Confidence is shown as a band/word, never a false-precision percent alone. */
     readonly preferConfidenceBand: true;
+};
+/**
+ * Operational-load / fatigue *proxies* (not medical diagnosis).
+ * Products observe via `ux.fatigue_signal` and may offer
+ * {@link VOICE.fatiguePauseOffer} / COGA calm — never block work on these alone.
+ */
+export declare const FATIGUE: {
+    /** Judgment+blocker+error interrupts per active hour → watch. */
+    readonly interruptPerHourWarn: 8;
+    /** Capacity warnings in {@link FATIGUE.capacityWarnWindowMs} → elevated. */
+    readonly capacityWarnBurst: 3;
+    readonly capacityWarnWindowMs: number;
+    /** Continuous session wall time → watch (suggest pause). */
+    readonly sessionActiveMsWarn: number;
+    /** Concurrent pending decisions → watch. */
+    readonly pendingDecisionsWarn: 5;
+    /** Single decision open longer than this → watch. */
+    readonly longPendingDecisionMs: number;
+    /** Suppress repeat emissions of the same kind. */
+    readonly signalCooldownMs: number;
 };
 /**
  * Preattentive status shapes (Treisman / Ware) — colour alone is never enough
@@ -380,7 +420,7 @@ export declare const FLAT_POP: {
     readonly backgroundColor: "#ffffff";
     readonly backgroundImage: "none";
     readonly border: "none";
-    readonly borderRadius: 0;
+    readonly borderRadius: 8;
     readonly boxShadow: "0 8px 24px rgba(20, 21, 23, 0.14)";
 };
 export declare const BTN_LIFT = "translateY(-2px)";
@@ -416,7 +456,7 @@ export declare const NEU_FILL = "#eceef2";
 export declare const NEU_INSET = "inset 2px 2px 4.5px rgba(20, 21, 23, 0.16), inset -2px -2px 4.5px rgba(255, 255, 255, 0.92)";
 export declare const NEU_INSET_FOCUS: string;
 export declare const NEU_INSET_ERROR: string;
-export declare const NEU_INPUT_RADIUS = 0;
+export declare const NEU_INPUT_RADIUS = 8;
 /** Dropdowns (Select) — FLAT at rest, button-like on hover (white box + accent line). */
 export declare function ddFlatFor(scheme?: ColorScheme): {
     readonly backgroundColor: "transparent";
@@ -469,12 +509,12 @@ export declare const NEU_RAISED: {
     readonly backgroundColor: "#eceef2";
     readonly backgroundImage: "none";
     readonly border: "none";
-    readonly borderRadius: 0;
+    readonly borderRadius: 8;
     readonly boxShadow: "6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92)";
 };
-/** ActionDock floating tray — neumorphic raised capsule (Layer 2 shell for dock buttons). */
+/** ActionDock floating tray — neumorphic raised (8px). */
 export declare const ACTION_DOCK_TRAY: {
-    readonly borderRadius: 9999;
+    readonly borderRadius: 8;
     readonly backgroundColor: "#eceef2";
     readonly backgroundImage: "none";
     readonly border: "none";
@@ -499,77 +539,83 @@ export declare const NEU_GROOVE_HORIZONTAL: {
     readonly background: "transparent";
     readonly boxShadow: "inset 0 1px 0 rgba(20, 21, 23, 0.12), inset 0 -1px 0 rgba(255, 255, 255, 0.72)";
 };
+/**
+ * @deprecated Opaque soft-raised alias — was frosted glass. Prefer `NEU_RAISED` / `LAYERS.soft`.
+ * Kept for one cycle so product `layer="glass"` keeps compiling without blur.
+ */
 export declare const GLASS_SURFACE: {
-    readonly background: "rgba(255, 255, 255, 0.36)";
-    readonly backdropFilter: "blur(28px) saturate(1.85)";
-    readonly WebkitBackdropFilter: "blur(28px) saturate(1.85)";
-    readonly border: "1px solid rgba(255, 255, 255, 0.48)";
-    readonly borderRadius: 0;
-    readonly boxShadow: "0 14px 42px rgba(20, 21, 23, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.62), inset 0 -1px 0 rgba(255, 255, 255, 0.18)";
+    readonly backdropFilter: "none";
+    readonly WebkitBackdropFilter: "none";
+    readonly backgroundColor: "#eceef2";
+    readonly backgroundImage: "none";
+    readonly border: "none";
+    readonly borderRadius: 8;
+    readonly boxShadow: "6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92)";
 };
 /**
- * Layer 3 variant — **liquid glass** for ActionDock buttons on hover/focus.
- * Crystal-clear frosted pill: gradient wash, high saturate blur, specular inset edges.
- * Flat pill at rest; liquid-glass capsule on hover/focus (`DOCK_PILL_RADIUS`).
- * Accent glow tracks the scheme accent (not a baked light-scheme hex).
+ * Dock / CTA hover — opaque neu raise + optional accent underline (no liquid glass).
+ * @deprecated Name kept; recipe is pure neu.
  */
 export declare function liquidGlassButtonFor(accent?: string): {
-    readonly background: "linear-gradient(165deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.18) 45%, rgba(255, 255, 255, 0.42) 100%)";
-    readonly backdropFilter: "blur(36px) saturate(2.25) brightness(1.14)";
-    readonly WebkitBackdropFilter: "blur(36px) saturate(2.25) brightness(1.14)";
-    readonly border: "1px solid rgba(255, 255, 255, 0.72)";
-    readonly borderRadius: 9999;
-    readonly boxShadow: `0 12px 36px rgba(20, 21, 23, 0.11), 0 2px 10px ${string}, inset 0 1.5px 0 rgba(255, 255, 255, 0.92), inset 0 -1px 0 rgba(255, 255, 255, 0.28)`;
+    readonly backgroundColor: "#eceef2";
+    readonly backgroundImage: "none";
+    readonly backdropFilter: "none";
+    readonly WebkitBackdropFilter: "none";
+    readonly border: "none";
+    readonly borderRadius: 8;
+    readonly boxShadow: `6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92), ${string}`;
 };
-/** Light-scheme default — prefer `liquidGlassButtonFor(scheme.accent)` when scheme-aware. */
+/** @deprecated Prefer neu hover recipes — opaque alias of liquidGlassButtonFor. */
 export declare const LIQUID_GLASS_BUTTON: {
-    readonly background: "linear-gradient(165deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.18) 45%, rgba(255, 255, 255, 0.42) 100%)";
-    readonly backdropFilter: "blur(36px) saturate(2.25) brightness(1.14)";
-    readonly WebkitBackdropFilter: "blur(36px) saturate(2.25) brightness(1.14)";
-    readonly border: "1px solid rgba(255, 255, 255, 0.72)";
-    readonly borderRadius: 9999;
-    readonly boxShadow: `0 12px 36px rgba(20, 21, 23, 0.11), 0 2px 10px ${string}, inset 0 1.5px 0 rgba(255, 255, 255, 0.92), inset 0 -1px 0 rgba(255, 255, 255, 0.28)`;
+    readonly backgroundColor: "#eceef2";
+    readonly backgroundImage: "none";
+    readonly backdropFilter: "none";
+    readonly WebkitBackdropFilter: "none";
+    readonly border: "none";
+    readonly borderRadius: 8;
+    readonly boxShadow: `6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92), ${string}`;
 };
 /** ActionDock button hover/focus lift. */
-export declare const DOCK_BUTTON_LIFT = "translateY(-3px)";
+export declare const DOCK_BUTTON_LIFT = "translateY(-2px)";
 /**
- * Layer 3 variant — **clear glass** (marketing rail / section heading bands).
- * More translucent than `GLASS_SURFACE` so atmosphere (contours) stays readable.
- * Do **not** use on dense sub-cards — flat/transparent + hairlines instead.
+ * @deprecated Opaque soft rail alias — was clear glass.
  */
 export declare const CLEAR_GLASS_SURFACE: {
-    readonly background: "linear-gradient(175deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 48%, rgba(255, 255, 255, 0.09) 100%)";
-    readonly backdropFilter: "blur(26px) saturate(1.7) brightness(1.08)";
-    readonly WebkitBackdropFilter: "blur(26px) saturate(1.7) brightness(1.08)";
-    readonly border: "1px solid rgba(255, 255, 255, 0.38)";
-    readonly borderRadius: 0;
-    readonly boxShadow: "6px 0 32px rgba(20, 21, 23, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 1px 0 0 rgba(255, 255, 255, 0.28)";
+    readonly backdropFilter: "none";
+    readonly WebkitBackdropFilter: "none";
+    readonly backgroundColor: "#eceef2";
+    readonly backgroundImage: "none";
+    readonly border: "none";
+    readonly borderRadius: 8;
+    readonly boxShadow: "6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92)";
 };
 /**
- * SectionDock chips — clear liquid glass pills (marketing section carousel).
- * Translucent gradient + specular inset edges; pair with `MARKETING_DOCK_RADIUS`.
+ * SectionDock chips — opaque neu (was clear liquid glass).
+ * @deprecated Name kept for API stability.
  */
 export declare const SECTION_DOCK_CHIP_GLASS: {
-    readonly background: "linear-gradient(175deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.07) 48%, rgba(255, 255, 255, 0.18) 100%)";
-    readonly backdropFilter: "blur(28px) saturate(1.85) brightness(1.1)";
-    readonly WebkitBackdropFilter: "blur(28px) saturate(1.85) brightness(1.1)";
-    readonly border: "1px solid rgba(255, 255, 255, 0.58)";
-    readonly boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.72), inset 0 -1px 0 rgba(255, 255, 255, 0.24), 0 4px 14px rgba(20, 21, 23, 0.06)";
+    readonly backgroundColor: "#eceef2";
+    readonly backgroundImage: "none";
+    readonly backdropFilter: "none";
+    readonly WebkitBackdropFilter: "none";
+    readonly border: "1px solid rgba(20, 21, 23, 0.10)";
+    readonly borderRadius: 8;
+    readonly boxShadow: "6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92)";
 };
 /**
- * Layer 3 variant — **heading glass** (full-width section openers on marketing).
- * Same clear recipe, stronger top edge; pairs with accent left rule in CSS.
+ * @deprecated Opaque heading band — was heading glass. Accent left rule retained.
  */
 export declare const HEADING_GLASS_SURFACE: {
-    readonly background: "linear-gradient(155deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 55%, rgba(255, 255, 255, 0.10) 100%)";
-    readonly backdropFilter: "blur(22px) saturate(1.55) brightness(1.06)";
-    readonly WebkitBackdropFilter: "blur(22px) saturate(1.55) brightness(1.06)";
-    readonly borderTop: "1px solid rgba(255, 255, 255, 0.55)";
-    readonly borderRight: "1px solid rgba(20, 21, 23, 0.06)";
-    readonly borderBottom: "1px solid rgba(20, 21, 23, 0.08)";
+    readonly backgroundColor: "#eceef2";
+    readonly backgroundImage: "none";
+    readonly backdropFilter: "none";
+    readonly WebkitBackdropFilter: "none";
+    readonly borderTop: "1px solid rgba(20, 21, 23, 0.10)";
+    readonly borderRight: "1px solid rgba(20, 21, 23, 0.10)";
+    readonly borderBottom: "1px solid rgba(20, 21, 23, 0.10)";
     readonly borderLeft: "4px solid #FF4F18";
-    readonly borderRadius: 0;
-    readonly boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 24px rgba(20, 21, 23, 0.04)";
+    readonly borderRadius: 8;
+    readonly boxShadow: "6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92)";
 };
 export type SurfaceRecipes = {
     POP_FILL: string;
@@ -582,29 +628,28 @@ export type SurfaceRecipes = {
     NEU_INSET_FOCUS: string;
     NEU_INSET_ERROR: string;
     GLASS_SURFACE: {
-        background: string;
-        backdropFilter: string;
-        WebkitBackdropFilter: string;
+        backgroundColor: string;
+        backgroundImage: string;
         border: string;
         borderRadius: number;
         boxShadow: string;
+        backdropFilter: string;
+        WebkitBackdropFilter: string;
     };
 };
 export declare const DARK_RECIPES: SurfaceRecipes;
 export declare const HIGH_CONTRAST_RECIPES: SurfaceRecipes;
 /** Surface recipes for a scheme — the theme factory resolves through this. */
 export declare function recipesFor(scheme: SchemeName): SurfaceRecipes;
-/** The three layers, by name. `flat` is intentionally minimal (square canvas). */
+/** Layers by name. Legacy glass* keys map to opaque soft neu (deprecation cycle). */
 export type SurfaceLayer = "flat" | "soft" | "glass" | "clearGlass" | "headingGlass";
 export declare const LAYERS: Record<SurfaceLayer, Record<string, unknown>>;
-/** Elevation ladder — depth-encodes-importance as numeric levels: 0 = flat
- *  (Layer 1) · 1–2 = neumorphic (Layer 2) · 3 = glass (Layer 3). Values are the
- *  box-shadow strings the recipes already use, exposed as one ordered scale. */
+/** Elevation ladder — 0 flat · 1–2 soft raised/pop · 3 soft raised (was glass). */
 export declare const ELEVATION: {
     readonly 0: "none";
     readonly 1: "6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92)";
     readonly 2: "9px 9px 22px rgba(20, 21, 23, 0.18), -9px -9px 22px rgba(255, 255, 255, 0.92)";
-    readonly 3: "0 14px 42px rgba(20, 21, 23, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.62), inset 0 -1px 0 rgba(255, 255, 255, 0.18)";
+    readonly 3: "6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92)";
 };
 /** The token bundle, handy for a one-shot import. */
 export declare const tokens: {
@@ -629,9 +674,9 @@ export declare const tokens: {
         readonly supportError: "#C8442E";
         readonly supportInfo: "#3B5568";
     };
-    readonly RADIUS: 0;
-    readonly BUTTON_RADIUS: 4;
-    readonly DOCK_PILL_RADIUS: 9999;
+    readonly RADIUS: 8;
+    readonly BUTTON_RADIUS: 8;
+    readonly DOCK_PILL_RADIUS: 8;
     readonly DIALOG_RADIUS: 8;
     readonly FONT_FAMILY: "'Urbanist', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
     readonly SPACING: {
@@ -721,11 +766,38 @@ export declare const tokens: {
         /** Bump dense type one step when calm mode is on (caption→label, etc.). */
         readonly calmTypeStep: 1;
     };
+    readonly VOICE: {
+        readonly stance: "empathic-partner";
+        /** Prefer invitation over order in ambient / confirm / awareness copy. */
+        readonly preferInvitation: true;
+        readonly confirmHeadingSlip: "Just checking before we continue";
+        readonly confirmHeadingMistake: "This needs a careful look";
+        readonly cancelLabel: "Not now";
+        readonly pendingLabel: "Working on it…";
+        /** Soft offer when fatigue signals fire — never force a break. */
+        readonly fatiguePauseOffer: "You've been deciding a lot — a short pause may help";
+        readonly fatigueCalmOffer: "Things are stacking up — calm mode can reduce the noise";
+    };
     readonly TRUST: {
-        readonly assumptionChipLabel: "Assumption";
-        readonly judgmentNeedsLabel: "Needs your judgment";
+        readonly assumptionChipLabel: "We're assuming";
+        readonly judgmentNeedsLabel: "Your judgment would help here";
         /** Confidence is shown as a band/word, never a false-precision percent alone. */
         readonly preferConfidenceBand: true;
+    };
+    readonly FATIGUE: {
+        /** Judgment+blocker+error interrupts per active hour → watch. */
+        readonly interruptPerHourWarn: 8;
+        /** Capacity warnings in {@link FATIGUE.capacityWarnWindowMs} → elevated. */
+        readonly capacityWarnBurst: 3;
+        readonly capacityWarnWindowMs: number;
+        /** Continuous session wall time → watch (suggest pause). */
+        readonly sessionActiveMsWarn: number;
+        /** Concurrent pending decisions → watch. */
+        readonly pendingDecisionsWarn: 5;
+        /** Single decision open longer than this → watch. */
+        readonly longPendingDecisionMs: number;
+        /** Suppress repeat emissions of the same kind. */
+        readonly signalCooldownMs: number;
     };
     readonly STATUS_SHAPE: {
         readonly ok: "circle";
@@ -787,7 +859,7 @@ export declare const tokens: {
         readonly 0: "none";
         readonly 1: "6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92)";
         readonly 2: "9px 9px 22px rgba(20, 21, 23, 0.18), -9px -9px 22px rgba(255, 255, 255, 0.92)";
-        readonly 3: "0 14px 42px rgba(20, 21, 23, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.62), inset 0 -1px 0 rgba(255, 255, 255, 0.18)";
+        readonly 3: "6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92)";
     };
 };
 //# sourceMappingURL=tokens.d.ts.map

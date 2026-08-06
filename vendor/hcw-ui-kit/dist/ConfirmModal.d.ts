@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
  * ConfirmModal — confirmation for destructive / consequential actions (HCW:
  * destroy always confirms; never `window.confirm`).
  *
+ * Voice: invitational defaults ({@link VOICE}) — empathic partner, not commander.
+ *
  * Error taxonomy (Reason):
  * - **slip** — unintended action; confirm + optional undo path after.
  * - **mistake** — wrong belief/default; show `reason` explaining why blocked or
@@ -19,11 +21,12 @@ export type ConfirmModalProps = {
     reason?: ReactNode;
     kind?: ConfirmKind;
     confirmText?: string;
+    cancelText?: string;
     danger?: boolean;
     pending?: boolean;
     onConfirm: () => void;
     onClose: () => void;
 };
-export declare function ConfirmModal({ open, heading, body, reason, kind, confirmText, danger, pending, onConfirm, onClose, }: ConfirmModalProps): import("react").JSX.Element;
+export declare function ConfirmModal({ open, heading, body, reason, kind, confirmText, cancelText, danger, pending, onConfirm, onClose, }: ConfirmModalProps): import("react").JSX.Element;
 export default ConfirmModal;
 //# sourceMappingURL=ConfirmModal.d.ts.map

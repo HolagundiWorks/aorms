@@ -1,12 +1,13 @@
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
+import { Surface } from "@hcw/ui-kit";
 import { HcwAttribution } from "./brand/HcwAttribution.js";
 import { MarketingFooter } from "./landing/MarketingFooter.js";
 import { AuthStageCanvas, type AuthStageVariant } from "./AuthStageCanvas.js";
 
 /**
- * Unauthenticated auth shell — **Rail · Stage** split (U2).
- * Forms and credentials live in the glass rail; the stage is editorial only.
+ * Unauthenticated auth shell — centered soft-neu card (no glass rail).
+ * Stage atmosphere remains editorial background only.
  */
 export function AuthRailLayout({
   rail,
@@ -16,12 +17,11 @@ export function AuthRailLayout({
   footerVariant = "architecture",
   visitCount,
 }: {
-  /** Sign-in / recovery form content — rendered inside `.esti-dash-rail`. */
+  /** Sign-in / recovery form content — centered soft neu card. */
   rail: ReactNode;
   /** Optional custom stage; defaults to {@link AuthStageCanvas}. */
   stage?: ReactNode;
   variant?: AuthStageVariant;
-  /** Sitewide orange glass footer below the stage scroll (non-portal public pages). */
   showMarketingFooter?: boolean;
   footerVariant?: "platform" | "architecture";
   visitCount?: number | null;
@@ -38,79 +38,66 @@ export function AuthRailLayout({
       </div>
 
       <Box
-        className="esti-glass-dash esti-auth-dash"
+        className="esti-neu-dash esti-auth-dash"
         sx={{
           flex: 1,
-          minHeight: 0,
-          overflow: { xs: "visible", md: "hidden" },
+          minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
+          position: "relative",
         }}
       >
         <Box
+          aria-hidden={variant === "external"}
+          className="esti-auth-stage-bg"
           sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            flex: 1,
-            minHeight: 0,
-            overflow: { xs: "visible", md: "hidden" },
-            gap: 2,
-            alignItems: "stretch",
-            width: 1,
+            position: "absolute",
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: "none",
+            opacity: 0.55,
           }}
         >
-          <Box
-            aria-hidden
-            className="esti-dash-rail-spacer"
-            sx={{
-              display: { xs: "none", md: "block" },
-              flex: "0 0 20%",
-              maxWidth: "20%",
-              flexShrink: 0,
-            }}
-          />
+          {stage ?? <AuthStageCanvas variant={variant} />}
+        </Box>
 
-          <Box
-            component="main"
-            className="esti-dash-rail esti-auth-rail"
-            id="esti-auth-main"
-            tabIndex={-1}
+        <Box
+          component="main"
+          id="esti-auth-main"
+          tabIndex={-1}
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            p: { xs: 2, md: 4 },
+            gap: 2,
+          }}
+        >
+          <Surface
+            layer="soft"
+            className="esti-auth-card"
             sx={{
-              flex: { xs: "0 0 auto", md: "0 0 20%" },
-              maxWidth: { md: "20%" },
-              minWidth: 0,
-              width: { xs: "100%", md: "auto" },
-              overflowY: { xs: "visible", md: "auto" },
+              width: "100%",
+              maxWidth: 420,
+              p: 2.5,
               display: "flex",
               flexDirection: "column",
               gap: 1.5,
-              p: 1.5,
             }}
           >
             <Box sx={{ minWidth: 0, width: 1, flex: 1 }}>{rail}</Box>
             <HcwAttribution variant="auth" />
-          </Box>
-
-          <Box
-            className="esti-dash-stage esti-auth-stage-wrap"
-            aria-hidden={variant === "external"}
-            sx={{
-              flex: 1,
-              minWidth: 0,
-              minHeight: 0,
-              height: { md: "100%" },
-              overflowY: { xs: "visible", md: "auto" },
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            {stage ?? <AuthStageCanvas variant={variant} />}
-            {showMarketingFooter ? (
-              <MarketingFooter visitCount={visitCount} variant={footerVariant} />
-            ) : null}
-          </Box>
+          </Surface>
         </Box>
       </Box>
+
+      {showMarketingFooter ? (
+        <MarketingFooter variant={footerVariant} visitCount={visitCount} />
+      ) : null}
     </div>
   );
 }

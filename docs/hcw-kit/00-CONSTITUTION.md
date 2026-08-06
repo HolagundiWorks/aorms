@@ -25,9 +25,12 @@ Domain knowledge is injected into kit primitives, never baked into them.
 An inconsistent improvement is a regression. Same action, same place, same verb,
 same behaviour — everywhere.
 
-**V. Depth encodes importance.**
-Flat = information · soft = objects · glass = action/alert. Layer is chosen by
-role, never by taste. Glass stays scarce.
+**V. Depth encodes importance (pure neumorphism).**
+Flat = information at rest · soft raised = objects / chrome / CTAs / dock ·
+soft inset (+ solid accent) = wells, focus, alerts. Layer is chosen by role,
+never by taste. **Banned:** glassmorphism, chrome `backdrop-filter`, translucent
+fills for interactive chrome. Global corner radius is **8px**. Primary colours
+are black/white (Fog · ink · white layers); accent is **Radiant Orange**.
 
 **VI. New patterns require governance.**
 Definition precedes implementation: a pattern enters the kit (tokens → theme →
@@ -52,4 +55,7 @@ better documented than it found it — or it does not ship.
 
 ## Amendments
 
-*(none yet — record as: date · article · change · rationale)*
+- **2026-08-06 · Article V · Pure neumorphism** — Replaced glass as Layer 3 with
+  soft raised / inset attention; banned blur and translucent chrome; unified
+  radius to 8px; SoftRail + AnalogueClock. Rationale: product direction to a
+  single opaque material language (B&W + Radiant Orange) across all AORMS surfaces.

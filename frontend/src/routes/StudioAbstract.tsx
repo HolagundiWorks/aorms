@@ -701,54 +701,30 @@ export function StudioAbstract() {
 
   return (
     <Box
-      className="esti-glass-dash"
+      className="esti-neu-dash"
       sx={{
         flex: 1,
         minHeight: 0,
         overflow: { xs: "visible", md: "hidden" },
         display: "flex",
         flexDirection: "column",
+        gap: 1.5,
       }}
     >
-      {/* Ambient resonant-breathing contour field (behind content; a passive pacer). */}
       <StudioBreath />
-      {/* Desktop: rail fixed in pane; stage scrolls independently. Mobile: stack. */}
+      {/* Brief strip — former rail content, full-width under top ribbon (no left rail). */}
       <Box
+        className="esti-dash-brief"
         sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          flex: 1,
-          minHeight: 0,
-          overflow: { xs: "visible", md: "hidden" },
-          gap: 2,
-          alignItems: "stretch",
+          flex: "0 0 auto",
           width: 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+          p: 1.5,
+          borderRadius: "8px",
         }}
       >
-        {/* Spacer reserves rail width while the rail is fixed full-viewport height. */}
-        <Box
-          aria-hidden
-          sx={{
-            display: { xs: "none", md: "block" },
-            flex: "0 0 20%",
-            maxWidth: "20%",
-            flexShrink: 0,
-          }}
-        />
-        {/* ── RAIL (20%) — greeting · Today · zones · status · toggles ── */}
-        <Box
-          className="esti-dash-rail"
-          sx={{
-            flex: { xs: "0 0 auto", md: "0 0 20%" },
-            maxWidth: { md: "20%" },
-            minWidth: 0,
-            width: { xs: "100%", md: "auto" },
-            overflowY: { xs: "visible", md: "auto" },
-            display: "flex",
-            flexDirection: "column",
-            gap: 1.5,
-          }}
-        >
           {/* Greeting — top of the rail */}
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 300, lineHeight: 1.15, mt: 0 }}>{greetingFor()},</Typography>
@@ -812,8 +788,8 @@ export function StudioAbstract() {
             </Box>
           </Box>
 
-          {/* Module toggles + hydration — bottom of the rail; one row each */}
-          <Box sx={{ mt: "auto", pt: 1, display: "flex", flexDirection: "column", gap: 1 }}>
+          {/* Module toggles + hydration — end of brief strip */}
+          <Box sx={{ pt: 0.5, display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center" }}>
             {moduleToggles}
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, minHeight: 38 }}>
               <WaterDropOutlined fontSize="small" color="action" />
@@ -849,16 +825,15 @@ export function StudioAbstract() {
               />
             </Box>
           </Box>
-        </Box>
+      </Box>
 
-        {/* ── STAGE (80%) — tabs + tab content ─────────────────────────────── */}
+        {/* ── STAGE — tabs + tab content (full width) ─────────────────────────────── */}
         <Box
           className="esti-dash-stage"
           sx={{
             flex: 1,
             minWidth: 0,
             minHeight: 0,
-            height: { md: "100%" },
             overflowY: { xs: "visible", md: "auto" },
             display: "flex",
             flexDirection: "column",
@@ -1085,7 +1060,6 @@ export function StudioAbstract() {
             </Box>
           )}
         </Box>
-      </Box>
     </Box>
   );
 }

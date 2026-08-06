@@ -11187,3 +11187,25 @@ $lp2-rail-ink-faint: var(--lp2-ink-faint, rgba(20, 21, 23, 0.48));
   color: var(--lp-ink-muted);
 }
 
+
+/* ── Pure neumorphism 1.5.0 — opaque marketing chrome (no glass) ─────────── */
+.lp2-shell .esti-dash-rail.lp2-marketing-rail,
+.lp2-shell .esti-neu-dash .esti-dash-rail {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-color: #eceef2 !important;
+  background-image: none !important;
+  border-radius: 8px !important;
+  box-shadow:
+    6px 6px 14px rgba(20, 21, 23, 0.16),
+    -6px -6px 14px rgba(255, 255, 255, 0.92) !important;
+  border: none !important;
+}
+.lp2-shell .hcw-action-dock,
+.lp2-shell [class*="ActionDock"] {
+  border-radius: 8px !important;
+}
+.lp2-shell .esti-neu,
+.esti-neu {
+  border-radius: 8px !important;
+}

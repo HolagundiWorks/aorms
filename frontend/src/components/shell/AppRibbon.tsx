@@ -43,13 +43,14 @@ const navSx = (active: boolean) => ({
   minHeight: 44,
   minWidth: 44,
   px: 1.5,
-  borderRadius: 0,
-  color: active ? "text.primary" : "text.secondary",
+  borderRadius: "8px",
+  color: active ? "primary.main" : "text.secondary",
   borderBottom: "2px solid",
   borderBottomColor: active ? "primary.main" : "transparent",
   "&:hover": {
-    backgroundColor: "transparent",
+    backgroundColor: "action.hover",
     borderBottomColor: active ? "primary.main" : "divider",
+    color: "primary.main",
   },
 });
 

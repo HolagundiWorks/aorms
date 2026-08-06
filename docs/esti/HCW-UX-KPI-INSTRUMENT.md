@@ -21,6 +21,7 @@ Emit structured events (analytics / telemetry — product choice of sink):
 | `ux.outcome` | `{ status: success\|failure\|blocked, source }` | Norman evaluation |
 | `ux.a11y_gate` | `{ pass: bool, rule }` | WCAG gate |
 | `ux.mission` | `{ id, state: active\|done\|failed }` | Mission completion |
+| `ux.fatigue_signal` | `{ kind, level: watch\|elevated, offer? }` | Operational load proxy |
 
 Ambient progress must **not** emit `ux.interrupt`.
 
@@ -38,6 +39,7 @@ Ambient progress must **not** emit `ux.interrupt`.
 | **Outcome coverage** | dock commits with `ux.outcome` / dock commits | → 1.0 |
 | **Mission success** | done / (done+failed) | trending up |
 | **A11y gate** | failed PRs | 0 |
+| **Fatigue signals** | `ux.fatigue_signal` / active day | investigate watch; act on elevated (offer calm/pause — never force) |
 
 ---
 
@@ -52,11 +54,15 @@ Ambient progress must **not** emit `ux.interrupt`.
 | `CAPACITY` / `INTERRUPTION` tokens | Caps for `capacity_warn` |
 | **`logUxEvent` / `setUxEventSink`** | Product attaches analytics sink |
 | **`logOrient` · `logDecision` · `logMission` · `logInterrupt`** | Typed KPI vocabulary helpers |
+| **`installFatigueTracking` / `pulseFatigueSession` / `FATIGUE`** | Observes interrupt · capacity · decision · orient → `ux.fatigue_signal` |
+| **`VOICE` · `suggestFatigueCopy`** | Empathic pause/calm offers ([HCW-UX-VOICE.md](../HCW-UX-VOICE.md)) |
 | **`DockAction.track` / `.outcome`** | `ux.dock` + auto `publishOutcome` on click |
 | **`KpiStrip` / ActionDock trim / Toast trim** | `ux.capacity_warn` on overrun |
 | **DecisionQueue focus** | `ux.decision` pending |
 
 Consumer apps still choose the sink implementation (Segment, custom, etc.).
+Fatigue signals are **operational-load proxies**, not medical diagnosis — products
+may offer COGA calm or `VOICE.fatiguePauseOffer`; they must not lock the UI.
 
 ## 3b. Validation evidence
 
@@ -83,13 +89,31 @@ Before/after write-ups: [case-studies/](../hcw-kit/11-audits/case-studies/).
 | Rework tagged “UX ambiguity” | count / month (product taxonomy) |
 | Freeze compliance | commercial decisions frozen before execute |
 
-See [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md).
+See [HCW-CONSTRUCTION-UX-OVERLAY.md](HCW-CONSTRUCTION-UX-OVERLAY.md).
 
 ---
 
-## 6. Anti-patterns
+## 7. Operational fatigue proxies
+
+| Signal (`FATIGUE`) | Threshold (default) | Suggested response |
+| --- | --- | --- |
+| `interrupt_density` | ≥8 judgment/blocker/error per hour | Offer calm chrome; cut ambient |
+| `capacity_burst` | ≥3 capacity warns / 10 min | Trim strips; progressive disclosure |
+| `session_duration` | ≥90 min continuous | Soft pause offer (`VOICE.fatiguePauseOffer`) |
+| `decision_backlog` | ≥5 pending | Rank / disclose; don’t add chrome |
+| `long_pending_decision` | ≥30 min open | Nudge gently; keep context |
+| `orient_slowing` | later orient samples ≥1.5× earlier | Simplify above-the-fold |
+
+Kit emits `ux.fatigue_signal` with `offer` copy when cooled (`signalCooldownMs`).
+See [HCW-UX-VOICE.md](../HCW-UX-VOICE.md).
+
+---
+
+## 8. Anti-patterns
 
 - Counting page views as UX success
 - Toasting progress
 - KPIs without owners
 - Changing caps without Constitution-level review
+- Treating fatigue proxies as medical claims or hard lockouts
+- Commanding ambient copy outside P0 safety/regulatory (see [HCW-UX-VOICE.md](../HCW-UX-VOICE.md))

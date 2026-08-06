@@ -60,14 +60,14 @@ export declare function typeScaleSx(key: keyof typeof TYPE_SCALE): {
         fontSize: string;
     };
 };
-/** ActionDock button — flat pill at rest, liquid-glass capsule on hover/focus. */
+/** ActionDock button — flat at rest, soft raised neu on hover/focus (8px). */
 export declare function actionDockButtonSx(ink: string, opts?: {
     iconOnly?: boolean;
     fontWeight?: number;
 }): SxProps<Theme>;
-/** SectionDock chip — clear liquid glass (marketing section carousel). */
+/** SectionDock chip — opaque neu (8px). */
 export declare function sectionDockChipSx(active: boolean): SxProps<Theme>;
-/** Static specimen / label chip — liquid glass at rest (e.g. design-system legend). */
+/** Static specimen / label chip — soft neu at rest. */
 export declare function liquidGlassSpecimenSx(ink?: "#FF4F18"): SxProps<Theme>;
 /**
  * Layout `sx` recipes — Carbon-inspired organisation (shell · gutters · 12-col

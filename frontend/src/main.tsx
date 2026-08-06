@@ -3,6 +3,7 @@ import "@fontsource/urbanist/400.css";
 import "@fontsource/urbanist/500.css";
 import "@fontsource/urbanist/600.css";
 import "@fontsource/urbanist/700.css";
+import "@fontsource/vt323/400.css";
 import "./styles.scss";
 import "@hcw/ui-kit/portal-chrome.scss";
 import "@hcw/ui-kit/tokens.css";

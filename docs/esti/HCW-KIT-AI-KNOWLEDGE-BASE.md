@@ -44,7 +44,7 @@ rounded. One spatial model everywhere:
 Layer-3 glass lift as `:hover` — keyboard parity is a brand behaviour, not a patch.
 
 **Package layout** (`src/`): `tokens.ts` (colour, type, **scales**: `SPACING`,
-`LAYOUT`, `CAPACITY`, `INTERRUPTION`, `COGA`, `TRUST`, `BREAKPOINTS`, `Z_INDEX`,
+`LAYOUT`, `CAPACITY`, `INTERRUPTION`, `COGA`, `VOICE`, `TRUST`, `FATIGUE`, `BREAKPOINTS`, `Z_INDEX`,
 `OPACITY`, `MOTION`, `ELEVATION`, plus layer recipes), `theme.ts`
 (`createHcwTheme({ scheme, density, coga })`), `chrome-sx.ts` (`layoutSx`), and
 primitives `Surface`, `GlassRail`, `ActionDock`, `AwarenessStrip`,
@@ -132,9 +132,16 @@ uses `AwarenessStrip` (Endsley). Dock commits publish `publishOutcome` / `DockAc
 (Norman evaluation). Confirm destroy with `ConfirmModal` slip/mistake kinds (Reason).
 Status never colour-only — use `StatusDot.shape` / `STATUS_SHAPE`. AI surfaces use T10
 orchestration primitives. Attach `setUxEventSink` in the product; prefer `logOrient` /
-`logDecision` / `logMission` / `logInterrupt`.
+`logDecision` / `logMission` / `logInterrupt`. Prefer `HcwTelemetryRoot` +
+`FatigueOfferBanner` for load offers; never lock on `ux.fatigue_signal`. Freeze via
+`freezeDecision` / `setDecisionAuditSink` for explainability.
 - Detect: unbounded KPI strips, toast spam patterns, colour-only urgency in tables,
-  chat-first AI without Mission/Decision anatomy.
+  chat-first AI without Mission/Decision anatomy, commanding ambient copy, missing audit sink.
+
+### R11 — Voice (empathic partner)
+Ambient copy uses `VOICE` / invitational `TRUST` labels ([HCW-UX-VOICE.md](../HCW-UX-VOICE.md)).
+P0 safety/regulatory may stay direct. Run `pnpm voice-lint` on kit changes.
+- Detect: bare sure-check prompts, “must” orders outside P0, success theatre.
 
 ---
 

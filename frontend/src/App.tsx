@@ -52,7 +52,7 @@ import { trpc } from "./lib/trpc.js";
 import { LegacyModuleRedirect } from "./components/LegacyModuleRedirect.js";
 import { AiAgentCommand } from "./components/AiAgentCommand.js";
 import { RightSlot } from "./components/shell/RightSlot.js";
-import { ActionDock, ActionDockProvider, ActionOutcomeBanner } from "@hcw/ui-kit";
+import { ActionDock, ActionDockProvider, ActionOutcomeBanner, AnalogueClock } from "@hcw/ui-kit";
 import { AppRibbon } from "./components/shell/AppRibbon.js";
 import { AppFooterBar } from "./components/shell/AppFooterBar.js";
 import { AormsLogo } from "./components/AormsLogo.js";
@@ -834,6 +834,18 @@ function AppWorkspace() {
           <ActionDock />
           {/* Outcome channel — publishes from DockAction.outcome / publishOutcome. */}
           <ActionOutcomeBanner />
+          {/* Fixed bottom-right analogue clock (kit) — separate from footer TrayClock. */}
+          <AnalogueClock
+            size={112}
+            className="esti-analogue-clock"
+            sx={{
+              position: "fixed",
+              right: 20,
+              bottom: "calc(var(--esti-footer-height, 56px) + 72px)",
+              zIndex: 40,
+              pointerEvents: "none",
+            }}
+          />
           {/* Taskbar footer (HCW-UI-Kit) — launchers CENTRE (Studio · Tasks · Search ·
               Ask ESTI · Wellness · Pomodoro), tray RIGHT. */}
           <AppFooterBar

@@ -1,23 +1,15 @@
 /**
- * @hcw/ui-kit — HCW-UI-Kit (Human Centric Works). The centralised, LAYERED design
- * system deployed against every portal.
+ * @hcw/ui-kit — HCW-UI-Kit (Human Centric Works). Pure neumorphism design system.
  *
- * Thesis: **depth encodes importance.** Three material languages stack by z-depth:
- *   1. Hyperminimalist (FLAT)   — information at rest: tables, text, inputs.
- *   2. Neumorphic      (SOFT)   — objects you work within: widgets, cards, dialogs.
- *   3. Glassmorphism   (GLASS)  — the live layer: hover, CTAs, the dock, alerts.
+ * Thesis: **depth encodes importance** (opaque only — no glass / blur):
+ *   1. Flat — information at rest
+ *   2. Soft raised — objects / chrome / dock / CTAs
+ *   3. Soft inset + accent — wells, focus, alerts
  *
- * Spatial model: Rail · Stage · TaskbarFooter · ActionDock.
- * Cognitive contracts: CAPACITY · INTERRUPTION · AwarenessStrip · ActionOutcome ·
- * Mission/Decision/Phase orchestration · KpiStrip · logUxEvent.
+ * Spatial model: Top ribbon · Stage · TaskbarFooter · ActionDock · AnalogueClock.
  *
- *   import { KitRoot, ActionDockProvider, ActionDock, TaskbarFooter,
- *            useScreenActions, Surface, GlassRail, HealthGlassOrb,
- *            BrandMark, MissionHeader, DecisionQueue, KpiStrip,
- *            setUxEventSink } from "@hcw/ui-kit";
- *
- * Full catalog (attributes): docs/hcw-kit/14-HCW-CATALOG.md.
- * UX laws: docs/esti/HCW-UI-UX-PRINCIPLES.md.
+ *   import { KitRoot, ActionDockProvider, ActionDock, SoftRail, AnalogueClock,
+ *            Surface, BrandMark, setUxEventSink } from "@hcw/ui-kit";
  */
 export * from "./tokens.js";
 export { DIALOG_RADIUS, DOCK_PILL_RADIUS, ACTION_DOCK_TRAY, NEU_GROOVE_VERTICAL, NEU_GROOVE_HORIZONTAL, LIQUID_GLASS_BUTTON, DOCK_BUTTON_LIFT, SECTION_DOCK_CHIP_GLASS, liquidGlassButtonFor, } from "./tokens.js";
@@ -34,7 +26,9 @@ export { buildTokenExport, buildTokensJson, buildTokensCss } from "./token-expor
 export type { TokenExportJson } from "./token-export.js";
 export { BrandMark } from "./BrandMark.js";
 export { Surface } from "./Surface.js";
-export { GlassRail } from "./GlassRail.js";
+export { SoftRail, GlassRail } from "./GlassRail.js";
+export { AnalogueClock } from "./AnalogueClock.js";
+export type { AnalogueClockProps } from "./AnalogueClock.js";
 export { HealthGlassOrb } from "./HealthGlassOrb.js";
 export type { HealthZoneState } from "./HealthGlassOrb.js";
 export { ActionDock, ActionDockProvider, useScreenActions, useDockActions, } from "./ActionDock.js";
@@ -64,7 +58,17 @@ export { MissionHeader, ObjectiveList, PhaseStrip, ConfidenceBand, DecisionCard,
 export type { ObjectiveItem, ConfidenceLevel, DecisionCardProps, FrozenDecision, } from "./orchestration.js";
 export { assertCapacity, enforceCapacity, capacityCap, } from "./capacity.js";
 export type { CapacityChannel } from "./capacity.js";
-export { logUxEvent, setUxEventSink, resetUxEventSink, logOrient, logDecision, logMission, logInterrupt, } from "./uxEvents.js";
-export type { UxEventName, UxEventPayload, UxEventSink } from "./uxEvents.js";
+export { logUxEvent, setUxEventSink, resetUxEventSink, clearUxEventObservers, addUxEventObserver, logOrient, logDecision, logMission, logInterrupt, } from "./uxEvents.js";
+export type { UxEventName, UxEventPayload, UxEventSink, UxEventObserver } from "./uxEvents.js";
+export { installFatigueTracking, startFatigueSession, resetFatigueSession, pulseFatigueSession, evaluateFatigue, getFatigueSnapshot, suggestFatigueCopy, getLatestFatigueOffer, clearLatestFatigueOffer, subscribeFatigueOffer, } from "./fatigue.js";
+export type { FatigueKind, FatigueLevel, FatigueAssessment, FatigueOffer } from "./fatigue.js";
+export { FatigueOfferBanner } from "./FatigueOfferBanner.js";
+export type { FatigueOfferBannerProps } from "./FatigueOfferBanner.js";
+export { setDecisionAuditSink, recordDecisionAudit, recordFreezeAudit, freezeDecision, openDecision, listSessionDecisionAudits, exportSessionDecisionAudits, resetDecisionAudit, } from "./decisionAudit.js";
+export type { DecisionAuditAction, DecisionAuditRecord, DecisionAuditSink, } from "./decisionAudit.js";
+export { estimateOrientMultiplier, isLoadRisk } from "./calibration.js";
+export type { LoadInputs } from "./calibration.js";
+export { HcwTelemetryRoot } from "./HcwTelemetryRoot.js";
+export type { HcwTelemetryRootProps } from "./HcwTelemetryRoot.js";
 export { trimDockActions, prioritizeDockActions } from "./ActionDock.js";
 //# sourceMappingURL=index.d.ts.map

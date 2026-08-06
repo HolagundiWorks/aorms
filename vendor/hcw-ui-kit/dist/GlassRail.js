@@ -1,18 +1,17 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 /**
- * GlassRail — rail · stage spatial shell for portals / auth / account surfaces.
- * App chrome (ribbon workspace) keeps its own RailLayout; this is the kit
- * primitive for layouts that share the same spatial model.
+ * SoftRail — rail · stage spatial shell for portals / auth (opaque neumorphism).
+ * Prefer this over {@link GlassRail} (deprecated alias).
  *
- *   glass="frost"  — default Layer 3 frosted glass (portals, auth)
- *   glass="clear"  — clear glass so atmosphere/canvas shows through (marketing-like)
- *
- * Widths/paddings come from {@link LAYOUT} — do not hardcode shell geometry.
+ * Widths/paddings come from {@link LAYOUT}.
  */
 import { Box } from "@mui/material";
 import { Surface } from "./Surface.js";
 import { colors, LAYOUT } from "./tokens.js";
-export function GlassRail({ rail, children, railAriaLabel = "Navigation", mainId = "esti-main", glass = "frost", sx, ...rest }) {
+export function SoftRail({ rail, children, railAriaLabel = "Navigation", mainId = "esti-main", 
+/** @deprecated Ignored — both map to opaque soft. Kept for GlassRail API parity. */
+glass: _glass = "frost", sx, ...rest }) {
+    void _glass;
     return (_jsxs(Box, { sx: {
             display: "flex",
             alignItems: "stretch",
@@ -20,7 +19,7 @@ export function GlassRail({ rail, children, railAriaLabel = "Navigation", mainId
             backgroundColor: colors.background,
             flexDirection: { xs: "column", md: "row" },
             ...sx,
-        }, ...rest, children: [_jsx(Surface, { layer: glass === "clear" ? "clearGlass" : "glass", component: "aside", "aria-label": railAriaLabel, sx: {
+        }, ...rest, children: [_jsx(Surface, { layer: "soft", component: "aside", "aria-label": railAriaLabel, sx: {
                     flex: { xs: "none", md: `0 0 ${LAYOUT.railWidth}px` },
                     width: { xs: "100%", md: LAYOUT.railWidth },
                     minHeight: { xs: 0, md: "100vh" },
@@ -39,4 +38,6 @@ export function GlassRail({ rail, children, railAriaLabel = "Navigation", mainId
                     pb: { xs: LAYOUT.stagePaddingBottomXs, md: LAYOUT.stagePaddingBottomMd },
                 }, children: children })] }));
 }
+/** @deprecated Use {@link SoftRail}. Opaque soft alias of the former glass rail. */
+export const GlassRail = SoftRail;
 //# sourceMappingURL=GlassRail.js.map
