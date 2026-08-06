@@ -4,22 +4,18 @@
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
 **Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
 **AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)  
-**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 (WinUI shell on `main` · Windows sign/bind open) · LF5 ✅ · LF6 ✅ — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
+**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 · LF5 ✅ · LF6 ✅ — see [LOCAL-FIRST.md](LOCAL-FIRST.md)
 
-**Crew:** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) (Vishwakarma · Bhoomi · Gagan · Aakash)
+**Solo delivery (2026-08-06):** cloud crew (Vishwakarma · Gagan · Aakash · Bhoomi)
+parked — model expired. **Bhoomi2** (this Windows Cursor session) is the only
+active agent and owns the remaining LF4 physical gate end-to-end. See
+[AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md).
 
 Phases 0–28 are **engineering-complete** for **AStudio**. **AConsulting**
 is **live**. **AProc** (PMC) Waves **0–5 are shipped** (preview product —
 owner-side BBS/steel recon + P6 XER milestone import; not a contractor CPM ERP).
 Stripe auto-billing remains **deferred by choice**. Market-fit Waves 1–3 are
 **shipped**; Wave 4 (integrations) stays phase-2 by design.
-
-**Active delivery (2026-08-06):** code merge wave ✅ (#55/#56/#51/#53/#54/#49) ·
-LF5 ✅ · LF6 ✅ · hub bind readiness ✅ · LF4 **WinUI 3** shell on `main` 🚧
-physical gate only (Windows `build-winui.ps1` → Authenticode → hub **0227**
-confirm → `hasSyncToken` bind · then Aakash live `/downloads` URL). See
-[MORNING-TEST-LF4.md](MORNING-TEST-LF4.md). Live installer URLs stay gated until
-signed HTTPS URL + sha256.
 
 **Desktop-first trim (2026-08-06):** with the desktop node as the primary app and
 AI running locally, the web stack is being slimmed: unused frontend deps removed
@@ -28,6 +24,26 @@ BYO tier and hosted token metering dropped (#63); legacy **Tauri** shell removed
 WinUI 3 is the sole desktop shell (#64); dead marketing/SEO assets trimmed (#65).
 Web parity of the staff SPA is otherwise preserved pending a product decision on
 browser-staff scope.
+
+### Now (Bhoomi2 solo queue)
+
+| # | Work | Status |
+| --- | --- | --- |
+| 1 | Local Docker node stack healthy | ✅ |
+| 2 | Host toolchain (.NET 8 · WinAppRuntime 1.6 · WebView2 · Node/pnpm · Docker) | ✅ |
+| 3 | Apply hub migration **`0227`** on local DB · confirm activate→`syncToken` | ✅ |
+| 4 | `build-winui.ps1 -Profile STUDIO` · run shell vs `http://127.0.0.1:5173` | ✅ |
+| 5 | Authenticode sign (operator cert) · measure sha256 | ✅ ACO **dev** · SmartScreen trust 🔲 |
+| 6 | Physical bind: firm admin → `DesktopLicenceBind` → `hasSyncToken` | ✅ local API smoke (`VALID` · `hasSyncToken` · `metaSync`) |
+| 7 | Public HTTPS URL + fill `/downloads` manifests (was Aakash) | 🔲 gated on production cert + host |
+| 8 | M8 item 4 live installer honesty · keep `web_fallback` until 7 | 🔲 |
+
+Canonical runbook: [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md). Do **not** invent
+sha256 or flip portal URLs unsigned. Landing morphic redesign (rail · stage ·
+soft/glass · tray clock) stays as shipped — no revert.
+
+**Parked until crew returns:** multi-agent PR choreography, cloud hub prod `0227`
+(ops), Stripe/W4, AStudio/AConsulting code extraction.
 The 2026-07-19 **web-only** product law is **superseded** for runtime shape
 ([PLANS-AND-TIERS.md](PLANS-AND-TIERS.md), [LOCAL-FIRST.md](LOCAL-FIRST.md)).
 Legacy Community / Manager installers and a separate Estimate desktop app stay
@@ -45,7 +61,7 @@ docs were removed 2026-07-24 (Git history retains them).
 | [LOCAL-FIRST.md](LOCAL-FIRST.md) | **Local-first + hub sync** — planes, APIs, LF waves |
 | [HUB-API.md](HUB-API.md) | Hub wire contract (`2026-08`) — activate→`syncToken`, sync REST/WS, node `sync.*` |
 | [DESKTOP-REPOS.md](DESKTOP-REPOS.md) | Desktop contracts gate · installer ownership |
-| [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) | Crew split — Vishwakarma · Bhoomi · Gagan · Aakash |
+| [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) | Crew — **solo Bhoomi2** while others parked |
 | [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) | Desktop ↔ web UX consistency |
 | [MARKET-FIT.md](MARKET-FIT.md) | **GTM + market-fit backlog** (ICP, competitors, waves) |
 | [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) | Standard licence law (desktop + web) |
@@ -77,8 +93,7 @@ Canonical plan: **[LOCAL-FIRST.md](LOCAL-FIRST.md)** · UX: **[DESKTOP-WEB-PARIT
 | **LF1** | Hub meta event log + catch-up + WS; node meta outbox/cursor | ✅ 2026-08 |
 | **LF2** | Artifact content-hash; publish DTOs; portal-from-hub reads; desktop stub; product-law docs | ✅ 2026-08 |
 | **LF3** | Domain metadata enqueue/apply (tasks, estimate totals, phase progress) + panel `syncToken` | ✅ Gagan 2026-08 |
-| **LF4** | Signed **WinUI 3** installer + first-run licence / hub bind | 🚧 code ✅ (#49) · Windows sign + physical bind + hub `0227` prod ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); Tauri removed (#64) |
-| **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | ✅ Aakash 2026-08 — `CapabilityBadge` · `keymap` · `/help` · web-parity `localAi` fix |
+| **LF4** | Signed **WinUI 3** installer + first-run licence / hub bind | 🚧 **Bhoomi2 solo** — code ✅ (#49) · local bind ✅ · SmartScreen/prod URL 🔲 ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); Tauri removed (#64) || **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | ✅ Aakash 2026-08 — `CapabilityBadge` · `keymap` · `/help` · web-parity `localAi` fix |
 | **LF6** | UX parity checklist + inspector/AI right-slot; Figma ↔ kit tokens | ✅ Aakash — token stub ✅ · right-slot ✅ (`RightSlot` Properties ↔ Ask ESTI) |
 
 **Namespaces / seams:** `sync` (tRPC + REST) · `esti_meta_*` · `esti_sync_*` ·

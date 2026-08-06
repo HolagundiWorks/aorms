@@ -26,6 +26,7 @@ import {
  * key. Products embedding the old public key must be updated to the new one.
  */
 const PANEL_PUBLIC_KEY_SPKI_DER_B64 =
+  process.env.LICENSE_PANEL_PUBLIC_KEY_SPKI_B64?.trim() ||
   "MCowBQYDK2VwAyEA66A1kjGLoHXX6TWOgyUlQPv394xT9SJ+bjDSNsoxenk=";
 
 let cachedPublicKey: KeyObject | null = null;

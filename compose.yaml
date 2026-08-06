@@ -94,6 +94,16 @@ services:
       SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-demo1234}
       DEMO_MASTER_PASSWORD: ${DEMO_MASTER_PASSWORD:-aorms-demo-admin}
       DEMO_MIDNIGHT_RESET: ${DEMO_MIDNIGHT_RESET:-true}
+      # Local-first / LF4 node bind (empty = unmanaged hub role in pure web dev).
+      ESTI_ROLE: ${ESTI_ROLE:-hub}
+      ESTI_DESKTOP: ${ESTI_DESKTOP:-}
+      ESTI_HUB_URL: ${ESTI_HUB_URL:-}
+      ESTI_LICENSE_API_URL: ${ESTI_LICENSE_API_URL:-}
+      ESTI_PRODUCT_API_KEY: ${ESTI_PRODUCT_API_KEY:-}
+      LICENSE_SIGNING_KEY: ${LICENSE_SIGNING_KEY:-}
+      LICENSE_SIGNING_KEY_FILE: ${LICENSE_SIGNING_KEY_FILE:-}
+      LICENSE_PANEL_PUBLIC_KEY_SPKI_B64: ${LICENSE_PANEL_PUBLIC_KEY_SPKI_B64:-}
+      INSTALL_ID: ${INSTALL_ID:-}
     # Dev hot-reload: host source is mounted over the image; node_modules stays.
     # vendor/ supplies the HCW kit packages — pnpm workspace symlinks point here.
     volumes:
@@ -101,6 +111,7 @@ services:
       - ./backend/drizzle:/app/esti/backend/drizzle
       - ./packages/contracts/src:/app/esti/packages/contracts/src
       - ./vendor:/app/esti/vendor
+      - ./desktop/artifacts/keys:/keys:ro
     ports: ["4000:4000"]
     # Reach the host (where the EOMS desktop companion listens on :8756). Under
     # Docker Engine `host.docker.internal` is not automatic — map it to the host
@@ -166,6 +177,7 @@ services:
     environment:
       VITE_API_URL: http://localhost:4000
       VITE_PROXY_TARGET: http://backend:4000
+      VITE_RUNTIME_HOST: ${VITE_RUNTIME_HOST:-web}
     # vendor/ mirrors the production layout: Vite aliases resolve to vendor/hcw-*/dist/
     # and Vite's fs.allow covers estiRoot which includes vendor/.
     volumes:

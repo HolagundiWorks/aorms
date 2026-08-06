@@ -1,8 +1,8 @@
 # AORMS local-first desktop + cloud hub
 
 > **Canonical implementation doc** for the dual-runtime product.  
-> **Status (2026-08):** LF0–LF3 ✅ · LF4 packaging/bind open (Bhoomi) ·
-> **LF5** web parity polish ✅ (Aakash) · **LF6** ✅ (token stub + `RightSlot`).  
+> **Status (2026-08):** LF0–LF3 ✅ · **LF4** 🚧 **Bhoomi2 solo** (sign/bind/URL) ·
+> **LF5** ✅ · **LF6** ✅. Cloud crew parked.  
 
 > Wire contract: [HUB-API.md](HUB-API.md) (`2026-08`) · contracts gate:
 > [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · crew: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md).  
@@ -83,8 +83,7 @@ Runtime resolution: `trpc.sync.capabilities` ·
 | **LF1** | Hub `esti_meta_event` + catch-up REST + WS; node meta outbox/cursor; drain tick | ✅ |
 | **LF2** | Artifact content-hash; publish DTOs (tender/RA/siteReference/progressReport); portal-from-hub reads | ✅ |
 | **LF3** | Domain enqueue of metadata (tasks, estimate totals, phase progress) + apply hooks on pull | ✅ Gagan 2026-08 |
-| **LF4** | Signed desktop installer (**WinUI 3** Fluent 2 shell + WebView2 SPA; profile STUDIO\|CONSULTANCY); first-run licence bind | 🚧 Bhoomi — `desktop/AStudio.Shell` · `build-winui.ps1` · sign + physical bind ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); the legacy Tauri scaffold was **removed — WinUI 3 is the only shell** |
-| **LF5** | Web parity polish: capability badges, degraded AI UX, shared keymap / Help | ✅ Aakash — `CapabilityBadge` · `frontend/src/lib/keymap.ts` · `/help` · `resolveRuntimeCapabilities` web-parity fix |
+| **LF4** | Signed desktop installer (**WinUI 3** Fluent 2 shell + WebView2 SPA; profile STUDIO\|CONSULTANCY); first-run licence bind | 🚧 **Bhoomi2 solo** — local `0227` ✅ · ACO-signed local exe · bind API smoke ✅ · SmartScreen/prod URL 🔲 ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); Tauri **removed** (#64) — WinUI 3 only || **LF5** | Web parity polish: capability badges, degraded AI UX, shared keymap / Help | ✅ Aakash — `CapabilityBadge` · `frontend/src/lib/keymap.ts` · `/help` · `resolveRuntimeCapabilities` web-parity fix |
 | **LF6** | UX parity checklist + inspector/AI right-slot; Figma token sync to kit | ✅ Aakash — [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) stub ✅ · right-slot ✅ (`RightSlot`) |
 
 **Migrations:** `0226_local_first_sync.sql` · `0227_hlp_org_sync_firm.sql` (panel sync firm UUID).

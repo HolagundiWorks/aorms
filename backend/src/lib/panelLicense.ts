@@ -14,6 +14,7 @@ import { z } from "zod";
  * `docs/esti/HCW-LICENSE-MANAGER.md`.
  */
 const PANEL_PUBLIC_KEY_SPKI_DER_B64 =
+  process.env.LICENSE_PANEL_PUBLIC_KEY_SPKI_B64?.trim() ||
   "MCowBQYDK2VwAyEA66A1kjGLoHXX6TWOgyUlQPv394xT9SJ+bjDSNsoxenk=";
 
 const PanelTokenPayload = z.object({

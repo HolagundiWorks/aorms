@@ -12,9 +12,11 @@ chrome + WebView2 SPA (`desktop/AStudio.Shell`). PR: **#49**
 | Merge **#55** (CI lint) · **#51** LF5 · **#54** LF6 | Vishwakarma | ✅ on `main` |
 | Merge **#56** (worker ruff) | Vishwakarma | ✅ on `main` (`00abaad5`) |
 | Merge **#53** (hub bind readiness) | Vishwakarma | ✅ on `main` |
-| Hub migration **`0227_hlp_org_sync_firm.sql`** on production | Ops / hub | 🔲 |
-| Windows host + .NET 8 + Windows App SDK + WebView2 | Operator | 🔲 |
-| Authenticode cert (SmartScreen) | Operator | 🔲 — **never invent sha256 or flip portal URLs** |
+| Hub migration **`0227_hlp_org_sync_firm.sql`** on production | Ops / hub | 🔲 prod · ✅ local Bhoomi2 |
+| Windows host + .NET 8 + Windows App SDK + WebView2 | **Bhoomi2** | ✅ |
+| Authenticode cert (SmartScreen) | Operator / **Bhoomi2** | 🔲 — **never invent sha256 or flip portal URLs** |
+
+**Solo (2026-08-06):** cloud crew parked — **Bhoomi2** runs this checklist.
 
 ## Hub deploy gate (before bind) — **required**
 
@@ -122,15 +124,16 @@ Get-FileHash -Algorithm SHA256 $exe | Format-List
 | Version | — | matching `version` |
 | Gate | `VITE_PORTAL_USE_RELEASE_INSTALLERS=true` | `status: available` |
 
-**Handoff status:** all 🔲 until operator completes steps 2–6.
+**Handoff status (Bhoomi2 solo 2026-08-06):**
 
 | Field | Value |
 | --- | --- |
 | Local artifact | `desktop/artifacts/winui/AStudio.Shell.exe` |
-| Signed | 🔲 |
-| SHA-256 | 🔲 measure after sign — **do not invent** |
-| Public HTTPS URL | 🔲 |
-| Bind verified | 🔲 |
+| Signed | ✅ ACO **dev** (`CN=Human Centric Works`) + DigiCert timestamp — root **not** trusted by SmartScreen; **not** for portal flip |
+| SHA-256 | `E25E266725E100C3B4D268DA027D9EA29DD4D5302A091DA2EF8E808E3B0A6CB0` |
+| Public HTTPS URL | 🔲 pending host/upload |
+| Bind verified | ✅ autopilot — `license.status=VALID`, `hasSyncToken=true`, `syncReady=true`, `metaSync`+`artifactSync`, `sync.flush` ok (local Ed25519 via `LICENSE_SIGNING_KEY_FILE` + `LICENSE_PANEL_PUBLIC_KEY_SPKI_B64`; key `HLP-5JNZ-445W-M59T`). `pullMeta` may still say `hub_unreachable` on loopback — non-blocking for bind gate. |
+| Local hub `0227` | ✅ applied on `esti-db` (`sync_firm_id` · `sync_token_hash`) |
 
 ---
 
