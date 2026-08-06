@@ -37,7 +37,7 @@ export const ARCHITECTURE_LANDING_FAQ = [
   {
     question: "How much does it cost?",
     answer:
-      "Every account includes 5 GB storage and the full workspace. Pay for additional storage per GB-month and for hosted AI usage, or bring your own OpenAI-compatible API key.",
+      "Every account includes 5 GB storage and the full workspace. Pay only for additional storage per GB-month — AI is unmetered (local Ollama on desktop, the hub on web), with no per-token billing or bring-your-own key.",
   },
   {
     question: "Is there a desktop app?",
