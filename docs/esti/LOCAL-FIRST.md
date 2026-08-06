@@ -2,7 +2,8 @@
 
 > **Canonical implementation doc** for the dual-runtime product.  
 > **Status (2026-08):** LF0–LF3 ✅ · LF4 packaging/bind open (Bhoomi) ·
-> **LF5** web parity polish ✅ (Aakash) · LF6 ◐ (token stub ✅ · right-slot 🔲).  
+> **LF5** web parity polish ✅ (Aakash) · **LF6** ✅ (token stub + `RightSlot`).  
+
 > Wire contract: [HUB-API.md](HUB-API.md) (`2026-08`) · contracts gate:
 > [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · crew: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md).  
 > **Product law:** [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) · **UX parity:**
@@ -82,7 +83,7 @@ Runtime resolution: `trpc.sync.capabilities` ·
 | **LF3** | Domain enqueue of metadata (tasks, estimate totals, phase progress) + apply hooks on pull | ✅ Gagan 2026-08 |
 | **LF4** | Signed desktop installer (Tauri + profile STUDIO\|CONSULTANCY); first-run licence bind | 🚧 Bhoomi — unsigned Studio Setup.exe · `DesktopLicenceBind` · sign + physical bind = morning ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)) |
 | **LF5** | Web parity polish: capability badges, degraded AI UX, shared keymap / Help | ✅ Aakash — `CapabilityBadge` · `frontend/src/lib/keymap.ts` · `/help` · `resolveRuntimeCapabilities` web-parity fix |
-| **LF6** | UX parity checklist + inspector/AI right-slot; Figma token sync to kit | ◐ Aakash — [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) stub ✅ · right-slot 🔲 |
+| **LF6** | UX parity checklist + inspector/AI right-slot; Figma token sync to kit | ✅ Aakash — [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) stub ✅ · right-slot ✅ (`RightSlot`) |
 
 **Migrations:** `0226_local_first_sync.sql` · `0227_hlp_org_sync_firm.sql` (panel sync firm UUID).
 
