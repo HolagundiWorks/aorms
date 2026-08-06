@@ -108,14 +108,17 @@ Drain helpers (`drainOutbox` / `drainMetaOutbox` / `pullMetaCatchUp`) also no-op
 
 ## Morning bind checklist (Bhoomi)
 
-0. **Hub deploy:** apply `backend/drizzle/0227_hlp_org_sync_firm.sql` (idempotent) before testing panel activate → sync
-1. Node: `ESTI_HUB_URL` + `ESTI_LICENSE_API_URL` + `ESTI_PRODUCT_API_KEY` + `INSTALL_ID`
-2. Owner runs `license.activate` with a live key
-3. `sync.hubConfigured.syncReady === true` (`hasSyncToken` true, `role=node`)
+0. **Hub deploy:** apply `backend/drizzle/0227_hlp_org_sync_firm.sql` (idempotent) before testing panel activate → sync. Verify: `\d hlp_organization` shows `sync_firm_id uuid`.
+1. Node: `ESTI_ROLE=node` + `ESTI_HUB_URL` + `ESTI_LICENSE_API_URL` + `ESTI_PRODUCT_API_KEY` + `INSTALL_ID`
+2. Owner runs `license.activate` with a live key → panel returns **`syncToken`** (persisted on `esti_org_settings`)
+3. `sync.hubConfigured`: `hasSyncToken === true` **and** `syncReady === true` (`role=node`)
 4. `sync.capabilities.metaSync` / `artifactSync` === true
 5. `sync.flush` / `sync.pullMeta` succeed against hub (no `skipped` / `skippedReason`)
 
+Expanded table + fail cues: [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) § Operator bind sequence.
+
 **Owner:** Gagan lands the hub wire; Bhoomi runs the bind test after Vishwakarma merges.
+**Human (prod):** confirm **0227** applied on the live hub DB before Bhoomi’s physical bind.
 
 ## Related
 
