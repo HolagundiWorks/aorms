@@ -56,6 +56,7 @@ import { AppRibbon } from "./components/shell/AppRibbon.js";
 import { AppFooterBar } from "./components/shell/AppFooterBar.js";
 import { AormsLogo } from "./components/AormsLogo.js";
 import { UsageIdentity } from "./components/identity/UsageIdentity.js";
+import { DesktopLicenceBind } from "./components/DesktopLicenceBind.js";
 import { PomodoroProvider } from "./contexts/PomodoroContext.js";
 import { UploadAuthProvider } from "./lib/uploadAuth.js";
 // Landing + Login stay eager so the first paint (marketing / sign-in) needs no extra
@@ -821,6 +822,8 @@ function AppWorkspace() {
           </div>
           <UsageIdentity />
           <AiAgentCommand />
+          {/* LF4 desktop first-run — licence / hub syncToken bind (no-op on web). */}
+          <DesktopLicenceBind />
           {/* HCW-UI-Kit global action dock — screens publish CTAs via useScreenActions;
               renders nothing until they do (zero regression until adopted). */}
           <ActionDock />

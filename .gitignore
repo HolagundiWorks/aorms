@@ -56,6 +56,10 @@ deploy/.installers/
 # Locally-staged download binaries (if any)
 frontend/public/downloads/
 
+# Desktop installer build outputs (unsigned overnight artifacts)
+desktop/artifacts/
+desktop/src-tauri/target/
+
 # Editor / agent metadata
 .cursor/
 
