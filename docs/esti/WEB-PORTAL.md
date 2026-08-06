@@ -51,32 +51,73 @@ Sibling-repo / contracts gate: [DESKTOP-REPOS.md](DESKTOP-REPOS.md).
 This file owns **portal fill fields only** — not the WinUI C# project, hub
 `syncToken`, or MORNING-TEST status tables.
 
+## Resolver contract (exact — matches `desktop-installers.ts`)
+
+| Input | Gate for Download CTA | Notes |
+| --- | --- | --- |
+| `VITE_ASTUDIO_INSTALLER_URL` / `VITE_ACONSULTING_INSTALLER_URL` | URL non-empty and `https://…` **or** site-relative `/…` | **Option A** — env wins over manifest; CTA flips without the release flag |
+| Manifest `url` + `sha256` + `status=available` | **and** `VITE_PORTAL_USE_RELEASE_INSTALLERS=true` | **Option B** — all four required; `sha256` must be 64 hex |
+| Manifest `version` / `sha256` | Display only when env path used | Always fill for UI honesty even on Option A |
+| Placeholder / empty | stays `web_fallback` | Current tree state — **do not flip until Bhoomi signs** |
+
+Code: `frontend/src/lib/desktop-installers.ts` · `resolveInstallerOffer`.  
+Env keys also declared in `frontend/src/vite-env.d.ts` · `.env.example` · `deploy/.env.production.example`.
+
 ## One-line fill (after Bhoomi signs WinUI)
 
 ### Option A — env (preferred for prod rebuild)
 
 ```bash
+# deploy/.env.production (or CI secrets) — then rebuild frontend
 VITE_ASTUDIO_INSTALLER_URL=https://cdn.example.com/AStudio-WinUI-1.0.0.exe
 VITE_ACONSULTING_INSTALLER_URL=https://cdn.example.com/AConsulting-WinUI-1.0.0.exe
-# rebuild frontend (deploy/update.sh)
+# Also fill sha256 + version in update-manifests/*.json for checksum display
+# (status may stay web_fallback when using env-only flip)
+# rebuild: deploy/update.sh
 ```
 
 ### Option B — update manifests + gate flag
 
 1. Edit `frontend/public/update-manifests/astudio.json` (and `aconsulting.json`):
 
-| Field | Required | Notes |
+| Field | Required for Option B | Notes |
 | --- | --- | --- |
 | `url` | yes | `https://…` HTTPS CDN of the **signed WinUI** package — never Tauri NSIS / `desktop/artifacts/` |
-| `sha256` | yes | 64-char hex of that signed binary |
-| `version` | yes | Semver / packaging version from Bhoomi |
+| `sha256` | yes | 64-char hex (`^[0-9a-f]{64}$`) of that signed binary |
+| `version` | recommended | Semver / packaging version from Bhoomi (shown on `/downloads`) |
 | `status` | yes | Set to `"available"` (placeholder is `"web_fallback"`) |
 | `signature` | optional | Authenticode / package sig metadata |
 | `publishedAt` | optional | ISO-8601 |
+| `sizeBytes` | optional | number |
 
 2. Set `VITE_PORTAL_USE_RELEASE_INSTALLERS=true` and rebuild.
 
 Without the flag, filled manifests stay inert (safe default).
+
+### Paste template — Bhoomi → Aakash handoff
+
+Fill after signing; leave blanks until then. Aakash copies into env and/or JSON.
+
+```text
+app: astudio | aconsulting
+url: https://…
+sha256: <64 hex>
+version: <e.g. 0.1.0>
+signed: yes (WinUI · not Tauri · not morning smoke)
+```
+
+Worked **Option B** JSON shape (values empty until handoff — keep `web_fallback`):
+
+```json
+{
+  "app": "astudio",
+  "product": "AStudio",
+  "version": "",
+  "url": "",
+  "sha256": "",
+  "status": "web_fallback"
+}
+```
 
 ## Placeholders in tree
 
@@ -112,4 +153,13 @@ Canonical field list also lives in [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) (B
 - [MARKET-FIT.md](MARKET-FIT.md) § M8 (item 4 stays 🔲 until signed WinUI URL)  
 - [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) · [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md)  
 - [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md)  
-- [LOCAL-FIRST.md](LOCAL-FIRST.md) · [ROADMAP.md](ROADMAP.md) (status owned by Vish)  
+- [LOCAL-FIRST.md](LOCAL-FIRST.md) · [ROADMAP.md](ROADMAP.md) (status owned by Vish)
+
+## CI note (visual / TypeScript)
+
+esti-ci **Visual regression** on `main` currently fails in the frontend **build**
+step on `packages/contracts` duplicate `ActivateResult.syncToken` (TS1117) —
+cleared by **#55** / **#51**. That is **main pre-existing**, not a landing-hero
+snapshot drift from `/downloads` or LF6 right-slot work. Do **not** mass-update
+`e2e` baselines until TypeScript is green and a real intentional hero change
+lands.

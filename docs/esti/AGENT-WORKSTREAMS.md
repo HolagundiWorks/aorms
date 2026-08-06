@@ -199,7 +199,7 @@ roadmap status accuracy.
 ### Key paths
 
 - `frontend/src/routes/Downloads.tsx` · `DocsHub.tsx` · `AccountPortal.tsx`  
-- `frontend/src/lib/portal-downloads.ts` · `frontend/public/update-manifests/`  
+- `frontend/src/lib/desktop-installers.ts` · `frontend/public/update-manifests/`  
 - `frontend/src/content/blog/` · landing SEO / nomenclature imports  
 - `docs/esti/repo-scaffolds/` · [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) LF6
 
@@ -211,7 +211,9 @@ roadmap status accuracy.
 - [x] Optional empty GitHub scaffolds created without app code (`docs/esti/repo-scaffolds/`)  
 - [x] PR opened for Vishwakarma to merge — **#46 merged**  
 
-**Still 🔲:** live download URL flip (wait on Bhoomi signed Setup.exe + sha256).
+**Still 🔲:** live download URL flip (wait on Bhoomi signed WinUI URL + sha256).
+
+**Status (2026-08-06, Aakash):** `/downloads` one-line fill fields confirmed exact in [WEB-PORTAL.md](WEB-PORTAL.md) (Option A env / Option B manifest+flag); placeholders stay `web_fallback`. Visual regression job on `main` fails **before** landing-hero screenshot — contracts `ActivateResult.syncToken` duplicate TS1117 (#55/#51); **not** a hero baseline drift from portal lanes.
 
 ---
 
