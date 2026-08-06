@@ -138,7 +138,7 @@ Get-FileHash -Algorithm SHA256 $exe | Format-List
 
 1. Panel activate → `syncToken` on `main` (Gagan #45 · `0227`).
 2. `DesktopLicenceBind` when desktop host **or** WinUI `__AORMS_NATIVE_SHELL__.host=desktop`.
-3. WinUI shell + `build-winui.ps1` (Tauri = `-LegacyTauri`).
+3. WinUI shell + `build-winui.ps1` (legacy Tauri scaffold removed — WinUI 3 is the only shell).
 4. SPA bridge `desktopNativeBridge.ts`.
 5. Linux smoke: `bash desktop/scripts/validate-winui-shell.sh`.
 
@@ -167,6 +167,6 @@ bash desktop/scripts/validate-winui-shell.sh
 
 ## Legacy / deferred
 
-- `desktop/src-tauri/` + WinLibs NSIS — **non-canonical**.
+- Legacy Tauri scaffold (`desktop/src-tauri/`) + WinLibs NSIS — **removed; WinUI 3 is the only shell**.
 - Bundled Postgres/Redis sidecar, repo extraction, Stripe / W4 — deferred.
 - Live portal URL flips — **Aakash waits on signed HTTPS + measured sha256**.

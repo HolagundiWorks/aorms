@@ -223,9 +223,9 @@ which needs a deployed platform + a couple of product decisions:
   at `/platform-admin`, set the three env vars, pilot on one install before flipping it
   on widely.*
 - **Hybrid desktop offline cache** — ✅ *structured (2026-08).* Desktop node packaging
-  stub lives under `desktop/` (Tauri shell → loopback SPA). Login still uses the
+  stub lives under `desktop/` (WinUI 3 shell → loopback SPA). Login still uses the
   **hybrid offline password grace** above when `ESTI_IDENTITY_DELEGATE` is on. A native
-  session-token cache in `desktop/src-tauri` (last successful online login so the shell
+  session-token cache under the WinUI shell (`desktop/AStudio.Shell`) (last successful online login so the shell
   opens offline after first sign-in) is the remaining packaging-wave item — chosen model
   unchanged: online identity, locally-cached session. See [`LOCAL-FIRST.md`](LOCAL-FIRST.md).
 - **ASPRF → growth** — call `recordGrowth(accountPublicId, …)` from the firm ASPRF/LXOS

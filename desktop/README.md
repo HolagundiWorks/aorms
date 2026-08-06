@@ -19,10 +19,7 @@ desktop/
   scripts/
     build-winui.ps1         ← canonical unsigned publish
     build-installer.ps1     ← delegates to build-winui.ps1
-    build-installer-tauri.ps1 ← LEGACY Tauri only
     start-node.ps1 / .sh
-  src-tauri/                ← LEGACY Tauri scaffold (non-canonical)
-  tauri.conf*.json          ← LEGACY
   artifacts/winui/          ← publish output (gitignored)
 ```
 
