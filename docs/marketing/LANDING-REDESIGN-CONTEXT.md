@@ -1,20 +1,21 @@
 # Landing page redesign — agent context
 
-**Status:** Canonical brief · **Updated:** 2026-07-25 · **Owner:** HCW
+**Status:** Canonical brief · **Updated:** 2026-08-06 · **Owner:** HCW
 
 Another agent or designer may own visual/layout work on the public landing. This
 file captures **product and documentation context** so copy, IA, and SEO stay
-aligned with the platform rebrand.
+aligned with the platform rebrand. **Page chrome / tokens:** [PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md).
 
 ---
 
-## What changed (2026-07)
+## What changed (2026-07 → 2026-08)
 
 | Before | After |
 | --- | --- |
 | AORMS = *Architecture Office Resource Management System* | AORMS = **Accelerated Operational Resources Management System** (platform) |
 | Landing = architecture-practice-only marketing | Landing = **platform home** with three apps |
-| Single / two-app story | **AStudio** · **AConsulting** · **AProc** on one spine |
+| Clear-glass left rail + SectionDock | **No left rail** — soft top bar · stage · `MarketingLandingDock` · clock |
+| Staff ActionDock on marketing | Marketing uses **MarketingLandingDock** only |
 
 Full naming rules: [AORMS-PLATFORM-NOMENCLATURE.md](../esti/AORMS-PLATFORM-NOMENCLATURE.md).  
 Executable constants: `frontend/src/lib/product-nomenclature.ts`.
@@ -24,12 +25,14 @@ Executable constants: `frontend/src/lib/product-nomenclature.ts`.
 ## Landing purpose (current)
 
 The home route (`/`) is the **AORMS platform landing** (`Landing.tsx` +
-`landing.scss` + `MarketingShell` / conversion dock):
+`landing.scss` + `MarketingNeuFrame`):
 
 - Mission: consolidate consulting + PMC workflows on one AI-enhanced spine
 - **EOMS** (knowledge bank) + **ESTI** (internal AI agent)
 - Three apps: **AStudio** (live) · **AConsulting** (live) · **AProc** (preview)
 - Target: AEC consulting and PMC firms ~5–500 people
+- Five sections: **Overview · Outcomes · Platform · Rhythm · Start**
+- Atmosphere: `LandingEntourage` (isometric buildings, marketing only)
 
 **SEO:** `frontend/src/lib/landing-seo.ts` · static fallback in `frontend/index.html`.  
 **LLM crawl summary:** `frontend/public/llms.txt`.  
@@ -47,7 +50,7 @@ to `/`** — keep copy aligned if routes are revived.
 - “Built for Indian architects” as the **only** headline (architecture is one app)
 - Claiming AORMS is “consultancy-only with no PMC” — **AProc** is the PMC app
 - Claiming a full P6/contractor ERP — AProc is owner-side governance
-- Duplicate CTAs in the rail — **ActionDock only** ([HCW-UI-KIT.md](../esti/HCW-UI-KIT.md))
+- Reintroducing a left marketing rail or staff ActionDock on marketing pages
 
 ---
 
@@ -55,8 +58,9 @@ to `/`** — keep copy aligned if routes are revived.
 
 | Concern | Canonical reference |
 | --- | --- |
+| Page structure · tokens · chrome | [PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md) |
 | UX audit checklist | [HCW-UI-UX-PRINCIPLES.md](../esti/HCW-UI-UX-PRINCIPLES.md) |
-| Spatial model | Rail · Stage · Dock — [HCW-UI-KIT.md](../esti/HCW-UI-KIT.md) |
+| Spatial / layers how-to | [HCW-UI-KIT.md](../esti/HCW-UI-KIT.md) |
 | Product names | [AORMS-PLATFORM-NOMENCLATURE.md](../esti/AORMS-PLATFORM-NOMENCLATURE.md) |
 | AProc scope | [APROC-ARCHITECTURE.md](../esti/APROC-ARCHITECTURE.md) |
 | Roadmap | [ROADMAP.md](../esti/ROADMAP.md) |

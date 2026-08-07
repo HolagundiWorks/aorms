@@ -23,8 +23,8 @@ Users are architecture principals and studio staff under time pressure — not
 power users exploring a new tool every week. The interface must:
 
 1. **Stay calm at rest** — most pixels are flat information (tables, text, labels).
-2. **Lift only what acts** — glass and accent orange mean “do something now”.
-3. **Reuse one geography** — rail · stage · footer · dock; muscle memory beats novelty.
+2. **Lift only what acts** — soft chrome and accent orange mean “do something now”.
+3. **Reuse one geography** — ribbon · stage · footer · dock · clock; muscle memory beats novelty.
 4. **Disclose progressively** — show the next step, not every branch at once.
 5. **Work without a mouse** — keyboard, focus, landmarks, and target size are not optional polish.
 
@@ -40,7 +40,7 @@ documented product exception (marketing atmosphere in `landing.scss` is one).
 | What is **HCW UX** (framework + process)? | [HCW-UX.md](../HCW-UX.md) |
 | What is the **UX framework** (purpose · KPIs · diagram)? | [HCW-UX-FRAMEWORK.md](../HCW-UX-FRAMEWORK.md) |
 | How do we **run** UX work (Plan → Improve)? | [HCW-UX-PROCESS.md](../HCW-UX-PROCESS.md) |
-| What colour / layer / component? | [HCW-UI-KIT.md](HCW-UI-KIT.md) |
+| What colour / layer / component? | [HCW-UI-KIT.md](HCW-UI-KIT.md) · [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) |
 | What heuristic or law applies? | **This document** |
 | How should an AI surface report, ask, and defer? | [HCW-AI-ORCHESTRATION-UX.md](HCW-AI-ORCHESTRATION-UX.md) |
 | Construction stakeholders / lifecycle / field? | [HCW-CONSTRUCTION-UX-OVERLAY.md](HCW-CONSTRUCTION-UX-OVERLAY.md) |
@@ -98,29 +98,26 @@ Each row ties an established UX principle to a **shipped or required** pattern.
 
 ## 4. Spatial model — UX roles
 
-The shell is not decoration. Each region has a **cognitive job**:
+The shell is not decoration. Each region has a **cognitive job**. Canon:
+[PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) — **left rail retired** (2026-08).
 
 ```
-┌─ RAIL ─────────────┐  ┌─ STAGE ─────────────────────────────┐
-│  Where am I?        │  │  What am I working on?             │
-│  What's the status? │  │  Tables · editors · primary content  │
-│  Filters · tabs     │  │                                    │
-│  Auth forms (login) │  │         ╭── ActionDock ──╮         │
-└────────────────────┘  │         │ destroy│create│commit │   │
-                        └─────────┴──────────────────────────┘
-├─ TASKBAR FOOTER ─ search · launchers · tray ─────────────────┤
+┌─ RIBBON ─ Where am I in the practice? ───────────────────────┐
+├─ STAGE ─ What am I working on? (header · tables · editors) ──┤
+│                    ╭── ActionDock / Marketing dock ──╮       │
+├─ TASKBAR FOOTER (staff) · CLOCK ─────────────────────────────┤
 ```
 
 | Region | User question it answers | Must NOT contain |
 |--------|--------------------------|------------------|
 | **Ribbon** | Which major area of the practice? | Page-level Create/Save (→ dock) |
-| **Rail** | What slice / filter / identity applies? | DataGrids; primary tables; centred login card |
-| **Stage** | What is the work artifact? | Duplicate CTAs; global nav |
-| **ActionDock** | What can I do to this screen? | Modal-only actions while dialog open (`[]`) |
-| **Taskbar footer** | What tool do I need without leaving context? | Admin module tree (→ ribbon hamburger) |
+| **Stage** | What is the work artifact? Filters/tabs live in the stage header | Duplicate CTAs; global nav |
+| **ActionDock** | What can I do to this screen? (staff) | Modal-only actions while dialog open (`[]`) |
+| **MarketingLandingDock** | Where next / how do I start? (marketing) | Staff ActionDock verbs duplicated |
+| **Taskbar footer** | What tool do I need without leaving context? | Admin module tree (→ ribbon) |
 
-**Marketing** uses the same model **without** taskbar footer: rail (nav) · stage (story) ·
-dock (Create / Sign in only). See [HCW-UI-KIT.md § Marketing shell](HCW-UI-KIT.md#marketing-shell--public-site-marketingshell).
+**Marketing** uses ribbon · stage · MarketingLandingDock · clock — **no** taskbar,
+**no** left rail. See [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md).
 
 ---
 
@@ -131,13 +128,10 @@ Pick a material layer by **role**, never by mood.
 | Layer | UX job | User feels |
 |-------|--------|------------|
 | **Flat** | Information at rest | “I’m reading / comparing data.” |
-| **Soft** | Object I work inside | “I’m in a form, dialog, or card.” |
-| **Glass** | Live / actionable | “This wants my attention or click.” |
-| **Clear glass** (marketing) | Chrome over atmosphere | “I see the story through the shell.” |
-| **Heading glass** (marketing) | Section boundary | “A new chapter starts here.” |
+| **Soft** | Object / chrome I work with | “I’m in a form, dialog, ribbon, or dock.” |
+| **Soft attention** | Focus / alert / inset well | “This needs care now.” |
 
-**Anti-pattern:** glass on every marketing tile — users cannot see the contour story,
-and nothing stands out (violates Von Restorff + depth thesis).
+**Anti-pattern:** glass or glow on every tile — nothing stands out (Von Restorff).
 
 **Decision tree:** [HCW-UI-KIT.md § Layer decision tree](HCW-UI-KIT.md#layer-decision-tree).
 
@@ -204,12 +198,11 @@ See `HealthGlassOrb` / `OfficeHealthGlyph`.
 | Rule | Rationale |
 |------|-----------|
 | **Brand test** | Logo first, not text “AORMS” | Recognition, brand equity |
-| **Dock-only CTAs** | Create + Sign in not duplicated in rail | Hick · single locus |
-| **Clear glass rail** | Atmosphere visible | Aesthetic-usability without milking stage |
-| **Heading glass only** | Full-width section heads | Hierarchy; sub-cards stay flat |
-| **FAQ 3-up grid** | `<details>` per card | Progressive disclosure; scannable grid |
-| **Contour scroll** | Depth 0→1 over **full page** | Goal-gradient through long story |
-| **No nested `<main>`** | Blog/SEO inside `MarketingShell` | Landmark clarity |
+| **Bottom-dock CTAs** | Sign in / Create in `MarketingLandingDock` — not duplicated in top bar | Hick · single locus |
+| **No left rail** | Soft top bar + stage only | Final UI 2026-08 |
+| **Soft / flat only** | Opaque neu chrome; flat tiles | Calm hierarchy |
+| **FAQ progressive** | Accordion / `<details>` | Scannable disclosure |
+| **No nested `<main>`** | Blog/SEO inside `MarketingShell` / `MarketingNeuFrame` | Landmark clarity |
 
 Editorial CSS lives in `landing.scss` — not in `@hcw/ui-kit` tokens.
 
@@ -219,10 +212,11 @@ Editorial CSS lives in `landing.scss` — not in `@hcw/ui-kit` tokens.
 
 | Rule | Rationale |
 |------|-----------|
-| **Login in rail** | Form never centred on stage | Consistent spatial model; Jakob |
+| **Login centered soft card** | `AuthRailLayout` on Fog Gray (legacy name) | Final auth pattern |
 | **Breadcrumbs** | `PageBreadcrumb` on adopted screens | Recognition; orientation |
 | **Search discoverable** | Footer + Ctrl/Cmd+K | Nielsen #6 |
-| **Studio Intelligence reference** | `/` proves rail + stage + health | Canonical pattern — clone, don’t invent |
+| **Studio Intelligence reference** | `/` proves stage KPIs + tabs (no left rail) | Canonical pattern |
+| **Stage page shell** | `RailLayout` = header strip + full-width main | All list/detail screens |
 | **Parallel WIP** | Avoid `Projects.tsx` / `Clients.tsx` unless asked | Stability |
 
 ---

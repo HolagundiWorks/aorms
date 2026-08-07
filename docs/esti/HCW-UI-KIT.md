@@ -63,83 +63,60 @@ dialogs), and the `<Surface layer="…">` primitive applies them:
 
 ```tsx
 <Surface layer="soft" sx={{ p: 2 }}>…a summary card…</Surface>        // Layer 2
-<Surface layer="glass" sx={{ p: 2 }}>…a priority alert…</Surface>     // Layer 3 frost
-<Surface layer="clearGlass">…marketing rail…</Surface>                // Layer 3 clear
-<Surface layer="headingGlass">…full-width section head…</Surface>     // Layer 3 heading
+<Surface layer="glass" sx={{ p: 2 }}>…a priority alert…</Surface>     // aliases soft (deprecation)
 ```
 
 ### Layer decision tree
 
 ```
-Is it a page-level CTA?                    → ActionDock (not a Surface)
+Is it a page-level CTA?                    → ActionDock / MarketingLandingDock (not a Surface)
 Is it information at rest (table/text)?    → flat
 Is it a contained object (dialog/panel)?   → soft
-Is it actionable / alert / dock chrome?    → glass (frost)
-Is it a marketing rail over atmosphere?    → clearGlass
-Is it a marketing section heading band?    → headingGlass
+Is it actionable / alert / dock chrome?    → soft raised (+ accent where needed)
 Is it a marketing sub-card / tile?         → flat (transparent + hairline — NO glass)
 ```
 
-**Do not** put glass on every card. Glass is scarce on purpose — when everything
-glows, nothing does (Von Restorff / depth-encodes-importance).
+**Do not** put glass on every card. Pure neumorphism is opaque — Fog Gray canvas,
+soft chrome, Radiant Orange only for true accent.
 
-## Spatial model — Rail · Stage · Footer · Dock
+## Spatial model — Ribbon · Stage · Footer · Dock · Clock
+
+**Canon:** [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) (2026-08). **Left rail retired** on
+marketing and staff apps. Portals keep SoftRail until the portal redesign.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│  ┌─ RAIL (20%, glass, 100vh) ─┐  STAGE (80%, scrolls)                    │
-│  │ identity · telemetry       │  stage head (zone health, KPIs)           │
-│  │ section tabs · filters     │  tables (L1) · panels (L2) · dialogs     │
-│  │ module toggles (bottom)    │                                          │
-│  │                            │        ╭─ ActionDock capsule (L2→L3) ─╮       │
-│  │  ← fixed full viewport     │        │ ⌫ │ ＋ new │ 💾 save │          │
-│  └────────────────────────────┘                                          │
+│  TOP RIBBON (soft neu) — brand / primary nav                             │
 ├──────────────────────────────────────────────────────────────────────────┤
-│ [Calc]    [Studio·Tasks·ESTI·Wellbeing·Pomodoro]    due·🔔·ID·🕐·out    │  ← glass taskbar
+│  STAGE (full width) — page header + working surface                      │
+│                         ╭─ ActionDock / MarketingLandingDock ─╮          │
+├──────────────────────────────────────────────────────────────────────────┤
+│  Taskbar footer (staff) · AnalogueClock (± Pomodoro)                     │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
 | Region | Width | Layer | Role |
 |--------|-------|-------|------|
-| **Rail** | 20% fluid (`LAYOUT.railFraction`) · kit portals **240px** (`LAYOUT.railWidth`) | **Glass (L3)** — frosted panel, full viewport height on desktop | Fixed **instruments**: identity/greeting, telemetry, health summaries, vertical section tabs, filters, module toggles (`mt: auto` at bottom). Scrolls internally (hidden scrollbar). **Auth panels (login, signup, recovery) live here — never on the stage.** |
-| **Stage** | 80% (`LAYOUT.stageFraction`) | Flat (L1) + soft cards (L2) | **Working surface**: stage-head metrics (e.g. zone health row), DataGrids, editors, tab bodies. **Scrolls independently** on desktop; the page shell does not scroll. Padding from `LAYOUT.stagePadding*`. Content grids use **12 columns** (`LAYOUT.columns` / `layoutSx.grid`) — not Carbon 16-col. |
-| **TaskbarFooter** | full width · height `LAYOUT.taskbarHeight` | Glass (L3) | **Calculator LEFT**; launcher cluster **CENTRE** (Studio Intelligence · Tasks · Ask ESTI · Wellbeing · Pomodoro); **system tray RIGHT** (due count · alerts · ID card · office health when not stable · clock · sign out). Admin menu lives in the **header ribbon**, not the footer. |
-| **ActionDock** | floats bottom-centre · clearance `LAYOUT.dockClearance` | Soft capsule tray → glass pill buttons on hover | The one **global, context-aware** action bar. **All page-level CTAs live here, not inline.** Tray uses `ACTION_DOCK_TRAY`; buttons are capsule pills. |
+| **Top ribbon** | full content / shell | Soft (L2) | Marketing: brand only. Staff: `AppRibbon` primary nav. |
+| **Stage** | full width | Flat (L1) + soft cards (L2) | Working surface / long-form story. Staff lists use `RailLayout` as a **stage page shell** (header strip + full-width main — no left column). |
+| **TaskbarFooter** | full width · staff only | Soft (L2) | Calculator · launcher cluster · tray. Absent on marketing. |
+| **ActionDock** | staff · bottom | Soft tray | Page-level CTAs via `useScreenActions`. |
+| **MarketingLandingDock** | marketing · bottom | Soft | Section spy + Sign in / Create / Downloads / Calculator. |
+| **Clock** | fixed bottom-right | Soft | Marketing `MarketingClockPomodoro`; staff kit `AnalogueClock`. |
 
-**Rollout queue:** [AORMS-UI-AUTOPILOT-ROADMAP.md](AORMS-UI-AUTOPILOT-ROADMAP.md) — clone the
-Studio Intelligence rail to every `RailLayout` screen and move login into the rail.
+### Marketing shell — public site (`MarketingNeuFrame`)
 
-### Marketing shell — public site (`MarketingShell`)
-
-**Status: design complete (2026-07-10)** on `aorms.in` (`Landing.tsx`, Blog, SEO
-landings, Investors) via `frontend/src/components/landing/MarketingShell.tsx` +
-`frontend/src/landing.scss`.
-
-Marketing reuses the same **Rail · Stage** spatial model as the workspace, with
-**SectionDock** instead of ActionDock:
+**Status: final UI (2026-08)** on `aorms.in` (`Landing.tsx` + `MarketingNeuFrame` /
+`MarketingShell` + `landing.scss`). Content column **1200px**
+(`MARKETING_CONTENT_MAX_PX`).
 
 | Region | Marketing rule |
 |--------|----------------|
-| **Rail** | Clear glass **floating card** · **open** (240px, icon + label nav) or **collapsed** (56px icon strip + pill tooltips on hover). Chevron toggle in header; state persists in `localStorage`. Brand, tagline, **Pages** nav, HCW mark. |
-| **Stage** | Scrolls the long-form page; single `#lp2-main` landmark (do not nest `<main>`). |
-| **TaskbarFooter** | **Absent** on marketing. |
-| **SectionDock** | **Replaces ActionDock** — rounded glass carousel (`SectionDock` in kit) with scroll-spy active section, prev/next chips. In-page anchors only (`sectionLinks` prop). |
-
-
-#### Marketing rail — open / collapsed (reference pattern)
-
-Desktop marketing uses a **floating clear-glass card** (`$lp2-rail-radius: 20px`, inset
-`$lp2-rail-gutter: 12px` from the viewport) — not an edge-to-edge strip:
-
-| State | Width | Chrome |
-|-------|-------|--------|
-| **Open** | 240px | Logo + wordmark · chevron collapse · section label · icon + label nav rows · footer |
-| **Collapsed** | 56px | Brand mark only · icon-only nav · **pill tooltip** on hover/focus (Radiant Orange, `DOCK_PILL_RADIUS`) |
-
-Toggle persists in `localStorage` (`aorms-marketing-rail-collapsed`). Implementation:
-`MarketingShell.tsx`, `MarketingRailNav.tsx`, `landing.scss` (`.lp2-rail--collapsed`).
-
-Mobile (≤900px) keeps the full-width overlay drawer — no collapsed strip.
+| **Top bar** | Sticky soft-neu brand ribbon (`MarketingTopBar`) — logo + expansion. |
+| **Stage** | Scrolls; single `#lp-main` / `#lp2-main` landmark. Landing IA: Overview · Outcomes · Platform · Rhythm · Start. |
+| **TaskbarFooter** | **Absent**. |
+| **Bottom dock** | `MarketingLandingDock` — section links + auth/tool actions. **Not** staff ActionDock. |
+| **Atmosphere** | Optional `LandingEntourage` (buildings) — marketing only. |
 
 #### Hero composition (brand test)
 
@@ -148,7 +125,7 @@ First viewport must read as **one composition**:
 1. **AORMS logo** (`<AormsLogo variant="hero" />` — CSS-mask `/aorms-logo.png`, Radiant Orange) — **not** plain text “AORMS”
 2. One headline (`h1`)
 3. One short supporting sentence
-4. **No** signal chips, stats, or CTAs in the hero — section nav is in SectionDock; sign-in on `/login`
+4. CTA group + optional `WorkspacePreview` — section nav lives in the bottom dock
 
 #### Contour atmosphere (Layer 0)
 
@@ -169,102 +146,51 @@ Owned in `landing.scss` (editorial marketing system) — **not** in `@hcw/ui-kit
 tokens. Kit owns workspace/portal chrome; marketing atmosphere stays in
 `landing.scss` so blur/rgba/3-D exceptions do not leak into product screens.
 
-#### Glass hierarchy on marketing stage
+#### Marketing stage materials
 
 | Surface | Treatment | Why |
 |---------|-----------|-----|
-| **Rail** | Clear glass (light frost, translucent) — kit `CLEAR_GLASS_SURFACE` / `layer="clearGlass"` | L3 instrument chrome; contours readable through it |
-| **Section heading** (`.lp2-section-head`) | Clear heading glass, **full content width** — kit `HEADING_GLASS_SURFACE` | Hierarchy — the only stage glass |
-| **Sub-cards** (tiles, pricing meters, trust, FAQ items) | **No glass** — transparent + hairline dividers | Lets the contour background stay sharp |
+| **Chrome** (top bar · bottom dock) | Opaque soft neu · 8px | Instruments without glass |
+| **Section / outcome cards** | Soft or flat Surfaces | Depth by role |
+| **Sub-tiles** | Flat + hairline | Calm information |
 
-Do **not** put `backdrop-filter` on `.lp2-tile` / pricing meters — that milks the
-scene and flattens hierarchy. Marketing SCSS currently mirrors these recipes;
-prefer importing the kit tokens when migrating surfaces to MUI `sx`.
+Do **not** put `backdrop-filter` on marketing tiles. Prefer kit tokens / `Surface`.
 
 #### FAQ & progressive disclosure
 
-Long FAQ answers use native `<details>` / `<summary>` in a **3-column grid**
-(`.lp2-faq` — 3 / 2 / 1 columns by breakpoint), not a wall of open tiles.
-Trust strip caps at **≤4** pain→solution chips (Miller).
+Long FAQ answers use accordion / `<details>` — not a wall of open tiles.
+Trust / outcome chips stay capacity-capped (Miller).
 
 #### Brand assets
 
 | Surface | Primitive |
 |---------|-----------|
-| Marketing hero / rail / footer | `AormsLogo` (`frontend`) — mask logo |
+| Marketing hero / ribbon / footer | `AormsLogo` (`frontend`) — mask logo |
 | Kit-portable wordmark (no image) | `<BrandMark />` from `@hcw/ui-kit` |
-| Auth rail | `AuthBrandBlock` / `AormsLogo variant="rail"` |
+| Auth card | `AuthBrandBlock` / `AormsLogo variant="rail"` |
 
-### Glass Rail — canonical reference (Studio Intelligence)
+### Staff stage — canonical reference
 
-**Status: design complete (2026-07-09)** on `/` (`StudioAbstract.tsx` +
-`frontend/src/glass.scss`). This is the template every workspace screen should match.
+**Status: final UI (2026-08).** Shell: `App.tsx` — ribbon · stage · ActionDock ·
+footer · AnalogueClock. Page wrapper: `RailLayout` (stage header + full-width main).
 
-#### Geometry
+Studio Intelligence (`StudioAbstract.tsx`) keeps KPI / zone / tab anatomy **in the
+stage** (no left SoftRail). Zone health and KPIs live in the stage head.
 
-| Property | Desktop (≥901px) | Mobile |
-|----------|------------------|--------|
-| Width | 20% of content area (`calc((100vw - 32px) * 0.2)`) | 100%, stacks above stage |
-| Height | `100vh`, `position: fixed`, `top: 0` | auto (static) |
-| Scroll | Rail scrolls internally; stage scrolls beside it | Page scrolls normally |
-| Spacer | Hidden 20% flex sibling reserves width while rail is fixed | none |
+#### Login & auth — centered soft card
 
-Classes: `.esti-dash-rail` (rail) · `.esti-dash-stage` (stage) · wrapper
-`.esti-glass-dash`. Studio home adds `.esti-app-shell2--studio-home` for the white
-canvas + ambient pulse.
-
-#### Glass panel recipe (rail)
-
-Documented exception in `glass.scss` (blur/rgba). **U6 (2026-07):** layout
-primitives live in `@hcw/ui-kit` (`GlassRail`, `HealthGlassOrb`, `Surface`).
-`glass.scss` retains Studio pulse, orb CSS, and frosted panel recipes only:
-
-- `border: 1px solid rgba(255,255,255,0.5)` · `border-radius: 0` (square — rounded corners are **buttons only**, `BUTTON_RADIUS`)
-- Background: `linear-gradient(145deg, rgba(255,255,255,0.44), rgba(255,255,255,0.2))`
-- `backdrop-filter: blur(12px) saturate(1.2)` + soft outer shadow + inset highlight
-- `padding: 12px` · `gap: 12px` column flex
-- Float-nav clearance: `padding-top: 40px` when ribbon uses `variant="float"`
-
-#### Rail content stack (top → bottom)
-
-1. **Identity** — light `h5` greeting line + semibold name + optional firm caption
-2. **Attention** — one-line `body2` secondary issue/action
-3. **Telemetry sections** — `overline` label + content; use hairline `borderTop` /
-   `borderBottom` between bands (Today grid, office health, due dates)
-4. **Section tabs** — vertical MUI tabs, left-aligned, **rectangular · no fill · inset
-   top alert line** on selected (theme `MuiTab`; rail SCSS left-align only)
-5. **Module toggles** — icon · label · `Switch` per row; `mt: "auto"` pins to bottom
-
-**Office health** (single glass orb + state word) belongs in the **rail**.
-**Zone health** (multi-zone orb row) belongs in the **stage head** — top hairline,
-`overline` heading on the **left**, 26×26px glass orbs with labels **beside** each dot.
-
-#### Stage head (zone health row)
-
-```
-──────────────────────────── top divider ────────────────────────────
-Zone health    ● Lead   ● Project   ● Financial   ● Team   …
-──────────────────────────── KPI row / tabs below ───────────────────
-```
-
-Component: `OfficeHealthGlyph` `variant="glass"` + `.esti-zone-glass-orb` in
-`glass.scss`. Default orb 13×13px; **stage-head orbs 26×26px**
-(`.esti-dash-stage-head__zones .esti-zone-glass-orb`).
-
-#### Login & auth — rail, not stage
-
-Unauthenticated surfaces use the same 20/80 split. The **form panel** (email,
-password, Google, tenant picker, recovery links) is rendered inside the **glass rail**.
-The **stage** holds editorial/brand content only — product visual, tagline, or calm
-empty canvas. **Never** centre a `max-width: 24rem` card on the page. See
-[AORMS-UI-AUTOPILOT-ROADMAP.md U2](AORMS-UI-AUTOPILOT-ROADMAP.md#u2--login--auth-rail).
+Unauthenticated forms use `AuthRailLayout` — a **centered soft-neu card** on Fog
+Gray (file name is legacy; there is no left rail). autoComplete on identity fields;
+errors inline; single submit with progress verb.
 
 #### Shared shell for other screens
 
-`frontend/src/components/RailLayout.tsx` — `<RailLayout title tabs aside>{stage}</RailLayout>`.
-**U1 complete (2026-07):** glass fixed-rail pattern (`.esti-dash-rail` /
-`.esti-dash-stage`). Prefer `RailLayout` for workspace screens; prefer kit
-`GlassRail` for portals / auth / account shells outside the ribbon chrome.
+`frontend/src/components/RailLayout.tsx` —
+`<RailLayout title tabs aside actions>{children}</RailLayout>`.
+
+Renders a soft **stage header** (title · description · horizontal tabs · filter
+strip · actions) above a full-width scrolling main. **Left column retired 2026-08.**
+Prefer `useScreenActions` for primary create/commit CTAs.
 
 ### The action dock — one dock, three zones
 

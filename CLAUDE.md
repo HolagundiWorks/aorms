@@ -101,14 +101,15 @@ via the repo’s wiki sync/build step.
 > 1. **Layer 1 — FLAT:** information at rest — tables, text, headings. Fog Gray
 >    `#F2F4F7`, Pure White cards, Coal Black `#141517`, **Radiant Orange `#FF4F18`**.
 > 2. **Layer 2 — SOFT RAISED:** objects / chrome — dialogs, ribbon, ActionDock,
->    SoftRail. `<Surface layer="soft">`.
+>    page headers. `<Surface layer="soft">`.
 > 3. **Layer 3 — SOFT ATTENTION:** wells, focus, alerts — inset neu + solid accent.
 >    Legacy `layer="glass"` aliases soft raised (deprecation cycle).
 >
 > **Spatial model — Top ribbon · Stage · Taskbar footer · ActionDock · AnalogueClock:**
-> ribbon (primary nav) + stage; **left glass rail removed**; footer taskbar
-> (`AppFooterBar`); global ActionDock; fixed bottom-right kit `AnalogueClock`
-> (separate from digital tray clock). Auth uses a centered soft-neu card.
+> ribbon (primary nav) + full-width stage; **left rail retired**; footer taskbar
+> (`AppFooterBar`); global ActionDock; fixed bottom-right kit `AnalogueClock`.
+> Auth uses a centered soft-neu card (`AuthRailLayout` — legacy name).
+> Canon: [`PAGE-STRUCTURE.md`](docs/esti/PAGE-STRUCTURE.md).
 > Screen CTAs via `useScreenActions` (publish `[]` while dialogs open).
 >
 > **Brand font: Urbanist** (OFL) — `@fontsource/urbanist` in `main.tsx`, mirrored
@@ -128,7 +129,7 @@ via the repo’s wiki sync/build step.
 
 | # | Topic | Canonical doc |
 | --- | --- | --- |
-| 01 | Layers · spatial model | [`HCW-UI-KIT.md`](docs/esti/HCW-UI-KIT.md) |
+| 01 | Layers · spatial model | [`PAGE-STRUCTURE.md`](docs/esti/PAGE-STRUCTURE.md) · [`HCW-UI-KIT.md`](docs/esti/HCW-UI-KIT.md) |
 | 02 | Tokens | `vendor/hcw-ui-kit/dist/tokens.js` · [`02-TOKEN-GOVERNANCE.md`](docs/hcw-kit/02-TOKEN-GOVERNANCE.md) · [`02-TOKEN-EXPORT.md`](docs/hcw-kit/02-TOKEN-EXPORT.md) |
 | 03 | Components | [`CHANGELOG`](vendor/hcw-ui-kit/CHANGELOG.md) · [`03-COMPONENT-QUALITY-CHECKLIST.md`](docs/hcw-kit/03-COMPONENT-QUALITY-CHECKLIST.md) · [`14-HCW-CATALOG.md`](docs/hcw-kit/14-HCW-CATALOG.md) |
 | 05 | Page templates | [`05-TEMPLATES.md`](docs/hcw-kit/05-TEMPLATES.md) — incl. T10 orchestration |
@@ -143,17 +144,14 @@ via the repo’s wiki sync/build step.
 | Primitive | Role |
 | --- | --- |
 | `KitRoot` (`MuiRoot` alias) | Theme provider (`scheme` · `density` · `coga` · `locale`) |
-| `Surface` | Layer 1/2/3 material |
-| `GlassRail` | Rail shell (clear/heading glass variants) |
-| `ActionDock` + `useScreenActions` | Global dock contract |
+| `Surface` | Layer 1/2/3 material (opaque neu) |
+| `ActionDock` + `useScreenActions` | Global dock contract (staff) |
 | `ActionOutcomeBanner` | Dock / publishOutcome feedback |
 | `KpiStrip` | Capacity-capped KPI row |
 | `MissionHeader` · `DecisionQueue` | Orchestration (T10) |
 | `AwarenessStrip` | Open-loop awareness |
 | `TaskbarFooter` | App footer launchers |
-| `SectionDock` | Marketing scroll-spy nav |
-| `HealthGlassOrb` | Zone health (shape + colour) |
-| `BrandMark` | HCW mark |
+| `AnalogueClock` | Fixed bottom-right clock |
 | `StatusDot` | Status indicator (never filled Chip; optional `shape`) |
 | `DataState` | Loading skeleton + empty state |
 | `ConfirmModal` | Destroy confirmation (`kind` / `reason`) |
@@ -161,6 +159,11 @@ via the repo’s wiki sync/build step.
 | `ToastHost` + `pushToast` | Transient feedback (mount inside KitRoot) |
 | `Avatar` + `getInitials` | Identity mark (colour injected by caller) |
 | `chromeIconSx` | Persistent chrome hit targets (COGA-aware) |
+
+`SoftRail` / `GlassRail` are **not** primary staff or marketing chrome (left rail
+retired 2026-08). Portal shells still use SoftRail until the portal redesign.
+`BrandMark` / `HealthGlassOrb` / `SectionDock` remain available where a template
+still references them.
 
 App compat shims re-export kit primitives where noted (`StatusTag` delegates to
 `StatusDot`). Domain colour logic (`StaffAvatar`, `resolveColor`) stays app-side.

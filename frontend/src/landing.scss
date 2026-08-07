@@ -11216,8 +11216,74 @@ $lp2-rail-ink-faint: var(--lp2-ink-faint, rgba(20, 21, 23, 0.48));
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+/* Shared content column — same as Landing Container maxWidth="lg" (1200px). */
+.esti-lp-neu {
+  --esti-mkt-content-max: 1200px;
+  --esti-mkt-content-gutter: 16px;
+  /* Shared chrome height — header bar + section/action dock */
+  --esti-mkt-chrome-height: 56px;
+  --esti-mkt-chrome-radius: 8px;
+}
+@media (min-width: 900px) {
+  .esti-lp-neu {
+    --esti-mkt-content-gutter: 24px;
+  }
+}
+
+.esti-mkt-topbar-wrap {
+  box-sizing: border-box;
+}
+
+.esti-mkt-topbar {
+  width: 100% !important;
+  max-width: var(--esti-mkt-content-max) !important;
+  margin-inline: auto !important;
+  box-sizing: border-box;
+  border-radius: var(--esti-mkt-chrome-radius) !important;
+  min-height: var(--esti-mkt-chrome-height) !important;
+  height: var(--esti-mkt-chrome-height) !important;
+  padding-block: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  overflow: hidden;
+}
+
+/* Section dock (legacy kit) — unused on landing; kept for other pages */
+.esti-mkt-section-dock {
+  width: min(var(--esti-mkt-content-max), calc(100vw - 2 * var(--esti-mkt-content-gutter))) !important;
+  max-width: min(var(--esti-mkt-content-max), calc(100vw - 2 * var(--esti-mkt-content-gutter))) !important;
+  box-sizing: border-box !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  border-radius: var(--esti-mkt-chrome-radius) !important;
+  min-height: var(--esti-mkt-chrome-height) !important;
+  height: var(--esti-mkt-chrome-height) !important;
+}
+
+.esti-mkt-landing-dock {
+  border-radius: var(--esti-mkt-chrome-radius) !important;
+  min-height: var(--esti-mkt-chrome-height) !important;
+  height: var(--esti-mkt-chrome-height) !important;
+}
+
+/* Conversion ActionDock — same chrome metrics; actions on the right */
+.esti-lp-neu .hcw-action-dock[role="toolbar"],
+.lp2-shell .hcw-action-dock[role="toolbar"] {
+  width: min(var(--esti-mkt-content-max), calc(100vw - 2 * var(--esti-mkt-content-gutter))) !important;
+  max-width: min(var(--esti-mkt-content-max), calc(100vw - 2 * var(--esti-mkt-content-gutter))) !important;
+  box-sizing: border-box !important;
+  border-radius: var(--esti-mkt-chrome-radius) !important;
+  min-height: var(--esti-mkt-chrome-height) !important;
+  height: var(--esti-mkt-chrome-height) !important;
+  padding-block: 0 !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+}
+
 .esti-lp-neu-hero {
-  max-width: 40rem;
+  max-width: 36rem;
 }
 .esti-mkt-analogue-clock {
   filter: drop-shadow(4px 4px 10px rgba(20, 21, 23, 0.14));
@@ -11228,5 +11294,47 @@ $lp2-rail-ink-faint: var(--lp2-ink-faint, rgba(20, 21, 23, 0.48));
     transform-origin: bottom right;
     bottom: 72px !important;
     right: 12px !important;
+  }
+}
+
+/* Architectural entourage — always-on buildings + depth parallax */
+.esti-lp-entourage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.esti-lp-entourage__fig {
+  --px: 0px;
+  --py: 0px;
+  --op: 0.2;
+  --rot: 0deg;
+  --flip: 1;
+  position: absolute;
+  width: auto;
+  max-width: 90px;
+  object-fit: contain;
+  opacity: var(--op);
+  filter: contrast(1.05) grayscale(0.15);
+  user-select: none;
+  will-change: transform;
+  transform: translate3d(calc(-50% + var(--px)), calc(-50% + var(--py)), 0) rotate(var(--rot))
+    scaleX(var(--flip));
+}
+.esti-lp-entourage__fig--building {
+  max-width: 175px; // 140 × 1.25
+  filter: contrast(1.08) grayscale(0.05);
+}
+@media (max-width: 900px) {
+  .esti-lp-entourage {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .esti-lp-entourage__fig {
+    will-change: auto;
+    --px: 0px !important;
+    --py: 0px !important;
   }
 }

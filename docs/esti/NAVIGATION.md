@@ -1,7 +1,7 @@
 # AORMS — Navigation Architecture (Canonical V3)
 
 **Status:** Canonical navigation IA · **Owner:** Holagundi Consulting Works ·
-**Adopted:** 2026-06-29 · **Shell sync:** 2026-07-10
+**Adopted:** 2026-06-29 · **Shell sync:** 2026-08-06 (no-rail soft neu)
 
 > This document is the **single source of truth for navigation** — where modules
 > live in the shipped chrome, and naming. Where any other doc disagrees, **this
@@ -14,9 +14,10 @@
 > Tenders) stay removed — AProc is a **greenfield** PMC consultancy workspace; see
 > [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md).
 >
-> **Spatial model (HCW-UI-Kit):** glass **ribbon** (top) · **rail** (20%) · **stage**
-> (80%) · **ActionDock** (bottom-centre CTAs) · glass **taskbar footer**. See
-> [HCW-UI-KIT.md](HCW-UI-KIT.md) · UX rationale: [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md).
+> **Spatial model (HCW-UI-Kit):** soft **ribbon** (top) · **stage** (full width) ·
+> **ActionDock** (bottom-centre CTAs) · soft **taskbar footer** · **AnalogueClock**.
+> **Left rail retired.** Canon: [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) ·
+> [HCW-UI-KIT.md](HCW-UI-KIT.md) · [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md).
 
 ## Status legend
 | Tag | Meaning |

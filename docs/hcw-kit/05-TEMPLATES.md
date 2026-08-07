@@ -1,37 +1,36 @@
 # Page templates — canonical anatomies
 
-**Status:** Documented from shipped screens (2026-07-11). These are not new
-inventions (Constitution VI): each template names its live reference
-implementation — clone that, don't improvise. Every template presumes the shell
-contract: rail · stage · taskbar footer · ActionDock, breadcrumb + document
-title via `PageBreadcrumb`, CTAs via `useScreenActions`.
+**Status:** Updated 2026-08-06 (no-rail soft neu). These are not new inventions
+(Constitution VI): each template names its live reference — clone that, don't
+improvise. Shell contract: **ribbon · stage · taskbar footer · ActionDock · clock**
+([PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md)). Breadcrumb + `document.title` via
+`PageBreadcrumb`; CTAs via `useScreenActions`. **Left rail retired** on staff and
+marketing; portals SoftRail until redesign.
 
 ## T1 — Dashboard (reference: `StudioAbstract.tsx`, route `/`)
 
 ```
-RAIL (glass, fixed)                STAGE (scrolls)
-├ identity + greeting              ├ stage head: zone-health orb row (26px, shape-coded)
-├ attention line (one issue)       ├ ≤4 KPI cards (TYPE_SCALE.kpi values)
-├ telemetry bands (hairline-split) ├ tab strip (transparent, inset top alert line)
-├ vertical section tabs            └ per-tab: 4 KPIs + one DataGrid that scrolls
-└ module toggles (mt:auto)             inside its tile — the page never scrolls
+STAGE (full width under AppRibbon)
+├ stage head: zone-health / attention (shape-coded)
+├ ≤4 KPI cards (TYPE_SCALE.kpi values)
+├ tab strip (transparent, inset top alert line)
+└ per-tab: 4 KPIs + one DataGrid that scrolls inside its tile
+Footer · ActionDock · AnalogueClock (shell)
 ```
 Rules: ≤4 KPIs visible (Miller); health = shape + colour; numbers drill through.
+No left SoftRail / GlassRail.
 
 ## T2 — List / register (reference: `Consultants.tsx`, `Invoices.tsx`)
 
 ```
-RailLayout(title, description, aside: search/filters)
-├ PageBreadcrumb
-├ Box sx={layoutSx.listToolbar}
-│   ├ TextField sx={searchFieldSx} + Search InputAdornment
-│   └ filters (Select / ToggleButtonGroup)
+RailLayout (stage page shell — soft header + full-width main)
+├ header: title · description · optional tabs · aside filters · actions
+├ PageBreadcrumb (in main)
+├ Box sx={layoutSx.listToolbar} — search + filters
 ├ optional success Alert (dismissible)
-└ DataState(loading, isEmpty, empty:{one sentence + one action})
-    └ DataGrid (≤8 columns · StatusDot for status · RowActionsMenu per row)
-       — prefer KitRoot density="compact" on dense registers
+└ DataState → DataGrid (≤8 columns · StatusDot · RowActionsMenu)
 Dock: CENTER "New <object>" · dialog publishes [] while open
-Create/edit = Dialog (aria-labelledby) — never an always-visible form
+Create/edit = Dialog — never an always-visible form
 ```
 
 ## T3 — Detail (reference: `ProjectDetail.tsx`)
@@ -39,9 +38,9 @@ Create/edit = Dialog (aria-labelledby) — never an always-visible form
 ```
 RailLayout · PageBreadcrumb (list → this record, 2–4 levels)
 ├ header: record identity + StatusDot
-├ tab strip for facets (each facet = its own panel component)
-└ facet panels own their queries; mutations carry meta.errorTitle
-Dock: RIGHT commit actions for the active facet · LEFT destroy (ConfirmModal)
+├ tab strip for facets (each facet = its own panel)
+└ facet panels own queries; mutations carry meta.errorTitle
+Dock: RIGHT commit · LEFT destroy (ConfirmModal)
 ```
 
 ## T4 — Settings / preferences (reference: `WorkspaceSettingsPanel.tsx`)
@@ -55,25 +54,28 @@ Success = dismissible Alert or toast; every mutation pending-disables its button
 ## T5 — Auth (reference: `Login.tsx` + `AuthRailLayout`)
 
 ```
-AuthRailLayout: FORM IN THE RAIL (never centred on stage) · AuthBrandBlock top
-· stage = editorial/brand canvas only. autoComplete on every identity field;
-errors inline below the fields; single submit with progress verb.
+AuthRailLayout: CENTERED soft-neu card on Fog Gray (legacy name — not a left rail)
+· AuthBrandBlock · autoComplete on identity fields · errors inline · single submit.
 ```
 
 ## T6 — Portal (external users) (reference: `Portal.tsx` + `ExternalPortalShell`)
 
 ```
-ExternalPortalShell (GlassRail): rail = portal label + firm + sign-out (44px);
-stage = read-mostly panels + request forms. No taskbar, no ActionDock —
-portal-class surfaces are dock-less by design (documented exception).
+ExternalPortalShell (SoftRail) — EXCEPTION until portal redesign (next design session).
+Rail = portal label + firm + sign-out; stage = read-mostly panels + request forms.
+No taskbar, no ActionDock — portal-class surfaces are dock-less by design.
 ```
 
-## T7 — Marketing page (reference: `MarketingShell` + `DesignSystemPage.tsx`)
+## T7 — Marketing page (reference: `Landing.tsx` + `MarketingNeuFrame`)
 
 ```
-MarketingShell: clear-glass floating rail (open 240 / collapsed 56) · SectionDock
-scroll-spy · heading-glass section heads · FLAT sub-cards (no glass on tiles)
-· contours atmosphere · one h1 · single #lp2-main.
+MarketingNeuFrame / MarketingShell:
+├ MarketingTopBar (sticky soft brand ribbon)
+├ stage — 1200px content column · single #lp-main
+├ MarketingLandingDock (section spy + Sign in / Create / Downloads / Calculator)
+└ MarketingClockPomodoro
+Landing sections: Overview · Outcomes · Platform · Rhythm · Start.
+Soft/flat Surfaces only — no left rail, no staff ActionDock on marketing.
 ```
 
 ## T8 — Report / document output (reference: `Filing.tsx`, PDF cells)
@@ -88,46 +90,25 @@ en-IN dates.
 
 ```
 Multi-step guided flow on the shell contract:
-├ RAIL   step progress — Stepper (MuiStepper themed: accent-active · success
-│        completed · accent-outlined current) OR a Step checklist that
-│        auto-completes from state (AccountHub: Account ✓ → Company → Workspace)
-├ STAGE  the CURRENT step only — one concern per step (form / summary / confirm),
-│        chunked (Tesler): never the whole flow at once
-└ DOCK   LEFT "Back" (reversible) · RIGHT "Next" / "Finish" (commit) — publish []
-         while a step-level Dialog is open
+├ STAGE HEADER / aside strip — step progress (Stepper or checklist)
+├ STAGE — CURRENT step only (one concern; never the whole flow at once)
+└ DOCK — LEFT "Back" · RIGHT "Next" / "Finish" — publish [] while Dialog open
 ```
-Rules: goal-gradient progress always visible (Nielsen #1 + goal-gradient law); one
-step = one decision (Miller); "Next" disabled until the step validates (error
-prevention); completed steps stay reachable to edit. Kit theming: `MuiStepper` /
-`MuiStepIcon` / `MuiStepConnector` (governed in `theme.ts`).
+Rules: goal-gradient progress visible; one step = one decision; Next disabled
+until valid; completed steps editable.
 
 ## T10 — AI / mission orchestration (reference: kit primitives)
 
-Mission-first supervision surface (Framework principle 6). Domain-agnostic kit
-primitives — product supplies copy and phase enums.
-
 ```
-RailLayout (GlassRail)
-├ RAIL
-│  ├ MissionHeader          — one-sentence mission + status
-│  ├ AwarenessStrip         — state · meaning · next (judgment = interrupt)
-│  ├ ObjectiveList          — ≤ CAPACITY.railObjectives (5)
-│  └ ConfidenceBand         — low|medium|high (never lone false-precision %)
-├ STAGE
-│  ├ PhaseStrip             — phase · progress · eta
-│  ├ DecisionQueue          — Pending Decisions first (DecisionCard)
-│  ├ FreezeTable            — locked decisions (read-only)
-│  ├ risks / artifacts      — StatusDot · HealthGlassOrb · soft Surface
-│  └ optional implementation detail (collapsed by default)
-└ DOCK
-   LEFT reject / defer · CENTER choose alternative · RIGHT approve / freeze
-   publish [] while a decision Dialog is open
-   RIGHT commits: DockAction.outcome + track → publishOutcome + ux.dock/ux.outcome
+RailLayout (stage shell — no left GlassRail)
+├ MissionHeader · AwarenessStrip · ObjectiveList · ConfidenceBand (in header / stage)
+├ PhaseStrip · DecisionQueue · FreezeTable · risks / artifacts
+└ DOCK — LEFT reject/defer · CENTER alternative · RIGHT approve/freeze
+   publish [] while decision Dialog open
 ```
 
-Four questions above the fold (≤30s): What is the mission? What is done? What needs
-judgment? What happens next? Ambient progress never interrupts. Compose only from
-`@hcw/ui-kit` — do not invent a fifth chrome region.
+Four questions above the fold (≤30s): mission · done · needs judgment · next.
+Compose from `@hcw/ui-kit` — do not invent a fifth chrome region.
 
 ---
 

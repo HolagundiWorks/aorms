@@ -1,17 +1,16 @@
 import type { ReactNode } from "react";
-import { CarbonScope } from "../carbon/CarbonScope.js";
+import { Box, Stack, Typography } from "@mui/material";
+import { Surface, RADIUS } from "@hcw/ui-kit";
 import { EstiOrchestrationStatus } from "./EstiOrchestrationStatus.js";
 
 /**
- * Standard app screen shell — Carbon layout (Wave 3).
+ * Stage page shell — left rail retired (2026-08).
  *
- * Per the migration decision (docs/esti/CARBON-MIGRATION.md §8), the HCW
- * Rail·Stage·glass geometry is dropped in favour of Carbon design principles: a
- * flat bordered **side-nav column** (heading · section nav · filters · actions)
- * beside a scrolling content area — all styled with Carbon tokens, no glass.
- * Slots are unchanged so existing callers keep working while they migrate their
- * own `tabs`/`aside` widgets to Carbon (prefer Carbon `Tabs` in the content, or
- * side-nav links here).
+ * Soft-neu header (title · description · tabs · filters · actions) above a
+ * full-width scrolling main. Export name `RailLayout` kept for call-site compat.
+ * Primary create/commit CTAs still belong in ActionDock via `useScreenActions`.
+ *
+ * Canon: docs/esti/PAGE-STRUCTURE.md
  */
 export function RailLayout({
   title,
@@ -23,88 +22,86 @@ export function RailLayout({
 }: {
   title: string;
   description?: string;
-  /** Action buttons — pinned to the bottom of the side column. */
+  /** Secondary actions — prefer ActionDock for primary create/commit. */
   actions?: ReactNode;
-  /** Section nav for the side column (prefer Carbon side-nav links). */
+  /** Section nav — rendered horizontally under the title. */
   tabs?: ReactNode;
-  /** Telemetry / filters / summary below the nav. */
+  /** Filters / summary strip under tabs. */
   aside?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <CarbonScope>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          gap: "1.5rem",
-          flex: 1,
-          minHeight: 0,
-          alignItems: "stretch",
-          width: "100%",
+    <Box
+      className="esti-stage-page"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+        minHeight: 0,
+        width: "100%",
+        gap: 1.5,
+      }}
+    >
+      <Surface
+        layer="soft"
+        className="esti-stage-page__header"
+        sx={{
+          p: { xs: 1.5, md: 2 },
+          borderRadius: `${RADIUS}px`,
+          flexShrink: 0,
         }}
       >
-        {/* Side-nav column */}
-        <aside
-          style={{
-            flex: "0 0 240px",
-            maxWidth: 240,
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-            borderRight: "1px solid var(--cds-border-subtle)",
-            paddingRight: "1rem",
-            overflowY: "auto",
-          }}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          sx={{ alignItems: { sm: "flex-start" }, justifyContent: "space-between" }}
         >
-          <div style={{ minWidth: 0 }}>
-            <p className="cds--type-label-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography variant="overline" color="text.secondary" sx={{ display: "block", lineHeight: 1.2 }}>
               Workspace
-            </p>
-            <h1 className="cds--type-heading-04" style={{ margin: "0.25rem 0 0", wordBreak: "break-word" }}>
+            </Typography>
+            <Typography variant="h5" component="h1" sx={{ mt: 0.25, wordBreak: "break-word" }}>
               {title}
-            </h1>
-            {description && (
-              <p
-                className="cds--type-body-01"
-                style={{ margin: "0.5rem 0 0", color: "var(--cds-text-secondary)", wordBreak: "break-word" }}
-              >
+            </Typography>
+            {description ? (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75, wordBreak: "break-word" }}>
                 {description}
-              </p>
-            )}
-          </div>
-
-          {/* Orchestration status — visible only while ESTI is working. */}
-          <EstiOrchestrationStatus />
-
-          {tabs}
-          {aside && (
-            <div style={{ minWidth: 0, width: "100%", flex: "1 1 auto", overflowY: "auto" }}>{aside}</div>
-          )}
-
-          {actions && (
-            <div style={{ marginTop: "auto", paddingTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              </Typography>
+            ) : null}
+          </Box>
+          {actions ? (
+            <Stack
+              direction="row"
+              spacing={1}
+              useFlexGap
+              sx={{ flexShrink: 0, alignItems: "center", flexWrap: "wrap" }}
+            >
               {actions}
-            </div>
-          )}
-        </aside>
+            </Stack>
+          ) : null}
+        </Stack>
 
-        {/* Content */}
-        <main
-          style={{
-            flex: 1,
-            minWidth: 0,
-            minHeight: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-            overflowY: "auto",
-          }}
-        >
-          {children}
-        </main>
-      </div>
-    </CarbonScope>
+        <EstiOrchestrationStatus />
+
+        {tabs ? <Box sx={{ mt: 1.5, minWidth: 0 }}>{tabs}</Box> : null}
+        {aside ? <Box sx={{ mt: 1.5, minWidth: 0 }}>{aside}</Box> : null}
+      </Surface>
+
+      <Box
+        component="main"
+        className="esti-stage-page__main"
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+          overflowY: "auto",
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
   );
 }

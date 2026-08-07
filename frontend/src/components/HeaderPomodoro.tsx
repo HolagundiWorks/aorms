@@ -7,15 +7,20 @@ import { PomodoroRing } from "./PomodoroRing.js";
 
 /**
  * Focus-timer control for the dock — opens a floating dial panel (Alt+T) in a
- * portaled MUI Popover anchored above the button (so it is never clipped by the
- * dock's transform/overflow). Material UI.
+ * portaled MUI Popover. Material UI.
  */
-export function HeaderPomodoro() {
+export function HeaderPomodoro({
+  placement = "above",
+}: {
+  /** Footer opens above; marketing top-bar opens below. */
+  placement?: "above" | "below";
+}) {
   const pom = usePomodoro();
   const btnRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const pomActive = pom.running || (pom.timeLeft < pom.duration && pom.timeLeft > 0);
   const isFocus = pom.mode === "work";
+  const below = placement === "below";
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -36,7 +41,7 @@ export function HeaderPomodoro() {
           className={pomActive ? "esti-header-pom--active" : undefined}
           aria-label="Focus timer"
           onClick={() => setOpen((o) => !o)}
-          sx={{ width: 44, height: 44 }}
+          sx={{ width: 44, height: 44, borderRadius: "8px" }}
         >
           <TimerOutlined />
         </IconButton>
@@ -56,8 +61,14 @@ export function HeaderPomodoro() {
         open={open}
         anchorEl={btnRef.current}
         onClose={() => setOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        transformOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{
+          vertical: below ? "bottom" : "top",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: below ? "top" : "bottom",
+          horizontal: "center",
+        }}
         slotProps={{ paper: { className: "esti-neu", sx: { width: 260, p: 2 } } }}
       >
         <Stack spacing={2}>

@@ -33,24 +33,23 @@ Companion docs — read together, in this order:
 ## 1. The system in one paragraph (agent priming)
 
 HCW-UI-Kit is a **token + MUI-theme + primitives** system, not a bespoke component
-library. Its thesis — **depth encodes importance** — stacks three material languages:
-FLAT (info at rest, ~90% of pixels), SOFT/neumorphic (objects you work within), GLASS
-(actions/alerts that want you now). One accent (Radiant Orange `#FF4F18`, fills/CTAs
-and active chrome glyph tints; body links stay slate). Surfaces are **square**
-(`RADIUS 0`); only buttons (4px), dialogs (8px) and the ActionDock capsule are
-rounded. One spatial model everywhere:
-**Rail (20%, glass) · Stage (80%, scrolls) · Taskbar footer · ActionDock**
-(LEFT destroy · CENTER create · RIGHT commit). `:focus-visible` receives the same
-Layer-3 glass lift as `:hover` — keyboard parity is a brand behaviour, not a patch.
+library. Its thesis — **depth encodes importance** — stacks opaque materials:
+FLAT (info at rest, ~90% of pixels), SOFT RAISED (objects / chrome), SOFT ATTENTION
+(wells / alerts). One accent (Radiant Orange `#FF4F18`). Soft-square **8px** radius
+on product chrome. One spatial model everywhere:
+**Ribbon · Stage (full width) · Taskbar footer · ActionDock · AnalogueClock**
+(LEFT destroy · CENTER create · RIGHT commit). **Left rail retired 2026-08** —
+see [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md). Portals still use SoftRail until redesign.
+`:focus-visible` receives the same lift as `:hover` — keyboard parity is brand behaviour.
 
 **Package layout** (`src/`): `tokens.ts` (colour, type, **scales**: `SPACING`,
 `LAYOUT`, `CAPACITY`, `INTERRUPTION`, `COGA`, `VOICE`, `TRUST`, `FATIGUE`, `BREAKPOINTS`, `Z_INDEX`,
 `OPACITY`, `MOTION`, `ELEVATION`, plus layer recipes), `theme.ts`
 (`createHcwTheme({ scheme, density, coga })`), `chrome-sx.ts` (`layoutSx`), and
-primitives `Surface`, `GlassRail`, `ActionDock`, `AwarenessStrip`,
+primitives `Surface`, `ActionDock`, `AwarenessStrip`,
 `ActionOutcomeBanner`, `ToastHost`, `KpiStrip`, T10 orchestration
 (`MissionHeader` · `DecisionQueue` · …), `logUxEvent` / `setUxEventSink`,
-`TaskbarFooter`, `SectionDock`, `HealthGlassOrb`, `BrandMark`, `KitRoot`.
+`TaskbarFooter`, `AnalogueClock`, `BrandMark`, `KitRoot`.
 
 ---
 
@@ -78,8 +77,9 @@ a frozen compat layer — never extend it).
 
 ### R2 — Component-first, no duplicates
 One canonical implementation per pattern. Status = `StatusTag`/`StatusDot`. Skeleton/empty
-= `DataState`. Confirm-destroy = `ConfirmModal`. Layout = `RailLayout` / `GlassRail` /
-`AuthRailLayout` / `PortalShell` / `ExternalPortalShell` / `MarketingShell` — never bespoke rails.
+= `DataState`. Confirm-destroy = `ConfirmModal`. Layout = `RailLayout` (stage page shell) /
+`AuthRailLayout` (centered soft card) / `PortalShell` / `ExternalPortalShell` (SoftRail —
+portal redesign pending) / `MarketingNeuFrame` · `MarketingShell` — never bespoke left rails.
 - Detect duplicates: `rg -n 'function TagChip|const chipSx' frontend/src`.
 - New shared elements are added to the **kit first**, then consumed.
 
