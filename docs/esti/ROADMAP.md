@@ -17,11 +17,11 @@ Canon: [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-B
 
 | # | Work | Where | Exit |
 | --- | --- | --- | --- |
-| 1 | **Merge AQC bridge docs** [PR #4](https://github.com/HolagundiWorks/AQC/pull/4) | AQC | `docs/AORMS-BRIDGE*.md` on `main` |
-| 2 | **D2 code — SQLite + `Aorms.Bridge` scaffold** | AQC | Activate stub · outbox tables · Flush skeleton compiles |
-| 3 | **D2 smoke** | AQC ↔ esti hub | activate → `syncToken` → Flush meta against colocated/hub |
-| 4 | **D5 kickoff** | AStudio / AConsulting | Pin AQC engine commit · import shared bridge |
-| 5 | **Portal sections** | esti | Map FirmPortalShell tabs to hub-published content |
+| 1 | **Merge AQC bridge docs** [PR #4](https://github.com/HolagundiWorks/AQC/pull/4) | AQC | ✅ merged |
+| 2 | **D2 code — `Aorms.Bridge` scaffold** | AQC | 🚧 [PR #5](https://github.com/HolagundiWorks/AQC/pull/5) — FirmDb + Activate/Flush |
+| 3 | **D2 smoke** | AQC ↔ esti hub | activate → `syncToken` → Flush meta |
+| 4 | **D5 kickoff** | AStudio / AConsulting | Pin AQC engine + bridge |
+| 5 | **Portal sections** | esti | Map FirmPortalShell tabs to hub content |
 
 Crew: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md).
 
