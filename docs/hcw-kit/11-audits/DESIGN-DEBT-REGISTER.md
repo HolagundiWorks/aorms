@@ -1,4 +1,9 @@
-﻿**2026-08-07 — Wave 4 studio polish.** Studio brief → `Surface layer="soft"`;
+﻿**2026-08-07 — Wave 5 composition everywhere.** `COMPOSITION_RHYTHM` shared
+token; applied to `RailLayout`, Studio Intelligence, `PortalNeuFrame`,
+`AuthRailLayout`, `AppRibbon`, `AdminConsoleShell`, staff `--esti-shell-gutter: 24px`.
+Canon: [COMPOSITION-PRINCIPLES.md](../../esti/COMPOSITION-PRINCIPLES.md).
+
+**2026-08-07 — Wave 4 studio polish.** Studio brief → `Surface layer="soft"`;
 `--esti-neu-fill` / kit `NEU_FILL` (#eceef2) documented as soft raised (not canvas).
 Footer + widgets use the same fill token.
 

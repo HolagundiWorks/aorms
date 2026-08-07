@@ -462,7 +462,7 @@ $neu-input-radius: 0;
   --esti-header-height: 48px;
   --esti-rail-inset-top: 0px;
   // Content gutters — left/right/bottom match; bottom clears footer (+ dock when shown).
-  --esti-shell-gutter: 16px;
+  --esti-shell-gutter: 24px; // COMPOSITION_RHYTHM.md (24) — more stage air
   --esti-footer-height: 56px; // 44px min-height + 12px bottom pad
   --esti-dock-stack: 0px;     // raised when ActionDock is visible (see ActionDock.tsx)
   // LF6 — Inspector / Ask ESTI right slot width (0 when closed).
@@ -531,10 +531,9 @@ $neu-input-radius: 0;
   }
 }
 
-// Studio brief strip — layout only; Soft Surface owns neu fill/shadow (kit NEU_RAISED).
+// Studio brief strip — layout only; Soft Surface owns neu fill/shadow + pad (COMPOSITION_RHYTHM).
 .esti-app-shell2 .esti-glass-dash .esti-dash-rail,
 .esti-app-shell2 .esti-neu-dash .esti-dash-brief {
-  padding: 12px;
   box-sizing: border-box;
 }
 

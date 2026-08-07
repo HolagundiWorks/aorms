@@ -4,10 +4,12 @@ import { Surface } from "@hcw/ui-kit";
 import { HcwAttribution } from "./brand/HcwAttribution.js";
 import { MarketingFooter } from "./landing/MarketingFooter.js";
 import { AuthStageCanvas, type AuthStageVariant } from "./AuthStageCanvas.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 
 /**
  * Unauthenticated auth shell — centered soft-neu card (no glass rail).
  * Stage atmosphere remains editorial background only.
+ * Spacing: COMPOSITION_RHYTHM · docs/esti/COMPOSITION-PRINCIPLES.md
  */
 export function AuthRailLayout({
   rail,
@@ -73,8 +75,8 @@ export function AuthRailLayout({
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            p: { xs: 2, md: 4 },
-            gap: 2,
+            p: { xs: COMPOSITION_RHYTHM.md, md: COMPOSITION_RHYTHM.lg },
+            gap: COMPOSITION_RHYTHM.md,
           }}
         >
           <Surface
@@ -82,11 +84,11 @@ export function AuthRailLayout({
             className="esti-auth-card"
             sx={{
               width: "100%",
-              maxWidth: 420,
-              p: 2.5,
+              maxWidth: COMPOSITION_RHYTHM.authCardMaxPx,
+              p: COMPOSITION_RHYTHM.authCardPad,
               display: "flex",
               flexDirection: "column",
-              gap: 1.5,
+              gap: COMPOSITION_RHYTHM.sm,
             }}
           >
             <Box sx={{ minWidth: 0, width: 1, flex: 1 }}>{rail}</Box>

@@ -43,6 +43,7 @@ import { useAuth } from "../lib/auth.js";
 import { trpc } from "../lib/trpc.js";
 import { useNavigate } from "react-router-dom";
 import { Surface, TYPE_SCALE, useScreenActions } from "@hcw/ui-kit";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import { AORMS_STUDIO } from "../lib/product-nomenclature.js";
 
 // ── Zone state ────────────────────────────────────────────────────────────────
@@ -705,7 +706,7 @@ export function StudioAbstract() {
         overflow: { xs: "visible", md: "hidden" },
         display: "flex",
         flexDirection: "column",
-        gap: 1.5,
+        gap: COMPOSITION_RHYTHM.stageGap,
       }}
     >
       <StudioBreath />
@@ -718,8 +719,8 @@ export function StudioAbstract() {
           width: 1,
           display: "flex",
           flexDirection: "column",
-          gap: 1.5,
-          p: 1.5,
+          gap: COMPOSITION_RHYTHM.sm,
+          p: COMPOSITION_RHYTHM.headerPad,
         }}
       >
           {/* Greeting */}
@@ -834,7 +835,7 @@ export function StudioAbstract() {
             overflowY: { xs: "visible", md: "auto" },
             display: "flex",
             flexDirection: "column",
-            gap: 1.5,
+            gap: COMPOSITION_RHYTHM.mainGap,
           }}
         >
           <Tabs

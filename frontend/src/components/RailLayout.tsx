@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import { Surface, RADIUS } from "@hcw/ui-kit";
 import { EstiOrchestrationStatus } from "./EstiOrchestrationStatus.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 
 /**
  * Stage page shell — left rail retired (2026-08).
@@ -10,7 +11,8 @@ import { EstiOrchestrationStatus } from "./EstiOrchestrationStatus.js";
  * full-width scrolling main. Export name `RailLayout` kept for call-site compat.
  * Primary create/commit CTAs still belong in ActionDock via `useScreenActions`.
  *
- * Canon: docs/esti/PAGE-STRUCTURE.md
+ * Spacing follows COMPOSITION_RHYTHM (8px modular · more stage air).
+ * Canon: docs/esti/PAGE-STRUCTURE.md · docs/esti/COMPOSITION-PRINCIPLES.md
  */
 export function RailLayout({
   title,
@@ -39,32 +41,32 @@ export function RailLayout({
         flex: 1,
         minHeight: 0,
         width: "100%",
-        gap: 1.5,
+        gap: COMPOSITION_RHYTHM.stageGap,
       }}
     >
       <Surface
         layer="soft"
         className="esti-stage-page__header"
         sx={{
-          p: { xs: 1.5, md: 2 },
+          p: COMPOSITION_RHYTHM.headerPad,
           borderRadius: `${RADIUS}px`,
           flexShrink: 0,
         }}
       >
         <Stack
           direction={{ xs: "column", sm: "row" }}
-          spacing={1.5}
+          spacing={COMPOSITION_RHYTHM.sm}
           sx={{ alignItems: { sm: "flex-start" }, justifyContent: "space-between" }}
         >
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography variant="overline" color="text.secondary" sx={{ display: "block", lineHeight: 1.2 }}>
               Workspace
             </Typography>
-            <Typography variant="h5" component="h1" sx={{ mt: 0.25, wordBreak: "break-word" }}>
+            <Typography variant="h5" component="h1" sx={{ mt: 0.5, wordBreak: "break-word" }}>
               {title}
             </Typography>
             {description ? (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75, wordBreak: "break-word" }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, wordBreak: "break-word" }}>
                 {description}
               </Typography>
             ) : null}
@@ -72,7 +74,7 @@ export function RailLayout({
           {actions ? (
             <Stack
               direction="row"
-              spacing={1}
+              spacing={COMPOSITION_RHYTHM.sm}
               useFlexGap
               sx={{ flexShrink: 0, alignItems: "center", flexWrap: "wrap" }}
             >
@@ -83,8 +85,8 @@ export function RailLayout({
 
         <EstiOrchestrationStatus />
 
-        {tabs ? <Box sx={{ mt: 1.5, minWidth: 0 }}>{tabs}</Box> : null}
-        {aside ? <Box sx={{ mt: 1.5, minWidth: 0 }}>{aside}</Box> : null}
+        {tabs ? <Box sx={{ mt: COMPOSITION_RHYTHM.sm, minWidth: 0 }}>{tabs}</Box> : null}
+        {aside ? <Box sx={{ mt: COMPOSITION_RHYTHM.sm, minWidth: 0 }}>{aside}</Box> : null}
       </Surface>
 
       <Box
@@ -96,7 +98,7 @@ export function RailLayout({
           minHeight: 0,
           display: "flex",
           flexDirection: "column",
-          gap: 1.5,
+          gap: COMPOSITION_RHYTHM.mainGap,
           overflowY: "auto",
         }}
       >

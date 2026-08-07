@@ -1,7 +1,8 @@
-import { Surface } from "@hcw/ui-kit";
+import { Surface, RADIUS } from "@hcw/ui-kit";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { AORMS_PORTALS } from "../../lib/product-nomenclature.js";
+import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
 
 export type AdminSectionKey =
   | "dashboard"
@@ -45,21 +46,21 @@ export function AdminConsoleShell({
   children: ReactNode;
 }) {
   return (
-    <Stack spacing={2} sx={{ height: "100%", minHeight: 0 }}>
+    <Stack spacing={COMPOSITION_RHYTHM.stageGap} sx={{ height: "100%", minHeight: 0 }}>
       <Stack
         direction={{ xs: "column", sm: "row" }}
-        spacing={1}
+        spacing={COMPOSITION_RHYTHM.sm}
         sx={{ alignItems: { sm: "center" }, justifyContent: "space-between" }}
       >
         <Box>
           <Typography variant="h4" component="h1">
             {AORMS_PORTALS.account.licensing}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             Manage accounts, organizations, licences, and API keys for AORMS Standard.
           </Typography>
         </Box>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+        <Stack direction="row" spacing={COMPOSITION_RHYTHM.sm} sx={{ alignItems: "center", flexWrap: "wrap" }}>
           <Chip
             size="small"
             label={isPlatformAdmin ? "Platform admin" : "Member"}
@@ -78,7 +79,7 @@ export function AdminConsoleShell({
         direction="row"
         spacing={0.5}
         useFlexGap
-        sx={{ flexWrap: "wrap", alignItems: "center" }}
+        sx={{ flexWrap: "wrap", alignItems: "center", gap: 1 }}
       >
         {SECTIONS.map((s) => {
           const selected = section === s.key;
@@ -93,7 +94,7 @@ export function AdminConsoleShell({
               variant={selected ? "contained" : "text"}
               color={selected ? "primary" : "inherit"}
               onClick={() => onSectionChange(s.key)}
-              sx={{ borderRadius: "8px", textTransform: "none", minHeight: 36 }}
+              sx={{ borderRadius: `${RADIUS}px`, textTransform: "none", minHeight: 36 }}
             >
               {label}
             </Button>
@@ -101,7 +102,11 @@ export function AdminConsoleShell({
         })}
       </Stack>
 
-      <Surface layer="flat" className="esti-admin-console__stage" sx={{ flex: 1, minHeight: 0, p: 2 }}>
+      <Surface
+        layer="flat"
+        className="esti-admin-console__stage"
+        sx={{ flex: 1, minHeight: 0, p: COMPOSITION_RHYTHM.headerPad }}
+      >
         {children}
       </Surface>
     </Stack>

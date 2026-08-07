@@ -9,6 +9,7 @@ import {
   MARKETING_CONTENT_GUTTER,
   marketingContentColumnSx,
 } from "../../lib/marketing-layout.js";
+import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
 
 /**
  * Brand-only marketing top ribbon — logo + expansion.
@@ -20,11 +21,11 @@ export function MarketingTopBar() {
       className="esti-mkt-topbar-wrap"
       sx={{
         position: "sticky",
-        top: 12,
+        top: COMPOSITION_RHYTHM.chromeInsetMd * 8,
         zIndex: 50,
         width: "100%",
         px: { xs: MARKETING_CONTENT_GUTTER.xs, md: MARKETING_CONTENT_GUTTER.md },
-        mt: 1.5,
+        mt: COMPOSITION_RHYTHM.sm,
         boxSizing: "border-box",
       }}
     >
@@ -34,11 +35,11 @@ export function MarketingTopBar() {
         className="esti-mkt-topbar"
         sx={{
           ...marketingContentColumnSx,
-          px: { xs: 1.5, md: 2.5 },
+          px: COMPOSITION_RHYTHM.headerPad,
           py: 0,
           display: "flex",
           alignItems: "center",
-          gap: 2,
+          gap: COMPOSITION_RHYTHM.md,
           flexWrap: "nowrap",
           borderRadius: `${RADIUS}px`,
           minHeight: 56,

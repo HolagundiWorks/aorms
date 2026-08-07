@@ -35,7 +35,7 @@ All spacing is multiples of **8**. Prefer the scale below so ribbon → stage �
 | 8 | 64 | `xl` | Section padding (mobile) |
 | 12 | 96 | `sectionY.md` | Section padding (desktop) |
 
-Executable helpers: `frontend/src/lib/marketing-layout.ts` (`MARKETING_RHYTHM`). Staff stage gutters remain `--esti-shell-gutter` (16) — same 8px module.
+Executable helpers: `frontend/src/lib/composition.ts` (`COMPOSITION_RHYTHM`) · marketing alias `frontend/src/lib/marketing-layout.ts`. Staff stage gutters: `--esti-shell-gutter` (24px).
 
 **No random alignment.** Edges share a column (1200px marketing / shell gutters staff). Nested cards align to the same modular grid — do not offset by odd pixels for “taste.”
 
@@ -126,7 +126,28 @@ Before shipping a landing or dashboard composition:
 
 ---
 
-## 8. Anti-patterns
+## 9. How every screen inherits this
+
+Do **not** invent per-route spacing. Shells carry the rhythm:
+
+| Shell | Path | What inherits |
+| --- | --- | --- |
+| `RailLayout` | Most staff list/detail pages | Header pad · stage gap · main gap |
+| `StudioAbstract` | Studio Intelligence `/` | Brief + stage column rhythm |
+| `AppRibbon` + `AppFooterBar` | Staff chrome | Sticky inset · gutters (`--esti-shell-gutter: 24px`) |
+| `ActionDock` | Staff CTAs | Von Restorff zones (destroy · create · commit) |
+| `PortalNeuFrame` | Client / consultant / contractor / site / account | Top bar + stage air + clock clear |
+| `AdminConsoleShell` | Licensing | Header · chips · stage pad |
+| `AuthRailLayout` | Login / access / reset | Centered soft card pad |
+| `MarketingNeuFrame` + `MARKETING_RHYTHM` | Landing / blog / downloads | Section air · odd groups |
+
+Executable tokens: `frontend/src/lib/composition.ts` (`COMPOSITION_RHYTHM`). Marketing re-exports via `marketing-layout.ts`.
+
+When adding a screen: wrap in the correct shell; use `COMPOSITION_RHYTHM` for any local Stack/Grid gaps; keep peer groups odd; isolate one primary CTA.
+
+---
+
+## 10. Anti-patterns
 
 | Don’t | Do |
 | --- | --- |
@@ -136,6 +157,7 @@ Before shipping a landing or dashboard composition:
 | Tight section stacking (`py: 3`) | Modular section air (`py: 8` / `12`) |
 | Misaligned card edges / mixed gutters | Single content column + 8px grid |
 | Two hero clocks / watermark + clock | One AnalogueClock |
+| Per-route magic spacing (13px, 18px) | `COMPOSITION_RHYTHM` steps only |
 
 ---
 

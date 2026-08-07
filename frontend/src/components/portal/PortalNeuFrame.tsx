@@ -1,8 +1,8 @@
 import { AnalogueClock, Surface, colors, RADIUS } from "@hcw/ui-kit";
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
+import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
 import {
-  MARKETING_CONTENT_GUTTER,
   MARKETING_CONTENT_MAX_PX,
   marketingContentColumnSx,
 } from "../../lib/marketing-layout.js";
@@ -10,7 +10,7 @@ import {
 /**
  * Shared no-rail portal chrome — soft top bar · full-width stage · analogue clock.
  * Same spatial model as marketing (`MarketingNeuFrame`) and staff apps.
- * No ActionDock / taskbar (portal exception). No Pomodoro (provider is staff-only).
+ * Spacing: COMPOSITION_RHYTHM. Canon: docs/esti/COMPOSITION-PRINCIPLES.md
  */
 export function PortalNeuFrame({
   topBar,
@@ -39,11 +39,11 @@ export function PortalNeuFrame({
         className="esti-portal-neu__top-wrap"
         sx={{
           position: "sticky",
-          top: 12,
+          top: COMPOSITION_RHYTHM.chromeInsetMd * 8,
           zIndex: 50,
           width: "100%",
-          px: { xs: MARKETING_CONTENT_GUTTER.xs, md: MARKETING_CONTENT_GUTTER.md },
-          mt: 1.5,
+          px: { xs: COMPOSITION_RHYTHM.gutter.xs, md: COMPOSITION_RHYTHM.gutter.md },
+          mt: COMPOSITION_RHYTHM.sm,
           boxSizing: "border-box",
         }}
       >
@@ -53,11 +53,11 @@ export function PortalNeuFrame({
           className="esti-portal-neu__topbar"
           sx={{
             ...marketingContentColumnSx,
-            px: { xs: 1.5, md: 2.5 },
-            py: 1,
+            px: COMPOSITION_RHYTHM.headerPad,
+            py: COMPOSITION_RHYTHM.sm,
             display: "flex",
             flexDirection: "column",
-            gap: 1,
+            gap: COMPOSITION_RHYTHM.sm,
             borderRadius: `${RADIUS}px`,
             minHeight: 56,
           }}
@@ -77,10 +77,13 @@ export function PortalNeuFrame({
           width: "100%",
           maxWidth: MARKETING_CONTENT_MAX_PX,
           mx: "auto",
-          px: { xs: MARKETING_CONTENT_GUTTER.xs, md: MARKETING_CONTENT_GUTTER.md },
-          py: { xs: 2, md: 3 },
-          pb: { xs: 10, md: 12 },
+          px: { xs: COMPOSITION_RHYTHM.gutter.xs, md: COMPOSITION_RHYTHM.gutter.md },
+          py: COMPOSITION_RHYTHM.portalStageY,
+          pb: COMPOSITION_RHYTHM.portalStagePb,
           boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+          gap: COMPOSITION_RHYTHM.mainGap,
         }}
       >
         {children}
@@ -90,8 +93,8 @@ export function PortalNeuFrame({
         className="esti-portal-neu__clock"
         sx={{
           position: "fixed",
-          right: { xs: 12, md: 20 },
-          bottom: { xs: 12, md: 20 },
+          right: { xs: 16, md: 24 },
+          bottom: { xs: 16, md: 24 },
           zIndex: 40,
           pointerEvents: "none",
         }}

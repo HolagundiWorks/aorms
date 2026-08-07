@@ -13,6 +13,7 @@ import {
 import { Surface, RADIUS, chromeIconSx } from "@hcw/ui-kit";
 import { useCallback, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
 
 /**
  * Top navigation — firm name (h1) + section buttons. Menus open on hover
@@ -441,12 +442,12 @@ export function AppRibbon({
       className="esti-ribbon-wrap"
       sx={{
         position: "sticky",
-        top: 12,
+        top: COMPOSITION_RHYTHM.chromeInsetMd * 8,
         zIndex: 1100,
         width: "100%",
-        px: { xs: 1.5, md: 2 },
-        mt: 1.5,
-        mb: 0.5,
+        px: { xs: COMPOSITION_RHYTHM.sm, md: COMPOSITION_RHYTHM.md },
+        mt: COMPOSITION_RHYTHM.sm,
+        mb: COMPOSITION_RHYTHM.xs,
         boxSizing: "border-box",
         flexShrink: 0,
       }}
@@ -460,8 +461,8 @@ export function AppRibbon({
         sx={{
           borderRadius: `${RADIUS}px`,
           minHeight: 56,
-          px: { xs: 1, md: 1.5 },
-          py: 0.5,
+          px: COMPOSITION_RHYTHM.headerPad,
+          py: COMPOSITION_RHYTHM.xs,
           display: "flex",
           alignItems: "center",
         }}

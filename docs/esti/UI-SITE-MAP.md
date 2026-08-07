@@ -50,8 +50,11 @@ flowchart TB
 
 **Wave 4** — Studio brief `Surface soft` · `--esti-neu-fill` = kit `NEU_FILL` (#eceef2 soft raised, Fog Gray remains canvas)  
 
+**Wave 5** — `COMPOSITION_RHYTHM` on all shells (`RailLayout` · Studio · portals · auth · ribbon · admin) · staff gutter 24px  
+
 ## Deferred (optional)
 
 - Knowledge Bank public vs staff path clarification  
 - Carbon spike isolation; de-Carbon shared portal widgets (`RowActionsMenu`, `SubmissionThread`, `ProjectSiteReference`) and company-admin / licensing Carbon tabs  
 - Optional AormsLogo in AppRibbon if firm-name-only feels weak  
+- Per-route odd-group audits inside large detail screens (ProjectDetail tabs)  
