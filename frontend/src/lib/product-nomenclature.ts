@@ -189,21 +189,22 @@ export function isAormsPmcLegacySlug(slug: string): boolean {
   );
 }
 
-/** Platform landing — three AEC apps on one spine. */
+/** Platform landing — suite map (managers + technical + drafting). */
 export const PLATFORM_APPS = [
   {
     id: "studio",
     status: AORMS_STUDIO.status,
+    kind: "manager" as const,
     title: AORMS_STUDIO.discipline,
     workspace: AORMS_STUDIO.title,
     expansion: AORMS_STUDIO.expansion,
-    subtitle: "Architecture consultancies",
+    subtitle: "Practice manager · architecture",
     body:
-      "Indian architecture and design consultancies — operational and design frameworks for fees, revisions, statutory compliance, drawings, and studio intelligence.",
+      "Tasks, office, HR, payroll, and client portals for architecture practices. Technical calc stays in AQC apps; drafting in AADT.",
     bullets: [
-      "COA fee proposals & GST invoicing",
-      "Drawing register & transmittals",
-      "ESTI · internal AI agent · Ask ESTI",
+      "Tasks · Office · HR · Payroll",
+      "Client & third-party communications",
+      "Portal publish controls",
     ],
     workspaceSlug: AORMS_STUDIO.slug,
     href: AORMS_STUDIO.appUrl,
@@ -212,16 +213,17 @@ export const PLATFORM_APPS = [
   {
     id: "consultancy",
     status: AORMS_CONSULTANCY.status,
+    kind: "manager" as const,
     title: AORMS_CONSULTANCY.discipline,
     workspace: AORMS_CONSULTANCY.title,
     expansion: AORMS_CONSULTANCY.expansion,
-    subtitle: "Engineering consultancies",
+    subtitle: "Practice manager · engineering",
     body:
-      "Structural, MEP, civil, and multidisciplinary engineering consultancies — engagement frameworks, review chains, deliverable models, and governed knowledge for advisory work.",
+      "Same practice-manager surface for engineering consultancies — engagements, deliverables, and governed communications.",
     bullets: [
-      "Engagement & deliverable frameworks",
-      "Serial review & sign-off chains",
-      "EOMS · knowledge bank · codes & compliance on tap",
+      "Engagements · RACI · deliverables",
+      "Timesheets · office docs",
+      "Portal communications",
     ],
     workspaceSlug: AORMS_CONSULTANCY.slug,
     href: AORMS_CONSULTANCY.appUrl,
@@ -230,22 +232,83 @@ export const PLATFORM_APPS = [
   {
     id: "pmc",
     status: AORMS_PMC.status,
+    kind: "technical" as const,
     title: AORMS_PMC.discipline,
-    workspace: AORMS_PMC.title,
+    workspace: AORMS_PMC.suiteTitle ?? AORMS_PMC.title,
     expansion: AORMS_PMC.expansion,
-    subtitle: "Project management consultancies",
+    subtitle: "Technical · programme & site",
     body:
-      "PMC firms that govern programme, packages, and site certification for clients — accelerated project management on the same AORMS spine, without becoming a contractor ERP.",
+      "AQC Project Management (AProc) — programme, packages, RA and site certification. Desktop technical app; portals show published progress only.",
     bullets: [
-      "Programme (CSV / P6 XER milestones) & packages",
-      "BBS, steel recon & RA certification",
-      "Contractor portal bids · client delivery oversight",
+      "Programme · packages · RA",
+      "Shared bbs_engine",
+      "Published milestones to portals",
     ],
     workspaceSlug: AORMS_PMC.slug,
     href: AORMS_PMC.appUrl,
     cta: `Open ${AORMS_PMC.title}`,
   },
 ] as const;
+
+/** Technical + drafting suite tiles (landing secondary row). */
+export const SUITE_TECHNICAL_APPS = [
+  {
+    id: "estimation",
+    status: AQC_ESTIMATION.status,
+    workspace: AQC_ESTIMATION.title,
+    expansion: AQC_ESTIMATION.expansion,
+    subtitle: "Technical · quantities",
+    body: AQC_ESTIMATION.tagline,
+    href: AQC_ESTIMATION.appUrl,
+    repo: "https://github.com/HolagundiWorks/AQC-Estimation",
+    cta: "Downloads",
+  },
+  {
+    id: "bbs",
+    status: AQC_BBS.status,
+    workspace: AQC_BBS.title,
+    expansion: AQC_BBS.expansion,
+    subtitle: "Technical · steel",
+    body: AQC_BBS.tagline,
+    href: AQC_BBS.appUrl,
+    repo: "https://github.com/HolagundiWorks/AQC-BBS",
+    cta: "Downloads",
+  },
+  {
+    id: "pm",
+    status: AORMS_PMC.status,
+    workspace: AORMS_PMC.suiteTitle,
+    expansion: AORMS_PMC.expansion,
+    subtitle: "Technical · programme & site",
+    body: AORMS_PMC.tagline,
+    href: AORMS_PMC.appUrl,
+    repo: "https://github.com/HolagundiWorks/AQC-PM",
+    cta: "Open AProc",
+  },
+  {
+    id: "aadt",
+    status: AADT.status,
+    workspace: AADT.title,
+    expansion: AADT.expansion,
+    subtitle: "Drafting · 2D CAD",
+    body: AADT.tagline,
+    href: AADT.appUrl,
+    repo: "https://github.com/HolagundiWorks/AADT",
+    cta: "GitHub",
+  },
+] as const;
+
+/** Practice-manager tiles only (landing primary app row). */
+export const SUITE_MANAGER_APPS = PLATFORM_APPS.filter((a) => a.kind === "manager");
+
+export const SHILPIDB = {
+  name: "ShilpiDB",
+  expansion: "Spatial vector drawing store",
+  role: "Geometry spine",
+  summary:
+    "Shared drawing database across the suite — .vdb codec, spatial index, shilpid server, and shilpi-http for portals.",
+  url: "https://github.com/HolagundiWorks/shilpidb",
+} as const;
 
 /**
  * Portal and surface labels — staff workspace, external portals, account hub.
@@ -270,13 +333,14 @@ export const AORMS_PORTALS = {
   contractor: { label: "Contractor portal" as const },
   site: { label: "Site portal" as const },
   external: {
-    authTagline: `Client, consultant, contractor & site portals · ${AORMS_STUDIO.title}`,
+    authTagline: `Firm portals · ${AORMS_PLATFORM.name} suite communications`,
     signInIntro:
-      "Sign in to your client, consultant, contractor, or site portal.",
-    staffHint: `Office team members use ${AORMS_STUDIO.title} sign-in`,
+      "Sign in to your firm-branded client, consultant, contractor, or site portal — published updates only.",
+    staffHint: `Office teams use desktop ${AORMS_STUDIO.title} / ${AORMS_CONSULTANCY.title}`,
     loginPageLink: "Client, consultant, contractor & site portals",
     marketingList: "Client, consultant, contractor, and site portals",
     stageHeadline: "External portal access",
+    suiteEyebrow: `${AORMS_PLATFORM.name} suite`,
     url: platformPageUrl("externalAccess"),
   },
   account: {

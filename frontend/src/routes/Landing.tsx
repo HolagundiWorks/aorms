@@ -34,7 +34,9 @@ import { AormsLogo } from "../components/AormsLogo.js";
 import {
   AORMS_PLATFORM,
   PLATFORM_FRAMEWORKS,
-  PLATFORM_APPS,
+  SUITE_MANAGER_APPS,
+  SUITE_TECHNICAL_APPS,
+  SHILPIDB,
   AORMS_STUDIO,
   AORMS_CONSULTANCY,
   AORMS_PMC,
@@ -332,8 +334,7 @@ export function Landing() {
                 >
                   <StatusDot color="green" label="" size="sm" />
                   <Typography variant="caption" color="text.secondary">
-                    {AORMS_STUDIO.title} &amp; {AORMS_CONSULTANCY.title} live · {AORMS_PMC.title} preview · AI
-                    unmetered
+                    Suite: managers · AQC Estimation/BBS/PM · AADT · ShilpiDB · firm portals
                   </Typography>
                 </Stack>
               </Box>
@@ -407,9 +408,9 @@ export function Landing() {
         {/* 3 — Platform: frameworks, apps, AI, proof figures */}
         <Box id="platform" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
           <SectionHead
-            eyebrow="Platform"
-            title="Two frameworks. Three apps. Dual-tier AI."
-            lead="Operational and design frameworks stay explicit and shared. Architecture, engineering, and PMC deploy as focused apps on the same spine."
+            eyebrow="Suite"
+            title="Managers. Technical apps. Drafting. Shared drawings."
+            lead="Practice managers sync communications to firm portals. Estimation, BBS, and project management run locally on a shared engine. AADT drafts into ShilpiDB."
           />
           <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
             {Object.values(PLATFORM_FRAMEWORKS).map((fw) => (
@@ -425,9 +426,12 @@ export function Landing() {
               </Grid>
             ))}
           </Grid>
+          <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em", display: "block", mb: MARKETING_RHYTHM.sm }}>
+            Practice managers
+          </Typography>
           <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
-            {PLATFORM_APPS.map((app) => (
-              <Grid key={app.id} size={{ xs: 12, md: 4 }}>
+            {SUITE_MANAGER_APPS.map((app) => (
+              <Grid key={app.id} size={{ xs: 12, md: 6 }}>
                 <Surface layer="flat" id={app.id} sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
                   <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1 }}>
                     <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
@@ -448,6 +452,9 @@ export function Landing() {
                       {app.status === "live" ? "Live" : app.status === "preview" ? "Preview" : "Roadmap"}
                     </Typography>
                   </Stack>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+                    {app.subtitle}
+                  </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                     {app.body}
                   </Typography>
@@ -466,6 +473,72 @@ export function Landing() {
               </Grid>
             ))}
           </Grid>
+          <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em", display: "block", mb: MARKETING_RHYTHM.sm }}>
+            Technical &amp; drafting
+          </Typography>
+          <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
+            {SUITE_TECHNICAL_APPS.map((app) => (
+              <Grid key={app.id} size={{ xs: 12, sm: 6, md: 3 }}>
+                <Surface layer="flat" id={app.id} sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
+                  <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
+                    {app.workspace}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+                    {app.subtitle}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
+                    {app.body}
+                  </Typography>
+                  <Stack direction="row" spacing={1} sx={{ mt: MARKETING_RHYTHM.md, flexWrap: "wrap" }}>
+                    <Button
+                      component="a"
+                      href={app.href}
+                      target={app.href.startsWith("http") ? "_blank" : undefined}
+                      rel={app.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                      variant="outlined"
+                      color="inherit"
+                      size="small"
+                      sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px` }}
+                    >
+                      {app.cta}
+                    </Button>
+                    <Button
+                      component="a"
+                      href={app.repo}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variant="text"
+                      size="small"
+                      sx={{ textTransform: "none", fontWeight: 600 }}
+                    >
+                      Repo
+                    </Button>
+                  </Stack>
+                </Surface>
+              </Grid>
+            ))}
+          </Grid>
+          <SoftSurface sx={{ p: MARKETING_RHYTHM.cardPad, mb: MARKETING_RHYTHM.blockGap }}>
+            <Typography variant="h6" component="h3" sx={{ fontWeight: 700 }}>
+              {SHILPIDB.name}
+            </Typography>
+            <Typography variant="overline" color="text.secondary">
+              {SHILPIDB.role}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
+              {SHILPIDB.summary}
+            </Typography>
+            <Button
+              component="a"
+              href={SHILPIDB.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="small"
+              sx={{ mt: MARKETING_RHYTHM.md, textTransform: "none", fontWeight: 700 }}
+            >
+              ShilpiDB on GitHub
+            </Button>
+          </SoftSurface>
           <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
             {[EOMS, ESTI].map((tier) => (
               <Grid key={tier.name} size={{ xs: 12, md: 6 }}>

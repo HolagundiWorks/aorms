@@ -8,18 +8,20 @@ import { Link } from "react-router-dom";
 import { MarketingShell } from "../components/landing/MarketingShell.js";
 import {
   loadDesktopInstallerOffers,
+  resolveInstallerOffer,
+  type DesktopInstallerApp,
   type DesktopInstallerOffer,
 } from "../lib/desktop-installers.js";
 import {
-  AORMS_CONSULTANCY,
   AORMS_PLATFORM,
   AORMS_STUDIO,
+  SHILPIDB,
 } from "../lib/product-nomenclature.js";
 
 /**
- * Public `/downloads` portal — local-first desktop installers for AStudio /
- * AConsulting. CTAs stay on web_fallback until a signed URL + sha256 is wired
- * (docs/esti/WEB-PORTAL.md). Legacy Lite/Pro Manager SKUs stay retired.
+ * Public `/downloads` portal — suite desktop installers (managers + AQC + AADT).
+ * CTAs stay on web_fallback until a signed URL + sha256 is wired
+ * (docs/esti/WEB-PORTAL.md).
  */
 export function Downloads() {
   const [offers, setOffers] = useState<DesktopInstallerOffer[] | null>(null);
@@ -39,15 +41,17 @@ export function Downloads() {
     <MarketingShell contours>
       <div className="lp2-ds">
         <header className="lp2-section-head lp2-reveal" id="top">
-          <p className="lp2-section-head__tag">Desktop · preferred path</p>
+          <p className="lp2-section-head__tag">Desktop · suite installers</p>
           <h1 className="lp2-section-head__title">Downloads</h1>
           <p className="lp2-section-head__body">
-            {AORMS_PLATFORM.name} is <strong>desktop preferred with web parity</strong> — the
-            same SPA on a local-first node or in the browser. Signed Windows installers
-            appear here when packaging ships; until then, open the web workspace.
+            {AORMS_PLATFORM.name} is a <strong>product suite</strong> — practice managers
+            online for communications; Estimation, BBS, project management, and drafting on
+            the desktop. Signed Windows installers appear here when packaging ships; until
+            then open the web workspace or the product repo. Drawings stay in{" "}
+            {SHILPIDB.name}.
           </p>
           <p className="lp2-blog-links">
-            <Link to="/">Platform home</Link>
+            <Link to="/">Suite home</Link>
             <span aria-hidden> · </span>
             <Link to="/login">{AORMS_STUDIO.title} web</Link>
             <span aria-hidden> · </span>
@@ -70,13 +74,12 @@ export function Downloads() {
                         ? offer.version
                           ? `Windows · v${offer.version}`
                           : "Windows · signed"
-                        : "Web workspace · installer pending"
+                        : "Installer pending"
                     }
                   />
                 </Stack>
                 <Typography variant="body2" color="text.secondary">
-                  {offer.expansion} — local-first desktop node (Postgres · worker · Ollama on
-                  device) with hub sync when licensed. Same Standard licence as web.
+                  {offer.expansion}
                 </Typography>
 
                 {offer.status === "available" && offer.downloadUrl ? (
@@ -101,16 +104,28 @@ export function Downloads() {
                 ) : (
                   <Stack spacing={1.5}>
                     <Typography variant="body2">{offer.fallbackReason}</Typography>
-                    <Box>
+                    <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap" }}>
                       <Button
                         variant="contained"
                         size="large"
                         endIcon={<OpenInNewOutlined />}
                         href={offer.webUrl}
                       >
-                        Open {offer.title} in browser
+                        Open {offer.title}
                       </Button>
-                    </Box>
+                      {offer.repoUrl ? (
+                        <Button
+                          variant="outlined"
+                          size="large"
+                          endIcon={<OpenInNewOutlined />}
+                          href={offer.repoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          GitHub
+                        </Button>
+                      ) : null}
+                    </Stack>
                   </Stack>
                 )}
               </Stack>
@@ -118,13 +133,11 @@ export function Downloads() {
           ))}
 
           <Typography variant="body2" color="text.secondary" className="lp2-reveal">
-            Legacy Lite / Pro / Community Manager installers and the separate Estimate desktop
-            app stay <strong>retired</strong>. Estimating is in-product (Rate Books + project
-            Estimation). Operators: wire signed URLs via{" "}
-            <code>VITE_ASTUDIO_INSTALLER_URL</code> / <code>VITE_ACONSULTING_INSTALLER_URL</code>{" "}
-            or fill <code>frontend/public/update-manifests/*.json</code> and set{" "}
+            Legacy Lite / Pro / Community Manager installers stay <strong>retired</strong>.
+            Operators: wire signed URLs via env or fill{" "}
+            <code>frontend/public/update-manifests/*.json</code> and set{" "}
             <code>VITE_PORTAL_USE_RELEASE_INSTALLERS=true</code> — never point live CTAs at
-            unsigned overnight builds (wait on Bhoomi for signed URL + sha256).
+            unsigned overnight builds.
           </Typography>
         </Stack>
       </div>
@@ -133,33 +146,13 @@ export function Downloads() {
 }
 
 function placeholderOffers(): DesktopInstallerOffer[] {
-  // Synchronous first paint while manifests fetch — always web_fallback.
-  return [
-    {
-      app: "astudio",
-      title: AORMS_STUDIO.title,
-      expansion: AORMS_STUDIO.expansion,
-      webUrl: AORMS_STUDIO.appUrl,
-      downloadUrl: null,
-      version: null,
-      sha256: null,
-      status: "web_fallback",
-      fallbackReason:
-        "Signed Windows installer not published yet — use the web workspace (same SPA, same Standard licence).",
-      manifestPath: "/update-manifests/astudio.json",
-    },
-    {
-      app: "aconsulting",
-      title: AORMS_CONSULTANCY.title,
-      expansion: AORMS_CONSULTANCY.expansion,
-      webUrl: AORMS_CONSULTANCY.appUrl,
-      downloadUrl: null,
-      version: null,
-      sha256: null,
-      status: "web_fallback",
-      fallbackReason:
-        "Signed Windows installer not published yet — use the web workspace (same SPA, same Standard licence).",
-      manifestPath: "/update-manifests/aconsulting.json",
-    },
+  const apps: DesktopInstallerApp[] = [
+    "astudio",
+    "aconsulting",
+    "aqc-estimation",
+    "aqc-bbs",
+    "aqc-pm",
+    "aadt",
   ];
+  return apps.map((app) => resolveInstallerOffer(app, null));
 }

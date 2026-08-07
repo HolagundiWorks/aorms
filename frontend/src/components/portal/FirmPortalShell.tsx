@@ -9,6 +9,7 @@ import {
 import type { ReactNode } from "react";
 import { PortalNeuFrame } from "./PortalNeuFrame.js";
 import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
+import { AORMS_PORTALS } from "../../lib/product-nomenclature.js";
 
 /** Firm portal IA — read-mostly; thin writes stay inside section bodies. */
 export type FirmPortalSection =
@@ -68,7 +69,7 @@ export function FirmPortalShell({
           >
             <Stack spacing={0.25} sx={{ minWidth: 0 }}>
               <Typography variant="overline" color="text.secondary" sx={{ lineHeight: 1.2 }}>
-                {portalLabel}
+                {AORMS_PORTALS.external.suiteEyebrow} · {portalLabel}
               </Typography>
               <Typography
                 variant="subtitle1"

@@ -1,25 +1,29 @@
 /** Landing-page SEO — platform home `/`. Keep in sync with index.html meta tags. */
 import {
+  AADT,
   AORMS_CONSULTANCY,
   AORMS_PMC,
   AORMS_PLATFORM,
   AORMS_STUDIO,
+  AQC_BBS,
+  AQC_ESTIMATION,
   EOMS,
   ESTI,
+  SHILPIDB,
 } from "./product-nomenclature.js";
 
 export const LANDING_SEO = {
   title: `AORMS | ${AORMS_PLATFORM.expansion}`,
   description:
-    "Operational and design frameworks for AEC consulting and PMC firms — desktop preferred with web parity, pure neumorphic chrome, EOMS intelligence, and ESTI on one spine.",
+    "AORMS suite for AEC consultancies — practice managers (AStudio, AConsulting), technical apps (AQC Estimation, BBS, Project Management), AADT drafting, and ShilpiDB drawings. Technical work local; portals online.",
   keywords:
-    "AORMS, EOMS, AEC consulting, AStudio, AConsulting, AProc, desktop local-first, WinUI, architecture consultancy software, engineering consultancy software, PMC software, neumorphism, operational framework, design framework",
+    "AORMS, AStudio, AConsulting, AQC Estimation, AQC BBS, AProc, AADT, ShilpiDB, EOMS, AEC consulting suite, desktop local-first, WinUI, architecture software, engineering software, PMC software",
   ogTitle: `AORMS — ${AORMS_PLATFORM.heroHeadline[0]} ${AORMS_PLATFORM.heroHeadline[1]}`,
   ogDescription:
-    "Accelerated Operational Resources Management System: three apps — AStudio, AConsulting, AProc. Desktop node + web parity. One spine.",
-  twitterTitle: "AORMS — frameworks for AEC consultancies",
+    "Accelerated Operational Resources Management System: practice managers online for communications; Estimation, BBS, PM, and AADT locally. ShilpiDB for drawings. Mongo ops for portals.",
+  twitterTitle: "AORMS — suite for AEC consultancies",
   twitterDescription:
-    `Desktop preferred + web parity for architecture, engineering, and PMC consultancies. ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title} live; ${AORMS_PMC.title} in preview.`,
+    `${AORMS_STUDIO.title} & ${AORMS_CONSULTANCY.title} managers · ${AQC_ESTIMATION.title} · ${AQC_BBS.title} · ${AORMS_PMC.title} · ${AADT.title} · ${SHILPIDB.name}.`,
   headline: `${AORMS_PLATFORM.heroHeadline[0]} ${AORMS_PLATFORM.heroHeadline[1]}`,
   footerBlurb: `${AORMS_PLATFORM.name} (${AORMS_PLATFORM.expansion}).`,
   canonical: "https://aorms.in/",
@@ -31,57 +35,47 @@ export const LANDING_FAQ = [
   {
     question: "What is AORMS?",
     answer:
-      `AORMS (Accelerated Operational Resources Management System) is a pre-release platform for AEC consulting and project management firms — architecture, engineering, and PMC practices. It combines an operational framework and a design framework on one spine, with ${EOMS.name} as the ${EOMS.role.toLowerCase()} and ${ESTI.name} as the ${ESTI.role.toLowerCase()} in ${AORMS_STUDIO.title}.`,
+      `AORMS (${AORMS_PLATFORM.expansion}) is a product suite for AEC consulting and PMC firms — practice managers, technical desktop apps, AADT drafting, and ShilpiDB for drawings. ${EOMS.name} is the knowledge bank; ${ESTI.name} is the internal AI agent.`,
   },
   {
     question: "Who is the platform for?",
     answer:
-      `AEC consulting and PMC firms — architecture, engineering, and project management practices of 5–500 people replacing scattered messaging, advisory workflows, documentation, email, sheets, and file sharing. ${AORMS_STUDIO.title} ships for architecture; ${AORMS_CONSULTANCY.title} for engineering; ${AORMS_PMC.title} for PMC (preview).`,
+      `AEC consulting and PMC firms — architecture, engineering, and project management practices. Managers handle tasks, office, HR, and communications; technical work (estimation, BBS, programme, drafting) stays on the desktop.`,
   },
   {
-    question: `What are ${AORMS_STUDIO.title}, ${AORMS_CONSULTANCY.title}, and ${AORMS_PMC.title}?`,
+    question: `What are ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title}?`,
     answer:
-      `${AORMS_STUDIO.title} (${AORMS_STUDIO.expansion}) is the architecture consultancy app (live at ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")}). ${AORMS_CONSULTANCY.title} (${AORMS_CONSULTANCY.expansion}) is the engineering consultancy app (live at ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")}). ${AORMS_PMC.title} (${AORMS_PMC.expansion}) is the PMC app (preview at ${AORMS_PMC.appUrl.replace(/^https:\/\//, "")}). All share the same AORMS platform spine and ${EOMS.name}.`,
+      `Practice managers — Tasks, Office, HR, Payroll, and portal communications. ${AORMS_STUDIO.title} for architecture; ${AORMS_CONSULTANCY.title} for engineering. They do not own BOQ math or CAD entities.`,
+  },
+  {
+    question: "What are the AQC technical apps?",
+    answer:
+      `${AQC_ESTIMATION.title}, ${AQC_BBS.title}, and ${AORMS_PMC.suiteTitle ?? AORMS_PMC.title} (${AORMS_PMC.title}) are separate desktop installers sharing bbs_engine. They publish totals and issued PDFs — never draft lines — to firm portals.`,
+  },
+  {
+    question: `What are ${AADT.title} and ${SHILPIDB.name}?`,
+    answer:
+      `${AADT.title} is local 2D CAD. ${SHILPIDB.name} is the geometry spine connecting drawings across the suite; portals see published packages only.`,
   },
   {
     question: "What are the operational and design frameworks?",
     answer:
-      "The operational framework is how the consulting office runs — intake, process standards, review, audit, and governed knowledge. The design framework is how engagements are structured — methodologies, deliverable models, and versioned advisory templates. AORMS is built for AEC consultancies and PMC firms that advise and govern — not contractor ERP.",
+      "The operational framework is how the consulting office runs — intake, process standards, review, audit, and governed knowledge. The design framework is how engagements are structured — methodologies, deliverable models, and versioned advisory templates.",
   },
   {
     question: "What is the dual-tier AI architecture?",
     answer:
-      `${EOMS.name} (${EOMS.expansion}) is the ${EOMS.role.toLowerCase()} — apps query it for authoritative codes and compliance. ${ESTI.name} (${ESTI.expansion}) is the ${ESTI.role.toLowerCase()} — it answers only from validated firm repositories. See the ${EOMS.name} + ${ESTI.name} section on this page.`,
+      `${EOMS.name} is the knowledge bank for codes and compliance. ${ESTI.name} answers from validated firm repositories on desktop managers. Technical AI stays local (propose, never auto-commit money or geometry).`,
   },
   {
-    question: `Where is the ${AORMS_STUDIO.title} documentation?`,
+    question: "Where do clients and consultants sign in?",
     answer:
-      `The ${AORMS_STUDIO.title} user guide lives at aorms.in/wiki — getting started, finance, workflows, and account setup for Indian architecture practices.`,
-  },
-  {
-    question: "What is EOMS?",
-    answer:
-      `${EOMS.name} (${EOMS.expansion}) is the ${EOMS.role.toLowerCase()} on the AORMS platform — ${EOMS.summary}`,
-  },
-  {
-    question: "What is ESTI?",
-    answer:
-      `${ESTI.name} (${ESTI.expansion}) is the ${ESTI.role.toLowerCase()} — ${ESTI.summary} Live in ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title} on the same spine.`,
-  },
-  {
-    question: `What does ${AORMS_PMC.title} include?`,
-    answer:
-      `${AORMS_PMC.title} is owner-side PMC governance: master programme milestones (CSV and Primavera P6 XER import), package tenders with sealed contractor-portal bids, RA and steel certification, BBS and steel reconciliation — not a contractor labour ERP or full CPM engine. Preview at ${AORMS_PMC.appUrl.replace(/^https:\/\//, "")}.`,
-  },
-  {
-    question: "Is this documentation the shipped product?",
-    answer:
-      `This page is the live platform home. Browser workspaces at ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")} and ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")} are live; ${AORMS_PMC.title} is in preview at ${AORMS_PMC.appUrl.replace(/^https:\/\//, "")}.`,
+      "Firm-branded portals — Updates, Project, Progress, Drawings, Documents — for published data only. Staff ERP is not on aorms.in; use desktop apps or demo sign-in for demos.",
   },
   {
     question: "Is there a desktop app?",
     answer:
-      `Yes. AORMS is desktop preferred with web parity — a local-first WinUI node plus the same SPA in the browser. Signed installers list at aorms.in/downloads when packaging ships; until then use the web workspace. Legacy Manager Lite/Pro installers stay retired.`,
+      `Yes. Technical work and practice managers ship as Windows desktop apps. Signed installers list at aorms.in/downloads when packaging ships; until then use demos and GitHub repos.`,
   },
 ] as const;
 
@@ -117,15 +111,6 @@ export function injectLandingJsonLd(): void {
         publisher: { "@id": "https://aorms.in/#organization" },
       },
       {
-        "@type": "WebSite",
-        "@id": "https://aorms.in/wiki#website",
-        url: "https://aorms.in/wiki",
-        name: AORMS_STUDIO.wikiName,
-        description: `Official documentation for ${AORMS_STUDIO.title} on the AORMS platform.`,
-        inLanguage: "en-IN",
-        publisher: { "@id": "https://aorms.in/#organization" },
-      },
-      {
         "@type": "Organization",
         "@id": "https://aorms.in/#organization",
         name: "Human Centric Works",
@@ -148,32 +133,31 @@ export function injectLandingJsonLd(): void {
         alternateName: [
           AORMS_PLATFORM.expansion,
           AORMS_STUDIO.title,
-          AORMS_STUDIO.expansion,
           AORMS_CONSULTANCY.title,
-          AORMS_CONSULTANCY.expansion,
+          AQC_ESTIMATION.title,
+          AQC_BBS.title,
           AORMS_PMC.title,
-          AORMS_PMC.expansion,
+          AADT.title,
+          SHILPIDB.name,
           EOMS.name,
-          EOMS.expansion,
           ESTI.name,
-          ESTI.expansion,
         ],
         applicationCategory: "BusinessApplication",
         operatingSystem: "Windows, Web",
         url: "https://aorms.in/",
         description: LANDING_SEO.description,
         featureList:
-          "operational framework, design framework, local-first desktop node, web parity, pure neumorphism UI, collaboration, review and approval, audit and compliance, knowledge base, analytics dashboards, EOMS knowledge bank, ESTI internal AI agent",
+          "practice managers, AQC Estimation, AQC BBS, AQC Project Management, AADT drafting, ShilpiDB geometry, firm portals, local-first desktop, EOMS, ESTI",
         audience: {
           "@type": "Audience",
           audienceType:
-            "AEC consulting and PMC firms — architecture, engineering, and project management consultancies (5–500 people)",
+            "AEC consulting and PMC firms — architecture, engineering, and project management consultancies",
         },
         offers: {
           "@type": "Offer",
-          name: `${AORMS_PLATFORM.name} platform`,
-          description: `Pre-release platform. ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title} shipping; ${AORMS_PMC.title} in preview — standard licence (desktop + web).`,
-          url: `https://aorms.in/login`,
+          name: `${AORMS_PLATFORM.name} suite`,
+          description: `Open-source suite. Managers and technical desktops; portals for communications.`,
+          url: "https://aorms.in/downloads",
         },
         publisher: { "@id": "https://aorms.in/#organization" },
       },

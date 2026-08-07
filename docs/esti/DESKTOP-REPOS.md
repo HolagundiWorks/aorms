@@ -1,6 +1,6 @@
 # Desktop sibling repos + suite packaging
 
-**Status:** Canonical · **Updated:** 2026-08-07 (suite architecture)  
+**Status:** Canonical · **Updated:** 2026-08-08 (suite branding + per-app repos)  
 **Product law:** [AORMS-SUITE.md](AORMS-SUITE.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md)
 
 ## Decision (locked)
@@ -8,7 +8,7 @@
 | Choice | Detail |
 | --- | --- |
 | **Practice managers** | [AStudio](https://github.com/HolagundiWorks/AStudio) · [AConsulting](https://github.com/HolagundiWorks/AConsulting) |
-| **Technical apps** | AQC **Estimation** · **BBS** · **PM** — three installers, shared `bbs_engine` |
+| **Technical apps** | [AQC-Estimation](https://github.com/HolagundiWorks/AQC-Estimation) · [AQC-BBS](https://github.com/HolagundiWorks/AQC-BBS) · [AQC-PM](https://github.com/HolagundiWorks/AQC-PM) — three installers; engine SoT in [AQC](https://github.com/HolagundiWorks/AQC) (`bbs_engine`) |
 | **Drafting / geometry** | [AADT](https://github.com/HolagundiWorks/AADT) · [shilpidb](https://github.com/HolagundiWorks/shilpidb) |
 | **Ops cloud** | MongoDB via esti hub |
 | **Stack (WinUI)** | C# WinUI 3 + C++ `bbs_engine` where calc applies |
@@ -18,21 +18,25 @@
 
 | Repo | Role |
 | --- | --- |
-| `HolagundiWorks/AQC` | Engine SoT + three technical app projects |
+| `HolagundiWorks/AQC` | Engine SoT (`bbs_engine`, `Aorms.Bridge`) + reference `BBSApp` |
+| `HolagundiWorks/AQC-Estimation` | Estimation installer shell (publishes to portals) |
+| `HolagundiWorks/AQC-BBS` | BBS installer shell |
+| `HolagundiWorks/AQC-PM` | Project Management / AProc installer shell |
 | `HolagundiWorks/AStudio` | Architecture practice manager |
 | `HolagundiWorks/AConsulting` | Engineering practice manager |
 | `HolagundiWorks/AADT` | 2D drafting |
 | `HolagundiWorks/shilpidb` | Geometry store + `shilpi-http` |
-| `HolagundiWorks/esti` (aorms) | Hub · portals · marketing · Mongo ops · contracts |
+| `HolagundiWorks/aorms` (esti) | Hub · portals · marketing · Mongo ops · contracts |
 
 ## Packaging policy
 
-1. Pin `bbs_engine` + `Aorms.Bridge` (submodule / tag `aorms-bridge-d2`).  
+1. Pin `bbs_engine` + `Aorms.Bridge` from **AQC** (submodule / tag).  
 2. Three AQC MSIX identities — do not fork divergent engines.  
 3. Managers do **not** absorb Estimation/BBS UI.  
-4. Drawings flow through ShilpiDB; ops through Mongo.
+4. Drawings flow through ShilpiDB; ops through Mongo.  
+5. Public download CTAs stay `web_fallback` until signed URL + sha256 (`frontend/public/update-manifests/`).
 
 ## Related
 
 - [AORMS-SUITE.md](AORMS-SUITE.md) · [SHILPI-WIRE.md](SHILPI-WIRE.md) · [MONGO-OPS.md](MONGO-OPS.md)  
-- [ROADMAP.md](ROADMAP.md)  
+- [ROADMAP.md](ROADMAP.md) · [WEB-PORTAL.md](WEB-PORTAL.md)  

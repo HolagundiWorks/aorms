@@ -147,7 +147,7 @@ function brandCopy(
   }
   return {
     title: "Sign in",
-    lead: `One AORMS sign-in for ${AORMS_STUDIO.title}, ${AORMS_CONSULTANCY.title}, ${AORMS_PMC.title}, portals, and licensing.`,
+    lead: `One AORMS sign-in for ${AORMS_STUDIO.title}, ${AORMS_CONSULTANCY.title}, firm portals, and licensing. Technical apps publish from the desktop.`,
   };
 }
 
