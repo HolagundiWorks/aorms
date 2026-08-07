@@ -30,6 +30,17 @@ services:
     restart: unless-stopped
     ports: ["6379:6379"]
 
+  mongo:
+    image: docker.io/library/mongo:7
+    container_name: esti-mongo
+    restart: unless-stopped
+    ports: ["27017:27017"]
+    volumes: ["esti-mongo-data:/var/lib/mongodb"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      retries: 5
+
   minio:
     image: docker.io/minio/minio:latest
     container_name: esti-minio
@@ -55,6 +66,8 @@ services:
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       DATABASE_URL: ${DATABASE_URL:-postgres://esti:esti@db:5432/esti}
+      MONGODB_URL: ${MONGODB_URL:-mongodb://mongo:27017}
+      MONGODB_DB: ${MONGODB_DB:-aorms_ops}
       REDIS_URL: redis://redis:6379
       S3_ENDPOINT: http://minio:9000
       S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
@@ -168,6 +181,8 @@ services:
         condition: service_started
       minio:
         condition: service_started
+      mongo:
+        condition: service_started
 
   frontend:
     image: localhost/esti-frontend:dev
@@ -198,5 +213,6 @@ services:
 
 volumes:
   esti-db-data:
+  esti-mongo-data:
   esti-minio-data:
   esti-ollama-data:

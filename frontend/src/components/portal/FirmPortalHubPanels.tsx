@@ -208,21 +208,30 @@ const TX_COLS: GridColDef[] = [
   },
 ];
 
-/** Drawings tab — READY drawings + issued transmittals. */
+/** Drawings tab — READY drawings + issued transmittals + Shilpi package refs. */
 export function FirmPortalDrawingsPanel({
   loading,
   drawings,
   transmittals,
+  packages,
 }: {
   loading: boolean;
   drawings: DrawingRow[];
   transmittals: TransmittalRow[];
+  packages?: Array<{
+    id: string;
+    title: string;
+    drawingPackageId?: string;
+    vdbUri?: string;
+    updatedAt?: string;
+  }>;
 }) {
+  const pkgs = packages ?? [];
   return (
-    <PanelShell title="Drawings" hint="READY drawings and issued transmittals visible to this portal.">
+    <PanelShell title="Drawings" hint="READY drawings, transmittals, and published Shilpi packages.">
       <DataState
         loading={loading}
-        isEmpty={!loading && drawings.length === 0 && transmittals.length === 0}
+        isEmpty={!loading && drawings.length === 0 && transmittals.length === 0 && pkgs.length === 0}
         columnCount={3}
         empty={{
           title: "No drawings yet",
@@ -230,6 +239,27 @@ export function FirmPortalDrawingsPanel({
         }}
       >
         <Stack spacing={3}>
+          {pkgs.length > 0 && (
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
+                Published packages (Shilpi)
+              </Typography>
+              <Stack spacing={1}>
+                {pkgs.map((p) => (
+                  <Box key={p.id} sx={{ py: 1, borderBottom: 1, borderColor: "divider" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {p.title}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {p.drawingPackageId ?? p.id}
+                      {p.vdbUri ? ` · ${p.vdbUri}` : ""}
+                      {p.updatedAt ? ` · ${p.updatedAt}` : ""}
+                    </Typography>
+                  </Box>
+                ))}
+              </Stack>
+            </Box>
+          )}
           {drawings.length > 0 && (
             <Box>
               <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>

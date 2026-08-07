@@ -1,0 +1,115 @@
+import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
+import type { DB } from "../../db/index.js";
+import { projectOffices } from "../../db/schema.js";
+import { getFirm } from "../../lib/firm.js";
+import {
+  listAllOpsForFirm,
+  listOpsTasksForProject,
+  listPublishedArtifacts,
+  mongoOpsMode,
+  upsertOpsTask,
+  upsertPublishedArtifact,
+} from "../../lib/mongo/ops.js";
+import { shilpiHealth, shilpiHttpConfigured } from "../../lib/shilpi/client.js";
+import { clientProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
+
+async function assertOwnedProject(
+  ctx: { db: DB; user: { clientId: string } },
+  projectId: string,
+) {
+  const rows = await ctx.db
+    .select({ id: projectOffices.id, clientId: projectOffices.clientId })
+    .from(projectOffices)
+    .where(eq(projectOffices.id, projectId))
+    .limit(1);
+  const p = rows[0];
+  if (!p || p.clientId !== ctx.user.clientId) {
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+}
+
+/** Mongo / memory ops — staff publish + portal read + ops DB manager. */
+export const mongoOpsRouter = router({
+  status: protectedProcedure.query(async () => ({
+    mode: mongoOpsMode(),
+    shilpiConfigured: shilpiHttpConfigured(),
+    shilpi: await shilpiHealth(),
+  })),
+
+  publishTask: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        taskId: z.string().min(1),
+        title: z.string().min(1),
+        status: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const firm = await getFirm(ctx.db);
+      const now = new Date().toISOString();
+      await upsertOpsTask({
+        firmId: firm.id,
+        projectId: input.projectId,
+        taskId: input.taskId,
+        title: input.title,
+        status: input.status,
+        updatedAt: now,
+        publishedAt: now,
+      });
+      return { ok: true as const };
+    }),
+
+  publishDrawingPackage: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        packageId: z.string().min(1),
+        title: z.string().min(1),
+        drawingPackageId: z.string().optional(),
+        vdbUri: z.string().optional(),
+        storageKey: z.string().optional(),
+        contentHash: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const firm = await getFirm(ctx.db);
+      const now = new Date().toISOString();
+      await upsertPublishedArtifact({
+        firmId: firm.id,
+        projectId: input.projectId,
+        entity: "drawingPackage",
+        entityId: input.packageId,
+        title: input.title,
+        drawingPackageId: input.drawingPackageId ?? input.packageId,
+        vdbUri: input.vdbUri,
+        storageKey: input.storageKey,
+        contentHash: input.contentHash,
+        updatedAt: now,
+      });
+      return { ok: true as const };
+    }),
+
+  portalTasks: clientProcedure
+    .input(z.object({ projectId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      await assertOwnedProject(ctx, input.projectId);
+      const firm = await getFirm(ctx.db);
+      return listOpsTasksForProject(firm.id, input.projectId);
+    }),
+
+  portalDrawingPackages: clientProcedure
+    .input(z.object({ projectId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      await assertOwnedProject(ctx, input.projectId);
+      const firm = await getFirm(ctx.db);
+      return listPublishedArtifacts(firm.id, input.projectId, "drawingPackage");
+    }),
+
+  adminBrowse: protectedProcedure.query(async ({ ctx }) => {
+    const firm = await getFirm(ctx.db);
+    return listAllOpsForFirm(firm.id);
+  }),
+});

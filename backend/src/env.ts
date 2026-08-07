@@ -77,6 +77,11 @@ const Env = z.object({
    */
   ESTI_UNIFIED_ACCOUNTS: envBool(),
   /** Read/write grace window (days) after a license `exp` before writes are blocked. */
+  MONGODB_URL: z.string().default(""),
+  /** Database name inside Mongo when MONGODB_URL is set (suite ops). */
+  MONGODB_DB: z.string().default("aorms_ops"),
+  /** ShilpiDB HTTP gateway (shilpi-http) for geometry queries from the hub. */
+  SHILPI_HTTP_URL: z.string().default(""),
   LICENSE_GRACE_DAYS: z.coerce.number().default(14),
   /** How often (hours) the node re-fetches a fresh license token from the hub. */
   LICENSE_REFRESH_HOURS: z.coerce.number().default(12),

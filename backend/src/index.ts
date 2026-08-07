@@ -50,6 +50,8 @@ import {
   ollamaModelFromEnv,
 } from "./lib/ai/ollama-config.js";
 import { registerSyncRoutes } from "./modules/sync/routes.js";
+import { registerMongoOpsRoutes } from "./modules/mongoOps/routes.js";
+import { initMongoOps } from "./lib/mongo/ops.js";
 import { drainOutbox } from "./lib/sync/outbox.js";
 import { proposePulseActions, runDueStandups } from "./lib/pulseEngine.js";
 import { tickDemoMidnightReset } from "./lib/demoReset.js";
@@ -146,6 +148,13 @@ try {
 } catch (err) {
   app.log.error(err, "migration failed");
   process.exit(1);
+}
+
+try {
+  const mongoMode = await initMongoOps();
+  app.log.info({ mongoMode }, "mongo ops store ready");
+} catch (err) {
+  app.log.warn(err, "mongo ops init failed — continuing with memory fallback");
 }
 
 // Licence-free plan pin for self-hosted VPS installs. No-op when FIRM_PLAN unset.
@@ -285,6 +294,7 @@ registerCalendarFeed(app);
 // License authority + sync ingest REST — hub-only; no-op on node installs.
 registerLicenseRoutes(app);
 registerSyncRoutes(app);
+registerMongoOpsRoutes(app);
 
 await app.register(fastifyTRPCPlugin, {
   prefix: "/trpc",

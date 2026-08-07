@@ -105,6 +105,7 @@ import { bbsRouter } from "../modules/bbs/router.js";
 import { steelReconciliationRouter } from "../modules/steel/router.js";
 import { moodboardRouter } from "../modules/moodboard/router.js";
 import { eomsRouter } from "../modules/eoms/router.js";
+import { mongoOpsRouter } from "../modules/mongoOps/router.js";
 import { publicProcedure, router } from "./trpc.js";
 
 export const appRouter = router({
@@ -178,6 +179,7 @@ export const appRouter = router({
   lessons: lessonRouter,
   appointments: appointmentRouter,
   portal: portalRouter,
+  mongoOps: mongoOpsRouter,
   clientRequests: clientRequestsRouter,
   settings: settingsRouter,
   licensing: licensingRouter,

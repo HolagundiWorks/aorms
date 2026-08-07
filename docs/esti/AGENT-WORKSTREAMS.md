@@ -1,48 +1,43 @@
 # AORMS active delivery — named agent crew
 
-**Status:** ACTIVE (D-waves) · **Date:** 2026-08-07  
-**Parent:** [ROADMAP.md](ROADMAP.md) · docs: [DOCUMENTATION-ROADMAP.md](DOCUMENTATION-ROADMAP.md)
+**Status:** ACTIVE (suite S-waves complete baseline) · **Date:** 2026-08-07  
+**Parent:** [ROADMAP.md](ROADMAP.md) · [AORMS-SUITE.md](AORMS-SUITE.md)
 
-## Solo mode — desktop-native pivot
+## Solo mode
 
-Prior esti SPA delivery is **closed** as product. **Open queue:** D5 sibling apps
-consume `aorms-bridge-d2` → D6 ops. **Open source for now;** SaaS licensing deferred.
+Suite law landed (S0–S5). **Open queue:** D6 signed installers · full BBSApp domain
+split into Estimation/BBS/PM WinUI · Postgres→Mongo migration completion.
 
 | Name | Role | Runtime | Owns now |
 | --- | --- | --- | --- |
-| **Bhoomi2** | Solo delivery | This Windows Cursor chat | ROADMAP Now · D5 consume pin · doc truth |
+| **Bhoomi2** | Solo delivery | This Windows Cursor chat | D6 · domain UI split · doc truth |
 | **Vishwakarma** | CTO / orchestrator | Parked | Resume → merge queue |
-| **Gagan** | Cloud hub / sync | Parked | Resume → hub contracts bumps |
-| **Aakash** | Portal / GTM | Parked | Resume → other portal roles · downloads |
-| **Bhoomi** | Cloud desktop | Parked | Optional AQC parallel |
+| **Gagan** | Cloud hub / sync | Parked | Resume → Mongo migration depth |
+| **Aakash** | Portal / GTM | Parked | Resume → downloads honesty |
+| **Bhoomi** | Cloud desktop | Parked | Optional parallel |
 
-### Now (from ROADMAP)
+### Done (suite)
 
-1. ✅ Merge [AQC#4](https://github.com/HolagundiWorks/AQC/pull/4) bridge docs  
-2. ✅ Scaffold `Aorms.Bridge` + SQLite in AQC (D2 code)  
-3. ✅ Smoke activate → Flush against hub (`aorms-bridge-d2`)  
-4. 🚧 Pin/consume engine in AStudio / AConsulting (D5) — ENGINE-PIN + submodule next  
+1. ✅ AORMS-SUITE canon + LOCAL-FIRST / nomenclature  
+2. ✅ Mongo ops + portal read + `/ops-db`  
+3. ✅ Shilpi wire docs + drawing packages on portal  
+4. ✅ AQC three product shells  
+5. ✅ AStudio / AConsulting Tasks → Mongo publish  
 
 ## Hard boundaries
 
 | Rule | Why |
 | --- | --- |
-| **Do not** reimplement BBS/estimate in TypeScript | C++ `bbs_engine` is SoT |
-| **Do not** invent SaaS commercial SKUs | Deferred — stay OSS |
-| **Do not** invent sha256 / flip unsigned installers | Honesty |
+| **Do not** put CAD entities in Mongo | ShilpiDB only |
+| **Do not** recompute BBS/estimates in cloud | `bbs_engine` SoT |
+| **Do not** invent SaaS SKUs | Deferred OSS |
 | **Do not** edit `Projects.tsx` / `Clients.tsx` | Parallel WIP |
-| Staff ERP stays out of `aorms.in` marketing apex | Product law |
 
 ## Sibling repos
 
 | Repo | Role |
 | --- | --- |
-| [AQC](https://github.com/HolagundiWorks/AQC) | Engine + bridge · tag `aorms-bridge-d2` |
-| [AStudio](https://github.com/HolagundiWorks/AStudio) | Architecture desktop OS |
-| [AConsulting](https://github.com/HolagundiWorks/AConsulting) | Engineering desktop OS |
-| esti / aorms | Hub · portals · marketing · contracts |
-
-## Related
-
-- [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · [AQC-BRIDGE-SPIKE.md](AQC-BRIDGE-SPIKE.md)  
-- [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md)  
+| [AQC](https://github.com/HolagundiWorks/AQC) | Engine + three technical shells |
+| [AStudio](https://github.com/HolagundiWorks/AStudio) · [AConsulting](https://github.com/HolagundiWorks/AConsulting) | Practice managers |
+| [AADT](https://github.com/HolagundiWorks/AADT) · [shilpidb](https://github.com/HolagundiWorks/shilpidb) | Drafting · geometry |
+| esti / aorms | Hub · portals · Mongo ops · marketing |

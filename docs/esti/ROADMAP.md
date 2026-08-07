@@ -1,68 +1,43 @@
 ﻿# AORMS Implementation Roadmap
 
-**Status:** ACTIVE (desktop-native pivot) · **Updated:** 2026-08-07  
-**Docs queue:** [DOCUMENTATION-ROADMAP.md](DOCUMENTATION-ROADMAP.md)
+**Status:** ACTIVE (suite architecture) · **Updated:** 2026-08-07  
+**Canon:** [AORMS-SUITE.md](AORMS-SUITE.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md)
 
-Staff ERP = desktop apps forked from [AQC](https://github.com/HolagundiWorks/AQC).
-`aorms.in` = marketing + demos. **Open source for now; SaaS licensing deferred.**
-
-Canon: [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md).
+Open source for now; SaaS licensing deferred.
 
 ---
 
-## Now (execute next)
+## Now (suite waves)
 
 | # | Work | Where | Exit |
 | --- | --- | --- | --- |
-| 1 | AQC bridge docs | AQC | ✅ [PR #4](https://github.com/HolagundiWorks/AQC/pull/4) |
-| 2 | `Aorms.Bridge` scaffold | AQC | ✅ [PR #5](https://github.com/HolagundiWorks/AQC/pull/5) merged |
-| 3 | **D2 smoke** — activate → Flush with live `syncToken` | AQC ↔ esti hub | ✅ Smoke + colocated hub |
-| 4 | **D5** — consume bridge in apps | AStudio · AConsulting | ✅ WinUI shell + BridgeHost · 🚧 domain UI fork of BBSApp |
-| 5 | Portal section content | esti | ✅ client portal panels (Project · Progress · Drawings · Documents) |
+| S0 | Suite canon docs | esti | ✅ [AORMS-SUITE.md](AORMS-SUITE.md) |
+| S1 | Mongo ops spike + portal read | esti hub | ✅ [MONGO-OPS.md](MONGO-OPS.md) · `mongoOps` · compose `mongo` |
+| S2 | Shilpi wire + portal drawing packages | esti · portals | ✅ [SHILPI-WIRE.md](SHILPI-WIRE.md) · package refs on Drawings tab |
+| S3 | AQC three-app packaging | AQC | ✅ Estimation · BBS · PM shells · [SUITE-PACKAGING](https://github.com/HolagundiWorks/AQC/blob/main/docs/SUITE-PACKAGING.md) |
+| S4 | Manager Tasks module | AStudio · AConsulting | ✅ local tasks + `PublishOpsTaskAsync` |
+| S5 | Online ops DB manager | esti | ✅ `/ops-db` (firm:admin) |
 
 ---
 
-## D-waves
+## D-waves (complete baseline)
 
 | Wave | Outcome | Status |
 | --- | --- | --- |
-| **D0–D1** | Product law · PORTAL-SYNC-BRIDGE | ✅ |
-| **D2** | AQC `Aorms.Bridge` | ✅ code + hub smoke |
-| **D3** | Sibling repos | ✅ |
-| **D4** | FirmPortalShell + marketing CTAs | ✅ |
-| **D5** | Domain apps consume engine + bridge | ✅ WinUI shells · domain UI next |
+| **D0–D5** | Bridge · siblings · WinUI shells · portal panels | ✅ |
 | **D6** | Signed installers · portal tenants | 🔲 |
 
 ---
 
 ## Platform apps
 
-| App | Repo |
+| App | Role |
 | --- | --- |
-| **AStudio** | https://github.com/HolagundiWorks/AStudio |
-| **AConsulting** | https://github.com/HolagundiWorks/AConsulting |
-| **AQC** | https://github.com/HolagundiWorks/AQC · tag `aorms-bridge-d2` |
-
----
-
-## Authoritative docs
-
-| Doc | Purpose |
-| --- | --- |
-| [DOCUMENTATION-ROADMAP.md](DOCUMENTATION-ROADMAP.md) | Doc read order |
-| [FIRM-PORTAL-SECTIONS.md](FIRM-PORTAL-SECTIONS.md) | Portal tab → hub map |
-| [AQC-BRIDGE-SPIKE.md](AQC-BRIDGE-SPIKE.md) | D2 checklist |
-| [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · [HUB-API.md](HUB-API.md) | Runtime + wire |
-| [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) | Repos · crew |
-
----
+| **AStudio** / **AConsulting** | Practice managers |
+| **AQC Estimation / BBS / PM** | Three installers · shared engine |
+| **AADT** · **ShilpiDB** | Drafting · geometry |
+| **Portals + `/ops-db`** | Online communications · Mongo browse |
 
 ## Deferred
 
-SaaS commercial SKUs · Stripe auto · W4 integrations · pure C++ UI rewrite.
-
-## Change rule
-
-Update this file + DOCUMENTATION-ROADMAP / PORTAL-SYNC-BRIDGE / sibling AGENTS when law moves.
-
-
+SaaS SKUs · Stripe · dual Postgres/Mongo forever · MSIX signing · full WinUI domain split from BBSApp.

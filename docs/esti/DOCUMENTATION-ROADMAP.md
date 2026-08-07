@@ -12,14 +12,13 @@ sibling repos.
 
 ## Read order (new agent / contributor)
 
-1. [ROADMAP.md](ROADMAP.md) — D-wave status · **Now** queue  
-2. [LOCAL-FIRST.md](LOCAL-FIRST.md) — runtime law (desktop-only staff)  
-3. [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) — SQLite + `aorms_bridge`  
-4. [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md) — marketing vs portal vs admin  
-5. [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) — licence (OSS)  
-6. [DESKTOP-REPOS.md](DESKTOP-REPOS.md) — AQC · AStudio · AConsulting  
-7. Sibling [AGENTS.md](https://github.com/HolagundiWorks/AStudio/blob/main/AGENTS.md) (or AConsulting)  
-8. [HUB-API.md](HUB-API.md) — activate → `syncToken` wire details  
+1. [AORMS-SUITE.md](AORMS-SUITE.md) — suite product law  
+2. [ROADMAP.md](ROADMAP.md) — S-wave status · **Now** queue  
+3. [LOCAL-FIRST.md](LOCAL-FIRST.md) — runtime law  
+4. [MONGO-OPS.md](MONGO-OPS.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md)  
+5. [SHILPI-WIRE.md](SHILPI-WIRE.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md)  
+6. [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md) · [HUB-API.md](HUB-API.md)  
+7. Sibling AGENTS (AStudio · AConsulting · AQC)  
 
 Historical / reference only: UNIFIED-ARCHITECTURE-V4 · NAVIGATION · APROC-ARCHITECTURE · DESKTOP-WEB-PARITY-UX · esti staff SPA.
 
@@ -44,8 +43,9 @@ Historical / reference only: UNIFIED-ARCHITECTURE-V4 · NAVIGATION · APROC-ARCH
 
 | Concern | Canon doc | Also update |
 | --- | --- | --- |
-| Delivery status | [ROADMAP.md](ROADMAP.md) | This file · AGENT-WORKSTREAMS · canvas |
-| Runtime / planes | [LOCAL-FIRST.md](LOCAL-FIRST.md) | PORTAL-SYNC-BRIDGE · contracts `sync.ts` |
+| Delivery status | [ROADMAP.md](ROADMAP.md) | This file · AGENT-WORKSTREAMS |
+| Suite law | [AORMS-SUITE.md](AORMS-SUITE.md) | LOCAL-FIRST · nomenclature · DESKTOP-REPOS |
+| Runtime / planes | [LOCAL-FIRST.md](LOCAL-FIRST.md) | MONGO-OPS · SHILPI-WIRE · contracts |
 | Hub wire | [HUB-API.md](HUB-API.md) | PORTAL-SYNC-BRIDGE · sibling SYNC-CONTRACT |
 | Hosts / CTAs | [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md) | `aorms-surface-urls.ts` · Landing |
 | Naming | [AORMS-PLATFORM-NOMENCLATURE.md](AORMS-PLATFORM-NOMENCLATURE.md) | `product-nomenclature.ts` |

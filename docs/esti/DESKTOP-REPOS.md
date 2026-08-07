@@ -1,41 +1,38 @@
-# Desktop sibling repos + portal installer wiring
+# Desktop sibling repos + suite packaging
 
-**Status:** Canonical · **Updated:** 2026-08-07 (desktop-native pivot)  
-**Product law:** [LOCAL-FIRST.md](LOCAL-FIRST.md) · Bridge: [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md)
+**Status:** Canonical · **Updated:** 2026-08-07 (suite architecture)  
+**Product law:** [AORMS-SUITE.md](AORMS-SUITE.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md)
 
 ## Decision (locked)
 
 | Choice | Detail |
 | --- | --- |
-| **Three desktop apps** | [AQC](https://github.com/HolagundiWorks/AQC) · `AStudio` · `AConsulting` |
-| **Stack** | C# WinUI 3 + C++ `bbs_engine` (fork AQC) |
-| **Contracts** | `@esti/contracts` + [HUB-API.md](HUB-API.md) / [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) |
-| **esti `desktop/`** | Historical WebView2 node — reference only |
-| **Open source** | Keep OSS for now; SaaS commercial licensing deferred |
+| **Practice managers** | [AStudio](https://github.com/HolagundiWorks/AStudio) · [AConsulting](https://github.com/HolagundiWorks/AConsulting) |
+| **Technical apps** | AQC **Estimation** · **BBS** · **PM** — three installers, shared `bbs_engine` |
+| **Drafting / geometry** | [AADT](https://github.com/HolagundiWorks/AADT) · [shilpidb](https://github.com/HolagundiWorks/shilpidb) |
+| **Ops cloud** | MongoDB via esti hub |
+| **Stack (WinUI)** | C# WinUI 3 + C++ `bbs_engine` where calc applies |
+| **Open source** | Keep OSS for now |
 
 ## Repos
 
 | Repo | Role |
 | --- | --- |
-| `HolagundiWorks/AQC` | AProc / quantity-costing — engine source + bridge spike |
-| `HolagundiWorks/AStudio` | Architecture practice OS |
-| `HolagundiWorks/AConsulting` | Engineering practice OS |
-| `HolagundiWorks/esti` (this) | Hub · portals · marketing · contracts · reference SPA |
+| `HolagundiWorks/AQC` | Engine SoT + three technical app projects |
+| `HolagundiWorks/AStudio` | Architecture practice manager |
+| `HolagundiWorks/AConsulting` | Engineering practice manager |
+| `HolagundiWorks/AADT` | 2D drafting |
+| `HolagundiWorks/shilpidb` | Geometry store + `shilpi-http` |
+| `HolagundiWorks/esti` (aorms) | Hub · portals · marketing · Mongo ops · contracts |
 
-Agent-ready scaffolds: [repo-scaffolds/](repo-scaffolds/).
+## Packaging policy
 
-## Fork policy
-
-1. Tag AQC baseline (BBS + estimate proven).  
-2. Share `bbs_engine` + `Aorms.Bridge` (submodule or package).  
-3. Specialize UI/domain per app — **do not** fork divergent engines.
-
-## Portal → installer wiring
-
-Signed Setup.exe from each sibling repo → `aorms.in/downloads` manifests
-([WEB-PORTAL.md](WEB-PORTAL.md)). Keep `web_fallback` until SmartScreen-trusted.
+1. Pin `bbs_engine` + `Aorms.Bridge` (submodule / tag `aorms-bridge-d2`).  
+2. Three AQC MSIX identities — do not fork divergent engines.  
+3. Managers do **not** absorb Estimation/BBS UI.  
+4. Drawings flow through ShilpiDB; ops through Mongo.
 
 ## Related
 
-- [AQC-BRIDGE-SPIKE.md](AQC-BRIDGE-SPIKE.md) · [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)  
-- [ROADMAP.md](ROADMAP.md) § D-waves  
+- [AORMS-SUITE.md](AORMS-SUITE.md) · [SHILPI-WIRE.md](SHILPI-WIRE.md) · [MONGO-OPS.md](MONGO-OPS.md)  
+- [ROADMAP.md](ROADMAP.md)  

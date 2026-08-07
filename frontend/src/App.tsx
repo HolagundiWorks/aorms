@@ -151,6 +151,7 @@ const Consultants = lazyRoute(() => import("./routes/Consultants.js"), "Consulta
 const Contractors = lazyRoute(() => import("./routes/Contractors.js"), "Contractors");
 const Lxos = lazyRoute(() => import("./routes/Lxos.js"), "Lxos");
 const SystemAdmin = lazyRoute(() => import("./routes/SystemAdmin.js"), "SystemAdmin");
+const OpsDbManager = lazyRoute(() => import("./routes/OpsDbManager.js"), "OpsDbManager");
 const Blog = lazyRoute(() => import("./routes/Blog.js"), "Blog");
 const BlogPost = lazyRoute(() => import("./routes/BlogPost.js"), "BlogPost");
 const Downloads = lazyRoute(() => import("./routes/Downloads.js"), "Downloads");
@@ -841,6 +842,9 @@ function AppWorkspace() {
                 )}
                 {can(user.role, "firm:admin") && (
                   <Route path="/audit" element={<Navigate to="/company-account#administration" replace />} />
+                )}
+                {can(user.role, "firm:admin") && (
+                  <Route path="/ops-db" element={<OpsDbManager />} />
                 )}
                 <Route path="/account" element={<AccountPortal />} />
                 <Route path="/company-account" element={<CompanyAccountPortal />} />

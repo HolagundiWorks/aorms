@@ -115,6 +115,10 @@ export function Portal() {
     { projectId: openId ?? "" },
     { enabled: !!openId },
   );
+  const drawingPackagesQ = trpc.mongoOps.portalDrawingPackages.useQuery(
+    { projectId: openId ?? "" },
+    { enabled: !!openId },
+  );
   const raBillsQ = trpc.portal.certifiedRaBills.useQuery(
     { projectId: openId ?? "" },
     { enabled: !!openId },
@@ -520,9 +524,16 @@ export function Portal() {
     ),
     drawings: (
       <FirmPortalDrawingsPanel
-        loading={!!openId && detailQ.isLoading}
+        loading={!!openId && (detailQ.isLoading || drawingPackagesQ.isLoading)}
         drawings={d?.drawings ?? []}
         transmittals={d?.transmittals ?? []}
+        packages={(drawingPackagesQ.data ?? []).map((p) => ({
+          id: p.entityId,
+          title: p.title,
+          drawingPackageId: p.drawingPackageId,
+          vdbUri: p.vdbUri,
+          updatedAt: p.updatedAt,
+        }))}
       />
     ),
     documents: (

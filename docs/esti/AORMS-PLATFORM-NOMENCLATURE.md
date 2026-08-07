@@ -7,10 +7,11 @@ This document is the **single source of truth for product naming**. Where an old
 **AORMS-Studio**, or **AORMS-Consultancy** as the *primary* display name, treat those as
 **superseded** (legacy redirects / transitional copy) unless the doc is explicitly marked historical.
 
-**Runtime (2026-08):** **AStudio** and **AConsulting** ship as **native desktop** apps
-(fork [AQC](https://github.com/HolagundiWorks/AQC)). **AProc = AQC**. `aorms.in` is
-marketing + demos. Firm clients use firm-branded portals. Open source for now;
-SaaS commercial licensing deferred — [LOCAL-FIRST.md](LOCAL-FIRST.md).
+**Runtime (2026-08):** **AORMS is a suite** — [AORMS-SUITE.md](AORMS-SUITE.md).
+**AStudio** / **AConsulting** = practice managers. **AQC** splits into Estimation ·
+BBS · Project Management (shared `bbs_engine`). **AADT** drafts; **ShilpiDB** holds
+geometry; **MongoDB** holds non-drawing ops. `aorms.in` = marketing + demos.
+Open source for now — [LOCAL-FIRST.md](LOCAL-FIRST.md).
 
 Executable constants: `frontend/src/lib/product-nomenclature.ts`.
 
@@ -20,28 +21,42 @@ Executable constants: `frontend/src/lib/product-nomenclature.ts`.
 
 | Name | Expansion / role | Audience |
 | --- | --- | --- |
-| **AORMS** | **Accelerated Operational Resources Management System** — the **platform** | **AEC consulting + PMC firms** — architecture, engineering, and project management consultancies |
-| **AStudio** | **Accelerated Studio** — architecture app (slug `astudio`; host `studio.aorms.in`) | Indian architecture & interior design consultancies |
-| **AConsulting** | **Accelerated Consulting** — engineering app (slug `aconsulting`; host `consultancy.aorms.in`) | Structural, MEP, civil, and multidisciplinary engineering consultancies |
-| **AProc** | **Accelerated Project Management** — PMC app (slug `aproc`; host `proc.aorms.in`) | Project management consultancies — programme, packages, site certification |
-| **EOMS** | **Knowledge bank** (standalone API, separate repo) — *Emergent Object Management System* | Catalog of standard codebooks & compliance codes; apps query its API |
-| **ESTI** | **Internal AI agent** — *Embedded Studio Intelligence* | Ask ESTI, Studio Intelligence, ESTI Pulse (live in **AStudio**) |
-| **`esti` (codename)** | Repo name, `@esti/*` packages, `esti_*` DB tables | Engineering only — do not expose in marketing |
+| **AORMS** | **Accelerated Operational Resources Management System** — the **suite / platform** | **AEC consulting + PMC firms** |
+| **AStudio** | **Accelerated Studio** — architecture **practice manager** | Architecture & interior consultancies |
+| **AConsulting** | **Accelerated Consulting** — engineering **practice manager** (marketing: AConsultancy) | Structural, MEP, civil consultancies |
+| **AQC Estimation** | Quantity / costing technical app (shared `bbs_engine`) | QS / estimators |
+| **AQC BBS** | Bar bending / steel recon technical app | Site / structural detailing |
+| **AQC Project Management** | Programme / packages / RA (absorbs **AProc**) | PMC / delivery |
+| **AADT** | **Accelerated Architectural Drafting** — 2D CAD | Drafters / architects |
+| **ShilpiDB** | Geometry / drawing store across the suite | All technical apps + portals (published) |
+| **EOMS** | **Knowledge bank** (standalone API) | Codebooks & compliance |
+| **ESTI** | **Internal AI agent** in managers / desktop | Ask ESTI, local assist |
+| **`esti` (codename)** | Repo / packages / legacy tables | Engineering only |
 
 **HCW** (Human Centric Works) is the design-system and product studio behind AORMS.
 
 ---
 
-## Three apps on one platform
+## Suite apps
 
-AORMS targets **AEC consulting firms and project management consultancies**. There are
-exactly **three apps**:
+AORMS is a **suite**, not three identical ERP forks:
 
-| Discipline | App name | Expansion | Slug | Host | Status |
-| --- | --- | --- | --- | --- | --- |
-| Architecture | **AStudio** | Accelerated Studio | `astudio` | `studio.aorms.in` (marketing) | **Desktop** — fork AQC |
-| Engineering | **AConsulting** | Accelerated Consulting | `aconsulting` | `consultancy.aorms.in` (marketing) | **Desktop** — fork AQC |
-| Project management / Q+C | **AQC** (*AProc*) | Accelerated Quantity and Costing | `aproc` / `aqc` | `proc.aorms.in` (marketing) | **Desktop** — [AQC](https://github.com/HolagundiWorks/AQC) |
+| Kind | Apps |
+| --- | --- |
+| Practice managers | **AStudio** · **AConsulting** — Tasks, Office, HR, Payroll, communications |
+| Technical (AQC lineage) | **Estimation** · **BBS** · **Project Management** — separate installers, shared engine |
+| Drafting | **AADT** |
+| Geometry | **ShilpiDB** |
+| Online | Portals · ops DB manager · marketing · Licence Manager |
+
+| Discipline | App name | Slug | Status |
+| --- | --- | --- | --- |
+| Architecture manager | **AStudio** | `astudio` | Desktop manager |
+| Engineering manager | **AConsulting** | `aconsulting` | Desktop manager |
+| Estimation | **AQC Estimation** | `aqc-estimation` | Desktop technical |
+| BBS | **AQC BBS** | `aqc-bbs` | Desktop technical |
+| Project management | **AQC PM** (*AProc*) | `aproc` / `aqc-pm` | Desktop technical |
+| Drafting | **AADT** | `aadt` | Desktop CAD |
 
 Legacy marketing names / slugs redirect:
 

@@ -1,19 +1,20 @@
 /**
- * Product naming — keep in sync with docs/esti/AORMS-PLATFORM-NOMENCLATURE.md.
- * Platform: AORMS. Apps: AStudio · AConsulting · AProc.
+ * Product naming — keep in sync with docs/esti/AORMS-PLATFORM-NOMENCLATURE.md
+ * and docs/esti/AORMS-SUITE.md.
+ * Suite: managers (AStudio · AConsulting) + AQC Estimation/BBS/PM + AADT + ShilpiDB.
  */
 import { platformPageUrl } from "./aorms-surface-urls.js";
 export const AORMS_PLATFORM = {
   name: "AORMS",
   expansion: "Accelerated Operational Resources Management System",
-  /** Platform scope — AEC consulting + PMC (2026-07). */
-  tagline: "The operating system for AEC consulting and project management firms",
+  /** Platform scope — AEC consulting suite (2026-08). */
+  tagline: "The operating suite for AEC consulting and project management firms",
   audience:
     "AEC consulting firms and project management consultancies — architecture, engineering, and PMC practices that advise and govern projects",
   /** Platform home hero — no third-party product names. */
   heroHeadline: [
-    "From disconnected tools to one operating system:",
-    "Built for architecture, engineering, and PMC consultancies.",
+    "From disconnected tools to one operating suite:",
+    "Managers online for communications; technical work stays local.",
   ] as const,
   aecDisciplines: ["Architecture", "Engineering", "Project management"] as const,
   fragmentedTools: [
@@ -42,8 +43,8 @@ export const PLATFORM_FRAMEWORKS = {
 } as const;
 
 /**
- * The three AORMS apps.
- * Display names: AStudio · AConsulting · AProc (Accelerated …).
+ * The AORMS suite apps.
+ * Managers: AStudio · AConsulting. Technical: AProc/AQC-PM · Estimation · BBS. Drafting: AADT.
  * Legacy marketing names AORMS-Studio / AORMS-Consultancy / AORMS-PMC redirect.
  */
 export const AORMS_APPS = {
@@ -55,7 +56,8 @@ export const AORMS_APPS = {
     /** @deprecated Prefer title + expansion — kept for transitional copy. */
     legacyTitle: "AORMS-Studio",
     discipline: "Architecture",
-    tagline: "Accelerated Studio — architecture consultancy workspace for Indian practices",
+    role: "practice_manager" as const,
+    tagline: "Accelerated Studio — architecture practice manager (tasks, office, HR, portals)",
     audience: "Indian architecture and interior design consultancies",
     appUrl: "https://studio.aorms.in",
     /** @deprecated Use studio.aorms.in — app.aorms.in redirects at nginx. */
@@ -72,8 +74,10 @@ export const AORMS_APPS = {
     title: "AConsulting",
     expansion: "Accelerated Consulting",
     legacyTitle: "AORMS-Consultancy",
+    marketingAlias: "AConsultancy",
     discipline: "Engineering",
-    tagline: "Accelerated Consulting — engineering consultancy workspace",
+    role: "practice_manager" as const,
+    tagline: "Accelerated Consulting — engineering practice manager",
     audience:
       "Structural, MEP, civil, and multidisciplinary engineering consultancies advising on built-environment projects",
     appUrl: "https://consultancy.aorms.in",
@@ -85,12 +89,14 @@ export const AORMS_APPS = {
   },
   pmc: {
     slug: "aproc",
-    legacySlugs: ["aorms-pmc", "pmc"] as const,
+    legacySlugs: ["aorms-pmc", "pmc", "aqc-pm"] as const,
     title: "AProc",
     expansion: "Accelerated Project Management",
     legacyTitle: "AORMS-PMC",
+    suiteTitle: "AQC Project Management",
     discipline: "Project management",
-    tagline: "Accelerated Project Management — PMC workspace for project management consultancies",
+    role: "technical" as const,
+    tagline: "AQC Project Management — programme, packages, and site certification (desktop)",
     audience:
       "Project management consultancies that plan, coordinate, and certify delivery on behalf of clients — programme, packages, and site governance",
     appUrl: "https://proc.aorms.in",
@@ -98,6 +104,51 @@ export const AORMS_APPS = {
     legacyMarketingPath: "/aorms-pmc",
     landingHref: "/#pmc",
     wikiPath: "/wiki/aproc",
+    status: "preview" as const,
+  },
+  estimation: {
+    slug: "aqc-estimation",
+    legacySlugs: [] as const,
+    title: "AQC Estimation",
+    expansion: "Accelerated Quantity and Costing — Estimation",
+    discipline: "Quantity / costing",
+    role: "technical" as const,
+    tagline: "Rate books, BOQ, and measurement — local engine, published totals only",
+    audience: "Quantity surveyors and estimators in AEC consultancies",
+    appUrl: "https://aorms.in/downloads",
+    marketingPath: "/downloads",
+    landingHref: "/#estimation",
+    wikiPath: "/wiki/aqc",
+    status: "preview" as const,
+  },
+  bbs: {
+    slug: "aqc-bbs",
+    legacySlugs: [] as const,
+    title: "AQC BBS",
+    expansion: "Accelerated Quantity and Costing — BBS",
+    discipline: "Bar bending",
+    role: "technical" as const,
+    tagline: "Bar bending schedules and steel reconciliation — local engine",
+    audience: "Structural detailing and site steel teams",
+    appUrl: "https://aorms.in/downloads",
+    marketingPath: "/downloads",
+    landingHref: "/#bbs",
+    wikiPath: "/wiki/aqc",
+    status: "preview" as const,
+  },
+  aadt: {
+    slug: "aadt",
+    legacySlugs: [] as const,
+    title: "AADT",
+    expansion: "Accelerated Architectural Drafting",
+    discipline: "Drafting",
+    role: "drafting" as const,
+    tagline: "2D CAD drafting — geometry in ShilpiDB",
+    audience: "Architects and drafters",
+    appUrl: "https://github.com/HolagundiWorks/AADT",
+    marketingPath: "/downloads",
+    landingHref: "/#aadt",
+    wikiPath: "/wiki",
     status: "preview" as const,
   },
 } as const;
@@ -111,9 +162,12 @@ export const ASTUDIO = AORMS_APPS.studio;
 export const AORMS_CONSULTANCY = AORMS_APPS.consultancy;
 export const ACONSULTING = AORMS_APPS.consultancy;
 
-/** Project management consultancy app (PMC). */
+/** Project management consultancy app (PMC) — AQC Project Management installer. */
 export const AORMS_PMC = AORMS_APPS.pmc;
 export const APROC = AORMS_APPS.pmc;
+export const AQC_ESTIMATION = AORMS_APPS.estimation;
+export const AQC_BBS = AORMS_APPS.bbs;
+export const AADT = AORMS_APPS.aadt;
 
 /** Legacy single slug — prefer {@link AORMS_STUDIO.legacySlugs}. */
 export const AORMS_STUDIO_LEGACY_SLUG = AORMS_STUDIO.legacySlugs[0];
