@@ -1,13 +1,10 @@
 ﻿# AORMS Implementation Roadmap
 
 **Status:** ACTIVE (desktop-native pivot) · **Updated:** 2026-08-07  
-**Prior platform build:** COMPLETE (P0–P10 · market-fit W1–W3 · AProc W0–W5 · LF0–LF6 · UI 1–8)  
-**New delivery:** **D-waves** — native desktop + firm portals  
 **Docs queue:** [DOCUMENTATION-ROADMAP.md](DOCUMENTATION-ROADMAP.md)
 
-Staff ERP = **desktop apps forked from [AQC](https://github.com/HolagundiWorks/AQC)**.
-`aorms.in` = marketing + demos. Cloud = hub sync + firm portals + License Manager.
-**Open source for now; SaaS commercial licensing deferred.**
+Staff ERP = desktop apps forked from [AQC](https://github.com/HolagundiWorks/AQC).
+`aorms.in` = marketing + demos. **Open source for now; SaaS licensing deferred.**
 
 Canon: [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md).
 
@@ -17,52 +14,34 @@ Canon: [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-B
 
 | # | Work | Where | Exit |
 | --- | --- | --- | --- |
-| 1 | **Merge AQC bridge docs** [PR #4](https://github.com/HolagundiWorks/AQC/pull/4) | AQC | ✅ merged |
-| 2 | **D2 code — `Aorms.Bridge` scaffold** | AQC | 🚧 [PR #5](https://github.com/HolagundiWorks/AQC/pull/5) — FirmDb + Activate/Flush |
-| 3 | **D2 smoke** | AQC ↔ esti hub | activate → `syncToken` → Flush meta |
-| 4 | **D5 kickoff** | AStudio / AConsulting | Pin AQC engine + bridge |
-| 5 | **Portal sections** | esti | Map FirmPortalShell tabs to hub content |
-
-Crew: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md).
+| 1 | AQC bridge docs | AQC | ✅ [PR #4](https://github.com/HolagundiWorks/AQC/pull/4) |
+| 2 | `Aorms.Bridge` scaffold | AQC | ✅ [PR #5](https://github.com/HolagundiWorks/AQC/pull/5) merged |
+| 3 | **D2 smoke** — activate → Flush with live `syncToken` | AQC ↔ esti hub | 🚧 local outbox OK; hub activate pending licence key |
+| 4 | **D5** — consume bridge in apps | AStudio · AConsulting | 🚧 ENGINE-PIN docs ([AStudio#1](https://github.com/HolagundiWorks/AStudio/pull/1) · [AConsulting#1](https://github.com/HolagundiWorks/AConsulting/pull/1)) |
+| 5 | Portal section content | esti | 🚧 shell + placeholders · [FIRM-PORTAL-SECTIONS.md](FIRM-PORTAL-SECTIONS.md) |
 
 ---
 
-## D-waves (desktop-native)
+## D-waves
 
-| Wave | Where | Outcome | Status |
-| --- | --- | --- | --- |
-| **D0** | esti docs | Product law: desktop-only staff · marketing apex · AQC fork | ✅ |
-| **D1** | esti | [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) connector + allow-list | ✅ |
-| **D2** | AQC | Bridge docs ✅ · **code** SQLite + `aorms_bridge` | 🚧 **in progress** |
-| **D3** | GitHub | [AStudio](https://github.com/HolagundiWorks/AStudio) · [AConsulting](https://github.com/HolagundiWorks/AConsulting) | ✅ |
-| **D4** | esti frontend | `FirmPortalShell` + marketing CTA demotion | ✅ |
-| **D5** | sibling apps | Domain specialization · local AI · publish path | 🔲 |
-| **D6** | Ops | Signed installers · portal tenants (OSS until SaaS terms) | 🔲 |
-
----
-
-## Completion summary (prior eras)
-
-| Track | Status |
-| --- | --- |
-| Product pivot P0–P10 · P9 Consultancy | ✅ |
-| Market fit W1–W3 | ✅ · W4 deferred |
-| AProc W0–W5 (esti preview) | ✅ → **product continues as AQC** |
-| Local-first LF0–LF6 (WebView2 era) | ✅ historical |
-| UI Waves 1–8 | ✅ |
-| Desktop-native D0–D6 | 🚧 D2 code next |
+| Wave | Outcome | Status |
+| --- | --- | --- |
+| **D0–D1** | Product law · PORTAL-SYNC-BRIDGE | ✅ |
+| **D2** | AQC `Aorms.Bridge` | ✅ code · 🚧 hub smoke |
+| **D3** | Sibling repos | ✅ |
+| **D4** | FirmPortalShell + marketing CTAs | ✅ |
+| **D5** | Domain apps consume engine + bridge | 🚧 kickoff |
+| **D6** | Signed installers · portal tenants | 🔲 |
 
 ---
 
 ## Platform apps
 
-| App | Status |
+| App | Repo |
 | --- | --- |
-| **AStudio** | **Desktop** (fork AQC) — [repo](https://github.com/HolagundiWorks/AStudio) · `studio.aorms.in` marketing |
-| **AConsulting** | **Desktop** (fork AQC) — [repo](https://github.com/HolagundiWorks/AConsulting) · `consultancy.aorms.in` marketing |
-| **AQC (= AProc)** | **Desktop** — [AQC](https://github.com/HolagundiWorks/AQC) · `proc.aorms.in` marketing |
-
-esti monorepo SPA = **reference** + hub/portal/marketing code.
+| **AStudio** | https://github.com/HolagundiWorks/AStudio |
+| **AConsulting** | https://github.com/HolagundiWorks/AConsulting |
+| **AQC** | https://github.com/HolagundiWorks/AQC |
 
 ---
 
@@ -70,30 +49,18 @@ esti monorepo SPA = **reference** + hub/portal/marketing code.
 
 | Doc | Purpose |
 | --- | --- |
-| [DOCUMENTATION-ROADMAP.md](DOCUMENTATION-ROADMAP.md) | Doc delivery queue · read order |
-| [LOCAL-FIRST.md](LOCAL-FIRST.md) | Runtime law |
-| [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) | DB connector + allow-list |
+| [DOCUMENTATION-ROADMAP.md](DOCUMENTATION-ROADMAP.md) | Doc read order |
+| [FIRM-PORTAL-SECTIONS.md](FIRM-PORTAL-SECTIONS.md) | Portal tab → hub map |
 | [AQC-BRIDGE-SPIKE.md](AQC-BRIDGE-SPIKE.md) | D2 checklist |
-| [HUB-API.md](HUB-API.md) | activate → syncToken |
-| [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md) | Host / path map |
-| [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) | Licence (OSS) |
-| [DESKTOP-REPOS.md](DESKTOP-REPOS.md) | Sibling repos |
-| [repo-scaffolds/](repo-scaffolds/) | Agent doc templates |
-| [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) | Crew · Now ownership |
+| [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · [HUB-API.md](HUB-API.md) | Runtime + wire |
+| [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) | Repos · crew |
 
 ---
 
-## Deferred (by choice)
+## Deferred
 
-1. **SaaS commercial licensing / dual-licence SKUs** — stay open source for now  
-2. **Stripe auto-billing** — manual India path  
-3. **Market-fit W4 integrations** — phase 2  
-4. **Pure C++ UI rewrite** — keep WinUI + C++ engine like AQC  
-
----
+SaaS commercial SKUs · Stripe auto · W4 integrations · pure C++ UI rewrite.
 
 ## Change rule
 
-Material feature changes update **this file** plus LOCAL-FIRST / SURFACE-URLS /
-PORTAL-SYNC-BRIDGE / DOCUMENTATION-ROADMAP / sibling AGENTS.md as needed in the
-same PR.
+Update this file + DOCUMENTATION-ROADMAP / PORTAL-SYNC-BRIDGE / sibling AGENTS when law moves.

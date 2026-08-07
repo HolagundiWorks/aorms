@@ -3,11 +3,16 @@ import {
   FirmPortalShell,
   type FirmPortalSection,
 } from "./FirmPortalShell.js";
+import {
+  FirmPortalSectionProvider,
+  FirmPortalStage,
+} from "./FirmPortalSection.js";
 
 /**
  * Client / consultant / contractor / site portals — firm-branded soft neu shell.
  * Section nav: Updates · Project · Progress · Drawings · Documents.
- * No ActionDock. Canon: docs/esti/PORTAL-SYNC-BRIDGE.md
+ * Updates shows full stage children; other tabs use optional panels or hub placeholders.
+ * Canon: docs/esti/PORTAL-SYNC-BRIDGE.md
  */
 export function ExternalPortalShell({
   companyName,
@@ -16,15 +21,17 @@ export function ExternalPortalShell({
   signingOut,
   section: sectionProp,
   onSectionChange,
+  panels,
   children,
 }: {
   companyName?: string;
   portalLabel: string;
   onSignOut?: () => void;
   signingOut?: boolean;
-  /** Controlled section; defaults to internal Updates state. */
   section?: FirmPortalSection;
   onSectionChange?: (section: FirmPortalSection) => void;
+  /** Optional per-tab bodies (Progress / Drawings / Documents…). */
+  panels?: Partial<Record<FirmPortalSection, ReactNode>>;
   children: ReactNode;
 }) {
   const [internalSection, setInternalSection] = useState<FirmPortalSection>("updates");
@@ -40,7 +47,9 @@ export function ExternalPortalShell({
       section={section}
       onSectionChange={setSection}
     >
-      {children}
+      <FirmPortalSectionProvider section={section}>
+        <FirmPortalStage panels={panels}>{children}</FirmPortalStage>
+      </FirmPortalSectionProvider>
     </FirmPortalShell>
   );
 }

@@ -35,7 +35,7 @@ Historical / reference only: UNIFIED-ARCHITECTURE-V4 · NAVIGATION · APROC-ARCH
 | **Doc-3** | AQC `docs/AORMS-BRIDGE*.md` (PR) | ✅ [AQC#4](https://github.com/HolagundiWorks/AQC/pull/4) |
 | **Doc-4** | This file + ROADMAP **Now** queue + AGENT-WORKSTREAMS reopen | ✅ |
 | **Doc-5** | Sync sibling ROADMAP/SYNC-CONTRACT when bridge API freezes | 🔲 after D2 smoke |
-| **Doc-6** | Portal UX brief (firm shell IA → section content map) | 🔲 with D4 follow-on |
+| **Doc-6** | Portal UX brief (firm shell IA → section content map) | ✅ [FIRM-PORTAL-SECTIONS.md](FIRM-PORTAL-SECTIONS.md) |
 | **Doc-7** | Downloads / installer honesty (WEB-PORTAL) for three apps | 🔲 with D6 |
 
 ---
