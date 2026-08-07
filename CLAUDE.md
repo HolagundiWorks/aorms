@@ -131,7 +131,7 @@ via the repo’s wiki sync/build step.
 
 | # | Topic | Canonical doc |
 | --- | --- | --- |
-| 01 | Layers · spatial model | [`PAGE-STRUCTURE.md`](docs/esti/PAGE-STRUCTURE.md) · [`UI-SITE-MAP.md`](docs/esti/UI-SITE-MAP.md) · [`HCW-UI-KIT.md`](docs/esti/HCW-UI-KIT.md) |
+| 01 | Layers · spatial model | [`PAGE-STRUCTURE.md`](docs/esti/PAGE-STRUCTURE.md) · [`UI-SITE-MAP.md`](docs/esti/UI-SITE-MAP.md) · [`COMPOSITION-PRINCIPLES.md`](docs/esti/COMPOSITION-PRINCIPLES.md) · [`HCW-UI-KIT.md`](docs/esti/HCW-UI-KIT.md) |
 | 02 | Tokens | `vendor/hcw-ui-kit/dist/tokens.js` · [`02-TOKEN-GOVERNANCE.md`](docs/hcw-kit/02-TOKEN-GOVERNANCE.md) · [`02-TOKEN-EXPORT.md`](docs/hcw-kit/02-TOKEN-EXPORT.md) |
 | 03 | Components | [`CHANGELOG`](vendor/hcw-ui-kit/CHANGELOG.md) · [`03-COMPONENT-QUALITY-CHECKLIST.md`](docs/hcw-kit/03-COMPONENT-QUALITY-CHECKLIST.md) · [`14-HCW-CATALOG.md`](docs/hcw-kit/14-HCW-CATALOG.md) |
 | 05 | Page templates | [`05-TEMPLATES.md`](docs/hcw-kit/05-TEMPLATES.md) — incl. T10 orchestration |

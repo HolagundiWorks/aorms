@@ -40,6 +40,7 @@ documented product exception (marketing atmosphere in `landing.scss` is one).
 | What is **HCW UX** (framework + process)? | [HCW-UX.md](../HCW-UX.md) |
 | What is the **UX framework** (purpose · KPIs · diagram)? | [HCW-UX-FRAMEWORK.md](../HCW-UX-FRAMEWORK.md) |
 | How do we **run** UX work (Plan → Improve)? | [HCW-UX-PROCESS.md](../HCW-UX-PROCESS.md) |
+| What colour mass / rhythm / grouping? | [COMPOSITION-PRINCIPLES.md](COMPOSITION-PRINCIPLES.md) |
 | What colour / layer / component? | [HCW-UI-KIT.md](HCW-UI-KIT.md) · [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) |
 | What heuristic or law applies? | **This document** |
 | How should an AI surface report, ask, and defer? | [HCW-AI-ORCHESTRATION-UX.md](HCW-AI-ORCHESTRATION-UX.md) |
@@ -76,10 +77,12 @@ Each row ties an established UX principle to a **shipped or required** pattern.
 | **W3C COGA** | Cognitive a11y beyond AA | `COGA` target floors + calm-mode type/target steps |
 | **Tesler's Law** | Some complexity is irreducible | Project delivery complexity lives in **stage** tables/editors — not hidden, but **chunked** by rail tabs + breadcrumbs |
 | **Doherty threshold** | Responsiveness &lt; ~400ms feels instant | Skeletons on heavy screens; optimistic UI where safe; avoid blocking whole stage for rail telemetry |
-| **Aesthetic-usability** | Pleasing UI feels more usable | Layered materials + calm canvas — but **never** glass on every tile (kills clarity) |
+| **Von Restorff** | Isolated items are remembered | One Radiant Orange primary CTA; stats stay coal; see [COMPOSITION-PRINCIPLES.md](COMPOSITION-PRINCIPLES.md) |
+| **60·30·10** | Dominant · structure · accent | ~60 Fog/White · ~30 coal/soft chrome · ~10 orange — marketing locks light |
+| **Odd grouping** | Prefer 3 / 5 / 7 peers | Landing sections, outcome cards, KPI strips, FAQ |
+| **Aesthetic-usability** | Pleasing UI feels more usable | Soft neu + calm canvas — never glass on every tile |
 | **Peak–end rule** | Peaks and endings dominate memory | ActionDock commit (RIGHT) for save/send; clear success toasts; portal sign-out always reachable in rail/dock |
 | **Serial position** | First and last items remembered | Ribbon: Projects · Clients first; dock: Create centre · Save right; hero brand first |
-| **Von Restorff** | Distinct items stand out | **One** accent (Radiant Orange); glass scarce; error/warning alerts tinted glass |
 | **Parkinson's Law** | Work expands to fill time | Progressive disclosure: FAQ `<details>`, collapsed project IA, dialogs for create — not always-visible forms |
 | **Goal-gradient** | Progress motivates completion | Breadcrumbs + dock commit; onboarding value-prop in marketing rail; empty states with one next action |
 | **Progressive disclosure** | Reveal detail on demand | FAQ accordion; nested project tabs grouped; `Dialog` for create; rail collapse optional |

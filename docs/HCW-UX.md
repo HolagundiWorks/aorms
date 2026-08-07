@@ -26,6 +26,7 @@ Neither replaces the other.
 | [esti/HCW-CONSTRUCTION-PATTERNS.md](esti/HCW-CONSTRUCTION-PATTERNS.md) | Domain patterns | CP-01…11 job specs (product implements) |
 | [HCW-DESIGN-PLAYBOOK.md](HCW-DESIGN-PLAYBOOK.md) | Philosophy | Why the rules exist |
 | [hcw-kit/00-CONSTITUTION.md](hcw-kit/00-CONSTITUTION.md) | Law | Non-negotiable articles |
+| [esti/COMPOSITION-PRINCIPLES.md](esti/COMPOSITION-PRINCIPLES.md) | **Composition grammar** | 60·30·10 · odd groups · 8px rhythm · von Restorff |
 | [esti/PAGE-STRUCTURE.md](esti/PAGE-STRUCTURE.md) | **Chrome SoT** | Soft neu · no left rail · ribbon · stage · dock · footer · clock |
 | [esti/UI-SITE-MAP.md](esti/UI-SITE-MAP.md) | Surface inventory | Marketing · auth · staff · portals · AProc |
 | [esti/HCW-UI-KIT.md](esti/HCW-UI-KIT.md) | Product kit how-to | Layers · spatial model · dock zones |

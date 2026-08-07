@@ -5,7 +5,7 @@
 
 Where this disagrees with older “glass rail · 20%” wording, **this wins**. Historical notes stay in [CARBON-MIGRATION.md](CARBON-MIGRATION.md).
 
-Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Templates: [05-TEMPLATES.md](../hcw-kit/05-TEMPLATES.md) · Nav IA: [NAVIGATION.md](NAVIGATION.md) · Chrome inventory: [UI-SITE-MAP.md](UI-SITE-MAP.md).
+Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Composition: [COMPOSITION-PRINCIPLES.md](COMPOSITION-PRINCIPLES.md) · Templates: [05-TEMPLATES.md](../hcw-kit/05-TEMPLATES.md) · Nav IA: [NAVIGATION.md](NAVIGATION.md) · Chrome inventory: [UI-SITE-MAP.md](UI-SITE-MAP.md).
 
 ---
 

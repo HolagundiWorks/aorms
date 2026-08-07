@@ -43,12 +43,13 @@ import {
 } from "../lib/product-nomenclature.js";
 import { applyLandingSeo, injectLandingJsonLd } from "../lib/landing-seo.js";
 import { useLandingVisitCounter } from "../lib/landing-visit.js";
-import { MARKETING_CONTENT_GUTTER, marketingContentColumnSx } from "../lib/marketing-layout.js";
+import { MARKETING_CONTENT_GUTTER, MARKETING_RHYTHM, marketingContentColumnSx } from "../lib/marketing-layout.js";
 
 /**
- * Five-section IA — hierarchy by market impact:
+ * Five-section IA — hierarchy by market impact (odd count):
  * 1 Overview → attention · 2 Outcomes → why buy · 3 Platform → proof ·
  * 4 Rhythm → differentiation · 5 Start → convert.
+ * Composition: docs/esti/COMPOSITION-PRINCIPLES.md
  */
 const SECTIONS = [
   { href: "#top", label: "Overview" },
@@ -58,7 +59,7 @@ const SECTIONS = [
   { href: "#start", label: "Start" },
 ] as const;
 
-/** Market outcomes — fee, speed, trust, sovereignty. */
+/** Market outcomes — five peers (odd grouping). */
 const OUTCOMES = [
   {
     icon: <PaymentsOutlined fontSize="small" />,
@@ -80,11 +81,16 @@ const OUTCOMES = [
     title: "Your data. Your machine. Unmetered AI.",
     body: "Desktop-first with web parity. Local AI on the node, hub AI on the browser — both unmetered, no bring-your-own key, no per-token surprise.",
   },
+  {
+    icon: <SelfImprovementOutlined fontSize="small" />,
+    title: "See the office before it slips",
+    body: `Studio Intelligence puts fee risk, delivery health, and ${ESTI.name} priorities on one Fog Gray stage — so principals act before the week collapses.`,
+  },
 ] as const;
 
+/** Proof stats — three peers (odd · Cowan-friendly). */
 const STATS = [
   { id: "apps", label: "AEC apps on one spine", value: "3" },
-  { id: "modules", label: "Consolidated modules", value: "80+" },
   { id: "ai", label: "AI tiers · EOMS + ESTI", value: "Dual" },
   { id: "storage", label: "Storage included", value: "5 GB" },
 ] as const;
@@ -106,6 +112,10 @@ const FAQ = [
     q: "Is wellbeing scored against me?",
     a: "No. Breathe, stretch, eyes, and Pomodoro are personal. ASPRF wellbeing is 5%, opt-in per person, never used for discipline.",
   },
+  {
+    q: "Do I need a dark theme on the marketing site?",
+    a: "No. Public surfaces lock the 60 white · 30 coal · 10 Radiant Orange ratio for calm reading. Staff Appearance still offers accessibility schemes inside the workspace.",
+  },
 ] as const;
 
 function SectionHead({
@@ -118,7 +128,7 @@ function SectionHead({
   lead?: string;
 }) {
   return (
-    <Stack spacing={1.5} sx={{ mb: 4, maxWidth: 720 }}>
+    <Stack spacing={MARKETING_RHYTHM.sm} sx={{ mb: MARKETING_RHYTHM.headMb, maxWidth: 720 }}>
       <Typography
         variant="overline"
         color="primary"
@@ -157,63 +167,43 @@ function WorkspacePreview() {
       layer="soft"
       aria-hidden
       sx={{
-        p: { xs: 2, md: 2.5 },
+        p: { xs: MARKETING_RHYTHM.md, md: MARKETING_RHYTHM.lg },
         height: { xs: 280, md: "min(52vh, 420px)" },
         minHeight: { md: 360 },
       }}
     >
-      <Stack direction="row" spacing={1.5} sx={{ height: "100%" }}>
+      <Stack spacing={MARKETING_RHYTHM.md} sx={{ height: "100%" }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          <Bar w={72} />
+          <Box sx={{ flex: 1 }} />
+          <Bar w={40} />
+          <Bar w={40} />
+        </Stack>
+        <KpiStrip
+          items={[
+            { id: "a", label: "Fee at risk", value: "₹2.4L" },
+            { id: "b", label: "Open loops", value: "3" },
+            { id: "c", label: "Health", value: "Steady" },
+          ]}
+        />
         <Surface
-          layer="soft"
+          layer="flat"
           sx={{
-            width: 84,
-            flexShrink: 0,
-            p: 1.5,
-            display: { xs: "none", sm: "flex" },
+            flex: 1,
+            minHeight: 0,
+            p: MARKETING_RHYTHM.md,
+            border: (t) => `1px solid ${t.palette.divider}`,
+            display: "flex",
             flexDirection: "column",
-            gap: 1.25,
+            gap: MARKETING_RHYTHM.sm,
           }}
         >
-          <AormsLogo variant="sm" />
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Bar key={i} w={i === 0 ? "70%" : "100%"} />
-          ))}
+          <Bar w="40%" />
+          <Bar w="92%" />
+          <Bar w="78%" />
+          <Bar w="85%" />
+          <Bar w="60%" />
         </Surface>
-        <Stack spacing={1.5} sx={{ flex: 1, minWidth: 0, height: "100%" }}>
-          <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
-            <Typography variant="caption" sx={{ fontWeight: 700 }}>
-              Studio Intelligence
-            </Typography>
-            <StatusDot color="green" label="Live" size="sm" />
-          </Stack>
-          <Grid container spacing={1}>
-            {["Projects", "Proposals", "Invoices"].map((k) => (
-              <Grid key={k} size={4}>
-                <Surface layer="flat" sx={{ p: 1.25, border: (t) => `1px solid ${t.palette.divider}` }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.75 }}>
-                    {k}
-                  </Typography>
-                  <Bar w="55%" />
-                </Surface>
-              </Grid>
-            ))}
-          </Grid>
-          <Surface layer="flat" sx={{ p: 1.5, flex: 1, minHeight: 0, border: (t) => `1px solid ${t.palette.divider}` }}>
-            <Stack spacing={1.25}>
-              {[92, 78, 85, 64, 72].map((w, i) => (
-                <Stack key={i} direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-                  <StatusDot
-                    color={i % 3 === 0 ? "gray" : "green"}
-                    label=""
-                    size="sm"
-                    shape={i % 3 === 0 ? "triangle" : "circle"}
-                  />
-                  <Bar w={`${w}%`} />
-                </Stack>
-              ))}
-            </Stack>
-          </Surface>
-        </Stack>
       </Stack>
     </Surface>
   );
@@ -258,16 +248,16 @@ export function Landing() {
           id="top"
           component="section"
           sx={{
-            pt: { xs: 5, md: 8 },
-            pb: { xs: 5, md: 7 },
+            pt: MARKETING_RHYTHM.sectionY,
+            pb: MARKETING_RHYTHM.sectionY,
           }}
         >
           <Grid
             container
-            spacing={{ xs: 3, md: 4 }}
+            spacing={MARKETING_RHYTHM.lg}
             sx={{
               alignItems: "center",
-              mb: { xs: 4, md: 5 },
+              mb: MARKETING_RHYTHM.lg,
               minHeight: { md: "min(52vh, 420px)" },
             }}
           >
@@ -277,14 +267,14 @@ export function Landing() {
                 <Typography
                   variant="overline"
                   color="text.secondary"
-                  sx={{ mt: 2, letterSpacing: "0.1em", display: "block" }}
+                  sx={{ mt: MARKETING_RHYTHM.md, letterSpacing: "0.1em", display: "block" }}
                 >
                   {AORMS_PLATFORM.expansion}
                 </Typography>
                 <Typography
                   variant="h3"
                   component="h1"
-                  sx={{ mt: 1.5, fontWeight: 700, lineHeight: 1.2, maxWidth: 560 }}
+                  sx={{ mt: MARKETING_RHYTHM.sm, fontWeight: 700, lineHeight: 1.2, maxWidth: 560 }}
                 >
                   {AORMS_PLATFORM.heroHeadline[0]}
                 </Typography>
@@ -292,21 +282,27 @@ export function Landing() {
                   variant="h5"
                   component="p"
                   color="text.secondary"
-                  sx={{ mt: 1, fontWeight: 500, lineHeight: 1.35, maxWidth: 520 }}
+                  sx={{ mt: MARKETING_RHYTHM.sm, fontWeight: 500, lineHeight: 1.35, maxWidth: 520 }}
                 >
                   {AORMS_PLATFORM.heroHeadline[1]}
                 </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ mt: 2, mb: 3, maxWidth: 520, lineHeight: 1.55 }}>
-                  {AORMS_PLATFORM.tagline}. Desktop-first with web parity — trusted local AI, Radiant Orange on
-                  pure neumorphism.
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{ mt: MARKETING_RHYTHM.md, mb: MARKETING_RHYTHM.lg, maxWidth: 520, lineHeight: 1.55 }}
+                >
+                  {AORMS_PLATFORM.tagline}. Desktop-first with web parity — trusted local AI on Fog Gray,
+                  Radiant Orange only where action matters.
                 </Typography>
-                <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap", gap: 1.5 }}>
+                {/* Von Restorff: one contained orange CTA; secondary stay quiet */}
+                <Stack direction="row" spacing={MARKETING_RHYTHM.sm} sx={{ flexWrap: "wrap", gap: MARKETING_RHYTHM.sm }}>
                   <Button
                     component={RouterLink}
                     to="/login"
                     variant="contained"
+                    color="primary"
                     endIcon={<ArrowForward />}
-                    sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 44 }}
+                    sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 48, px: 3 }}
                   >
                     Sign in
                   </Button>
@@ -314,7 +310,8 @@ export function Landing() {
                     component={RouterLink}
                     to="/account?mode=create"
                     variant="outlined"
-                    sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 44 }}
+                    color="inherit"
+                    sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
                   >
                     Create account
                   </Button>
@@ -322,12 +319,17 @@ export function Landing() {
                     component={RouterLink}
                     to="/downloads"
                     variant="text"
-                    sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 44 }}
+                    color="inherit"
+                    sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
                   >
                     Desktop installers
                   </Button>
                 </Stack>
-                <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 1, mt: 3 }}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 1, mt: MARKETING_RHYTHM.lg }}
+                >
                   <StatusDot color="green" label="" size="sm" />
                   <Typography variant="caption" color="text.secondary">
                     {AORMS_STUDIO.title} &amp; {AORMS_CONSULTANCY.title} live · {AORMS_PMC.title} preview · AI
@@ -341,11 +343,11 @@ export function Landing() {
             </Grid>
           </Grid>
 
-          <Surface layer="soft" sx={{ p: { xs: 2, md: 2.5 }, mt: 0 }}>
+          <Surface layer="soft" sx={{ p: { xs: MARKETING_RHYTHM.md, md: MARKETING_RHYTHM.lg }, mt: 0 }}>
             <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em" }}>
               Replaces the sprawl
             </Typography>
-            <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1, mt: 1.25 }}>
+            <Stack direction="row" sx={{ flexWrap: "wrap", gap: MARKETING_RHYTHM.sm, mt: MARKETING_RHYTHM.sm }}>
               {AORMS_PLATFORM.fragmentedTools.map((tool) => (
                 <Typography
                   key={tool}
@@ -371,24 +373,27 @@ export function Landing() {
           </Surface>
         </Box>
 
-        {/* 2 — Outcomes: why the market should care */}
-        <Box id="outcomes" component="section" sx={{ py: { xs: 6, md: 9 } }}>
+        {/* 2 — Outcomes: five cards (odd grouping) */}
+        <Box id="outcomes" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
           <SectionHead
             eyebrow="Outcomes"
             title="What changes when the practice runs on one record"
             lead="AORMS is not another dashboard. It is how fee recovery, delivery quality, and trusted answers stop competing with tool chaos."
           />
-          <Grid container spacing={3}>
+          <Grid container spacing={MARKETING_RHYTHM.md}>
             {OUTCOMES.map((o) => (
-              <Grid key={o.title} size={{ xs: 12, sm: 6 }}>
-                <Surface layer="flat" sx={{ p: 3, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
-                  <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start" }}>
-                    <Box sx={{ color: "primary.main", display: "flex", mt: 0.25 }}>{o.icon}</Box>
+              <Grid key={o.title} size={{ xs: 12, sm: 6, md: 4 }}>
+                <Surface
+                  layer="flat"
+                  sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}
+                >
+                  <Stack direction="row" spacing={MARKETING_RHYTHM.sm} sx={{ alignItems: "flex-start" }}>
+                    <Box sx={{ color: "text.secondary", display: "flex", mt: 0.25 }}>{o.icon}</Box>
                     <Box>
                       <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
                         {o.title}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                         {o.body}
                       </Typography>
                     </Box>
@@ -400,30 +405,30 @@ export function Landing() {
         </Box>
 
         {/* 3 — Platform: frameworks, apps, AI, proof figures */}
-        <Box id="platform" component="section" sx={{ py: { xs: 6, md: 9 } }}>
+        <Box id="platform" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
           <SectionHead
             eyebrow="Platform"
             title="Two frameworks. Three apps. Dual-tier AI."
             lead="Operational and design frameworks stay explicit and shared. Architecture, engineering, and PMC deploy as focused apps on the same spine."
           />
-          <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
             {Object.values(PLATFORM_FRAMEWORKS).map((fw) => (
               <Grid key={fw.title} size={{ xs: 12, md: 6 }}>
-                <Surface layer="soft" sx={{ p: 3, height: "100%" }}>
+                <Surface layer="soft" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
                   <Typography variant="h6" component="h3" sx={{ fontWeight: 700 }}>
                     {fw.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                     {fw.summary}
                   </Typography>
                 </Surface>
               </Grid>
             ))}
           </Grid>
-          <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
             {PLATFORM_APPS.map((app) => (
               <Grid key={app.id} size={{ xs: 12, md: 4 }}>
-                <Surface layer="flat" id={app.id} sx={{ p: 3, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
+                <Surface layer="flat" id={app.id} sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
                   <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1 }}>
                     <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
                       {app.workspace}
@@ -436,24 +441,24 @@ export function Landing() {
                         fontWeight: 700,
                         textTransform: "uppercase",
                         letterSpacing: "0.08em",
-                        color: app.status === "live" ? "primary.main" : "text.disabled",
-                        border: (t) =>
-                          `1px solid ${app.status === "live" ? t.palette.primary.main : t.palette.divider}`,
+                        color: app.status === "live" ? "text.primary" : "text.disabled",
+                        border: (t) => `1px solid ${t.palette.divider}`,
                       }}
                     >
                       {app.status === "live" ? "Live" : app.status === "preview" ? "Preview" : "Roadmap"}
                     </Typography>
                   </Stack>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                     {app.body}
                   </Typography>
                   <Button
                     component="a"
                     href={app.href}
-                    variant="contained"
+                    variant={app.id === "studio" ? "contained" : "outlined"}
+                    color={app.id === "studio" ? "primary" : "inherit"}
                     size="small"
                     endIcon={<ArrowForward />}
-                    sx={{ mt: 2, textTransform: "none", fontWeight: 700 }}
+                    sx={{ mt: MARKETING_RHYTHM.md, textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px` }}
                   >
                     {app.cta}
                   </Button>
@@ -461,83 +466,83 @@ export function Landing() {
               </Grid>
             ))}
           </Grid>
-          <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
             {[EOMS, ESTI].map((tier) => (
               <Grid key={tier.name} size={{ xs: 12, md: 6 }}>
-                <Surface layer="soft" sx={{ p: 3, height: "100%" }}>
-                  <Stack direction="row" spacing={1.5} sx={{ alignItems: "baseline" }}>
+                <Surface layer="soft" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
+                  <Stack direction="row" spacing={MARKETING_RHYTHM.sm} sx={{ alignItems: "baseline" }}>
                     <Typography variant="h6" component="h3" sx={{ fontWeight: 800 }}>
                       {tier.name}
                     </Typography>
-                    <Typography variant="overline" color="primary">
+                    <Typography variant="overline" color="text.secondary">
                       {tier.role}
                     </Typography>
                   </Stack>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                     {tier.summary}
                   </Typography>
                 </Surface>
               </Grid>
             ))}
           </Grid>
-          <Surface layer="soft" sx={{ p: { xs: 3, md: 4 } }}>
+          <Surface layer="soft" sx={{ p: { xs: MARKETING_RHYTHM.cardPad, md: MARKETING_RHYTHM.lg } }}>
             <KpiStrip
               aria-label="AORMS platform at a glance"
               items={STATS.map((s) => ({
                 id: s.id,
                 label: s.label,
                 value: (
-                  <Box component="span" sx={{ fontSize: "1.9rem", fontWeight: 800, color: "primary.main" }}>
+                  <Box component="span" sx={{ fontSize: "1.9rem", fontWeight: 800, color: "text.primary" }}>
                     {s.value}
                   </Box>
                 ),
               }))}
             />
             {visitCount != null ? (
-              <Typography variant="caption" color="text.disabled" sx={{ mt: 2, display: "block" }}>
+              <Typography variant="caption" color="text.disabled" sx={{ mt: MARKETING_RHYTHM.md, display: "block" }}>
                 {visitCount.toLocaleString()} visits to this page and counting.
               </Typography>
             ) : null}
           </Surface>
         </Box>
 
-        {/* 4 — Rhythm: sustainable delivery + wellbeing widget */}
-        <Box id="rhythm" component="section" sx={{ py: { xs: 6, md: 9 } }}>
+        {/* 4 — Rhythm: three peers (odd) + wellbeing */}
+        <Box id="rhythm" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
           <SectionHead
             eyebrow="Rhythm"
             title="Delivery quality needs recovery — built in, not bolted on"
             lead="Deadline pressure is the job. AORMS keeps focus and wellbeing inside the chrome so sharp judgment survives long drawing nights — opt-in, never surveillance."
           />
-          <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Surface layer="flat" sx={{ p: 3, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
-                <Box sx={{ color: "primary.main", display: "flex", mb: 1.5 }}>
+              <Surface layer="flat" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
+                <Box sx={{ color: "text.secondary", display: "flex", mb: MARKETING_RHYTHM.sm }}>
                   <SelfImprovementOutlined fontSize="small" />
                 </Box>
                 <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
                   Calm between critical sets
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                   Guided breathe, desk stretches, and eye breaks reset attention before the next revision lands — without leaving the workspace.
                 </Typography>
               </Surface>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Surface layer="flat" sx={{ p: 3, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
+              <Surface layer="flat" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
                 <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
                   One Pomodoro on the clock
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                   Click the orange-ringed analogue clock to start or pause. Drag the crown in 5-minute steps. Double-click to reset. No focus/break theatre — one timer.
                 </Typography>
               </Surface>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Surface layer="flat" sx={{ p: 3, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
+              <Surface layer="flat" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
                 <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
                   Opt-in, never a scoreboard
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                   ASPRF wellbeing is only 5% of the composite and each person opts themselves in. Coaching signal — not discipline.
                 </Typography>
               </Surface>
@@ -546,34 +551,34 @@ export function Landing() {
           <LandingWellbeingWidget />
         </Box>
 
-        {/* 5 — Start: pricing, FAQ, convert */}
-        <Box id="start" component="section" sx={{ py: { xs: 6, md: 9 } }}>
+        {/* 5 — Start: three pricing cards (odd) + FAQ */}
+        <Box id="start" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
           <SectionHead
             eyebrow="Start"
             title="One Standard licence. Unlimited users."
             lead="No tiers. Full workspace from day one. Pay only for cloud storage over 5 GB — AI stays unmetered on desktop and web."
           />
-          <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.lg }}>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Surface layer="soft" sx={{ p: 3, height: "100%" }}>
-                <Typography variant="overline" color="primary">
+              <Surface layer="soft" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
+                <Typography variant="overline" color="text.secondary">
                   Included
                 </Typography>
-                <Typography variant="h6" component="h3" sx={{ mt: 1, fontWeight: 700 }}>
+                <Typography variant="h6" component="h3" sx={{ mt: MARKETING_RHYTHM.sm, fontWeight: 700 }}>
                   Full workspace
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                   Projects, fees, GST invoices, drawings, portals, Studio Intelligence, and{" "}
                   {AORMS_CONSULTANCY.title} on the same spine. Unlimited staff logins.
                 </Typography>
               </Surface>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Surface layer="soft" sx={{ p: 3, height: "100%" }}>
-                <Typography variant="overline" color="primary">
+              <Surface layer="soft" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
+                <Typography variant="overline" color="text.secondary">
                   Storage
                 </Typography>
-                <Typography variant="h6" component="h3" sx={{ mt: 1, fontWeight: 700 }}>
+                <Typography variant="h6" component="h3" sx={{ mt: MARKETING_RHYTHM.sm, fontWeight: 700 }}>
                   5 GB included
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
@@ -582,47 +587,75 @@ export function Landing() {
               </Surface>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Surface layer="soft" sx={{ p: 3, height: "100%" }}>
-                <Typography variant="overline" color="primary">
+              <Surface layer="soft" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
+                <Typography variant="overline" color="text.secondary">
                   AI
                 </Typography>
-                <Typography variant="h6" component="h3" sx={{ mt: 1, fontWeight: 700 }}>
+                <Typography variant="h6" component="h3" sx={{ mt: MARKETING_RHYTHM.sm, fontWeight: 700 }}>
                   Local &amp; unmetered
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                   {ESTI.name} on your desktop node and on the hub for web — no per-token billing, no bring-your-own key.
                 </Typography>
               </Surface>
             </Grid>
           </Grid>
 
-          <Surface layer="soft" sx={{ p: { xs: 4, md: 5 }, textAlign: "center", mb: 5 }}>
+          <Surface
+            layer="soft"
+            sx={{ p: { xs: MARKETING_RHYTHM.lg, md: MARKETING_RHYTHM.xl }, textAlign: "center", mb: MARKETING_RHYTHM.xl }}
+          >
             <Typography variant="h4" component="h3" sx={{ fontWeight: 800 }}>
               Bring the practice onto one system.
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mt: 2, maxWidth: 520, mx: "auto" }}>
+            <Typography variant="body1" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.md, maxWidth: 520, mx: "auto" }}>
               Sign in to {AORMS_STUDIO.title} or {AORMS_CONSULTANCY.title} — same platform, discipline-fit workspace.
             </Typography>
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "center", mt: 3 }}>
-              <Button component={RouterLink} to="/login" variant="contained" size="large" endIcon={<ArrowForward />}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={MARKETING_RHYTHM.md}
+              sx={{ justifyContent: "center", mt: MARKETING_RHYTHM.lg }}
+            >
+              <Button
+                component={RouterLink}
+                to="/login"
+                variant="contained"
+                color="primary"
+                size="large"
+                endIcon={<ArrowForward />}
+                sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 48 }}
+              >
                 {AORMS_STUDIO.title}
               </Button>
               <Button
                 component="a"
                 href={AORMS_CONSULTANCY.appUrl}
                 variant="outlined"
+                color="inherit"
                 size="large"
                 endIcon={<ArrowForward />}
+                sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
               >
                 {AORMS_CONSULTANCY.title}
               </Button>
-              <Button component="a" href={`mailto:${HUMAN_CENTRIC_WORKS.email}`} variant="text" size="large">
+              <Button
+                component="a"
+                href={`mailto:${HUMAN_CENTRIC_WORKS.email}`}
+                variant="text"
+                color="inherit"
+                size="large"
+                sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
+              >
                 Talk to HCW
               </Button>
             </Stack>
           </Surface>
 
-          <Typography variant="overline" color="primary" sx={{ letterSpacing: "0.12em", display: "block", mb: 2 }}>
+          <Typography
+            variant="overline"
+            color="text.secondary"
+            sx={{ letterSpacing: "0.12em", display: "block", mb: MARKETING_RHYTHM.md }}
+          >
             Questions practices ask first
           </Typography>
           <Box sx={{ maxWidth: 820 }}>
