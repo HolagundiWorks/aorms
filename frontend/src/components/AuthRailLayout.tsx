@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
-import { Surface, RADIUS, colors } from "@hcw/ui-kit";
+import { AnalogueClock, Surface, RADIUS, colors } from "@hcw/ui-kit";
 import { HcwAttribution } from "./brand/HcwAttribution.js";
 import { MarketingFooter } from "./landing/MarketingFooter.js";
 import { LandingEntourage } from "./landing/LandingEntourage.js";
@@ -9,7 +9,7 @@ import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 /**
  * Unauthenticated auth shell — centered soft-neu card on the same Fog Gray
  * canvas + architectural entourage as the landing page (`esti-lp-neu`).
- * Brand lives in the card. Spacing: COMPOSITION_RHYTHM.
+ * Ambient AnalogueClock bottom-right (no Pomodoro). Brand lives in the card.
  */
 export function AuthRailLayout({
   rail,
@@ -98,6 +98,20 @@ export function AuthRailLayout({
             <HcwAttribution variant="auth" logoTone="on-light" />
           </Surface>
         </Box>
+      </Box>
+
+      <Box
+        className="esti-auth-clock"
+        sx={{
+          position: "fixed",
+          right: { xs: 16, md: 24 },
+          bottom: { xs: 16, md: 24 },
+          zIndex: 40,
+          pointerEvents: "none",
+        }}
+        aria-hidden
+      >
+        <AnalogueClock size={72} />
       </Box>
 
       {showMarketingFooter ? (
