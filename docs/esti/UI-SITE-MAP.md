@@ -31,7 +31,7 @@ flowchart TB
 | Surface | Routes | Shell | Content width | Top bar | Bottom | Clock | Left rail |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Marketing | `/`, blog, downloads, 404 | `MarketingNeuFrame` / `MarketingShell` | 1200px | soft sticky · AormsLogo | `MarketingLandingDock` | Pomodoro clock | No |
-| Auth | `/login`, `/access`, signup, forgot/reset, force-pw, admin login | `AuthRailLayout` | ~420px card | none (card brand) | none | none | No |
+| Auth | `/login`, `/access`, signup, forgot/reset, force-pw, admin login | `AuthRailLayout` | ~440px card | brand in card (stage atmosphere only) | none | none | No |
 | Staff (AStudio) | office, library, projects, … | `.esti-app-shell2` + `AppRibbon` + `RailLayout` | full + gutters | soft sticky · mark + firm name | footer + ActionDock | AnalogueClock only | No |
 | Staff (AConsulting) | `/consultancy/*` on consultancy host | same staff shell · `consultancyNav` | full | soft sticky | footer + dock | AnalogueClock | No |
 | Staff (AProc) | `/pmc` on proc host | same staff shell · `pmcNav` + `PmcHome` | full | soft sticky | footer home → `/pmc` | AnalogueClock | No |

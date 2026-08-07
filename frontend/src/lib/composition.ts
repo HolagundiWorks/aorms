@@ -36,8 +36,8 @@ export const COMPOSITION_RHYTHM = {
   portalStagePb: { xs: 10, md: 12 } as const,
   /** Auth card padding */
   authCardPad: 3, // 24px
-  /** Auth card max width */
-  authCardMaxPx: 420,
+  /** Auth card max width — room for brand + form without cramped fields */
+  authCardMaxPx: 440,
   /** Section vertical padding (marketing / long-form) */
   sectionY: { xs: 8, md: 12 } as const, // 64 / 96
   /** Gap between card grids inside a section */

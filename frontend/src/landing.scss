@@ -4626,12 +4626,12 @@ $lp2-gap: 1px;               // shared border thickness
   }
 
   &--auth {
-    margin-top: 1.25rem;
+    margin-top: 0.25rem;
     padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid var(--lp-border, rgba(20, 21, 23, 0.1));
 
     .hcw-attribution__mark {
-      opacity: 0.75;
+      opacity: 0.72;
     }
 
     .hcw-attribution__note {

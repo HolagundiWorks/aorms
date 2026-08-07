@@ -47,15 +47,25 @@ export function AormsMark({
   );
 }
 
-/** Logo + optional tagline for auth rail headers. */
-export function AuthBrandBlock({ tagline }: { tagline?: string }) {
+/** Logo + optional product eyebrow / tagline for auth card headers. */
+export function AuthBrandBlock({
+  tagline,
+  product,
+  logoVariant = "stage",
+}: {
+  tagline?: string;
+  /** Short product label above the wordmark (e.g. AStudio). */
+  product?: string;
+  logoVariant?: "sm" | "md" | "rail" | "stage" | "hero" | "watermark";
+}) {
   return (
     <div className="esti-login-brand esti-login-brand--stacked">
+      {product ? <p className="esti-auth-eyebrow">{product}</p> : null}
       <a href="/#top" className="esti-login-brand__link" aria-label="AORMS home">
-        <AormsLogo variant="rail" />
+        <AormsLogo variant={logoVariant} />
       </a>
       {tagline ? (
-        <p className="esti-label esti-label--secondary">{tagline}</p>
+        <p className="esti-label esti-label--secondary esti-auth-brand-tagline">{tagline}</p>
       ) : null}
     </div>
   );

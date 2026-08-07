@@ -14,7 +14,7 @@ const DEFAULT_TONE: Record<Variant, LogoTone> = {
   rail: "on-light",
   footer: "on-dark",
   inline: "on-light",
-  auth: "on-dark",
+  auth: "on-light",
 };
 
 /** Human Centric Works logo + optional design credit. */

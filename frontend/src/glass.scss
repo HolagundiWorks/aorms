@@ -1067,7 +1067,7 @@ $neu-input-radius: 0;
   }
 }
 
-// ── Auth rail shell (U2) — login / signup / recovery ─────────────────────────
+// ── Auth shell — login / signup / recovery (composition soft card) ───────────
 .esti-auth-shell {
   position: relative;
   min-height: 100vh;
@@ -1075,7 +1075,7 @@ $neu-input-radius: 0;
   height: 100dvh;
   overflow: hidden;
   background: #f2f4f7;
-  padding: var(--esti-shell-gutter, 16px);
+  padding: var(--esti-shell-gutter, 24px);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -1125,6 +1125,56 @@ $neu-input-radius: 0;
   z-index: 1;
   flex: 1;
   min-height: 0;
+}
+
+.esti-auth-card {
+  animation: esti-auth-card-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes esti-auth-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.esti-auth-eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary, #5b616b);
+}
+
+.esti-auth-brand-tagline {
+  margin: 0;
+  max-width: 22rem;
+}
+
+.esti-auth-title {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.esti-auth-lead {
+  margin: 0;
+  max-width: 28rem;
+  line-height: 1.5;
+}
+
+.esti-auth-form {
+  .MuiTextField-root,
+  .MuiButton-root.MuiButton-contained,
+  .MuiButton-root.MuiButton-outlined {
+    width: 100%;
+  }
 }
 
 @media (min-width: 901px) {
@@ -1248,5 +1298,11 @@ $neu-input-radius: 0;
 
   .esti-auth-dash {
     overflow: visible;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .esti-auth-card {
+    animation: none;
   }
 }

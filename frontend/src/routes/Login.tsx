@@ -3,11 +3,14 @@ import ArrowForward from "@mui/icons-material/ArrowForward";
 import {
   Alert,
   AlertTitle,
+  Box,
   Button,
   CircularProgress,
+  Divider,
   MenuItem,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
@@ -17,6 +20,7 @@ import { AuthBrandBlock } from "../components/AormsLogo.js";
 import { AORMS_STUDIO, AORMS_PORTALS } from "../lib/product-nomenclature.js";
 import { AuthRailLayout } from "../components/AuthRailLayout.js";
 import { GoogleIconCircle } from "../components/GoogleIconCircle.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import { AUTH_PAGE_SEO, applyPublicPageSeo } from "../lib/public-page-seo.js";
 
 const PUBLIC_SITE = import.meta.env.VITE_PUBLIC_SITE !== "false";
@@ -46,6 +50,10 @@ function companyItem(c: CompanyOption): TenantItem {
   return { id: c.publicId ?? c.name, label: `${c.name} — ${c.role}` };
 }
 
+/**
+ * AStudio staff sign-in — composition: brand → one headline → form → one primary CTA.
+ * Canon: COMPOSITION-PRINCIPLES · AuthRailLayout soft card.
+ */
 export function Login() {
   const navigate = useNavigate();
   const utils = trpc.useUtils();
@@ -137,213 +145,268 @@ export function Login() {
       : login.error?.message;
   const showError = Boolean(login.error) && login.error?.message !== "totp_required";
 
+  const brand = (
+    <AuthBrandBlock
+      product={AORMS_STUDIO.title}
+      tagline={AORMS_STUDIO.expansion}
+      logoVariant="stage"
+    />
+  );
+
   const form = (
-    <Stack spacing={2}>
-      <Stack spacing={3}>
-        <Stack spacing={1}>
-          <AuthBrandBlock tagline={AORMS_STUDIO.tagline} />
-          <h1>{companies ? "Choose where to go" : "Sign in"}</h1>
-          {companies ? (
-            <p className="esti-label esti-label--secondary">
-              Open your workspace, manage your account, or review your company.
-            </p>
-          ) : (
-            <p className="esti-label esti-label--secondary">
-              {PUBLIC_SITE
-                ? `${AORMS_STUDIO.title} — your architecture consultancy workspace.`
+    <Stack className="esti-auth-form" spacing={COMPOSITION_RHYTHM.md}>
+      <Stack spacing={COMPOSITION_RHYTHM.sm}>
+        {brand}
+        <Box>
+          <Typography variant="h4" component="h1" className="esti-auth-title">
+            {companies ? "Choose where to go" : "Sign in"}
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            className="esti-auth-lead"
+            sx={{ mt: 1 }}
+          >
+            {companies
+              ? "Open your workspace, manage your account, or review your company."
+              : PUBLIC_SITE
+                ? `${AORMS_STUDIO.title} — architecture consultancy workspace for Indian practices.`
                 : "Sign in, then choose your workspace, account, or company."}
-            </p>
-          )}
+          </Typography>
+        </Box>
+      </Stack>
+
+      {fromGoogle.isPending && (
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          <CircularProgress size={16} />
+          <Typography variant="body2" color="text.secondary">
+            Completing Google sign-in…
+          </Typography>
         </Stack>
+      )}
 
-        {fromGoogle.isPending && (
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <CircularProgress size={16} />
-            <span className="esti-label esti-label--secondary">Completing Google sign-in…</span>
-          </Stack>
-        )}
+      {googleError && !companies && (
+        <Alert severity="warning" onClose={() => setGoogleError(null)}>
+          <AlertTitle>Google sign-in</AlertTitle>
+          {googleError}
+        </Alert>
+      )}
 
-        {googleError && !companies && (
-          <Alert severity="warning" onClose={() => setGoogleError(null)}>
-            <AlertTitle>Google sign-in</AlertTitle>
-            {googleError}
-          </Alert>
-        )}
-
-        {companies ? (
-          (() => {
-            const owned = companies.filter((c) => c.role === "OWNER");
-            const current = selectedCompany();
-            const accountCompany =
-              current && current.role === "OWNER"
-                ? current
-                : owned.length === 1
-                  ? owned[0]!
-                  : null;
-            const showDropdown = companies.length > 1 || owned.length > 1;
-            const tenantItems = [WORKSPACE_ITEM, ...companies.map(companyItem)];
-            return (
-              <Stack spacing={2}>
-                <Button
-                  variant="contained"
-                  endIcon={<ArrowForward />}
-                  disabled={companyBusy}
-                  onClick={() => void enterWorkspace()}
-                >
-                  {companyBusy ? "Opening…" : "Open workspace"}
-                </Button>
-                <Button component={RouterLink} to="/account" variant="outlined" disabled={companyBusy}>
-                  {AORMS_PORTALS.account.myAccount}
-                </Button>
-                {owned.length > 0 && (
-                  <Button
-                    variant="outlined"
-                    disabled={companyBusy || !accountCompany}
-                    onClick={() => accountCompany && void openCompanyAccount(accountCompany)}
-                  >
-                    {accountCompany
-                      ? `Company account — ${accountCompany.name}`
-                      : "Company account (owner only)"}
-                  </Button>
-                )}
-                <Button component={RouterLink} to="/account#join" variant="text" size="small">
-                  Request to join a company
-                </Button>
-                {showDropdown ? (
-                  <TextField
-                    id="tenant-select"
-                    select
-                    label="Workspace context (optional)"
-                    size="small"
-                    value={(tenant ?? WORKSPACE_ITEM).id}
-                    onChange={(e) =>
-                      setTenant(tenantItems.find((item) => item.id === e.target.value) ?? null)
-                    }
-                  >
-                    {tenantItems.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>
-                        {item.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                ) : null}
-                {companyError && (
-                  <Alert severity="error">
-                    <AlertTitle>Could not open the company</AlertTitle>
-                    {companyError}
-                  </Alert>
-                )}
-                <Button variant="text" size="small" onClick={() => setCompanies(null)}>
-                  Sign in as someone else
-                </Button>
-              </Stack>
-            );
-          })()
-        ) : (
-          <>
-            {PUBLIC_SITE && (
-              <Stack spacing={1}>
+      {companies ? (
+        (() => {
+          const owned = companies.filter((c) => c.role === "OWNER");
+          const current = selectedCompany();
+          const accountCompany =
+            current && current.role === "OWNER"
+              ? current
+              : owned.length === 1
+                ? owned[0]!
+                : null;
+          const showDropdown = companies.length > 1 || owned.length > 1;
+          const tenantItems = [WORKSPACE_ITEM, ...companies.map(companyItem)];
+          // Odd peer destinations: workspace · account · company|join
+          return (
+            <Stack spacing={COMPOSITION_RHYTHM.sm}>
+              <Button
+                variant="contained"
+                size="large"
+                fullWidth
+                endIcon={<ArrowForward />}
+                disabled={companyBusy}
+                onClick={() => void enterWorkspace()}
+              >
+                {companyBusy ? "Opening…" : "Open workspace"}
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/account"
+                variant="outlined"
+                size="large"
+                fullWidth
+                disabled={companyBusy}
+              >
+                {AORMS_PORTALS.account.myAccount}
+              </Button>
+              {owned.length > 0 ? (
                 <Button
                   variant="outlined"
                   size="large"
-                  className="esti-grow"
-                  startIcon={<GoogleIconCircle />}
-                  disabled={fromGoogle.isPending}
-                  onClick={startGoogle}
-                >
-                  Continue with Google
-                </Button>
-                <p className="esti-label esti-label--secondary">or sign in with email</p>
-              </Stack>
-            )}
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                login.mutate({ email, password, code: needCode ? code : undefined });
-              }}
-            >
-              <Stack spacing={2}>
-                <TextField
-                  id="email"
-                  label="Email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
                   fullWidth
-                />
-                <TextField
-                  id="password"
-                  label="Password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  fullWidth
-                />
-                {needCode && (
-                  <TextField
-                    id="totp-code"
-                    label="Authenticator code"
-                    placeholder="123456"
-                    autoComplete="one-time-code"
-                    helperText="6-digit code from your authenticator app."
-                    slotProps={{ htmlInput: { inputMode: "numeric" } }}
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    fullWidth
-                  />
-                )}
-                {showError && (
-                  <Alert severity="error">
-                    <AlertTitle>Sign-in failed</AlertTitle>
-                    {errorText}
-                  </Alert>
-                )}
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  endIcon={<ArrowForward />}
-                  disabled={login.isPending || (needCode && code.length < 6)}
+                  disabled={companyBusy || !accountCompany}
+                  onClick={() => accountCompany && void openCompanyAccount(accountCompany)}
                 >
-                  {login.isPending ? "Signing in..." : needCode ? "Verify" : "Sign in"}
-                </Button>
-              </Stack>
-            </form>
-
-            <div className="esti-row-between">
-              <Button component={RouterLink} to="/forgot-password" variant="text" size="small">
-                Forgot password?
-              </Button>
-              {PUBLIC_SITE ? (
-                <Button component={RouterLink} to="/account?mode=create" variant="text" size="small">
-                  {AORMS_PORTALS.account.create}
+                  {accountCompany
+                    ? `Company account — ${accountCompany.name}`
+                    : "Company account (owner only)"}
                 </Button>
               ) : (
-                <Button component={RouterLink} to="/signup" variant="text" size="small">
-                  Create account
+                <Button
+                  component={RouterLink}
+                  to="/account#join"
+                  variant="outlined"
+                  size="large"
+                  fullWidth
+                  disabled={companyBusy}
+                >
+                  Request to join a company
                 </Button>
               )}
-            </div>
-          </>
-        )}
-      </Stack>
+              {showDropdown ? (
+                <TextField
+                  id="tenant-select"
+                  select
+                  label="Workspace context (optional)"
+                  size="small"
+                  fullWidth
+                  value={(tenant ?? WORKSPACE_ITEM).id}
+                  onChange={(e) =>
+                    setTenant(tenantItems.find((item) => item.id === e.target.value) ?? null)
+                  }
+                >
+                  {tenantItems.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ) : null}
+              {companyError && (
+                <Alert severity="error">
+                  <AlertTitle>Could not open the company</AlertTitle>
+                  {companyError}
+                </Alert>
+              )}
+              <Button variant="text" size="small" onClick={() => setCompanies(null)}>
+                Sign in as someone else
+              </Button>
+            </Stack>
+          );
+        })()
+      ) : (
+        <Stack spacing={COMPOSITION_RHYTHM.md}>
+          {PUBLIC_SITE && (
+            <Stack spacing={COMPOSITION_RHYTHM.sm}>
+              <Button
+                variant="outlined"
+                size="large"
+                fullWidth
+                startIcon={<GoogleIconCircle />}
+                disabled={fromGoogle.isPending}
+                onClick={startGoogle}
+              >
+                Continue with Google
+              </Button>
+              <Divider>
+                <Typography variant="caption" color="text.secondary">
+                  or email
+                </Typography>
+              </Divider>
+            </Stack>
+          )}
+
+          <Box
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              login.mutate({ email, password, code: needCode ? code : undefined });
+            }}
+          >
+            <Stack spacing={COMPOSITION_RHYTHM.sm}>
+              <TextField
+                id="email"
+                label="Email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                fullWidth
+                autoFocus
+              />
+              <TextField
+                id="password"
+                label="Password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                fullWidth
+              />
+              {needCode && (
+                <TextField
+                  id="totp-code"
+                  label="Authenticator code"
+                  placeholder="123456"
+                  autoComplete="one-time-code"
+                  helperText="6-digit code from your authenticator app."
+                  slotProps={{ htmlInput: { inputMode: "numeric" } }}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  fullWidth
+                />
+              )}
+              {showError && (
+                <Alert severity="error">
+                  <AlertTitle>Sign-in failed</AlertTitle>
+                  {errorText}
+                </Alert>
+              )}
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                endIcon={<ArrowForward />}
+                disabled={login.isPending || (needCode && code.length < 6)}
+              >
+                {login.isPending ? "Signing in…" : needCode ? "Verify" : "Sign in"}
+              </Button>
+            </Stack>
+          </Box>
+
+          <Stack
+            direction="row"
+            spacing={COMPOSITION_RHYTHM.sm}
+            sx={{ justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}
+          >
+            <Button component={RouterLink} to="/forgot-password" variant="text" size="small">
+              Forgot password?
+            </Button>
+            {PUBLIC_SITE ? (
+              <Button component={RouterLink} to="/account?mode=create" variant="text" size="small">
+                {AORMS_PORTALS.account.create}
+              </Button>
+            ) : (
+              <Button component={RouterLink} to="/signup" variant="text" size="small">
+                Create account
+              </Button>
+            )}
+          </Stack>
+        </Stack>
+      )}
 
       {!companies && (
-        <Stack spacing={1} sx={{ pt: 1, borderTop: 1, borderColor: "divider" }}>
+        <Stack
+          spacing={0.5}
+          sx={{ pt: COMPOSITION_RHYTHM.sm, borderTop: 1, borderColor: "divider" }}
+        >
           {PUBLIC_SITE && (
-            <Button component={RouterLink} to="/account" variant="text" size="small">
-              Manage your {AORMS_PORTALS.account.name} &amp; licence →
+            <Button component={RouterLink} to="/account" variant="text" size="small" fullWidth>
+              Manage your {AORMS_PORTALS.account.name} &amp; licence
             </Button>
           )}
-          <Button component={RouterLink} to="/access" variant="text" size="small">
+          <Button component={RouterLink} to="/access" variant="text" size="small" fullWidth>
             {AORMS_PORTALS.external.loginPageLink}
           </Button>
-          <Button component={RouterLink} to="/" variant="text" size="small" startIcon={<ArrowBack />}>
+          <Button
+            component={RouterLink}
+            to="/"
+            variant="text"
+            size="small"
+            fullWidth
+            startIcon={<ArrowBack />}
+          >
             Back to home
           </Button>
         </Stack>
@@ -351,7 +414,5 @@ export function Login() {
     </Stack>
   );
 
-  return (
-    <AuthRailLayout variant="workspace" showMarketingFooter={false} rail={form} />
-  );
+  return <AuthRailLayout variant="workspace" showMarketingFooter={false} rail={form} />;
 }

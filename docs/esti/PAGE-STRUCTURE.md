@@ -42,7 +42,7 @@ Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Composition: [COMPOSITION-PR
 | --- | --- |
 | Marketing | `AormsLogo` left in `MarketingTopBar` |
 | Staff | `AormsMark` + firm name in `AppRibbon` (no floating watermark) |
-| Auth | `AuthBrandBlock` inside soft card |
+| Auth | `AuthBrandBlock` — product eyebrow + `AormsLogo` stage in soft card |
 | Account / licensing | `AormsLogo` in `PortalShell` |
 | External portals | Portal label + company name |
 
