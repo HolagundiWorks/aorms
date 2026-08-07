@@ -47,7 +47,7 @@ export default defineConfig({
     // Auth / navigation / PDF specs sign in fresh themselves.
     {
       name: "office",
-      testMatch: /(auth|navigation.*|pdf)\.spec\.ts$/,
+      testMatch: /(auth|navigation.*|pdf|portal-neu)\.spec\.ts$/,
       dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"] },
     },
@@ -61,6 +61,12 @@ export default defineConfig({
     {
       name: "visual",
       testMatch: /visual-regression\.spec\.ts$/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    // Portal chrome smoke (no SoftRail) — can run without setup deps for speed.
+    {
+      name: "portal",
+      testMatch: /portal-neu\.spec\.ts$/,
       use: { ...devices["Desktop Chrome"] },
     },
   ],

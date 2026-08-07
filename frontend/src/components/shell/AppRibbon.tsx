@@ -10,7 +10,7 @@ import {
   Stack,
   Tooltip,
 } from "@mui/material";
-import { chromeIconSx } from "@hcw/ui-kit";
+import { Surface, RADIUS, chromeIconSx } from "@hcw/ui-kit";
 import { useCallback, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
@@ -411,22 +411,25 @@ function AdminMenu({
 
 const ADMIN_MENU_ID = "__admin__";
 
+/**
+ * Staff top navigation — soft sticky neu bar (same language as marketing/portal).
+ * `variant="float"` is deprecated and ignored (Wave 1 UI consistency 2026-08).
+ */
 export function AppRibbon({
   nav,
   firmName,
   adminGroups = [],
-  variant = "bar",
+  variant: _variant = "bar",
 }: {
   nav: RibbonNode[];
   firmName: string;
   adminGroups?: AdminGroup[];
-  /** `float` — fixed top-right overlay (Studio Intelligence home). */
+  /** @deprecated Always renders soft bar. Kept for call-site compat. */
   variant?: "bar" | "float";
 }) {
   const { pathname } = useLocation();
   const { openId, mode, openHover, toggleFocus, closeMenu, cancelClose, scheduleClose } =
     useRibbonMenu();
-  const isFloat = variant === "float";
 
   const closeMenus = () => {
     cancelClose();
@@ -435,64 +438,88 @@ export function AppRibbon({
 
   return (
     <Box
-      className={isFloat ? "esti-ribbon esti-ribbon--float" : "esti-ribbon"}
-      component="nav"
-      aria-label="Main navigation"
-      onMouseLeave={scheduleClose}
+      className="esti-ribbon-wrap"
+      sx={{
+        position: "sticky",
+        top: 12,
+        zIndex: 1100,
+        width: "100%",
+        px: { xs: 1.5, md: 2 },
+        mt: 1.5,
+        mb: 0.5,
+        boxSizing: "border-box",
+        flexShrink: 0,
+      }}
     >
-      <Box className="esti-ribbon__nav">
-        {!isFloat && (
-          <h1 className="esti-ribbon__title" title={firmName}>{firmName}</h1>
-        )}
-        {!isFloat && <Box sx={{ flex: 1 }} />}
-        <Stack
-          direction="row"
-          spacing={0.5}
-          sx={{ alignItems: "center", flexWrap: isFloat ? "wrap" : "nowrap", justifyContent: "flex-end" }}
-          onMouseEnter={cancelClose}
-        >
-          {nav.map((n) =>
-            "items" in n ? (
-              <SectionMenu
-                key={n.label}
-                node={n}
-                menuId={n.label}
-                openId={openId}
-                mode={mode}
-                openHover={openHover}
-                toggleFocus={toggleFocus}
-                closeMenu={closeMenu}
-                cancelClose={cancelClose}
-                scheduleClose={scheduleClose}
-              />
-            ) : (
-              <Button
-                key={n.label}
-                component={Link}
-                to={n.to}
-                variant="text"
-                color="inherit"
-                aria-current={pathActive(pathname, n.to) ? "page" : undefined}
-                onMouseEnter={closeMenus}
-                sx={navSx(pathActive(pathname, n.to))}
-              >
-                {n.label}
-              </Button>
-            ),
-          )}
-          <AdminMenu
-            groups={adminGroups}
-            menuId={ADMIN_MENU_ID}
-            openId={openId}
-            mode={mode}
-            openHover={openHover}
-            toggleFocus={toggleFocus}
-            closeMenu={closeMenu}
-            cancelClose={cancelClose}
-            scheduleClose={scheduleClose}
-          />
-        </Stack>
-      </Box>
+      <Surface
+        layer="soft"
+        component="nav"
+        className="esti-ribbon"
+        aria-label="Main navigation"
+        onMouseLeave={scheduleClose}
+        sx={{
+          borderRadius: `${RADIUS}px`,
+          minHeight: 56,
+          px: { xs: 1, md: 1.5 },
+          py: 0.5,
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <Box className="esti-ribbon__nav" sx={{ width: "100%", minWidth: 0 }}>
+          <h1 className="esti-ribbon__title" title={firmName}>
+            {firmName}
+          </h1>
+          <Box sx={{ flex: 1, minWidth: 8 }} />
+          <Stack
+            direction="row"
+            spacing={0.5}
+            sx={{ alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}
+            onMouseEnter={cancelClose}
+          >
+            {nav.map((n) =>
+              "items" in n ? (
+                <SectionMenu
+                  key={n.label}
+                  node={n}
+                  menuId={n.label}
+                  openId={openId}
+                  mode={mode}
+                  openHover={openHover}
+                  toggleFocus={toggleFocus}
+                  closeMenu={closeMenu}
+                  cancelClose={cancelClose}
+                  scheduleClose={scheduleClose}
+                />
+              ) : (
+                <Button
+                  key={n.label}
+                  component={Link}
+                  to={n.to}
+                  variant="text"
+                  color="inherit"
+                  aria-current={pathActive(pathname, n.to) ? "page" : undefined}
+                  onMouseEnter={closeMenus}
+                  sx={navSx(pathActive(pathname, n.to))}
+                >
+                  {n.label}
+                </Button>
+              ),
+            )}
+            <AdminMenu
+              groups={adminGroups}
+              menuId={ADMIN_MENU_ID}
+              openId={openId}
+              mode={mode}
+              openHover={openHover}
+              toggleFocus={toggleFocus}
+              closeMenu={closeMenu}
+              cancelClose={cancelClose}
+              scheduleClose={scheduleClose}
+            />
+          </Stack>
+        </Box>
+      </Surface>
     </Box>
   );
 }

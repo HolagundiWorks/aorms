@@ -146,7 +146,7 @@ export function AccountPortal() {
       showCompanyNav={ownsCompany}
       showLicensingNav={isPlatformAdmin}
       footer={
-        <Button variant="text" size="small" fullWidth onClick={handleSignOut}>
+        <Button variant="text" size="small" onClick={handleSignOut}>
           Sign out
         </Button>
       }

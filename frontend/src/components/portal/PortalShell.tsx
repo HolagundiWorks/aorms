@@ -1,18 +1,9 @@
-import { SoftRail } from "@hcw/ui-kit";
-import {
-  Box,
-  Button,
-  Divider,
-  List,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { AormsLogo } from "../AormsLogo.js";
 import { AORMS_PORTALS } from "../../lib/product-nomenclature.js";
+import { PortalNeuFrame } from "./PortalNeuFrame.js";
 
 export type PortalNavKey = "account" | "company" | "licensing" | "workspace";
 
@@ -23,6 +14,10 @@ const NAV: { key: PortalNavKey; label: string; href: string; external?: boolean 
   { key: "workspace", label: AORMS_PORTALS.studio.navLabel, href: `${AORMS_PORTALS.studio.url}/login`, external: true },
 ];
 
+/**
+ * AORMS account / company / licensing hub — no-rail soft neu frame.
+ * Horizontal nav in the top bar; stage scrolls below.
+ */
 export function PortalShell({
   active,
   children,
@@ -36,6 +31,7 @@ export function PortalShell({
   showCompanyNav?: boolean;
   /** Show licensing console link (platform admins). */
   showLicensingNav?: boolean;
+  /** Sign-out / tray actions — right side of the top bar. */
   footer?: ReactNode;
 }) {
   const location = useLocation();
@@ -49,55 +45,60 @@ export function PortalShell({
   });
 
   return (
-    <>
-    <a href="#esti-main" className="esti-skip-link">
-      Skip to main content
-    </a>
-    <SoftRail
-      railAriaLabel="Account navigation"
-      rail={
-        <Stack spacing={2} sx={{ height: "100%" }}>
-          <Box sx={{ px: 0.5, pt: 0.5 }}>
-            <Button component={RouterLink} to="/" variant="text" sx={{ p: 0, minWidth: 0 }}>
-              <AormsLogo variant="rail" />
-            </Button>
-            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
-              {AORMS_PORTALS.account.hubCaption}
-            </Typography>
-          </Box>
-          <Divider />
-          <List dense disablePadding sx={{ flex: 1 }}>
+    <PortalNeuFrame
+      topBar={
+        <>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ alignItems: "center", justifyContent: "space-between", width: "100%", minWidth: 0 }}
+          >
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", minWidth: 0 }}>
+              <Button component={RouterLink} to="/" variant="text" sx={{ p: 0, minWidth: 0, flexShrink: 0 }}>
+                <AormsLogo variant="rail" />
+              </Button>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: { xs: "none", sm: "block" }, letterSpacing: "0.04em" }}
+              >
+                {AORMS_PORTALS.account.hubCaption}
+              </Typography>
+            </Stack>
+            {footer ? <Box sx={{ flexShrink: 0 }}>{footer}</Box> : null}
+          </Stack>
+
+          <Stack
+            component="nav"
+            aria-label="Account navigation"
+            direction="row"
+            spacing={0.5}
+            useFlexGap
+            sx={{ flexWrap: "wrap", alignItems: "center", width: "100%" }}
+          >
             {links.map((item) => {
               const selected = item.key === active;
               const href =
                 item.key === "licensing" && isAdminHost ? "/platform-admin" : item.href;
               return (
-                <ListItemButton
+                <Button
                   key={item.key}
                   component={item.external ? "a" : RouterLink}
                   {...(item.external ? { href } : { to: href })}
-                  selected={selected}
-                  sx={{ mx: 0.5 }}
+                  size="small"
+                  variant={selected ? "contained" : "text"}
+                  color={selected ? "primary" : "inherit"}
+                  sx={{ borderRadius: "8px", textTransform: "none", minHeight: 36 }}
                 >
-                  <ListItemText
-                    primary={item.label}
-                    slotProps={{ primary: { variant: "body2" } }}
-                  />
-                </ListItemButton>
+                  {item.label}
+                </Button>
               );
             })}
-          </List>
-          {footer && (
-            <>
-              <Divider />
-              <Box sx={{ px: 0.5, pb: 0.5 }}>{footer}</Box>
-            </>
-          )}
-        </Stack>
+          </Stack>
+        </>
       }
     >
       {children}
-    </SoftRail>
-    </>
+    </PortalNeuFrame>
   );
 }

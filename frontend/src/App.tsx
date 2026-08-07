@@ -608,9 +608,8 @@ function AppWorkspace() {
             Skip to main content
           </a>
           <AormsLogo variant="watermark" className="esti-app-logo-float" />
-          {/* Ribbon — floating top-right; rails and stage start below the header line. */}
-          <AppRibbon nav={nav} firmName={firmName} adminGroups={adminGroups} variant="float" />
-          <div className={`esti-app-content2${isStudioHome ? " esti-app-content2--flush-top" : ""}`}>
+          <AppRibbon nav={nav} firmName={firmName} adminGroups={adminGroups} />
+          <div className="esti-app-content2">
             <RouteFocus />
             <main id="esti-main" className="esti-grow" tabIndex={-1}>
               {licenseBlocked && (
@@ -834,7 +833,7 @@ function AppWorkspace() {
           <ActionDock />
           {/* Outcome channel — publishes from DockAction.outcome / publishOutcome. */}
           <ActionOutcomeBanner />
-          {/* Fixed bottom-right analogue clock (kit) — separate from footer TrayClock. */}
+          {/* Fixed bottom-right analogue clock (single staff clock). */}
           <AnalogueClock
             size={112}
             className="esti-analogue-clock"
@@ -846,8 +845,7 @@ function AppWorkspace() {
               pointerEvents: "none",
             }}
           />
-          {/* Taskbar footer (HCW-UI-Kit) — launchers CENTRE (Studio · Tasks · Search ·
-              Ask ESTI · Wellness · Pomodoro), tray RIGHT. */}
+          {/* Taskbar footer — launchers CENTRE, tray RIGHT (no duplicate clock). */}
           <AppFooterBar
             planClass="esti-app-header--pro"
             onSignOut={() => logout.mutate()}

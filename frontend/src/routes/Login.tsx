@@ -16,7 +16,6 @@ import { trpc } from "../lib/trpc.js";
 import { AuthBrandBlock } from "../components/AormsLogo.js";
 import { AORMS_STUDIO, AORMS_PORTALS } from "../lib/product-nomenclature.js";
 import { AuthRailLayout } from "../components/AuthRailLayout.js";
-import { PublicAuthStageLayout } from "../components/PublicAuthStageLayout.js";
 import { GoogleIconCircle } from "../components/GoogleIconCircle.js";
 import { AUTH_PAGE_SEO, applyPublicPageSeo } from "../lib/public-page-seo.js";
 
@@ -352,16 +351,7 @@ export function Login() {
     </Stack>
   );
 
-  if (PUBLIC_SITE) {
-    return <PublicAuthStageLayout>{form}</PublicAuthStageLayout>;
-  }
-
   return (
-    <AuthRailLayout
-      variant="workspace"
-      showMarketingFooter={false}
-      rail={<AuthBrandBlock tagline={AORMS_STUDIO.tagline} />}
-      stage={form}
-    />
+    <AuthRailLayout variant="workspace" showMarketingFooter={false} rail={form} />
   );
 }

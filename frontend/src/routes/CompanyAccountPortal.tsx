@@ -174,7 +174,7 @@ export function CompanyAccountPortal() {
       <PortalShell
         active="company"
         footer={
-          <Button variant="text" size="small" fullWidth onClick={handleSignOut}>
+          <Button variant="text" size="small" onClick={handleSignOut}>
             Sign out
           </Button>
         }
@@ -204,7 +204,7 @@ export function CompanyAccountPortal() {
       showCompanyNav
       showLicensingNav={isPlatformAdmin}
       footer={
-        <Button variant="text" size="small" fullWidth onClick={handleSignOut}>
+        <Button variant="text" size="small" onClick={handleSignOut}>
           Sign out
         </Button>
       }

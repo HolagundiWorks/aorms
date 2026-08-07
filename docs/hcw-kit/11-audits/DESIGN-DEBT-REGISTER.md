@@ -1,7 +1,9 @@
-﻿**2026-08-06 — Final UI: no-rail soft neu.** Staff + marketing left rail retired
+﻿**2026-08-07 — Portal SoftRail retired.** Account + external portals use
+`PortalNeuFrame` (soft top bar · 1200px stage · AnalogueClock).
+
+**2026-08-06 — Final UI: no-rail soft neu.** Staff + marketing left rail retired
 ([PAGE-STRUCTURE.md](../../esti/PAGE-STRUCTURE.md)). `RailLayout` is a full-width
-stage header shell. Portal SoftRail = **next wave** (design session). Pure
-neumorphism 1.5.0 remains (glass banned on chrome).
+stage header shell. Pure neumorphism 1.5.0 remains (glass banned on chrome).
 
 **2026-08-06 — Pure neumorphism 1.5.0 shipped** (Constitution Art. V amended; glass banned; SoftRail + AnalogueClock). Product surfaces remapped opaque neu.
 
@@ -41,7 +43,7 @@ Adoption checklist: [HCW-UX-ADOPTION-PLAYBOOK.md](../../esti/HCW-UX-ADOPTION-PLA
 *Kit halves of D15/D16 shipped in **1.4.0** â€” see [13-ROADMAPS.md](../13-ROADMAPS.md).*
 Product-only remainders (not kit defects):
 
-- **Portal SoftRail redesign** — client / consultant / contractor shells; design session next ([PAGE-STRUCTURE.md](../../esti/PAGE-STRUCTURE.md))
+- **Portal SoftRail redesign** — ✅ shipped 2026-08-07 (`PortalNeuFrame`); SoftRail no longer used in product portals
 - **Product i18n** â€” message catalogs / locale switcher in consumer apps
 - **Figma component library** â€” designer-owned `.fig` mirroring primitives
 - **Variables sync ritual** â€” DesignOps (see roadmaps)

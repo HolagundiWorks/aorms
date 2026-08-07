@@ -36,36 +36,15 @@ import { useOfficeHealth } from "./useOfficeHealth.js";
 import { SyncQueueChip } from "../SyncQueueChip.js";
 
 /**
- * Taskbar footer — glassmorphic bar (HCW-UI-Kit spatial model). Launcher
- * icons are round neumorphic chips on the frosted surface:
+ * Taskbar footer — soft neu bar. Launcher icons are round neumorphic chips:
  *
  *   LEFT   — calculator · office health · task due.
- *   CENTER — home (Studio Intelligence / AConsulting Enquiries / AProc) · tasks · Search · **Ask ESTI** · wellbeing · pomodoro.
- *   RIGHT  — clock · alerts · ID · sign out.
+ *   CENTER — home · tasks · Search · Ask ESTI · wellbeing · pomodoro.
+ *   RIGHT  — alerts · ID · sign out (AnalogueClock is fixed bottom-right separately).
  *
  * The top border carries the office-health signal (green/amber/red).
  * Hit targets use kit `chromeIconSx` so COGA calm expands to 48px.
  */
-
-function TrayClock() {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-  const time = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false });
-  const date = now.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
-  return (
-    <Box className="esti-header-clock esti-app-footer__clock">
-      <Typography variant="caption" sx={{ fontVariantNumeric: "tabular-nums", lineHeight: 1.15 }}>
-        {time}
-      </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.15 }}>
-        {date}
-      </Typography>
-    </Box>
-  );
-}
 
 export function AppFooterBar({
   planClass,
@@ -255,9 +234,8 @@ export function AppFooterBar({
         <HeaderPomodoro />
       </Stack>
 
-      {/* RIGHT — system tray */}
+      {/* RIGHT — system tray (AnalogueClock is fixed bottom-right — no duplicate tray clock) */}
       <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flex: 1, justifyContent: "flex-end", minWidth: 0 }}>
-        <TrayClock />
         <RuntimeHostTrayHint />
         <SyncQueueChip />
         <Tooltip title={tooltipWithChord("Keyboard shortcuts", "help")}>

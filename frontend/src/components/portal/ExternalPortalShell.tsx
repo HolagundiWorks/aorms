@@ -1,12 +1,12 @@
 import LogoutIcon from "@mui/icons-material/Logout";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { SoftRail } from "@hcw/ui-kit";
 import { AORMS_PORTALS } from "../../lib/product-nomenclature.js";
+import { PortalNeuFrame } from "./PortalNeuFrame.js";
 
 /**
- * Client / consultant / site external portals — opaque soft rail · stage
- * (kit `SoftRail`; same spatial model as AuthRailLayout and account PortalShell).
+ * Client / consultant / contractor / site portals — no-rail soft neu frame.
+ * Identity + sign-out in the top bar; stage scrolls below. No ActionDock.
  */
 export function ExternalPortalShell({
   companyName,
@@ -22,42 +22,49 @@ export function ExternalPortalShell({
   children: ReactNode;
 }) {
   return (
-    <>
-      <a href="#esti-main" className="esti-skip-link">
-        Skip to main content
-      </a>
-      <SoftRail
-        railAriaLabel={`${portalLabel} navigation`}
-        rail={
-          <Stack spacing={2} sx={{ height: "100%", minHeight: "12rem" }}>
-            <Stack spacing={0.5}>
-              <Typography variant="overline" color="text.secondary">
-                {portalLabel}
-              </Typography>
-              <Typography variant="h6" component="p" sx={{ m: 0, fontWeight: 700 }}>
-                {companyName ?? AORMS_PORTALS.studio.railFallback}
-              </Typography>
-            </Stack>
-            <Box sx={{ flex: 1 }} />
-            {onSignOut && (
-              <Button
-                variant="outlined"
-                color="inherit"
-                startIcon={<LogoutIcon />}
-                disabled={signingOut}
-                onClick={() => {
-                  if (!signingOut) onSignOut();
-                }}
-                sx={{ alignSelf: "stretch", minHeight: 44, borderRadius: "8px" }}
-              >
-                Sign out
-              </Button>
-            )}
+    <PortalNeuFrame
+      topBar={
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
+            minWidth: 0,
+            minHeight: 40,
+          }}
+        >
+          <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+            <Typography variant="overline" color="text.secondary" sx={{ lineHeight: 1.2 }}>
+              {portalLabel}
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              component="p"
+              sx={{ m: 0, fontWeight: 700, wordBreak: "break-word" }}
+            >
+              {companyName ?? AORMS_PORTALS.studio.railFallback}
+            </Typography>
           </Stack>
-        }
-      >
-        {children}
-      </SoftRail>
-    </>
+          {onSignOut ? (
+            <Button
+              variant="outlined"
+              color="inherit"
+              startIcon={<LogoutIcon />}
+              disabled={signingOut}
+              onClick={() => {
+                if (!signingOut) onSignOut();
+              }}
+              sx={{ flexShrink: 0, minHeight: 40, borderRadius: "8px" }}
+            >
+              Sign out
+            </Button>
+          ) : null}
+        </Stack>
+      }
+    >
+      {children}
+    </PortalNeuFrame>
   );
 }

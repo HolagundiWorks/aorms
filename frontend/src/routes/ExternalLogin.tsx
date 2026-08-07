@@ -5,11 +5,8 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
 import { AuthBrandBlock } from "../components/AormsLogo.js";
 import { AuthRailLayout } from "../components/AuthRailLayout.js";
-import { PublicAuthStageLayout } from "../components/PublicAuthStageLayout.js";
 import { AUTH_PAGE_SEO, applyPublicPageSeo } from "../lib/public-page-seo.js";
 import { trpc } from "../lib/trpc.js";
-
-const PUBLIC_SITE = import.meta.env.VITE_PUBLIC_SITE !== "false";
 
 /** External-party access page (/access). */
 export function ExternalLogin() {
@@ -122,16 +119,5 @@ export function ExternalLogin() {
     </Stack>
   );
 
-  if (PUBLIC_SITE) {
-    return <PublicAuthStageLayout>{form}</PublicAuthStageLayout>;
-  }
-
-  return (
-    <AuthRailLayout
-      variant="external"
-      rail={<AuthBrandBlock tagline={AORMS_PORTALS.external.authTagline} />}
-      stage={form}
-      showMarketingFooter={false}
-    />
-  );
+  return <AuthRailLayout variant="external" showMarketingFooter={false} rail={form} />;
 }

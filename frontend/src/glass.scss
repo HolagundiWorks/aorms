@@ -491,37 +491,10 @@ $neu-input-radius: 0;
 .esti-app-shell2--studio-home {
   position: relative;
   isolation: isolate;
-  background: #ffffff;
+  background: #f2f4f7; // Fog Gray — same as every staff page
 
   &::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    z-index: 0;
-    pointer-events: none;
-    background:
-      radial-gradient(
-        ellipse 130vw 110vh at 0% 0%,
-        rgba(255, 255, 255, 0.95) 0%,
-        rgba(242, 244, 247, 0.28) 38%,
-        rgba(255, 255, 255, 0) 72%
-      ),
-      radial-gradient(
-        ellipse 130vw 110vh at 100% 100%,
-        rgba(255, 255, 255, 0.9) 0%,
-        rgba(242, 244, 247, 0.22) 42%,
-        rgba(255, 255, 255, 0) 68%
-      );
-    filter: blur(4px);
-    transform-origin: center center;
-    animation: esti-rail-orange-pulse 8.5s ease-in-out infinite;
+    content: none; // no white atmosphere wash
   }
 
   > * {
@@ -531,23 +504,21 @@ $neu-input-radius: 0;
 }
 .esti-ribbon {
   flex: 0 0 auto;
-  // No bar background — blends with the page. Opaque because the shell canvas
-  // (#f2f4f7) sits behind it, so scrolling content never shows through.
-  background-color: transparent;
-  border-bottom: none;
+  width: 100%;
+  box-sizing: border-box;
 }
-// Row 1: firm-name h1 (40%) + section tabs.
+// Row 1: firm-name h1 + section tabs.
 .esti-ribbon__nav {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 2px 12px 0;
+  min-width: 0;
 }
 .esti-ribbon__title {
-  width: 40%;
+  max-width: min(40%, 280px);
   min-width: 0;
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   line-height: 1.2;
   white-space: nowrap;
@@ -556,35 +527,22 @@ $neu-input-radius: 0;
   color: var(--cds-text-primary);
 }
 
-// Floating nav — section buttons pinned top-right (Studio Intelligence home).
+// Float variant retired (Wave 1 UI consistency) — keep class inert if referenced.
 .esti-ribbon--float {
-  position: fixed;
-  top: 10px;
-  right: 12px;
-  z-index: 1200;
-  pointer-events: none;
-  max-width: min(72vw, 640px);
-
-  .esti-ribbon__nav {
-    padding: 0;
-    justify-content: flex-end;
-    pointer-events: auto;
-  }
+  position: static;
+  max-width: none;
+  pointer-events: auto;
 }
 
-// Studio home — stage clears the floating ribbon (content area is flush-top).
-.esti-app-shell2--studio-home .esti-glass-dash .esti-dash-stage {
-  padding-top: var(--esti-header-height, 48px);
+// Studio home — stage padding under soft ribbon.
+.esti-app-shell2--studio-home .esti-glass-dash .esti-dash-stage,
+.esti-app-shell2--studio-home .esti-neu-dash {
   box-sizing: border-box;
 }
 
 @media (min-width: 901px) {
   .esti-app-shell2 .esti-glass-dash .esti-dash-stage {
     padding-top: 0;
-  }
-
-  .esti-app-shell2--studio-home .esti-glass-dash .esti-dash-stage {
-    padding-top: var(--esti-header-height, 48px);
   }
 }
 

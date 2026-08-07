@@ -1,14 +1,5 @@
 import { Surface } from "@hcw/ui-kit";
-import {
-  Badge,
-  Box,
-  Chip,
-  List,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { AORMS_PORTALS } from "../../lib/product-nomenclature.js";
 
@@ -37,7 +28,7 @@ const SECTIONS: { key: AdminSectionKey; label: string }[] = [
   { key: "components", label: "Component releases" },
 ];
 
-/** Licensing console — left nav + content stage inside the portal shell. */
+/** Licensing console — horizontal section nav + stage (no left rail). */
 export function AdminConsoleShell({
   section,
   onSectionChange,
@@ -54,7 +45,7 @@ export function AdminConsoleShell({
   children: ReactNode;
 }) {
   return (
-    <Stack spacing={2} sx={{ height: "100%" }}>
+    <Stack spacing={2} sx={{ height: "100%", minHeight: 0 }}>
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={1}
@@ -81,28 +72,38 @@ export function AdminConsoleShell({
         </Stack>
       </Stack>
 
-      <Box className="esti-admin-console">
-        <Surface layer="flat" className="esti-admin-console__nav">
-          <List dense disablePadding>
-            {SECTIONS.map((s) => (
-              <ListItemButton
-                key={s.key}
-                selected={section === s.key}
-                onClick={() => onSectionChange(s.key)}
-                sx={{ mx: 0.5, my: 0.25 }}
-              >
-                <ListItemText primary={s.label} slotProps={{ primary: { variant: "body2" } }} />
-                {s.key === "requests" && pendingRequests > 0 && (
-                  <Badge badgeContent={pendingRequests} color="primary" sx={{ mr: 1 }} />
-                )}
-              </ListItemButton>
-            ))}
-          </List>
-        </Surface>
-        <Surface layer="flat" className="esti-admin-console__stage">
-          {children}
-        </Surface>
-      </Box>
+      <Stack
+        component="nav"
+        aria-label="Licensing sections"
+        direction="row"
+        spacing={0.5}
+        useFlexGap
+        sx={{ flexWrap: "wrap", alignItems: "center" }}
+      >
+        {SECTIONS.map((s) => {
+          const selected = section === s.key;
+          const label =
+            s.key === "requests" && pendingRequests > 0
+              ? `${s.label} (${pendingRequests})`
+              : s.label;
+          return (
+            <Button
+              key={s.key}
+              size="small"
+              variant={selected ? "contained" : "text"}
+              color={selected ? "primary" : "inherit"}
+              onClick={() => onSectionChange(s.key)}
+              sx={{ borderRadius: "8px", textTransform: "none", minHeight: 36 }}
+            >
+              {label}
+            </Button>
+          );
+        })}
+      </Stack>
+
+      <Surface layer="flat" className="esti-admin-console__stage" sx={{ flex: 1, minHeight: 0, p: 2 }}>
+        {children}
+      </Surface>
     </Stack>
   );
 }

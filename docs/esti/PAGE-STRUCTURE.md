@@ -1,11 +1,11 @@
 # AORMS — page structure, colours, elements & tokens
 
-**Status:** Canonical · **Adopted:** 2026-08-06 · **Owner:** HCW  
-**Reference UI:** platform landing (`Landing.tsx` + `MarketingNeuFrame`) — final language for marketing and staff apps.
+**Status:** Canonical · **Adopted:** 2026-08-06 · **Updated:** 2026-08-07 · **Owner:** HCW  
+**Reference UI:** platform landing (`Landing.tsx` + `MarketingNeuFrame`) — final language for marketing, staff apps, and portals.
 
-Where this disagrees with older “glass rail · 20%” wording, **this wins**. Historical notes stay in [CARBON-MIGRATION.md](CARBON-MIGRATION.md). Portal SoftRail redesign is **deferred** (design session next).
+Where this disagrees with older “glass rail · 20%” wording, **this wins**. Historical notes stay in [CARBON-MIGRATION.md](CARBON-MIGRATION.md).
 
-Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Templates: [05-TEMPLATES.md](../hcw-kit/05-TEMPLATES.md) · Nav IA: [NAVIGATION.md](NAVIGATION.md).
+Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Templates: [05-TEMPLATES.md](../hcw-kit/05-TEMPLATES.md) · Nav IA: [NAVIGATION.md](NAVIGATION.md) · Chrome inventory: [UI-SITE-MAP.md](UI-SITE-MAP.md).
 
 ---
 
@@ -27,14 +27,14 @@ Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Templates: [05-TEMPLATES.md]
 
 | Region | Marketing | Staff apps (AStudio / AConsulting / AProc) | Portals |
 | --- | --- | --- | --- |
-| **Top ribbon** | `MarketingTopBar` — logo + expansion | `AppRibbon` — primary nav | TBD (SoftRail until redesign) |
-| **Stage** | Full width · content column **1200px** | `.esti-app-content2` full width under ribbon | SoftRail stage (exception) |
+| **Top ribbon** | `MarketingTopBar` — logo + expansion | `AppRibbon` — soft sticky neu bar + primary nav | `PortalNeuFrame` top bar — brand/nav or portal identity + sign-out |
+| **Stage** | Full width · content column **1200px** | `.esti-app-content2` full width under ribbon | Full width · **1200px** (`PortalNeuFrame`) |
 | **Bottom dock** | `MarketingLandingDock` — section spy + Sign in / Create / Downloads / Calculator | Kit `ActionDock` + `useScreenActions` | None (dock-less by design) |
-| **Footer** | Inline marketing footer in content | `AppFooterBar` — calc · launchers · tray | Sign-out in SoftRail |
-| **Clock** | `MarketingClockPomodoro` bottom-right | Kit `AnalogueClock` bottom-right | — |
-| **Left rail** | **Retired** | **Retired** | SoftRail — redesign tomorrow |
+| **Footer** | Inline marketing footer in content | `AppFooterBar` — calc · launchers · tray | None |
+| **Clock** | `MarketingClockPomodoro` bottom-right | Kit `AnalogueClock` bottom-right (single) | Kit `AnalogueClock` bottom-right |
+| **Left rail** | **Retired** | **Retired** | **Retired** |
 
-**Retired:** GlassRail / SoftRail as primary staff chrome · marketing clear-glass floating rail · `RailLayout` left Carbon column (replaced by full-width stage header — export name kept).
+**Retired:** GlassRail / SoftRail as primary chrome · marketing clear-glass floating rail · `RailLayout` left Carbon column (replaced by full-width stage header — export name kept).
 
 ---
 
@@ -96,11 +96,13 @@ Landing IA (five sections): **Overview · Outcomes · Platform · Rhythm · Star
 | --- | --- |
 | `AuthRailLayout` | **Centered soft-neu card** (file name legacy — not a left rail) |
 
-### Portals (exception until redesign)
+### Portals (`frontend/src/components/portal/`)
 
 | Element | Role |
 | --- | --- |
-| `PortalShell` / `ExternalPortalShell` | Still kit `SoftRail` — redesign session next |
+| `PortalNeuFrame` | Shared no-rail frame — soft top bar · 1200px stage · AnalogueClock |
+| `PortalShell` | Account / company / licensing hub — horizontal nav in top bar |
+| `ExternalPortalShell` | Client / consultant / contractor / site — identity + sign-out in top bar |
 
 ---
 
@@ -131,8 +133,7 @@ Primary create/commit actions still belong in **ActionDock**, not duplicated as 
 
 **Don’t**
 
-- Reintroduce a left glass / SoftRail on staff or marketing  
+- Reintroduce a left glass / SoftRail on staff, marketing, or portals  
 - Put glass on every card or invent accent glows  
-- Put staff ActionDock on marketing (use `MarketingLandingDock`)  
-- Apply building entourage inside authenticated apps  
-- Redesign portal SoftRail ad hoc before the portal design pass  
+- Put staff ActionDock on marketing (use `MarketingLandingDock`) or portals  
+- Apply building entourage inside authenticated apps or portals  

@@ -58,11 +58,13 @@ AuthRailLayout: CENTERED soft-neu card on Fog Gray (legacy name — not a left r
 · AuthBrandBlock · autoComplete on identity fields · errors inline · single submit.
 ```
 
-## T6 — Portal (external users) (reference: `Portal.tsx` + `ExternalPortalShell`)
+## T6 — Portal (external + account hubs) (reference: `Portal.tsx` + `ExternalPortalShell` / `PortalShell`)
 
 ```
-ExternalPortalShell (SoftRail) — EXCEPTION until portal redesign (next design session).
-Rail = portal label + firm + sign-out; stage = read-mostly panels + request forms.
+PortalNeuFrame (no left SoftRail):
+├ soft top bar — portal identity + Sign out  OR  account hub nav + Sign out
+├ stage — 1200px · read-mostly panels / request forms / account tabs
+└ AnalogueClock (fixed bottom-right)
 No taskbar, no ActionDock — portal-class surfaces are dock-less by design.
 ```
 

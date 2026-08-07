@@ -4,11 +4,8 @@ import { useEffect, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AuthBrandBlock } from "../components/AormsLogo.js";
 import { AuthRailLayout } from "../components/AuthRailLayout.js";
-import { PublicAuthStageLayout } from "../components/PublicAuthStageLayout.js";
 import { AUTH_PAGE_SEO, applyPublicPageSeo } from "../lib/public-page-seo.js";
 import { trpc } from "../lib/trpc.js";
-
-const PUBLIC_SITE = import.meta.env.VITE_PUBLIC_SITE !== "false";
 
 /** Set a new workspace password from a reset link (esti_user). */
 export function ResetPassword() {
@@ -92,11 +89,5 @@ export function ResetPassword() {
     </Stack>
   );
 
-  if (PUBLIC_SITE) {
-    return <PublicAuthStageLayout>{form}</PublicAuthStageLayout>;
-  }
-
-  return (
-    <AuthRailLayout variant="workspace" showMarketingFooter={false} rail={<AuthBrandBlock />} stage={form} />
-  );
+  return <AuthRailLayout variant="workspace" showMarketingFooter={false} rail={form} />;
 }

@@ -114,13 +114,13 @@ export default function Panel() {
       showCompanyNav={ownsCompany}
       showLicensingNav={isAdmin}
       footer={
-        <Stack spacing={1}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
           {isAdmin && !memberView && (
-            <Button variant="text" size="small" fullWidth onClick={() => setShowAccount(true)}>
-              My account (2FA, profile)
+            <Button variant="text" size="small" onClick={() => setShowAccount(true)}>
+              My account
             </Button>
           )}
-          <Button variant="text" size="small" fullWidth onClick={handleLogout}>
+          <Button variant="text" size="small" onClick={handleLogout}>
             Sign out
           </Button>
         </Stack>

@@ -160,8 +160,8 @@ via the repo’s wiki sync/build step.
 | `Avatar` + `getInitials` | Identity mark (colour injected by caller) |
 | `chromeIconSx` | Persistent chrome hit targets (COGA-aware) |
 
-`SoftRail` / `GlassRail` are **not** primary staff or marketing chrome (left rail
-retired 2026-08). Portal shells still use SoftRail until the portal redesign.
+`SoftRail` / `GlassRail` are **not** primary chrome (left rail retired 2026-08).
+Portals use `PortalNeuFrame` · `PortalShell` · `ExternalPortalShell`.
 `BrandMark` / `HealthGlassOrb` / `SectionDock` remain available where a template
 still references them.
 
