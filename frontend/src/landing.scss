@@ -4628,22 +4628,23 @@ $lp2-gap: 1px;               // shared border thickness
   &--auth {
     flex-direction: row;
     align-items: center;
-    gap: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
     margin-top: 0;
     padding-top: 0;
     border-top: none;
 
     .hcw-attribution__mark {
-      opacity: 0.65;
-      max-height: 12px;
+      opacity: 0.88;
+      max-height: 18px;
       width: auto;
     }
 
     .hcw-attribution__note {
-      color: var(--cds-text-secondary, rgba(20, 21, 23, 0.62));
-      font-size: 0.55rem;
-      line-height: 1.3;
-      max-width: none;
+      color: var(--cds-text-secondary, rgba(20, 21, 23, 0.72));
+      font-size: 0.6875rem;
+      line-height: 1.4;
+      max-width: 28rem;
     }
   }
 }

@@ -8,7 +8,7 @@ const LOGO_HEIGHT: Record<Variant, number> = {
   rail: 14,
   footer: 30,
   inline: 22,
-  auth: 12,
+  auth: 18,
 };
 
 const DEFAULT_TONE: Record<Variant, LogoTone> = {

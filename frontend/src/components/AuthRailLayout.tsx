@@ -118,15 +118,15 @@ export function AuthRailLayout({
                 className="esti-auth-card__foot"
                 sx={{
                   px: COMPOSITION_RHYTHM.md,
-                  py: 1,
+                  py: 1.5,
                   borderTop: 1,
                   borderColor: "divider",
                 }}
               >
-                <HcwAttribution variant="auth" logoTone="on-light" compact showNote={false} />
+                <HcwAttribution variant="auth" logoTone="on-light" />
               </Box>
             ) : (
-              <HcwAttribution variant="auth" logoTone="on-light" compact />
+              <HcwAttribution variant="auth" logoTone="on-light" />
             )}
           </Surface>
         </Box>
