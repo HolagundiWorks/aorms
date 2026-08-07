@@ -46,7 +46,8 @@ Get-Command signtool      # usually under Windows SDK 10 bin\x64
 ```
 
 Missing on current Bhoomi cloud Linux host: `dotnet`, `pwsh` / Windows SDK
-`signtool`, Windows App SDK, WebView2 — **cannot finish LF4 here**.
+`signtool`, Windows App SDK, WebView2 — **cannot run WinUI publish here**
+(use Windows host / Bhoomi2). LF4 engineering is already closed on ROADMAP.
 
 ### 1. Local node stack + unsigned publish
 
