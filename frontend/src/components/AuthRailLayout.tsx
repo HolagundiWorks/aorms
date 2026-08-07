@@ -6,6 +6,10 @@ import { MarketingFooter } from "./landing/MarketingFooter.js";
 import { MarketingTopBar } from "./landing/MarketingTopBar.js";
 import { LandingEntourage } from "./landing/LandingEntourage.js";
 import { COMPOSITION_RHYTHM } from "../lib/composition.js";
+import {
+  MARKETING_CONTENT_GUTTER,
+  marketingContentColumnSx,
+} from "../lib/marketing-layout.js";
 
 /**
  * Unauthenticated auth shell — landing MarketingTopBar + Fog Gray entourage +
@@ -82,18 +86,22 @@ export function AuthRailLayout({
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            p: { xs: COMPOSITION_RHYTHM.md, md: COMPOSITION_RHYTHM.lg },
+            px: { xs: MARKETING_CONTENT_GUTTER.xs, md: MARKETING_CONTENT_GUTTER.md },
+            py: { xs: COMPOSITION_RHYTHM.md, md: COMPOSITION_RHYTHM.lg },
             gap: COMPOSITION_RHYTHM.md,
+            boxSizing: "border-box",
           }}
         >
           <Surface
             layer="soft"
             className={`esti-auth-card${wide ? " esti-auth-card--horizontal" : ""}`}
             sx={{
-              width: "100%",
-              maxWidth: wide
-                ? COMPOSITION_RHYTHM.authCardWideMaxPx
-                : COMPOSITION_RHYTHM.authCardMaxPx,
+              ...(wide
+                ? marketingContentColumnSx
+                : {
+                    width: "100%",
+                    maxWidth: COMPOSITION_RHYTHM.authCardMaxPx,
+                  }),
               borderRadius: `${RADIUS}px`,
               p: wide ? 0 : { xs: COMPOSITION_RHYTHM.md, sm: COMPOSITION_RHYTHM.lg },
               display: "flex",
@@ -107,18 +115,18 @@ export function AuthRailLayout({
             </Box>
             {wide ? (
               <Box
+                className="esti-auth-card__foot"
                 sx={{
                   px: COMPOSITION_RHYTHM.md,
-                  pb: COMPOSITION_RHYTHM.md,
-                  pt: COMPOSITION_RHYTHM.sm,
+                  py: 1,
                   borderTop: 1,
                   borderColor: "divider",
                 }}
               >
-                <HcwAttribution variant="auth" logoTone="on-light" />
+                <HcwAttribution variant="auth" logoTone="on-light" compact showNote={false} />
               </Box>
             ) : (
-              <HcwAttribution variant="auth" logoTone="on-light" />
+              <HcwAttribution variant="auth" logoTone="on-light" compact />
             )}
           </Surface>
         </Box>

@@ -171,10 +171,10 @@ export function Login() {
       <AuthBrandBlock
         product={AORMS_STUDIO.title}
         tagline={AORMS_STUDIO.expansion}
-        logoVariant="stage"
+        logoVariant="rail"
       />
       <Box>
-        <Typography variant="h4" component="h1" className="esti-auth-title">
+        <Typography variant="h5" component="h1" className="esti-auth-title">
           {title}
         </Typography>
         <Typography
@@ -475,7 +475,7 @@ export function Login() {
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
         alignItems: "stretch",
-        minHeight: { md: 440 },
+        minHeight: { md: 360 },
       }}
     >
       {brandPane}

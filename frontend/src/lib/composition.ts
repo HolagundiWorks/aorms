@@ -38,8 +38,8 @@ export const COMPOSITION_RHYTHM = {
   authCardPad: 3, // 24px
   /** Auth card max width — single-column forms */
   authCardMaxPx: 440,
-  /** Auth card max width — horizontal brand | form split */
-  authCardWideMaxPx: 880,
+  /** Auth horizontal card — same content column as MarketingTopBar */
+  authCardWideMaxPx: 1200,
   /** Section vertical padding (marketing / long-form) */
   sectionY: { xs: 8, md: 12 } as const, // 64 / 96
   /** Gap between card grids inside a section */

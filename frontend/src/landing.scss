@@ -4626,16 +4626,24 @@ $lp2-gap: 1px;               // shared border thickness
   }
 
   &--auth {
-    margin-top: 0.25rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--lp-border, rgba(20, 21, 23, 0.1));
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
 
     .hcw-attribution__mark {
-      opacity: 0.72;
+      opacity: 0.65;
+      max-height: 12px;
+      width: auto;
     }
 
     .hcw-attribution__note {
       color: var(--cds-text-secondary, rgba(20, 21, 23, 0.62));
+      font-size: 0.55rem;
+      line-height: 1.3;
+      max-width: none;
     }
   }
 }
