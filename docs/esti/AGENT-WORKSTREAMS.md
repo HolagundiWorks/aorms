@@ -1,32 +1,32 @@
 # AORMS active delivery — named agent crew
 
-**Status:** ACTIVE · **Date:** 2026-08-06  
-**Parent:** [ROADMAP.md](ROADMAP.md) · morning checklist [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)
+**Status:** ACTIVE (ops gates only) · **Date:** 2026-08-07  
+**Parent:** [ROADMAP.md](ROADMAP.md) — **engineering COMPLETE** · morning checklist [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)
 
 ## Solo mode (current)
 
 Cloud agents (**Vishwakarma**, **Gagan**, **Aakash**, cloud **Bhoomi**) are
-**stopped** (model expired). **Bhoomi2** is the only active agent and absorbs
-orchestration + LF4 + interim portal honesty until the crew restarts.
+**stopped** (model expired). **Bhoomi2** is the only active agent. Product
+delivery is **complete**; remaining work is **LF4 ops** (SmartScreen-trusted
+cert · public installer URL) and parked phase-2 items — see ROADMAP “Open gates”.
 
 | Name | Role | Runtime | Owns now |
 | --- | --- | --- | --- |
-| **Bhoomi2** | Solo delivery | This Windows Cursor chat | Roadmap truth · LF4 WinUI build/sign/bind · local hub `0227` · keep `/downloads` gated |
+| **Bhoomi2** | Solo delivery | This Windows Cursor chat | Roadmap truth · LF4 ops gates · keep `/downloads` `web_fallback` |
 | **Vishwakarma** | CTO / orchestrator | Parked | Resume → merge queue only |
-| **Gagan** | Cloud hub / sync | Parked | Resume → hub/contracts |
-| **Aakash** | Cloud portal / GTM | Parked | Resume → live installer URL after Bhoomi2 handoff |
+| **Gagan** | Cloud hub / sync | Parked | Resume → hub/contracts · prod `0227` |
+| **Aakash** | Cloud portal / GTM | Parked | Resume → live installer URL after trusted cert |
 | **Bhoomi** | Cloud desktop env | Parked | Optional parallel LF4 |
 
 ### Live roster
 
 | Name | Agent | Focus now |
 | --- | --- | --- |
-| **Bhoomi2** | This chat (*Bhoomi2*) | **Solo queue** — see [ROADMAP.md](ROADMAP.md) “Now” table |
+| **Bhoomi2** | This chat (*Bhoomi2*) | **Ops gates only** — [ROADMAP.md](ROADMAP.md) open gates |
 | Vishwakarma · Gagan · Aakash · Bhoomi | Parked | Do not wait on them |
 
 Prior merge wave **#55 → #56 → #51 → #53 → #54 → #49 → #57** remains on `main`.
-Pure neumorphism marketing (`MarketingNeuFrame` · AnalogueClock · blog/SEO) shipped
-(`8bad1e5c`); kit/app neu 1.5.0 on `42fb2eb5`.
+UI Wave 7 (unified `/login` + account hub) shipped `68361264`.
 
 ```mermaid
 flowchart TB

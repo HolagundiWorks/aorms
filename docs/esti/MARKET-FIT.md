@@ -8,7 +8,9 @@ Companion to [ROADMAP.md](ROADMAP.md) (delivery queue) and
 research conclusions** and what we must ship for paying firms.
 
 **Delivery status:** Market-fit Waves **W1–W3 shipped**; **W4 integrations deferred**;
-**M8 local-first GTM** in progress ([WEB-PORTAL.md](WEB-PORTAL.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md)).
+**M8 local-first GTM** — desktop preferred story live; public installer URL still
+ops-gated ([WEB-PORTAL.md](WEB-PORTAL.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md) ·
+[ROADMAP.md](ROADMAP.md)).
 
 ---
 
