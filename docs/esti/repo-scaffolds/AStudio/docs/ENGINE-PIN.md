@@ -1,16 +1,16 @@
-# Engine + bridge pin (D5)
+﻿# Engine + bridge pin (D5)
 
-**Status:** Pin ready · **Updated:** 2026-08-07  
+**Status:** Pin ready Â· **Updated:** 2026-08-07  
 **Upstream:** [HolagundiWorks/AQC](https://github.com/HolagundiWorks/AQC)  
-**Baseline:** tag `aorms-bridge-d2` · commit `1184390`
+**Baseline:** tag `aorms-bridge-d2` Â· commit `1184390`
 
 ## Pin
 
 | Artifact | How to consume |
 | --- | --- |
-| C++ `bbs_engine` | Submodule or copy from AQC `BBSDesktop/src` — **do not fork the engine** |
+| C++ `bbs_engine` | Submodule or copy from AQC `BBSDesktop/src` â€” **do not fork the engine** |
 | `Aorms.Bridge` | ProjectReference to AQC `BBSDesktop/Aorms.Bridge` at tag `aorms-bridge-d2` |
-| Wire contract | esti [PORTAL-SYNC-BRIDGE](https://github.com/HolagundiWorks/esti/blob/main/docs/esti/PORTAL-SYNC-BRIDGE.md) · HUB-API `2026-08` |
+| Wire contract | esti [PORTAL-SYNC-BRIDGE](https://github.com/HolagundiWorks/esti/blob/main/docs/esti/PORTAL-SYNC-BRIDGE.md) Â· HUB-API `2026-08` |
 
 ## Submodule (recommended)
 
@@ -30,6 +30,11 @@ Then in the WinUI `.csproj`:
 1. Add submodule at `aorms-bridge-d2`.  
 2. WinUI shell fork (branding AStudio / AConsulting).  
 3. Call `AormsBridgeHost`-style activate/Flush on publish actions.  
-4. Local AI (ESTI) — desktop only.
+4. Local AI (ESTI) â€” desktop only.
 
 Open source; SaaS licensing deferred.
+
+## WinUI shell
+
+See sibling [WINUI-SHELL.md](https://github.com/HolagundiWorks/AStudio/blob/main/docs/WINUI-SHELL.md) — unpackaged app builds with VS 2022 `build-winui.cmd`.
+

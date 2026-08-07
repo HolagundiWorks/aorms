@@ -17,7 +17,7 @@ Canon: [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-B
 | 1 | AQC bridge docs | AQC | ✅ [PR #4](https://github.com/HolagundiWorks/AQC/pull/4) |
 | 2 | `Aorms.Bridge` scaffold | AQC | ✅ [PR #5](https://github.com/HolagundiWorks/AQC/pull/5) merged |
 | 3 | **D2 smoke** — activate → Flush with live `syncToken` | AQC ↔ esti hub | ✅ Smoke + colocated hub |
-| 4 | **D5** — consume bridge in apps | AStudio · AConsulting | ✅ submodule + BridgeHost ProjectReference · 🚧 WinUI shell next |
+| 4 | **D5** — consume bridge in apps | AStudio · AConsulting | ✅ WinUI shell + BridgeHost · 🚧 domain UI fork of BBSApp |
 | 5 | Portal section content | esti | ✅ client portal panels (Project · Progress · Drawings · Documents) |
 
 ---
@@ -30,7 +30,7 @@ Canon: [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-B
 | **D2** | AQC `Aorms.Bridge` | ✅ code + hub smoke |
 | **D3** | Sibling repos | ✅ |
 | **D4** | FirmPortalShell + marketing CTAs | ✅ |
-| **D5** | Domain apps consume engine + bridge | 🚧 BridgeHost ✅ · WinUI shell next |
+| **D5** | Domain apps consume engine + bridge | ✅ WinUI shells · domain UI next |
 | **D6** | Signed installers · portal tenants | 🔲 |
 
 ---
@@ -64,4 +64,5 @@ SaaS commercial SKUs · Stripe auto · W4 integrations · pure C++ UI rewrite.
 ## Change rule
 
 Update this file + DOCUMENTATION-ROADMAP / PORTAL-SYNC-BRIDGE / sibling AGENTS when law moves.
+
 
