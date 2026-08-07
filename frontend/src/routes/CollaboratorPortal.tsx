@@ -2,7 +2,6 @@ import {
   Alert,
   Box,
   Button,
-  Card,
   CardActionArea,
   Dialog,
   DialogActions,
@@ -39,6 +38,7 @@ import { StatusDot } from "../components/StatusTag.js";
 import { SubmissionThread } from "../components/SubmissionThread.js";
 import { trpc } from "../lib/trpc.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
+import { Surface, RADIUS } from "@hcw/ui-kit";
 
 type SubmissionStatus = keyof typeof CONSULTANT_SUBMISSION_STATUS_LABEL;
 
@@ -254,34 +254,40 @@ export function CollaboratorPortal() {
                 your fee balance, and your deliverables, RFIs and notes.
               </Typography>
             </Stack>
-            <Grid container spacing={2}>
-              {(projectsQ.data ?? []).length === 0 && (
-                <Grid size={12}>
-                  <Typography variant="body1">No engagements yet.</Typography>
-                </Grid>
-              )}
-              {(projectsQ.data ?? []).map((p) => {
-                const balance = p.agreedFeePaise - p.paidPaise;
-                return (
-                  <Grid key={p.id} size={{ xs: 12, md: 6, lg: 3 }}>
-                    <Card className="esti-fill">
-                      <CardActionArea onClick={() => navigate(`/projects/${p.id}`)} sx={{ p: 2, height: 1 }}>
-                        <Stack spacing={1}>
-                          <Typography variant="body2">{p.ref}</Typography>
-                          <Typography variant="h6" component="h3">{p.title}</Typography>
-                          <Box>
-                            <StatusDot color="cool-gray" label={p.status} />
-                          </Box>
-                          <Typography variant="body2">
-                            Balance {formatINR(balance, { paise: false })}
-                          </Typography>
-                        </Stack>
-                      </CardActionArea>
-                    </Card>
-                  </Grid>
-                );
-              })}
-            </Grid>
+            <DataState
+              loading={projectsQ.isLoading}
+              isEmpty={!projectsQ.isLoading && (projectsQ.data ?? []).length === 0}
+              columnCount={3}
+              empty={{
+                title: "No engagements yet",
+                description:
+                  "When the firm engages you on a project, it appears here with stages, drawings, and submissions.",
+              }}
+            >
+              <Grid container spacing={2}>
+                {(projectsQ.data ?? []).map((p) => {
+                  const balance = p.agreedFeePaise - p.paidPaise;
+                  return (
+                    <Grid key={p.id} size={{ xs: 12, md: 6, lg: 3 }}>
+                      <Surface layer="soft" sx={{ borderRadius: `${RADIUS}px`, height: 1, overflow: "hidden" }}>
+                        <CardActionArea onClick={() => navigate(`/projects/${p.id}`)} sx={{ p: 2, height: 1 }}>
+                          <Stack spacing={1}>
+                            <Typography variant="body2">{p.ref}</Typography>
+                            <Typography variant="h6" component="h3">{p.title}</Typography>
+                            <Box>
+                              <StatusDot color="cool-gray" label={p.status} />
+                            </Box>
+                            <Typography variant="body2">
+                              Balance {formatINR(balance, { paise: false })}
+                            </Typography>
+                          </Stack>
+                        </CardActionArea>
+                      </Surface>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </DataState>
           </Stack>
         )}
 

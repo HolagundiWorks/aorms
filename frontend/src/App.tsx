@@ -1,5 +1,5 @@
 import { Alert, AlertTitle, Box, CircularProgress } from "@mui/material";
-import { AORMS_STUDIO, AORMS_CONSULTANCY, isAormsStudioLegacySlug } from "./lib/product-nomenclature.js";
+import { AORMS_STUDIO, AORMS_CONSULTANCY, AORMS_PMC, isAormsStudioLegacySlug } from "./lib/product-nomenclature.js";
 import {
   Analytics,
   Archive,
@@ -15,6 +15,7 @@ import {
   Apartment as Enterprise,
   Engineering,
   Event as Events,
+  Home,
   Badge as Identification,
   CardMembership as License,
   Checklist as ListChecked,
@@ -104,6 +105,7 @@ const ConsultancyEnquiries = lazyRoute(
   () => import("./routes/ConsultancyEnquiries.js"),
   "ConsultancyEnquiries",
 );
+const PmcHome = lazyRoute(() => import("./routes/PmcHome.js"), "PmcHome");
 const Contracts = lazyRoute(() => import("./routes/Contracts.js"), "Contracts");
 const DocumentsRegister = lazyRoute(() => import("./routes/DocumentsRegister.js"), "DocumentsRegister");
 const Letters = lazyRoute(() => import("./routes/Letters.js"), "Letters");
@@ -258,7 +260,7 @@ function AppWorkspace() {
   if (!ADMIN_CONSOLE_URL && (isAdminHost() || pathname.startsWith("/platform-admin")))
     return <PlatformAdmin />;
 
-  // consultancy.aorms.in — AORMS-Consultancy. Authenticated staff enter the
+  // consultancy.aorms.in — AConsulting. Authenticated staff enter the
   // engineering workspace (Enquiries home); everyone else sees the
   // unified platform landing. One login window — the workspace type only
   // routes where a company works.
@@ -272,6 +274,22 @@ function AppWorkspace() {
         return <Landing />;
       if (pathname === "/login") {
         // Fall through — staff sign-in works on this host too (single login).
+      } else {
+        return <Navigate to="/" replace />;
+      }
+    }
+  }
+
+  // proc.aorms.in — AProc. Authenticated staff enter PMC home; others see landing.
+  if (surface === "pmc") {
+    if (user && isStaffRole(user.role)) {
+      if (pathname === "/" || pathname === AORMS_PMC.marketingPath)
+        return <Navigate to="/pmc" replace />;
+    } else {
+      if (pathname === "/" || pathname === AORMS_PMC.marketingPath)
+        return <Landing />;
+      if (pathname === "/login") {
+        // Fall through — staff sign-in on this host.
       } else {
         return <Navigate to="/" replace />;
       }
@@ -557,7 +575,39 @@ function AppWorkspace() {
     },
   ];
 
-  const nav: NavNode[] = prune(surface === "consultancy" ? consultancyNav : studioNav);
+  const pmcNav: NavNode[] = [
+    { label: "Home", to: "/pmc", icon: Home },
+    { label: "Projects", to: "/projects", icon: Building },
+    ...(can(user.role, "write")
+      ? [
+          { label: "Clients", to: "/clients", icon: User },
+          { label: "Contractors", to: "/contractors", icon: Tools },
+        ]
+      : []),
+    {
+      kind: "menu",
+      label: "Teams",
+      icon: UserMultiple,
+      items: [
+        ...(hrEnabled
+          ? [
+              { label: "Teams", to: "/team", icon: Events },
+              ...(atLeast(60)
+                ? [{ label: "Performance", to: "/performance", icon: Analytics }]
+                : []),
+            ]
+          : []),
+      ],
+    },
+  ];
+
+  const nav: NavNode[] = prune(
+    surface === "consultancy"
+      ? consultancyNav
+      : surface === "pmc"
+        ? pmcNav
+        : studioNav,
+  );
 
   // Admin hamburger: remaining Third Parties, Library, system.
   const adminGroups: { heading: string; items: NavLink[] }[] = [
@@ -706,17 +756,9 @@ function AppWorkspace() {
                 )}
                 <Route path="/tasks" element={<Work />} />
                 <Route path="/work" element={<Navigate to="/tasks" replace />} />
-                {/* Consultancy-only: PMC / Construction / Programme removed. */}
-                <Route
-                  path="/pmc"
-                  element={
-                    <LegacyModuleRedirect
-                      to="/projects"
-                      title="PMC module removed"
-                      subtitle="Portfolio management was retired — opening Projects."
-                    />
-                  }
-                />
+                {/* AProc portfolio home — also served on proc.aorms.in */}
+                <Route path="/pmc" element={<PmcHome />} />
+                <Route path="/aproc" element={<Navigate to="/pmc" replace />} />
                 <Route
                   path="/programme"
                   element={

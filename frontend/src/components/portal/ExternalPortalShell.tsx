@@ -1,7 +1,6 @@
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Button, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { AORMS_PORTALS } from "../../lib/product-nomenclature.js";
 import { PortalNeuFrame } from "./PortalNeuFrame.js";
 
 /**
@@ -44,7 +43,7 @@ export function ExternalPortalShell({
               component="p"
               sx={{ m: 0, fontWeight: 700, wordBreak: "break-word" }}
             >
-              {companyName ?? AORMS_PORTALS.studio.railFallback}
+              {companyName ?? portalLabel}
             </Typography>
           </Stack>
           {onSignOut ? (

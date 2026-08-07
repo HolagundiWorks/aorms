@@ -4,7 +4,6 @@ import {
   AlertTitle,
   Box,
   Button,
-  Card,
   CardActionArea,
   Checkbox,
   Dialog,
@@ -54,6 +53,7 @@ import { StatusDot, StatusTag } from "../components/StatusTag.js";
 import { SubmissionThread } from "../components/SubmissionThread.js";
 import { trpc } from "../lib/trpc.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
+import { Surface, RADIUS } from "@hcw/ui-kit";
 
 const INV_TAG: Record<string, "blue" | "green"> = {
   ISSUED: "blue",
@@ -526,7 +526,7 @@ export function Portal() {
             <Grid container spacing={2}>
               {(projectsQ.data ?? []).map((p) => (
                 <Grid key={p.id} size={{ xs: 12, md: 6, lg: 3 }}>
-                  <Card className="esti-fill">
+                  <Surface layer="soft" sx={{ borderRadius: `${RADIUS}px`, height: 1, overflow: "hidden" }}>
                     <CardActionArea onClick={() => navigate(`/projects/${p.id}`)} sx={{ p: 2, height: 1 }}>
                       <Stack spacing={1}>
                         <Typography variant="body2" color="text.secondary">{p.ref}</Typography>
@@ -536,7 +536,7 @@ export function Portal() {
                         </Box>
                       </Stack>
                     </CardActionArea>
-                  </Card>
+                  </Surface>
                 </Grid>
               ))}
             </Grid>

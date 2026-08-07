@@ -141,12 +141,12 @@ export function ConsultancyEnquiries() {
     <RailLayout
       title="Enquiries"
       description="Register intake, score go/no-go, then open a job number on win."
-      actions={
-        <Stack spacing={1} sx={{ width: 1 }}>
-          <Button component={RouterLink} to="/consultancy/enquiries" size="small" variant="contained" fullWidth>
+      tabs={
+        <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+          <Button component={RouterLink} to="/consultancy/enquiries" size="small" variant="contained">
             Enquiries
           </Button>
-          <Button component={RouterLink} to="/consultancy/engagements" size="small" variant="outlined" fullWidth>
+          <Button component={RouterLink} to="/consultancy/engagements" size="small" variant="outlined">
             Engagements
           </Button>
         </Stack>

@@ -185,7 +185,7 @@ $neu-input-radius: 0;
   }
 
   .esti-app-content2--flush-top {
-    padding-top: calc(var(--esti-header-height, 48px) + 8px);
+    padding-top: var(--esti-shell-gutter, 16px);
   }
 
   .esti-glass-dash {
@@ -546,10 +546,10 @@ $neu-input-radius: 0;
   }
 }
 
-// Glass rail in the app shell — panel flush to the top; content starts below the header band.
+// Studio brief strip — soft padding (ribbon is in-flow; no float clear).
 .esti-app-shell2 .esti-glass-dash .esti-dash-rail,
 .esti-app-shell2 .esti-neu-dash .esti-dash-brief {
-  padding: var(--esti-header-height, 48px) 12px 12px 12px;
+  padding: 12px;
   box-sizing: border-box;
 }
 
@@ -692,7 +692,8 @@ $neu-input-radius: 0;
 .esti-app-content2 {
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: var(--esti-header-height, 48px)
+  // Soft sticky ribbon is in-flow — only side/bottom clear (footer + dock).
+  padding: var(--esti-shell-gutter, 16px)
     calc(var(--esti-shell-gutter, 16px) + var(--esti-right-slot-width, 0px))
     calc(
       var(--esti-footer-height, 56px) + var(--esti-dock-stack, 0px) + var(--esti-shell-gutter, 16px)

@@ -35,6 +35,10 @@ export function SitePortal() {
   const meQ = trpc.auth.me.useQuery();
   const user = meQ.data;
   const utils = trpc.useUtils();
+  const logout = trpc.auth.logout.useMutation({
+    meta: { errorTitle: "Couldn't sign out" },
+    onSuccess: () => utils.auth.me.invalidate(),
+  });
 
   // Projects list (for supervisor to pick from when not scoped to one)
   const projectsQ = trpc.projectOffice.list.useQuery(
@@ -71,14 +75,16 @@ export function SitePortal() {
   const resetForm = () => setForm({ dateVisit: "", weather: "", attendees: "", progress: "", observations: "", instructions: "" });
 
   const shellProps = {
-    companyName: user?.fullName ?? "Site Supervisor",
+    companyName: user?.fullName ?? "Site supervisor",
     portalLabel: AORMS_PORTALS.site.label,
+    onSignOut: () => logout.mutate(),
+    signingOut: logout.isPending,
   };
 
   if (!projectId) {
     return (
       <ExternalPortalShell {...shellProps}>
-        <Stack spacing={3} sx={{ maxWidth: 640 }}>
+        <Stack spacing={3}>
           <Stack spacing={1}>
             <Typography variant="h5" component="h2">{AORMS_PORTALS.site.label}</Typography>
             <Typography variant="body2" color="text.secondary">
@@ -88,7 +94,7 @@ export function SitePortal() {
           {projectsQ.isLoading && (
             <Stack spacing={1.5} aria-busy="true" aria-label="Loading projects">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} variant="rectangular" height={72} />
+                <Skeleton key={i} variant="rectangular" height={72} sx={{ borderRadius: "8px" }} />
               ))}
             </Stack>
           )}
@@ -99,7 +105,7 @@ export function SitePortal() {
           )}
           <Stack spacing={1.5}>
             {(projectsQ.data ?? []).map((p) => (
-              <Card key={p.id}>
+              <Card key={p.id} elevation={0} sx={{ borderRadius: "8px", bgcolor: "background.paper" }}>
                 <CardActionArea onClick={() => navigate(`/projects/${p.id}`)} sx={{ p: 2 }}>
                   <Stack spacing={1.5}>
                     <Typography variant="body1">
@@ -120,7 +126,7 @@ export function SitePortal() {
 
   return (
     <ExternalPortalShell {...shellProps}>
-      <Stack spacing={3} sx={{ maxWidth: 640 }}>
+      <Stack spacing={3}>
         <Stack spacing={1}>
           <Typography variant="h5" component="h2">Site Inspections</Typography>
           <Typography variant="body2" color="text.secondary">

@@ -81,6 +81,7 @@ import { RowActionsMenu } from "../components/RowActionsMenu.js";
 import { StatusDot, StatusTag } from "../components/StatusTag.js";
 import { pushToast } from "../lib/toast.js";
 import { trpc } from "../lib/trpc.js";
+import { AORMS_CONSULTANCY } from "../lib/product-nomenclature.js";
 
 type FeeConfirm =
   | { kind: "invoice"; id: string; label: string }
@@ -97,7 +98,7 @@ const CHECK_CATEGORIES = CheckCategory.options;
 const MDR_DOC_TYPES = MdrDocType.options;
 
 /**
- * AORMS-Consultancy — Phase 0 "Living record" workspace (preview): engineering
+ * AConsulting — Phase 0 "Living record" workspace: engineering
  * engagements + the deliverable register. Register lifecycle only — the
  * originate→check→approve sign-off chain arrives with Phase 1.
  * Design: docs/esti/AORMS-CONSULTANCY-OPERATING-MODEL-AND-ARCHITECTURE.md.
@@ -687,7 +688,17 @@ export function ConsultancyEngagements() {
   return (
     <RailLayout
       title="Engagements"
-      description="AORMS-Consultancy · engineering workspace (preview)"
+      description={`${AORMS_CONSULTANCY.title} · engineering workspace`}
+      tabs={
+        <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+          <Button component={RouterLink} to="/consultancy/enquiries" size="small" variant="outlined">
+            Enquiries
+          </Button>
+          <Button component={RouterLink} to="/consultancy/engagements" size="small" variant="contained">
+            Engagements
+          </Button>
+        </Stack>
+      }
       aside={
         showAside ? (
           <Stack spacing={0.75}>
@@ -749,16 +760,6 @@ export function ConsultancyEngagements() {
             )}
           </Stack>
         ) : undefined
-      }
-      actions={
-        <Stack spacing={1} sx={{ width: 1 }}>
-          <Button component={RouterLink} to="/consultancy/enquiries" size="small" variant="outlined" fullWidth>
-            Enquiries
-          </Button>
-          <Button component={RouterLink} to="/consultancy/engagements" size="small" variant="contained" fullWidth>
-            Engagements
-          </Button>
-        </Stack>
       }
     >
       <PageBreadcrumb items={[{ label: "Consultancy" }, { label: "Engagements" }]} />

@@ -49,9 +49,11 @@ export default function Panel() {
 
   if (loading) {
     return (
-      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <CircularProgress />
-      </Box>
+      <PortalShell active="licensing" showCompanyNav={false} showLicensingNav={false}>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+          <CircularProgress aria-label="Loading licensing console" />
+        </Box>
+      </PortalShell>
     );
   }
 

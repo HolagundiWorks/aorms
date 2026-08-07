@@ -7,6 +7,7 @@ import {
   tenderBids,
   tenderInvitations,
   tenders,
+  firm,
 } from "../../db/schema.js";
 import { writeAudit } from "../../lib/audit.js";
 import { contractorProcedure, contractorWriteProcedure, router } from "../../trpc/trpc.js";
@@ -16,6 +17,17 @@ import { contractorProcedure, contractorWriteProcedure, router } from "../../trp
  * Scoped strictly by `ctx.user.contractorId`.
  */
 export const contractorPortalRouter = router({
+  branding: contractorProcedure.query(async ({ ctx }) => {
+    const [row] = await ctx.db
+      .select({ companyName: firm.companyName, logoKey: firm.logoKey })
+      .from(firm)
+      .limit(1);
+    return {
+      companyName: row?.companyName ?? "AORMS",
+      logoKey: row?.logoKey ?? null,
+    };
+  }),
+
   myTenders: contractorProcedure.query(async ({ ctx }) => {
     const contractorId = ctx.user.contractorId!;
     return ctx.db

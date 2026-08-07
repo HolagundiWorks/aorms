@@ -19,7 +19,7 @@ import {
   type TenderInvitationStatus,
   type TenderStatus,
 } from "@esti/contracts";
-import { pushToast } from "@hcw/ui-kit";
+import { pushToast, Surface, RADIUS } from "@hcw/ui-kit";
 import { useState } from "react";
 import { DataState } from "../components/DataState.js";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
@@ -36,6 +36,7 @@ export function ContractorPortal() {
     meta: { errorTitle: "Couldn't sign out" },
     onSuccess: () => utils.auth.me.invalidate(),
   });
+  const brandingQ = trpc.contractorPortal.branding.useQuery();
   const listQ = trpc.contractorPortal.myTenders.useQuery();
   const [openId, setOpenId] = useState<string | null>(null);
   const [amountRupees, setAmountRupees] = useState("");
@@ -70,6 +71,7 @@ export function ContractorPortal() {
 
   return (
     <ExternalPortalShell
+      companyName={brandingQ.data?.companyName}
       portalLabel={AORMS_PORTALS.contractor.label}
       onSignOut={() => logout.mutate()}
       signingOut={logout.isPending}
@@ -96,12 +98,12 @@ export function ContractorPortal() {
         >
           <Stack spacing={1}>
             {rows.map((r) => (
-              <Box
+              <Surface
                 key={r.invitationId}
+                layer="soft"
                 sx={{
-                  py: 1.25,
-                  borderBottom: 1,
-                  borderColor: "divider",
+                  borderRadius: `${RADIUS}px`,
+                  p: 1.5,
                   cursor: "pointer",
                 }}
                 onClick={() => {
@@ -142,7 +144,7 @@ export function ContractorPortal() {
                   {r.projectRef} — {r.projectTitle}
                   {r.dueDate ? ` · due ${r.dueDate}` : ""}
                 </Typography>
-              </Box>
+              </Surface>
             ))}
           </Stack>
         </DataState>
