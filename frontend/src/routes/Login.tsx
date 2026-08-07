@@ -312,39 +312,70 @@ export function Login() {
             }}
           >
             <Stack spacing={COMPOSITION_RHYTHM.sm}>
-              <TextField
-                id="email"
-                label="Email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                fullWidth
-                autoFocus
-              />
-              <TextField
-                id="password"
-                label="Password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                fullWidth
-              />
-              {needCode && (
+              <Stack spacing={0.75}>
+                <Typography
+                  component="label"
+                  htmlFor="email"
+                  variant="body2"
+                  sx={{ fontWeight: 600 }}
+                >
+                  Email
+                </Typography>
                 <TextField
-                  id="totp-code"
-                  label="Authenticator code"
-                  placeholder="123456"
-                  autoComplete="one-time-code"
-                  helperText="6-digit code from your authenticator app."
-                  slotProps={{ htmlInput: { inputMode: "numeric" } }}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@firm.in"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                   fullWidth
+                  autoFocus
+                  aria-label="Email"
                 />
+              </Stack>
+              <Stack spacing={0.75}>
+                <Typography
+                  component="label"
+                  htmlFor="password"
+                  variant="body2"
+                  sx={{ fontWeight: 600 }}
+                >
+                  Password
+                </Typography>
+                <TextField
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  fullWidth
+                  aria-label="Password"
+                />
+              </Stack>
+              {needCode && (
+                <Stack spacing={0.75}>
+                  <Typography
+                    component="label"
+                    htmlFor="totp-code"
+                    variant="body2"
+                    sx={{ fontWeight: 600 }}
+                  >
+                    Authenticator code
+                  </Typography>
+                  <TextField
+                    id="totp-code"
+                    placeholder="123456"
+                    autoComplete="one-time-code"
+                    helperText="6-digit code from your authenticator app."
+                    slotProps={{ htmlInput: { inputMode: "numeric" } }}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    fullWidth
+                    aria-label="Authenticator code"
+                  />
+                </Stack>
               )}
               {showError && (
                 <Alert severity="error">

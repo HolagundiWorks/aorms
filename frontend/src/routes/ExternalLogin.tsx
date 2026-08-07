@@ -1,5 +1,5 @@
 import ArrowBack from "@mui/icons-material/ArrowBack";
-import { Alert, AlertTitle, Button, Link, Stack, TextField } from "@mui/material";
+import { Alert, AlertTitle, Button, Link, Stack, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
@@ -61,38 +61,69 @@ export function ExternalLogin() {
         }}
       >
         <Stack spacing={2}>
-          <TextField
-            id="access-email"
-            label="Email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            fullWidth
-          />
-          <TextField
-            id="access-password"
-            label="Password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            fullWidth
-          />
-          {needCode && (
+          <Stack spacing={0.75}>
+            <Typography
+              component="label"
+              htmlFor="access-email"
+              variant="body2"
+              sx={{ fontWeight: 600 }}
+            >
+              Email
+            </Typography>
             <TextField
-              id="access-totp"
-              label="Authenticator code"
-              placeholder="123456"
-              autoComplete="one-time-code"
-              helperText="6-digit code from your authenticator app."
-              slotProps={{ htmlInput: { inputMode: "numeric" } }}
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
+              id="access-email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@firm.in"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               fullWidth
+              aria-label="Email"
             />
+          </Stack>
+          <Stack spacing={0.75}>
+            <Typography
+              component="label"
+              htmlFor="access-password"
+              variant="body2"
+              sx={{ fontWeight: 600 }}
+            >
+              Password
+            </Typography>
+            <TextField
+              id="access-password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              fullWidth
+              aria-label="Password"
+            />
+          </Stack>
+          {needCode && (
+            <Stack spacing={0.75}>
+              <Typography
+                component="label"
+                htmlFor="access-totp"
+                variant="body2"
+                sx={{ fontWeight: 600 }}
+              >
+                Authenticator code
+              </Typography>
+              <TextField
+                id="access-totp"
+                placeholder="123456"
+                autoComplete="one-time-code"
+                helperText="6-digit code from your authenticator app."
+                slotProps={{ htmlInput: { inputMode: "numeric" } }}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                fullWidth
+                aria-label="Authenticator code"
+              />
+            </Stack>
           )}
           {showError && (
             <Alert severity="error">
