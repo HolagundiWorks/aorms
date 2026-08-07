@@ -1,12 +1,11 @@
-import { isMarketingOnly } from "./marketing-gate.js";
-
 /**
  * Desktop installer resolution for the public `/downloads` portal.
  *
  * Honesty rule: never offer a download button until a **signed** URL is wired.
- * Soft launch (`isMarketingOnly`): force **coming_soon** — no Open / GitHub CTAs.
- * Placeholders stay in `web_fallback` until a signed WinUI installer URL + sha256
- * is published (docs/esti/WEB-PORTAL.md).
+ * Until D6, force **coming_soon** (independent of the apex auth marketing gate).
+ * Opt out locally with `VITE_INSTALLERS_COMING_SOON=false` for web_fallback testing.
+ * Placeholders never become Download CTAs without release flag + sha256
+ * (docs/esti/WEB-PORTAL.md · ROADMAP D6).
  */
 import {
   AADT,
@@ -139,29 +138,47 @@ function releaseInstallersEnabled(): boolean {
   );
 }
 
+/**
+ * Force Coming soon on `/downloads` until D6 (signed URL + release flag).
+ * Independent of `VITE_MARKETING_ONLY` so S8 can reopen auth without fake Setup.exe CTAs.
+ * Set `VITE_INSTALLERS_COMING_SOON=false` to exercise web_fallback Open/GitHub locally.
+ */
+export function installersComingSoonForced(): boolean {
+  const raw = (
+    import.meta.env.VITE_INSTALLERS_COMING_SOON as string | undefined
+  )
+    ?.trim()
+    .toLowerCase();
+  if (raw === "false" || raw === "0" || raw === "off" || raw === "no") return false;
+  if (raw === "true" || raw === "1" || raw === "on" || raw === "yes") return true;
+  return true;
+}
+
+function comingSoonOffer(
+  app: DesktopInstallerApp,
+  meta: (typeof APP_META)[DesktopInstallerApp],
+): DesktopInstallerOffer {
+  return {
+    app,
+    title: meta.title,
+    expansion: meta.expansion,
+    webUrl: meta.webUrl,
+    repoUrl: meta.repoUrl,
+    downloadUrl: null,
+    version: null,
+    sha256: null,
+    status: "coming_soon",
+    fallbackReason:
+      "Windows installer coming soon — follow the blog for release notes.",
+    manifestPath: meta.manifest,
+  };
+}
+
 export function resolveInstallerOffer(
   app: DesktopInstallerApp,
   manifest?: DesktopUpdateManifest | null,
 ): DesktopInstallerOffer {
   const meta = APP_META[app];
-
-  // Soft launch: installers are announced as Coming soon only.
-  if (isMarketingOnly()) {
-    return {
-      app,
-      title: meta.title,
-      expansion: meta.expansion,
-      webUrl: meta.webUrl,
-      repoUrl: meta.repoUrl,
-      downloadUrl: null,
-      version: null,
-      sha256: null,
-      status: "coming_soon",
-      fallbackReason:
-        "Windows installer coming soon — follow the blog for release notes.",
-      manifestPath: meta.manifest,
-    };
-  }
 
   const envUrl = envInstallerUrl(app);
   const manifestUrl = (manifest?.url ?? "").trim();
@@ -169,6 +186,7 @@ export function resolveInstallerOffer(
   const version = (manifest?.version ?? "").trim() || null;
   const manifestStatus = (manifest?.status ?? "web_fallback") as DesktopInstallerStatus;
 
+  // D6 path: signed env URL or release-gated manifest wins over Coming soon.
   if (envUrl && looksLikeHttpsOrSitePath(envUrl)) {
     return {
       app,
@@ -205,6 +223,10 @@ export function resolveInstallerOffer(
       fallbackReason: "",
       manifestPath: meta.manifest,
     };
+  }
+
+  if (installersComingSoonForced()) {
+    return comingSoonOffer(app, meta);
   }
 
   return {

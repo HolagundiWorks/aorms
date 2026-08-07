@@ -91,12 +91,16 @@ Monolithic [AQC](https://github.com/HolagundiWorks/AQC) = **engine + reference**
 
 | Surface | Purpose |
 | --- | --- |
-| **aorms.in** | Marketing · demos · downloads — **not** staff ERP |
-| **Firm portals** | Updates · Project · Progress · Drawings · Documents |
+| **aorms.in** | Marketing · blog · downloads — **not** staff ERP |
+| **Soft launch (2026-08)** | Landing + blog live; apex login / installers **Coming soon** (`VITE_MARKETING_ONLY`) |
+| **Firm portals** | Updates · Project · Progress · Drawings · Documents (published only) |
 | **Hub APIs** | Activate → `syncToken` · ops ingest · artifacts · portal auth |
 | **Ops DB manager** | Browse Mongo firm data (`/ops-db` staff console) |
 | **Shilpi Desktop / hosted** | Geometry admin (not CAD) |
 | **admin.aorms.in** | Licence Manager |
+
+**Roadmap:** [ROADMAP.md](ROADMAP.md) · **Repos:** [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · **VPS:** [VPS-INSTALL.md](VPS-INSTALL.md)  
+**Updated:** 2026-08-08
 
 ---
 
@@ -132,14 +136,14 @@ Postgres in this monorepo is **transitional** until hub APIs are fully Mongo-bac
 
 ## Delivery waves
 
-| Wave | Outcome |
-| --- | --- |
-| **S0** | This canon + LOCAL-FIRST / nomenclature / ROADMAP retarget |
-| **S1** | Mongo ops spike behind hub + one portal read |
-| **S2** | Shilpi wire + portal drawing packages |
-| **S3** | AQC three-app packaging |
-| **S4** | Manager Tasks module (AStudio / AConsulting) |
-| **S5** | Online ops DB manager |
+| Wave | Outcome | Status |
+| --- | --- | --- |
+| **S0–S5** | Canon · Mongo · Shilpi · AQC packaging · Manager Tasks · ops DB | ✅ |
+| **S6–S7** | Soft-launch marketing · VPS · PRODUCTION-OPS · agent law | ✅ |
+| **S8** | Reopen apex auth / portal demos (`VITE_MARKETING_ONLY=false`) | 🔲 |
+| **S9** | Per-app MSIX (AQC-* repos) | 🔲 |
+| **S10** | Firm portal depth | 🔲 |
+| **D6** | Signed installers + portal tenants | 🔲 |
 
 See [ROADMAP.md](ROADMAP.md).
 

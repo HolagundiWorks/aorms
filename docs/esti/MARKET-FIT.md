@@ -1,16 +1,19 @@
 # AORMS — Market fit brief
 
-**Status:** Canonical GTM + product priority · **Updated:** 2026-08-07  
+**Status:** Canonical GTM + product priority · **Updated:** 2026-08-08  
 **Owner:** Human Centric Works (HCW)
 
-Companion to [ROADMAP.md](ROADMAP.md) (**implementation COMPLETE**) and
-[PRODUCT-VISION.md](PRODUCT-VISION.md) (boundary). This file records **market
-research conclusions** and GTM priorities for paying firms.
+Companion to [ROADMAP.md](ROADMAP.md) (suite soft launch · next **S8**) and
+[PRODUCT-VISION.md](PRODUCT-VISION.md) (boundary). Suite law:
+[AORMS-SUITE.md](AORMS-SUITE.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md).
 
-**Delivery status:** Market-fit Waves **W1–W3 shipped**; **W4 integrations deferred
-by choice**; **M8 local-first GTM** — desktop preferred story live. Public
-installer URL is **post-delivery ops** ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)),
-not an open market-fit wave.
+This file records **market research conclusions** and GTM priorities for paying
+firms. Prefer suite wording over older “web parity / Standard licence” lines in
+campaign drafts until those files are rewritten.
+
+**Delivery status:** Historical market-fit Waves **W1–W3 shipped**; **W4 deferred**.
+**Suite soft launch (S6–S7):** landing + blog live; apex login and installers
+Coming soon. Public signed installers = **D6** ops, not an open market-fit wave.
 
 ---
 
@@ -35,10 +38,10 @@ revision control, site supervision, and GST on one spine.
 | Generic PM ignores COA fees, GST/TDS, FY April | India-first money (paise), proposals, invoices, reconcile |
 | Global A/E PSA ignores Indian site supervision | Drawings, transmittals, snags, instructions, progress (architect-side) |
 | “AI for architects” = chat wrappers | Dual-tier: **ESTI** (validated firm data) + **EOMS** (codes / knowledge bank) |
-| Architecture tools ignore engineering (and vice versa) | Same spine: **AORMS-Studio** + **AORMS-Consultancy** |
-| Scope creep into construction ERP | Explicit teardown — **advise, don’t deliver** |
-| Fragmented external access | Client / consultant / contractor / site portals |
-| Desktop install friction | Desktop preferred + web parity · one Standard licence · storage + AI usage |
+| Architecture tools ignore engineering (and vice versa) | Suite: **AStudio** + **AConsulting** + AQC technical apps |
+| Scope creep into construction ERP | Explicit teardown — **advise, don’t deliver** (PMC via AProc/AQC PM) |
+| Fragmented external access | Firm-branded portals (published data only) |
+| Desktop install friction | Local-first desktop suite · OSS for now · signed installers (D6) |
 
 ---
 
@@ -112,24 +115,26 @@ full P6 CPM · “AI that designs the building.” · W4 integrations.
 **In scope (shipped):** project **Tenders** — firm issues; contractors bid in portal
 (`/office/tenders`, Project → Tenders).
 
-**In scope (local-first):** desktop node preferred + web parity ([LOCAL-FIRST.md](LOCAL-FIRST.md)) —
-signed installer URL on `/downloads` stays open until Bhoomi signs (M8 item 4).
+**In scope (local-first):** desktop suite + online portals
+([LOCAL-FIRST.md](LOCAL-FIRST.md) · [AORMS-SUITE.md](AORMS-SUITE.md)). Soft launch
+keeps installers Coming soon; signed URL on `/downloads` is **D6**.
 
-### M8 — Local-first GTM
+### M8 — Local-first GTM → suite soft launch
 
-Align public story with desktop-preferred product law. Delivery checklist:
+Align public story with suite product law. Checklist:
 
 | # | Item | Status |
 |---|---|---|
-| 1 | Product / blog / FAQ: desktop preferred + web parity (no “web-only / no desktop”) | ✅ 2026-08-06 |
-| 2 | `/downloads` portal with honest `web_fallback` CTAs | ✅ prep |
-| 3 | Update manifests + env one-line fill documented ([WEB-PORTAL.md](WEB-PORTAL.md)) | ✅ prep |
-| 4 | Live signed installer URL + sha256 for AStudio / AConsulting | 🔲 until SmartScreen-trusted publish |
+| 1 | Product / blog / FAQ: suite · local-first · OSS (no web-only ERP) | ✅ 2026-08-08 |
+| 2 | `/downloads` honest Coming soon / `web_fallback` | ✅ soft launch |
+| 3 | Update manifests + env fill ([WEB-PORTAL.md](WEB-PORTAL.md)) | ✅ prep |
+| 4 | Live signed installer URL + sha256 (managers + AQC) | 🔲 D6 |
 | 5 | LF6 Figma ↔ kit token sync notes / stub ([FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md)) | ✅ stub |
-| 6 | Pure neumorphism marketing frame + blog/SEO scrub (`MarketingNeuFrame`) | ✅ 2026-08-06 |
+| 6 | Pure neumorphism marketing frame + blog/SEO scrub | ✅ |
+| 7 | Soft-launch gate `VITE_MARKETING_ONLY` + VPS landing profile | ✅ S6–S7 |
 
-Portal fill fields: [WEB-PORTAL.md](WEB-PORTAL.md). Crew status tables: Vishwakarma
-([AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) after orch merge). Hub bind: Gagan.
+Portal fill fields: [WEB-PORTAL.md](WEB-PORTAL.md). Next implementation waves:
+[ROADMAP.md](ROADMAP.md) S8–S10 · D6.
 
 ---
 

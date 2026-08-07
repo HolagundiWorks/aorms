@@ -1,15 +1,20 @@
 # AORMS local-first suite + cloud hub
 
-> **Canonical runtime law** · **Updated:** 2026-08-07 (suite architecture)  
+> **Canonical runtime law** · **Updated:** 2026-08-08 (suite soft launch)  
 > Suite: [AORMS-SUITE.md](AORMS-SUITE.md) · Wire: [HUB-API.md](HUB-API.md) ·  
-> Bridge: [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · Repos: [DESKTOP-REPOS.md](DESKTOP-REPOS.md)
+> Bridge: [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · Repos: [DESKTOP-REPOS.md](DESKTOP-REPOS.md) ·  
+> Roadmap: [ROADMAP.md](ROADMAP.md)
 
 **AORMS is a product suite.** Practice managers (**AStudio** / **AConsulting**) and
 technical apps (**AQC Estimation** · **AQC BBS** · **AQC Project Management**) ship
 as native Windows apps. **AADT** drafts locally; **ShilpiDB** holds geometry;
 **MongoDB** holds all non-drawing cloud ops/comms. Technical work and AI stay on
 the machine. Firm-branded **portals** + ops DB manager live online.
-`aorms.in` is **marketing + demos only** — no firm ERP logins on the apex.
+
+`aorms.in` is **marketing + blog** — no firm ERP logins on the apex.
+**Soft launch (2026-08):** landing and blog live; apex `/login` and Windows
+installers show **Coming soon** (`VITE_MARKETING_ONLY=true` by default on public builds).
+Set `VITE_MARKETING_ONLY=false` and rebuild when demos reopen ([ROADMAP.md](ROADMAP.md) S8).
 
 The esti monorepo staff SPA is a **reference archive** — not the shipping staff UI.
 

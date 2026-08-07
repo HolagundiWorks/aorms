@@ -6,8 +6,8 @@ describe("resolveInstallerOffer", () => {
     vi.unstubAllEnvs();
   });
 
-  it("forces coming_soon when marketing-only soft launch is on", () => {
-    vi.stubEnv("VITE_MARKETING_ONLY", "true");
+  it("forces coming_soon by default until D6 (even when marketing gate is off)", () => {
+    vi.stubEnv("VITE_MARKETING_ONLY", "false");
     const offer = resolveInstallerOffer("astudio", {
       app: "astudio",
       product: "AStudio",
@@ -19,8 +19,8 @@ describe("resolveInstallerOffer", () => {
     expect(offer.downloadUrl).toBeNull();
   });
 
-  it("stays web_fallback when manifest is a placeholder", () => {
-    vi.stubEnv("VITE_MARKETING_ONLY", "false");
+  it("stays web_fallback when Coming soon is explicitly off and manifest is a placeholder", () => {
+    vi.stubEnv("VITE_INSTALLERS_COMING_SOON", "false");
     const offer = resolveInstallerOffer("astudio", {
       app: "astudio",
       product: "AStudio",
@@ -33,7 +33,7 @@ describe("resolveInstallerOffer", () => {
   });
 
   it("does not use manifest URL without VITE_PORTAL_USE_RELEASE_INSTALLERS", () => {
-    vi.stubEnv("VITE_MARKETING_ONLY", "false");
+    vi.stubEnv("VITE_INSTALLERS_COMING_SOON", "false");
     const offer = resolveInstallerOffer("astudio", {
       app: "astudio",
       product: "AStudio",
@@ -46,8 +46,7 @@ describe("resolveInstallerOffer", () => {
     expect(offer.downloadUrl).toBeNull();
   });
 
-  it("uses manifest when release flag is on and sha256 is valid", () => {
-    vi.stubEnv("VITE_MARKETING_ONLY", "false");
+  it("uses manifest when release flag is on and sha256 is valid (D6)", () => {
     vi.stubEnv("VITE_PORTAL_USE_RELEASE_INSTALLERS", "true");
     const offer = resolveInstallerOffer("aconsulting", {
       app: "aconsulting",
@@ -62,8 +61,7 @@ describe("resolveInstallerOffer", () => {
     expect(offer.version).toBe("0.2.0");
   });
 
-  it("prefers explicit env installer URL over manifest", () => {
-    vi.stubEnv("VITE_MARKETING_ONLY", "false");
+  it("prefers explicit env installer URL over Coming soon", () => {
     vi.stubEnv("VITE_ASTUDIO_INSTALLER_URL", "https://releases.aorms.in/astudio-signed.exe");
     const offer = resolveInstallerOffer("astudio", {
       app: "astudio",

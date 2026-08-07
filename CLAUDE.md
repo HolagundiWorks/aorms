@@ -1,80 +1,101 @@
-# AORMS (`esti`) — agent instructions
+# AORMS (`esti` / `aorms`) — agent instructions
 
-**AORMS** (**Accelerated Operational Resources Management System**) is the
-**platform** — operational consolidation for **AEC consulting and PMC firms** with
-dual-tier AI. Apps: **AStudio** (*Accelerated Studio*, architecture), **AConsulting**
-(*Accelerated Consulting*, engineering), **AProc** (*Accelerated Project Management*,
-PMC — preview). Slugs `astudio` / `aconsulting` / `aproc`; legacy marketing names
-AORMS-Studio / AORMS-Consultancy / AORMS-PMC redirect. Nomenclature:
+**AORMS** (**Accelerated Operational Resources Management System**) is a
+**product suite** for **AEC consulting and PMC firms** — not a single mega-app.
+
+| Plane | Products |
+| --- | --- |
+| Practice managers | **AStudio** · **AConsulting** (desktop) |
+| Technical | **AQC Estimation** · **AQC BBS** · **AQC Project Management** / **AProc** (desktop, shared `bbs_engine`) |
+| Drafting / geometry | **AADT** · **ShilpiDB** |
+| Online | Firm portals · hub · Mongo ops · **aorms.in** marketing |
+
+**ESTI** = internal AI on desktop managers. **EOMS** = external knowledge bank.
+Code identifiers (`@esti/*`, `esti_*`, repo folder `esti`) keep the `esti` codename;
+GitHub remote may be `HolagundiWorks/aorms`.
+
+Canon: [`docs/esti/AORMS-SUITE.md`](docs/esti/AORMS-SUITE.md) ·
+[`docs/esti/LOCAL-FIRST.md`](docs/esti/LOCAL-FIRST.md) ·
+[`docs/esti/ROADMAP.md`](docs/esti/ROADMAP.md) ·
 [`docs/esti/AORMS-PLATFORM-NOMENCLATURE.md`](docs/esti/AORMS-PLATFORM-NOMENCLATURE.md).
 
-**ESTI** (Embedded Studio Intelligence) is the **internal AI agent** in
-**AStudio**: Ask ESTI, the cognition engine, Studio Intelligence, ESTI Pulse.
-**EOMS** (Emergent Object Management System) is the **external knowledge bank** —
-a standalone API cataloging standard codebooks and building/compliance codes.
-Code identifiers (`@esti/*` packages, `esti_*` tables, repo name) keep the
-`esti` codename.
+Monorepo (pnpm): `packages/contracts`, `backend` (Fastify + tRPC + Drizzle),
+`frontend` (React + Vite), Python `worker`. Dev: `compose.yaml`. Prod VPS:
+`compose.prod.yaml` + `deploy/*`.
 
-Monorepo (pnpm workspaces): `packages/contracts`, `backend` (Fastify + tRPC +
-Drizzle), `frontend` (React + Vite), plus a Python `worker`. Services run via
-Docker Compose (`compose.yaml`).
+## Soft launch (agent memory — 2026-08-08)
 
-## Product naming (agent memory — 2026-07-25)
+**aorms.in ships landing + blog only.** Apex login and Windows installers are
+**Coming soon**.
 
-**Canonical doc:** [`docs/esti/AORMS-PLATFORM-NOMENCLATURE.md`](docs/esti/AORMS-PLATFORM-NOMENCLATURE.md).
+| Rule | Detail |
+| --- | --- |
+| Gate | `VITE_MARKETING_ONLY` (default **true** on public builds) — `frontend/src/lib/marketing-gate.ts` |
+| Live | `/` · `/blog` · `/downloads` (Coming soon CTAs) |
+| Blocked on apex | `/login`, `/access`, `/signup`, `/account`, … → `ComingSoonAuth` |
+| Installers | Force `coming_soon` while gate is on — never invent signed download URLs |
+| Reopen demos | S8: set `VITE_MARKETING_ONLY=false` + rebuild (`deploy/update.sh`) |
+| Wiki | `/wiki*` redirects home — do not add wiki CTAs |
+| Staff UI | Desktop siblings — esti SPA is **reference archive**, not shipping ERP |
+
+VPS: [`docs/esti/VPS-INSTALL.md`](docs/esti/VPS-INSTALL.md) ·
+[`docs/esti/PRODUCTION-OPS.md`](docs/esti/PRODUCTION-OPS.md) § Soft launch ·
+`deploy/bootstrap-vps.sh` · `deploy/install-landing.sh` · `deploy/verify-vps.sh`.
+
+## Product naming (agent memory — 2026-08)
+
 **Executable constants:** `frontend/src/lib/product-nomenclature.ts` — import
 `AORMS_PLATFORM`, `AORMS_APPS`, `AORMS_STUDIO` / `ASTUDIO`, `AORMS_CONSULTANCY` /
-`ACONSULTING`, `AORMS_PMC` / `APROC`, `AORMS_PORTALS`, `PLATFORM_APPS`, `EOMS`,
-`ESTI` for user-facing copy; do not hard-code product strings in UI/SEO.
+`ACONSULTING`, `AORMS_PMC` / `APROC`, `AQC_ESTIMATION`, `AQC_BBS`, `AADT`,
+`SHILPIDB`, `SUITE_MANAGER_APPS`, `SUITE_TECHNICAL_APPS`, `AORMS_PORTALS`,
+`EOMS`, `ESTI`. Do not hard-code product strings in UI/SEO.
 
 | Name | Role |
 | --- | --- |
-| **AORMS** | Platform — *Accelerated Operational Resources Management System*; AEC consulting + PMC |
-| **AStudio** | Architecture app (*Accelerated Studio*) — this repo; **`studio.aorms.in`**; slug `astudio` |
-| **AConsulting** | Engineering app (*Accelerated Consulting*) — live; **`consultancy.aorms.in`**; slug `aconsulting` |
-| **AProc** | PMC app (*Accelerated Project Management*) — preview; **`proc.aorms.in`**; slug `aproc` |
-| **EOMS** | Knowledge bank (standalone API) — standard codebooks & compliance codes |
-| **ESTI** | Internal AI agent in **AStudio** — Ask ESTI, Studio Intelligence, ESTI Pulse |
-| **`AORMS_PORTALS`** | Portal/surface UI labels — staff workspace, external portals, account hub |
-| **`esti`** | Repo codename — `@esti/*`, `esti_*` tables; never in marketing |
+| **AORMS** | Suite brand + cloud spine |
+| **AStudio** | Architecture practice manager — desktop; slug `astudio` |
+| **AConsulting** | Engineering practice manager — desktop; slug `aconsulting` |
+| **AProc** / **AQC PM** | Project management technical app — desktop; slug `aproc` |
+| **AQC Estimation / BBS** | Technical installers — separate repos |
+| **AADT** · **ShilpiDB** | Drafting · geometry store |
+| **EOMS** | Knowledge bank API |
+| **ESTI** | Internal AI agent (desktop managers) |
+| **`esti` / `aorms`** | Hub monorepo — never use `esti` in marketing copy |
 
-**Retired terms (do not use in new copy):**
+**Retired in new copy:** web-parity staff ERP on apex · Standard licence metering
+claims · wiki as primary docs · AORMS-Studio / EmOI / HiveD · “one mega platform app”.
 
-- *Architecture Office Resource Management System* → **AORMS** (platform) or **AStudio** (app)
-- **AORMS portal** / **AORMS-Architecture** / **HiveD** / **AORMS-Studio** → **AStudio**
-- **AORMS-Consultancy** → **AConsulting**; **AORMS-PMC** → **AProc**
-- **EmOI** / *Embedded Operational Intelligence* → **EOMS**
-- Pre-2026-07 multi-industry platform scope → **AEC + PMC consultancies**
-
-**Public marketing surfaces:**
+**Public marketing surfaces (soft launch):**
 
 | Path / host | Role |
 | --- | --- |
-| `/` · **aorms.in** | Platform landing — operational + design frameworks, EOMS; all path-based pages below |
-| `/wiki` | Four-pillar wiki: HCW-UI · AStudio · AI core · Management |
-| `/login` | **Unified sign-in** — Workspace · Portals · Account (scopes Personal · Company · Licensing) |
-| `/access` | Legacy → `/login?tab=portals` |
-| `/account` · `/company-account` | AORMS account & company hubs (unauth → matching login scope) |
-| **admin.aorms.in** · `/platform-admin` | **HCW License Manager** console (in-tree — `backend/src/licensing-platform/`, `frontend/src/platform-admin/`) |
-| `/libraries/knowledge-bank-portal` | Knowledge Bank portal (EOMS textbook library) |
-| **studio.aorms.in** · `/login` | **AStudio** workspace (architecture); unified login tabs |
-| **consultancy.aorms.in** · `/aconsulting` | **AConsulting** engineering marketing + product entry |
-| **proc.aorms.in** · `/aproc` · `/pmc` | **AProc** PMC marketing + preview workspace |
-| `/blog` | Platform blog (practice + product notes) |
+| `/` · **aorms.in** | Suite landing |
+| `/blog` | Suite explainers + practice notes |
+| `/downloads` | Installer list — Coming soon |
+| `/login` | Coming soon (marketing-only gate) |
+| `/wiki*` | Redirect → `/` |
+| **studio.** / **consultancy.** / **proc.** | App hosts (desktop-era; not apex marketing) |
+| **admin.aorms.in** | Licence Manager (when enabled) |
 
-Frozen host map: [`docs/esti/AORMS-SURFACE-URLS.md`](docs/esti/AORMS-SURFACE-URLS.md) ·
-`frontend/src/lib/aorms-surface-urls.ts`.
-AProc architecture & waves: [`docs/esti/APROC-ARCHITECTURE.md`](docs/esti/APROC-ARCHITECTURE.md).
+Frozen hosts: [`docs/esti/AORMS-SURFACE-URLS.md`](docs/esti/AORMS-SURFACE-URLS.md).
 
-**Operator:** **Human Centric Works (HCW)** — design studio behind `@hcw/ui-kit` and AORMS.
-- [`docs/marketing/LANDING-REDESIGN-CONTEXT.md`](docs/marketing/LANDING-REDESIGN-CONTEXT.md) — landing/marketing brief.
-- [`docs/hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md`](docs/hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md) — living design debt.
-- [`docs/esti/ROADMAP.md`](docs/esti/ROADMAP.md) — single delivery roadmap (market-fit waves).
-- [`docs/esti/MARKET-FIT.md`](docs/esti/MARKET-FIT.md) — ICP, gaps closed, viability, GTM backlog.
+**Operator:** **Human Centric Works (HCW)** — `@hcw/ui-kit` + AORMS.
+- [`docs/marketing/LANDING-REDESIGN-CONTEXT.md`](docs/marketing/LANDING-REDESIGN-CONTEXT.md)
+- [`docs/esti/ROADMAP.md`](docs/esti/ROADMAP.md) — S0–S7 ✅; next S8–S10 · D6
+- [`docs/esti/MARKET-FIT.md`](docs/esti/MARKET-FIT.md)
 
 When editing wiki markdown under `frontend/src/content/wiki/`, rebuild the AI wiki
-index if Ask ESTI should see changes: regenerate `backend/src/lib/ai/wiki-knowledge.generated.ts`
-via the repo’s wiki sync/build step.
+index only if Ask ESTI should see it (wiki is not a public marketing surface).
+
+## Agent do / don't (suite)
+
+| Do | Don't |
+| --- | --- |
+| Prefer suite nomenclature + `marketing-gate` | Claim web staff ERP or live signed installers |
+| Keep `/downloads` honest (`coming_soon` / `web_fallback`) | Point CTAs at unsigned `Setup.exe` |
+| Update `landing-seo.ts` + `index.html` together | Leave Standard/InStock commercial JSON-LD |
+| Pin AQC engine from HolagundiWorks/AQC | Fork divergent `bbs_engine` in product repos |
+| Edit `Projects.tsx` / `Clients.tsx` only when asked | Parallel WIP collisions |
 
 ## UI / design system — HCW-UI-KIT
 

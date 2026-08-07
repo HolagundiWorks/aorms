@@ -35,6 +35,20 @@ export const FIRM_PORTAL_SECTIONS: {
  * No staff ribbon / ActionDock. Data must come from hub published records only.
  * Canon: docs/esti/PORTAL-SYNC-BRIDGE.md · AORMS-SURFACE-URLS.md
  */
+
+/** Updates always; other tabs only when a panel body is wired (S8/S10 honesty). */
+export function visibleFirmPortalSections(
+  panels?: Partial<Record<FirmPortalSection, ReactNode>> | null,
+): FirmPortalSection[] {
+  const ids: FirmPortalSection[] = ["updates"];
+  if (!panels) return ids;
+  for (const s of FIRM_PORTAL_SECTIONS) {
+    if (s.id === "updates") continue;
+    if (panels[s.id] != null) ids.push(s.id);
+  }
+  return ids;
+}
+
 export function FirmPortalShell({
   companyName,
   portalLabel,
@@ -42,6 +56,7 @@ export function FirmPortalShell({
   signingOut,
   section = "updates",
   onSectionChange,
+  sections = FIRM_PORTAL_SECTIONS.map((s) => s.id),
   children,
 }: {
   companyName?: string;
@@ -50,8 +65,13 @@ export function FirmPortalShell({
   signingOut?: boolean;
   section?: FirmPortalSection;
   onSectionChange?: (section: FirmPortalSection) => void;
+  /** Which chrome tabs to show — omit unused tabs instead of Alert stubs. */
+  sections?: FirmPortalSection[];
   children: ReactNode;
 }) {
+  const tabDefs = FIRM_PORTAL_SECTIONS.filter((s) => sections.includes(s.id));
+  const tabValue = sections.includes(section) ? section : "updates";
+
   return (
     <PortalNeuFrame
       topBar={
@@ -95,26 +115,28 @@ export function FirmPortalShell({
             ) : null}
           </Stack>
 
-          <Tabs
-            value={section}
-            onChange={(_, value: FirmPortalSection) => onSectionChange?.(value)}
-            variant="scrollable"
-            scrollButtons="auto"
-            aria-label="Portal sections"
-            sx={{
-              minHeight: 40,
-              "& .MuiTab-root": {
+          {tabDefs.length > 1 ? (
+            <Tabs
+              value={tabValue}
+              onChange={(_, value: FirmPortalSection) => onSectionChange?.(value)}
+              variant="scrollable"
+              scrollButtons="auto"
+              aria-label="Portal sections"
+              sx={{
                 minHeight: 40,
-                textTransform: "none",
-                fontWeight: 600,
-                borderRadius: "8px",
-              },
-            }}
-          >
-            {FIRM_PORTAL_SECTIONS.map((s) => (
-              <Tab key={s.id} value={s.id} label={s.label} />
-            ))}
-          </Tabs>
+                "& .MuiTab-root": {
+                  minHeight: 40,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  borderRadius: "8px",
+                },
+              }}
+            >
+              {tabDefs.map((s) => (
+                <Tab key={s.id} value={s.id} label={s.label} />
+              ))}
+            </Tabs>
+          ) : null}
         </Stack>
       }
     >

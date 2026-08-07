@@ -1,13 +1,9 @@
-import { Alert, Stack, Typography } from "@mui/material";
 import {
   createContext,
   useContext,
   type ReactNode,
 } from "react";
-import {
-  FIRM_PORTAL_SECTIONS,
-  type FirmPortalSection,
-} from "./FirmPortalShell.js";
+import { type FirmPortalSection } from "./FirmPortalShell.js";
 
 const FirmPortalSectionContext = createContext<FirmPortalSection>("updates");
 
@@ -42,17 +38,9 @@ export function PortalSection({
   return <>{children}</>;
 }
 
-const SECTION_HINT: Record<FirmPortalSection, string> = {
-  updates: "Activity and status from hub metadata.",
-  project: "Project summary and status from published meta.",
-  progress: "Phase progress % and progress reports.",
-  drawings: "READY drawings and issued transmittals.",
-  documents: "Final docs and numbers — invoices, RA, estimate totals, approvals.",
-};
-
 /**
- * Stage body for firm portals: full children on Updates; other tabs show the
- * mapped slot when provided, else a hub-data placeholder (D4 follow-on).
+ * Stage body for firm portals: Updates = children; other tabs = wired panels only.
+ * Unused tabs are hidden in chrome (`visibleFirmPortalSections`) — no Alert stubs.
  */
 export function FirmPortalStage({
   children,
@@ -65,18 +53,5 @@ export function FirmPortalStage({
   if (section === "updates") return <>{children}</>;
   const panel = panels?.[section];
   if (panel) return <>{panel}</>;
-  const label = FIRM_PORTAL_SECTIONS.find((s) => s.id === section)?.label ?? section;
-  return (
-    <Alert severity="info" variant="outlined" sx={{ borderRadius: "8px" }}>
-      <Stack spacing={0.5}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-          {label}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {SECTION_HINT[section]} Fed from hub published records only (
-          <code>esti_meta_event</code> / <code>esti_sync_record</code>).
-        </Typography>
-      </Stack>
-    </Alert>
-  );
+  return null;
 }

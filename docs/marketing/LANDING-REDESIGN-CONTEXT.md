@@ -16,7 +16,8 @@ aligned with the suite rebrand. **Page chrome / tokens:** [PAGE-STRUCTURE.md](..
 | Landing = architecture-practice-only marketing | Landing = **suite home** — managers · AQC technical · AADT · ShilpiDB |
 | Clear-glass left rail + SectionDock | **No left rail** — soft top bar · stage · `MarketingLandingDock` · clock |
 | Staff ActionDock on marketing | Marketing uses **MarketingLandingDock** only |
-| Web-parity staff ERP on apex | Apex = **marketing + demos**; staff on desktop; portals online |
+| Web-parity staff ERP on apex | Apex = **marketing** (soft launch); staff on desktop; portals online |
+| Apex login + installers live | Soft launch: **Coming soon** until S8 / D6 |
 
 Full naming rules: [AORMS-PLATFORM-NOMENCLATURE.md](../esti/AORMS-PLATFORM-NOMENCLATURE.md) ·
 [AORMS-SUITE.md](../esti/AORMS-SUITE.md).  
@@ -41,7 +42,10 @@ The home route (`/`) is the **AORMS suite landing** (`Landing.tsx` +
 **LLM crawl summary:** `frontend/public/llms.txt`.  
 **Sitemap / RSS:** `frontend/public/sitemap.xml` · `frontend/public/blog/feed.xml`
 (regenerate when adding blog posts).  
-**Downloads:** [WEB-PORTAL.md](../esti/WEB-PORTAL.md).
+**Downloads:** [WEB-PORTAL.md](../esti/WEB-PORTAL.md) — soft launch Coming soon.
+
+**Soft launch (2026-08):** landing + blog only; no demo sign-in CTAs; apex `/login`
+→ Coming soon (`VITE_MARKETING_ONLY`). See [ROADMAP.md](../esti/ROADMAP.md).
 
 Keyword SEO landings under `frontend/src/content/landing/` currently **redirect
 to `/`** — keep copy aligned if routes are revived. `/wiki*` also redirects home.

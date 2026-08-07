@@ -19,10 +19,16 @@ interface ImportMetaEnv {
    */
   readonly VITE_PORTAL_USE_RELEASE_INSTALLERS?: string;
   /**
-   * Soft launch: landing + blog only; apex login deactivated; installers Coming soon.
-   * Default on when `VITE_PUBLIC_SITE` is not false. Set `"false"` to re-enable demos.
+   * Soft launch: landing + blog only; apex login deactivated.
+   * Default on when `VITE_PUBLIC_SITE` is not false. Set `"false"` to re-enable demos (S8).
    */
   readonly VITE_MARKETING_ONLY?: string;
+  /**
+   * Force `/downloads` Coming soon until D6. Default on. Independent of marketing auth gate.
+   * Set `"false"` to exercise web_fallback Open/GitHub locally. Signed Download still needs
+   * env URL or `VITE_PORTAL_USE_RELEASE_INSTALLERS` + sha256.
+   */
+  readonly VITE_INSTALLERS_COMING_SOON?: string;
 }
 
 interface ImportMeta {

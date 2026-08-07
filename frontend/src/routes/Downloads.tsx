@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MarketingShell } from "../components/landing/MarketingShell.js";
 import {
+  installersComingSoonForced,
   loadDesktopInstallerOffers,
   resolveInstallerOffer,
   type DesktopInstallerApp,
@@ -14,15 +15,14 @@ import {
   AORMS_PLATFORM,
   SHILPIDB,
 } from "../lib/product-nomenclature.js";
-import { isMarketingOnly } from "../lib/marketing-gate.js";
 
 /**
  * Public `/downloads` portal — suite desktop installers.
- * Soft launch: every offer is Coming soon (no Open / GitHub / Download CTAs).
+ * Coming soon until D6 (signed URL + release flag) — independent of auth soft launch.
  */
 export function Downloads() {
   const [offers, setOffers] = useState<DesktopInstallerOffer[] | null>(null);
-  const softLaunch = isMarketingOnly();
+  const softLaunch = installersComingSoonForced();
 
   useEffect(() => {
     document.title = `Downloads · ${AORMS_PLATFORM.name}`;

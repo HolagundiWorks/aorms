@@ -34,7 +34,17 @@
 2. Three AQC MSIX identities — do not fork divergent engines.  
 3. Managers do **not** absorb Estimation/BBS UI.  
 4. Drawings flow through ShilpiDB; ops through Mongo.  
-5. Public download CTAs stay `web_fallback` until signed URL + sha256 (`frontend/public/update-manifests/`).
+5. Public download CTAs stay Coming soon / `web_fallback` until signed URL + sha256 (`frontend/public/update-manifests/`). Soft launch: [ROADMAP.md](ROADMAP.md) S6–S7 · D6.
+
+## S9 exit (AQC product repos)
+
+| Check | Done when | Status |
+| --- | --- | --- |
+| Distinct package identity | Estimation · BBS · PM each have `ApplicationId` | ✅ `in.aorms.aqc.{estimation,bbs,pm}` |
+| Engine pin | Submodule/tag → `HolagundiWorks/AQC` `bbs_engine` (no fork) | 🔲 |
+| MSIX / WinUI shell | Real installer project per repo | 🔲 |
+| Manifest stubs | Matching `update-manifests/aqc-*.json` in aorms hub | ✅ prep |
+| Honesty | No public Download CTA until D6 signed URL + sha256 | ✅ |
 
 ## Related
 

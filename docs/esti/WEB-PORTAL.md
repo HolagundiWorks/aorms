@@ -5,17 +5,23 @@
 **Repos:** [DESKTOP-REPOS.md](DESKTOP-REPOS.md)
 
 Public surface for **signed** Windows installers across the AORMS suite.
-`aorms.in` is **marketing + demos**; staff ERP is desktop. Legacy Lite / Pro /
-Community Manager SKUs stay **retired**.
+`aorms.in` is **marketing + blog** (soft launch); staff ERP is desktop. Legacy
+Lite / Pro / Community Manager SKUs stay **retired**.
+
+**Soft launch (2026-08):** `/downloads` lists suite offers but CTAs are
+**Coming soon** by default (`VITE_INSTALLERS_COMING_SOON`, independent of
+`VITE_MARKETING_ONLY`) — do not wire unsigned `Setup.exe` URLs. Reopen auth
+demos on S8; flip Download CTAs only with signed URL + sha256 (D6).
+See [ROADMAP.md](ROADMAP.md).
 
 ## Surface
 
 | Path | Behaviour |
 | --- | --- |
-| `/downloads` | Live portal — suite offers (managers + AQC + AADT) |
+| `/downloads` | Suite offers — **Coming soon** under marketing-only gate |
 | `/download` | Legacy Manager path → **redirects to `/downloads`** |
 | `/` | Suite landing |
-| `/login` | Demo / portals / account (preview) |
+| `/login` | Soft launch → Coming soon; later demos / portals / account |
 
 Host: platform apex (`aorms.in`). Code: `frontend/src/routes/Downloads.tsx` ·
 resolver `frontend/src/lib/desktop-installers.ts`.

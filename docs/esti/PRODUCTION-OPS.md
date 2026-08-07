@@ -1,26 +1,57 @@
 # Production operations checklist
 
-Use this before declaring a VPS instance production-ready. Engineering delivery
-through [Phase 20](ROADMAP.md) is complete; this checklist is the **operator gate**
-for a live firm instance (secrets, TLS, backup/restore drill).
+Use this before declaring a VPS instance production-ready.
 
 > **Runtime split:** development uses **Podman** (`podman compose up`) with `compose.yaml`.
 > Production (VPS) uses **Docker** (`docker compose`) with `compose.prod.yaml`.
 > All commands in this document target the VPS/Docker environment unless explicitly noted.
+>
+> **Roadmap:** [ROADMAP.md](ROADMAP.md) · **Install:** [VPS-INSTALL.md](VPS-INSTALL.md) · **Deploy scripts:** [`deploy/README.md`](../../deploy/README.md)
+
+---
+
+## Soft launch (aorms.in marketing — 2026-08)
+
+Goal: **landing + blog only**. Apex login and installers stay Coming soon.
+
+| Check | How |
+| --- | --- |
+| DNS A/AAAA → VPS | `dig +short YOUR_DOMAIN` |
+| Install | `PROFILE=landing` via `deploy/bootstrap-vps.sh` or `deploy/install-landing.sh` |
+| Env | `VITE_PUBLIC_SITE=true` · `VITE_MARKETING_ONLY=true` (default) · Mongo URL set by installer |
+| Build | Frontend image bakes `VITE_MARKETING_ONLY` ([Dockerfile.prod](../../frontend/Dockerfile.prod)) |
+| Smoke | `bash deploy/verify-vps.sh https://YOUR_DOMAIN` |
+| Expect 200 | `/` · `/blog` · `/downloads` · `/wiki`→home · `/login`→Coming soon |
+| Blog explainers | `/blog/why-aorms-suite-matters` · `how-aorms-suite-solves-fragmented-practice` · `aorms-suite-map` |
+| Do **not** | Seed demo for marketing-only · Flip installers without signed URL+sha256 |
+
+One-shot:
+
+```bash
+PROFILE=landing DOMAIN=aorms.in ADMIN_EMAIL=ops@aorms.in \
+  OWNER_EMAIL=owner@firm.in OWNER_PASSWORD='…' \
+  curl -fsSL https://raw.githubusercontent.com/HolagundiWorks/aorms/main/deploy/bootstrap-vps.sh \
+  | sudo -E bash
+```
+
+Reopen demos later (S8): set `VITE_MARKETING_ONLY=false` in `/opt/esti/.env`, then
+`bash deploy/update.sh`. Keep installers Coming soon until D6 (signed URL + sha256)
+even after the marketing gate is off — see [ROADMAP.md](ROADMAP.md) § S8.
 
 ---
 
 ## Secrets and environment
 
-1. Normally you don't touch `.env` — `deploy/install.sh` generates `/opt/esti/.env` for you (secrets auto-generated). For a **manual** deploy, copy `deploy/.env.production.example` → `.env` on the VPS.
+1. Normally you don't touch `.env` — `deploy/install.sh` / `bootstrap-vps.sh` generates `/opt/esti/.env` (secrets auto-generated). For a **manual** deploy, copy `deploy/.env.production.example` → `.env` on the VPS.
 2. In a manual `.env`, replace **every** `CHANGE_ME_*` value by hand — nothing auto-substitutes when you deploy this way.
 3. Generate strong secrets:
    - `openssl rand -hex 32` → `SESSION_SECRET`
    - `openssl rand -base64 24` → `POSTGRES_PASSWORD`, `S3_SECRET_KEY`
-4. Set `ALLOWED_ORIGINS=https://your-domain` (exact SPA origin, no trailing slash).
+4. Soft launch: keep `VITE_MARKETING_ONLY=true`. Full firm: set `ALLOWED_ORIGINS` for every surface host ([AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md)).
 5. Keep `COOKIE_SECURE=true` when serving over HTTPS.
 6. For **real firm data**: use a unique `SEED_OWNER_EMAIL` / strong password; **do not** run `seed:demo`.
-7. Store `.env` with `chmod 600`; never commit it.
+7. Ensure `MONGODB_URL=mongodb://esti-mongo:27017` (suite ops) unless intentionally using in-memory fallback.
+8. Store `.env` with `chmod 600`; never commit it.
 
 ---
 
@@ -37,18 +68,23 @@ AORMS terminates TLS on **host nginx** (not inside Docker). Docker runs the API 
 ### Fresh VPS (SSL included)
 
 ```bash
-git clone https://github.com/HolagundiWorks/esti.git /opt/esti
+# Soft-launch marketing (recommended for aorms.in now):
+PROFILE=landing DOMAIN=aorms.in ADMIN_EMAIL=ops@aorms.in \
+  OWNER_EMAIL=owner@firm.in OWNER_PASSWORD='…' \
+  curl -fsSL https://raw.githubusercontent.com/HolagundiWorks/aorms/main/deploy/bootstrap-vps.sh \
+  | sudo -E bash
+
+# Or full AORMS-site profile:
+git clone https://github.com/HolagundiWorks/aorms.git /opt/esti
 cd /opt/esti
 sudo bash deploy/install.sh
-# menu: 1 landing · 2 demo · 3 AORMS Pro (cloud, legacy core profile) · 4 AORMS Pro (self-hosted, legacy enterprise profile) · 5 Licensing
-# prompts for domain + admin email; runs certbot at the end
 ```
 
 Non-interactive (pass the profile + inputs as env vars):
 
 ```bash
-PROFILE=core DOMAIN=aorms.in ADMIN_EMAIL=ops@firm.in \
-  OWNER_EMAIL=owner@firm.in OWNER_PASSWORD=… sudo -E bash deploy/install.sh
+PROFILE=landing DOMAIN=aorms.in ADMIN_EMAIL=ops@firm.in \
+  OWNER_EMAIL=owner@firm.in OWNER_PASSWORD=… sudo -E bash deploy/install-landing.sh
 ```
 
 ### Enable SSL on an existing HTTP-only VPS

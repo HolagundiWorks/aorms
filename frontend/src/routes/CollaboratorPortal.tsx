@@ -35,7 +35,6 @@ import { DataState } from "../components/DataState.js";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
 import {
   FirmPortalDrawingsPanel,
-  FirmPortalProgressPanel,
   FirmPortalProjectPanel,
 } from "../components/portal/FirmPortalHubPanels.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
@@ -252,13 +251,7 @@ export function CollaboratorPortal() {
         pickProjectHint="Open an engagement from Updates to see summary and stages."
       />
     ),
-    progress: (
-      <FirmPortalProgressPanel
-        loading={!!openId && detailQ.isLoading}
-        reports={[]}
-        phases={d?.phases}
-      />
-    ),
+    // Progress omitted until collab issued-progress API exists (S10) — hide empty tab.
     drawings: (
       <FirmPortalDrawingsPanel
         loading={!!openId && detailQ.isLoading}

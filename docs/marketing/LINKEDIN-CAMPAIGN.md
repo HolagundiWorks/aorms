@@ -7,12 +7,16 @@
 **Companion doc:** [`INSTAGRAM-CAMPAIGN.md`](INSTAGRAM-CAMPAIGN.md) — shared product
 truth, brand voice and content rules apply here too.
 
-> ## Product law (canonical — 2026-08-05)
+> ## Product law (canonical — 2026-08-08)
 >
-> - **Desktop preferred + web parity.** Same SPA on a local-first desktop node and in the browser. See [LOCAL-FIRST.md](../esti/LOCAL-FIRST.md).
-> - **One AORMS Standard licence** — no Lite/Pro split, no free tier, no trial. Unlimited users; **5 GB** cloud included; storage + hosted AI metered (or BYO key).
-> - **CTA:** `aorms.in` signup / demo — or `/downloads` when signed installers ship; never legacy Manager SKUs or “Lite forever”.
-> - Law: [PLANS-AND-TIERS.md](../esti/PLANS-AND-TIERS.md). Companion IG doc shares the same product truth.
+> - **Suite · local-first.** Managers + AQC technical apps + AADT on desktop;
+>   portals online; `aorms.in` = marketing ([AORMS-SUITE.md](../esti/AORMS-SUITE.md)).
+> - **Soft launch:** landing + blog; apex login / installers **Coming soon** until S8 / D6.
+> - **Licensing:** open source for now; do **not** claim Standard licence / web-parity staff ERP.
+> - **CTA:** `/` · `/blog` · `/downloads` (Coming soon) — never legacy Manager SKUs.
+> - Law: [LOCAL-FIRST.md](../esti/LOCAL-FIRST.md) · [ROADMAP.md](../esti/ROADMAP.md) · [PLANS-AND-TIERS.md](../esti/PLANS-AND-TIERS.md).
+>
+> Older “web parity / Standard licence” bullets in this draft are **superseded**.
 
 ---
 
