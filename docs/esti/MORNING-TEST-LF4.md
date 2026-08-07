@@ -148,6 +148,9 @@ Get-FileHash -Algorithm SHA256 $exe | Format-List
 | Bind verified | ✅ re-smoke — `hasSyncToken=true`, `syncReady=true`, `role=node`, `metaSync`+`artifactSync`, `sync.flush` ok, `sync.pullMeta` empty catch-up. Colocated: `ESTI_ROLE=node` + `ESTI_COLOCATED_HUB=true`. Demo login `principal@demo.aorms.in`. |
 | Local hub `0227` | ✅ applied on `esti-db` |
 
+**LF4 engineering is COMPLETE** on [ROADMAP.md](ROADMAP.md). Remaining steps are
+**post-delivery ops only** (not product backlog).
+
 **Next operator gate (cannot invent):** purchase/install a **SmartScreen-trusted** Authenticode cert (or EV), re-sign, upload HTTPS, then fill manifests / `VITE_*_INSTALLER_URL`. Keep `status: web_fallback` until then.
 
 ---

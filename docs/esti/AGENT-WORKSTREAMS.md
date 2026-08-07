@@ -1,45 +1,30 @@
 # AORMS active delivery — named agent crew
 
-**Status:** ACTIVE (ops gates only) · **Date:** 2026-08-07  
-**Parent:** [ROADMAP.md](ROADMAP.md) — **engineering COMPLETE** · morning checklist [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)
+**Status:** PARKED (delivery closed) · **Date:** 2026-08-07  
+**Parent:** [ROADMAP.md](ROADMAP.md) — **COMPLETE** · ops runbook [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)
 
-## Solo mode (current)
+## Delivery closed
 
-Cloud agents (**Vishwakarma**, **Gagan**, **Aakash**, cloud **Bhoomi**) are
-**stopped** (model expired). **Bhoomi2** is the only active agent. Product
-delivery is **complete**; remaining work is **LF4 ops** (SmartScreen-trusted
-cert · public installer URL) and parked phase-2 items — see ROADMAP “Open gates”.
+Product/engineering delivery for AStudio · AConsulting · AProc (preview) ·
+local-first LF0–LF6 · UI Waves 1–7 is **complete**. There is no active
+implementation queue on [ROADMAP.md](ROADMAP.md).
+
+Cloud agents (**Vishwakarma**, **Gagan**, **Aakash**, cloud **Bhoomi**) remain
+parked. **Bhoomi2** owns optional **post-delivery ops** only (SmartScreen-
+trusted cert · public installer URL · keep `/downloads` on `web_fallback`
+until then). Do **not** invent sha256 or flip live installer URLs unsigned.
 
 | Name | Role | Runtime | Owns now |
 | --- | --- | --- | --- |
-| **Bhoomi2** | Solo delivery | This Windows Cursor chat | Roadmap truth · LF4 ops gates · keep `/downloads` `web_fallback` |
+| **Bhoomi2** | Ops (optional) | This Windows Cursor chat | MORNING-TEST-LF4 gates · roadmap truth if reopened |
 | **Vishwakarma** | CTO / orchestrator | Parked | Resume → merge queue only |
 | **Gagan** | Cloud hub / sync | Parked | Resume → hub/contracts · prod `0227` |
 | **Aakash** | Cloud portal / GTM | Parked | Resume → live installer URL after trusted cert |
-| **Bhoomi** | Cloud desktop env | Parked | Optional parallel LF4 |
-
-### Live roster
-
-| Name | Agent | Focus now |
-| --- | --- | --- |
-| **Bhoomi2** | This chat (*Bhoomi2*) | **Ops gates only** — [ROADMAP.md](ROADMAP.md) open gates |
-| Vishwakarma · Gagan · Aakash · Bhoomi | Parked | Do not wait on them |
+| **Bhoomi** | Cloud desktop env | Parked | Optional parallel LF4 ops |
 
 Prior merge wave **#55 → #56 → #51 → #53 → #54 → #49 → #57** remains on `main`.
-UI Wave 7 (unified `/login` + account hub) shipped `68361264`.
-
-```mermaid
-flowchart TB
-  B2[Bhoomi2_solo]
-  subgraph local [Windows_host]
-    LF4[LF4_WinUI_sign_bind]
-    Stack[Docker_node_stack]
-    Portal[Downloads_stay_web_fallback]
-  end
-  B2 --> Stack
-  B2 --> LF4
-  LF4 -->|signed_HTTPS_sha256| Portal
-```
+UI Wave 7 (unified `/login` + account hub) shipped `68361264`. Roadmap close
+`656abcdd`+.
 
 ## Hard boundaries (still)
 
@@ -49,52 +34,42 @@ flowchart TB
 | **Do not** touch Stripe / W4 integrations | Deferred by choice |
 | **Do not** edit `Projects.tsx` / `Clients.tsx` | Parallel WIP |
 | **Do not** invent sha256 or flip live installer URLs unsigned | Honesty / M8 |
-| Update [ROADMAP.md](ROADMAP.md) + this file when status flips | Change rule |
+| Reopen delivery only via a new ROADMAP wave row | Change rule |
 
-## Crew sync matrix (historical + solo)
+## Crew sync matrix (historical)
 
 | Surface | Owner | PR / branch | Notes |
 | --- | --- | --- | --- |
-| Hub `syncToken` · `0227` · LF3 · bind readiness | Gagan (parked) / **Bhoomi2** local | **#45/#48/#53** ✅ | Local `0227` apply = Bhoomi2 |
-| CI lint · worker ruff | Vishwakarma (parked) | **#55/#56** ✅ | On `main` |
-| LF5 · LF6 | Aakash (parked) | **#51/#54** ✅ | On `main` |
-| **WinUI 3** shell · sign · bind | **Bhoomi2** | **#49** ✅ code | Physical gate open |
-| Portal WinUI wording | Aakash (parked) / **Bhoomi2** gate | **#50** | Keep `web_fallback` |
+| Hub `syncToken` · `0227` · LF3 · bind readiness | Gagan / Bhoomi2 local | **#45/#48/#53** ✅ | Local `0227` applied |
+| CI lint · worker ruff | Vishwakarma | **#55/#56** ✅ | On `main` |
+| LF5 · LF6 | Aakash | **#51/#54** ✅ | On `main` |
+| **WinUI 3** shell · sign · bind | Bhoomi2 | **#49** ✅ | Engineering done; SmartScreen = ops |
+| Portal WinUI wording | Aakash / Bhoomi2 | **#50** | Keep `web_fallback` until trusted cert |
 
 ---
 
-## Bhoomi2 — solo Windows delivery (this chat)
+## Bhoomi2 — post-delivery ops (optional)
 
-**Owns:** Roadmap accuracy · LF4 physical gate · local stack · interim portal gate.  
-**Does not:** invent release hashes · force-push · Stripe/W4 · repo extraction.
+**Owns:** SmartScreen / public installer when cert exists · local stack health.  
+**Does not:** invent release hashes · force-push · Stripe/W4 · repo extraction ·
+fake “complete” on unsigned portal flip.
 
-### Queue
+### Ops checklist
 
-1. Keep Docker node stack healthy (`start-node.ps1`).
-2. Apply / verify `0227_hlp_org_sync_firm.sql` on local `esti-db`.
-3. `build-winui.ps1 -Profile STUDIO` · launch vs Vite `5173`.
-4. Sign with operator cert when available; measure sha256.
-5. Bind: firm admin → `DesktopLicenceBind` → `hasSyncToken` / `sync.capabilities`.
-6. Only then host HTTPS + fill manifests / `VITE_*_INSTALLER_URL`.
+- [x] Host toolchain + Docker stack  
+- [x] Local `0227` verified  
+- [x] WinUI publish against local SPA  
+- [x] ACO **dev**-signed artifact + sha256 in [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)  
+- [x] `hasSyncToken` bind · `sync.pullMeta` colocated loopback  
+- [x] Manifest honesty (`web_fallback` until SmartScreen + HTTPS)  
+- [ ] Production / SmartScreen-trusted cert (operator)  
+- [ ] HTTPS handoff + live manifests / `VITE_*_INSTALLER_URL`  
+- [ ] `sync.pullMeta` against **production** hub URL  
 
 ### Key paths
 
 - `desktop/AStudio.Shell/` · `desktop/scripts/build-winui.ps1` · `start-node.ps1`
 - [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md) · [ROADMAP.md](ROADMAP.md)
-
-### Done when
-
-- [x] Solo roadmap + this roster updated  
-- [x] Host toolchain + Docker stack up  
-- [x] Local `0227` verified  
-- [x] WinUI publish runs against local SPA (process up)  
-- [x] ACO **dev**-signed artifact + sha256 recorded (SmartScreen trust still open) — evening rebuild hash `57774D65…` in [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)  
-- [x] `hasSyncToken` bind confirmed (API smoke · VALID · metaSync) — re-smoke 2026-08-06 evening  
-- [x] `sync.pullMeta` clean on colocated loopback (`ESTI_COLOCATED_HUB=true`)  
-- [x] Manifest honesty gate (`web_fallback` until SmartScreen + HTTPS)  
-- [ ] HTTPS handoff fields ready (or still gated)  
-- [ ] Production / SmartScreen-trusted cert (operator)  
-- [ ] `sync.pullMeta` against **production** hub URL (ops)
 
 ---
 
@@ -102,17 +77,16 @@ flowchart TB
 
 ### Vishwakarma — orchestrator
 
-Merge green PRs · roadmap truth · no day-to-day WinUI when Bhoomi2 is live.
+Merge green PRs · roadmap truth if a new wave opens.
 
 ### Gagan — hub / sync
 
-`syncToken` · HUB-API · `@esti/contracts` · no desktop packaging.
+`syncToken` · HUB-API · `@esti/contracts` · prod `0227` when scheduled.
 
 ### Aakash — portal / GTM
 
-`/downloads` live URL flip **after** signed HTTPS + sha256 from Bhoomi2.
-LF5/LF6 already ✅ on `main`.
+`/downloads` live URL flip **after** signed HTTPS + sha256. LF5/LF6 already ✅.
 
 ### Bhoomi — cloud desktop env
 
-Optional `env.name=bhoomi` assist; physical Windows gate stays Bhoomi2.
+Optional assist; physical Windows ops stay with Bhoomi2 when needed.

@@ -1,16 +1,16 @@
 # AORMS — Market fit brief
 
-**Status:** Canonical GTM + product priority · **Updated:** 2026-08-06  
+**Status:** Canonical GTM + product priority · **Updated:** 2026-08-07  
 **Owner:** Human Centric Works (HCW)
 
-Companion to [ROADMAP.md](ROADMAP.md) (delivery queue) and
+Companion to [ROADMAP.md](ROADMAP.md) (**implementation COMPLETE**) and
 [PRODUCT-VISION.md](PRODUCT-VISION.md) (boundary). This file records **market
-research conclusions** and what we must ship for paying firms.
+research conclusions** and GTM priorities for paying firms.
 
-**Delivery status:** Market-fit Waves **W1–W3 shipped**; **W4 integrations deferred**;
-**M8 local-first GTM** — desktop preferred story live; public installer URL still
-ops-gated ([WEB-PORTAL.md](WEB-PORTAL.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md) ·
-[ROADMAP.md](ROADMAP.md)).
+**Delivery status:** Market-fit Waves **W1–W3 shipped**; **W4 integrations deferred
+by choice**; **M8 local-first GTM** — desktop preferred story live. Public
+installer URL is **post-delivery ops** ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)),
+not an open market-fit wave.
 
 ---
 

@@ -1,26 +1,27 @@
 ﻿# AORMS Implementation Roadmap
 
-**Status:** COMPLETE (engineering) · **Updated:** 2026-08-07  
+**Status:** COMPLETE · **Closed:** 2026-08-07  
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
-**Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred by choice** — [MARKET-FIT.md](MARKET-FIT.md)  
+**Market-fit waves:** COMPLETE (W1–W3) · W4 deferred by choice — [MARKET-FIT.md](MARKET-FIT.md)  
 **AProc waves:** COMPLETE (W0–W5) — [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)  
-**Local-first waves:** LF0–LF3 · LF5 · LF6 ✅ · **LF4** code + local bind ✅ · **prod SmartScreen / public installer URL** 🔒 ops  
-**UI chrome:** Waves 1–7 ✅ — [UI-SITE-MAP.md](UI-SITE-MAP.md) · [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md)
+**Local-first waves:** COMPLETE (LF0–LF6) — [LOCAL-FIRST.md](LOCAL-FIRST.md)  
+**UI chrome:** COMPLETE (Waves 1–7) — [UI-SITE-MAP.md](UI-SITE-MAP.md) · [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md)
 
-This is the **single** delivery roadmap. Product and engineering delivery for
-**AStudio**, **AConsulting**, and **AProc** (preview) is **complete**. Remaining
-open items are **operator / ops gates** or **explicit phase-2 deferrals** — not
-missing product scope.
+This is the **single** delivery roadmap. **AStudio**, **AConsulting**, and
+**AProc** (preview) product/engineering delivery is **closed**. There is no
+open product backlog on this file.
 
-Phases 0–28 are **engineering-complete** for **AStudio**. **AConsulting** is
-**live**. **AProc** Waves **0–5 are shipped** (owner-side BBS/steel recon + P6 XER
-milestone import; not a contractor CPM ERP). Stripe auto-billing remains
-**deferred by choice**. Market-fit Waves 1–3 are **shipped**; Wave 4
-(integrations) stays phase-2 by design.
+Phases 0–28 are engineering-complete for **AStudio**. **AConsulting** is live.
+**AProc** Waves 0–5 are shipped (owner-side BBS/steel recon + P6 XER milestone
+import; not a contractor CPM ERP). Stripe auto-billing and market-fit Wave 4
+integrations remain **deferred by choice** (phase 2), not incomplete work.
 
 **Desktop-first (2026-08):** desktop node is the preferred runtime; AI is
 **local-only** (Ollama + deterministic mock); WinUI 3 is the sole desktop shell
-(Tauri removed). Web SPA parity is preserved.
+(Tauri removed). Web SPA parity is preserved. LF4 engineering (WinUI shell,
+dev-sign, local hub bind, `pullMeta`) is **done**; production SmartScreen /
+public installer hosting is **operator ops** outside this roadmap — see
+[MORNING-TEST-LF4.md](MORNING-TEST-LF4.md).
 
 ---
 
@@ -29,33 +30,15 @@ milestone import; not a contractor CPM ERP). Stripe auto-billing remains
 | Track | Status |
 | --- | --- |
 | Product pivot P0–P10 | ✅ |
-| P7 billing (manual India path) | ✅ · Stripe auto deferred |
+| P7 billing (manual India path) | ✅ · Stripe auto deferred by choice |
 | P9 Consultancy · P9.V / P9.M | ✅ |
 | Pre-con R&O | ✅ |
 | UI shell U0–U6 · pure neu 1.5.0 | ✅ |
 | UI Wave 7 — unified `/login` + account hub | ✅ 2026-08-07 |
-| Market fit W1–W3 | ✅ · W4 deferred |
+| Market fit W1–W3 | ✅ · W4 deferred by choice |
 | AProc W0–W5 | ✅ |
-| Local-first LF0–LF3 · LF5 · LF6 | ✅ |
-| Local-first LF4 (WinUI + bind) | ✅ code · ✅ local bind · 🔒 SmartScreen + public URL |
+| Local-first LF0–LF6 | ✅ |
 | Blog / SEO · HCW License Manager | ✅ |
-
----
-
-## Open gates (ops only — not product backlog)
-
-| # | Work | Status |
-| --- | --- | --- |
-| 1 | SmartScreen-trusted Authenticode cert (production) | 🔒 operator cert |
-| 2 | Public HTTPS installer URL + `/downloads` live manifests (sha256) | 🔒 gated on (1) — keep `web_fallback` until then |
-| 3 | Cloud hub prod migration `0227` (ops) | 🔒 parked |
-| 4 | Multi-agent PR choreography / crew return | 🔒 parked |
-
-Canonical LF4 runbook: [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md).  
-**Do not** invent sha256 or flip portal installer URLs unsigned.
-
-**Parked until crew / ops:** Stripe/W4 integrations, AStudio/AConsulting code
-extraction, cloud hub prod `0227`.
 
 ---
 
@@ -77,6 +60,8 @@ extraction, cloud hub prod `0227`.
 | [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md) | AProc product law + waves |
 | [DESIGN-DEBT-REGISTER.md](../hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md) | Living design debt |
 | [PRD.md](PRD.md) | Requirements |
+| [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) | **Ops runbook** — SmartScreen / public installer (not product backlog) |
+| [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) | Crew roster (parked after delivery close) |
 
 ## Platform apps
 
@@ -98,7 +83,7 @@ Canonical plan: **[LOCAL-FIRST.md](LOCAL-FIRST.md)** · UX: **[DESKTOP-WEB-PARIT
 | **LF1** | Hub meta event log + catch-up + WS; node meta outbox/cursor | ✅ 2026-08 |
 | **LF2** | Artifact content-hash; publish DTOs; portal-from-hub reads; desktop stub | ✅ 2026-08 |
 | **LF3** | Domain metadata enqueue/apply + panel `syncToken` | ✅ 2026-08 |
-| **LF4** | Signed **WinUI 3** installer + first-run licence / hub bind | ✅ code · ✅ local bind · 🔒 prod SmartScreen/URL |
+| **LF4** | WinUI 3 installer path + first-run licence / hub bind | ✅ 2026-08 |
 | **LF5** | Web parity polish (capability badges, keymap, `/help`) | ✅ 2026-08 |
 | **LF6** | UX parity + inspector/AI right-slot | ✅ 2026-08 |
 
@@ -168,6 +153,22 @@ Canon: [UI-SITE-MAP.md](UI-SITE-MAP.md) · [ADMIN-GUIDE.md](ADMIN-GUIDE.md) §3 
 
 ---
 
+## Post-delivery ops (outside this roadmap)
+
+Operator work that does **not** reopen product delivery. Track in
+[MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) · [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md).
+
+| # | Work | Note |
+| --- | --- | --- |
+| 1 | SmartScreen-trusted Authenticode cert | Purchase / install EV or trusted OV |
+| 2 | Public HTTPS installer + `/downloads` live manifests | Keep `web_fallback` until (1) + real sha256 |
+| 3 | Cloud hub prod migration `0227` | Deploy when ops schedules it |
+| 4 | Multi-agent crew return | Optional — delivery already closed |
+
+**Do not** invent sha256 or flip portal installer URLs unsigned.
+
+---
+
 ## Change rule
 
 Material feature changes update **PRD**, **NAVIGATION** (if IA moves),
@@ -176,3 +177,6 @@ Material feature changes update **PRD**, **NAVIGATION** (if IA moves),
 [UI-SITE-MAP.md](UI-SITE-MAP.md) (if chrome / auth surfaces move),
 and **this file** in the same pull request. **Do not** keep superseded specs in
 the tree — delete them; Git history is the archive.
+
+Reopening delivery means adding a **new** wave/phase row here — do not leave
+orphaned “in progress” status without a named owner and exit criteria.
