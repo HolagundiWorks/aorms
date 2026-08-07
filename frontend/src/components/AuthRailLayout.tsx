@@ -1,15 +1,15 @@
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
-import { Surface, RADIUS } from "@hcw/ui-kit";
+import { Surface, RADIUS, colors } from "@hcw/ui-kit";
 import { HcwAttribution } from "./brand/HcwAttribution.js";
 import { MarketingFooter } from "./landing/MarketingFooter.js";
-import { LandingContours } from "./landing/LandingContours.js";
+import { LandingEntourage } from "./landing/LandingEntourage.js";
 import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 
 /**
- * Unauthenticated auth shell — centered soft-neu card on Fog Gray (no glass rail).
- * Brand lives in the card; stage is atmosphere only (contours + soft blobs).
- * Spacing: COMPOSITION_RHYTHM · docs/esti/COMPOSITION-PRINCIPLES.md
+ * Unauthenticated auth shell — centered soft-neu card on the same Fog Gray
+ * canvas + architectural entourage as the landing page (`esti-lp-neu`).
+ * Brand lives in the card. Spacing: COMPOSITION_RHYTHM.
  */
 export function AuthRailLayout({
   rail,
@@ -21,7 +21,7 @@ export function AuthRailLayout({
 }: {
   /** Sign-in / recovery form content — centered soft neu card. */
   rail: ReactNode;
-  /** Optional custom stage atmosphere; defaults to LandingContours. */
+  /** Optional custom stage atmosphere; defaults to LandingEntourage. */
   stage?: ReactNode;
   /** @deprecated Kept for call-site compat — stage no longer carries product copy. */
   variant?: "workspace" | "portal" | "external" | "admin";
@@ -30,24 +30,23 @@ export function AuthRailLayout({
   visitCount?: number | null;
 }) {
   return (
-    <div className="esti-auth-shell">
+    <div
+      className="esti-auth-shell esti-lp-neu"
+      style={{ backgroundColor: colors.background }}
+    >
       <a href="#esti-auth-main" className="esti-skip-link">
         Skip to main content
       </a>
-      <div className="esti-auth-blobs" aria-hidden>
-        <div className="esti-auth-blob esti-auth-blob--a" />
-        <div className="esti-auth-blob esti-auth-blob--b" />
-        <div className="esti-auth-blob esti-auth-blob--c" />
-      </div>
 
       <Box
-        className="esti-neu-dash esti-auth-dash"
+        className="esti-auth-dash"
         sx={{
           flex: 1,
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
           position: "relative",
+          backgroundColor: colors.background,
         }}
       >
         <Box
@@ -58,10 +57,10 @@ export function AuthRailLayout({
             inset: 0,
             zIndex: 0,
             pointerEvents: "none",
-            opacity: 0.4,
+            overflow: "hidden",
           }}
         >
-          {stage ?? <LandingContours />}
+          {stage ?? <LandingEntourage count={14} seed={41} />}
         </Box>
 
         <Box
