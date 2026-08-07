@@ -104,7 +104,11 @@ Landing IA (five sections): **Overview · Outcomes · Platform · Rhythm · Star
 
 | Element | Role |
 | --- | --- |
-| `AuthRailLayout` | **Centered soft-neu card** (file name legacy — not a left rail) |
+| `AuthRailLayout` | Soft-neu **horizontal** brand\|form card on Fog Gray (file name legacy — not a left rail) |
+| `AuthSplitCard` | Shared brand pane + form; optional pinned `header` (login tabs) |
+| `Login.tsx` | **Unified sign-in** — Workspace · Portals · Account tabs; Account scopes Personal · Company · Licensing |
+
+Unauthenticated `/access`, `/company-account`, and `/platform-admin` **redirect** into the matching `/login` tab/scope. Self-hosted `/signup` (firm bootstrap) stays separate.
 
 ### Portals (`frontend/src/components/portal/`)
 

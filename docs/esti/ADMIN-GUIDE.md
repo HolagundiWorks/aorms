@@ -42,12 +42,13 @@ All on your one domain (`https://<domain>`), TLS-terminated by nginx.
 | URL | What it is | Auth |
 |---|---|---|
 | `/` | **AORMS-Studio** home (**Studio Intelligence**) — or the public Landing if `VITE_PUBLIC_SITE=true` | firm session |
-| `/login` | **AORMS-Studio** sign-in — staff workspace; create account on public-site builds; one **standard AORMS licence** | firm session |
-| `/access` | **External portals** — client, consultant, contractor, and site portal sign-in | portal session |
-| `/account`, `/company-account` | **AORMS account** (personal) and **Company account** (firm owners) | platform session |
+| `/login` | **Unified sign-in** — tabs **Workspace** · **Portals** · **Account** (scopes Personal · Company · Licensing). Staff, portals, account, and licensing console share one card | firm / portal / platform session by tab |
+| `/login?tab=portals` | External portals (client, consultant, contractor, site) | portal session |
+| `/access` | Legacy — **redirects** to `/login?tab=portals` | — |
+| `/account`, `/company-account` | **AORMS account** (personal) and **Company account** (firm owners). Unauthenticated visitors are sent to the matching `/login` Account scope | platform session |
 | `/wiki` | Official documentation (canonical) | public |
 | `/demo` | One-click auto-login into the seeded demo (profile 2 only) | baked demo creds |
-| `/platform-admin` | **Licensing console** (HCW License Manager, in-tree) — platform admins **only**; simple email + password, no company step | platform session (admin) |
+| `/platform-admin` | **Licensing console** (HCW License Manager, in-tree). Unauthenticated → `/login?tab=account&scope=licensing` | platform session (admin) |
 | `/platform` | Platform backend root (not a page) | — |
 | `/platform/trpc` | Platform API (tRPC) | platform session |
 | `/platform/auth/*` | Platform auth: `resolve-company`, `login`, `switch-company`, `create/join/leave-company`, `request-plan`, `my-request`, `my-credentials` | — |
@@ -62,40 +63,37 @@ Internal-only (never exposed): Postgres, Redis, MinIO. Backend binds `127.0.0.1:
 
 ---
 
-## 3. Login flows (two distinct surfaces)
+## 3. Login flows (one page, three tabs)
 
-**A. Firm app / customer account — `/login` (merged).** The **only** form shown by default
-is plain email + password against the firm's local `esti_user` — what a firm's staff use
-day-to-day, and what a visitor lands on regardless of whether this is a public-site or
-self-hosted build. **Optional delegation is now shipped** (opt-in,
-`ESTI_IDENTITY_DELEGATE=true`): the firm app verifies credentials against the central
-platform, with **offline-grace** fallback to the cached local password when it's
-unreachable — see §5 "Delegated login". Default off = local login only.
+**Canonical UI:** `frontend/src/routes/Login.tsx` — horizontal `AuthSplitCard` with pinned tabs.
+Chrome: [UI-SITE-MAP.md](UI-SITE-MAP.md) · [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md).
 
-On public-site builds, `/login` also hosts a **"Create account"** button — an explicit,
-separate action (a toggle on the same page, or land directly on it via
-`/login?mode=create`) for someone with no account yet: it creates a central platform
-account (`hlp_account`) and raises a **plan request** (§8). This is a one-way door into
-sign-up only — it does not become the default view, and it is not where an existing
-account is managed. There is no separate `/account` URL.
+| Tab | Query | Who | After success |
+| --- | --- | --- | --- |
+| **Workspace** | `/login` (default) | Firm staff (`esti_user`) | Destination picker → workspace / account / company |
+| **Portals** | `?tab=portals` | Client, consultant, contractor, site | Portal home `/` |
+| **Account → Personal** | `?tab=account` | Portable AORMS account (`hlp_account`) | `/account` |
+| **Account → Company** | `?tab=account&scope=company` | Company owners | `/company-account` |
+| **Account → Licensing** | `?tab=account&scope=licensing` | HCW operators / platform admin | `/platform-admin` |
 
-Managing an already-created account (plan/request status, companies, 2FA, credentials) is
-a **workspace** feature, not a `/login` one: once signed in to the firm workspace, it's the
-**Account** tab under Profile (`/profile`) — sign in there once (a separate `hlp_session`
-cookie from the workspace's own session) to link it for that browser, same as any other tab.
+**Workspace tab.** Email + password against the firm's local `esti_user`. **Optional
+delegation** (`ESTI_IDENTITY_DELEGATE=true`): verifies against the central platform with
+offline-grace to the cached local password — see §5 "Delegated login". Default off =
+local login only. Google continue (public-site builds) lands back on Workspace.
 
-**B. Licensing console — `/platform-admin` (admin only, single step).** Plain email +
-password, no company step, no "Create account" flow for customers. "Create account" only
-appears **before the first admin exists** (one-time bootstrap — closes itself afterward);
-after that, this URL is sign-in only. A non-admin account that signs in here is redirected
-to `/login`. This is where HCW operators issue/edit licences, approve plan requests, and
-manually resets a customer's password.
+**Portals tab.** Same credential API as workspace for external portal roles; success
+invalidates `auth.me` and opens the portal shell. Legacy `/access` redirects here.
 
-The tenant-first, company-scoped login (name/email/AORMS-C ID → verifies ACTIVE membership)
-still exists as an internal building block (`resolveCompany`/`/platform/auth/login`'s
-optional `company` param) — the merged `/login` "Create account" flow uses it with a "no
-company yet? sign in with just your email" skip, since most customers are solo/personal
-accounts with no company to name.
+**Account tab.** Embeds the platform login form (`platform-admin/Login` · `embedded`)
+without a second chrome shell. Personal scope supports **Create account**
+(`?mode=create`). Licensing scope is sign-in only after the first platform admin exists
+(one-time bootstrap "Create account" still appears until then).
+
+Self-hosted **`/signup`** (firm bootstrap: name company + first owner) remains a
+**separate** one-time page — it is not an AORMS account signup.
+
+The tenant-first company resolver (`resolveCompany` / optional `company` on
+`POST /platform/auth/login`) still powers Account company/personal flows under the hood.
 
 ---
 

@@ -199,7 +199,7 @@ Phase-linked billing is written on **fresh** seed only. To refresh billing signa
 | Record | Value |
 |--------|-------|
 | Sharma Villa civil package | OPEN · 2 invitations (Vinayaka Civil · Sairam Structural) |
-| Contractor portal | `contractor@demo.aorms.in` / demo password → `/access` |
+| Contractor portal | `contractor@demo.aorms.in` / demo password → `/login?tab=portals` |
 
 Routes: Project → Tenders · Office → Tenders · contractor portal home.
 

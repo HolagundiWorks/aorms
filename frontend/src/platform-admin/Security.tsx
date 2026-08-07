@@ -4,13 +4,14 @@ import {
   AlertTitle,
   Box,
   Button,
-  Paper,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { QRCodeSVG } from "qrcode.react";
 import { StatusDot } from "../components/StatusTag.js";
+import { PortalCard } from "../components/portal/PortalChrome.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import { type Me, totpDisable, totpEnable, totpSetup } from "./lib/auth";
 
 /** Two-factor authenticator (TOTP) enrollment for the signed-in account. */
@@ -61,9 +62,9 @@ export default function Security({ me, onChange }: { me: Me; onChange: () => voi
   }
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Stack spacing={2}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+    <PortalCard>
+      <Stack spacing={COMPOSITION_RHYTHM.sm}>
+        <Stack direction="row" spacing={COMPOSITION_RHYTHM.xs} sx={{ alignItems: "center" }}>
           <Typography variant="subtitle1" component="h3" className="esti-label">
             Two-factor authentication
           </Typography>
@@ -173,6 +174,6 @@ export default function Security({ me, onChange }: { me: Me; onChange: () => voi
           </Alert>
         )}
       </Stack>
-    </Paper>
+    </PortalCard>
   );
 }

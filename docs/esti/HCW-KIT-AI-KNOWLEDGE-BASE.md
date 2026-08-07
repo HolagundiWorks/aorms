@@ -80,7 +80,7 @@ a frozen compat layer — never extend it).
 ### R2 — Component-first, no duplicates
 One canonical implementation per pattern. Status = `StatusTag`/`StatusDot`. Skeleton/empty
 = `DataState`. Confirm-destroy = `ConfirmModal`. Layout = `RailLayout` (stage page shell) /
-`AuthRailLayout` (centered soft card) / `PortalNeuFrame` · `PortalShell` /
+`AuthRailLayout` + `AuthSplitCard` (unified `/login` tabs) / `PortalNeuFrame` · `PortalShell` /
 `ExternalPortalShell` / `MarketingNeuFrame` · `MarketingShell` — never bespoke left rails.
 - Detect duplicates: `rg -n 'function TagChip|const chipSx' frontend/src`.
 - New shared elements are added to the **kit first**, then consumed.

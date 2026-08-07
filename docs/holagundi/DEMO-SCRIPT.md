@@ -17,7 +17,7 @@ Companion: [ICP-ONE-PAGER.md](ICP-ONE-PAGER.md) · [SOP.md](SOP.md) ·
 | 1 | Studio Intelligence `/` — zone health + **Fee recovery %** | “Fee vs invoiced at a glance — not another dashboard tile farm.” |
 | 2 | Capacity strip (if HR on) · Team tab | “Who is overloaded before you take the next job.” |
 | 3 | Open Sharma Villa — phases + invoice tab | “COA phases hang fees; GST invoices are first-class.” |
-| 4 | Client portal `/access` as `client@demo.aorms.in` | “Approvals and invoices without WhatsApp archaeology.” |
+| 4 | Client portal `/login?tab=portals` as `client@demo.aorms.in` | “Approvals and invoices without WhatsApp archaeology.” |
 | 5 | Alerts bell — digest lines | “Medium follow-ups stay in the record, not only in chat.” |
 
 **Empty-firm path (non-demo):** Studio ESTI tab shows **Get to your first invoice** —

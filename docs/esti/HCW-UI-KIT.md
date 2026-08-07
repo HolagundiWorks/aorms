@@ -181,11 +181,14 @@ footer · AnalogueClock. Page wrapper: `RailLayout` (stage header + full-width m
 Studio Intelligence (`StudioAbstract.tsx`) keeps KPI / zone / tab anatomy **in the
 stage** (no left SoftRail). Zone health and KPIs live in the stage head.
 
-#### Login & auth — centered soft card
+#### Login & auth — unified tabbed card
 
-Unauthenticated forms use `AuthRailLayout` — a **centered soft-neu card** on Fog
-Gray (file name is legacy; there is no left rail). autoComplete on identity fields;
-errors inline; single submit with progress verb.
+Unauthenticated forms use `AuthRailLayout` + `AuthSplitCard` — a **horizontal soft-neu
+brand | form card** on Fog Gray (file name is legacy; there is no left rail). One page
+(`/login`) carries tabs **Workspace · Portals · Account**; Account adds scopes
+Personal · Company · Licensing. Labels above fields (`AuthLabeledField`); autoComplete
+on identity fields; errors inline; single submit with progress verb. Legacy `/access`
+and unauthenticated account/licensing hubs redirect into the matching tab.
 
 #### Shared shell for other screens
 

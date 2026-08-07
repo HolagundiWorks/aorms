@@ -51,11 +51,14 @@ Password · 2FA…), subtitle1 headings, helper text via esti-label--helper.
 Success = dismissible Alert or toast; every mutation pending-disables its button.
 ```
 
-## T5 — Auth (reference: `Login.tsx` + `AuthRailLayout`)
+## T5 — Auth (reference: `Login.tsx` + `AuthRailLayout` + `AuthSplitCard`)
 
 ```
-AuthRailLayout: CENTERED soft-neu card on Fog Gray (legacy name — not a left rail)
-· AuthBrandBlock · autoComplete on identity fields · errors inline · single submit.
+AuthRailLayout: horizontal soft-neu brand|form card on Fog Gray
+· MarketingTopBar · pinned tabs Workspace · Portals · Account
+· Account scopes Personal · Company · Licensing (?scope=)
+· AuthBrandPane · AuthLabeledField · autoComplete · errors inline · single submit
+· Legacy /access → ?tab=portals; company/licensing unauth → Account scopes
 ```
 
 ## T6 — Portal (external + account hubs) (reference: `Portal.tsx` + `ExternalPortalShell` / `PortalShell`)
@@ -63,9 +66,10 @@ AuthRailLayout: CENTERED soft-neu card on Fog Gray (legacy name — not a left r
 ```
 PortalNeuFrame (no left SoftRail):
 ├ soft top bar — portal identity + Sign out  OR  account hub nav + Sign out
-├ stage — 1200px · read-mostly panels / request forms / account tabs
+├ stage — 1200px · PortalCard soft panels / request forms / account tabs
 └ AnalogueClock (fixed bottom-right)
 No taskbar, no ActionDock — portal-class surfaces are dock-less by design.
+Account hubs: PortalCard (soft) for Overview / Companies / Profile / Security panels.
 ```
 
 ## T7 — Marketing page (reference: `Landing.tsx` + `MarketingNeuFrame`)

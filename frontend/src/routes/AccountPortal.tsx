@@ -1,13 +1,18 @@
 import ArrowBack from "@mui/icons-material/ArrowBack";
-import { Surface } from "@hcw/ui-kit";
 import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import { Link as RouterLink, Navigate } from "react-router-dom";
 import { PortalLicenceCard } from "../components/portal/PortalLicenceCard.js";
-import { PortalPageHeader, PortalTabPanel, PortalTabs } from "../components/portal/PortalChrome.js";
+import {
+  PortalCard,
+  PortalPageHeader,
+  PortalTabPanel,
+  PortalTabs,
+} from "../components/portal/PortalChrome.js";
 import { PortalShell } from "../components/portal/PortalShell.js";
 import { StatusDot } from "../components/StatusTag.js";
 import { useAuth } from "../lib/auth.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import { fetchMe, fetchMyLicense, logout, type Me, type MyLicense } from "../platform-admin/lib/auth.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
 
@@ -30,6 +35,7 @@ const AccountHub = lazy(() =>
 );
 const Companies = lazy(() => import("../platform-admin/Companies.js"));
 
+/** Odd peer group — Overview · Companies · Profile · Security · Workspace */
 const TAB_LABELS = ["Overview", "Companies", "Profile", "Security", "Workspace"] as const;
 
 function tabIndexFromHash(): number {
@@ -119,7 +125,7 @@ export function AccountPortal() {
   if (checking) {
     return (
       <PortalShell active="account">
-        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", py: COMPOSITION_RHYTHM.lg }}>
           <CircularProgress />
         </Box>
       </PortalShell>
@@ -145,9 +151,9 @@ export function AccountPortal() {
         </Button>
       }
     >
-      <Stack spacing={3}>
+      <Stack spacing={COMPOSITION_RHYTHM.md}>
         <PortalPageHeader
-          title="Personal account"
+          title={AORMS_PORTALS.account.personal}
           documentTitle={
             tab === 0
               ? `${AORMS_PORTALS.account.personal} — ${AORMS_PORTALS.account.name}`
@@ -155,7 +161,11 @@ export function AccountPortal() {
           }
           subtitle={`Your portable identity, companies, and security — separate from ${AORMS_PORTALS.studio.title}.`}
           meta={
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+            <Stack
+              direction="row"
+              spacing={COMPOSITION_RHYTHM.xs}
+              sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}
+            >
               <Typography variant="body2">{account.email}</Typography>
               {account.publicId && <StatusDot color="cool-gray" label={account.publicId} />}
             </Stack>
@@ -172,65 +182,75 @@ export function AccountPortal() {
             </Button>
           }
         />
-          <PortalTabs
-            value={tab}
-            onChange={handleTabChange}
-            labels={[...TAB_LABELS]}
-            ariaLabel="Account sections"
-          />
 
-          <Suspense fallback={<Box sx={{ display: "flex" }}><CircularProgress /></Box>}>
-            <PortalTabPanel active={tab === 0}>
-              <AccountHub me={me} />
-              {license ? <PortalLicenceCard license={license} /> : <RequestPlan />}
-              <Surface layer="flat" sx={{ p: 2.5 }}>
-                <Typography variant="body2" color="text.secondary">
-                  {ownsCompany ? (
-                    <>
-                      Company owners manage GST, members, workspace users, and audit logs in the{" "}
-                      <RouterLink to="/company-account">Company account</RouterLink>.
-                    </>
-                  ) : (
-                    <>
-                      After you create or join a company, owners can manage firm settings in the{" "}
-                      <RouterLink to="/company-account">Company account</RouterLink>.
-                    </>
-                  )}
-                </Typography>
-              </Surface>            </PortalTabPanel>
+        <PortalTabs
+          value={tab}
+          onChange={handleTabChange}
+          labels={[...TAB_LABELS]}
+          ariaLabel="Account sections"
+        />
 
-            <PortalTabPanel active={tab === 1}>
-              <Companies me={me} onChange={setMe} />
-            </PortalTabPanel>
+        <Suspense
+          fallback={
+            <Box sx={{ display: "flex", justifyContent: "center", py: COMPOSITION_RHYTHM.lg }}>
+              <CircularProgress />
+            </Box>
+          }
+        >
+          <PortalTabPanel active={tab === 0}>
+            <AccountHub me={me} />
+            {license ? <PortalLicenceCard license={license} /> : <RequestPlan />}
+            <PortalCard>
+              <Typography variant="body2" color="text.secondary">
+                {ownsCompany ? (
+                  <>
+                    Company owners manage GST, members, workspace users, and audit logs in the{" "}
+                    <RouterLink to="/company-account">Company account</RouterLink>.
+                  </>
+                ) : (
+                  <>
+                    After you create or join a company, owners can manage firm settings in the{" "}
+                    <RouterLink to="/company-account">Company account</RouterLink>.
+                  </>
+                )}
+              </Typography>
+            </PortalCard>
+          </PortalTabPanel>
 
-            <PortalTabPanel active={tab === 2}>
-              <AccountProfilePanel account={account} onSaved={refresh} />
-            </PortalTabPanel>
+          <PortalTabPanel active={tab === 1}>
+            <Companies me={me} onChange={setMe} />
+          </PortalTabPanel>
 
-            <PortalTabPanel active={tab === 3}>
-              <Security me={me} onChange={refresh} />
-              <Credentials />
-            </PortalTabPanel>
+          <PortalTabPanel active={tab === 2}>
+            <AccountProfilePanel account={account} onSaved={refresh} />
+          </PortalTabPanel>
 
-            <PortalTabPanel active={tab === 4}>
-              {!user ? (
-                <Alert severity="warning">
-                  <AlertTitle>Workspace sign-in required</AlertTitle>
-                  Work profile and workspace settings need an active {AORMS_PORTALS.studio.sessionLabel}.{" "}
-                  <RouterLink to="/login">{AORMS_PORTALS.studio.signInLink}</RouterLink> first, then return here.
-                </Alert>
-              ) : (
-                <>
-                  <Surface layer="flat" sx={{ overflow: "hidden" }}>
-                    <WorkspaceSettingsPanel />
-                  </Surface>
-                  <Surface layer="flat" sx={{ overflow: "hidden" }}>
-                    <UserProfilePanel />
-                  </Surface>
-                </>
-              )}            </PortalTabPanel>
-          </Suspense>
-        </Stack>
+          <PortalTabPanel active={tab === 3}>
+            <Security me={me} onChange={refresh} />
+            <Credentials />
+          </PortalTabPanel>
+
+          <PortalTabPanel active={tab === 4}>
+            {!user ? (
+              <Alert severity="warning">
+                <AlertTitle>Workspace sign-in required</AlertTitle>
+                Work profile and workspace settings need an active {AORMS_PORTALS.studio.sessionLabel}.{" "}
+                <RouterLink to="/login">{AORMS_PORTALS.studio.signInLink}</RouterLink> first, then
+                return here.
+              </Alert>
+            ) : (
+              <>
+                <PortalCard sx={{ overflow: "hidden", p: 0 }}>
+                  <WorkspaceSettingsPanel />
+                </PortalCard>
+                <PortalCard sx={{ overflow: "hidden", p: 0 }}>
+                  <UserProfilePanel />
+                </PortalCard>
+              </>
+            )}
+          </PortalTabPanel>
+        </Suspense>
+      </Stack>
     </PortalShell>
   );
 }

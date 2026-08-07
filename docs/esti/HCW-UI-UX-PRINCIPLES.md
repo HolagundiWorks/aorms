@@ -215,7 +215,7 @@ Editorial CSS lives in `landing.scss` — not in `@hcw/ui-kit` tokens.
 
 | Rule | Rationale |
 |------|-----------|
-| **Login centered soft card** | `AuthRailLayout` on Fog Gray (legacy name) | Final auth pattern |
+| **Login centered soft card** | `AuthRailLayout` + `AuthSplitCard` on Fog Gray — unified `/login` tabs | Final auth pattern |
 | **Breadcrumbs** | `PageBreadcrumb` on adopted screens | Recognition; orientation |
 | **Search discoverable** | Footer + Ctrl/Cmd+K | Nielsen #6 |
 | **Studio Intelligence reference** | `/` proves stage KPIs + tabs (no left rail) | Canonical pattern |
@@ -268,7 +268,7 @@ Before shipping UI:
 |--------------|-----|
 | Left SoftRail / GlassRail on product | Retired 2026-08 — use ribbon + stage |
 | Floating staff watermark beside clock | Collides with AnalogueClock; brand lives in ribbon |
-| Auth form mounted as marketing stage | Use centered `AuthRailLayout` soft card |
+| Auth form mounted as marketing stage | Use unified `/login` (`AuthRailLayout` + tabs) |
 | Inline Save + dock Save | Duplicate affordance; Fitts waste |
 | Non-8px corners on product chrome | Soft-square `RADIUS` / `BUTTON_RADIUS` = **8px** |
 | Glass on every card | Flattens hierarchy; hides marketing atmosphere |

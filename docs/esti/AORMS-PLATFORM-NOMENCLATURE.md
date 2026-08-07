@@ -104,19 +104,20 @@ Executable labels: `AORMS_PORTALS` in `frontend/src/lib/product-nomenclature.ts`
 
 | Surface | Display name | URL / route | Notes |
 | --- | --- | --- | --- |
-| **Staff workspace (architecture)** | **AStudio** | `studio.aorms.in` · `/login` | Architecture app |
+| **Staff workspace (architecture)** | **AStudio** | `studio.aorms.in` · `/login` (Workspace tab) | Architecture app |
 | **Staff workspace (engineering)** | **AConsulting** | `consultancy.aorms.in` | Engineering app |
 | **Staff workspace (PMC)** | **AProc** | `proc.aorms.in` · `/pmc` | PMC preview |
 | **Knowledge Bank portal** | Knowledge Bank portal | `/libraries/knowledge-bank-portal` | EOMS textbook intake → ESTI RAG |
 | **Wiki** | AORMS Wiki | `/wiki/*` on **aorms.in** | Public documentation |
-| **External portals** | External portals | `/access` | Client, consultant, contractor, site sign-in |
+| **Unified sign-in** | Sign in | `/login` | Tabs: Workspace · Portals · Account |
+| **External portals** | External portals | `/login?tab=portals` (legacy `/access` redirects) | Client, consultant, contractor, site sign-in |
 | **Client portal** | Client portal | external session | Scoped to client projects |
 | **Consultant portal** | Consultant portal | external session | Alias *collaborator portal* in internal copy |
 | **Contractor portal** | Contractor portal | external session | Rebuild in progress |
 | **Site portal** | Site portal | site supervisor session | Mobile-first site inspections |
-| **Personal account** | AORMS account | `/account` | Portable identity + licence hub |
-| **Company account** | Company account | `/company-account` | Firm owners: GST, members, admin |
-| **Licensing console** | Licensing console (**HCW License Manager**) | `admin.aorms.in` · `/platform-admin` | In-tree operators console |
+| **Personal account** | AORMS account | `/account` · sign-in `/login?tab=account` | Portable identity + licence hub |
+| **Company account** | Company account | `/company-account` · sign-in `/login?tab=account&scope=company` | Firm owners: GST, members, admin |
+| **Licensing console** | Licensing console (**HCW License Manager**) | `admin.aorms.in` · `/platform-admin` · sign-in `/login?tab=account&scope=licensing` | In-tree operators console |
 | **Consultancy marketing** | **AConsulting** | `consultancy.aorms.in` · `/aconsulting` | Legacy path `/aorms-consultancy` |
 | **PMC marketing** | **AProc** | `proc.aorms.in` · `/aproc` | Legacy path `/aorms-pmc` |
 | **Blog** | Blog | `/blog` | Platform + practice notes |

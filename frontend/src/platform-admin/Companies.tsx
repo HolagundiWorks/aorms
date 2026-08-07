@@ -14,12 +14,13 @@ import {
   DialogContent,
   DialogTitle,
   LinearProgress,
-  Paper,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { StatusDot } from "../components/StatusTag.js";
+import { PortalCard } from "../components/portal/PortalChrome.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import {
   type CompanyIdStatus,
   type Me,
@@ -273,8 +274,8 @@ export default function Companies({
   }
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Stack spacing={2}>
+    <PortalCard>
+      <Stack spacing={COMPOSITION_RHYTHM.sm}>
         <Typography variant="subtitle1" component="h3" className="esti-label">
           Your companies
         </Typography>
@@ -567,6 +568,6 @@ export default function Companies({
           </Box>
         </Dialog>
       </Stack>
-    </Paper>
+    </PortalCard>
   );
 }

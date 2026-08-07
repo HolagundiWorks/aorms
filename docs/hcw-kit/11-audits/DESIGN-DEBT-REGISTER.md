@@ -1,4 +1,11 @@
-﻿**2026-08-07 — Wave 6 polish.** `AormsMark` + firm name in `AppRibbon`; de-Carbon
+﻿**2026-08-07 — Unified login + account hub.** `/login` is the single sign-in card
+(Workspace · Portals · Account; Account scopes Personal · Company · Licensing).
+`/access`, unauthenticated `/account` / `/company-account` / `/platform-admin` redirect
+into matching tabs. Account hubs use soft `PortalCard` panels. Canon:
+[UI-SITE-MAP.md](../../esti/UI-SITE-MAP.md) · [AORMS-SURFACE-URLS.md](../../esti/AORMS-SURFACE-URLS.md) ·
+[ADMIN-GUIDE.md](../../esti/ADMIN-GUIDE.md) §3.
+
+**2026-08-07 — Wave 6 polish.** `AormsMark` + firm name in `AppRibbon`; de-Carbon
 shared widgets (`RowActionsMenu`, `SubmissionThread`, `ProjectSiteReference`,
 `AdminSection`, `PortalLicenceCard`, `LicensePanel`); ProjectDetail nav → Setup 3 ·
 Design 5 · Delivery (capability-gated). Remaining Carbon: platform-admin tab bodies

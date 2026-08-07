@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useState, type ReactNode } from "react";
 import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
-import Login from "./Login";
+import { Navigate } from "react-router-dom";
 import AdminApp from "./admin/AdminApp";
 import { PortalShell } from "../components/portal/PortalShell.js";
 import { StatusDot } from "../components/StatusTag.js";
@@ -58,7 +58,7 @@ export default function Panel() {
   }
 
   if (!me?.account) {
-    return <Login onLogin={setMe} />;
+    return <Navigate to="/login?tab=account&scope=licensing" replace />;
   }
 
   const account = me.account;

@@ -138,7 +138,7 @@ Do **not** invent per-route spacing. Shells carry the rhythm:
 | `ActionDock` | Staff CTAs | Von Restorff zones (destroy · create · commit) |
 | `PortalNeuFrame` | Client / consultant / contractor / site / account | Top bar + stage air + clock clear |
 | `AdminConsoleShell` | Licensing | Header · chips · stage pad |
-| `AuthRailLayout` | Login / access / reset | Centered soft card pad |
+| `AuthRailLayout` | `/login` (unified tabs) / reset / forgot | Horizontal soft card pad · pinned tab header |
 | `MarketingNeuFrame` + `MARKETING_RHYTHM` | Landing / blog / downloads | Section air · odd groups |
 
 Executable tokens: `frontend/src/lib/composition.ts` (`COMPOSITION_RHYTHM`). Marketing re-exports via `marketing-layout.ts`.

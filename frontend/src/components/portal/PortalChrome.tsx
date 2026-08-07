@@ -1,11 +1,29 @@
-import { Surface } from "@hcw/ui-kit";
+import { SoftSurface } from "../landing/SoftSurface.js";
 import { Stack, Tab, Tabs, Typography } from "@mui/material";
 import type { ReactNode, SyntheticEvent } from "react";
 import { useEffect } from "react";
+import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
 import { AORMS_PORTALS } from "../../lib/product-nomenclature.js";
 
-/** Shared padding for portal content cards. */
-export const portalPaperSx = { p: 3 } as const;
+/** Shared padding for portal content cards (8px rhythm). */
+export const portalPaperSx = { p: COMPOSITION_RHYTHM.md } as const;
+
+/** Soft neu content card for account / company / licensing hubs. */
+export function PortalCard({
+  children,
+  sx,
+  id,
+}: {
+  children: ReactNode;
+  sx?: Record<string, unknown>;
+  id?: string;
+}) {
+  return (
+    <SoftSurface id={id} sx={{ ...portalPaperSx, ...(sx ?? {}) }}>
+      {children}
+    </SoftSurface>
+  );
+}
 
 export function PortalPageHeader({
   title,
@@ -28,7 +46,7 @@ export function PortalPageHeader({
   return (
     <Stack
       direction={{ xs: "column", md: "row" }}
-      spacing={2}
+      spacing={COMPOSITION_RHYTHM.sm}
       sx={{ alignItems: { md: "flex-start" }, justifyContent: "space-between" }}
     >
       <Stack spacing={0.75} className="esti-grow" sx={{ minWidth: 0 }}>
@@ -45,7 +63,7 @@ export function PortalPageHeader({
       {actions && (
         <Stack
           direction="row"
-          spacing={0.5}
+          spacing={COMPOSITION_RHYTHM.xs}
           sx={{ flexWrap: "wrap", alignItems: "center", flexShrink: 0 }}
         >
           {actions}
@@ -67,7 +85,12 @@ export function PortalTabs({
   ariaLabel: string;
 }) {
   return (
-    <Surface layer="flat" sx={{ px: { xs: 1, sm: 2 }, py: 0.5 }}>
+    <SoftSurface
+      sx={{
+        px: { xs: COMPOSITION_RHYTHM.xs, sm: COMPOSITION_RHYTHM.sm },
+        py: 0.5,
+      }}
+    >
       <Tabs
         value={value}
         onChange={onChange}
@@ -75,12 +98,20 @@ export function PortalTabs({
         variant="scrollable"
         scrollButtons="auto"
         allowScrollButtonsMobile
+        sx={{
+          minHeight: 44,
+          "& .MuiTab-root": {
+            textTransform: "none",
+            minHeight: 44,
+            fontWeight: 600,
+          },
+        }}
       >
         {labels.map((label) => (
           <Tab key={label} label={label} />
         ))}
       </Tabs>
-    </Surface>
+    </SoftSurface>
   );
 }
 
@@ -95,7 +126,7 @@ export function PortalTabPanel({
 }) {
   if (!active) return null;
   return (
-    <Stack id={id} spacing={3}>
+    <Stack id={id} spacing={COMPOSITION_RHYTHM.md}>
       {children}
     </Stack>
   );

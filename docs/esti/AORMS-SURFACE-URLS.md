@@ -1,6 +1,6 @@
 # AORMS surface URLs (frozen)
 
-**Status:** Canonical · **Frozen:** 2026-07-11 · **Revised:** 2026-07-25 · **Owner:** HCW
+**Status:** Canonical · **Frozen:** 2026-07-11 · **Revised:** 2026-08-07 · **Owner:** HCW
 
 Executable constants: `frontend/src/lib/aorms-surface-urls.ts` and
 `frontend/src/lib/product-nomenclature.ts`.
@@ -29,13 +29,18 @@ Same SPA bundle; no dedicated host.
 | Path | Surface | Notes |
 | --- | --- | --- |
 | `/` | Platform landing | Hero, frameworks, conversion dock |
-| `/login` | AStudio sign-in | Architecture marketing + workspace login |
+| `/login` | **Unified sign-in** | Tabs: **Workspace** · **Portals** · **Account**. Account scopes: Personal · Company · Licensing (`?tab=` / `?scope=`). See [UI-SITE-MAP.md](UI-SITE-MAP.md) |
+| `/login?tab=portals` | External portals | Client, consultant, contractor, site — same page, Portals tab |
+| `/login?tab=account` | AORMS account | Personal account / create (`?mode=create`) |
+| `/login?tab=account&scope=company` | Company account sign-in | Owners; success → `/company-account` |
+| `/login?tab=account&scope=licensing` | Licensing console sign-in | Operators; success → `/platform-admin` |
+| `/access` | Legacy | **Redirects** to `/login?tab=portals` (keep old links) |
 | `/wiki`, `/wiki/*` | AORMS Wiki | Public documentation |
 | `/blog`, `/blog/*` | Blog | Editorial |
 | `/downloads` | Desktop installers | Local-first signed Setup.exe (web_fallback until signed); legacy `/download` redirects here — [WEB-PORTAL.md](WEB-PORTAL.md) |
-| `/access` | External portals | Client, consultant, contractor, site sign-in |
-| `/account` | Personal account | Identity + licence hub |
-| `/company-account` | Company account | Firm owners |
+| `/account` | Personal account hub | Soft `PortalCard` panels; unauthenticated → `/login?tab=account` |
+| `/company-account` | Company account hub | Firm owners; unauthenticated → `/login?tab=account&scope=company` |
+| `/platform-admin` | Licensing console | HCW operators; unauthenticated → `/login?tab=account&scope=licensing` |
 | `/libraries/knowledge-bank-portal` | Knowledge Bank portal | Staff L4+, EOMS intake |
 | `/aconsulting` | AConsulting marketing | Path alias; canonical host `consultancy.aorms.in` |
 | `/aorms-consultancy` | Legacy | Redirects to `/#consultancy` |
@@ -53,7 +58,7 @@ Retired hosts **301 → aorms.in** (nginx + client-side fallback in `App.tsx`):
 | --- | --- |
 | `wiki.aorms.in` | `https://aorms.in/wiki` (+ path preserved) |
 | `kbank.aorms.in` | `https://aorms.in/libraries/knowledge-bank-portal` |
-| `external.aorms.in` | `https://aorms.in/access` |
+| `external.aorms.in` | `https://aorms.in/login?tab=portals` (legacy `/access` also redirects here) |
 | `account.aorms.in` | `https://aorms.in/account` |
 | `app.aorms.in` | **301 → `https://studio.aorms.in`** |
 | `www.aorms.in` | **301 → `https://aorms.in`** |

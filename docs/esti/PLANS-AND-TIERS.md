@@ -34,7 +34,7 @@ the hub; unbound desktop still works fully offline for local work.
 |---------|-------|------|
 | **Desktop node** | Packaged app / local stack (`desktop/`) | Firm login · offline grace |
 | **AORMS web** (parity) | Cloud staff SPA | Firm login · ACTIVE licence |
-| **External portals** | `aorms.in/access` (hub published store) | CLIENT / CONSULTANT / CONTRACTOR |
+| **External portals** | `aorms.in/login?tab=portals` (hub published store; legacy `/access` redirects) | CLIENT / CONSULTANT / CONTRACTOR |
 | **Account / licence hub** | `aorms.in/account` | Platform account |
 
 ## Sync scope (Free vs licensed desktop)

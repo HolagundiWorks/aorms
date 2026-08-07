@@ -52,11 +52,12 @@ Docker Compose (`compose.yaml`).
 | --- | --- |
 | `/` · **aorms.in** | Platform landing — operational + design frameworks, EOMS; all path-based pages below |
 | `/wiki` | Four-pillar wiki: HCW-UI · AStudio · AI core · Management |
-| `/access` | Client, consultant, contractor, site portal sign-in |
-| `/account` · `/company-account` | AORMS account & licensing hub |
+| `/login` | **Unified sign-in** — Workspace · Portals · Account (scopes Personal · Company · Licensing) |
+| `/access` | Legacy → `/login?tab=portals` |
+| `/account` · `/company-account` | AORMS account & company hubs (unauth → matching login scope) |
 | **admin.aorms.in** · `/platform-admin` | **HCW License Manager** console (in-tree — `backend/src/licensing-platform/`, `frontend/src/platform-admin/`) |
 | `/libraries/knowledge-bank-portal` | Knowledge Bank portal (EOMS textbook library) |
-| **studio.aorms.in** · `/login` | **AStudio** workspace (architecture) |
+| **studio.aorms.in** · `/login` | **AStudio** workspace (architecture); unified login tabs |
 | **consultancy.aorms.in** · `/aconsulting` | **AConsulting** engineering marketing + product entry |
 | **proc.aorms.in** · `/aproc` · `/pmc` | **AProc** PMC marketing + preview workspace |
 | `/blog` | Platform blog (practice + product notes) |
@@ -331,7 +332,7 @@ GST rates, SAC codes)
 - `clients` — client CRM; `clientLog` — interaction history
 - `leads` — inbound enquiry capture
 - `tenders` — firm **issues** project tenders; `contractorPortal` — invited contractors
- submit sealed lump-sum bids (login at `/access`)
+ submit sealed lump-sum bids (login at `/login?tab=portals`)
 - `projectOffice` — project-level admin data; `phases` — project phase management
 - `proposals` — **unified** proposals: COA fee proposals + scope agreements in one
  `esti_proposal` model (`fees:manage`); includes the Project OS client-approval gate
@@ -503,7 +504,7 @@ Key routes by area:
 | `Alerts.tsx` | Notification/alert center (header bell) |
 | `Portal.tsx` | Client portal — `/` and `/projects/:projectId` |
 | `CollaboratorPortal.tsx` | Consultant portal — `/` and `/projects/:projectId` |
-| `ContractorPortal.tsx` | Contractor portal — invited tenders + sealed lump-sum bids (`CONTRACTOR` login at `/access`) |
+| `ContractorPortal.tsx` | Contractor portal — invited tenders + sealed lump-sum bids (`CONTRACTOR` login at `/login?tab=portals`) |
 | `Company.tsx` | Removed — `/company` redirects to `/company-account` |
 | `Users.tsx` | User management (firm:admin) |
 | `Settings.tsx` | Removed — `/settings` redirects to `/account#settings` |

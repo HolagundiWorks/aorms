@@ -367,7 +367,7 @@ export function Contractors() {
           <Stack spacing={2} sx={{ mt: 1 }}>
             <p>
               Provisions a {AORMS_PORTALS.contractor.label.toLowerCase()} login so this contractor
-              can open invitations and submit sealed bids at /access.
+              can open invitations and submit sealed bids at /login?tab=portals.
             </p>
             <TextField
               id="ct-login-email"

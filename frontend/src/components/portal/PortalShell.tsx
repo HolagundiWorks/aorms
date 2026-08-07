@@ -2,7 +2,9 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { AormsLogo } from "../AormsLogo.js";
+import { MarketingHomeLink } from "../landing/MarketingHomeLink.js";
 import { AORMS_PORTALS } from "../../lib/product-nomenclature.js";
+import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
 import { PortalNeuFrame } from "./PortalNeuFrame.js";
 
 export type PortalNavKey = "account" | "company" | "licensing" | "workspace";
@@ -11,7 +13,12 @@ const NAV: { key: PortalNavKey; label: string; href: string; external?: boolean 
   { key: "account", label: AORMS_PORTALS.account.personal, href: "/account" },
   { key: "company", label: AORMS_PORTALS.account.company, href: "/company-account" },
   { key: "licensing", label: AORMS_PORTALS.account.licensing, href: "/platform-admin" },
-  { key: "workspace", label: AORMS_PORTALS.studio.navLabel, href: `${AORMS_PORTALS.studio.url}/login`, external: true },
+  {
+    key: "workspace",
+    label: AORMS_PORTALS.studio.navLabel,
+    href: `${AORMS_PORTALS.studio.url}/login`,
+    external: true,
+  },
 ];
 
 /**
@@ -50,16 +57,23 @@ export function PortalShell({
         <>
           <Stack
             direction="row"
-            spacing={2}
+            spacing={COMPOSITION_RHYTHM.sm}
             sx={{ alignItems: "center", justifyContent: "space-between", width: "100%", minWidth: 0 }}
           >
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", minWidth: 0 }}>
-              <Button component={RouterLink} to="/" variant="text" sx={{ p: 0, minWidth: 0, flexShrink: 0 }}>
+            <Stack
+              direction="row"
+              spacing={COMPOSITION_RHYTHM.sm}
+              sx={{ alignItems: "center", minWidth: 0 }}
+            >
+              <MarketingHomeLink
+                style={{ display: "inline-flex", alignItems: "center", textDecoration: "none", flexShrink: 0 }}
+              >
                 <AormsLogo variant="rail" />
-              </Button>
+              </MarketingHomeLink>
               <Typography
                 variant="caption"
                 color="text.secondary"
+                className="esti-label esti-label--secondary"
                 sx={{ display: { xs: "none", sm: "block" }, letterSpacing: "0.04em" }}
               >
                 {AORMS_PORTALS.account.hubCaption}
@@ -72,9 +86,9 @@ export function PortalShell({
             component="nav"
             aria-label="Account navigation"
             direction="row"
-            spacing={0.5}
+            spacing={COMPOSITION_RHYTHM.xs}
             useFlexGap
-            sx={{ flexWrap: "wrap", alignItems: "center", width: "100%" }}
+            sx={{ flexWrap: "wrap", alignItems: "center", width: "100%", gap: 0.5 }}
           >
             {links.map((item) => {
               const selected = item.key === active;

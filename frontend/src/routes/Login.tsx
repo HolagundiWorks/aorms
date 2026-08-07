@@ -47,11 +47,19 @@ const PUBLIC_SITE = import.meta.env.VITE_PUBLIC_SITE !== "false";
 const PlatformLogin = lazy(() => import("../platform-admin/Login.js"));
 
 export type LoginTab = "workspace" | "portals" | "account";
+/** Account-tab variants folded into the unified login. */
+export type AccountScope = "personal" | "company" | "licensing";
 
 const LOGIN_TABS: { id: LoginTab; label: string }[] = [
   { id: "workspace", label: "Workspace" },
   { id: "portals", label: "Portals" },
   { id: "account", label: "Account" },
+];
+
+const ACCOUNT_SCOPES: { id: AccountScope; label: string }[] = [
+  { id: "personal", label: "Personal" },
+  { id: "company", label: "Company" },
+  { id: "licensing", label: "Licensing" },
 ];
 
 interface CompanyOption {
@@ -89,11 +97,24 @@ function authProductName(): string {
 
 function parseTab(raw: string | null): LoginTab {
   if (raw === "portals" || raw === "access") return "portals";
-  if (raw === "account") return "account";
+  if (raw === "account" || raw === "licensing" || raw === "company") return "account";
   return "workspace";
 }
 
-function brandCopy(tab: LoginTab, choosing: boolean): { title: string; lead: ReactNode } {
+function parseAccountScope(params: URLSearchParams): AccountScope {
+  const scope = params.get("scope");
+  const tab = params.get("tab");
+  if (scope === "company" || tab === "company") return "company";
+  if (scope === "licensing" || scope === "admin" || tab === "licensing") return "licensing";
+  if (isAdminHost()) return "licensing";
+  return "personal";
+}
+
+function brandCopy(
+  tab: LoginTab,
+  choosing: boolean,
+  scope: AccountScope,
+): { title: string; lead: ReactNode } {
   if (choosing) {
     return {
       title: "Choose where to go",
@@ -107,6 +128,18 @@ function brandCopy(tab: LoginTab, choosing: boolean): { title: string; lead: Rea
     };
   }
   if (tab === "account") {
+    if (scope === "company") {
+      return {
+        title: AORMS_PORTALS.account.company,
+        lead: "Sign in as the company owner to manage profile, members, and licence.",
+      };
+    }
+    if (scope === "licensing") {
+      return {
+        title: AORMS_PORTALS.auth.licensingHeadline,
+        lead: AORMS_PORTALS.auth.licensingSubline,
+      };
+    }
     return {
       title: AORMS_PORTALS.account.stageHeadline,
       lead: AORMS_PORTALS.account.stageSubline,
@@ -119,14 +152,15 @@ function brandCopy(tab: LoginTab, choosing: boolean): { title: string; lead: Rea
 }
 
 /**
- * Unified AORMS sign-in — Workspace · Portals · Account tabs on one page.
- * `/access` redirects here with `?tab=portals`.
+ * Unified AORMS sign-in — Workspace · Portals · Account on one page.
+ * Legacy routes redirect here: `/access` → portals · company/licensing → Account scope.
  */
 export function Login() {
   const navigate = useNavigate();
   const utils = trpc.useUtils();
   const [params, setParams] = useSearchParams();
   const tab = parseTab(params.get("tab"));
+  const accountScope = parseAccountScope(params);
   const wantsCreate = params.get("mode") === "create";
 
   const [email, setEmail] = useState("");
@@ -160,9 +194,26 @@ export function Login() {
         const p = new URLSearchParams(prev);
         if (next === "workspace") p.delete("tab");
         else p.set("tab", next);
-        if (next !== "account") p.delete("mode");
+        if (next !== "account") {
+          p.delete("mode");
+          p.delete("scope");
+        }
         p.delete("google");
         p.delete("google_error");
+        return p;
+      },
+      { replace: true },
+    );
+  }
+
+  function selectAccountScope(scope: AccountScope) {
+    setParams(
+      (prev) => {
+        const p = new URLSearchParams(prev);
+        p.set("tab", "account");
+        if (scope === "personal") p.delete("scope");
+        else p.set("scope", scope);
+        if (scope !== "personal") p.delete("mode");
         return p;
       },
       { replace: true },
@@ -265,18 +316,24 @@ export function Login() {
   const showError = Boolean(activeLogin.error) && activeLogin.error?.message !== "totp_required";
 
   const choosing = Boolean(companies) && tab === "workspace";
-  const copy = brandCopy(tab, choosing);
+  const copy = brandCopy(tab, choosing, accountScope);
   const product =
     tab === "portals"
       ? AORMS_PLATFORM.name
       : tab === "account"
-        ? AORMS_PORTALS.account.name
+        ? accountScope === "licensing"
+          ? HCW_LICENSE_MANAGER.consoleTitle
+          : accountScope === "company"
+            ? AORMS_PORTALS.account.company
+            : AORMS_PORTALS.account.name
         : authProductName();
   const tagline =
     tab === "portals"
       ? AORMS_PORTALS.external.authTagline
       : tab === "account"
-        ? AORMS_PORTALS.account.hubCaption
+        ? accountScope === "licensing"
+          ? AORMS_PORTALS.auth.licensingSubline
+          : AORMS_PORTALS.account.hubCaption
         : AORMS_PLATFORM.expansion;
 
   const tabBar = (
@@ -536,23 +593,54 @@ export function Login() {
         ? destinationPicker
         : tab === "account"
           ? (
-              <Suspense
-                fallback={
-                  <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-                    <CircularProgress size={24} />
-                  </Box>
-                }
-              >
-                <PlatformLogin
-                  portal
-                  embedded
-                  initialMode={wantsCreate ? "register" : "signin"}
-                  onLogin={(_me: Me) => {
-                    window.location.href = "/account";
-                  }}
-                  onBack={() => selectTab("workspace")}
-                />
-              </Suspense>
+              <Stack spacing={COMPOSITION_RHYTHM.sm}>
+                <Stack
+                  direction="row"
+                  spacing={COMPOSITION_RHYTHM.xs}
+                  useFlexGap
+                  sx={{ flexWrap: "wrap", gap: 0.5 }}
+                >
+                  {ACCOUNT_SCOPES.map((s) => (
+                    <Button
+                      key={s.id}
+                      size="small"
+                      variant={accountScope === s.id ? "contained" : "text"}
+                      color={accountScope === s.id ? "primary" : "inherit"}
+                      onClick={() => selectAccountScope(s.id)}
+                      sx={{ textTransform: "none", minHeight: 32, borderRadius: "8px" }}
+                    >
+                      {s.label}
+                    </Button>
+                  ))}
+                </Stack>
+                <Suspense
+                  fallback={
+                    <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                      <CircularProgress size={24} />
+                    </Box>
+                  }
+                >
+                  <PlatformLogin
+                    key={accountScope}
+                    portal={accountScope !== "licensing"}
+                    companyPortal={accountScope === "company"}
+                    embedded
+                    initialMode={
+                      wantsCreate && accountScope === "personal" ? "register" : "signin"
+                    }
+                    onLogin={(_me: Me) => {
+                      if (accountScope === "company") {
+                        window.location.href = "/company-account";
+                      } else if (accountScope === "licensing") {
+                        window.location.href = "/platform-admin";
+                      } else {
+                        window.location.href = "/account";
+                      }
+                    }}
+                    onBack={() => selectTab("workspace")}
+                  />
+                </Suspense>
+              </Stack>
             )
           : workspaceOrPortalForm}
 

@@ -1,9 +1,11 @@
 import CheckCircleOutlined from "@mui/icons-material/CheckCircleOutlined";
 import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
-import { Alert, AlertTitle, Button, Paper, Stack, Typography } from "@mui/material";
+import { Alert, AlertTitle, Button, Stack, Typography } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { WORKSPACE_TYPE_LABEL, type WorkspaceType } from "@esti/contracts";
 import type { Me } from "./lib/auth.js";
+import { PortalCard } from "../components/portal/PortalChrome.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import {
   AORMS_CONSULTANCY,
   AORMS_PMC,
@@ -58,8 +60,8 @@ export function AccountHub({ me }: { me: Me }) {
   const wsLabel = WORKSPACE_TYPE_LABEL[wsType];
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Stack spacing={2}>
+    <PortalCard>
+      <Stack spacing={COMPOSITION_RHYTHM.sm}>
         <Typography variant="h6" component="h2">
           Get started
         </Typography>
@@ -68,7 +70,7 @@ export function AccountHub({ me }: { me: Me }) {
           existing company by its contact email.
         </Typography>
 
-        <Stack spacing={1.5}>
+        <Stack spacing={COMPOSITION_RHYTHM.sm}>
           <Step
             done
             label={AORMS_PORTALS.account.name}
@@ -96,7 +98,7 @@ export function AccountHub({ me }: { me: Me }) {
           />
         </Stack>
 
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+        <Stack direction="row" spacing={COMPOSITION_RHYTHM.xs} sx={{ flexWrap: "wrap", gap: 1 }}>
           {wsType === "CONSULTANCY" ? (
             <Button
               component="a"
@@ -132,6 +134,6 @@ export function AccountHub({ me }: { me: Me }) {
           </Alert>
         )}
       </Stack>
-    </Paper>
+    </PortalCard>
   );
 }

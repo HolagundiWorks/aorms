@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, Navigate } from "react-router-dom";
 import { CompanyAdminPanel } from "../components/company/CompanyAdminPanel.js";
 import { CompanyProfilePanel } from "../components/company/CompanyProfilePanel.js";
 import { PortalLicenceCard } from "../components/portal/PortalLicenceCard.js";
@@ -31,9 +31,9 @@ import {
   type MyLicense,
 } from "../platform-admin/lib/auth.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 
 const Companies = lazy(() => import("../platform-admin/Companies.js"));
-const PlatformLogin = lazy(() => import("../platform-admin/Login.js"));
 const RequestPlan = lazy(() => import("../platform-admin/RequestPlan.js"));
 const Users = lazy(() => import("./Users.js").then((m) => ({ default: m.Users })));
 const AuditLog = lazy(() => import("./AuditLog.js").then((m) => ({ default: m.AuditLog })));
@@ -162,11 +162,7 @@ export function CompanyAccountPortal() {
   }
 
   if (!me?.account) {
-    return (
-      <Suspense fallback={<CircularProgress />}>
-        <PlatformLogin companyPortal portal onLogin={setMe} />
-      </Suspense>
-    );
+    return <Navigate to="/login?tab=account&scope=company" replace />;
   }
 
   if (owned.length === 0) {
@@ -179,9 +175,9 @@ export function CompanyAccountPortal() {
           </Button>
         }
       >
-        <Stack spacing={2}>
+        <Stack spacing={COMPOSITION_RHYTHM.md}>
           <Typography variant="h4" component="h1">
-            Company account
+            {AORMS_PORTALS.account.company}
           </Typography>
           <Alert severity="info">
             <AlertTitle>No company to manage</AlertTitle>
@@ -209,9 +205,9 @@ export function CompanyAccountPortal() {
         </Button>
       }
     >
-      <Stack spacing={3}>
+      <Stack spacing={COMPOSITION_RHYTHM.md}>
         <PortalPageHeader
-          title="Company account"
+          title={AORMS_PORTALS.account.company}
           documentTitle={
             tab === 0
               ? `${AORMS_PORTALS.account.company} — ${AORMS_PORTALS.account.name}`

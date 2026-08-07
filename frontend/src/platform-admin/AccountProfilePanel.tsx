@@ -1,10 +1,11 @@
-import { Alert, Button, Paper, Stack, Typography } from "@mui/material";
-import { portalPaperSx } from "../components/portal/PortalChrome.js";
+import { Alert, Button, Stack, Typography } from "@mui/material";
+import { PortalCard } from "../components/portal/PortalChrome.js";
 import { AccountSignupProfile, greetingGivenName, resolveNamePrefix } from "@esti/contracts";
 import { useState } from "react";
 import type { Account } from "./lib/auth.js";
 import { updateAccountProfile } from "./lib/auth.js";
 import { AccountSignupFields, EMPTY_PROFILE, type ProfileDraft } from "./AccountSignupFields.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 
 function draftFromAccount(account: Account): ProfileDraft {
   if (account.profile) return { ...EMPTY_PROFILE, ...account.profile };
@@ -59,9 +60,9 @@ export function AccountProfilePanel({
 
   if (!editing && p) {
     return (
-      <Paper sx={portalPaperSx}>
-        <Stack spacing={1.5}>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+      <PortalCard>
+        <Stack spacing={COMPOSITION_RHYTHM.sm}>
+          <Stack direction="row" spacing={COMPOSITION_RHYTHM.xs} sx={{ alignItems: "center" }}>
             <Typography variant="h6" component="h4" className="esti-grow">
               Account profile
             </Typography>
@@ -94,13 +95,13 @@ export function AccountProfilePanel({
           )}
           {saved && <Alert severity="success">Profile saved.</Alert>}
         </Stack>
-      </Paper>
+      </PortalCard>
     );
   }
 
   return (
-    <Paper sx={portalPaperSx}>
-      <Stack spacing={2}>
+    <PortalCard>
+      <Stack spacing={COMPOSITION_RHYTHM.sm}>
         <Typography variant="h6" component="h4">
           {p ? "Edit account profile" : "Complete your account profile"}
         </Typography>
@@ -111,7 +112,7 @@ export function AccountProfilePanel({
         )}
         <AccountSignupFields value={draft} onChange={setDraft} />
         {error && <Alert severity="error">{error}</Alert>}
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={COMPOSITION_RHYTHM.xs}>
           <Button variant="contained" disabled={busy} onClick={handleSave}>
             {busy ? "Saving…" : "Save profile"}
           </Button>
@@ -130,6 +131,6 @@ export function AccountProfilePanel({
           )}
         </Stack>
       </Stack>
-    </Paper>
+    </PortalCard>
   );
 }

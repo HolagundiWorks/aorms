@@ -61,7 +61,7 @@ export function Tenders() {
         <Stack gap={4} style={{ marginTop: "0.75rem" }}>
           <p className="cds--type-body-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
             The firm issues tenders. Contractors submit sealed bids via their portal login at
-            /access. Create and manage tenders from a project&apos;s Tenders tab.
+            /login?tab=portals. Create and manage tenders from a project&apos;s Tenders tab.
           </p>
           <DataState
             loading={listQ.isLoading}

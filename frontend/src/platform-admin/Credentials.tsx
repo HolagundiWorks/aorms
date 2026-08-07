@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import { StatusDot } from "../components/StatusTag.js";
+import { PortalCard } from "../components/portal/PortalChrome.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import { type Credentials as Creds, fetchCredentials } from "./lib/auth";
 
 function fmt(d: string | null): string {
@@ -17,9 +19,11 @@ export default function Credentials() {
   }, []);
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Stack spacing={2}>
-        <Typography variant="h6" component="h3">My credentials</Typography>
+    <PortalCard>
+      <Stack spacing={COMPOSITION_RHYTHM.sm}>
+        <Typography variant="h6" component="h3">
+          My credentials
+        </Typography>
         <Typography variant="body2">
           Certifications and growth stay on you (AORMS-U) and follow you across companies.
         </Typography>
@@ -52,13 +56,13 @@ export default function Credentials() {
         )}
 
         {creds.growth.length > 0 && (
-          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+          <Stack direction="row" spacing={COMPOSITION_RHYTHM.xs} sx={{ flexWrap: "wrap", gap: 1 }}>
             {creds.growth.slice(0, 12).map((g) => (
               <StatusDot key={g.id} color="cool-gray" label={`${g.kind} · ${fmt(g.at)}`} />
             ))}
           </Stack>
         )}
       </Stack>
-    </Paper>
+    </PortalCard>
   );
 }

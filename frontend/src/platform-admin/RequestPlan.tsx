@@ -1,6 +1,8 @@
-import { Alert, AlertTitle, Paper, Stack, Typography } from "@mui/material";
+import { Alert, AlertTitle, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { type PlanRequest, fetchMyRequest } from "./lib/auth";
+import { PortalCard } from "../components/portal/PortalChrome.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import { AORMS_PORTALS, AORMS_STUDIO } from "../lib/product-nomenclature.js";
 
 /** Licence status for the linked platform account — one standard product. */
@@ -15,8 +17,8 @@ export default function RequestPlan() {
   const pending = req?.status === "PENDING";
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Stack spacing={2}>
+    <PortalCard>
+      <Stack spacing={COMPOSITION_RHYTHM.sm}>
         <Typography variant="subtitle1" component="h3" className="esti-label">
           Your licence
         </Typography>
@@ -41,6 +43,6 @@ export default function RequestPlan() {
           </Typography>
         )}
       </Stack>
-    </Paper>
+    </PortalCard>
   );
 }

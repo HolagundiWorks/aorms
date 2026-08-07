@@ -72,6 +72,6 @@ export const AUTH_PAGE_SEO = {
     title: "External portal sign-in — AORMS",
     description:
       `Sign in to your client, consultant, contractor, or site portal. Office staff use ${AORMS_STUDIO.title} at /login.`,
-    path: "/access",
+    path: "/login?tab=portals",
   },
 } as const;
