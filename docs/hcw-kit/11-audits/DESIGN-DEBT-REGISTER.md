@@ -1,4 +1,15 @@
-﻿**2026-08-07 — Unified login + account hub.** `/login` is the single sign-in card
+﻿**2026-08-07 — Desktop-native SaaS pivot (D0–D4).** Staff ERP → desktop apps
+forked from AQC (WinUI + C++ engine). `aorms.in` marketing/demos only. Firm
+portal shell: Updates · Project · Progress · Drawings · Documents.
+[PORTAL-SYNC-BRIDGE.md](../../esti/PORTAL-SYNC-BRIDGE.md). **Open source for now** —
+SaaS commercial licensing deferred. Repos: AStudio · AConsulting · AQC PR #4.
+
+**2026-08-07 — Wave 8 plain Studio Intelligence.** Removed `StudioBreath`
+animated topographic contour field from `/` — stage is plain Fog Gray only
+(brief strip Soft Surface kept as content chrome). Deleted
+`StudioBreath.tsx` + `.esti-si-breath` / `esti-si-breathe` CSS.
+
+**2026-08-07 — Unified login + account hub.** `/login` is the single sign-in card
 (Workspace · Portals · Account; Account scopes Personal · Company · Licensing).
 `/access`, unauthenticated `/account` / `/company-account` / `/platform-admin` redirect
 into matching tabs. Account hubs use soft `PortalCard` panels. Canon:

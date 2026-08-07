@@ -8,7 +8,7 @@ const PLATFORM_LINKS = [
   { href: "/", label: "Home" },
   { href: "/blog", label: "Blog" },
   { href: "/downloads", label: "Downloads" },
-  { href: "/login", label: "Sign in" },
+  { href: "/login", label: "Demo sign-in" },
   { href: "mailto:hi@aorms.in", label: "hi@aorms.in" },
 ] as const;
 

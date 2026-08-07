@@ -1,7 +1,7 @@
 /**
- * Frozen AORMS surface URLs — canonical host map (revised 2026-07-25).
- * Subdomains: admin · studio · consultancy · proc. Everything else is a path
- * on **aorms.in**. Docs: docs/esti/AORMS-SURFACE-URLS.md
+ * Frozen AORMS surface URLs — revised 2026-08-07 (desktop-native pivot).
+ * `aorms.in` = marketing + demos. Staff ERP = desktop apps. Firm portals =
+ * client/partner web. Docs: docs/esti/AORMS-SURFACE-URLS.md
  */
 export const AORMS_DOMAIN = "aorms.in" as const;
 
@@ -16,7 +16,7 @@ export const AORMS_PLATFORM_PAGES = {
     path: "/libraries/knowledge-bank-portal",
     label: "Knowledge Bank portal",
   },
-  studioLogin: { path: "/login", label: "AStudio sign-in" },
+  studioLogin: { path: "/login", label: "Demo sign-in (not firm ERP)" },
   /** Path alias on apex; canonical marketing host is consultancy.aorms.in. */
   consultancyMarketing: { path: "/aconsulting", label: "AConsulting" },
   /** Legacy path — redirects to /aconsulting. */
@@ -42,7 +42,7 @@ export const AORMS_SURFACES = {
     host: `https://${AORMS_DOMAIN}`,
     hostnames: [AORMS_DOMAIN, `www.${AORMS_DOMAIN}`] as const,
   },
-  /** AStudio staff workspace (architecture app). */
+  /** AStudio marketing host (staff app is desktop). */
   studio: {
     id: "studio",
     label: "AStudio",
@@ -51,7 +51,7 @@ export const AORMS_SURFACES = {
     legacyRedirectFrom: [`app.${AORMS_DOMAIN}`] as const,
     loginPath: AORMS_PLATFORM_PAGES.studioLogin.path,
   },
-  /** AConsulting marketing + engineering workspace. */
+  /** AConsulting marketing host (staff app is desktop). */
   consultancy: {
     id: "consultancy",
     label: "AConsulting",
@@ -59,7 +59,7 @@ export const AORMS_SURFACES = {
     hostnames: [`consultancy.${AORMS_DOMAIN}`] as const,
     marketingPath: AORMS_PLATFORM_PAGES.consultancyMarketing.path,
   },
-  /** AProc — Accelerated Project Management (PMC) workspace. */
+  /** AQC / AProc marketing host. */
   pmc: {
     id: "pmc",
     label: "AProc",

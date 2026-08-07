@@ -8,8 +8,9 @@ import { z } from "zod";
  * - **Metadata** — compact shared fields (tasks, status, cost scalars, progress); realtime via hub event log
  * - **Artifacts** — finalized docs/PDFs; Phase B outbox → hub ingest only on explicit finalize
  *
- * A **node** (desktop or office install) holds the working store; the **hub** is the
- * realtime metadata authority and the published-artifact store for portals + web parity.
+ * A **node** (native desktop app) holds the working store; the **hub** is the
+ * realtime metadata authority and the published-artifact store for firm portals.
+ * Staff web parity SPA is retired as a product surface (desktop-native pivot).
  */
 
 // ─── Planes & classification ─────────────────────────────────────────────────

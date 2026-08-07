@@ -1,134 +1,105 @@
 # AORMS local-first desktop + cloud hub
 
-> **Canonical implementation doc** for the dual-runtime product.  
-> **Status (2026-08-07):** LF0–LF6 ✅ — [ROADMAP.md](ROADMAP.md) closed.  
-> Production SmartScreen / public installer URL = **ops** ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)).
+> **Canonical runtime law** · **Updated:** 2026-08-07 (desktop-native SaaS pivot)  
+> Wire: [HUB-API.md](HUB-API.md) · Bridge: [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) ·  
+> Repos: [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · Licence: [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md)
 
-> Wire contract: [HUB-API.md](HUB-API.md) (`2026-08`) · contracts gate:
-> [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · crew: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md).  
-> **Product law:** [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) · **UX parity:**
-> [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) · **Identity:**
-> [AORMS-IDENTITY.md](AORMS-IDENTITY.md) §10.
+**Staff product is desktop-only.** AStudio and AConsulting ship as native Windows
+apps forked from [AQC](https://github.com/HolagundiWorks/AQC) (WinUI 3 + C++
+`bbs_engine`). **AProc = AQC.** Work, calculations, and AI stay on the machine.
+The cloud hub holds **metadata · progress · numbers · final docs/drawings** for
+**firm-branded portals**. `aorms.in` is **marketing + demos only** — no firm ERP
+logins on the apex.
 
-This document supersedes the 2026-07-19 **web-only** product law for runtime
-shape. Estimating remains **in-product** (no separate Estimate desktop app).
-Legacy Community / Manager installers stay retired.
+The esti monorepo staff SPA is a **reference archive** for IA/domain — not the
+shipping staff UI. [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) is
+**historical**.
+
+**Licensing:** products stay **open source** for now (AQC AGPL community lineage).
+**SaaS commercial licensing is deferred** — figure out later; do not block
+engineering on SKUs.
 
 ## Decisions (locked)
 
 | # | Choice |
 | --- | --- |
-| Firm sync | **Cloud hub** is the realtime metadata authority — every desktop is a peer (no LAN firm-server) |
-| Online surface | **Full web parity** — same SPA on desktop (preferred / offline) and browser (degraded local AI/worker) |
-| Design system | **`@hcw/ui-kit` only** — one chrome on both hosts ([DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md)) |
+| Staff runtime | **Native desktop only** (WinUI 3 + C++ engine) — no browser staff ERP |
+| Engine SoT | **C++** `bbs_engine` (JSON C API) — every number from the deterministic engine |
+| UI shell | **C# WinUI 3** (same stack as AQC) — do not discard AQC’s tested UI for a pure-C++ rewrite |
+| Firm sync | **Cloud hub** is metadata + published-artifact authority (no LAN firm-server) |
+| Online surface | **Firm-branded portals** (updates · progress · drawings · finals) + marketing/demos + License Manager |
+| Design system (web) | **`@hcw/ui-kit`** on marketing + portals |
+| Open source | **Keep OSS for now** — SaaS commercial licensing later |
 
 ## Three planes
 
-| Plane | Moves | Transport |
+| Plane | Lives where | Examples |
 | --- | --- | --- |
-| **Work / localOnly** | Drafts, BOQ lines, measurements, AI chats | Stay on the node until promote |
-| **Metadata** | Tasks, status, cost scalars, progress % | Hub `esti_meta_event` + WS `/api/sync/meta/ws` |
-| **Artifacts** | Issued PDFs, READY drawings, etc. | `esti_sync_outbox` → `POST /api/sync/ingest` |
+| **Work / localOnly** | Desktop SQLite (local DB) | Drafts, BOQ lines, measurements, AI chats, scratch drawings |
+| **Calculations** | C++ engine on desktop | BBS, quantities, estimate rollups — never recomputed in cloud |
+| **Metadata** | Hub `esti_meta_event` | Tasks, status, cost scalars, progress % |
+| **Artifacts** | Hub `esti_sync_record` + object store | READY drawings, issued PDFs, certified finals |
 
-Classification + field maps: [`packages/contracts/src/sync.ts`](../../packages/contracts/src/sync.ts).
+Classification: [`packages/contracts/src/sync.ts`](../../packages/contracts/src/sync.ts).  
+Connector design: [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md).
 
 ```mermaid
 flowchart LR
-  subgraph node [Desktop_or_node]
+  subgraph desktop [Desktop_AStudio_AConsulting_AQC]
     Work[localOnly_work]
+    Engine[cpp_bbs_engine]
     MetaQ[meta_outbox]
-    ArtQ[sync_outbox]
+    ArtQ[artifact_outbox]
   end
   subgraph hub [Cloud_hub]
     MetaLog[esti_meta_event]
     ArtStore[esti_sync_record]
-    Portals[external_portals]
-    WebSPA[staff_web_SPA]
+    Portals[firm_branded_portals]
   end
+  Engine --> Work
   MetaQ -->|POST_/api/sync/meta| MetaLog
   ArtQ -->|POST_/api/sync/ingest| ArtStore
-  MetaLog -->|WS_catch-up| node
+  MetaLog --> Portals
   ArtStore --> Portals
-  MetaLog --> WebSPA
 ```
 
 ## Runtimes
 
-| Runtime | Role | Key env |
-| --- | --- | --- |
-| **Desktop node** | Preferred authoring path | `ESTI_ROLE=node`, `ESTI_DESKTOP=true`, `STORAGE_DRIVER=fs`, `INSTALL_ID`, local Ollama/EOMS |
-| **Cloud hub** | Metadata SoT + published artifacts + portals + web SPA | `ESTI_ROLE=hub`, S3, licensing platform |
-| **Web staff SPA** | Parity path (same SPA, hub API) | Browser → hub; AI/worker on hub (Hosted AI, unmetered) |
-
-Packaging stub: [`desktop/`](../../desktop/) · env: `desktop/env.desktop.example`.
+| Runtime | Role |
+| --- | --- |
+| **AStudio / AConsulting / AQC desktop** | Authoring · calc · AI · local DB · `aorms_bridge` push |
+| **Cloud hub** | Licence activate → `syncToken` · meta log · artifact store · firm portals |
+| **`aorms.in`** | Marketing · wiki · blog · demos · downloads CTAs |
+| **`admin.aorms.in`** | HCW License Manager |
+| **Firm portal host** | Client / consultant / contractor / site — published data only |
+| **esti staff SPA** | Reference only (not product) |
 
 ## Licence / sync scope
 
-| Mode | Local AI / worker | Metadata sync | Artifact push |
+| Mode | Local AI / calc | Metadata sync | Artifact push |
 | --- | --- | --- | --- |
-| Free / unbound desktop | Yes | No | No |
-| Licensed desktop (`VALID`/`GRACE` + hub + syncToken) | Yes | Yes | Yes |
-| Web parity | Hub (Hosted AI) | Yes | Server-side |
+| Unbound desktop | Yes | No | No |
+| Licensed desktop (`ACTIVE`/`GRACE` + hub + syncToken) | Yes | Yes | Yes |
+| Firm portal (web) | N/A | Read hub meta | Read published artifacts |
 
-Runtime resolution: `trpc.sync.capabilities` ·
-[`backend/src/lib/sync/runtimeCapabilities.ts`](../../backend/src/lib/sync/runtimeCapabilities.ts)
-(server) · [`frontend/src/lib/runtimeCapabilities.ts`](../../frontend/src/lib/runtimeCapabilities.ts)
-(SPA badges / host). Desktop sync caps require licence + hub URL + `syncToken`.
+## Sibling repos
 
-## Implementation waves
-
-| Wave | Focus | Status |
-| --- | --- | --- |
-| **LF0** | Contracts: planes, `MetaEntity`, field maps, capability presets, tests | ✅ |
-| **LF1** | Hub `esti_meta_event` + catch-up REST + WS; node meta outbox/cursor; drain tick | ✅ |
-| **LF2** | Artifact content-hash; publish DTOs (tender/RA/siteReference/progressReport); portal-from-hub reads | ✅ |
-| **LF3** | Domain enqueue of metadata (tasks, estimate totals, phase progress) + apply hooks on pull | ✅ Gagan 2026-08 |
-| **LF4** | WinUI 3 shell + WebView2 SPA (STUDIO\|CONSULTANCY); first-run licence / hub bind | ✅ — local `0227` · ACO dev-sign · bind + `pullMeta` · `ESTI_COLOCATED_HUB`; Tauri removed (#64). Prod SmartScreen/URL → [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) |
-| **LF5** | Web parity polish: capability badges, degraded AI UX, shared keymap / Help | ✅ Aakash — `CapabilityBadge` · `frontend/src/lib/keymap.ts` · `/help` · `resolveRuntimeCapabilities` web-parity fix |
-| **LF6** | UX parity checklist + inspector/AI right-slot; Figma token sync to kit | ✅ Aakash — [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) stub ✅ · right-slot ✅ (`RightSlot`) |
-
-**Migrations:** `0226_local_first_sync.sql` · `0227_hlp_org_sync_firm.sql` (panel sync firm UUID).
-
-## Key APIs & modules
-
-| Surface | Path |
+| Repo | Product |
 | --- | --- |
-| Wire contract | [HUB-API.md](HUB-API.md) (`2026-08`) |
-| Artifact ingest | `POST /api/sync/ingest` — [`routes.ts`](../../backend/src/modules/sync/routes.ts) |
-| Meta append / catch-up / WS | `/api/sync/meta*` — same |
-| Node tRPC | `sync.status` · `flush` · `enqueueMeta` · `pullMeta` · `capabilities` · `hubConfigured` |
-| Panel activate → sync bearer | `/platform/v1/activate` · `license.activate` ([HUB-API.md](HUB-API.md)) |
-| Capability resolution | [`backend/src/lib/sync/runtimeCapabilities.ts`](../../backend/src/lib/sync/runtimeCapabilities.ts) |
-| Meta lib | [`backend/src/lib/sync/metadata.ts`](../../backend/src/lib/sync/metadata.ts) |
-| LF3 domain enqueue/apply | [`backend/src/lib/sync/domainMeta.ts`](../../backend/src/lib/sync/domainMeta.ts) |
-| Artifact outbox | [`backend/src/lib/sync/outbox.ts`](../../backend/src/lib/sync/outbox.ts) |
-| Publish DTOs | [`backend/src/lib/sync/publish.ts`](../../backend/src/lib/sync/publish.ts) |
-| Hub portal reads | [`backend/src/lib/sync/hubPortal.ts`](../../backend/src/lib/sync/hubPortal.ts) |
-| Sync queue chrome | [`SyncQueueChip.tsx`](../../frontend/src/components/SyncQueueChip.tsx) |
+| [HolagundiWorks/AQC](https://github.com/HolagundiWorks/AQC) | AProc — quantity / costing / BBS (engine source) |
+| `HolagundiWorks/AStudio` | Architecture practice OS (fork AQC) |
+| `HolagundiWorks/AConsulting` | Engineering practice OS (fork AQC) |
 
-## Conflict policy
+Agent scaffolds: [`docs/esti/repo-scaffolds/`](repo-scaffolds/).
 
-- Task/status-like fields: **LWW per field** (`updatedAt` + actor)
-- Derived money / progress scalars: **server seq wins** (`conflict: "serverSeq"`)
+## Historical LF waves (esti WebView2 era)
 
-## What must not sync
-
-- AI transcripts / model weights
-- Measurement scratch / nested estimate lines (until finalize)
-- Draft drawings and unissued PDFs
-
-## Operator notes
-
-- Empty `ESTI_HUB_URL` = offline-only node (no meta/artifact push).
-- Single-box smoke (`ESTI_HUB_URL` → same process): set `ESTI_COLOCATED_HUB=true` so `/api/sync/*` mounts on a `node` role (compose passes the env through).
-- Hub portals prefer `esti_sync_record` when `ESTI_ROLE=hub`; nodes keep live-table reads.
-- File mirror on ingest is best-effort when node and hub share object keys; content-hash skips unchanged bytes.
+LF0–LF6 in this monorepo remain **engineering history** (contracts, hub sync,
+WinUI+WebView2 bind). Shipping path moves to **AQC-lineage native apps** +
+[PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md). See [ROADMAP.md](ROADMAP.md) § D-waves.
 
 ## Related
 
-- [HUB-API.md](HUB-API.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)  
-- [ROADMAP.md](ROADMAP.md) § Local-first  
-- [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md)  
-- [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md)  
-- [AORMS-IDENTITY.md](AORMS-IDENTITY.md) §10  
-- [ARCHITECTURE.md](ARCHITECTURE.md)  
+- [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · [HUB-API.md](HUB-API.md)  
+- [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md)  
+- [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) · [ROADMAP.md](ROADMAP.md)  

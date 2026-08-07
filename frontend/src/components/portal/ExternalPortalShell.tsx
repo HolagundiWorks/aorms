@@ -1,69 +1,46 @@
-import LogoutIcon from "@mui/icons-material/Logout";
-import { Button, Stack, Typography } from "@mui/material";
-import type { ReactNode } from "react";
-import { PortalNeuFrame } from "./PortalNeuFrame.js";
+import { useState, type ReactNode } from "react";
+import {
+  FirmPortalShell,
+  type FirmPortalSection,
+} from "./FirmPortalShell.js";
 
 /**
- * Client / consultant / contractor / site portals — no-rail soft neu frame.
- * Identity + sign-out in the top bar; stage scrolls below. No ActionDock.
+ * Client / consultant / contractor / site portals — firm-branded soft neu shell.
+ * Section nav: Updates · Project · Progress · Drawings · Documents.
+ * No ActionDock. Canon: docs/esti/PORTAL-SYNC-BRIDGE.md
  */
 export function ExternalPortalShell({
   companyName,
   portalLabel,
   onSignOut,
   signingOut,
+  section: sectionProp,
+  onSectionChange,
   children,
 }: {
   companyName?: string;
   portalLabel: string;
   onSignOut?: () => void;
   signingOut?: boolean;
+  /** Controlled section; defaults to internal Updates state. */
+  section?: FirmPortalSection;
+  onSectionChange?: (section: FirmPortalSection) => void;
   children: ReactNode;
 }) {
+  const [internalSection, setInternalSection] = useState<FirmPortalSection>("updates");
+  const section = sectionProp ?? internalSection;
+  const setSection = onSectionChange ?? setInternalSection;
+
   return (
-    <PortalNeuFrame
-      topBar={
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "100%",
-            minWidth: 0,
-            minHeight: 40,
-          }}
-        >
-          <Stack spacing={0.25} sx={{ minWidth: 0 }}>
-            <Typography variant="overline" color="text.secondary" sx={{ lineHeight: 1.2 }}>
-              {portalLabel}
-            </Typography>
-            <Typography
-              variant="subtitle1"
-              component="p"
-              sx={{ m: 0, fontWeight: 700, wordBreak: "break-word" }}
-            >
-              {companyName ?? portalLabel}
-            </Typography>
-          </Stack>
-          {onSignOut ? (
-            <Button
-              variant="outlined"
-              color="inherit"
-              startIcon={<LogoutIcon />}
-              disabled={signingOut}
-              onClick={() => {
-                if (!signingOut) onSignOut();
-              }}
-              sx={{ flexShrink: 0, minHeight: 40, borderRadius: "8px" }}
-            >
-              Sign out
-            </Button>
-          ) : null}
-        </Stack>
-      }
+    <FirmPortalShell
+      companyName={companyName}
+      portalLabel={portalLabel}
+      onSignOut={onSignOut}
+      signingOut={signingOut}
+      section={section}
+      onSectionChange={setSection}
     >
       {children}
-    </PortalNeuFrame>
+    </FirmPortalShell>
   );
 }

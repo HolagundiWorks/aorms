@@ -1,33 +1,38 @@
 # AStudio
 
-**Accelerated Studio** — architecture consultancy workspace on the AORMS platform.
+**Accelerated Studio** — architecture consultancy OS on the AORMS platform.
 
-> **Scaffold only.** This empty repository is a future home for packaging /
-> release metadata. **Do not** treat it as the application source of truth.
+Native **Windows** desktop app. Fork lineage: [HolagundiWorks/AQC](https://github.com/HolagundiWorks/AQC)
+(WinUI 3 + C++ `bbs_engine`). Work, calculations, and AI run **locally**. Metadata,
+progress, and final documents/drawings push to the AORMS hub for **firm-branded
+portals**.
 
-## Source of truth (today)
+> **Open source for now.** SaaS commercial licensing deferred.
 
-| Concern | Location |
-| --- | --- |
-| Product SPA + backend | Monorepo [`HolagundiWorks/esti`](https://github.com/HolagundiWorks/esti) |
-| Desktop node stub | `esti/desktop/` |
-| Public downloads portal | `https://aorms.in/downloads` |
-| Naming | `esti/docs/esti/AORMS-PLATFORM-NOMENCLATURE.md` |
-| Local-first law | `esti/docs/esti/LOCAL-FIRST.md` |
+## Agent entry
 
-## App identity
+Read **[AGENTS.md](AGENTS.md)** before coding. Architecture:
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Identity
 
 | | |
 | --- | --- |
 | Title | AStudio |
 | Expansion | Accelerated Studio |
 | Slug | `astudio` |
-| Workspace host | `https://studio.aorms.in` |
-| Installer manifest | `esti/frontend/public/update-manifests/astudio.json` |
+| Marketing host | `https://studio.aorms.in` |
+| Hub / contracts | [esti](https://github.com/HolagundiWorks/esti) · [PORTAL-SYNC-BRIDGE](https://github.com/HolagundiWorks/esti/blob/main/docs/esti/PORTAL-SYNC-BRIDGE.md) |
 
-## Policy
+## Source of truth
 
-- No app code move until the sibling-repo / contracts gate is green (Vish/Gagan).  
+| Concern | Location |
+| --- | --- |
+| C++ engine / BBS / estimate | AQC `bbs_engine` (pin commit — do not reimplement in TS) |
+| Hub sync API | esti `HUB-API` + `PORTAL-SYNC-BRIDGE` |
+| Domain IA (reference) | esti `docs/esti/NAVIGATION.md` |
+| This app UI + local DB | **this repository** |
 
-- Shared types stay in `@esti/contracts` inside the monorepo — do not invent a second contracts package here.  
-- Signed installers are published by Local packaging; the web portal wires URL + sha256 only after signing.
+## Build (target)
+
+Same as AQC: CMake + MSVC for `bbs_engine`, .NET 8 WinUI 3 for the shell. See AQC README.

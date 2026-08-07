@@ -126,7 +126,7 @@ Expanded table + fail cues: [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) § Operat
 
 ## Related
 
-- [LOCAL-FIRST.md](LOCAL-FIRST.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [HCW-LICENSE-MANAGER.md](HCW-LICENSE-MANAGER.md)  
+- [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [HCW-LICENSE-MANAGER.md](HCW-LICENSE-MANAGER.md)  
 - [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) — operator checklist including `0227`  
 - Contracts: `packages/contracts` · consumer notes: `packages/contracts/README.md`  
 - Crew: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)

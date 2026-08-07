@@ -291,38 +291,38 @@ export function Landing() {
                   color="text.secondary"
                   sx={{ mt: MARKETING_RHYTHM.md, mb: MARKETING_RHYTHM.lg, maxWidth: 520, lineHeight: 1.55 }}
                 >
-                  {AORMS_PLATFORM.tagline}. Desktop-first with web parity — trusted local AI on Fog Gray,
-                  Radiant Orange only where action matters.
+                  {AORMS_PLATFORM.tagline}. Desktop apps for practice work — firm portals for
+                  clients. Marketing and demos live here.
                 </Typography>
-                {/* Von Restorff: one contained orange CTA; secondary stay quiet */}
+                {/* Primary CTA: desktop installers — apex is not firm ERP login */}
                 <Stack direction="row" spacing={MARKETING_RHYTHM.sm} sx={{ flexWrap: "wrap", gap: MARKETING_RHYTHM.sm }}>
                   <Button
                     component={RouterLink}
-                    to="/login"
+                    to="/downloads"
                     variant="contained"
                     color="primary"
                     endIcon={<ArrowForward />}
                     sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 48, px: 3 }}
                   >
-                    Sign in
+                    Get desktop apps
                   </Button>
                   <Button
                     component={RouterLink}
-                    to="/account?mode=create"
+                    to="/wiki"
                     variant="outlined"
                     color="inherit"
                     sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
                   >
-                    Create account
+                    Wiki &amp; demos
                   </Button>
                   <Button
                     component={RouterLink}
-                    to="/downloads"
+                    to="/login"
                     variant="text"
                     color="inherit"
                     sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
                   >
-                    Desktop installers
+                    Demo sign-in
                   </Button>
                 </Stack>
                 <Stack
@@ -595,7 +595,7 @@ export function Landing() {
                   Local &amp; unmetered
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
-                  {ESTI.name} on your desktop node and on the hub for web — no per-token billing, no bring-your-own key.
+                  {ESTI.name} runs on the desktop — local and unmetered. No per-token billing.
                 </Typography>
               </SoftSurface>
             </Grid>
@@ -608,7 +608,7 @@ export function Landing() {
               Bring the practice onto one system.
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.md, maxWidth: 520, mx: "auto" }}>
-              Sign in to {AORMS_STUDIO.title} or {AORMS_CONSULTANCY.title} — same platform, discipline-fit workspace.
+              Install {AORMS_STUDIO.title} or {AORMS_CONSULTANCY.title} on the desktop — clients meet you on the firm portal.
             </Typography>
             <Stack
               direction={{ xs: "column", sm: "row" }}
@@ -617,14 +617,14 @@ export function Landing() {
             >
               <Button
                 component={RouterLink}
-                to="/login"
+                to="/downloads"
                 variant="contained"
                 color="primary"
                 size="large"
                 endIcon={<ArrowForward />}
                 sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 48 }}
               >
-                {AORMS_STUDIO.title}
+                Get desktop apps
               </Button>
               <Button
                 component="a"

@@ -1,11 +1,16 @@
 # AORMS platform nomenclature
 
-**Status:** Canonical · **Owner:** Human Centric Works (HCW) · **Updated:** 2026-07-25
+**Status:** Canonical · **Owner:** Human Centric Works (HCW) · **Updated:** 2026-08-07
 
 This document is the **single source of truth for product naming**. Where an older doc still says
 *Architecture Office Resource Management System*, **AORMS-Architecture**, **HiveD**,
 **AORMS-Studio**, or **AORMS-Consultancy** as the *primary* display name, treat those as
 **superseded** (legacy redirects / transitional copy) unless the doc is explicitly marked historical.
+
+**Runtime (2026-08):** **AStudio** and **AConsulting** ship as **native desktop** apps
+(fork [AQC](https://github.com/HolagundiWorks/AQC)). **AProc = AQC**. `aorms.in` is
+marketing + demos. Firm clients use firm-branded portals. Open source for now;
+SaaS commercial licensing deferred — [LOCAL-FIRST.md](LOCAL-FIRST.md).
 
 Executable constants: `frontend/src/lib/product-nomenclature.ts`.
 
@@ -34,9 +39,9 @@ exactly **three apps**:
 
 | Discipline | App name | Expansion | Slug | Host | Status |
 | --- | --- | --- | --- | --- | --- |
-| Architecture | **AStudio** | Accelerated Studio | `astudio` | `studio.aorms.in` | **Live** (this repo) |
-| Engineering | **AConsulting** | Accelerated Consulting | `aconsulting` | `consultancy.aorms.in` | **Live** |
-| Project management | **AProc** | Accelerated Project Management | `aproc` | `proc.aorms.in` | **Preview** |
+| Architecture | **AStudio** | Accelerated Studio | `astudio` | `studio.aorms.in` (marketing) | **Desktop** — fork AQC |
+| Engineering | **AConsulting** | Accelerated Consulting | `aconsulting` | `consultancy.aorms.in` (marketing) | **Desktop** — fork AQC |
+| Project management / Q+C | **AQC** (*AProc*) | Accelerated Quantity and Costing | `aproc` / `aqc` | `proc.aorms.in` (marketing) | **Desktop** — [AQC](https://github.com/HolagundiWorks/AQC) |
 
 Legacy marketing names / slugs redirect:
 

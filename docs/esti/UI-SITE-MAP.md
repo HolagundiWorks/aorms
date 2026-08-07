@@ -1,6 +1,6 @@
 # AORMS — UI site map (chrome by surface)
 
-**Status:** Canonical inventory · **Updated:** 2026-08-07 · **Wave 1–7 chrome + unified login:** closed  
+**Status:** Canonical inventory · **Updated:** 2026-08-07 · **Wave 1–8 chrome:** closed  
 **Canon:** [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) · [HCW-UI-KIT.md](HCW-UI-KIT.md) · [HCW-UX.md](../HCW-UX.md) · [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md)
 
 One language everywhere: **no left rail · soft neu top bar · Fog Gray canvas · 8px radius · one clock · dock only where staff**.
@@ -72,6 +72,10 @@ form body scrolls inside the fixed-height card.
 **Wave 6** — `AormsMark` in AppRibbon · de-Carbon shared widgets · ProjectDetail odd groups  
 
 **Wave 7** — Unified `/login` tabs (Workspace · Portals · Account + scopes) · account hub `PortalCard` soft panels · denser building entourage  
+
+**Wave 8** — Plain Studio Intelligence stage — remove `StudioBreath` contour ambient; Fog Gray canvas only  
+
+**Wave D4** — Firm portal shell (`FirmPortalShell`: Updates · Project · Progress · Drawings · Documents) · marketing apex CTAs → downloads / demos (not firm ERP login)
 
 ## Deferred (optional)
 
