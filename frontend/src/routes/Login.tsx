@@ -9,11 +9,13 @@ import {
   Divider,
   MenuItem,
   Stack,
+  Tab,
+  Tabs,
   Typography,
 } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
-import { login as platformLogin } from "../platform-admin/lib/auth.js";
+import { login as platformLogin, type Me } from "../platform-admin/lib/auth.js";
 import { trpc } from "../lib/trpc.js";
 import {
   AORMS_CONSULTANCY,
@@ -42,6 +44,15 @@ import {
 } from "../lib/aorms-surface-urls.js";
 
 const PUBLIC_SITE = import.meta.env.VITE_PUBLIC_SITE !== "false";
+const PlatformLogin = lazy(() => import("../platform-admin/Login.js"));
+
+export type LoginTab = "workspace" | "portals" | "account";
+
+const LOGIN_TABS: { id: LoginTab; label: string }[] = [
+  { id: "workspace", label: "Workspace" },
+  { id: "portals", label: "Portals" },
+  { id: "account", label: "Account" },
+];
 
 interface CompanyOption {
   publicId: string | null;
@@ -76,14 +87,47 @@ function authProductName(): string {
   return AORMS_PLATFORM.name;
 }
 
+function parseTab(raw: string | null): LoginTab {
+  if (raw === "portals" || raw === "access") return "portals";
+  if (raw === "account") return "account";
+  return "workspace";
+}
+
+function brandCopy(tab: LoginTab, choosing: boolean): { title: string; lead: ReactNode } {
+  if (choosing) {
+    return {
+      title: "Choose where to go",
+      lead: "Open your workspace, manage your account, or review your company.",
+    };
+  }
+  if (tab === "portals") {
+    return {
+      title: AORMS_PORTALS.external.stageHeadline,
+      lead: AORMS_PORTALS.external.signInIntro,
+    };
+  }
+  if (tab === "account") {
+    return {
+      title: AORMS_PORTALS.account.stageHeadline,
+      lead: AORMS_PORTALS.account.stageSubline,
+    };
+  }
+  return {
+    title: "Sign in",
+    lead: `One AORMS sign-in for ${AORMS_STUDIO.title}, ${AORMS_CONSULTANCY.title}, ${AORMS_PMC.title}, portals, and licensing.`,
+  };
+}
+
 /**
- * AStudio staff sign-in — horizontal brand | form card.
- * Canon: COMPOSITION-PRINCIPLES · AuthRailLayout soft card.
+ * Unified AORMS sign-in — Workspace · Portals · Account tabs on one page.
+ * `/access` redirects here with `?tab=portals`.
  */
 export function Login() {
   const navigate = useNavigate();
   const utils = trpc.useUtils();
   const [params, setParams] = useSearchParams();
+  const tab = parseTab(params.get("tab"));
+  const wantsCreate = params.get("mode") === "create";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -98,16 +142,51 @@ export function Login() {
   );
 
   useEffect(() => {
-    if (PUBLIC_SITE) applyPublicPageSeo(AUTH_PAGE_SEO.login);
-  }, []);
+    if (PUBLIC_SITE) {
+      applyPublicPageSeo(
+        tab === "portals" ? AUTH_PAGE_SEO.externalAccess : AUTH_PAGE_SEO.login,
+      );
+    }
+  }, [tab]);
 
-  async function afterLogin(data: unknown) {
+  function selectTab(next: LoginTab) {
+    setCompanies(null);
+    setNeedCode(false);
+    setCode("");
+    setCompanyError(null);
+    setGoogleError(null);
+    setParams(
+      (prev) => {
+        const p = new URLSearchParams(prev);
+        if (next === "workspace") p.delete("tab");
+        else p.set("tab", next);
+        if (next !== "account") p.delete("mode");
+        p.delete("google");
+        p.delete("google_error");
+        return p;
+      },
+      { replace: true },
+    );
+  }
+
+  async function afterWorkspaceLogin(data: unknown) {
     setCompanies((data as { companies?: CompanyOption[] }).companies ?? []);
   }
 
-  const login = trpc.auth.login.useMutation({
+  const workspaceLogin = trpc.auth.login.useMutation({
     meta: { errorTitle: "Couldn't sign in" },
-    onSuccess: afterLogin,
+    onSuccess: afterWorkspaceLogin,
+    onError: (err) => {
+      if (err.message === "totp_required") setNeedCode(true);
+    },
+  });
+
+  const portalLogin = trpc.auth.login.useMutation({
+    meta: { errorTitle: "Couldn't sign in" },
+    onSuccess: async () => {
+      await utils.auth.me.invalidate();
+      navigate("/", { replace: true });
+    },
     onError: (err) => {
       if (err.message === "totp_required") setNeedCode(true);
     },
@@ -115,14 +194,22 @@ export function Login() {
 
   const fromGoogle = trpc.auth.sessionFromPlatform.useMutation({
     meta: { errorTitle: "Couldn't sign in with Google" },
-    onSuccess: afterLogin,
-    onError: () => setGoogleError("Google sign-in could not open the workspace — try email and password."),
+    onSuccess: afterWorkspaceLogin,
+    onError: () =>
+      setGoogleError("Google sign-in could not open the workspace — try email and password."),
   });
   const googleStarted = useRef(false);
   useEffect(() => {
     if (params.get("google") === "1" && !googleStarted.current) {
       googleStarted.current = true;
-      setParams({}, { replace: true });
+      setParams(
+        (prev) => {
+          const p = new URLSearchParams(prev);
+          p.delete("google");
+          return p;
+        },
+        { replace: true },
+      );
       fromGoogle.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -156,7 +243,12 @@ export function Login() {
     }
     setCompanyBusy(true);
     setCompanyError(null);
-    const res = await platformLogin(email, password, company.publicId ?? company.name, needCode ? code : undefined);
+    const res = await platformLogin(
+      email,
+      password,
+      company.publicId ?? company.name,
+      needCode ? code : undefined,
+    );
     setCompanyBusy(false);
     if (!res.account) {
       setCompanyError("Could not open that company right now — try again.");
@@ -165,28 +257,268 @@ export function Login() {
     window.location.href = "/company-account";
   }
 
+  const activeLogin = tab === "portals" ? portalLogin : workspaceLogin;
   const errorText =
-    login.error?.message === "totp_invalid"
+    activeLogin.error?.message === "totp_invalid"
       ? "That authenticator code is incorrect."
-      : login.error?.message;
-  const showError = Boolean(login.error) && login.error?.message !== "totp_required";
+      : activeLogin.error?.message;
+  const showError = Boolean(activeLogin.error) && activeLogin.error?.message !== "totp_required";
 
-  const title = companies ? "Choose where to go" : "Sign in";
-  const lead = companies
-    ? "Open your workspace, manage your account, or review your company."
-    : "One AORMS sign-in for workspace, portals, account, and licensing.";
+  const choosing = Boolean(companies) && tab === "workspace";
+  const copy = brandCopy(tab, choosing);
+  const product =
+    tab === "portals"
+      ? AORMS_PLATFORM.name
+      : tab === "account"
+        ? AORMS_PORTALS.account.name
+        : authProductName();
+  const tagline =
+    tab === "portals"
+      ? AORMS_PORTALS.external.authTagline
+      : tab === "account"
+        ? AORMS_PORTALS.account.hubCaption
+        : AORMS_PLATFORM.expansion;
 
-  const rail = (
-    <AuthSplitCard
-      brand={
-        <AuthBrandPane
-          product={authProductName()}
-          tagline={AORMS_PLATFORM.expansion}
-          title={title}
-          lead={lead}
-        />
-      }
+  const tabBar = !choosing ? (
+    <Tabs
+      value={tab}
+      onChange={(_, v: LoginTab) => selectTab(v)}
+      variant="fullWidth"
+      aria-label="Sign-in surface"
+      sx={{
+        minHeight: 44,
+        borderBottom: 1,
+        borderColor: "divider",
+        mb: COMPOSITION_RHYTHM.sm,
+        "& .MuiTab-root": {
+          textTransform: "none",
+          minHeight: 44,
+          fontWeight: 600,
+        },
+      }}
     >
+      {LOGIN_TABS.map((t) => (
+        <Tab key={t.id} value={t.id} label={t.label} />
+      ))}
+    </Tabs>
+  ) : null;
+
+  const workspaceOrPortalForm = (
+    <Stack spacing={COMPOSITION_RHYTHM.md}>
+      {tab === "workspace" && PUBLIC_SITE && !choosing && (
+        <Stack spacing={COMPOSITION_RHYTHM.sm}>
+          <Button
+            variant="outlined"
+            size="large"
+            fullWidth
+            startIcon={<GoogleIconCircle />}
+            disabled={fromGoogle.isPending}
+            onClick={startGoogle}
+          >
+            Continue with Google
+          </Button>
+          <Divider>
+            <Typography variant="caption" color="text.secondary">
+              or email
+            </Typography>
+          </Divider>
+        </Stack>
+      )}
+
+      <Box
+        component="form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          activeLogin.mutate({ email, password, code: needCode ? code : undefined });
+        }}
+      >
+        <Stack spacing={COMPOSITION_RHYTHM.sm}>
+          <AuthLabeledField
+            id={`${tab}-email`}
+            label="Email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@firm.in"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoFocus
+          />
+          <AuthLabeledField
+            id={`${tab}-password`}
+            label="Password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          {needCode && (
+            <AuthLabeledField
+              id={`${tab}-totp`}
+              label="Authenticator code"
+              placeholder="123456"
+              autoComplete="one-time-code"
+              helperText="6-digit code from your authenticator app."
+              slotProps={{ htmlInput: { inputMode: "numeric" } }}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
+          )}
+          {showError && (
+            <Alert severity="error">
+              <AlertTitle>{tab === "portals" ? "Access denied" : "Sign-in failed"}</AlertTitle>
+              {errorText}
+            </Alert>
+          )}
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            fullWidth
+            endIcon={<ArrowForward />}
+            disabled={activeLogin.isPending || (needCode && code.length < 6)}
+          >
+            {activeLogin.isPending ? "Signing in…" : needCode ? "Verify" : "Sign in"}
+          </Button>
+        </Stack>
+      </Box>
+
+      <Stack
+        direction="row"
+        spacing={COMPOSITION_RHYTHM.sm}
+        sx={{ justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}
+      >
+        <Button component={RouterLink} to="/forgot-password" variant="text" size="small">
+          Forgot password?
+        </Button>
+        {tab === "workspace" &&
+          (PUBLIC_SITE ? (
+            <Button
+              variant="text"
+              size="small"
+              onClick={() => {
+                setCompanies(null);
+                setNeedCode(false);
+                setCode("");
+                setParams(
+                  (prev) => {
+                    const p = new URLSearchParams(prev);
+                    p.set("tab", "account");
+                    p.set("mode", "create");
+                    p.delete("google");
+                    p.delete("google_error");
+                    return p;
+                  },
+                  { replace: true },
+                );
+              }}
+            >
+              {AORMS_PORTALS.account.create}
+            </Button>
+          ) : (
+            <Button component={RouterLink} to="/signup" variant="text" size="small">
+              Create account
+            </Button>
+          ))}
+      </Stack>
+    </Stack>
+  );
+
+  const destinationPicker = companies ? (
+    (() => {
+      const owned = companies.filter((c) => c.role === "OWNER");
+      const current = selectedCompany();
+      const accountCompany =
+        current && current.role === "OWNER"
+          ? current
+          : owned.length === 1
+            ? owned[0]!
+            : null;
+      const showDropdown = companies.length > 1 || owned.length > 1;
+      const tenantItems = [WORKSPACE_ITEM, ...companies.map(companyItem)];
+      return (
+        <Stack spacing={COMPOSITION_RHYTHM.sm}>
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            endIcon={<ArrowForward />}
+            disabled={companyBusy}
+            onClick={() => void enterWorkspace()}
+          >
+            {companyBusy ? "Opening…" : "Open workspace"}
+          </Button>
+          <Button
+            component={RouterLink}
+            to="/account"
+            variant="outlined"
+            size="large"
+            fullWidth
+            disabled={companyBusy}
+          >
+            {AORMS_PORTALS.account.myAccount}
+          </Button>
+          {owned.length > 0 ? (
+            <Button
+              variant="outlined"
+              size="large"
+              fullWidth
+              disabled={companyBusy || !accountCompany}
+              onClick={() => accountCompany && void openCompanyAccount(accountCompany)}
+            >
+              {accountCompany
+                ? `Company account — ${accountCompany.name}`
+                : "Company account (owner only)"}
+            </Button>
+          ) : (
+            <Button
+              component={RouterLink}
+              to="/account#join"
+              variant="outlined"
+              size="large"
+              fullWidth
+              disabled={companyBusy}
+            >
+              Request to join a company
+            </Button>
+          )}
+          {showDropdown ? (
+            <AuthLabeledField
+              id="tenant-select"
+              label="Workspace context (optional)"
+              select
+              size="small"
+              value={(tenant ?? WORKSPACE_ITEM).id}
+              onChange={(e) =>
+                setTenant(tenantItems.find((item) => item.id === e.target.value) ?? null)
+              }
+            >
+              {tenantItems.map((item) => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.label}
+                </MenuItem>
+              ))}
+            </AuthLabeledField>
+          ) : null}
+          {companyError && (
+            <Alert severity="error">
+              <AlertTitle>Could not open the company</AlertTitle>
+              {companyError}
+            </Alert>
+          )}
+          <Button variant="text" size="small" onClick={() => setCompanies(null)}>
+            Sign in as someone else
+          </Button>
+        </Stack>
+      );
+    })()
+  ) : null;
+
+  const formPane = (
+    <Stack spacing={COMPOSITION_RHYTHM.sm}>
+      {tabBar}
+
       {fromGoogle.isPending && (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <CircularProgress size={16} />
@@ -196,234 +528,70 @@ export function Login() {
         </Stack>
       )}
 
-      {googleError && !companies && (
+      {googleError && tab === "workspace" && !companies && (
         <Alert severity="warning" onClose={() => setGoogleError(null)}>
           <AlertTitle>Google sign-in</AlertTitle>
           {googleError}
         </Alert>
       )}
 
-      {companies ? (
-        (() => {
-          const owned = companies.filter((c) => c.role === "OWNER");
-          const current = selectedCompany();
-          const accountCompany =
-            current && current.role === "OWNER"
-              ? current
-              : owned.length === 1
-                ? owned[0]!
-                : null;
-          const showDropdown = companies.length > 1 || owned.length > 1;
-          const tenantItems = [WORKSPACE_ITEM, ...companies.map(companyItem)];
-          return (
-            <Stack spacing={COMPOSITION_RHYTHM.sm}>
-              <Button
-                variant="contained"
-                size="large"
-                fullWidth
-                endIcon={<ArrowForward />}
-                disabled={companyBusy}
-                onClick={() => void enterWorkspace()}
+      {choosing
+        ? destinationPicker
+        : tab === "account"
+          ? (
+              <Suspense
+                fallback={
+                  <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                    <CircularProgress size={24} />
+                  </Box>
+                }
               >
-                {companyBusy ? "Opening…" : "Open workspace"}
-              </Button>
-              <Button
-                component={RouterLink}
-                to="/account"
-                variant="outlined"
-                size="large"
-                fullWidth
-                disabled={companyBusy}
-              >
-                {AORMS_PORTALS.account.myAccount}
-              </Button>
-              {owned.length > 0 ? (
-                <Button
-                  variant="outlined"
-                  size="large"
-                  fullWidth
-                  disabled={companyBusy || !accountCompany}
-                  onClick={() => accountCompany && void openCompanyAccount(accountCompany)}
-                >
-                  {accountCompany
-                    ? `Company account — ${accountCompany.name}`
-                    : "Company account (owner only)"}
-                </Button>
-              ) : (
-                <Button
-                  component={RouterLink}
-                  to="/account#join"
-                  variant="outlined"
-                  size="large"
-                  fullWidth
-                  disabled={companyBusy}
-                >
-                  Request to join a company
-                </Button>
-              )}
-              {showDropdown ? (
-                <AuthLabeledField
-                  id="tenant-select"
-                  label="Workspace context (optional)"
-                  select
-                  size="small"
-                  value={(tenant ?? WORKSPACE_ITEM).id}
-                  onChange={(e) =>
-                    setTenant(tenantItems.find((item) => item.id === e.target.value) ?? null)
-                  }
-                >
-                  {tenantItems.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
-                      {item.label}
-                    </MenuItem>
-                  ))}
-                </AuthLabeledField>
-              ) : null}
-              {companyError && (
-                <Alert severity="error">
-                  <AlertTitle>Could not open the company</AlertTitle>
-                  {companyError}
-                </Alert>
-              )}
-              <Button variant="text" size="small" onClick={() => setCompanies(null)}>
-                Sign in as someone else
-              </Button>
-            </Stack>
-          );
-        })()
-      ) : (
-        <Stack spacing={COMPOSITION_RHYTHM.md}>
-          {PUBLIC_SITE && (
-            <Stack spacing={COMPOSITION_RHYTHM.sm}>
-              <Button
-                variant="outlined"
-                size="large"
-                fullWidth
-                startIcon={<GoogleIconCircle />}
-                disabled={fromGoogle.isPending}
-                onClick={startGoogle}
-              >
-                Continue with Google
-              </Button>
-              <Divider>
-                <Typography variant="caption" color="text.secondary">
-                  or email
-                </Typography>
-              </Divider>
-            </Stack>
-          )}
-
-          <Box
-            component="form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              login.mutate({ email, password, code: needCode ? code : undefined });
-            }}
-          >
-            <Stack spacing={COMPOSITION_RHYTHM.sm}>
-              <AuthLabeledField
-                id="email"
-                label="Email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@firm.in"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoFocus
-              />
-              <AuthLabeledField
-                id="password"
-                label="Password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              {needCode && (
-                <AuthLabeledField
-                  id="totp-code"
-                  label="Authenticator code"
-                  placeholder="123456"
-                  autoComplete="one-time-code"
-                  helperText="6-digit code from your authenticator app."
-                  slotProps={{ htmlInput: { inputMode: "numeric" } }}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
+                <PlatformLogin
+                  portal
+                  embedded
+                  initialMode={wantsCreate ? "register" : "signin"}
+                  onLogin={(_me: Me) => {
+                    window.location.href = "/account";
+                  }}
+                  onBack={() => selectTab("workspace")}
                 />
-              )}
-              {showError && (
-                <Alert severity="error">
-                  <AlertTitle>Sign-in failed</AlertTitle>
-                  {errorText}
-                </Alert>
-              )}
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                fullWidth
-                endIcon={<ArrowForward />}
-                disabled={login.isPending || (needCode && code.length < 6)}
-              >
-                {login.isPending ? "Signing in…" : needCode ? "Verify" : "Sign in"}
-              </Button>
-            </Stack>
-          </Box>
+              </Suspense>
+            )
+          : workspaceOrPortalForm}
 
-          <Stack
-            direction="row"
-            spacing={COMPOSITION_RHYTHM.sm}
-            sx={{ justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}
-          >
-            <Button component={RouterLink} to="/forgot-password" variant="text" size="small">
-              Forgot password?
-            </Button>
-            {PUBLIC_SITE ? (
-              <Button component={RouterLink} to="/account?mode=create" variant="text" size="small">
-                {AORMS_PORTALS.account.create}
-              </Button>
-            ) : (
-              <Button component={RouterLink} to="/signup" variant="text" size="small">
-                Create account
-              </Button>
-            )}
-          </Stack>
-        </Stack>
-      )}
-
-      {!companies && (
-        <Stack
-          spacing={0.5}
-          sx={{ pt: COMPOSITION_RHYTHM.sm, borderTop: 1, borderColor: "divider" }}
+      {!choosing && tab !== "account" && (
+        <Button
+          component={isPlatformHost() ? RouterLink : "a"}
+          {...(isPlatformHost() ? { to: "/" } : { href: platformHomeHref() })}
+          variant="text"
+          size="small"
+          fullWidth
+          startIcon={<ArrowBack />}
         >
-          {PUBLIC_SITE && (
-            <Button component={RouterLink} to="/account" variant="text" size="small" fullWidth>
-              Manage your {AORMS_PORTALS.account.name} &amp; licence
-            </Button>
-          )}
-          <Button component={RouterLink} to="/access" variant="text" size="small" fullWidth>
-            {AORMS_PORTALS.external.loginPageLink}
-          </Button>
-          <Button
-            component={isPlatformHost() ? RouterLink : "a"}
-            {...(isPlatformHost() ? { to: "/" } : { href: platformHomeHref() })}
-            variant="text"
-            size="small"
-            fullWidth
-            startIcon={<ArrowBack />}
-          >
-            Back to home
-          </Button>
-        </Stack>
+          Back to home
+        </Button>
       )}
+    </Stack>
+  );
+
+  const rail = (
+    <AuthSplitCard
+      brand={
+        <AuthBrandPane
+          product={product}
+          tagline={tagline}
+          title={copy.title}
+          lead={copy.lead}
+        />
+      }
+    >
+      {formPane}
     </AuthSplitCard>
   );
 
   return (
     <AuthRailLayout
-      variant="workspace"
+      variant={tab === "portals" ? "external" : tab === "account" ? "portal" : "workspace"}
       showMarketingFooter={false}
       layout="horizontal"
       rail={rail}

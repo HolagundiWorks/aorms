@@ -21,7 +21,9 @@ export function AuthSplitCard({
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
         alignItems: "stretch",
-        minHeight: { md: 360 },
+        // Fixed height on md+ so tab switches (Workspace · Portals · Account) don't jump.
+        height: { md: COMPOSITION_RHYTHM.authCardHeightPx },
+        minHeight: { xs: 360, md: COMPOSITION_RHYTHM.authCardHeightPx },
       }}
     >
       <Stack
@@ -46,8 +48,10 @@ export function AuthSplitCard({
         sx={{
           flex: 1,
           minWidth: 0,
+          minHeight: 0,
           p: { xs: COMPOSITION_RHYTHM.md, md: COMPOSITION_RHYTHM.lg },
           justifyContent: "center",
+          overflowY: { md: "auto" },
         }}
       >
         {children}

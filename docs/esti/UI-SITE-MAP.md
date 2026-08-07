@@ -31,7 +31,7 @@ flowchart TB
 | Surface | Routes | Shell | Content width | Top bar | Bottom | Clock | Left rail |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Marketing | `/`, blog, downloads, 404 | `MarketingNeuFrame` / `MarketingShell` | 1200px | soft sticky · AormsLogo | `MarketingLandingDock` | Pomodoro clock | No |
-| Auth | `/login`, `/access`, `/platform-admin`, signup, forgot/reset, force-pw, account sign-in | `AuthRailLayout` + `AuthSplitCard` | horizontal 1200px (workspace · portals · licensing) | `MarketingTopBar` (logo → landing) | none | AnalogueClock (no Pomodoro) | No |
+| Auth | `/login` (tabs: Workspace · Portals · Account); `/access` → `?tab=portals`; `/platform-admin` operator; signup/forgot/reset/force-pw | `AuthRailLayout` + `AuthSplitCard` | horizontal 1200px; one card, three tabs | `MarketingTopBar` (logo → landing) | none | AnalogueClock (no Pomodoro) | No |
 | Staff (AStudio) | office, library, projects, … | `.esti-app-shell2` + `AppRibbon` + `RailLayout` | full + gutters | soft sticky · mark + firm name | footer + ActionDock | AnalogueClock only | No |
 | Staff (AConsulting) | `/consultancy/*` on consultancy host | same staff shell · `consultancyNav` | full | soft sticky | footer + dock | AnalogueClock | No |
 | Staff (AProc) | `/pmc` on proc host | same staff shell · `pmcNav` + `PmcHome` | full | soft sticky | footer home → `/pmc` | AnalogueClock | No |

@@ -68,6 +68,8 @@ export default function Login({
   companyPortal = false,
   onBack,
   initialMode,
+  /** Form-only — parent supplies AuthRailLayout / AuthSplitCard (unified /login tabs). */
+  embedded = false,
 }: {
   onLogin: (me: Me) => void;
   /** Customer user-portal: skip the tenant company step + always allow sign-up. */
@@ -81,6 +83,7 @@ export default function Login({
   /** Force the starting mode (e.g. a caller's own "Create account" button
    *  landing straight on the register form) instead of the default inference. */
   initialMode?: "signin" | "register";
+  embedded?: boolean;
 }) {
   // Onboarding (?onboard=PRODUCT) only ever applies to the customer portal.
   const product = portal && !companyPortal ? onboardProduct() : null;
@@ -216,6 +219,188 @@ export default function Login({
               : `Sign in to your ${AORMS_PORTALS.account.name}.`
           : "Sign in to manage licences.";
 
+  const formBody = (
+    <Stack spacing={2}>
+      {showCompanyStep ? (
+        <Box component="form" onSubmit={handleCompany}>
+          <Stack spacing={2}>
+            <AuthLabeledField
+              id="auth-company"
+              label="Company name, email, or ID"
+              placeholder="acme.in · you@acme.in · AORMS-C-2K4P"
+              helperText="Your company's domain, an email at that company, or its AORMS-C ID."
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+            />
+            <Button type="submit" variant="contained" size="large" disabled={busy || !company}>
+              Continue
+            </Button>
+            <Button
+              type="button"
+              variant="text"
+              size="small"
+              onClick={() => {
+                setCompany("");
+                setResolved(null);
+                setError(null);
+                setStep("credentials");
+              }}
+            >
+              No company yet? Sign in with just your email
+            </Button>
+          </Stack>
+        </Box>
+      ) : (
+        <Box component="form" onSubmit={handleSubmit}>
+          <Stack spacing={2}>
+            <Stack spacing={1}>
+              <Button
+                type="button"
+                variant="outlined"
+                startIcon={<GoogleIconCircle />}
+                onClick={() => {
+                  window.location.href =
+                    "/platform/auth/google/start?return=" + encodeURIComponent("/account");
+                }}
+              >
+                Continue with Google
+              </Button>
+              <Typography
+                variant="body2"
+                component="p"
+                className="esti-label esti-label--secondary"
+              >
+                or use email
+              </Typography>
+            </Stack>
+            {mode === "signin" && !product && resolved && (
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                <StatusDot color="cool-gray" label={companyLabel(resolved)} />
+                <Button
+                  type="button"
+                  variant="text"
+                  size="small"
+                  onClick={() => {
+                    setStep("company");
+                    setError(null);
+                  }}
+                >
+                  Change
+                </Button>
+              </Stack>
+            )}
+            {mode === "register" && portal && (
+              <AccountSignupFields value={profile} onChange={setProfile} />
+            )}
+            {mode === "register" && !portal && (
+              <AuthLabeledField
+                id="auth-name"
+                label="Name (optional)"
+                autoComplete="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            )}
+            <AuthLabeledField
+              id="auth-email"
+              label="Email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@firm.in"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <AuthLabeledField
+              id="auth-password"
+              label="Password"
+              type="password"
+              autoComplete={mode === "register" ? "new-password" : "current-password"}
+              helperText={mode === "register" ? "At least 8 characters." : undefined}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {mode === "signin" && needCode && (
+              <AuthLabeledField
+                id="auth-code"
+                label="Authenticator code"
+                placeholder="123456"
+                autoComplete="one-time-code"
+                slotProps={{ htmlInput: { inputMode: "numeric" } }}
+                helperText="6-digit code from your authenticator app."
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+              />
+            )}
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              disabled={busy || !email || !password || (needCode && code.length < 6)}
+            >
+              {mode === "register" ? "Create account" : needCode ? "Verify" : "Sign in"}
+            </Button>
+          </Stack>
+        </Box>
+      )}
+
+      {registrationOpen && (
+        <Button
+          type="button"
+          variant="text"
+          size="small"
+          onClick={() => {
+            const next = mode === "register" ? "signin" : "register";
+            setMode(next);
+            setStep(next === "register" ? "credentials" : "company");
+            setError(null);
+          }}
+        >
+          {mode === "register"
+            ? "Already have an account? Sign in"
+            : "Need an account? Create one"}
+        </Button>
+      )}
+
+      {companyPortal && (
+        <Button component={RouterLink} to="/account" variant="text" size="small">
+          Personal {AORMS_PORTALS.account.name} instead
+        </Button>
+      )}
+
+      {onBack && (
+        <Button type="button" variant="text" size="small" onClick={onBack}>
+          Looking for your AORMS workspace sign-in instead?
+        </Button>
+      )}
+
+      {error && (
+        <Alert severity="error" onClose={() => setError(null)}>
+          <AlertTitle>Sign-in failed</AlertTitle>
+          {error}
+        </Alert>
+      )}
+
+      {import.meta.env.DEV && (
+        <Box component="form" onSubmit={handleDev}>
+          <Stack spacing={2}>
+            <AuthLabeledField
+              id="dev-email"
+              label="Developer sign-in (local only)"
+              placeholder="you@example.com"
+              value={devEmail}
+              onChange={(e) => setDevEmail(e.target.value)}
+            />
+            <Button type="submit" variant="outlined" disabled={busy || !devEmail}>
+              Dev sign-in
+            </Button>
+          </Stack>
+        </Box>
+      )}
+    </Stack>
+  );
+
+  if (embedded) return formBody;
+
   return (
     <AuthRailLayout
       variant={companyPortal ? "portal" : portal ? "portal" : "admin"}
@@ -242,181 +427,7 @@ export default function Login({
             />
           }
         >
-          {showCompanyStep ? (
-            <Box component="form" onSubmit={handleCompany}>
-              <Stack spacing={2}>
-                <AuthLabeledField
-                  id="auth-company"
-                  label="Company name, email, or ID"
-                  placeholder="acme.in · you@acme.in · AORMS-C-2K4P"
-                  helperText="Your company's domain, an email at that company, or its AORMS-C ID."
-                  value={company}
-                  onChange={(e) => setCompany(e.target.value)}
-                />
-                <Button type="submit" variant="contained" size="large" disabled={busy || !company}>
-                  Continue
-                </Button>
-                <Button
-                  type="button"
-                  variant="text"
-                  size="small"
-                  onClick={() => {
-                    setCompany("");
-                    setResolved(null);
-                    setError(null);
-                    setStep("credentials");
-                  }}
-                >
-                  No company yet? Sign in with just your email
-                </Button>
-              </Stack>
-            </Box>
-          ) : (
-            <Box component="form" onSubmit={handleSubmit}>
-              <Stack spacing={2}>
-                <Stack spacing={1}>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    startIcon={<GoogleIconCircle />}
-                    onClick={() => {
-                      window.location.href =
-                        "/platform/auth/google/start?return=" + encodeURIComponent("/account");
-                    }}
-                  >
-                    Continue with Google
-                  </Button>
-                  <Typography
-                    variant="body2"
-                    component="p"
-                    className="esti-label esti-label--secondary"
-                  >
-                    or use email
-                  </Typography>
-                </Stack>
-                {mode === "signin" && !product && resolved && (
-                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                    <StatusDot color="cool-gray" label={companyLabel(resolved)} />
-                    <Button
-                      type="button"
-                      variant="text"
-                      size="small"
-                      onClick={() => {
-                        setStep("company");
-                        setError(null);
-                      }}
-                    >
-                      Change
-                    </Button>
-                  </Stack>
-                )}
-                {mode === "register" && portal && (
-                  <AccountSignupFields value={profile} onChange={setProfile} />
-                )}
-                {mode === "register" && !portal && (
-                  <AuthLabeledField
-                    id="auth-name"
-                    label="Name (optional)"
-                    autoComplete="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                )}
-                <AuthLabeledField
-                  id="auth-email"
-                  label="Email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@firm.in"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <AuthLabeledField
-                  id="auth-password"
-                  label="Password"
-                  type="password"
-                  autoComplete={mode === "register" ? "new-password" : "current-password"}
-                  helperText={mode === "register" ? "At least 8 characters." : undefined}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                {mode === "signin" && needCode && (
-                  <AuthLabeledField
-                    id="auth-code"
-                    label="Authenticator code"
-                    placeholder="123456"
-                    autoComplete="one-time-code"
-                    slotProps={{ htmlInput: { inputMode: "numeric" } }}
-                    helperText="6-digit code from your authenticator app."
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                  />
-                )}
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  disabled={busy || !email || !password || (needCode && code.length < 6)}
-                >
-                  {mode === "register" ? "Create account" : needCode ? "Verify" : "Sign in"}
-                </Button>
-              </Stack>
-            </Box>
-          )}
-
-          {registrationOpen && (
-            <Button
-              type="button"
-              variant="text"
-              size="small"
-              onClick={() => {
-                const next = mode === "register" ? "signin" : "register";
-                setMode(next);
-                setStep(next === "register" ? "credentials" : "company");
-                setError(null);
-              }}
-            >
-              {mode === "register"
-                ? "Already have an account? Sign in"
-                : "Need an account? Create one"}
-            </Button>
-          )}
-
-          {companyPortal && (
-            <Button component={RouterLink} to="/account" variant="text" size="small">
-              Personal {AORMS_PORTALS.account.name} instead
-            </Button>
-          )}
-
-          {onBack && (
-            <Button type="button" variant="text" size="small" onClick={onBack}>
-              Looking for your AORMS workspace sign-in instead?
-            </Button>
-          )}
-
-          {error && (
-            <Alert severity="error" onClose={() => setError(null)}>
-              <AlertTitle>Sign-in failed</AlertTitle>
-              {error}
-            </Alert>
-          )}
-
-          {import.meta.env.DEV && (
-            <Box component="form" onSubmit={handleDev}>
-              <Stack spacing={2}>
-                <AuthLabeledField
-                  id="dev-email"
-                  label="Developer sign-in (local only)"
-                  placeholder="you@example.com"
-                  value={devEmail}
-                  onChange={(e) => setDevEmail(e.target.value)}
-                />
-                <Button type="submit" variant="outlined" disabled={busy || !devEmail}>
-                  Dev sign-in
-                </Button>
-              </Stack>
-            </Box>
-          )}
+          {formBody}
         </AuthSplitCard>
       }
     />

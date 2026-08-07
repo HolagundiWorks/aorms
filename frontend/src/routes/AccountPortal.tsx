@@ -1,16 +1,17 @@
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import { Surface } from "@hcw/ui-kit";
-import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";import { Suspense, lazy, useCallback, useEffect, useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
+import { Suspense, lazy, useCallback, useEffect, useState } from "react";
+import { Link as RouterLink, Navigate } from "react-router-dom";
 import { PortalLicenceCard } from "../components/portal/PortalLicenceCard.js";
 import { PortalPageHeader, PortalTabPanel, PortalTabs } from "../components/portal/PortalChrome.js";
-import { PortalShell } from "../components/portal/PortalShell.js";import { StatusDot } from "../components/StatusTag.js";
+import { PortalShell } from "../components/portal/PortalShell.js";
+import { StatusDot } from "../components/StatusTag.js";
 import { useAuth } from "../lib/auth.js";
 import { fetchMe, fetchMyLicense, logout, type Me, type MyLicense } from "../platform-admin/lib/auth.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
 
 const Credentials = lazy(() => import("../platform-admin/Credentials.js"));
-const PlatformLogin = lazy(() => import("../platform-admin/Login.js"));
 const AccountProfilePanel = lazy(() =>
   import("../platform-admin/AccountProfilePanel.js").then((m) => ({ default: m.AccountProfilePanel })),
 );
@@ -125,15 +126,8 @@ export function AccountPortal() {
     );
   }
   if (!me?.account) {
-    return (
-      <Suspense fallback={<CircularProgress />}>
-        <PlatformLogin
-          portal
-          initialMode={wantsCreate ? "register" : "signin"}
-          onLogin={setMe}
-        />
-      </Suspense>
-    );
+    const q = wantsCreate ? "?tab=account&mode=create" : "?tab=account";
+    return <Navigate to={`/login${q}`} replace />;
   }
 
   const account = me.account;

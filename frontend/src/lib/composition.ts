@@ -40,6 +40,8 @@ export const COMPOSITION_RHYTHM = {
   authCardMaxPx: 440,
   /** Auth horizontal card — same content column as MarketingTopBar */
   authCardWideMaxPx: 1200,
+  /** Locked split-card body height (md+) so Workspace · Portals · Account tabs don't resize */
+  authCardHeightPx: 560,
   /** Section vertical padding (marketing / long-form) */
   sectionY: { xs: 8, md: 12 } as const, // 64 / 96
   /** Gap between card grids inside a section */
