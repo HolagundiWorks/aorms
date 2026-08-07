@@ -31,10 +31,20 @@ Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Templates: [05-TEMPLATES.md]
 | **Stage** | Full width · content column **1200px** | `.esti-app-content2` full width under ribbon | Full width · **1200px** (`PortalNeuFrame`) |
 | **Bottom dock** | `MarketingLandingDock` — section spy + Sign in / Create / Downloads / Calculator | Kit `ActionDock` + `useScreenActions` | None (dock-less by design) |
 | **Footer** | Inline marketing footer in content | `AppFooterBar` — calc · launchers · tray | None |
-| **Clock** | `MarketingClockPomodoro` bottom-right | Kit `AnalogueClock` bottom-right (single) | Kit `AnalogueClock` bottom-right |
+| **Clock** | `MarketingClockPomodoro` bottom-right | Kit `AnalogueClock` bottom-right (single — no watermark) | Kit `AnalogueClock` bottom-right |
 | **Left rail** | **Retired** | **Retired** | **Retired** |
 
-**Retired:** GlassRail / SoftRail as primary chrome · marketing clear-glass floating rail · `RailLayout` left Carbon column (replaced by full-width stage header — export name kept).
+**Retired:** GlassRail / SoftRail as primary chrome · marketing clear-glass floating rail · `RailLayout` left Carbon column · staff `esti-app-logo-float` watermark · `MarketingRailNav` / `.lp2-rail` · `PublicAuthStageLayout` / `MarketingConversionDock`.
+
+**Brand placement**
+
+| Surface | Brand |
+| --- | --- |
+| Marketing | `AormsLogo` left in `MarketingTopBar` |
+| Staff | Firm name in `AppRibbon` (no floating watermark) |
+| Auth | `AuthBrandBlock` inside soft card |
+| Account / licensing | `AormsLogo` in `PortalShell` |
+| External portals | Portal label + company name |
 
 ---
 
@@ -137,3 +147,5 @@ Primary create/commit actions still belong in **ActionDock**, not duplicated as 
 - Put glass on every card or invent accent glows  
 - Put staff ActionDock on marketing (use `MarketingLandingDock`) or portals  
 - Apply building entourage inside authenticated apps or portals  
+- Mount a floating staff watermark beside the AnalogueClock  
+- Leave dead SoftRail / `.lp2-rail` / conversion-dock code in product paths  

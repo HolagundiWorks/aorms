@@ -29,7 +29,7 @@ export function HcwAttribution({
   showNote?: boolean;
   /** Logo variant — defaults from surface (black on light rail, white on orange footer). */
   logoTone?: LogoTone;
-  /** Smaller logo (e.g. collapsed marketing rail). */
+  /** Smaller logo (e.g. compact auth / footer). */
   compact?: boolean;
   className?: string;
 }) {
@@ -42,7 +42,6 @@ export function HcwAttribution({
   const rootClass = [
     "hcw-attribution",
     `hcw-attribution--${variant}`,
-    variant === "rail" ? "lp2-rail__hcw" : null,
     className,
   ]
     .filter(Boolean)

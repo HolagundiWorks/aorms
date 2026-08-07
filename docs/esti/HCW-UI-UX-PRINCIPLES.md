@@ -86,7 +86,7 @@ Each row ties an established UX principle to a **shipped or required** pattern.
 | **Nielsen #1 Visibility** | Show status clearly | `StatusDot` / `HealthGlassOrb`; office health in rail; zone row in stage head |
 | **Nielsen #2 Real world** | Match user language | Indian practice terms (GST, COA, MoM, paise); `formatINR` everywhere |
 | **Nielsen #3 User control** | Undo / escape | Dock LEFT = destroy; dialog Cancel; Escape closes menus; skip link to `#esti-main` / `#lp2-main` |
-| **Nielsen #4 Consistency** | Same patterns everywhere | `RailLayout` / `GlassRail`; `useScreenActions`; [NAVIGATION.md](NAVIGATION.md) = chrome SoT |
+| **Nielsen #4 Consistency** | Same patterns everywhere | `RailLayout` / `PortalNeuFrame`; `useScreenActions`; [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) + [NAVIGATION.md](NAVIGATION.md) = chrome SoT |
 | **Nielsen #5 Error prevention** | Prevent mistakes | Confirm on destroy (dock LEFT); required fields + `helperText`; disable dock when stale |
 | **Nielsen #6 Recognition** | Show options, don't recall | Search in footer + Ctrl/Cmd+K; ribbon menus; breadcrumbs — not URL memory |
 | **Nielsen #7 Flexibility** | Shortcuts for experts | Keyboard ribbon menus; Alt+C calculator; dock keyboard focus; power users use search |
@@ -244,16 +244,18 @@ Editorial CSS lives in `landing.scss` — not in `@hcw/ui-kit` tokens.
 
 Before shipping UI:
 
-- [ ] Uses `RailLayout` or `GlassRail` — no bespoke rail geometry
-- [ ] Rail: identity / tabs / filters only — **no** DataGrid in rail
+- [ ] Uses `RailLayout` (staff) or `PortalNeuFrame` (portals) — no bespoke left rail
+- [ ] Stage header: identity / tabs / filters only — **no** DataGrid in the soft header
 - [ ] Stage: primary work content; scrolls independently (desktop)
-- [ ] Page CTAs via `useScreenActions`; dock cleared while dialog open
+- [ ] Page CTAs via `useScreenActions`; dock cleared while dialog open (staff)
 - [ ] Breadcrumb if screen is deeper than top-level module
 - [ ] Layer chosen by role ([decision tree](HCW-UI-KIT.md#layer-decision-tree))
+- [ ] Soft-square **8px** radius on chrome (`RADIUS`) — no ad-hoc 4/12px
 - [ ] No new raw hex — `@hcw/ui-kit` tokens only (marketing: `landing.scss` exceptions documented)
 - [ ] Keyboard path verified for primary action
-- [ ] `[NAVIGATION.md](NAVIGATION.md)` updated if chrome or IA changed
+- [ ] `[NAVIGATION.md](NAVIGATION.md)` / `[UI-SITE-MAP.md](UI-SITE-MAP.md)` updated if chrome or IA changed
 - [ ] Helper text meets contrast; destroy actions in dock LEFT
+- [ ] No floating watermark beside AnalogueClock
 
 ---
 
@@ -261,9 +263,11 @@ Before shipping UI:
 
 | Anti-pattern | Why |
 |--------------|-----|
-| Centred login card on stage | Breaks rail-first model; duplicates auth spatial grammar |
+| Left SoftRail / GlassRail on product | Retired 2026-08 — use ribbon + stage |
+| Floating staff watermark beside clock | Collides with AnalogueClock; brand lives in ribbon |
+| Auth form mounted as marketing stage | Use centered `AuthRailLayout` soft card |
 | Inline Save + dock Save | Duplicate affordance; Fitts waste |
-| Rounded corners on panels/cards/chips | Surfaces are square (`RADIUS: 0`); `MuiButton` uses `BUTTON_RADIUS` (4px); **ActionDock** tray + buttons use `DOCK_PILL_RADIUS` (capsule) |
+| Non-8px corners on product chrome | Soft-square `RADIUS` / `BUTTON_RADIUS` = **8px** |
 | Glass on every card | Flattens hierarchy; hides marketing atmosphere |
 | Hover-only ribbon nav | Blocks keyboard users |
 | `primaryTypographyProps` on MUI v6+ | Use `slotProps` — typing and a11y consistency |

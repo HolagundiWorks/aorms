@@ -1,11 +1,11 @@
 # Page templates — canonical anatomies
 
-**Status:** Updated 2026-08-06 (no-rail soft neu). These are not new inventions
+**Status:** Updated 2026-08-07 (no-rail soft neu · portals on `PortalNeuFrame`). These are not new inventions
 (Constitution VI): each template names its live reference — clone that, don't
 improvise. Shell contract: **ribbon · stage · taskbar footer · ActionDock · clock**
-([PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md)). Breadcrumb + `document.title` via
-`PageBreadcrumb`; CTAs via `useScreenActions`. **Left rail retired** on staff and
-marketing; portals SoftRail until redesign.
+([PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md) · [UI-SITE-MAP.md](../esti/UI-SITE-MAP.md)). Breadcrumb + `document.title` via
+`PageBreadcrumb`; CTAs via `useScreenActions`. **Left rail retired** on staff,
+marketing, and portals.
 
 ## T1 — Dashboard (reference: `StudioAbstract.tsx`, route `/`)
 
@@ -74,7 +74,7 @@ No taskbar, no ActionDock — portal-class surfaces are dock-less by design.
 MarketingNeuFrame / MarketingShell:
 ├ MarketingTopBar (sticky soft brand ribbon)
 ├ stage — 1200px content column · single #lp-main
-├ MarketingLandingDock (section spy + Sign in / Create / Downloads / Calculator)
+├ MarketingLandingDock (section spy + Blog / Downloads / Sign in / Calculator)
 └ MarketingClockPomodoro
 Landing sections: Overview · Outcomes · Platform · Rhythm · Start.
 Soft/flat Surfaces only — no left rail, no staff ActionDock on marketing.

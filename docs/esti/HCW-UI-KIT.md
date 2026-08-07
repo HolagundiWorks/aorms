@@ -82,7 +82,8 @@ soft chrome, Radiant Orange only for true accent.
 ## Spatial model — Ribbon · Stage · Footer · Dock · Clock
 
 **Canon:** [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) (2026-08). **Left rail retired** on
-marketing and staff apps. Portals keep SoftRail until the portal redesign.
+marketing, staff apps, and portals. Soft neu everywhere; single AnalogueClock;
+no floating staff watermark.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -97,12 +98,12 @@ marketing and staff apps. Portals keep SoftRail until the portal redesign.
 
 | Region | Width | Layer | Role |
 |--------|-------|-------|------|
-| **Top ribbon** | full content / shell | Soft (L2) | Marketing: brand only. Staff: `AppRibbon` primary nav. |
-| **Stage** | full width | Flat (L1) + soft cards (L2) | Working surface / long-form story. Staff lists use `RailLayout` as a **stage page shell** (header strip + full-width main — no left column). |
-| **TaskbarFooter** | full width · staff only | Soft (L2) | Calculator · launcher cluster · tray. Absent on marketing. |
+| **Top ribbon** | full content / shell | Soft (L2) | Marketing: brand only. Staff: `AppRibbon` firm name + primary nav. Portals: identity / hub nav. |
+| **Stage** | full width · 1200px mkt/portals | Flat (L1) + soft cards (L2) | Working surface. Staff lists use `RailLayout` as a **stage page shell** (header strip + full-width main — no left column). |
+| **TaskbarFooter** | full width · staff only | Soft (L2) | Calculator · launcher cluster · tray (no digital clock). Absent on marketing/portals. |
 | **ActionDock** | staff · bottom | Soft tray | Page-level CTAs via `useScreenActions`. |
-| **MarketingLandingDock** | marketing · bottom | Soft | Section spy + Sign in / Create / Downloads / Calculator. |
-| **Clock** | fixed bottom-right | Soft | Marketing `MarketingClockPomodoro`; staff kit `AnalogueClock`. |
+| **MarketingLandingDock** | marketing · bottom | Soft | Section spy + Sign in / Downloads / Calculator. |
+| **Clock** | fixed bottom-right | Soft | Marketing `MarketingClockPomodoro`; staff/portals kit `AnalogueClock` only. |
 
 ### Marketing shell — public site (`MarketingNeuFrame`)
 
@@ -168,6 +169,9 @@ Trust / outcome chips stay capacity-capped (Miller).
 | Marketing hero / ribbon / footer | `AormsLogo` (`frontend`) — mask logo |
 | Kit-portable wordmark (no image) | `<BrandMark />` from `@hcw/ui-kit` |
 | Auth card | `AuthBrandBlock` / `AormsLogo variant="rail"` |
+| Staff ribbon | Firm name (`AppRibbon`) — no floating watermark |
+| Account / licensing | `AormsLogo` in `PortalShell` top bar |
+| External portals | Company name + portal label (no AormsLogo) |
 
 ### Staff stage — canonical reference
 
@@ -221,28 +225,30 @@ useScreenActions(
 );
 ```
 
-## Mounting the kit in a portal
+## Mounting the kit in a portal / staff shell
 
 ```tsx
 import {
-  KitRoot, ActionDockProvider, ActionDock, SectionDock, TaskbarFooter, TaskbarButton,
-  GlassRail, Surface, useScreenActions, HealthGlassOrb, setUxEventSink,
+  KitRoot, ActionDockProvider, ActionDock, Surface, AnalogueClock,
+  useScreenActions, HealthGlassOrb, setUxEventSink,
 } from "@hcw/ui-kit";
 
 setUxEventSink((name, payload) => analytics.track(name, payload));
 
 <KitRoot density="comfortable" coga="default">
   <ActionDockProvider>
-    <GlassRail glass="frost" rail={<>…</>}>
-      <Routes />
-    </GlassRail>
-    <ActionDock />
-    <TaskbarFooter left={…} center={…} right={…} />
+    {/* Soft sticky AppRibbon / PortalNeuFrame top bar — not GlassRail */}
+    <Surface layer="soft">{/* brand · primary nav */}</Surface>
+    <main>{/* stage — RailLayout or 1200px portal column */}</main>
+    <ActionDock /> {/* staff only */}
+    <AnalogueClock /* fixed bottom-right */ />
+    {/* AppFooterBar / TaskbarFooter — staff only */}
   </ActionDockProvider>
 </KitRoot>
 ```
 
-(`MuiRoot` / `createAormsTheme` remain as deprecated aliases of `KitRoot` / `createHcwTheme`.)
+(`MuiRoot` / `createAormsTheme` remain as deprecated aliases of `KitRoot` / `createHcwTheme`.
+Kit may still export `GlassRail` / `SoftRail` — **do not use** as product chrome.)
 
 Add `"@hcw/ui-kit": "workspace:*"` to the portal's `package.json`, and import the
 brand font once (`@fontsource/urbanist` weights 400/500/600/700).
@@ -260,13 +266,16 @@ src/
 ├─ capacity.ts · uxEvents.ts
 ├─ portal-chrome.scss
 ├─ KitRoot.tsx         (alias MuiRoot) — scheme · density · coga
-├─ Surface · GlassRail · HealthGlassOrb · BrandMark
-├─ ActionDock · SectionDock · TaskbarFooter
+├─ Surface · SoftRail/GlassRail (kit legacy — not product chrome) · HealthGlassOrb · BrandMark
+├─ ActionDock · AnalogueClock · SectionDock · TaskbarFooter
 ├─ StatusDot · DataState · ConfirmModal · PageBreadcrumb · Avatar · Toast
 ├─ AwarenessStrip · ActionOutcome* · KpiStrip
 └─ orchestration.tsx   MissionHeader · ObjectiveList · PhaseStrip ·
                        ConfidenceBand · DecisionQueue · FreezeTable (T10)
 ```
+
+Product shells: `AppRibbon` · `RailLayout` · `PortalNeuFrame` · `MarketingNeuFrame` —
+see [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md).
 
 Full attribute tables: [14-HCW-CATALOG.md](../hcw-kit/14-HCW-CATALOG.md).
 Versioned from **0.1.0** — [`CHANGELOG.md`](../../CHANGELOG.md).

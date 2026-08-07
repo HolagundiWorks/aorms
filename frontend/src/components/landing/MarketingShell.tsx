@@ -1,4 +1,3 @@
-import { ActionDockProvider } from "@hcw/ui-kit";
 import { Box } from "@mui/material";
 import { type ReactNode, useEffect } from "react";
 import { useLpReveal } from "../../lib/use-lp-reveal.js";
@@ -20,8 +19,6 @@ export function MarketingShell({
   footerVariant,
   visitCount,
   showFooter = true,
-  showConversionDock: _showConversionDock,
-  conversionDockVariant: _conversionDockVariant,
 }: {
   children: ReactNode;
   contours?: boolean;
@@ -31,43 +28,14 @@ export function MarketingShell({
   footerVariant?: "platform" | "architecture";
   visitCount?: number | null;
   showFooter?: boolean;
-  /** @deprecated Actions live in MarketingLandingDock. */
-  showConversionDock?: boolean;
-  /** @deprecated */
-  conversionDockVariant?: "default" | "platform-apps";
-}) {
-  return (
-    <ActionDockProvider>
-      <MarketingShellInner
-        contours={contours}
-        footerVariant={footerVariant ?? vertical}
-        visitCount={visitCount}
-        showFooter={showFooter}
-      >
-        {children}
-      </MarketingShellInner>
-    </ActionDockProvider>
-  );
-}
-
-function MarketingShellInner({
-  children,
-  contours,
-  footerVariant,
-  visitCount,
-  showFooter,
-}: {
-  children: ReactNode;
-  contours?: boolean;
-  footerVariant: "platform" | "architecture";
-  visitCount?: number | null;
-  showFooter: boolean;
 }) {
   useLpReveal();
 
   useEffect(() => {
     document.body.style.overflow = "";
   }, []);
+
+  const foot = footerVariant ?? vertical;
 
   return (
     <MarketingNeuFrame mainId="lp2-main">
@@ -102,7 +70,7 @@ function MarketingShellInner({
           <div className="lp2-content">
             {children}
             {showFooter ? (
-              <MarketingFooter visitCount={visitCount} variant={footerVariant} />
+              <MarketingFooter visitCount={visitCount} variant={foot} />
             ) : null}
           </div>
         </Box>

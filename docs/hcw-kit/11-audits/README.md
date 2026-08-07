@@ -92,7 +92,7 @@ over `frontend/src` (reproducible; recipes in the skill +
 | --- | --- |
 | Single breakpoint source | `BREAKPOINTS` (xs0 · sm600 · md900 · lg1200 · xl1536) → `theme.breakpoints.values`; no ad-hoc pixel media queries |
 | Responsive coverage | 42 files use responsive `sx` / `useMediaQuery` |
-| Shells degrade | RailLayout · GlassRail · MarketingShell all `flexDirection {xs:column, md:row}` — rail stacks full-width above stage on mobile, 20% side-rail at md+ |
+| Shells degrade | Soft sticky ribbon + full-width stage stack on mobile; no left SoftRail. `RailLayout` / `PortalNeuFrame` / `MarketingShell` |
 | Horizontal overflow | 0 hardcoded wide fixed widths; DataGrids scroll inside their tile |
 | Posture | Desktop-first workspace (studio principals); mobile = graceful stack, not a primary target |
 

@@ -26,12 +26,20 @@ Neither replaces the other.
 | [esti/HCW-CONSTRUCTION-PATTERNS.md](esti/HCW-CONSTRUCTION-PATTERNS.md) | Domain patterns | CP-01…11 job specs (product implements) |
 | [HCW-DESIGN-PLAYBOOK.md](HCW-DESIGN-PLAYBOOK.md) | Philosophy | Why the rules exist |
 | [hcw-kit/00-CONSTITUTION.md](hcw-kit/00-CONSTITUTION.md) | Law | Non-negotiable articles |
+| [esti/PAGE-STRUCTURE.md](esti/PAGE-STRUCTURE.md) | **Chrome SoT** | Soft neu · no left rail · ribbon · stage · dock · footer · clock |
+| [esti/UI-SITE-MAP.md](esti/UI-SITE-MAP.md) | Surface inventory | Marketing · auth · staff · portals · AProc |
+| [esti/HCW-UI-KIT.md](esti/HCW-UI-KIT.md) | Product kit how-to | Layers · spatial model · dock zones |
 | [esti/HCW-UI-UX-PRINCIPLES.md](esti/HCW-UI-UX-PRINCIPLES.md) | Evidence map | Law → pattern table |
 | [esti/HCW-AI-ORCHESTRATION-UX.md](esti/HCW-AI-ORCHESTRATION-UX.md) | AI module | Mission-first AI surfaces |
 | [esti/HCW-CONSTRUCTION-UX-OVERLAY.md](esti/HCW-CONSTRUCTION-UX-OVERLAY.md) | Domain overlay | Construction-**aware** lifecycle & stakeholders (not a CPM UX framework) |
 | [esti/HCW-UX-KPI-INSTRUMENT.md](esti/HCW-UX-KPI-INSTRUMENT.md) | Measurement | Events & healthy bands |
 | [hcw-kit/07-UX-REVIEW-CHECKLISTS.md](hcw-kit/07-UX-REVIEW-CHECKLISTS.md) | Process tool | Pass/fail Evaluate gate |
 | [hcw-kit/14-HCW-CATALOG.md](hcw-kit/14-HCW-CATALOG.md) | Implementation | Attributes for every element |
+
+### Product chrome (2026-08 — final soft neu)
+
+Spatial model on **every** surface: **top ribbon · stage · bottom dock · (staff) footer · AnalogueClock**.  
+**No left SoftRail / GlassRail.** Soft-square **8px** radius. Fog Gray canvas. Staff brand = firm name in `AppRibbon` (no floating watermark). Portals use `PortalNeuFrame`. Details: [PAGE-STRUCTURE.md](esti/PAGE-STRUCTURE.md) · [UI-SITE-MAP.md](esti/UI-SITE-MAP.md).
 
 ### One-line distinction
 

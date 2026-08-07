@@ -56,7 +56,6 @@ import { RightSlot } from "./components/shell/RightSlot.js";
 import { ActionDock, ActionDockProvider, ActionOutcomeBanner, AnalogueClock } from "@hcw/ui-kit";
 import { AppRibbon } from "./components/shell/AppRibbon.js";
 import { AppFooterBar } from "./components/shell/AppFooterBar.js";
-import { AormsLogo } from "./components/AormsLogo.js";
 import { UsageIdentity } from "./components/identity/UsageIdentity.js";
 import { DesktopLicenceBind } from "./components/DesktopLicenceBind.js";
 import { PomodoroProvider } from "./contexts/PomodoroContext.js";
@@ -657,7 +656,6 @@ function AppWorkspace() {
           <a href="#esti-main" className="esti-skip-link">
             Skip to main content
           </a>
-          <AormsLogo variant="watermark" className="esti-app-logo-float" />
           <AppRibbon nav={nav} firmName={firmName} adminGroups={adminGroups} />
           <div className="esti-app-content2">
             <RouteFocus />

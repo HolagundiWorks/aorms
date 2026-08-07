@@ -33,7 +33,7 @@ $neu-bg: #eceef2;
 $neu-dark: rgba(20, 21, 23, 0.16);
 $neu-light: rgba(255, 255, 255, 0.92);
 $neu-radius: 0; // panels — square (HCW: radius on buttons only)
-$neu-btn-radius: 4px; // matches @hcw/ui-kit BUTTON_RADIUS
+$neu-btn-radius: 8px; // matches @hcw/ui-kit BUTTON_RADIUS / RADIUS
 $glass-radius: 0;
 $glass-orange-30: rgba(255, 79, 24, 0.3);
 
@@ -644,16 +644,6 @@ $neu-input-radius: 0;
   }
 }
 
-// Floating AORMS watermark — bottom-right, above the taskbar footer.
-.esti-app-logo-float {
-  position: fixed;
-  bottom: 68px;
-  right: 12px;
-  opacity: 0.8;
-  z-index: 1300;
-  pointer-events: none;
-}
-
 // Ask ESTI — anchor icon at the true centre of the taskbar.
 .esti-app-footer__esti {
   flex-shrink: 0;
@@ -1050,7 +1040,7 @@ $neu-input-radius: 0;
   min-width: min(92vw, 22rem);
   max-width: 24rem;
   padding: 0.65rem 0.75rem;
-  border-radius: 12px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.97);
   border: 1px solid rgba(255, 79, 24, 0.35);
   box-shadow: 0 8px 28px rgba(20, 21, 23, 0.12);
@@ -1163,15 +1153,6 @@ $neu-input-radius: 0;
     left: var(--esti-shell-gutter, 16px);
     height: 100dvh;
     max-height: 100dvh;
-  }
-
-  // Public marketing pages — studio rail without app header or taskbar footer
-  .lp2-shell .esti-glass-dash .esti-dash-rail.lp2-marketing-rail {
-    top: 0;
-    left: var(--esti-shell-gutter, 16px);
-    height: 100dvh;
-    max-height: 100dvh;
-    padding: 12px;
   }
 
   .esti-auth-shell .esti-auth-stage-wrap {

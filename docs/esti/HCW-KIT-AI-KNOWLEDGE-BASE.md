@@ -38,8 +38,10 @@ FLAT (info at rest, ~90% of pixels), SOFT RAISED (objects / chrome), SOFT ATTENT
 (wells / alerts). One accent (Radiant Orange `#FF4F18`). Soft-square **8px** radius
 on product chrome. One spatial model everywhere:
 **Ribbon · Stage (full width) · Taskbar footer · ActionDock · AnalogueClock**
-(LEFT destroy · CENTER create · RIGHT commit). **Left rail retired 2026-08** —
-see [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md). Portals still use SoftRail until redesign.
+(LEFT destroy · CENTER create · RIGHT commit). **Left rail retired 2026-08** on
+staff, marketing, and portals — see [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) and
+[UI-SITE-MAP.md](UI-SITE-MAP.md). Soft radius **8px** (`RADIUS` / `BUTTON_RADIUS`).
+Staff brand = firm name in `AppRibbon`; no floating watermark (clock owns BR).
 `:focus-visible` receives the same lift as `:hover` — keyboard parity is brand behaviour.
 
 **Package layout** (`src/`): `tokens.ts` (colour, type, **scales**: `SPACING`,

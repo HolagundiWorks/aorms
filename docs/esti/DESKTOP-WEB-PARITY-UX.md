@@ -2,23 +2,24 @@
 
 > **Law:** one design language, two hosts — only **platform behaviour** diverges.  
 > **Design system:** [`@hcw/ui-kit`](HCW-UI-KIT.md) (Urbanist · Radiant Orange · opaque soft neu · Top ribbon · Stage · Taskbar · ActionDock · AnalogueClock).  
+> **Chrome SoT:** [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) · [UI-SITE-MAP.md](UI-SITE-MAP.md).  
 > **Runtime:** [LOCAL-FIRST.md](LOCAL-FIRST.md). Do **not** introduce a second typeface, palette, or ERP chrome for desktop.
 
 ## Shell mapping (same IA both hosts)
 
 ```text
 ┌─ Optional thin OS menu (desktop only: Project · Edit · View · AI · Help) ─┐
-├─ Top ribbon / SoftRail (modules) ── Stage ── Inspector / Ask ESTI ───────┤
+├─ Soft neu top ribbon (modules) ── Stage ── Inspector / Ask ESTI ──────────┤
 ├─ ActionDock (destroy · create · commit) ──────────────────────────────────┤
-├─ TaskbarFooter (calc · launchers · tray: digital clock · sync · alerts) ──┤
-└─ AnalogueClock (fixed bottom-right — separate from tray digital clock) ───┘
+├─ TaskbarFooter (calc · launchers · tray: sync · alerts · ID — no clock) ──┤
+└─ AnalogueClock (fixed bottom-right — single clock; no watermark) ─────────┘
 ```
 
 | Role | Primitive | Rule |
 | --- | --- | --- |
-| Modules | Soft neu top ribbon / brief strip (staff); `SoftRail` on portals | Same IA on desktop + web — do not invent a second module tree |
+| Modules | Soft neu `AppRibbon` / stage brief (staff); `PortalNeuFrame` on portals | Same IA on desktop + web — do not invent a second module tree |
 | Marketing | `MarketingNeuFrame` (top ribbon · stage · AnalogueClock) | Public Home/Blog/Downloads — no left SoftRail |
-| Workspace | Stage | Same routes + [05-TEMPLATES](../hcw-kit/05-TEMPLATES.md) |
+| Workspace | Stage + `RailLayout` page shell | Same routes + [05-TEMPLATES](../hcw-kit/05-TEMPLATES.md) |
 | Inspector / AI | One right slot (properties ↔ Ask ESTI) | AI never menu-only |
 | Native chrome | Thin **WinUI 3** Fluent 2 menu → SPA commands | AI never menu-only |
 | Status | Taskbar + `SyncQueueChip` + AnalogueClock | Same tray order; analogue clock is decorative/ambient |

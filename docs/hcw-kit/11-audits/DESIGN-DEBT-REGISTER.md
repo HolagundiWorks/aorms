@@ -1,4 +1,10 @@
-﻿**2026-08-07 — Portal SoftRail retired.** Account + external portals use
+﻿**2026-08-07 — Wave 3 chrome cleanup.** Staff watermark removed (AnalogueClock owns
+BR). `$neu-btn-radius` + wellness banner → 8px. Deleted `MarketingRailNav`,
+`MarketingConversionDock`, `PublicAuthStageLayout`; purged `.lp2-rail` /
+portal-rail CSS. Docs: [PAGE-STRUCTURE](../../esti/PAGE-STRUCTURE.md) ·
+[UI-SITE-MAP](../../esti/UI-SITE-MAP.md) · [HCW-UX](../../HCW-UX.md).
+
+**2026-08-07 — Portal SoftRail retired.** Account + external portals use
 `PortalNeuFrame` (soft top bar · 1200px stage · AnalogueClock).
 
 **2026-08-06 — Final UI: no-rail soft neu.** Staff + marketing left rail retired
@@ -7,11 +13,11 @@ stage header shell. Pure neumorphism 1.5.0 remains (glass banned on chrome).
 
 **2026-08-06 — Pure neumorphism 1.5.0 shipped** (Constitution Art. V amended; glass banned; SoftRail + AnalogueClock). Product surfaces remapped opaque neu.
 
-# Design debt register â€” LIVING
+# Design debt register — LIVING
 
 **The single queue of known design debt.** Every audit deposits here; every fix
 withdraws. Agents: update this file in the same change that alters a fact
-(Rulebook Â§14). Ordered by severity Ã— reach. **Updated:** 2026-07-22.
+(Rulebook §14). Ordered by severity × reach. **Updated:** 2026-08-07.
 
 ## Open
 
@@ -21,7 +27,15 @@ withdraws. Agents: update this file in the same change that alters a fact
 
 ### Framework gaps
 
-*None open â€” F1â€“F5 closed in 1.3.0 (see Retired).*
+*None open — F1–F5 closed in 1.3.0 (see Retired).*
+
+### Product chrome (optional polish)
+
+- Reconcile `#eceef2` footer / Studio brief fills with Fog Gray / soft tokens
+- StudioAbstract brief strip → soft `Surface` stage header
+- Optional `AormsLogo` in `AppRibbon` if firm-name branding feels weak
+- De-Carbon portal widgets (`RowActionsMenu`, `SubmissionThread`, `ProjectSiteReference`) and company-admin / licensing Carbon tabs
+- Knowledge Bank public vs staff path clarification
 
 ### Empirical maturity (industry-reference bar)
 
@@ -44,9 +58,11 @@ Adoption checklist: [HCW-UX-ADOPTION-PLAYBOOK.md](../../esti/HCW-UX-ADOPTION-PLA
 Product-only remainders (not kit defects):
 
 - **Portal SoftRail redesign** — ✅ shipped 2026-08-07 (`PortalNeuFrame`); SoftRail no longer used in product portals
-- **Product i18n** â€” message catalogs / locale switcher in consumer apps
-- **Figma component library** â€” designer-owned `.fig` mirroring primitives
-- **Variables sync ritual** â€” DesignOps (see roadmaps)
+- **Dead marketing rail code** — ✅ deleted 2026-08-07 (`MarketingRailNav` · ConversionDock · `.lp2-rail` CSS)
+- **Staff watermark vs clock** — ✅ removed 2026-08-07
+- **Product i18n** — message catalogs / locale switcher in consumer apps
+- **Figma component library** — designer-owned `.fig` mirroring primitives
+- **Variables sync ritual** — DesignOps (see roadmaps)
 
 ## Roadmap-class (tracked in 13-Roadmaps)
 

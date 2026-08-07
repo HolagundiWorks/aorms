@@ -42,7 +42,7 @@ Phase is a **Stage frame** (tabs or Mission phase strip) — not a new shell reg
 | --- | --- | --- |
 | **Owner / client** | Approve / fund | Judgment-heavy rail · recommendation-first decisions |
 | **Architect / principal** | Design intent | Full studio chrome · dock commits |
-| **Consultant** | Advise / certify | Portal GlassRail · limited dock |
+| **Consultant** | Advise / certify | `ExternalPortalShell` · limited write |
 | **Contractor** | Execute / report | Compact density · field targets |
 | **Subcontractor / site** | Task + safety | **Field mode:** larger targets (`COGA`/`calm`), fewer nav items, offline-tolerant patterns (product) |
 
