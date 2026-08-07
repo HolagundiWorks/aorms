@@ -52,7 +52,7 @@ function companyItem(c: CompanyOption): TenantItem {
 }
 
 /**
- * AStudio staff sign-in — composition: brand → one headline → form → one primary CTA.
+ * AStudio staff sign-in — horizontal brand | form card.
  * Canon: COMPOSITION-PRINCIPLES · AuthRailLayout soft card.
  */
 export function Login() {
@@ -146,37 +146,60 @@ export function Login() {
       : login.error?.message;
   const showError = Boolean(login.error) && login.error?.message !== "totp_required";
 
-  const brand = (
-    <AuthBrandBlock
-      product={AORMS_STUDIO.title}
-      tagline={AORMS_STUDIO.expansion}
-      logoVariant="stage"
-    />
+  const title = companies ? "Choose where to go" : "Sign in";
+  const lead = companies
+    ? "Open your workspace, manage your account, or review your company."
+    : PUBLIC_SITE
+      ? `${AORMS_STUDIO.title} — architecture consultancy workspace for Indian practices.`
+      : "Sign in, then choose your workspace, account, or company.";
+
+  const brandPane = (
+    <Stack
+      className="esti-auth-card__brand"
+      spacing={COMPOSITION_RHYTHM.md}
+      sx={{
+        flex: { md: "0 0 42%" },
+        width: { xs: "100%", md: "auto" },
+        p: { xs: COMPOSITION_RHYTHM.md, md: COMPOSITION_RHYTHM.lg },
+        justifyContent: "center",
+        borderBottom: { xs: 1, md: 0 },
+        borderRight: { xs: 0, md: 1 },
+        borderColor: "divider",
+        backgroundColor: "action.hover",
+      }}
+    >
+      <AuthBrandBlock
+        product={AORMS_STUDIO.title}
+        tagline={AORMS_STUDIO.expansion}
+        logoVariant="stage"
+      />
+      <Box>
+        <Typography variant="h4" component="h1" className="esti-auth-title">
+          {title}
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          className="esti-auth-lead"
+          sx={{ mt: 1 }}
+        >
+          {lead}
+        </Typography>
+      </Box>
+    </Stack>
   );
 
-  const form = (
-    <Stack className="esti-auth-form" spacing={COMPOSITION_RHYTHM.md}>
-      <Stack spacing={COMPOSITION_RHYTHM.sm}>
-        {brand}
-        <Box>
-          <Typography variant="h4" component="h1" className="esti-auth-title">
-            {companies ? "Choose where to go" : "Sign in"}
-          </Typography>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            className="esti-auth-lead"
-            sx={{ mt: 1 }}
-          >
-            {companies
-              ? "Open your workspace, manage your account, or review your company."
-              : PUBLIC_SITE
-                ? `${AORMS_STUDIO.title} — architecture consultancy workspace for Indian practices.`
-                : "Sign in, then choose your workspace, account, or company."}
-          </Typography>
-        </Box>
-      </Stack>
-
+  const formPane = (
+    <Stack
+      className="esti-auth-form"
+      spacing={COMPOSITION_RHYTHM.md}
+      sx={{
+        flex: 1,
+        minWidth: 0,
+        p: { xs: COMPOSITION_RHYTHM.md, md: COMPOSITION_RHYTHM.lg },
+        justifyContent: "center",
+      }}
+    >
       {fromGoogle.isPending && (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <CircularProgress size={16} />
@@ -205,7 +228,6 @@ export function Login() {
                 : null;
           const showDropdown = companies.length > 1 || owned.length > 1;
           const tenantItems = [WORKSPACE_ITEM, ...companies.map(companyItem)];
-          // Odd peer destinations: workspace · account · company|join
           return (
             <Stack spacing={COMPOSITION_RHYTHM.sm}>
               <Button
@@ -446,5 +468,27 @@ export function Login() {
     </Stack>
   );
 
-  return <AuthRailLayout variant="workspace" showMarketingFooter={false} rail={form} />;
+  const form = (
+    <Box
+      className="esti-auth-card__split"
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        alignItems: "stretch",
+        minHeight: { md: 440 },
+      }}
+    >
+      {brandPane}
+      {formPane}
+    </Box>
+  );
+
+  return (
+    <AuthRailLayout
+      variant="workspace"
+      showMarketingFooter={false}
+      layout="horizontal"
+      rail={form}
+    />
+  );
 }

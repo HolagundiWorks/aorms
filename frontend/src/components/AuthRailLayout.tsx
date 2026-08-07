@@ -9,7 +9,7 @@ import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 
 /**
  * Unauthenticated auth shell — landing MarketingTopBar + Fog Gray entourage +
- * centered soft-neu card. Ambient AnalogueClock (no Pomodoro). Logos → landing.
+ * soft-neu card. Ambient AnalogueClock (no Pomodoro). Logos → landing.
  */
 export function AuthRailLayout({
   rail,
@@ -18,6 +18,8 @@ export function AuthRailLayout({
   showMarketingFooter = true,
   footerVariant = "architecture",
   visitCount,
+  /** Horizontal brand|form card (login). Stacked is the default for short forms. */
+  layout = "stack",
 }: {
   /** Sign-in / recovery form content — centered soft neu card. */
   rail: ReactNode;
@@ -28,7 +30,10 @@ export function AuthRailLayout({
   showMarketingFooter?: boolean;
   footerVariant?: "platform" | "architecture";
   visitCount?: number | null;
+  layout?: "stack" | "horizontal";
 }) {
+  const wide = layout === "horizontal";
+
   return (
     <div
       className="esti-auth-shell esti-lp-neu"
@@ -83,21 +88,38 @@ export function AuthRailLayout({
         >
           <Surface
             layer="soft"
-            className="esti-auth-card"
+            className={`esti-auth-card${wide ? " esti-auth-card--horizontal" : ""}`}
             sx={{
               width: "100%",
-              maxWidth: COMPOSITION_RHYTHM.authCardMaxPx,
+              maxWidth: wide
+                ? COMPOSITION_RHYTHM.authCardWideMaxPx
+                : COMPOSITION_RHYTHM.authCardMaxPx,
               borderRadius: `${RADIUS}px`,
-              p: { xs: COMPOSITION_RHYTHM.md, sm: COMPOSITION_RHYTHM.lg },
+              p: wide ? 0 : { xs: COMPOSITION_RHYTHM.md, sm: COMPOSITION_RHYTHM.lg },
               display: "flex",
               flexDirection: "column",
-              gap: COMPOSITION_RHYTHM.md,
+              gap: wide ? 0 : COMPOSITION_RHYTHM.md,
+              overflow: "hidden",
             }}
           >
             <Box className="esti-auth-card__body" sx={{ minWidth: 0, width: 1, flex: 1 }}>
               {rail}
             </Box>
-            <HcwAttribution variant="auth" logoTone="on-light" />
+            {wide ? (
+              <Box
+                sx={{
+                  px: COMPOSITION_RHYTHM.md,
+                  pb: COMPOSITION_RHYTHM.md,
+                  pt: COMPOSITION_RHYTHM.sm,
+                  borderTop: 1,
+                  borderColor: "divider",
+                }}
+              >
+                <HcwAttribution variant="auth" logoTone="on-light" />
+              </Box>
+            ) : (
+              <HcwAttribution variant="auth" logoTone="on-light" />
+            )}
           </Surface>
         </Box>
       </Box>
