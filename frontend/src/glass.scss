@@ -1128,6 +1128,9 @@ $neu-input-radius: 0;
 }
 
 .esti-auth-card {
+  // Kit Surface passes numeric RADIUS; MUI multiplies by shape.borderRadius (8×8=64).
+  // Soft chrome must stay kit RADIUS = 8px.
+  border-radius: 8px !important;
   animation: esti-auth-card-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 

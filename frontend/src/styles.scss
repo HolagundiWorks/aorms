@@ -154,9 +154,10 @@ body,
   background: color-mix(in srgb, var(--cds-support-warning, #f1c21b) 18%, transparent);
 }
 
-/* HCW-UI-Kit Surface — square panels; BUTTON_RADIUS for buttons only. */
+/* HCW-UI-Kit Surface — soft chrome RADIUS (8px). Numeric sx is multiplied by
+ * theme.shape.borderRadius, so pin px here. Buttons use BUTTON_RADIUS separately. */
 .hcw-surface {
-  border-radius: 0 !important;
+  border-radius: 8px !important;
 }
 
 // Horizontal tile headers (title + tag/arrow) — layout only; spacing-05 (16px).
