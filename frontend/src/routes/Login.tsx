@@ -22,6 +22,7 @@ import { AuthRailLayout } from "../components/AuthRailLayout.js";
 import { GoogleIconCircle } from "../components/GoogleIconCircle.js";
 import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import { AUTH_PAGE_SEO, applyPublicPageSeo } from "../lib/public-page-seo.js";
+import { isPlatformHost, platformHomeHref } from "../lib/aorms-surface-urls.js";
 
 const PUBLIC_SITE = import.meta.env.VITE_PUBLIC_SITE !== "false";
 
@@ -431,8 +432,8 @@ export function Login() {
             {AORMS_PORTALS.external.loginPageLink}
           </Button>
           <Button
-            component={RouterLink}
-            to="/"
+            component={isPlatformHost() ? RouterLink : "a"}
+            {...(isPlatformHost() ? { to: "/" } : { href: platformHomeHref() })}
             variant="text"
             size="small"
             fullWidth

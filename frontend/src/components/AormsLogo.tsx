@@ -1,4 +1,6 @@
 /** AORMS wordmark — CSS-mask logo (`/aorms-logo.png`, Radiant Orange fill). */
+import { MarketingHomeLink } from "./landing/MarketingHomeLink.js";
+
 export function AormsLogo({
   variant = "md",
   className,
@@ -47,7 +49,7 @@ export function AormsMark({
   );
 }
 
-/** Logo + optional product eyebrow / tagline for auth card headers. */
+/** Logo + optional product eyebrow / tagline for auth card headers. Logo → landing. */
 export function AuthBrandBlock({
   tagline,
   product,
@@ -61,9 +63,9 @@ export function AuthBrandBlock({
   return (
     <div className="esti-login-brand esti-login-brand--stacked">
       {product ? <p className="esti-auth-eyebrow">{product}</p> : null}
-      <a href="/#top" className="esti-login-brand__link" aria-label="AORMS home">
+      <MarketingHomeLink className="esti-login-brand__link">
         <AormsLogo variant={logoVariant} />
-      </a>
+      </MarketingHomeLink>
       {tagline ? (
         <p className="esti-label esti-label--secondary esti-auth-brand-tagline">{tagline}</p>
       ) : null}

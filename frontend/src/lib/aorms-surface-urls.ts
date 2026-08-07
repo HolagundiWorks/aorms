@@ -162,6 +162,16 @@ export function platformPageUrl(
   return `${base}${root}${suffix}`;
 }
 
+/**
+ * Platform marketing home — `/` on aorms.in, absolute apex URL on studio/other hosts
+ * (studio `/` redirects to `/login`).
+ */
+export function platformHomeHref(
+  hostname = typeof window !== "undefined" ? window.location.hostname : "",
+): string {
+  return isPlatformHost(hostname) ? "/" : surfaceAbsoluteUrl("platform");
+}
+
 /** All production origins that must appear in ALLOWED_ORIGINS (cookie CSRF). */
 export const AORMS_ALLOWED_ORIGINS = Array.from(
   new Set(

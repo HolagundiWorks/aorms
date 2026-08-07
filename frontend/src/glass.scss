@@ -1071,7 +1071,7 @@ $neu-input-radius: 0;
   height: 100dvh;
   overflow: hidden;
   background: #f2f4f7; // Fog Gray — kit colors.background / --lp-bg
-  padding: var(--esti-shell-gutter, 24px);
+  padding: 0; // gutters live on MarketingTopBar + auth main (match landing)
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

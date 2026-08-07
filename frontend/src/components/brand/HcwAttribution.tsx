@@ -1,4 +1,5 @@
 import { HUMAN_CENTRIC_WORKS } from "../../lib/product-nomenclature.js";
+import { MarketingHomeLink } from "../landing/MarketingHomeLink.js";
 
 type Variant = "rail" | "footer" | "inline" | "auth";
 type LogoTone = "on-dark" | "on-light";
@@ -49,11 +50,7 @@ export function HcwAttribution({
 
   return (
     <div className={rootClass}>
-      <a
-        href="/"
-        className="hcw-attribution__link"
-        aria-label={`${HUMAN_CENTRIC_WORKS.legalName} — AORMS home`}
-      >
+      <MarketingHomeLink className="hcw-attribution__link">
         <img
           src={logoSrc}
           alt={HUMAN_CENTRIC_WORKS.legalName}
@@ -62,7 +59,7 @@ export function HcwAttribution({
           loading="lazy"
           decoding="async"
         />
-      </a>
+      </MarketingHomeLink>
       {showNote ? (
         <p className="hcw-attribution__note">{HUMAN_CENTRIC_WORKS.attribution}</p>
       ) : null}

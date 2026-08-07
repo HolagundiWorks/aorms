@@ -1,15 +1,17 @@
 import { Box, Typography } from "@mui/material";
 import { Surface, colors, RADIUS } from "@hcw/ui-kit";
-import { Link as RouterLink } from "react-router-dom";
 import { type ReactNode } from "react";
 import { AormsLogo } from "../AormsLogo.js";
 import { MarketingClockPomodoro } from "./MarketingClockPomodoro.js";
+import { MarketingHomeLink } from "./MarketingHomeLink.js";
 import { AORMS_PLATFORM } from "../../lib/product-nomenclature.js";
 import {
   MARKETING_CONTENT_GUTTER,
   marketingContentColumnSx,
 } from "../../lib/marketing-layout.js";
 import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
+
+export { MarketingHomeLink } from "./MarketingHomeLink.js";
 
 /**
  * Brand-only marketing top ribbon — logo + expansion.
@@ -27,6 +29,7 @@ export function MarketingTopBar() {
         px: { xs: MARKETING_CONTENT_GUTTER.xs, md: MARKETING_CONTENT_GUTTER.md },
         mt: COMPOSITION_RHYTHM.sm,
         boxSizing: "border-box",
+        flexShrink: 0,
       }}
     >
       <Surface
@@ -46,13 +49,11 @@ export function MarketingTopBar() {
           height: 56,
         }}
       >
-        <RouterLink
-          to="/"
-          aria-label={`${AORMS_PLATFORM.name} home`}
+        <MarketingHomeLink
           style={{ display: "inline-flex", alignItems: "center", textDecoration: "none" }}
         >
           <AormsLogo variant="rail" />
-        </RouterLink>
+        </MarketingHomeLink>
         <Typography
           variant="caption"
           color="text.secondary"
