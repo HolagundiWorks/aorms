@@ -1,7 +1,7 @@
 /**
  * AORMS Studio Intelligence — home screen of the system.
  *
- * Soft-neu Fog Gray stage: brief strip (Surface soft) · KPI/tabs · DataGrids.
+ * Plain Fog Gray stage: brief strip (Surface soft) · KPI/tabs · DataGrids.
  * Route: / (studio host root).
  */
 import {
@@ -27,7 +27,6 @@ import { StatusDot } from "../components/StatusTag.js";
 import { EstiOrchestrationStatus } from "../components/EstiOrchestrationStatus.js";
 import { STATE_WORD } from "../components/dashboard/zoneState.js";
 import type { ZoneState } from "../components/dashboard/zoneState.js";
-import { StudioBreath } from "../components/dashboard/StudioBreath.js";
 import { StudioTeamPanel } from "../components/dashboard/StudioTeamPanel.js";
 import AccountBalanceOutlined from "@mui/icons-material/AccountBalanceOutlined";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
@@ -709,7 +708,6 @@ export function StudioAbstract() {
         gap: COMPOSITION_RHYTHM.stageGap,
       }}
     >
-      <StudioBreath />
       {/* Brief strip — soft Surface stage header (no left rail). */}
       <Surface
         layer="soft"
