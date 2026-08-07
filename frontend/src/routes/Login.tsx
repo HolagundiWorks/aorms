@@ -9,20 +9,37 @@ import {
   Divider,
   MenuItem,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
 import { login as platformLogin } from "../platform-admin/lib/auth.js";
 import { trpc } from "../lib/trpc.js";
-import { AuthBrandBlock } from "../components/AormsLogo.js";
-import { AORMS_STUDIO, AORMS_PORTALS } from "../lib/product-nomenclature.js";
+import {
+  AORMS_CONSULTANCY,
+  AORMS_PLATFORM,
+  AORMS_PMC,
+  AORMS_PORTALS,
+  AORMS_STUDIO,
+  HCW_LICENSE_MANAGER,
+} from "../lib/product-nomenclature.js";
 import { AuthRailLayout } from "../components/AuthRailLayout.js";
+import {
+  AuthBrandPane,
+  AuthLabeledField,
+  AuthSplitCard,
+} from "../components/auth/AuthSplitCard.js";
 import { GoogleIconCircle } from "../components/GoogleIconCircle.js";
 import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import { AUTH_PAGE_SEO, applyPublicPageSeo } from "../lib/public-page-seo.js";
-import { isPlatformHost, platformHomeHref } from "../lib/aorms-surface-urls.js";
+import {
+  isAdminHost,
+  isConsultancyHost,
+  isPlatformHost,
+  isPmcHost,
+  isStudioHost,
+  platformHomeHref,
+} from "../lib/aorms-surface-urls.js";
 
 const PUBLIC_SITE = import.meta.env.VITE_PUBLIC_SITE !== "false";
 
@@ -49,6 +66,14 @@ const GOOGLE_ERRORS: Record<string, string> = {
 
 function companyItem(c: CompanyOption): TenantItem {
   return { id: c.publicId ?? c.name, label: `${c.name} — ${c.role}` };
+}
+
+function authProductName(): string {
+  if (isStudioHost()) return AORMS_STUDIO.title;
+  if (isConsultancyHost()) return AORMS_CONSULTANCY.title;
+  if (isPmcHost()) return AORMS_PMC.title;
+  if (isAdminHost()) return HCW_LICENSE_MANAGER.consoleTitle;
+  return AORMS_PLATFORM.name;
 }
 
 /**
@@ -149,56 +174,18 @@ export function Login() {
   const title = companies ? "Choose where to go" : "Sign in";
   const lead = companies
     ? "Open your workspace, manage your account, or review your company."
-    : PUBLIC_SITE
-      ? `${AORMS_STUDIO.title} — architecture consultancy workspace for Indian practices.`
-      : "Sign in, then choose your workspace, account, or company.";
+    : "One AORMS sign-in for workspace, portals, account, and licensing.";
 
-  const brandPane = (
-    <Stack
-      className="esti-auth-card__brand"
-      spacing={COMPOSITION_RHYTHM.md}
-      sx={{
-        flex: { md: "0 0 42%" },
-        width: { xs: "100%", md: "auto" },
-        p: { xs: COMPOSITION_RHYTHM.md, md: COMPOSITION_RHYTHM.lg },
-        justifyContent: "center",
-        borderBottom: { xs: 1, md: 0 },
-        borderRight: { xs: 0, md: 1 },
-        borderColor: "divider",
-        backgroundColor: "action.hover",
-      }}
-    >
-      <AuthBrandBlock
-        product={AORMS_STUDIO.title}
-        tagline={AORMS_STUDIO.expansion}
-        logoVariant="rail"
-      />
-      <Box>
-        <Typography variant="h5" component="h1" className="esti-auth-title">
-          {title}
-        </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          className="esti-auth-lead"
-          sx={{ mt: 1 }}
-        >
-          {lead}
-        </Typography>
-      </Box>
-    </Stack>
-  );
-
-  const formPane = (
-    <Stack
-      className="esti-auth-form"
-      spacing={COMPOSITION_RHYTHM.md}
-      sx={{
-        flex: 1,
-        minWidth: 0,
-        p: { xs: COMPOSITION_RHYTHM.md, md: COMPOSITION_RHYTHM.lg },
-        justifyContent: "center",
-      }}
+  const rail = (
+    <AuthSplitCard
+      brand={
+        <AuthBrandPane
+          product={authProductName()}
+          tagline={AORMS_PLATFORM.expansion}
+          title={title}
+          lead={lead}
+        />
+      }
     >
       {fromGoogle.isPending && (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
@@ -275,12 +262,11 @@ export function Login() {
                 </Button>
               )}
               {showDropdown ? (
-                <TextField
+                <AuthLabeledField
                   id="tenant-select"
-                  select
                   label="Workspace context (optional)"
+                  select
                   size="small"
-                  fullWidth
                   value={(tenant ?? WORKSPACE_ITEM).id}
                   onChange={(e) =>
                     setTenant(tenantItems.find((item) => item.id === e.target.value) ?? null)
@@ -291,7 +277,7 @@ export function Login() {
                       {item.label}
                     </MenuItem>
                   ))}
-                </TextField>
+                </AuthLabeledField>
               ) : null}
               {companyError && (
                 <Alert severity="error">
@@ -335,70 +321,37 @@ export function Login() {
             }}
           >
             <Stack spacing={COMPOSITION_RHYTHM.sm}>
-              <Stack spacing={0.75}>
-                <Typography
-                  component="label"
-                  htmlFor="email"
-                  variant="body2"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Email
-                </Typography>
-                <TextField
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@firm.in"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  fullWidth
-                  autoFocus
-                  aria-label="Email"
-                />
-              </Stack>
-              <Stack spacing={0.75}>
-                <Typography
-                  component="label"
-                  htmlFor="password"
-                  variant="body2"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Password
-                </Typography>
-                <TextField
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  fullWidth
-                  aria-label="Password"
-                />
-              </Stack>
+              <AuthLabeledField
+                id="email"
+                label="Email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@firm.in"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoFocus
+              />
+              <AuthLabeledField
+                id="password"
+                label="Password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
               {needCode && (
-                <Stack spacing={0.75}>
-                  <Typography
-                    component="label"
-                    htmlFor="totp-code"
-                    variant="body2"
-                    sx={{ fontWeight: 600 }}
-                  >
-                    Authenticator code
-                  </Typography>
-                  <TextField
-                    id="totp-code"
-                    placeholder="123456"
-                    autoComplete="one-time-code"
-                    helperText="6-digit code from your authenticator app."
-                    slotProps={{ htmlInput: { inputMode: "numeric" } }}
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    fullWidth
-                    aria-label="Authenticator code"
-                  />
-                </Stack>
+                <AuthLabeledField
+                  id="totp-code"
+                  label="Authenticator code"
+                  placeholder="123456"
+                  autoComplete="one-time-code"
+                  helperText="6-digit code from your authenticator app."
+                  slotProps={{ htmlInput: { inputMode: "numeric" } }}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                />
               )}
               {showError && (
                 <Alert severity="error">
@@ -465,22 +418,7 @@ export function Login() {
           </Button>
         </Stack>
       )}
-    </Stack>
-  );
-
-  const form = (
-    <Box
-      className="esti-auth-card__split"
-      sx={{
-        display: "flex",
-        flexDirection: { xs: "column", md: "row" },
-        alignItems: "stretch",
-        minHeight: { md: 360 },
-      }}
-    >
-      {brandPane}
-      {formPane}
-    </Box>
+    </AuthSplitCard>
   );
 
   return (
@@ -488,7 +426,7 @@ export function Login() {
       variant="workspace"
       showMarketingFooter={false}
       layout="horizontal"
-      rail={form}
+      rail={rail}
     />
   );
 }

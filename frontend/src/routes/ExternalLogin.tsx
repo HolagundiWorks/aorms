@@ -1,10 +1,14 @@
 import ArrowBack from "@mui/icons-material/ArrowBack";
-import { Alert, AlertTitle, Button, Link, Stack, TextField, Typography } from "@mui/material";
+import { Alert, AlertTitle, Button, Link, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
-import { AuthBrandBlock } from "../components/AormsLogo.js";
+import { AORMS_PLATFORM, AORMS_PORTALS } from "../lib/product-nomenclature.js";
 import { AuthRailLayout } from "../components/AuthRailLayout.js";
+import {
+  AuthBrandPane,
+  AuthLabeledField,
+  AuthSplitCard,
+} from "../components/auth/AuthSplitCard.js";
 import { AUTH_PAGE_SEO, applyPublicPageSeo } from "../lib/public-page-seo.js";
 import { trpc } from "../lib/trpc.js";
 
@@ -39,21 +43,25 @@ export function ExternalLogin() {
     applyPublicPageSeo(AUTH_PAGE_SEO.externalAccess);
   }, []);
 
-  const form = (
-    <Stack spacing={2}>
-      <Stack spacing={1}>
-        <AuthBrandBlock tagline={AORMS_PORTALS.external.authTagline} />
-        <h1 className="esti-label">{AORMS_PORTALS.external.stageHeadline}</h1>
-        <p>
-          {AORMS_PORTALS.external.signInIntro}
-          If you are an office team member, use{" "}
-          <Link component={RouterLink} to="/login">
-            {AORMS_PORTALS.studio.signInTitle}
-          </Link>
-          .
-        </p>
-      </Stack>
-
+  const rail = (
+    <AuthSplitCard
+      brand={
+        <AuthBrandPane
+          product={AORMS_PLATFORM.name}
+          tagline={AORMS_PORTALS.external.authTagline}
+          title={AORMS_PORTALS.external.stageHeadline}
+          lead={
+            <>
+              {AORMS_PORTALS.external.signInIntro} If you are an office team member, use{" "}
+              <Link component={RouterLink} to="/login">
+                {AORMS_PORTALS.studio.signInTitle}
+              </Link>
+              .
+            </>
+          }
+        />
+      }
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -61,69 +69,37 @@ export function ExternalLogin() {
         }}
       >
         <Stack spacing={2}>
-          <Stack spacing={0.75}>
-            <Typography
-              component="label"
-              htmlFor="access-email"
-              variant="body2"
-              sx={{ fontWeight: 600 }}
-            >
-              Email
-            </Typography>
-            <TextField
-              id="access-email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@firm.in"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              fullWidth
-              aria-label="Email"
-            />
-          </Stack>
-          <Stack spacing={0.75}>
-            <Typography
-              component="label"
-              htmlFor="access-password"
-              variant="body2"
-              sx={{ fontWeight: 600 }}
-            >
-              Password
-            </Typography>
-            <TextField
-              id="access-password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              fullWidth
-              aria-label="Password"
-            />
-          </Stack>
+          <AuthLabeledField
+            id="access-email"
+            label="Email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@firm.in"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoFocus
+          />
+          <AuthLabeledField
+            id="access-password"
+            label="Password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
           {needCode && (
-            <Stack spacing={0.75}>
-              <Typography
-                component="label"
-                htmlFor="access-totp"
-                variant="body2"
-                sx={{ fontWeight: 600 }}
-              >
-                Authenticator code
-              </Typography>
-              <TextField
-                id="access-totp"
-                placeholder="123456"
-                autoComplete="one-time-code"
-                helperText="6-digit code from your authenticator app."
-                slotProps={{ htmlInput: { inputMode: "numeric" } }}
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                fullWidth
-                aria-label="Authenticator code"
-              />
-            </Stack>
+            <AuthLabeledField
+              id="access-totp"
+              label="Authenticator code"
+              placeholder="123456"
+              autoComplete="one-time-code"
+              helperText="6-digit code from your authenticator app."
+              slotProps={{ htmlInput: { inputMode: "numeric" } }}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
           )}
           {showError && (
             <Alert severity="error">
@@ -134,6 +110,8 @@ export function ExternalLogin() {
           <Button
             type="submit"
             variant="contained"
+            size="large"
+            fullWidth
             disabled={login.isPending || (needCode && code.length < 6)}
           >
             {login.isPending ? "Signing in…" : needCode ? "Verify" : "Sign in"}
@@ -147,8 +125,10 @@ export function ExternalLogin() {
       <Button component={RouterLink} to="/" variant="text" size="small" startIcon={<ArrowBack />}>
         Back to home
       </Button>
-    </Stack>
+    </AuthSplitCard>
   );
 
-  return <AuthRailLayout variant="external" showMarketingFooter={false} rail={form} />;
+  return (
+    <AuthRailLayout variant="external" showMarketingFooter={false} layout="horizontal" rail={rail} />
+  );
 }

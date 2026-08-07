@@ -5,7 +5,6 @@ import {
   Box,
   Button,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import {
@@ -19,11 +18,19 @@ import {
   resolveCompany,
 } from "./lib/auth";
 import { Link as RouterLink } from "react-router-dom";
-import { AuthBrandBlock } from "../components/AormsLogo.js";
 import { AuthRailLayout } from "../components/AuthRailLayout.js";
+import {
+  AuthBrandPane,
+  AuthLabeledField,
+  AuthSplitCard,
+} from "../components/auth/AuthSplitCard.js";
 import { StatusDot } from "../components/StatusTag.js";
 import { GoogleIconCircle } from "../components/GoogleIconCircle.js";
-import { AORMS_PORTALS, AORMS_STUDIO } from "../lib/product-nomenclature.js";
+import {
+  AORMS_PORTALS,
+  AORMS_STUDIO,
+  HCW_LICENSE_MANAGER,
+} from "../lib/product-nomenclature.js";
 import { AccountSignupFields, EMPTY_PROFILE, type ProfileDraft } from "./AccountSignupFields.js";
 import { AccountSignupProfile } from "@esti/contracts";
 
@@ -187,13 +194,42 @@ export default function Login({
 
   const showCompanyStep = mode === "signin" && step === "company" && !skipCompany;
 
+  const brandTitle = companyPortal
+    ? "AORMS Company"
+    : portal
+      ? "AORMS Account"
+      : AORMS_PORTALS.auth.licensingHeadline;
+
+  const brandLead = companyPortal
+    ? "Sign in as the company owner to manage profile, members, and licence."
+    : product
+      ? `Create your account to activate ${product}.`
+      : mode === "register"
+        ? portal
+          ? `Create your ${AORMS_PORTALS.account.name} and request ${AORMS_STUDIO.title}.`
+          : "Create the platform admin account."
+        : portal
+          ? showCompanyStep
+            ? "Sign in — start with your company."
+            : resolved
+              ? `Signing in to ${companyLabel(resolved)}.`
+              : `Sign in to your ${AORMS_PORTALS.account.name}.`
+          : "Sign in to manage licences.";
+
   return (
     <AuthRailLayout
       variant={companyPortal ? "portal" : portal ? "portal" : "admin"}
+      layout="horizontal"
+      showMarketingFooter={false}
       rail={
-        <Stack spacing={3}>
-          <Stack spacing={1}>
-            <AuthBrandBlock
+        <AuthSplitCard
+          brand={
+            <AuthBrandPane
+              product={
+                companyPortal || portal
+                  ? undefined
+                  : HCW_LICENSE_MANAGER.consoleTitle
+              }
               tagline={
                 companyPortal
                   ? "Company account"
@@ -201,44 +237,21 @@ export default function Login({
                     ? "Account & licence portal"
                     : undefined
               }
+              title={brandTitle}
+              lead={brandLead}
             />
-            <Typography variant="h5" component="h2">
-              {companyPortal
-                ? "AORMS Company"
-                : portal
-                  ? "AORMS Account"
-                  : AORMS_PORTALS.auth.licensingHeadline}
-            </Typography>
-            <Typography variant="body2">
-              {companyPortal
-                ? "Sign in as the company owner to manage profile, members, and licence."
-                : product
-                ? `Create your account to activate ${product}.`
-                : mode === "register"
-                  ? portal
-                    ? `Create your ${AORMS_PORTALS.account.name} and request ${AORMS_STUDIO.title}.`
-                    : "Create the platform admin account."
-                  : portal
-                    ? showCompanyStep
-                      ? "Sign in — start with your company."
-                      : resolved
-                        ? `Signing in to ${companyLabel(resolved)}.`
-                        : `Sign in to your ${AORMS_PORTALS.account.name}.`
-                    : "Sign in to manage licences."}
-            </Typography>
-          </Stack>
-
+          }
+        >
           {showCompanyStep ? (
             <Box component="form" onSubmit={handleCompany}>
               <Stack spacing={2}>
-                <TextField
+                <AuthLabeledField
                   id="auth-company"
                   label="Company name, email, or ID"
                   placeholder="acme.in · you@acme.in · AORMS-C-2K4P"
                   helperText="Your company's domain, an email at that company, or its AORMS-C ID."
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  fullWidth
                 />
                 <Button type="submit" variant="contained" size="large" disabled={busy || !company}>
                   Continue
@@ -301,37 +314,34 @@ export default function Login({
                   <AccountSignupFields value={profile} onChange={setProfile} />
                 )}
                 {mode === "register" && !portal && (
-                  <TextField
+                  <AuthLabeledField
                     id="auth-name"
                     label="Name (optional)"
                     autoComplete="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    fullWidth
                   />
                 )}
-                <TextField
+                <AuthLabeledField
                   id="auth-email"
-                  type="email"
                   label="Email"
+                  type="email"
                   autoComplete="email"
                   placeholder="you@firm.in"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  fullWidth
                 />
-                <TextField
+                <AuthLabeledField
                   id="auth-password"
-                  type="password"
                   label="Password"
+                  type="password"
                   autoComplete={mode === "register" ? "new-password" : "current-password"}
                   helperText={mode === "register" ? "At least 8 characters." : undefined}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  fullWidth
                 />
                 {mode === "signin" && needCode && (
-                  <TextField
+                  <AuthLabeledField
                     id="auth-code"
                     label="Authenticator code"
                     placeholder="123456"
@@ -340,7 +350,6 @@ export default function Login({
                     helperText="6-digit code from your authenticator app."
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    fullWidth
                   />
                 )}
                 <Button
@@ -395,13 +404,12 @@ export default function Login({
           {import.meta.env.DEV && (
             <Box component="form" onSubmit={handleDev}>
               <Stack spacing={2}>
-                <TextField
+                <AuthLabeledField
                   id="dev-email"
                   label="Developer sign-in (local only)"
                   placeholder="you@example.com"
                   value={devEmail}
                   onChange={(e) => setDevEmail(e.target.value)}
-                  fullWidth
                 />
                 <Button type="submit" variant="outlined" disabled={busy || !devEmail}>
                   Dev sign-in
@@ -409,7 +417,7 @@ export default function Login({
               </Stack>
             </Box>
           )}
-        </Stack>
+        </AuthSplitCard>
       }
     />
   );
