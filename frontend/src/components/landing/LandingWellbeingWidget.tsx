@@ -2,7 +2,8 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import SelfImprovement from "@mui/icons-material/SelfImprovementOutlined";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import { Surface, RADIUS, StatusDot } from "@hcw/ui-kit";
+import { SoftSurface } from "./SoftSurface.js";
+import { RADIUS, StatusDot } from "@hcw/ui-kit";
 import { useState } from "react";
 import { WellnessPanel } from "../wellness/WellnessPanel.js";
 
@@ -14,8 +15,7 @@ export function LandingWellbeingWidget() {
   const [open, setOpen] = useState(true);
 
   return (
-    <Surface
-      layer="soft"
+    <SoftSurface
       sx={{
         width: "100%",
         maxWidth: "100%",
@@ -77,6 +77,6 @@ export function LandingWellbeingWidget() {
           </Box>
         ) : null}
       </Stack>
-    </Surface>
+    </SoftSurface>
   );
 }

@@ -1,7 +1,8 @@
 import DownloadOutlined from "@mui/icons-material/DownloadOutlined";
 import OpenInNewOutlined from "@mui/icons-material/OpenInNewOutlined";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { StatusDot, Surface } from "@hcw/ui-kit";
+import { StatusDot } from "@hcw/ui-kit";
+import { SoftSurface } from "../components/landing/SoftSurface.js";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MarketingShell } from "../components/landing/MarketingShell.js";
@@ -56,7 +57,7 @@ export function Downloads() {
 
         <Stack spacing={3} className="lp2-reveal" sx={{ mt: 4, maxWidth: 720 }}>
           {(offers ?? placeholderOffers()).map((offer) => (
-            <Surface key={offer.app} layer="soft" sx={{ p: 3 }}>
+            <SoftSurface key={offer.app} sx={{ p: 3 }}>
               <Stack spacing={2}>
                 <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
                   <Typography variant="h5" component="h2">
@@ -113,7 +114,7 @@ export function Downloads() {
                   </Stack>
                 )}
               </Stack>
-            </Surface>
+            </SoftSurface>
           ))}
 
           <Typography variant="body2" color="text.secondary" className="lp2-reveal">

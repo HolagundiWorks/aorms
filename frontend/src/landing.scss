@@ -10015,7 +10015,8 @@ $lp2-gap: 1px;               // shared border thickness
     scaleX(var(--flip));
 }
 .esti-lp-entourage__fig--building {
-  max-width: 175px; // 140 × 1.25
+  /* Per-figure max-width wins; soft ceiling for 1.5× depth ladder (~330px) */
+  max-width: min(330px, 21vw);
   filter: contrast(1.08) grayscale(0.05);
 }
 @media (max-width: 900px) {

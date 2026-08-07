@@ -6,12 +6,17 @@ import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
 /**
  * Shared horizontal brand | form card body for every AORMS sign-in surface
  * (workspace, external portals, account, licensing console).
+ *
+ * Optional `header` (e.g. login tabs) stays pinned at the top of the form
+ * column; only `children` scroll when content is taller than the card.
  */
 export function AuthSplitCard({
   brand,
+  header,
   children,
 }: {
   brand: ReactNode;
+  header?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -42,20 +47,37 @@ export function AuthSplitCard({
       >
         {brand}
       </Stack>
-      <Stack
+      <Box
         className="esti-auth-form"
-        spacing={COMPOSITION_RHYTHM.md}
         sx={{
           flex: 1,
           minWidth: 0,
           minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
           p: { xs: COMPOSITION_RHYTHM.md, md: COMPOSITION_RHYTHM.lg },
-          justifyContent: "center",
-          overflowY: { md: "auto" },
+          gap: COMPOSITION_RHYTHM.sm,
         }}
       >
-        {children}
-      </Stack>
+        {header ? (
+          <Box className="esti-auth-form__header" sx={{ flexShrink: 0 }}>
+            {header}
+          </Box>
+        ) : null}
+        <Box
+          className="esti-auth-form__body"
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: { md: "auto" },
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+          }}
+        >
+          {children}
+        </Box>
+      </Box>
     </Box>
   );
 }

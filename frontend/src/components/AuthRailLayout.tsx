@@ -1,10 +1,11 @@
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
-import { AnalogueClock, Surface, RADIUS, colors } from "@hcw/ui-kit";
+import { AnalogueClock, RADIUS, colors } from "@hcw/ui-kit";
 import { HcwAttribution } from "./brand/HcwAttribution.js";
 import { MarketingFooter } from "./landing/MarketingFooter.js";
 import { MarketingTopBar } from "./landing/MarketingTopBar.js";
 import { LandingEntourage } from "./landing/LandingEntourage.js";
+import { SoftSurface } from "./landing/SoftSurface.js";
 import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import {
   MARKETING_CONTENT_GUTTER,
@@ -71,7 +72,7 @@ export function AuthRailLayout({
             overflow: "hidden",
           }}
         >
-          {stage ?? <LandingEntourage count={14} seed={41} />}
+          {stage ?? <LandingEntourage count={11} seed={41} />}
         </Box>
 
         <Box
@@ -92,8 +93,7 @@ export function AuthRailLayout({
             boxSizing: "border-box",
           }}
         >
-          <Surface
-            layer="soft"
+          <SoftSurface
             className={`esti-auth-card${wide ? " esti-auth-card--horizontal" : ""}`}
             sx={{
               ...(wide
@@ -128,7 +128,7 @@ export function AuthRailLayout({
             ) : (
               <HcwAttribution variant="auth" logoTone="on-light" />
             )}
-          </Surface>
+          </SoftSurface>
         </Box>
       </Box>
 

@@ -279,7 +279,7 @@ export function Login() {
         ? AORMS_PORTALS.account.hubCaption
         : AORMS_PLATFORM.expansion;
 
-  const tabBar = !choosing ? (
+  const tabBar = (
     <Tabs
       value={tab}
       onChange={(_, v: LoginTab) => selectTab(v)}
@@ -289,7 +289,6 @@ export function Login() {
         minHeight: 44,
         borderBottom: 1,
         borderColor: "divider",
-        mb: COMPOSITION_RHYTHM.sm,
         "& .MuiTab-root": {
           textTransform: "none",
           minHeight: 44,
@@ -301,7 +300,7 @@ export function Login() {
         <Tab key={t.id} value={t.id} label={t.label} />
       ))}
     </Tabs>
-  ) : null;
+  );
 
   const workspaceOrPortalForm = (
     <Stack spacing={COMPOSITION_RHYTHM.md}>
@@ -517,8 +516,6 @@ export function Login() {
 
   const formPane = (
     <Stack spacing={COMPOSITION_RHYTHM.sm}>
-      {tabBar}
-
       {fromGoogle.isPending && (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <CircularProgress size={16} />
@@ -584,6 +581,7 @@ export function Login() {
           lead={copy.lead}
         />
       }
+      header={tabBar}
     >
       {formPane}
     </AuthSplitCard>

@@ -29,6 +29,7 @@ import { MarketingNeuFrame } from "../components/landing/MarketingTopBar.js";
 import { MarketingLandingDock } from "../components/landing/MarketingLandingDock.js";
 import { LandingWellbeingWidget } from "../components/landing/LandingWellbeingWidget.js";
 import { LandingEntourage } from "../components/landing/LandingEntourage.js";
+import { SoftSurface } from "../components/landing/SoftSurface.js";
 import { AormsLogo } from "../components/AormsLogo.js";
 import {
   AORMS_PLATFORM,
@@ -163,8 +164,7 @@ function Bar({ w = "100%" }: { w?: number | string }) {
 
 function WorkspacePreview() {
   return (
-    <Surface
-      layer="soft"
+    <SoftSurface
       aria-hidden
       sx={{
         p: { xs: MARKETING_RHYTHM.md, md: MARKETING_RHYTHM.lg },
@@ -205,7 +205,7 @@ function WorkspacePreview() {
           <Bar w="60%" />
         </Surface>
       </Stack>
-    </Surface>
+    </SoftSurface>
   );
 }
 
@@ -231,7 +231,7 @@ export function Landing() {
   return (
     <MarketingNeuFrame>
       <Box sx={{ position: "relative", width: "100%" }}>
-        <LandingEntourage count={18} seed={77} />
+        <LandingEntourage count={15} seed={77} />
         <Container
           maxWidth={false}
           disableGutters
@@ -343,7 +343,7 @@ export function Landing() {
             </Grid>
           </Grid>
 
-          <Surface layer="soft" sx={{ p: { xs: MARKETING_RHYTHM.md, md: MARKETING_RHYTHM.lg }, mt: 0 }}>
+          <SoftSurface sx={{ p: { xs: MARKETING_RHYTHM.md, md: MARKETING_RHYTHM.lg }, mt: 0 }}>
             <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em" }}>
               Replaces the sprawl
             </Typography>
@@ -370,7 +370,7 @@ export function Landing() {
                 → {AORMS_PLATFORM.name}
               </Typography>
             </Stack>
-          </Surface>
+          </SoftSurface>
         </Box>
 
         {/* 2 — Outcomes: five cards (odd grouping) */}
@@ -414,14 +414,14 @@ export function Landing() {
           <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
             {Object.values(PLATFORM_FRAMEWORKS).map((fw) => (
               <Grid key={fw.title} size={{ xs: 12, md: 6 }}>
-                <Surface layer="soft" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
+                <SoftSurface sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
                   <Typography variant="h6" component="h3" sx={{ fontWeight: 700 }}>
                     {fw.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                     {fw.summary}
                   </Typography>
-                </Surface>
+                </SoftSurface>
               </Grid>
             ))}
           </Grid>
@@ -469,7 +469,7 @@ export function Landing() {
           <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
             {[EOMS, ESTI].map((tier) => (
               <Grid key={tier.name} size={{ xs: 12, md: 6 }}>
-                <Surface layer="soft" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
+                <SoftSurface sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
                   <Stack direction="row" spacing={MARKETING_RHYTHM.sm} sx={{ alignItems: "baseline" }}>
                     <Typography variant="h6" component="h3" sx={{ fontWeight: 800 }}>
                       {tier.name}
@@ -481,11 +481,11 @@ export function Landing() {
                   <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                     {tier.summary}
                   </Typography>
-                </Surface>
+                </SoftSurface>
               </Grid>
             ))}
           </Grid>
-          <Surface layer="soft" sx={{ p: { xs: MARKETING_RHYTHM.cardPad, md: MARKETING_RHYTHM.lg } }}>
+          <SoftSurface sx={{ p: { xs: MARKETING_RHYTHM.cardPad, md: MARKETING_RHYTHM.lg } }}>
             <KpiStrip
               aria-label="AORMS platform at a glance"
               items={STATS.map((s) => ({
@@ -503,7 +503,7 @@ export function Landing() {
                 {visitCount.toLocaleString()} visits to this page and counting.
               </Typography>
             ) : null}
-          </Surface>
+          </SoftSurface>
         </Box>
 
         {/* 4 — Rhythm: three peers (odd) + wellbeing */}
@@ -560,7 +560,7 @@ export function Landing() {
           />
           <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.lg }}>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Surface layer="soft" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
+              <SoftSurface sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
                 <Typography variant="overline" color="text.secondary">
                   Included
                 </Typography>
@@ -571,10 +571,10 @@ export function Landing() {
                   Projects, fees, GST invoices, drawings, portals, Studio Intelligence, and{" "}
                   {AORMS_CONSULTANCY.title} on the same spine. Unlimited staff logins.
                 </Typography>
-              </Surface>
+              </SoftSurface>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Surface layer="soft" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
+              <SoftSurface sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
                 <Typography variant="overline" color="text.secondary">
                   Storage
                 </Typography>
@@ -584,10 +584,10 @@ export function Landing() {
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
                   Extra billed per GB-month when you grow — no surprise edition upgrades.
                 </Typography>
-              </Surface>
+              </SoftSurface>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Surface layer="soft" sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
+              <SoftSurface sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
                 <Typography variant="overline" color="text.secondary">
                   AI
                 </Typography>
@@ -597,12 +597,11 @@ export function Landing() {
                 <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
                   {ESTI.name} on your desktop node and on the hub for web — no per-token billing, no bring-your-own key.
                 </Typography>
-              </Surface>
+              </SoftSurface>
             </Grid>
           </Grid>
 
-          <Surface
-            layer="soft"
+          <SoftSurface
             sx={{ p: { xs: MARKETING_RHYTHM.lg, md: MARKETING_RHYTHM.xl }, textAlign: "center", mb: MARKETING_RHYTHM.xl }}
           >
             <Typography variant="h4" component="h3" sx={{ fontWeight: 800 }}>
@@ -649,7 +648,7 @@ export function Landing() {
                 Talk to HCW
               </Button>
             </Stack>
-          </Surface>
+          </SoftSurface>
 
           <Typography
             variant="overline"
