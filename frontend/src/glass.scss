@@ -1,38 +1,23 @@
-// ── Studio Intelligence — liquid-glass reskin (LIGHT / MP025) ────────────────
-//
-// U6 shrink policy (2026-07): Prefer `@hcw/ui-kit` for layout primitives
-// (`GlassRail`, `HealthGlassOrb`, `Surface`, `TaskbarFooter`, `ActionDock`).
-// This file keeps **app-only** glass: Studio ambient pulse, `.esti-zone-glass-orb*`
-// (aliased by kit HealthGlassOrb), neumorphic float widgets, and frosted panel
-// recipes that still need rgba/blur. Do not add new portal chrome here — use the kit.
-//
-// DOCUMENTED EXCEPTION (see docs/esti/HCW-UI-KIT.md). At the user's
-// request the app rides a hyper-minimalist LIGHT surface (the MP025 palette):
-// a soft off-white canvas with near-white frosted-glass panels floating on top.
-// The structure stays component-driven — only the surface treatment (light
-// ambient backdrop + frosted-white panels) is layered on, mirroring how
-// landing.scss dresses the marketing surfaces.
-//
-// AORMS Branding Kit tokens referenced here (docs/esti/AORMS-BRANDING-KIT.md):
-//   Fog Gray #F2F4F7 · Pure White #FFFFFF · Coal Black #141517
-//   Radiant Orange #FF4F18 (accent) · deeper orange #DB3E0F (hover)
+// ── App shell chrome — soft neu (PAGE-STRUCTURE 2026-08) ─────────────────────
+// Prefer `@hcw/ui-kit` for Surface · ActionDock · AnalogueClock · HealthGlassOrb.
+// This file keeps **app-only** neu: Studio brief/stage layout, zone orbs,
+// footer taskbar chips, float widgets. Soft fill matches kit `NEU_FILL` (#eceef2).
+// Fog Gray canvas #F2F4F7 · Coal Black #141517 · Radiant Orange #FF4F18.
 
-// Brand-mark fill — both the ESTI mark and the AORMS wordmark render in the
-// Radiant Orange accent (recoloured via CSS mask in styles.scss; transparent bg).
 :root {
   --esti-brand-accent: #ff4f18; // Radiant Orange — brand mark fill
   --esti-brand-yellow: #ff4f18; // legacy alias → accent (kept for older refs)
+  --esti-neu-fill: #eceef2; // kit NEU_FILL — soft raised chrome (not the canvas)
 }
 
 // ── NEUMORPHIC (soft UI) — ESTI · Pomodoro · Calculator · Wellness ───────────
-// The floating dock + its widgets are the ONE surface that stays neumorphic:
-// panels extrude softly from the Fog-Gray canvas (same-colour fill, dark shadow
-// bottom-right + light highlight top-left), buttons press in on click. Panels stay
+// Soft raised chrome on Fog Gray: same-colour fill as kit NEU_FILL, dark shadow
+// bottom-right + light highlight top-left; buttons press in on click. Panels stay
 // square (0 radius); only button controls use $neu-btn-radius. Exempt file → box-shadow/rgba OK.
-$neu-bg: #eceef2;
+$neu-bg: #eceef2; // = kit NEU_FILL / --esti-neu-fill
 $neu-dark: rgba(20, 21, 23, 0.16);
 $neu-light: rgba(255, 255, 255, 0.92);
-$neu-radius: 0; // panels — square (HCW: radius on buttons only)
+$neu-radius: 0; // widget panels — square (chrome uses kit RADIUS 8 via Surface)
 $neu-btn-radius: 8px; // matches @hcw/ui-kit BUTTON_RADIUS / RADIUS
 $glass-radius: 0;
 $glass-orange-30: rgba(255, 79, 24, 0.3);
@@ -546,14 +531,13 @@ $neu-input-radius: 0;
   }
 }
 
-// Studio brief strip — soft padding (ribbon is in-flow; no float clear).
+// Studio brief strip — layout only; Soft Surface owns neu fill/shadow (kit NEU_RAISED).
 .esti-app-shell2 .esti-glass-dash .esti-dash-rail,
 .esti-app-shell2 .esti-neu-dash .esti-dash-brief {
   padding: 12px;
   box-sizing: border-box;
 }
 
-// Studio brief strip — opaque soft neu (replaces frosted glass rail)
 .esti-neu-dash .esti-dash-brief,
 .esti-glass-dash .esti-dash-rail {
   position: relative;
@@ -561,14 +545,6 @@ $neu-input-radius: 0;
   flex-shrink: 0;
   min-width: 0;
   box-sizing: border-box;
-  border: none;
-  border-radius: 8px;
-  background-color: #eceef2;
-  box-shadow:
-    6px 6px 14px rgba(20, 21, 23, 0.16),
-    -6px -6px 14px rgba(255, 255, 255, 0.92);
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
 }
 
 @media (min-width: 901px) {
@@ -817,7 +793,7 @@ $neu-input-radius: 0;
   justify-content: space-between;
   gap: 12px;
   padding: 0 12px 12px;
-  background-color: #eceef2;
+  background-color: var(--esti-neu-fill, #eceef2);
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   box-shadow:
@@ -825,7 +801,7 @@ $neu-input-radius: 0;
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
   border-radius: 8px 8px 0 0;
 
-  // Round neumorphic launcher chips — extruded circles on the glass taskbar.
+  // Round neumorphic launcher chips — extruded circles on the soft taskbar.
   .MuiIconButton-root {
     background: $neu-bg;
     color: var(--cds-text-primary, #141517);

@@ -1,4 +1,8 @@
-﻿**2026-08-07 — Wave 3 chrome cleanup.** Staff watermark removed (AnalogueClock owns
+﻿**2026-08-07 — Wave 4 studio polish.** Studio brief → `Surface layer="soft"`;
+`--esti-neu-fill` / kit `NEU_FILL` (#eceef2) documented as soft raised (not canvas).
+Footer + widgets use the same fill token.
+
+**2026-08-07 — Wave 3 chrome cleanup.** Staff watermark removed (AnalogueClock owns
 BR). `$neu-btn-radius` + wellness banner → 8px. Deleted `MarketingRailNav`,
 `MarketingConversionDock`, `PublicAuthStageLayout`; purged `.lp2-rail` /
 portal-rail CSS. Docs: [PAGE-STRUCTURE](../../esti/PAGE-STRUCTURE.md) ·
@@ -31,8 +35,6 @@ withdraws. Agents: update this file in the same change that alters a fact
 
 ### Product chrome (optional polish)
 
-- Reconcile `#eceef2` footer / Studio brief fills with Fog Gray / soft tokens
-- StudioAbstract brief strip → soft `Surface` stage header
 - Optional `AormsLogo` in `AppRibbon` if firm-name branding feels weak
 - De-Carbon portal widgets (`RowActionsMenu`, `SubmissionThread`, `ProjectSiteReference`) and company-admin / licensing Carbon tabs
 - Knowledge Bank public vs staff path clarification

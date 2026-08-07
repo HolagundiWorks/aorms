@@ -1,6 +1,6 @@
 # AORMS — UI site map (chrome by surface)
 
-**Status:** Canonical inventory · **Updated:** 2026-08-07 · **Wave 1–3 chrome:** closed  
+**Status:** Canonical inventory · **Updated:** 2026-08-07 · **Wave 1–4 chrome:** closed  
 **Canon:** [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) · [HCW-UI-KIT.md](HCW-UI-KIT.md) · [HCW-UX.md](../HCW-UX.md)
 
 One language everywhere: **no left rail · soft neu top bar · Fog Gray canvas · 8px radius · one clock · dock only where staff**.
@@ -48,10 +48,10 @@ flowchart TB
 
 **Wave 3** — 8px neu-button + wellness radii · remove staff watermark · delete `MarketingRailNav` / `MarketingConversionDock` / `PublicAuthStageLayout` · purge `.lp2-rail` / portal-rail CSS · docs sync  
 
+**Wave 4** — Studio brief `Surface soft` · `--esti-neu-fill` = kit `NEU_FILL` (#eceef2 soft raised, Fog Gray remains canvas)  
+
 ## Deferred (optional)
 
 - Knowledge Bank public vs staff path clarification  
 - Carbon spike isolation; de-Carbon shared portal widgets (`RowActionsMenu`, `SubmissionThread`, `ProjectSiteReference`) and company-admin / licensing Carbon tabs  
-- StudioAbstract brief → soft `Surface` stage header (hand-rolled brief strip remains)  
-- Reconcile `#eceef2` footer/widget fills with Fog Gray / soft tokens  
 - Optional AormsLogo in AppRibbon if firm-name-only feels weak  

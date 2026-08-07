@@ -1,10 +1,8 @@
 /**
  * AORMS Studio Intelligence — home screen of the system.
  *
- * Material UI + MUI X dashboard: attention banner · KPI cards · module launcher ·
- * billed-vs-collected chart (x-charts) · side signal panels · DataGrids for action
- * items, project health, work queue, approvals and team capacity. Liquid-glass
- * surface (dark g100). Route: /  (root)
+ * Soft-neu Fog Gray stage: brief strip (Surface soft) · KPI/tabs · DataGrids.
+ * Route: / (studio host root).
  */
 import {
   Accordion,
@@ -44,7 +42,7 @@ import { ZonalComplianceCalculator } from "../components/compliance/ZonalComplia
 import { useAuth } from "../lib/auth.js";
 import { trpc } from "../lib/trpc.js";
 import { useNavigate } from "react-router-dom";
-import { TYPE_SCALE, useScreenActions } from "@hcw/ui-kit";
+import { Surface, TYPE_SCALE, useScreenActions } from "@hcw/ui-kit";
 import { AORMS_STUDIO } from "../lib/product-nomenclature.js";
 
 // ── Zone state ────────────────────────────────────────────────────────────────
@@ -325,8 +323,7 @@ export function StudioAbstract() {
 
   const canInvoice = can(user?.role, "invoice:manage");
 
-  // Main-screen 30/70 split: left rail carries heading + telemetry + these tabs;
-  // the right 70% renders the selected tab's items.
+  // Stage tabs under the soft brief strip (full width — no left rail).
   const [tab, setTab] = useState<"priorities" | "projects" | "work" | "team" | "zoning">("priorities");
   const [estiExpanded, setEstiExpanded] = useState(false);
 
@@ -712,8 +709,9 @@ export function StudioAbstract() {
       }}
     >
       <StudioBreath />
-      {/* Brief strip — former rail content, full-width under top ribbon (no left rail). */}
-      <Box
+      {/* Brief strip — soft Surface stage header (no left rail). */}
+      <Surface
+        layer="soft"
         className="esti-dash-brief"
         sx={{
           flex: "0 0 auto",
@@ -722,17 +720,16 @@ export function StudioAbstract() {
           flexDirection: "column",
           gap: 1.5,
           p: 1.5,
-          borderRadius: "8px",
         }}
       >
-          {/* Greeting — top of the rail */}
+          {/* Greeting */}
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 300, lineHeight: 1.15, mt: 0 }}>{greetingFor()},</Typography>
             <Typography variant="h5" sx={{ fontWeight: 600, lineHeight: 1.15 }}>{firstName}</Typography>
             {companyName && <Typography variant="caption" color="text.secondary">{companyName}</Typography>}
           </Box>
 
-          {/* Orchestration lives in the rail — visible only while ESTI is working. */}
+          {/* Orchestration — visible only while ESTI is working. */}
           <EstiOrchestrationStatus />
 
           {/* Attention update — below the greeting */}
@@ -825,7 +822,7 @@ export function StudioAbstract() {
               />
             </Box>
           </Box>
-      </Box>
+      </Surface>
 
         {/* ── STAGE — tabs + tab content (full width) ─────────────────────────────── */}
         <Box

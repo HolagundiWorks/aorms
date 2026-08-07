@@ -52,7 +52,7 @@ Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Templates: [05-TEMPLATES.md]
 
 | Token / role | Value | Use |
 | --- | --- | --- |
-| Fog Gray canvas | `#F2F4F7` · `colors.background` · `--lp-bg` | Page / stage background |
+| Soft raised fill | `#eceef2` · kit `NEU_FILL` · `--esti-neu-fill` | Soft chrome (ribbon, footer, Surface soft) — **not** the page canvas |
 | Pure White | `#FFFFFF` · `--lp-bg-soft` | Flat cards at rest |
 | Quiet muted | `#E7EAF0` · `--lp-bg-muted` | Secondary wells |
 | Coal Black ink | `#141517` · `--lp-ink` | Primary text |
