@@ -3,12 +3,11 @@ import { LANDING_SEO } from "../../lib/landing-seo.js";
 import { formatVisitCount } from "../../lib/landing-visit.js";
 import { HcwAttribution } from "../brand/HcwAttribution.js";
 
-// Landing + blog are live; wiki / about / legal stay consolidated to `/`.
+// Soft launch: landing + blog (+ downloads coming soon). Login deactivated.
 const PLATFORM_LINKS = [
   { href: "/", label: "Home" },
   { href: "/blog", label: "Blog" },
   { href: "/downloads", label: "Downloads" },
-  { href: "/login", label: "Demo sign-in" },
   { href: "mailto:hi@aorms.in", label: "hi@aorms.in" },
 ] as const;
 

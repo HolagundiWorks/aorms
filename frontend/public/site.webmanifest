@@ -1,7 +1,7 @@
 {
-  "name": "AORMS-Studio — architecture app on AORMS",
-  "short_name": "AORMS-Studio",
-  "description": "AORMS-Studio — Indian architecture consultancy app on the AORMS platform — COA fees, GST, drawings, revisions, client/consultant/contractor/site portals, and studio operations.",
+  "name": "AORMS — AEC consulting suite",
+  "short_name": "AORMS",
+  "description": "AORMS suite for AEC consultancies — practice managers, AQC technical apps, AADT, ShilpiDB, and firm portals. Soft launch: suite home and blog live; installers coming soon.",
   "icons": [
     { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }

@@ -1,10 +1,10 @@
 # Landing page redesign — agent context
 
-**Status:** Canonical brief · **Updated:** 2026-08-06 · **Owner:** HCW
+**Status:** Canonical brief · **Updated:** 2026-08-08 · **Owner:** HCW
 
 Another agent or designer may own visual/layout work on the public landing. This
 file captures **product and documentation context** so copy, IA, and SEO stay
-aligned with the platform rebrand. **Page chrome / tokens:** [PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md).
+aligned with the suite rebrand. **Page chrome / tokens:** [PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md).
 
 ---
 
@@ -12,35 +12,39 @@ aligned with the platform rebrand. **Page chrome / tokens:** [PAGE-STRUCTURE.md]
 
 | Before | After |
 | --- | --- |
-| AORMS = *Architecture Office Resource Management System* | AORMS = **Accelerated Operational Resources Management System** (platform) |
-| Landing = architecture-practice-only marketing | Landing = **platform home** with three apps |
+| AORMS = *Architecture Office Resource Management System* | AORMS = **Accelerated Operational Resources Management System** (suite) |
+| Landing = architecture-practice-only marketing | Landing = **suite home** — managers · AQC technical · AADT · ShilpiDB |
 | Clear-glass left rail + SectionDock | **No left rail** — soft top bar · stage · `MarketingLandingDock` · clock |
 | Staff ActionDock on marketing | Marketing uses **MarketingLandingDock** only |
+| Web-parity staff ERP on apex | Apex = **marketing + demos**; staff on desktop; portals online |
 
-Full naming rules: [AORMS-PLATFORM-NOMENCLATURE.md](../esti/AORMS-PLATFORM-NOMENCLATURE.md).  
+Full naming rules: [AORMS-PLATFORM-NOMENCLATURE.md](../esti/AORMS-PLATFORM-NOMENCLATURE.md) ·
+[AORMS-SUITE.md](../esti/AORMS-SUITE.md).  
 Executable constants: `frontend/src/lib/product-nomenclature.ts`.
 
 ---
 
 ## Landing purpose (current)
 
-The home route (`/`) is the **AORMS platform landing** (`Landing.tsx` +
+The home route (`/`) is the **AORMS suite landing** (`Landing.tsx` +
 `landing.scss` + `MarketingNeuFrame`):
 
-- Mission: consolidate consulting + PMC workflows on one AI-enhanced spine
-- **EOMS** (knowledge bank) + **ESTI** (internal AI agent)
-- Three apps: **AStudio** (live) · **AConsulting** (live) · **AProc** (preview)
-- Target: AEC consulting and PMC firms ~5–500 people
+- Mission: AEC consulting suite — managers for communications; technical work local
+- **EOMS** (knowledge bank) + **ESTI** (internal AI agent on desktop managers)
+- Managers: **AStudio** · **AConsulting** · Technical: **AQC Estimation / BBS / PM** · Drafting: **AADT** · Geometry: **ShilpiDB**
+- Target: AEC consulting and PMC firms
 - Five sections: **Overview · Outcomes · Platform · Rhythm · Start**
+- Licensing: **open source for now**; SaaS deferred
 - Atmosphere: `LandingEntourage` (isometric buildings, marketing only)
 
 **SEO:** `frontend/src/lib/landing-seo.ts` · static fallback in `frontend/index.html`.  
 **LLM crawl summary:** `frontend/public/llms.txt`.  
 **Sitemap / RSS:** `frontend/public/sitemap.xml` · `frontend/public/blog/feed.xml`
-(regenerate when adding blog posts).
+(regenerate when adding blog posts).  
+**Downloads:** [WEB-PORTAL.md](../esti/WEB-PORTAL.md).
 
 Keyword SEO landings under `frontend/src/content/landing/` currently **redirect
-to `/`** — keep copy aligned if routes are revived.
+to `/`** — keep copy aligned if routes are revived. `/wiki*` also redirects home.
 
 ---
 

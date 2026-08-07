@@ -39,12 +39,12 @@ import {
   SHILPIDB,
   AORMS_STUDIO,
   AORMS_CONSULTANCY,
-  AORMS_PMC,
+  AADT,
   EOMS,
   ESTI,
   HUMAN_CENTRIC_WORKS,
 } from "../lib/product-nomenclature.js";
-import { applyLandingSeo, injectLandingJsonLd } from "../lib/landing-seo.js";
+import { applyLandingSeo, injectLandingJsonLd, LANDING_FAQ } from "../lib/landing-seo.js";
 import { useLandingVisitCounter } from "../lib/landing-visit.js";
 import { MARKETING_CONTENT_GUTTER, MARKETING_RHYTHM, marketingContentColumnSx } from "../lib/marketing-layout.js";
 
@@ -67,58 +67,35 @@ const OUTCOMES = [
   {
     icon: <PaymentsOutlined fontSize="small" />,
     title: "Recover fees you already earned",
-    body: "Revisions, COA proposals, and GST invoices stay on one project record. Scope changes bill correctly — margin stops leaking into uninvoiced nights.",
+    body: "Practice managers keep revisions, proposals, and invoices on one project record. Scope changes bill correctly — margin stops leaking into uninvoiced nights.",
   },
   {
     icon: <HubOutlined fontSize="small" />,
-    title: "Replace five tools with one spine",
-    body: "Projects, drawings, finance, team, and portals share a single system of record. No exports. No version drift. No end-of-month spreadsheet archaeology.",
+    title: "One suite — not five disconnected tools",
+    body: "Managers for communications, AQC apps for quantities and programme, AADT for drafting, ShilpiDB for drawings. Firm portals publish updates — no spreadsheet archaeology.",
   },
   {
     icon: <VerifiedUserOutlined fontSize="small" />,
     title: "AI that cites your firm — not the open web",
-    body: `${ESTI.name} answers only from validated firm repositories. ${EOMS.name} supplies external codes. Every answer is traceable. Nothing trains a third-party model.`,
+    body: `${ESTI.name} answers only from validated firm repositories on the desktop. ${EOMS.name} supplies external codes. Nothing trains a third-party model.`,
   },
   {
     icon: <DnsOutlined fontSize="small" />,
-    title: "Your data. Your machine. Unmetered AI.",
-    body: "Desktop-first with web parity. Local AI on the node, hub AI on the browser — both unmetered, no bring-your-own key, no per-token surprise.",
+    title: "Technical work stays local",
+    body: "Estimation, BBS, project management, and drafting run on the desktop. Firm portals and this marketing site stay online — aorms.in is demos and downloads, not staff ERP.",
   },
   {
     icon: <SelfImprovementOutlined fontSize="small" />,
     title: "See the office before it slips",
-    body: `Studio Intelligence puts fee risk, delivery health, and ${ESTI.name} priorities on one Fog Gray stage — so principals act before the week collapses.`,
+    body: `Practice managers surface fee risk, delivery health, and ${ESTI.name} priorities so principals act before the week collapses.`,
   },
 ] as const;
 
 /** Proof stats — three peers (odd · Cowan-friendly). */
 const STATS = [
-  { id: "apps", label: "AEC apps on one spine", value: "3" },
+  { id: "apps", label: "Suite product families", value: "6+" },
   { id: "ai", label: "AI tiers · EOMS + ESTI", value: "Dual" },
-  { id: "storage", label: "Storage included", value: "5 GB" },
-] as const;
-
-const FAQ = [
-  {
-    q: "Who is AORMS for?",
-    a: `${AORMS_PLATFORM.audience}. Start with architecture studios of about 5–25 people losing fee recovery to revisions — then grow onto engineering and PMC on the same spine.`,
-  },
-  {
-    q: "Is my data used to train external models?",
-    a: `No. ${ESTI.name} answers only from your validated firm repositories on your infrastructure — nothing is sent to train third-party models.`,
-  },
-  {
-    q: "How much does it cost?",
-    a: "One Standard licence — unlimited users, full workspace, 5 GB cloud storage. Pay only for storage above 5 GB. AI is unmetered. No Lite/Pro tiers.",
-  },
-  {
-    q: "Is wellbeing scored against me?",
-    a: "No. Breathe, stretch, eyes, and Pomodoro are personal. ASPRF wellbeing is 5%, opt-in per person, never used for discipline.",
-  },
-  {
-    q: "Do I need a dark theme on the marketing site?",
-    a: "No. Public surfaces lock the 60 white · 30 coal · 10 Radiant Orange ratio for calm reading. Staff Appearance still offers accessibility schemes inside the workspace.",
-  },
+  { id: "oss", label: "Licensing right now", value: "OSS" },
 ] as const;
 
 function SectionHead({
@@ -296,7 +273,7 @@ export function Landing() {
                   {AORMS_PLATFORM.tagline}. Desktop apps for practice work — firm portals for
                   clients. Marketing and demos live here.
                 </Typography>
-                {/* Primary CTA: desktop installers — apex is not firm ERP login */}
+                {/* Soft launch: downloads coming soon; no demo login */}
                 <Stack direction="row" spacing={MARKETING_RHYTHM.sm} sx={{ flexWrap: "wrap", gap: MARKETING_RHYTHM.sm }}>
                   <Button
                     component={RouterLink}
@@ -306,25 +283,25 @@ export function Landing() {
                     endIcon={<ArrowForward />}
                     sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 48, px: 3 }}
                   >
-                    Get desktop apps
+                    Downloads — coming soon
                   </Button>
                   <Button
-                    component={RouterLink}
-                    to="/wiki"
+                    component="a"
+                    href="#platform"
                     variant="outlined"
                     color="inherit"
                     sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
                   >
-                    Wiki &amp; demos
+                    Suite map
                   </Button>
                   <Button
                     component={RouterLink}
-                    to="/login"
+                    to="/blog"
                     variant="text"
                     color="inherit"
                     sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
                   >
-                    Demo sign-in
+                    Blog
                   </Button>
                 </Stack>
                 <Stack
@@ -624,51 +601,51 @@ export function Landing() {
           <LandingWellbeingWidget />
         </Box>
 
-        {/* 5 — Start: three pricing cards (odd) + FAQ */}
+        {/* 5 — Start: open-source suite + FAQ */}
         <Box id="start" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
           <SectionHead
             eyebrow="Start"
-            title="One Standard licence. Unlimited users."
-            lead="No tiers. Full workspace from day one. Pay only for cloud storage over 5 GB — AI stays unmetered on desktop and web."
+            title="Open source for now. Desktop preferred."
+            lead="Open source for now. Soft launch: suite home and blog are live. Windows installers and workspace sign-in are coming soon — start with why the suite exists."
           />
           <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.lg }}>
             <Grid size={{ xs: 12, md: 4 }}>
               <SoftSurface sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
                 <Typography variant="overline" color="text.secondary">
-                  Included
+                  Managers
                 </Typography>
                 <Typography variant="h6" component="h3" sx={{ mt: MARKETING_RHYTHM.sm, fontWeight: 700 }}>
-                  Full workspace
+                  {AORMS_STUDIO.title} · {AORMS_CONSULTANCY.title}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
-                  Projects, fees, GST invoices, drawings, portals, Studio Intelligence, and{" "}
-                  {AORMS_CONSULTANCY.title} on the same spine. Unlimited staff logins.
+                  Tasks, office, HR, payroll, and portal communications for architecture and engineering practices.
                 </Typography>
               </SoftSurface>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <SoftSurface sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
                 <Typography variant="overline" color="text.secondary">
-                  Storage
+                  Technical
                 </Typography>
                 <Typography variant="h6" component="h3" sx={{ mt: MARKETING_RHYTHM.sm, fontWeight: 700 }}>
-                  5 GB included
+                  AQC · {AADT.title}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
-                  Extra billed per GB-month when you grow — no surprise edition upgrades.
+                <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
+                  Estimation, BBS, and project management on a shared engine; drafting in AADT with geometry in{" "}
+                  {SHILPIDB.name}.
                 </Typography>
               </SoftSurface>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <SoftSurface sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%" }}>
                 <Typography variant="overline" color="text.secondary">
-                  AI
+                  Online
                 </Typography>
                 <Typography variant="h6" component="h3" sx={{ mt: MARKETING_RHYTHM.sm, fontWeight: 700 }}>
-                  Local &amp; unmetered
+                  Firm portals
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
-                  {ESTI.name} runs on the desktop — local and unmetered. No per-token billing.
+                  Clients and collaborators see published updates only. This apex site stays marketing and demos.
                 </Typography>
               </SoftSurface>
             </Grid>
@@ -678,10 +655,10 @@ export function Landing() {
             sx={{ p: { xs: MARKETING_RHYTHM.lg, md: MARKETING_RHYTHM.xl }, textAlign: "center", mb: MARKETING_RHYTHM.xl }}
           >
             <Typography variant="h4" component="h3" sx={{ fontWeight: 800 }}>
-              Bring the practice onto one system.
+              Bring the practice onto one suite.
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.md, maxWidth: 520, mx: "auto" }}>
-              Install {AORMS_STUDIO.title} or {AORMS_CONSULTANCY.title} on the desktop — clients meet you on the firm portal.
+              Explore desktop offers and product repos — clients meet you on the firm portal when you publish.
             </Typography>
             <Stack
               direction={{ xs: "column", sm: "row" }}
@@ -697,18 +674,18 @@ export function Landing() {
                 endIcon={<ArrowForward />}
                 sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 48 }}
               >
-                Get desktop apps
+                Downloads — coming soon
               </Button>
               <Button
-                component="a"
-                href={AORMS_CONSULTANCY.appUrl}
+                component={RouterLink}
+                to="/blog"
                 variant="outlined"
                 color="inherit"
                 size="large"
                 endIcon={<ArrowForward />}
                 sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
               >
-                {AORMS_CONSULTANCY.title}
+                Read the blog
               </Button>
               <Button
                 component="a"
@@ -731,9 +708,9 @@ export function Landing() {
             Questions practices ask first
           </Typography>
           <Box sx={{ maxWidth: 820 }}>
-            {FAQ.map((item) => (
+            {LANDING_FAQ.map((item) => (
               <Accordion
-                key={item.q}
+                key={item.question}
                 disableGutters
                 elevation={0}
                 square
@@ -748,12 +725,12 @@ export function Landing() {
                   sx={{ px: 0, py: 1, "& .MuiAccordionSummary-content": { my: 1.5 } }}
                 >
                   <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
-                    {item.q}
+                    {item.question}
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails sx={{ px: 0, pt: 0, pb: 2.5 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 720 }}>
-                    {item.a}
+                    {item.answer}
                   </Typography>
                 </AccordionDetails>
               </Accordion>
@@ -791,15 +768,15 @@ export function Landing() {
                 Company
               </Typography>
               <Stack spacing={1} sx={{ mt: 1.5 }}>
-                <Box component={RouterLink} to="/login" sx={{ color: "text.secondary", textDecoration: "none" }}>
-                  <Typography variant="body2">Sign in</Typography>
+                <Box component={RouterLink} to="/blog" sx={{ color: "text.secondary", textDecoration: "none" }}>
+                  <Typography variant="body2">Blog</Typography>
                 </Box>
                 <Box
                   component={RouterLink}
-                  to="/account?mode=create"
+                  to="/downloads"
                   sx={{ color: "text.secondary", textDecoration: "none" }}
                 >
-                  <Typography variant="body2">Create account</Typography>
+                  <Typography variant="body2">Downloads (coming soon)</Typography>
                 </Box>
                 <Box
                   component="a"

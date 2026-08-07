@@ -12,10 +12,25 @@ a profile only changes a few `.env` knobs (`VITE_PUBLIC_SITE`, `SEED_DEMO`,
 licensing platform + unified accounts, on one box:
 
 ```bash
+# One-shot from a blank Ubuntu VPS (clones + installs):
+DOMAIN=aorms.in ADMIN_EMAIL=ops@aorms.in \
+  OWNER_EMAIL=owner@firm.in OWNER_PASSWORD='…' \
+  curl -fsSL https://raw.githubusercontent.com/HolagundiWorks/aorms/main/deploy/bootstrap-vps.sh \
+  | sudo -E bash
+
+# Or clone first, then install:
 apt-get update && apt-get install -y git
-git clone --branch main https://github.com/HolagundiWorks/esti.git /opt/esti
+git clone --branch main https://github.com/HolagundiWorks/aorms.git /opt/esti
 cd /opt/esti
 sudo bash deploy/install.sh
+```
+
+**Marketing / landing only** (suite home + blog; login off; installers Coming soon):
+
+```bash
+sudo bash deploy/install-landing.sh
+# or: PROFILE=landing sudo -E bash deploy/bootstrap-vps.sh
+# Reopen demos later: VITE_MARKETING_ONLY=false in .env → bash deploy/update.sh
 ```
 
 **Customer/self-hosted enterprise:** firm workspace only — no landing, no demo,
@@ -38,12 +53,19 @@ sudo bash deploy/install-demo.sh
 DOMAIN=demo.aorms.in ADMIN_EMAIL=ops@aorms.in sudo -E bash deploy/install-demo.sh
 ```
 
+**After install — smoke:**
+
+```bash
+bash deploy/verify-vps.sh
+bash deploy/verify-vps.sh https://aorms.in
+```
+
 ## Profiles (`PROFILE=` overrides on `install.sh`)
 
 | Profile | Public site | Demo data | Plan | Notes |
 |---|---|---|---|---|
-| **aorms** (default) | ✅ | — | Standard | Landing + main app + licensing + `/wiki` docs |
-| `landing` | ✅ | — | Standard | Public marketing site |
+| **aorms** (default) | ✅ | — | Standard | Landing + main app + licensing |
+| `landing` | ✅ | — | Standard | Public marketing site (`install-landing.sh`) |
 | `demo` | ✅ | ✅ seeded | Standard | Seeded demo workspace |
 | `core` / `enterprise` | — | — | Standard | Firm workspace — prefer `install-enterprise.sh` |
 | `licensing` | — | — | Standard | Licensing platform without public site |
@@ -53,16 +75,19 @@ DOMAIN=demo.aorms.in ADMIN_EMAIL=ops@aorms.in sudo -E bash deploy/install-demo.s
 
 | File | Role |
 |---|---|
+| `deploy/bootstrap-vps.sh` | **Blank VPS one-shot** — clone `/opt/esti` + run the right installer |
 | `deploy/install.sh` | **AORMS-site installer (default: aorms profile)** → sets profile env → runs `install_core` |
+| `deploy/install-landing.sh` | **Marketing landing** — `PROFILE=landing` front door |
 | `deploy/install-enterprise.sh` | **Customer Core/Enterprise self-host** — firm-only front door + licence-key activation; reuses `install_core` |
-| `deploy/install-demo.sh` | **Landing + demo showcase** — public marketing landing + seeded demo workspace only; auto-generates secrets, `WITH_LICENSING=true` adds the console; reuses `install_core` |
-| `deploy/install-admin-console.sh` | **Licensing console at `admin.DOMAIN`** — vhost + TLS for the `dist/admin.html` entry; same-box `/platform/` proxy (run after the main install; needs the `admin.` DNS record) |
-| `deploy/install-wiki-tls.sh` | **Legacy `wiki.DOMAIN`** — optional TLS so HTTPS redirects to `https://DOMAIN/wiki` (HTTP redirect block is in `nginx-proxy.conf`) |
+| `deploy/install-demo.sh` | **Landing + demo showcase** — public marketing landing + seeded demo workspace only |
+| `deploy/install-admin-console.sh` | **Licensing console at `admin.DOMAIN`** — vhost + TLS for `dist/admin.html` |
+| `deploy/install-wiki-tls.sh` | **Legacy `wiki.DOMAIN`** — optional TLS redirect (wiki SPA consolidated to `/`) |
+| `deploy/install-surface-tls.sh` | Extra surface-host TLS helpers |
+| `deploy/verify-vps.sh` | Post-install smoke (landing, downloads, login, mongo, health) |
 | `deploy/lib.sh` | Shared helpers + `write_env` + `install_core` (the one install flow) |
 | `deploy/update.sh` | In-place update (reads the profile from `.env`) |
-| `deploy/cleanup-vps.sh` | **VPS hygiene** — remove retired `/downloads` installers, `dist.old`, temp Docker containers; optional image/build-cache prune |
-| `deploy/fetch-installers.sh` | **Retired** — legacy Lite/Pro desktop installers |
-| `deploy/preflight-migrations.sh` | **Migration safety check** — clone the live DB to a scratch copy, apply pending migrations to the clone, report pass/fail; never touches the real DB. Run before `update.sh` on a migration release |
+| `deploy/cleanup-vps.sh` | **VPS hygiene** — retired artefacts, optional Docker prune |
+| `deploy/preflight-migrations.sh` | Migration dry-run on a DB clone before `update.sh` |
 | `deploy/backup.sh` / `restore.sh` | Postgres + MinIO backup / restore |
 | `deploy/nginx-proxy.conf` | nginx vhost template |
 

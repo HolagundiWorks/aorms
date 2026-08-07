@@ -46,6 +46,24 @@ services:
       timeout: 5s
       retries: 5
 
+  # ── MongoDB (suite ops / portal communications — not CAD) ─────────────────────
+  # Firm-scoped ops metadata (tasks, progress, portal threads). Geometry stays in
+  # ShilpiDB. Optional: leave MONGODB_URL empty in .env to use in-memory fallback.
+  esti-mongo:
+    image: mongo:7
+    container_name: esti-mongo
+    restart: always
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - esti-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
   # ── MinIO (S3-compatible object storage) ──────────────────────────────────────
   # Remove this service and set S3_ENDPOINT to your managed S3/B2 provider if
   # you prefer not to self-host object storage.
@@ -111,6 +129,8 @@ services:
         condition: service_healthy
       esti-redis:
         condition: service_healthy
+      esti-mongo:
+        condition: service_healthy
       esti-minio:
         condition: service_started
       esti-ollama:
@@ -150,6 +170,8 @@ services:
         # "true" = public demo site (landing/blog/investors/legal). Override with
         # compose.firm.yaml (or VITE_PUBLIC_SITE=false) for the firm product.
         VITE_PUBLIC_SITE: ${VITE_PUBLIC_SITE:-true}
+        # Soft launch default — landing + blog; login off; installers coming soon.
+        VITE_MARKETING_ONLY: ${VITE_MARKETING_ONLY:-true}
         # Standalone licensing console origin (admin.DOMAIN, its own repo/deploy).
         VITE_ADMIN_URL: ${VITE_ADMIN_URL:-}
         # Signed local-first installers for /downloads — leave empty until Bhoomi signs.
@@ -199,5 +221,6 @@ networks:
 volumes:
   pgdata:
   redisdata:
+  mongodata:
   miniodata:
   ollamadata:

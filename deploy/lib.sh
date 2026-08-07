@@ -16,7 +16,7 @@ error()   { echo -e "${RED}[✘] ERROR:${NC} $*"; exit 1; }
 ask()     { echo -en "${BOLD}$1${NC} "; read -r "$2" || true; }
 askpass() { echo -en "${BOLD}$1${NC} "; read -rs "$2" || true; echo; }
 
-REPO_URL="${REPO_URL:-https://github.com/HolagundiWorks/esti.git}"
+REPO_URL="${REPO_URL:-https://github.com/HolagundiWorks/aorms.git}"
 DEPLOY_DIR="${DEPLOY_DIR:-/opt/esti}"
 
 # Fully non-interactive apt: DEBIAN_FRONTEND suppresses debconf prompts
@@ -236,6 +236,10 @@ DATABASE_URL=postgresql://esti:${POSTGRES_PASSWORD}@esti-db:5432/esti
 
 REDIS_URL=redis://esti-redis:6379
 
+# Suite ops (portal communications) — internal only. Empty → in-memory fallback.
+MONGODB_URL=mongodb://esti-mongo:27017
+MONGODB_DB=aorms_ops
+
 S3_ENDPOINT=http://esti-minio:9000
 S3_PUBLIC_ENDPOINT=https://${DOMAIN}/storage
 S3_BUCKET=esti-documents
@@ -271,6 +275,9 @@ BETA_REQUEST_NOTIFY_TO=${BETA_REQUEST_NOTIFY_TO:-hi@${DOMAIN}}
 # SEED_DEMO gates the demo workspace seed, FIRM_PLAN sets the plan tier.
 DEPLOY_PROFILE=${PROFILE}
 VITE_PUBLIC_SITE=${PUBLIC_SITE}
+# Soft launch: landing + blog; deactivate apex login; installers Coming soon.
+# Set VITE_MARKETING_ONLY=false and rebuild to reopen demos / signed downloads.
+VITE_MARKETING_ONLY=${VITE_MARKETING_ONLY:-true}
 # Standalone licensing console origin (its own repo, deployed at admin.DOMAIN).
 # Set → aorms.in/platform-admin redirects there; empty → embedded console.
 VITE_ADMIN_URL=${VITE_ADMIN_URL:-}
@@ -368,14 +375,20 @@ install_core() {
   docker compose -f compose.prod.yaml build
   info "Images built."
 
-  section "Starting database, Redis, MinIO"
-  docker compose -f compose.prod.yaml up -d esti-db esti-redis esti-minio
+  section "Starting database, Redis, Mongo, MinIO"
+  docker compose -f compose.prod.yaml up -d esti-db esti-redis esti-mongo esti-minio
   echo -n "  Waiting for esti-db"
   for _ in $(seq 1 24); do
     [[ "$(docker inspect --format='{{.State.Health.Status}}' esti-db 2>/dev/null || echo starting)" == "healthy" ]] && { echo ""; break; }
     echo -n "."; sleep 5
   done
   info "Database healthy."
+  echo -n "  Waiting for esti-mongo"
+  for _ in $(seq 1 24); do
+    [[ "$(docker inspect --format='{{.State.Health.Status}}' esti-mongo 2>/dev/null || echo starting)" == "healthy" ]] && { echo ""; break; }
+    echo -n "."; sleep 5
+  done
+  info "Mongo healthy (suite ops)."
 
   set -a; load_dotenv "$DEPLOY_DIR/.env"; set +a
   ensure_minio_bucket "$DEPLOY_DIR" && info "MinIO bucket ready." || warn "MinIO bucket creation skipped — backend will retry."

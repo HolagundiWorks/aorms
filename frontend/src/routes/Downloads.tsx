@@ -1,5 +1,3 @@
-import DownloadOutlined from "@mui/icons-material/DownloadOutlined";
-import OpenInNewOutlined from "@mui/icons-material/OpenInNewOutlined";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { StatusDot } from "@hcw/ui-kit";
 import { SoftSurface } from "../components/landing/SoftSurface.js";
@@ -14,17 +12,17 @@ import {
 } from "../lib/desktop-installers.js";
 import {
   AORMS_PLATFORM,
-  AORMS_STUDIO,
   SHILPIDB,
 } from "../lib/product-nomenclature.js";
+import { isMarketingOnly } from "../lib/marketing-gate.js";
 
 /**
- * Public `/downloads` portal — suite desktop installers (managers + AQC + AADT).
- * CTAs stay on web_fallback until a signed URL + sha256 is wired
- * (docs/esti/WEB-PORTAL.md).
+ * Public `/downloads` portal — suite desktop installers.
+ * Soft launch: every offer is Coming soon (no Open / GitHub / Download CTAs).
  */
 export function Downloads() {
   const [offers, setOffers] = useState<DesktopInstallerOffer[] | null>(null);
+  const softLaunch = isMarketingOnly();
 
   useEffect(() => {
     document.title = `Downloads · ${AORMS_PLATFORM.name}`;
@@ -44,18 +42,26 @@ export function Downloads() {
           <p className="lp2-section-head__tag">Desktop · suite installers</p>
           <h1 className="lp2-section-head__title">Downloads</h1>
           <p className="lp2-section-head__body">
-            {AORMS_PLATFORM.name} is a <strong>product suite</strong> — practice managers
-            online for communications; Estimation, BBS, project management, and drafting on
-            the desktop. Signed Windows installers appear here when packaging ships; until
-            then open the web workspace or the product repo. Drawings stay in{" "}
-            {SHILPIDB.name}.
+            {softLaunch ? (
+              <>
+                Windows installers for the {AORMS_PLATFORM.name} suite are{" "}
+                <strong>coming soon</strong>. This site is live for the suite home and
+                blog; signed builds will appear here when packaging ships. Drawings stay
+                in {SHILPIDB.name}.
+              </>
+            ) : (
+              <>
+                {AORMS_PLATFORM.name} is a <strong>product suite</strong> — practice managers
+                for communications; Estimation, BBS, project management, and drafting on the
+                desktop. Until a signed Windows build is published, open the product page or
+                GitHub repo. Drawings stay in {SHILPIDB.name}.
+              </>
+            )}
           </p>
           <p className="lp2-blog-links">
             <Link to="/">Suite home</Link>
             <span aria-hidden> · </span>
-            <Link to="/login">{AORMS_STUDIO.title} web</Link>
-            <span aria-hidden> · </span>
-            <Link to="/blog/aorms-local-first">Local-first notes</Link>
+            <Link to="/blog">Blog</Link>
           </p>
         </header>
 
@@ -74,7 +80,9 @@ export function Downloads() {
                         ? offer.version
                           ? `Windows · v${offer.version}`
                           : "Windows · signed"
-                        : "Installer pending"
+                        : offer.status === "coming_soon"
+                          ? "Coming soon"
+                          : "Installer pending"
                     }
                   />
                 </Stack>
@@ -83,61 +91,31 @@ export function Downloads() {
                 </Typography>
 
                 {offer.status === "available" && offer.downloadUrl ? (
-                  <Stack spacing={1.5}>
+                  <Box>
+                    <Button variant="contained" size="large" href={offer.downloadUrl} download>
+                      Download {offer.title} for Windows
+                    </Button>
+                  </Box>
+                ) : offer.status === "coming_soon" ? (
+                  <Stack spacing={1}>
+                    <Typography variant="body2">{offer.fallbackReason}</Typography>
                     <Box>
-                      <Button
-                        variant="contained"
-                        size="large"
-                        endIcon={<DownloadOutlined />}
-                        href={offer.downloadUrl}
-                        download
-                      >
-                        Download {offer.title} for Windows
+                      <Button variant="outlined" size="large" disabled>
+                        Coming soon
                       </Button>
                     </Box>
-                    {offer.sha256 ? (
-                      <Typography variant="caption" color="text.secondary" component="p">
-                        SHA-256: <code>{offer.sha256}</code>
-                      </Typography>
-                    ) : null}
                   </Stack>
                 ) : (
-                  <Stack spacing={1.5}>
-                    <Typography variant="body2">{offer.fallbackReason}</Typography>
-                    <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap" }}>
-                      <Button
-                        variant="contained"
-                        size="large"
-                        endIcon={<OpenInNewOutlined />}
-                        href={offer.webUrl}
-                      >
-                        Open {offer.title}
-                      </Button>
-                      {offer.repoUrl ? (
-                        <Button
-                          variant="outlined"
-                          size="large"
-                          endIcon={<OpenInNewOutlined />}
-                          href={offer.repoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          GitHub
-                        </Button>
-                      ) : null}
-                    </Stack>
-                  </Stack>
+                  <Typography variant="body2">{offer.fallbackReason}</Typography>
                 )}
               </Stack>
             </SoftSurface>
           ))}
 
           <Typography variant="body2" color="text.secondary" className="lp2-reveal">
-            Legacy Lite / Pro / Community Manager installers stay <strong>retired</strong>.
-            Operators: wire signed URLs via env or fill{" "}
-            <code>frontend/public/update-manifests/*.json</code> and set{" "}
-            <code>VITE_PORTAL_USE_RELEASE_INSTALLERS=true</code> — never point live CTAs at
-            unsigned overnight builds.
+            {softLaunch
+              ? "Release notes will land on the blog when signed installers are ready."
+              : "Legacy Lite / Pro / Community Manager installers stay retired."}
           </Typography>
         </Stack>
       </div>

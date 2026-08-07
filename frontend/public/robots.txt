@@ -23,9 +23,9 @@ Allow: /blog
 Allow: /blog/
 Allow: /sitemap.xml
 
-# Live public surfaces: / , /blog , /login , account hub.
-# Keyword landings / wiki / about / legal redirect to / in the SPA.
-# Apps: AStudio (studio.aorms.in) · AConsulting · AProc (proc.aorms.in).
+# Live soft launch: / · /blog · /downloads (coming soon).
+# Sign-in deactivated on apex. Keyword landings / wiki redirect to /.
+# Suite: AStudio · AConsulting · AQC Estimation/BBS/PM · AADT · ShilpiDB.
 
 # Block authenticated app routes — these require login and must not be indexed
 Disallow: /dashboard

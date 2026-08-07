@@ -1,7 +1,10 @@
+import { isMarketingOnly } from "./marketing-gate.js";
+
 /**
  * Desktop installer resolution for the public `/downloads` portal.
  *
  * Honesty rule: never offer a download button until a **signed** URL is wired.
+ * Soft launch (`isMarketingOnly`): force **coming_soon** — no Open / GitHub CTAs.
  * Placeholders stay in `web_fallback` until a signed WinUI installer URL + sha256
  * is published (docs/esti/WEB-PORTAL.md).
  */
@@ -141,6 +144,25 @@ export function resolveInstallerOffer(
   manifest?: DesktopUpdateManifest | null,
 ): DesktopInstallerOffer {
   const meta = APP_META[app];
+
+  // Soft launch: installers are announced as Coming soon only.
+  if (isMarketingOnly()) {
+    return {
+      app,
+      title: meta.title,
+      expansion: meta.expansion,
+      webUrl: meta.webUrl,
+      repoUrl: meta.repoUrl,
+      downloadUrl: null,
+      version: null,
+      sha256: null,
+      status: "coming_soon",
+      fallbackReason:
+        "Windows installer coming soon — follow the blog for release notes.",
+      manifestPath: meta.manifest,
+    };
+  }
+
   const envUrl = envInstallerUrl(app);
   const manifestUrl = (manifest?.url ?? "").trim();
   const sha = (manifest?.sha256 ?? "").trim() || null;

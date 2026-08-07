@@ -1,11 +1,12 @@
 ---
 title: AORMS is web-only — no desktop apps, one browser workspace
 date: 2026-07-22
-excerpt: Historical (July 2026). Superseded August 2026 by local-first desktop + web parity — see “AORMS local-first”.
+excerpt: Historical (July 2026). Superseded August 2026 — see “AORMS local-first” and the suite map posts.
 tags: Product, Platform, Operations
 author: Human Centric Works
 status: superseded
 superseded_by: aorms-local-first
+draft: true
 ---
 
 > **Superseded (2026-08).** Product law is now **desktop preferred + web parity**

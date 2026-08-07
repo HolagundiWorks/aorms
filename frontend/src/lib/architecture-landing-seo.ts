@@ -1,73 +1,58 @@
-/** SEO for /login — AStudio marketing + sign-in (canonical vertical entry page). */
+/** SEO for /login — AStudio entry (soft launch: Coming soon on apex). */
 import { AORMS_STUDIO, AORMS_PLATFORM, EOMS, ESTI } from "./product-nomenclature.js";
 
 const BASE = "https://aorms.in/";
 const LEGACY_SLUGS = AORMS_STUDIO.legacySlugs.join(", ");
 
 export const ARCHITECTURE_LANDING_SEO = {
-  title: `${AORMS_STUDIO.title} | Advisory workspace for Indian architecture consultancies`,
+  title: `${AORMS_STUDIO.title} | Architecture practice manager on AORMS`,
   description:
-    `${AORMS_STUDIO.title} — the architecture consultancy workspace on AORMS — fee recovery, MoM-led client revisions, GST billing, drawings, studio load and portals. Not construction project management. Unlimited users. 5 GB included.`,
+    `${AORMS_STUDIO.title} is the architecture practice manager in the AORMS suite — tasks, office, portal communications. Technical calc stays in AQC apps; drafting in AADT. Soft launch: sign-in coming soon.`,
   keywords:
-    `architecture consultancy software India, architecture advisory practice, fee recovery architects, architect fee proposal software COA, GST billing architects India, client revision management architects, AStudio, Accelerated Studio, ${LEGACY_SLUGS}, ESTI`,
-  ogTitle: `${AORMS_STUDIO.title} — from chaos to clarity`,
+    `architecture practice manager, AStudio, Accelerated Studio, AORMS suite, ${LEGACY_SLUGS}, ESTI, EOMS, AEC consulting`,
+  ogTitle: `${AORMS_STUDIO.title} — architecture practice manager on AORMS`,
   ogDescription:
-    `One cloud workspace for Indian architecture consultancies: fee recovery, MoM-to-site revisions, GST, drawings, studio load and portals — ${AORMS_STUDIO.title} on the AORMS platform.`,
-  twitterTitle: `${AORMS_STUDIO.title} — advisory workspace for Indian consultancies`,
+    `Part of the AORMS suite: managers for communications; technical work local. ${AORMS_STUDIO.title} does not own BOQ or CAD entities.`,
+  twitterTitle: `${AORMS_STUDIO.title} — AORMS practice manager`,
   twitterDescription:
-    "Fees, MoM-led revisions, GST and studio load in one browser workspace. Unlimited users · 5 GB included.",
+    "Architecture practice manager in the AORMS suite. Soft launch: suite home and blog live; sign-in coming soon.",
   headline: "From chaos to clarity. One living record for the practice.",
   footerBlurb: `${AORMS_STUDIO.title} on ${AORMS_PLATFORM.name}.`,
   canonical: `${BASE}`,
   siteName: AORMS_PLATFORM.name,
-  wikiUrl: "https://aorms.in/wiki",
+  wikiUrl: "https://aorms.in/blog",
 } as const;
 
 export const ARCHITECTURE_LANDING_FAQ = [
   {
     question: `Who is ${AORMS_STUDIO.title} for?`,
     answer:
-      "Registered architects, interior designers and architectural consultancy practices in India — from solo studios to mid-sized firms. Unlimited users on every account.",
+      "Architecture and design consultancies — practice managers for tasks, office, and portal communications within the AORMS suite.",
   },
   {
     question: "How does fee recovery work?",
     answer:
-      "The workspace shows what is ready to invoice, the next COA payment stage, incoming receipts and due dates on the project record. GST invoices and filing reminders stay on the same trail.",
+      "The practice manager keeps proposals, invoices, and project records together so revisions and stages stay billable — technical totals publish from AQC Estimation when issued.",
   },
   {
-    question: "How much does it cost?",
+    question: "How is AORMS licensed?",
     answer:
-      "Every account includes 5 GB storage and the full workspace. Pay only for additional storage per GB-month — AI is unmetered (local Ollama on desktop, the hub on web), with no per-token billing or bring-your-own key.",
+      "Open source for now. SaaS commercial licensing is deferred. Windows installers are coming soon on aorms.in/downloads.",
   },
   {
     question: "Is there a desktop app?",
     answer:
-      "Yes — desktop preferred with web parity. The same workspace runs as a local-first desktop node or in the browser; drafts and AI can stay on the machine, and finalized documents publish to the hub. Signed installers appear on aorms.in/downloads when packaging ships; until then, use the web workspace.",
+      "Yes — practice managers and technical apps ship as desktop installers (coming soon on /downloads). Soft launch: aorms.in is marketing and blog.",
   },
   {
     question: "Where is the documentation?",
     answer:
-      "The official AORMS Wiki at aorms.in/wiki covers getting started, workflows, finance and account setup.",
+      "Start with the AORMS blog — why the suite matters, how it solves fragmented tools, and the suite map at aorms.in/blog.",
   },
   {
-    question: "How does client revision management work?",
+    question: `What are ${EOMS.name} and ${ESTI.name}?`,
     answer:
-      "Discussion becomes minutes of meeting. ESTI extracts implied revisions; the architect marks criticality; the client approves — then drawings and site move with a dated trail.",
-  },
-  {
-    question: "Can I use my own AI API key?",
-    answer:
-      "Yes. In Company → AI you can set an OpenAI-compatible endpoint and API key. ESTI also extracts revision items from minutes of meeting.",
-  },
-  {
-    question: "Does it cover pre-construction risk and opportunity?",
-    answer:
-      "Yes. On each project, Brief → R&O holds a risk register, opportunity scorecard, and design phase gates (concept through issue readiness). It is consultancy delivery — not construction project management.",
-  },
-  {
-    question: "What is the relationship to AORMS platform?",
-    answer:
-      `AORMS (${AORMS_PLATFORM.expansion}) is the platform for AEC consulting firms — ${EOMS.name} (${EOMS.role.toLowerCase()}) and ${ESTI.name} (${ESTI.role.toLowerCase()} in ${AORMS_STUDIO.title}). ${AORMS_STUDIO.title} is the shipping architecture app for Indian architecture practices.`,
+      `${EOMS.name} is the external knowledge bank for codes. ${ESTI.name} is the internal AI agent on desktop managers — answers from validated firm repositories.`,
   },
 ] as const;
 
@@ -105,7 +90,12 @@ export function injectArchitectureLandingJsonLd(): void {
         "@type": "SoftwareApplication",
         "@id": `${ARCHITECTURE_LANDING_SEO.canonical}#software`,
         name: AORMS_STUDIO.title,
-        alternateName: [AORMS_PLATFORM.expansion, ESTI.name, ESTI.expansion, ...AORMS_STUDIO.legacySlugs],
+        alternateName: [
+          AORMS_PLATFORM.expansion,
+          ESTI.name,
+          ESTI.expansion,
+          ...AORMS_STUDIO.legacySlugs,
+        ],
         applicationCategory: "BusinessApplication",
         operatingSystem: "Windows, Web",
         url: AORMS_STUDIO.appUrl,

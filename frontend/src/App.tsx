@@ -1,5 +1,11 @@
 import { Alert, AlertTitle, Box, CircularProgress } from "@mui/material";
-import { AORMS_STUDIO, AORMS_CONSULTANCY, AORMS_PMC, isAormsStudioLegacySlug } from "./lib/product-nomenclature.js";
+import {
+  AORMS_STUDIO,
+  AORMS_CONSULTANCY,
+  AORMS_PMC,
+  isAormsStudioLegacySlug,
+  isAormsPmcLegacySlug,
+} from "./lib/product-nomenclature.js";
 import {
   Analytics,
   Archive,
@@ -67,17 +73,21 @@ import { Landing } from "./routes/Landing.js";
 import { NotFound } from "./routes/NotFound.js";
 import { Signup } from "./routes/Signup.js";
 import { Login } from "./routes/Login.js";
+import { ComingSoonAuth } from "./routes/ComingSoonAuth.js";
 import { ExternalLogin } from "./routes/ExternalLogin.js";
 import { ForcePasswordChange } from "./routes/ForcePasswordChange.js";
 import { ForceWorkspaceProfile } from "./routes/ForceWorkspaceProfile.js";
 import { ForgotPassword } from "./routes/ForgotPassword.js";
 import { ResetPassword } from "./routes/ResetPassword.js";
+import { isMarketingAuthPath, isMarketingOnly } from "./lib/marketing-gate.js";
 
 // Build variant gate. The public marketing site (landing, blog, investors, one-click
 // demo) is included only when VITE_PUBLIC_SITE !== "false". Set it to "false" for the
 // firm product build — unauthenticated visitors then go straight to /login, with no
 // marketing surfaces shipped. Defaults to public (demo/dev builds).
 const PUBLIC_SITE = import.meta.env.VITE_PUBLIC_SITE !== "false";
+/** Soft launch: apex landing+blog only; login + installers gated. */
+const MARKETING_ONLY = isMarketingOnly();
 
 // Lazily import a named export as a route component (Vite splits each into its own chunk).
 // Loader is typed loosely so modules that also export types/constants still satisfy it.
@@ -319,7 +329,11 @@ function AppWorkspace() {
     );
 
   if (publicMarketing && pathname === "/demo")
-    return <Navigate to="/login" replace />;
+    return MARKETING_ONLY ? <Navigate to="/" replace /> : <Navigate to="/login" replace />;
+
+  // Soft launch: landing + blog (+ downloads coming-soon) only — no apex login.
+  if (publicMarketing && MARKETING_ONLY && isMarketingAuthPath(pathname))
+    return <ComingSoonAuth />;
 
   if (publicMarketing) {
     const slug = pathname.replace(/^\/+/, "").replace(/\/+$/, "");
@@ -334,12 +348,25 @@ function AppWorkspace() {
       isLandingSlug(pathname) ||
       slug === AORMS_STUDIO.slug ||
       isAormsStudioLegacySlug(slug);
-    if (pathname === AORMS_CONSULTANCY.marketingPath || slug === AORMS_CONSULTANCY.slug)
+    if (
+      pathname === AORMS_CONSULTANCY.marketingPath ||
+      slug === AORMS_CONSULTANCY.slug ||
+      slug === "acsulting"
+    )
       return <Navigate to="/#consultancy" replace />;
+    if (
+      pathname === AORMS_PMC.marketingPath ||
+      pathname === AORMS_PMC.legacyMarketingPath ||
+      slug === AORMS_PMC.slug ||
+      isAormsPmcLegacySlug(slug) ||
+      pathname === "/pmc"
+    )
+      return <Navigate to="/#pmc" replace />;
     if (isRemovedMarketing) return <Navigate to="/" replace />;
   }
 
   // AORMS account + licence portal (hlp_account) — available on every build variant.
+  // Soft-launch apex: already handled above via ComingSoonAuth.
   if (pathname === "/account")
     return <AccountPortal />;
 
@@ -359,11 +386,26 @@ function AppWorkspace() {
   if (!user) {
     return (
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/access" element={<ExternalLogin />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route
+          path="/login"
+          element={publicMarketing && MARKETING_ONLY ? <ComingSoonAuth /> : <Login />}
+        />
+        <Route
+          path="/access"
+          element={publicMarketing && MARKETING_ONLY ? <ComingSoonAuth /> : <ExternalLogin />}
+        />
+        <Route
+          path="/signup"
+          element={publicMarketing && MARKETING_ONLY ? <ComingSoonAuth /> : <Signup />}
+        />
+        <Route
+          path="/forgot-password"
+          element={publicMarketing && MARKETING_ONLY ? <ComingSoonAuth /> : <ForgotPassword />}
+        />
+        <Route
+          path="/reset-password"
+          element={publicMarketing && MARKETING_ONLY ? <ComingSoonAuth /> : <ResetPassword />}
+        />
         {publicMarketing ? (
           <>
             <Route path="/" element={<Landing />} />

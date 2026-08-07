@@ -15,37 +15,42 @@ import {
 export const LANDING_SEO = {
   title: `AORMS | ${AORMS_PLATFORM.expansion}`,
   description:
-    "AORMS suite for AEC consultancies — practice managers (AStudio, AConsulting), technical apps (AQC Estimation, BBS, Project Management), AADT drafting, and ShilpiDB drawings. Technical work local; portals online.",
+    "AORMS suite for AEC consultancies — practice managers, AQC Estimation/BBS/PM, AADT drafting, ShilpiDB drawings, and firm portals. Technical work stays local; aorms.in is marketing and blog. Open source; installers coming soon.",
   keywords:
-    "AORMS, AStudio, AConsulting, AQC Estimation, AQC BBS, AProc, AADT, ShilpiDB, EOMS, AEC consulting suite, desktop local-first, WinUI, architecture software, engineering software, PMC software",
+    "AORMS, AStudio, AConsulting, AQC Estimation, AQC BBS, AProc, AADT, ShilpiDB, EOMS, ESTI, AEC consulting suite, practice management, local-first desktop, architecture software, engineering software, PMC software, fragmented tools",
   ogTitle: `AORMS — ${AORMS_PLATFORM.heroHeadline[0]} ${AORMS_PLATFORM.heroHeadline[1]}`,
   ogDescription:
-    "Accelerated Operational Resources Management System: practice managers online for communications; Estimation, BBS, PM, and AADT locally. ShilpiDB for drawings. Mongo ops for portals.",
-  twitterTitle: "AORMS — suite for AEC consultancies",
+    "One suite for AEC consultancies: managers for communications; Estimation, BBS, PM, and AADT locally; ShilpiDB for drawings; firm portals for published updates. Open source. Installers coming soon.",
+  twitterTitle: "AORMS — the operating suite for AEC consultancies",
   twitterDescription:
-    `${AORMS_STUDIO.title} & ${AORMS_CONSULTANCY.title} managers · ${AQC_ESTIMATION.title} · ${AQC_BBS.title} · ${AORMS_PMC.title} · ${AADT.title} · ${SHILPIDB.name}.`,
+    `${AORMS_STUDIO.title} · ${AORMS_CONSULTANCY.title} · ${AQC_ESTIMATION.title} · ${AQC_BBS.title} · ${AORMS_PMC.title} · ${AADT.title} · ${SHILPIDB.name}. Technical work local; portals online.`,
   headline: `${AORMS_PLATFORM.heroHeadline[0]} ${AORMS_PLATFORM.heroHeadline[1]}`,
-  footerBlurb: `${AORMS_PLATFORM.name} (${AORMS_PLATFORM.expansion}).`,
+  footerBlurb: `${AORMS_PLATFORM.name} (${AORMS_PLATFORM.expansion}) — suite home and blog.`,
   canonical: "https://aorms.in/",
   siteName: AORMS_PLATFORM.name,
-  wikiUrl: "https://aorms.in/wiki",
+  wikiUrl: "https://aorms.in/blog",
 } as const;
 
 export const LANDING_FAQ = [
   {
     question: "What is AORMS?",
     answer:
-      `AORMS (${AORMS_PLATFORM.expansion}) is a product suite for AEC consulting and PMC firms — practice managers, technical desktop apps, AADT drafting, and ShilpiDB for drawings. ${EOMS.name} is the knowledge bank; ${ESTI.name} is the internal AI agent.`,
+      `AORMS (${AORMS_PLATFORM.expansion}) is a product suite for AEC consulting and PMC firms — practice managers, technical desktop apps, AADT drafting, and ShilpiDB for drawings. ${EOMS.name} is the knowledge bank; ${ESTI.name} is the internal AI agent on desktop managers.`,
   },
   {
-    question: "Who is the platform for?",
+    question: "Why a suite instead of one mega-app?",
     answer:
-      `AEC consulting and PMC firms — architecture, engineering, and project management practices. Managers handle tasks, office, HR, and communications; technical work (estimation, BBS, programme, drafting) stays on the desktop.`,
+      "Practice communications and commercial rhythm belong in managers. Heavy calc (BOQ, BBS, programme) and drafting stay on the desktop. Firm portals show published updates only. One cloud ERP that tries to own CAD drafts and payroll always fails trust or correctness.",
+  },
+  {
+    question: "Who is the suite for?",
+    answer:
+      `AEC consulting and PMC firms — architecture, engineering, and project management practices that advise and govern projects. Not contractor labour ERP.`,
   },
   {
     question: `What are ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title}?`,
     answer:
-      `Practice managers — Tasks, Office, HR, Payroll, and portal communications. ${AORMS_STUDIO.title} for architecture; ${AORMS_CONSULTANCY.title} for engineering. They do not own BOQ math or CAD entities.`,
+      `Practice managers — Tasks, Office, HR, Payroll views, and portal communications. ${AORMS_STUDIO.title} for architecture; ${AORMS_CONSULTANCY.title} for engineering. They do not own BOQ math or CAD entities.`,
   },
   {
     question: "What are the AQC technical apps?",
@@ -55,27 +60,22 @@ export const LANDING_FAQ = [
   {
     question: `What are ${AADT.title} and ${SHILPIDB.name}?`,
     answer:
-      `${AADT.title} is local 2D CAD. ${SHILPIDB.name} is the geometry spine connecting drawings across the suite; portals see published packages only.`,
+      `${AADT.title} is local 2D CAD. ${SHILPIDB.name} is the geometry spine; portals see published drawing packages only.`,
   },
   {
-    question: "What are the operational and design frameworks?",
+    question: "How is AORMS licensed right now?",
     answer:
-      "The operational framework is how the consulting office runs — intake, process standards, review, audit, and governed knowledge. The design framework is how engagements are structured — methodologies, deliverable models, and versioned advisory templates.",
+      "Open source for now. SaaS commercial licensing is deferred. Windows installers are listed as coming soon on aorms.in/downloads.",
   },
   {
-    question: "What is the dual-tier AI architecture?",
+    question: "Can I sign in on aorms.in today?",
     answer:
-      `${EOMS.name} is the knowledge bank for codes and compliance. ${ESTI.name} answers from validated firm repositories on desktop managers. Technical AI stays local (propose, never auto-commit money or geometry).`,
+      "Soft launch: the suite home and blog are live. Workspace sign-in and firm-portal demos are coming soon. Follow the blog for release notes.",
   },
   {
-    question: "Where do clients and consultants sign in?",
+    question: "Where do I learn how the suite solves fragmented tools?",
     answer:
-      "Firm-branded portals — Updates, Project, Progress, Drawings, Documents — for published data only. Staff ERP is not on aorms.in; use desktop apps or demo sign-in for demos.",
-  },
-  {
-    question: "Is there a desktop app?",
-    answer:
-      `Yes. Technical work and practice managers ship as Windows desktop apps. Signed installers list at aorms.in/downloads when packaging ships; until then use demos and GitHub repos.`,
+      "Read the blog posts “Why the AORMS suite matters”, “How the AORMS suite solves fragmented practice tools”, and “AORMS suite map” at aorms.in/blog.",
   },
 ] as const;
 
@@ -147,7 +147,7 @@ export function injectLandingJsonLd(): void {
         url: "https://aorms.in/",
         description: LANDING_SEO.description,
         featureList:
-          "practice managers, AQC Estimation, AQC BBS, AQC Project Management, AADT drafting, ShilpiDB geometry, firm portals, local-first desktop, EOMS, ESTI",
+          "practice managers, AQC Estimation, AQC BBS, AQC Project Management, AADT drafting, ShilpiDB geometry, firm portals, local-first desktop, EOMS, ESTI, open source",
         audience: {
           "@type": "Audience",
           audienceType:
@@ -156,8 +156,9 @@ export function injectLandingJsonLd(): void {
         offers: {
           "@type": "Offer",
           name: `${AORMS_PLATFORM.name} suite`,
-          description: `Open-source suite. Managers and technical desktops; portals for communications.`,
-          url: "https://aorms.in/downloads",
+          description:
+            "Open-source suite. Soft launch: marketing home and blog live; Windows installers coming soon.",
+          url: "https://aorms.in/blog",
         },
         publisher: { "@id": "https://aorms.in/#organization" },
       },

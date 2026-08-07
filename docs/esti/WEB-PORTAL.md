@@ -1,41 +1,53 @@
 # AORMS web portal — desktop downloads
 
-**Status:** Canonical · **Updated:** 2026-08-06 · **Owner:** Aakash (Portal / GTM / UX)  
-**Runtime law:** [LOCAL-FIRST.md](LOCAL-FIRST.md) · **UX:** [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md)  
-**Crew (Vishwakarma owns status):** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) § Aakash  
-*(link target lands with orch merge — this PR does not rewrite that file)*
+**Status:** Canonical · **Updated:** 2026-08-08 · **Owner:** Aakash (Portal / GTM / UX)  
+**Runtime law:** [LOCAL-FIRST.md](LOCAL-FIRST.md) · **Suite:** [AORMS-SUITE.md](AORMS-SUITE.md) ·  
+**Repos:** [DESKTOP-REPOS.md](DESKTOP-REPOS.md)
 
-Public surface for **signed** local-first Windows installers. Same SPA as web;
-legacy Lite / Pro / Community Manager SKUs stay **retired**.
+Public surface for **signed** Windows installers across the AORMS suite.
+`aorms.in` is **marketing + demos**; staff ERP is desktop. Legacy Lite / Pro /
+Community Manager SKUs stay **retired**.
 
 ## Surface
 
 | Path | Behaviour |
 | --- | --- |
-| `/downloads` | Live portal — AStudio + AConsulting offers |
+| `/downloads` | Live portal — suite offers (managers + AQC + AADT) |
 | `/download` | Legacy Manager path → **redirects to `/downloads`** |
+| `/` | Suite landing |
+| `/login` | Demo / portals / account (preview) |
 
 Host: platform apex (`aorms.in`). Code: `frontend/src/routes/Downloads.tsx` ·
 resolver `frontend/src/lib/desktop-installers.ts`.
+
+### Offers (all default `web_fallback`)
+
+| App | Manifest |
+| --- | --- |
+| AStudio | `astudio.json` |
+| AConsulting | `aconsulting.json` |
+| AQC Estimation | `aqc-estimation.json` |
+| AQC BBS | `aqc-bbs.json` |
+| AQC Project Management | `aqc-pm.json` |
+| AADT | `aadt.json` |
 
 ## Honesty rule (do not break)
 
 | State | CTA |
 | --- | --- |
-| No signed URL wired | **web_fallback** — “Open … in browser” only |
+| No signed URL wired | **web_fallback** — open product page / GitHub only |
 | Signed URL + sha256 live | **Download … for Windows** |
 
 **Never** point live CTAs at unsigned overnight binaries under `desktop/artifacts/`
 (or any morning smoke `Setup.exe`). Wait on **Bhoomi** for a **code-signed** URL +
-sha256 before flipping. Morning bind checklist is Bhoomi/Vish-owned
-([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) — do not fork status tables here).
+sha256 before flipping.
 
 ## Portal → installer wiring
 
 ```text
 Bhoomi (Local)                         Aakash (Portal)
 ──────────────                         ───────────────
-signed Setup.exe ──url + sha256──►     VITE_*_INSTALLER_URL
+signed Setup.exe ──url + sha256──►     VITE_*_INSTALLER_URL (managers)
                                        or update-manifests/*.json
                                        + VITE_PORTAL_USE_RELEASE_INSTALLERS=true
                                                 │
@@ -43,22 +55,17 @@ signed Setup.exe ──url + sha256──►     VITE_*_INSTALLER_URL
                                        aorms.in/downloads  (web_fallback until then)
 ```
 
-Sibling-repo / contracts gate stays with Vish/Gagan ([DESKTOP-REPOS.md](DESKTOP-REPOS.md)
-after their PRs). This file owns **portal fill fields only**.
+Product repos: [DESKTOP-REPOS.md](DESKTOP-REPOS.md). This file owns **portal fill fields**.
 
 ## One-line fill (after Bhoomi signs)
 
-Bhoomi produces `desktop/artifacts/winui/studio/handoff-studio.json` (and
-`…/consultancy/handoff-consultancy.json`) via `desktop/scripts/sign-winui.ps1`. Copy `sha256` /
-`version` from that file; set `url` only after HTTPS upload. Flip `status` to
-`available` only when handoff `chainTrusted` / `smartScreenReady` is **true**.
+Copy `sha256` / `version` from the trusted handoff; set `url` only after HTTPS upload.
+Flip `status` to `available` only when the chain is SmartScreen-ready.
 
-**HTTPS host (interim):** GitHub Releases on `HolagundiWorks/aorms` via
-`desktop/scripts/publish-winui-release.ps1` (refuses ACO-dev unless
-`-ForceDraftUntrusted`; `-FillManifests` only when trusted). Do **not** reuse
-legacy Estimate / Community / Manager release assets.
+**HTTPS host (interim):** GitHub Releases on `HolagundiWorks/aorms` (or per-app
+repos). Do **not** reuse legacy Estimate / Community / Manager release assets.
 
-### Option A — env (preferred for prod rebuild)
+### Option A — env (managers)
 
 ```bash
 VITE_ASTUDIO_INSTALLER_URL=https://cdn.example.com/AStudio-Setup-1.0.0.exe
@@ -68,55 +75,39 @@ VITE_ACONSULTING_INSTALLER_URL=https://cdn.example.com/AConsulting-Setup-1.0.0.e
 
 ### Option B — update manifests + gate flag
 
-1. Edit `frontend/public/update-manifests/astudio.json` (and `aconsulting.json`):
+1. Edit the matching file under `frontend/public/update-manifests/`:
 
 | Field | Required | Notes |
 | --- | --- | --- |
-| `url` | yes | `https://…` HTTPS (prefer CDN). Do **not** use `desktop/artifacts/` paths |
+| `url` | yes | `https://…` HTTPS (prefer CDN) |
 | `sha256` | yes | 64-char hex of the **signed** binary |
 | `version` | yes | Semver / packaging version |
 | `status` | yes | Set to `"available"` (placeholder is `"web_fallback"`) |
-| `signature` | optional | Authenticode / package sig metadata |
-| `publishedAt` | optional | ISO-8601 |
 
 2. Set `VITE_PORTAL_USE_RELEASE_INSTALLERS=true` and rebuild.
 
 Without the flag, filled manifests stay inert (safe default).
 
-Optional sha256 env mirrors (if used in deploy): document alongside URL fills —
-manifest `sha256` remains the checksum source of truth for the portal UI.
-
 ## Placeholders in tree
 
 ```
-frontend/public/update-manifests/astudio.json      # status=web_fallback
-frontend/public/update-manifests/aconsulting.json  # status=web_fallback
+frontend/public/update-manifests/astudio.json
+frontend/public/update-manifests/aconsulting.json
+frontend/public/update-manifests/aqc-estimation.json
+frontend/public/update-manifests/aqc-bbs.json
+frontend/public/update-manifests/aqc-pm.json
+frontend/public/update-manifests/aadt.json
 ```
 
-Binary staging dir `frontend/public/downloads/` remains **gitignored** — host
-signed artefacts via CDN or deploy copy, not the repo.
-
-## What Bhoomi must provide (handoff)
-
-| Deliverable | Fill |
-| --- | --- |
-| Code-signed AStudio `Setup.exe` HTTPS URL | `VITE_ASTUDIO_INSTALLER_URL` **or** `astudio.json` → `url` |
-| Code-signed AConsulting `Setup.exe` HTTPS URL | `VITE_ACONSULTING_INSTALLER_URL` **or** `aconsulting.json` → `url` |
-| SHA-256 (64 hex) per binary | matching manifest `sha256` |
-| Version string | matching manifest `version` |
-| “Signed for release” confirmation (not morning smoke) | then set manifest `status: available` + `VITE_PORTAL_USE_RELEASE_INSTALLERS=true` **or** set env URLs and rebuild |
+Binary staging dir `frontend/public/downloads/` remains **gitignored**.
 
 ## Out of scope here
 
-- Building / signing installers → **Bhoomi** (`DesktopLicenceBind`, Tauri)  
-- Hub `syncToken` mint / sync APIs / `HUB-API.md` → **Gagan**  
-- ROADMAP / AGENT-WORKSTREAMS status tables → **Vishwakarma**  
-- Extracting SPA into sibling repos → future; scaffolds only in
-  [repo-scaffolds/](repo-scaffolds/)
+- Building / signing installers → **Bhoomi**
+- Firm portal tab wiring beyond published reads
+- SaaS SKUs / storage metering (deferred; OSS for now)
 
 ## Related
 
-- [MARKET-FIT.md](MARKET-FIT.md) § M8 (item 4 stays 🔲 until signed URL)  
-- [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) · [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md)  
-- [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md)  
-- [LOCAL-FIRST.md](LOCAL-FIRST.md) · [ROADMAP.md](ROADMAP.md) (status owned by Vish)  
+- [MARKET-FIT.md](MARKET-FIT.md) · [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md)
+- [LOCAL-FIRST.md](LOCAL-FIRST.md) · [ROADMAP.md](ROADMAP.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md)

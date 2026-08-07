@@ -12,10 +12,20 @@ auto-start. You only provision the box, point DNS, and run the installer.
 
 ```bash
 # On a fresh Ubuntu 22.04/24.04 VPS, as root, AFTER pointing DNS at this box:
+
+# One-shot (clone + install):
+DOMAIN=aorms.in ADMIN_EMAIL=ops@aorms.in \
+  OWNER_EMAIL=owner@firm.in OWNER_PASSWORD='…' \
+  curl -fsSL https://raw.githubusercontent.com/HolagundiWorks/aorms/main/deploy/bootstrap-vps.sh \
+  | sudo -E bash
+
+# Or clone first:
 apt-get update && apt-get install -y git
-git clone --branch main https://github.com/HolagundiWorks/esti.git /opt/esti
+git clone --branch main https://github.com/HolagundiWorks/aorms.git /opt/esti
 cd /opt/esti
 sudo bash deploy/install.sh          # default: landing + main app (the AORMS site)
+# Marketing-only: sudo bash deploy/install-landing.sh
+bash deploy/verify-vps.sh            # smoke landing / downloads / login / mongo
 ```
 
 ~5–8 min later you're live at `https://<your-domain>` with TLS.
@@ -24,7 +34,7 @@ sudo bash deploy/install.sh          # default: landing + main app (the AORMS si
 
 ## 1. What gets deployed
 
-One box runs six containers behind the host's nginx (which terminates TLS):
+One box runs containers behind the host's nginx (which terminates TLS):
 
 ```
             Internet (HTTPS)
@@ -37,13 +47,15 @@ One box runs six containers behind the host's nginx (which terminates TLS):
    │  worker                    ─ Python job consumer    │
    │  esti-db      (Postgres)   ─ internal only          │
    │  esti-redis   (Redis)      ─ internal only          │
+   │  esti-mongo   (Mongo ops)  ─ suite portal ops       │
    │  esti-minio   (S3 storage) ─ internal only          │
+   │  esti-ollama  (local LLM)  ─ internal only          │
    │  frontend     (build-only) ─ compiles the SPA → dist│
    └────────────────────────────────────────────────────┘
 ```
 
 - Only the **backend** binds a host port, and only on **loopback** (`127.0.0.1:4000`).
-  Postgres/Redis/MinIO are never exposed to the internet.
+  Postgres/Redis/Mongo/MinIO are never exposed to the internet.
 - The SPA is built once and served as static files by nginx from `/opt/esti/frontend/dist`.
 - A `systemd` unit (`esti.service`) starts the stack on boot.
 

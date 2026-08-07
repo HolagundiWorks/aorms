@@ -7,10 +7,10 @@ import { applyBlogListSeo } from "../lib/blog-seo.js";
 
 // Roadmap of articles in the pipeline — shown as titles, not thin placeholder pages.
 const COMING_NEXT = [
+  "Signed installer release notes — when /downloads flips off Coming soon",
+  "Firm portal soft launch — what clients see first",
   "COA stage-wise fee structures — a billing guide for Indian architects",
-  "Transmittal anatomy — what every drawing issue record should contain",
   "ASPRF in the wild — reading a studio score without gaming it",
-  "Signed installer release notes — when /downloads flips off web_fallback",
 ];
 
 export function Blog() {
@@ -28,14 +28,14 @@ export function Blog() {
           <p className="lp2-section-head__tag">{AORMS_PLATFORM.name} blog</p>
           <h1 className="lp2-section-head__title">Blog</h1>
           <p className="lp2-section-head__body">
-            Platform notes (frameworks, EOMS, ESTI) and <strong>{AORMS_STUDIO.title}</strong>{" "}
-            advisory operations for Indian architecture consultancies — revisions, approvals,
-            billing, and workflows. Desktop preferred with web parity.
+            Suite notes for {AORMS_PLATFORM.name} — why the suite matters, how it solves
+            fragmented tools, and the product map for managers, AQC apps, AADT, and{" "}
+            {AORMS_STUDIO.title} operations.
           </p>
           <p className="lp2-blog-links">
-            <Link to="/">AORMS platform</Link>
+            <Link to="/">Suite home</Link>
             <span aria-hidden> · </span>
-            <Link to="/login">{AORMS_STUDIO.title}</Link>
+            <Link to="/downloads">Downloads</Link>
           </p>
         </header>
 

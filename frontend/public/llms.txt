@@ -1,48 +1,38 @@
 ﻿# AORMS
 
-AORMS stands for Accelerated Operational Resources Management System — a platform for AEC consulting firms and project management consultancies (architecture, engineering, and PMC practices that advise and govern projects).
+AORMS stands for Accelerated Operational Resources Management System — a **product suite** for AEC consulting firms and project management consultancies.
 
-AORMS is NOT contractor ERP and NOT a full Primavera/MSP replacement. It provides an operational framework (how the office runs) and a design framework (how engagements are structured) on one spine, with **EOMS** (external knowledge bank) and **ESTI** (internal AI agent).
+AORMS is NOT contractor ERP and NOT a full Primavera/MSP replacement. Practice managers handle communications; technical work (estimation, BBS, programme, drafting) stays on the desktop. Firm portals publish updates online. **aorms.in** is marketing and blog (soft launch — sign-in and Windows installers coming soon). Licensing is **open source for now**.
 
-Three apps on one platform:
-- **AStudio** (*Accelerated Studio*) — architecture consultancy workspace for Indian architecture and design practices (live at studio.aorms.in)
-- **AConsulting** (*Accelerated Consulting*) — engineering consultancy workspace for structural, MEP, civil, and multidisciplinary firms (live at consultancy.aorms.in)
-- **AProc** (*Accelerated Project Management*) — PMC workspace for project management consultancies (preview at proc.aorms.in) — programme, packages, sealed contractor bids, RA/steel certification, BBS, P6 XER milestone import
+Suite map:
+- **AStudio** / **AConsulting** — practice managers (architecture / engineering)
+- **AQC Estimation** · **AQC BBS** · **AQC Project Management (AProc)** — technical desktop installers sharing bbs_engine
+- **AADT** — 2D drafting · **ShilpiDB** — geometry store
+- **EOMS** — external knowledge bank · **ESTI** — internal AI on desktop managers
 
-Platform home: https://aorms.in/
-Architecture app (sign in): https://aorms.in/login · https://studio.aorms.in
-Engineering app: https://consultancy.aorms.in
-PMC app: https://proc.aorms.in
+Suite home: https://aorms.in/
 Blog: https://aorms.in/blog
-Central wiki: https://aorms.in/wiki (path may redirect to platform home while docs consolidate)
+Downloads (coming soon): https://aorms.in/downloads
 
-AStudio capabilities:
-- Fee recovery — what needs invoicing, next payment stage, receipts, due dates, GST reminders
-- Client revision management — MoM → ESTI extracts → client request → architect criticality → client approves
-- Drawing register, transmittals, and client approval workflows
-- Pre-construction R&O — risks, opportunities, design phase gates
-- COA fee proposals and GST invoicing with reconciliation
-- Studio Intelligence dashboard and Ask ESTI (BYO API key supported)
-- **EOMS** — Emergent Object Management System (knowledge bank); **ESTI** — internal AI agent
-- **Desktop preferred + web parity** — WinUI local-first node and browser SPA; one Standard licence; AI unmetered (local on desktop, hub on web)
-- **Pure neumorphism** UI (`@hcw/ui-kit` 1.5.0) — opaque soft chrome, 8px radius; signed installers at /downloads when packaging ships
+Key articles:
+- https://aorms.in/blog/why-aorms-suite-matters
+- https://aorms.in/blog/how-aorms-suite-solves-fragmented-practice
+- https://aorms.in/blog/aorms-suite-map
+- https://aorms.in/blog/aorms-local-first
 
-AProc capabilities (owner-side PMC governance — not contractor labour ERP):
-- Master programme milestones (CSV + Primavera P6 XER import)
-- Package tender invites with sealed contractor-portal bids
-- RA bill and steel certification; BBS (IS 456) + steel reconciliation
-- Progress reports, snags, site supervision on the Delivery spine
+Product notes:
+- Technical work and AI stay local on desktop apps
+- Firm portals show published data only (not draft CAD / BOQ lines)
+- Pure neumorphism UI (`@hcw/ui-kit`) on marketing + portals
 
 Website:
 https://aorms.in
 
 ## Public Pages
-- [AORMS platform home](https://aorms.in/)
-- [Desktop downloads](https://aorms.in/downloads)
-- [AStudio — sign in](https://aorms.in/login)
-- [AConsulting — engineering app](https://consultancy.aorms.in/)
-- [AProc — PMC app](https://proc.aorms.in/)
+- [AORMS suite home](https://aorms.in/)
 - [AORMS Blog](https://aorms.in/blog/)
-- [Pure neumorphism UI](https://aorms.in/blog/pure-neumorphism-ui)
-- [Desktop installers](https://aorms.in/blog/desktop-installers-winui)
+- [Why the suite matters](https://aorms.in/blog/why-aorms-suite-matters)
+- [How the suite solves fragmented tools](https://aorms.in/blog/how-aorms-suite-solves-fragmented-practice)
+- [Suite map](https://aorms.in/blog/aorms-suite-map)
+- [Downloads (coming soon)](https://aorms.in/downloads)
 - [Local-first](https://aorms.in/blog/aorms-local-first)

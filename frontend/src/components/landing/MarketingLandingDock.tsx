@@ -26,8 +26,8 @@ function sectionIdFromHref(href: string): string | null {
  */
 export function MarketingLandingDock({
   sections,
-  signInHref = "/downloads",
-  signInLabel = "Get apps",
+  signInHref = "/",
+  signInLabel = "Home",
 }: {
   sections: readonly MarketingDockSection[];
   signInHref?: string;

@@ -20,6 +20,8 @@ git fetch origin && git checkout "$GIT_BRANCH" && git pull origin "$GIT_BRANCH"
 
 section "Rebuilding backend + worker"
 docker compose -f compose.prod.yaml build backend worker
+# Ensure suite ops Mongo is up (added 2026-08; no-op if already running).
+docker compose -f compose.prod.yaml up -d esti-mongo 2>/dev/null || true
 docker compose -f compose.prod.yaml up -d backend worker
 wait_for_backend_health 30 2 && info "Backend healthy." || warn "Backend /health failed — docker logs esti-backend"
 

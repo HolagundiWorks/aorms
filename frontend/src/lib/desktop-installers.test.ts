@@ -6,7 +6,21 @@ describe("resolveInstallerOffer", () => {
     vi.unstubAllEnvs();
   });
 
+  it("forces coming_soon when marketing-only soft launch is on", () => {
+    vi.stubEnv("VITE_MARKETING_ONLY", "true");
+    const offer = resolveInstallerOffer("astudio", {
+      app: "astudio",
+      product: "AStudio",
+      status: "available",
+      url: "https://cdn.example.com/AStudio-Setup.exe",
+      sha256: "a".repeat(64),
+    });
+    expect(offer.status).toBe("coming_soon");
+    expect(offer.downloadUrl).toBeNull();
+  });
+
   it("stays web_fallback when manifest is a placeholder", () => {
+    vi.stubEnv("VITE_MARKETING_ONLY", "false");
     const offer = resolveInstallerOffer("astudio", {
       app: "astudio",
       product: "AStudio",
@@ -19,6 +33,7 @@ describe("resolveInstallerOffer", () => {
   });
 
   it("does not use manifest URL without VITE_PORTAL_USE_RELEASE_INSTALLERS", () => {
+    vi.stubEnv("VITE_MARKETING_ONLY", "false");
     const offer = resolveInstallerOffer("astudio", {
       app: "astudio",
       product: "AStudio",
@@ -32,6 +47,7 @@ describe("resolveInstallerOffer", () => {
   });
 
   it("uses manifest when release flag is on and sha256 is valid", () => {
+    vi.stubEnv("VITE_MARKETING_ONLY", "false");
     vi.stubEnv("VITE_PORTAL_USE_RELEASE_INSTALLERS", "true");
     const offer = resolveInstallerOffer("aconsulting", {
       app: "aconsulting",
@@ -47,6 +63,7 @@ describe("resolveInstallerOffer", () => {
   });
 
   it("prefers explicit env installer URL over manifest", () => {
+    vi.stubEnv("VITE_MARKETING_ONLY", "false");
     vi.stubEnv("VITE_ASTUDIO_INSTALLER_URL", "https://releases.aorms.in/astudio-signed.exe");
     const offer = resolveInstallerOffer("astudio", {
       app: "astudio",

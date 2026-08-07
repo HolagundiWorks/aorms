@@ -18,6 +18,11 @@ interface ImportMetaEnv {
    * placeholder manifests never become live CTAs.
    */
   readonly VITE_PORTAL_USE_RELEASE_INSTALLERS?: string;
+  /**
+   * Soft launch: landing + blog only; apex login deactivated; installers Coming soon.
+   * Default on when `VITE_PUBLIC_SITE` is not false. Set `"false"` to re-enable demos.
+   */
+  readonly VITE_MARKETING_ONLY?: string;
 }
 
 interface ImportMeta {
