@@ -47,6 +47,12 @@ import type { ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DataState } from "../components/DataState.js";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
+import {
+  FirmPortalDocumentsPanel,
+  FirmPortalDrawingsPanel,
+  FirmPortalProgressPanel,
+  FirmPortalProjectPanel,
+} from "../components/portal/FirmPortalHubPanels.js";
 import { PortalMinutes } from "../components/PortalMinutes.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
 import { StatusDot, StatusTag } from "../components/StatusTag.js";
@@ -497,12 +503,44 @@ export function Portal() {
     },
   ];
 
+  const portalPanels = {
+    project: (
+      <FirmPortalProjectPanel
+        loading={!!openId && detailQ.isLoading}
+        project={d?.project ?? null}
+        phases={d?.phases ?? []}
+      />
+    ),
+    progress: (
+      <FirmPortalProgressPanel
+        loading={!!openId && (detailQ.isLoading || progressReportsQ.isLoading)}
+        reports={progressReportsQ.data ?? []}
+        phases={d?.phases}
+      />
+    ),
+    drawings: (
+      <FirmPortalDrawingsPanel
+        loading={!!openId && detailQ.isLoading}
+        drawings={d?.drawings ?? []}
+        transmittals={d?.transmittals ?? []}
+      />
+    ),
+    documents: (
+      <FirmPortalDocumentsPanel
+        loading={!!openId && detailQ.isLoading}
+        invoices={d?.invoices ?? []}
+        approvals={d?.approvals ?? []}
+      />
+    ),
+  };
+
   return (
     <ExternalPortalShell
       companyName={brandingQ.data?.companyName}
       portalLabel={AORMS_PORTALS.client.label}
       onSignOut={() => logout.mutate()}
       signingOut={logout.isPending}
+      panels={portalPanels}
     >
         {!openId && (
           <Stack spacing={3}>

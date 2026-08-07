@@ -16,9 +16,9 @@ Canon: [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-B
 | --- | --- | --- | --- |
 | 1 | AQC bridge docs | AQC | ✅ [PR #4](https://github.com/HolagundiWorks/AQC/pull/4) |
 | 2 | `Aorms.Bridge` scaffold | AQC | ✅ [PR #5](https://github.com/HolagundiWorks/AQC/pull/5) merged |
-| 3 | **D2 smoke** — activate → Flush with live `syncToken` | AQC ↔ esti hub | 🚧 local outbox OK; hub activate pending licence key |
-| 4 | **D5** — consume bridge in apps | AStudio · AConsulting | 🚧 ENGINE-PIN docs ([AStudio#1](https://github.com/HolagundiWorks/AStudio/pull/1) · [AConsulting#1](https://github.com/HolagundiWorks/AConsulting/pull/1)) |
-| 5 | Portal section content | esti | 🚧 shell + placeholders · [FIRM-PORTAL-SECTIONS.md](FIRM-PORTAL-SECTIONS.md) |
+| 3 | **D2 smoke** — activate → Flush with live `syncToken` | AQC ↔ esti hub | ✅ Smoke + colocated hub |
+| 4 | **D5** — consume bridge in apps | AStudio · AConsulting | 🚧 pin `aorms-bridge-d2` · ENGINE-PIN ready |
+| 5 | Portal section content | esti | ✅ client portal panels (Project · Progress · Drawings · Documents) |
 
 ---
 
@@ -27,10 +27,10 @@ Canon: [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-B
 | Wave | Outcome | Status |
 | --- | --- | --- |
 | **D0–D1** | Product law · PORTAL-SYNC-BRIDGE | ✅ |
-| **D2** | AQC `Aorms.Bridge` | ✅ code · 🚧 hub smoke |
+| **D2** | AQC `Aorms.Bridge` | ✅ code + hub smoke |
 | **D3** | Sibling repos | ✅ |
 | **D4** | FirmPortalShell + marketing CTAs | ✅ |
-| **D5** | Domain apps consume engine + bridge | 🚧 kickoff |
+| **D5** | Domain apps consume engine + bridge | 🚧 pin ready · consume next |
 | **D6** | Signed installers · portal tenants | 🔲 |
 
 ---
@@ -41,7 +41,7 @@ Canon: [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-B
 | --- | --- |
 | **AStudio** | https://github.com/HolagundiWorks/AStudio |
 | **AConsulting** | https://github.com/HolagundiWorks/AConsulting |
-| **AQC** | https://github.com/HolagundiWorks/AQC |
+| **AQC** | https://github.com/HolagundiWorks/AQC · tag `aorms-bridge-d2` |
 
 ---
 
