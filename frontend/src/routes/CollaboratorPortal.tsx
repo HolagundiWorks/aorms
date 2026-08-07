@@ -33,6 +33,11 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DataState } from "../components/DataState.js";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
+import {
+  FirmPortalDrawingsPanel,
+  FirmPortalProgressPanel,
+  FirmPortalProjectPanel,
+} from "../components/portal/FirmPortalHubPanels.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
 import { StatusDot } from "../components/StatusTag.js";
 import { SubmissionThread } from "../components/SubmissionThread.js";
@@ -238,12 +243,43 @@ export function CollaboratorPortal() {
     },
   ];
 
+  const portalPanels = {
+    project: (
+      <FirmPortalProjectPanel
+        loading={!!openId && detailQ.isLoading}
+        project={d?.project ?? null}
+        phases={d?.phases ?? []}
+        pickProjectHint="Open an engagement from Updates to see summary and stages."
+      />
+    ),
+    progress: (
+      <FirmPortalProgressPanel
+        loading={!!openId && detailQ.isLoading}
+        reports={[]}
+        phases={d?.phases}
+      />
+    ),
+    drawings: (
+      <FirmPortalDrawingsPanel
+        loading={!!openId && detailQ.isLoading}
+        drawings={(d?.drawings ?? []).map((dr, i) => ({
+          id: `${dr.ref}-${i}`,
+          ref: dr.ref,
+          title: dr.title,
+          status: "READY",
+        }))}
+        transmittals={[]}
+      />
+    ),
+  };
+
   return (
     <ExternalPortalShell
       companyName={brandingQ.data?.companyName}
       portalLabel={AORMS_PORTALS.consultant.label}
       onSignOut={() => logout.mutate()}
       signingOut={logout.isPending}
+      panels={portalPanels}
     >
         {!openId && (
           <Stack spacing={2}>
