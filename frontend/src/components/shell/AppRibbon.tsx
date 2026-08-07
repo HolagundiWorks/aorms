@@ -13,12 +13,14 @@ import {
 import { Surface, RADIUS, chromeIconSx } from "@hcw/ui-kit";
 import { useCallback, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AormsMark } from "../AormsLogo.js";
 import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
+import { AORMS_PLATFORM } from "../../lib/product-nomenclature.js";
 
 /**
- * Top navigation — firm name (h1) + section buttons. Menus open on hover
- * (pointer) or click / Enter / Space / ArrowDown (keyboard). Focus management
- * is enabled for keyboard/click opens (WCAG 2.1.1).
+ * Top navigation — AORMS mark + firm name (h1) + section buttons. Menus open on
+ * hover (pointer) or click / Enter / Space / ArrowDown (keyboard). Focus
+ * management is enabled for keyboard/click opens (WCAG 2.1.1).
  * Chrome icons use kit `chromeIconSx` (COGA calm expands targets).
  */
 export type RibbonLink = { label: string; to: string; icon?: ComponentType<any> };
@@ -468,9 +470,21 @@ export function AppRibbon({
         }}
       >
         <Box className="esti-ribbon__nav" sx={{ width: "100%", minWidth: 0 }}>
-          <h1 className="esti-ribbon__title" title={firmName}>
-            {firmName}
-          </h1>
+          <Box
+            className="esti-ribbon__brand"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: COMPOSITION_RHYTHM.xs,
+              minWidth: 0,
+              maxWidth: "min(42%, 300px)",
+            }}
+          >
+            <AormsMark size="md" className="esti-ribbon__mark" />
+            <h1 className="esti-ribbon__title" title={firmName || AORMS_PLATFORM.name}>
+              {firmName || AORMS_PLATFORM.name}
+            </h1>
+          </Box>
           <Box sx={{ flex: 1, minWidth: 8 }} />
           <Stack
             direction="row"

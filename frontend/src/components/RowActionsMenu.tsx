@@ -1,12 +1,11 @@
-import { OverflowMenu, OverflowMenuItem } from "@carbon/react";
-import { OverflowMenuHorizontal } from "@carbon/icons-react";
-import { CarbonScope } from "../carbon/CarbonScope.js";
+import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import { IconButton, ListItemText, Menu, MenuItem } from "@mui/material";
+import { chromeIconSx } from "@hcw/ui-kit";
+import { useId, useState } from "react";
 
 /**
- * Row actions collapsed into a single "⋯" menu. Wave 3 (Carbon): stock
- * `OverflowMenu`/`OverflowMenuItem` (handles open/close itself; `isDelete` marks
- * destructive actions). Was MUI `IconButton` + `Menu`. Falsy entries are skipped
- * so callers can inline conditionals.
+ * Row actions collapsed into a single "⋯" menu (MUI + kit chrome hit target).
+ * Falsy entries are skipped so callers can inline conditionals.
  */
 export type RowAction = {
   label: string;
@@ -22,28 +21,53 @@ export function RowActionsMenu({
   actions: Array<RowAction | false | null | undefined>;
   ariaLabel?: string;
 }) {
+  const menuId = useId();
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const items = actions.filter(Boolean) as RowAction[];
   if (items.length === 0) return null;
+
+  const open = Boolean(anchor);
+
   return (
-    <CarbonScope as="span">
-      <OverflowMenu
+    <>
+      <IconButton
+        size="small"
         aria-label={ariaLabel}
-        size="sm"
-        flipped
-        renderIcon={OverflowMenuHorizontal}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
+        onClick={(e) => {
+          e.stopPropagation();
+          setAnchor(e.currentTarget);
+        }}
+        sx={chromeIconSx}
+      >
+        <MoreHoriz fontSize="small" />
+      </IconButton>
+      <Menu
+        id={menuId}
+        anchorEl={anchor}
+        open={open}
+        onClose={() => setAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
         onClick={(e) => e.stopPropagation()}
       >
         {items.map((a, i) => (
-          <OverflowMenuItem
+          <MenuItem
             key={a.label}
-            itemText={a.label}
             disabled={a.disabled}
-            isDelete={a.danger}
-            hasDivider={i > 0}
-            onClick={() => a.onClick()}
-          />
+            divider={i < items.length - 1}
+            onClick={() => {
+              setAnchor(null);
+              a.onClick();
+            }}
+            sx={a.danger ? { color: "error.main" } : undefined}
+          >
+            <ListItemText>{a.label}</ListItemText>
+          </MenuItem>
         ))}
-      </OverflowMenu>
-    </CarbonScope>
+      </Menu>
+    </>
   );
 }

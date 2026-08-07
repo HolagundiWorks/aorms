@@ -1,4 +1,10 @@
-﻿**2026-08-07 — Wave 5 composition everywhere.** `COMPOSITION_RHYTHM` shared
+﻿**2026-08-07 — Wave 6 polish.** `AormsMark` + firm name in `AppRibbon`; de-Carbon
+shared widgets (`RowActionsMenu`, `SubmissionThread`, `ProjectSiteReference`,
+`AdminSection`, `PortalLicenceCard`, `LicensePanel`); ProjectDetail nav → Setup 3 ·
+Design 5 · Delivery (capability-gated). Remaining Carbon: platform-admin tab bodies
++ some company settings panels.
+
+**2026-08-07 — Wave 5 composition everywhere.** `COMPOSITION_RHYTHM` shared
 token; applied to `RailLayout`, Studio Intelligence, `PortalNeuFrame`,
 `AuthRailLayout`, `AppRibbon`, `AdminConsoleShell`, staff `--esti-shell-gutter: 24px`.
 Canon: [COMPOSITION-PRINCIPLES.md](../../esti/COMPOSITION-PRINCIPLES.md).
@@ -40,8 +46,7 @@ withdraws. Agents: update this file in the same change that alters a fact
 
 ### Product chrome (optional polish)
 
-- Optional `AormsLogo` in `AppRibbon` if firm-name branding feels weak
-- De-Carbon portal widgets (`RowActionsMenu`, `SubmissionThread`, `ProjectSiteReference`) and company-admin / licensing Carbon tabs
+- Remaining company-admin / platform-admin Carbon panels (DashboardTab, StorageSettings, Migration, etc.)
 - Knowledge Bank public vs staff path clarification
 
 ### Empirical maturity (industry-reference bar)

@@ -32,7 +32,7 @@ flowchart TB
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Marketing | `/`, blog, downloads, 404 | `MarketingNeuFrame` / `MarketingShell` | 1200px | soft sticky · AormsLogo | `MarketingLandingDock` | Pomodoro clock | No |
 | Auth | `/login`, `/access`, signup, forgot/reset, force-pw, admin login | `AuthRailLayout` | ~420px card | none (card brand) | none | none | No |
-| Staff (AStudio) | office, library, projects, … | `.esti-app-shell2` + `AppRibbon` + `RailLayout` | full + gutters | soft sticky · firm name | footer + ActionDock | AnalogueClock only | No |
+| Staff (AStudio) | office, library, projects, … | `.esti-app-shell2` + `AppRibbon` + `RailLayout` | full + gutters | soft sticky · mark + firm name | footer + ActionDock | AnalogueClock only | No |
 | Staff (AConsulting) | `/consultancy/*` on consultancy host | same staff shell · `consultancyNav` | full | soft sticky | footer + dock | AnalogueClock | No |
 | Staff (AProc) | `/pmc` on proc host | same staff shell · `pmcNav` + `PmcHome` | full | soft sticky | footer home → `/pmc` | AnalogueClock | No |
 | Studio home | `/` on studio | `StudioAbstract` | full | soft AppRibbon | footer + dock | AnalogueClock | No |
@@ -52,9 +52,9 @@ flowchart TB
 
 **Wave 5** — `COMPOSITION_RHYTHM` on all shells (`RailLayout` · Studio · portals · auth · ribbon · admin) · staff gutter 24px  
 
+**Wave 6** — `AormsMark` in AppRibbon · de-Carbon shared widgets (`RowActionsMenu`, `SubmissionThread`, `ProjectSiteReference`, `AdminSection`, `PortalLicenceCard`, `LicensePanel`) · ProjectDetail odd groups (Setup 3 · Design 5 · Delivery gated)  
+
 ## Deferred (optional)
 
 - Knowledge Bank public vs staff path clarification  
-- Carbon spike isolation; de-Carbon shared portal widgets (`RowActionsMenu`, `SubmissionThread`, `ProjectSiteReference`) and company-admin / licensing Carbon tabs  
-- Optional AormsLogo in AppRibbon if firm-name-only feels weak  
-- Per-route odd-group audits inside large detail screens (ProjectDetail tabs)  
+- Remaining company-admin / platform-admin Carbon panels (storage, migration, dashboard tabs, etc.)  

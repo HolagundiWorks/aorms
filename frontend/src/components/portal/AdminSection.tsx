@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import { Stack } from "@carbon/react";
-import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { Box, Stack, Typography } from "@mui/material";
+import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
 
-/** Standard header + body for an admin console section. Wave 3 (Carbon). */
+/** Standard header + body for an admin console section. */
 export function AdminSection({
   title,
   description,
@@ -15,37 +15,35 @@ export function AdminSection({
   children: ReactNode;
 }) {
   return (
-    <CarbonScope>
-      <Stack gap={5} style={{ height: "100%", minHeight: 0 }}>
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
-            <h2 className="cds--type-heading-03" style={{ margin: 0 }}>
-              {title}
-            </h2>
-            {description && (
-              <p className="cds--type-body-01" style={{ margin: "0.25rem 0 0" }}>
-                {description}
-              </p>
-            )}
-          </div>
-          {actions && (
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", flexShrink: 0 }}>
-              {actions}
-            </div>
+    <Stack spacing={COMPOSITION_RHYTHM.md} sx={{ height: "100%", minHeight: 0 }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+        }}
+      >
+        <Box>
+          <Typography variant="h6" component="h2" sx={{ m: 0 }}>
+            {title}
+          </Typography>
+          {description && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              {description}
+            </Typography>
           )}
-        </div>
-        <Stack gap={5} style={{ flex: 1, minHeight: 0 }}>
-          {children}
-        </Stack>
+        </Box>
+        {actions && (
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", flexShrink: 0 }}>
+            {actions}
+          </Box>
+        )}
+      </Box>
+      <Stack spacing={COMPOSITION_RHYTHM.md} sx={{ flex: 1, minHeight: 0 }}>
+        {children}
       </Stack>
-    </CarbonScope>
+    </Stack>
   );
 }

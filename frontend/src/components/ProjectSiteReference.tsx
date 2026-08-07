@@ -1,16 +1,17 @@
 import {
-  InlineNotification,
+  Alert,
+  Box,
   Stack,
   Table,
   TableBody,
   TableCell,
   TableHead,
-  TableHeader,
   TableRow,
-} from "@carbon/react";
+  Typography,
+} from "@mui/material";
+import { StatusDot } from "@hcw/ui-kit";
 import { PROGRAM_SPACE_CATEGORY_LABEL, formatINR } from "@esti/contracts";
-import { CarbonScope } from "../carbon/CarbonScope.js";
-import { StatusDot } from "../carbon/adapters/index.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import { trpc } from "../lib/trpc.js";
 
 function area(n: number | null | undefined): string {
@@ -24,26 +25,26 @@ function floorLabel(level: number): string {
 }
 
 /**
- * Read-only "Program & feasibility" reference for site delivery. Wave 3 (Carbon).
+ * Read-only "Program & feasibility" reference for site delivery.
  * The site never edits here — it reads the agreed feasibility + frozen program.
  */
 export function ProjectSiteReference({ projectId, compact = false }: { projectId: string; compact?: boolean }) {
   const q = trpc.program.siteReference.useQuery({ projectId });
   const data = q.data;
 
-  if (q.isLoading) return <p className="esti-label--secondary">Loading reference…</p>;
+  if (q.isLoading) return <Typography color="text.secondary">Loading reference…</Typography>;
   if (!data || (!data.assessment && !data.program)) {
     return (
-      <Stack gap={3}>
+      <Stack spacing={COMPOSITION_RHYTHM.xs}>
         {!compact && (
-          <h4 className="cds--type-heading-03" style={{ margin: 0 }}>
+          <Typography variant="h6" component="h4" sx={{ m: 0 }}>
             Program &amp; feasibility
-          </h4>
+          </Typography>
         )}
-        <p className="esti-label--secondary">
+        <Typography color="text.secondary">
           No feasibility assessment or frozen program yet. Once the feasibility is recorded and
           the program is frozen, the agreed baseline appears here as the site reference.
-        </p>
+        </Typography>
       </Stack>
     );
   }
@@ -51,102 +52,104 @@ export function ProjectSiteReference({ projectId, compact = false }: { projectId
   const a = data.assessment;
   const p = data.program;
 
+  // Odd peer group (5) — drop ground coverage from the strip; still in full program elsewhere.
+  const envelopeFacts = a
+    ? [
+        { label: "Site area", value: `${area(a.siteAreaSqm)} sqm` },
+        { label: "Permissible FAR area", value: `${area(a.permissibleFarArea)} sqm` },
+        { label: "Max built extent", value: `${area(a.superBuiltupArea)} sqm` },
+        { label: "Possible floors", value: area(a.possibleFloors) },
+        { label: "Est. project cost", value: formatINR(a.estimatedProjectCostPaise, { paise: false }) },
+      ]
+    : [];
+
   return (
-    <CarbonScope>
-      <Stack gap={6}>
-        {!compact && (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-            <h4 className="cds--type-heading-03" style={{ margin: 0 }}>
-              Program &amp; feasibility
-            </h4>
-            {p && <StatusDot color="green" label={`Program v${p.version} · frozen`} />}
-          </div>
-        )}
+    <Stack spacing={COMPOSITION_RHYTHM.lg}>
+      {!compact && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+          <Typography variant="h6" component="h4" sx={{ m: 0 }}>
+            Program &amp; feasibility
+          </Typography>
+          {p && <StatusDot color="green" label={`Program v${p.version} · frozen`} />}
+        </Box>
+      )}
 
-        <InlineNotification
-          kind="info"
-          lowContrast
-          hideCloseButton
-          title="Source of truth"
-          subtitle="The feasibility envelope and frozen program are the agreed baseline for site delivery. This view is read-only — changes are made upstream in the Pipeline and Program tabs."
-        />
+      <Alert severity="info">
+        The feasibility envelope and frozen program are the agreed baseline for site delivery.
+        This view is read-only — changes are made upstream in the Pipeline and Program tabs.
+      </Alert>
 
-        {a && (
-          <Stack gap={3}>
-            <h5 className="cds--type-heading-compact-01" style={{ margin: 0 }}>
-              Feasibility envelope
-            </h5>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-                gap: "0.25rem",
-              }}
-            >
-              {[
-                { label: "Site area", value: `${area(a.siteAreaSqm)} sqm` },
-                { label: "Permissible FAR area", value: `${area(a.permissibleFarArea)} sqm` },
-                { label: "Max built extent", value: `${area(a.superBuiltupArea)} sqm` },
-                { label: "Possible floors", value: area(a.possibleFloors) },
-                { label: "Ground coverage", value: `${area(a.actualGroundCoverage)} sqm` },
-                { label: "Est. project cost", value: formatINR(a.estimatedProjectCostPaise, { paise: false }) },
-              ].map((k) => (
-                <div key={k.label} style={{ padding: "0.5rem", borderBottom: "1px solid var(--cds-border-subtle)" }}>
-                  <p className="esti-label--secondary" style={{ margin: 0 }}>
-                    {k.label}
-                  </p>
-                  <p className="cds--type-heading-compact-01" style={{ margin: "0.25rem 0 0" }}>
-                    {k.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </Stack>
-        )}
+      {a && (
+        <Stack spacing={COMPOSITION_RHYTHM.xs}>
+          <Typography variant="subtitle2" sx={{ m: 0 }}>
+            Feasibility envelope
+          </Typography>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+              gap: 1,
+            }}
+          >
+            {envelopeFacts.map((k) => (
+              <Box
+                key={k.label}
+                sx={{ py: 1, borderBottom: 1, borderColor: "divider" }}
+              >
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                  {k.label}
+                </Typography>
+                <Typography variant="subtitle2" sx={{ mt: 0.5 }}>
+                  {k.value}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Stack>
+      )}
 
-        {p ? (
-          <Stack gap={3}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-              <h5 className="cds--type-heading-compact-01" style={{ margin: 0 }}>
-                Frozen program (v{p.version})
-              </h5>
-              <StatusDot color="gray" label={`${area(p.totalProgrammedAreaSqm)} sqm · ${p.floorsUsed} floors`} />
-              {p.overEnvelope && <StatusDot color="red" label="Over envelope" />}
-            </div>
-            <Table size="sm">
-              <TableHead>
-                <TableRow>
-                  <TableHeader>Space</TableHeader>
-                  <TableHeader>Category</TableHeader>
-                  <TableHeader>Floor</TableHeader>
-                  <TableHeader>Count</TableHeader>
-                  <TableHeader>Area</TableHeader>
+      {p ? (
+        <Stack spacing={COMPOSITION_RHYTHM.xs}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+            <Typography variant="subtitle2" sx={{ m: 0 }}>
+              Frozen program (v{p.version})
+            </Typography>
+            <StatusDot color="gray" label={`${area(p.totalProgrammedAreaSqm)} sqm · ${p.floorsUsed} floors`} />
+            {p.overEnvelope && <StatusDot color="red" label="Over envelope" />}
+          </Box>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Space</TableCell>
+                <TableCell>Category</TableCell>
+                <TableCell>Floor</TableCell>
+                <TableCell>Count</TableCell>
+                <TableCell>Area</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {p.spaces.map((s) => (
+                <TableRow key={s.id}>
+                  <TableCell>{s.name}</TableCell>
+                  <TableCell>
+                    {PROGRAM_SPACE_CATEGORY_LABEL[
+                      s.category as keyof typeof PROGRAM_SPACE_CATEGORY_LABEL
+                    ] ?? s.category}
+                  </TableCell>
+                  <TableCell>{floorLabel(s.floorLevel)}</TableCell>
+                  <TableCell>{s.count}</TableCell>
+                  <TableCell>{area(s.areaSqm)} sqm</TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {p.spaces.map((s) => (
-                  <TableRow key={s.id}>
-                    <TableCell>{s.name}</TableCell>
-                    <TableCell>
-                      {PROGRAM_SPACE_CATEGORY_LABEL[
-                        s.category as keyof typeof PROGRAM_SPACE_CATEGORY_LABEL
-                      ] ?? s.category}
-                    </TableCell>
-                    <TableCell>{floorLabel(s.floorLevel)}</TableCell>
-                    <TableCell>{s.count}</TableCell>
-                    <TableCell>{area(s.areaSqm)} sqm</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Stack>
-        ) : (
-          <p className="esti-label--secondary">
-            No frozen program yet — freeze a program version in the Program tab to publish the
-            agreed space schedule to the site.
-          </p>
-        )}
-      </Stack>
-    </CarbonScope>
+              ))}
+            </TableBody>
+          </Table>
+        </Stack>
+      ) : (
+        <Typography color="text.secondary">
+          No frozen program yet — freeze a program version in the Program tab to publish the
+          agreed space schedule to the site.
+        </Typography>
+      )}
+    </Stack>
   );
 }

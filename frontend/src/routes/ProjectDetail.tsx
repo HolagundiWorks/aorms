@@ -70,7 +70,7 @@ export function ProjectDetail() {
     rawTab === "approvals" || approvalId ? ("approvals" as const) : ("drawings" as const);
 
   const projectGroups = useMemo((): ProjectGroup[] => {
-    // Setup — Overview · Brief (nested) · Settings. Hick/Miller: fewer primaries.
+    // Odd peer groups (COMPOSITION-PRINCIPLES §3): Setup 3 · Design 5 · Delivery gated.
     const setupTabs: ProjectTab[] = [
       { slug: "overview", label: "Overview", panel: <ProjectOverview projectId={id} /> },
       {
@@ -81,8 +81,7 @@ export function ProjectDetail() {
       { slug: "settings", label: "Settings", panel: <ProjectSettings projectId={id} /> },
     ];
 
-    // Workspace — Measurement · Drawings · Documents · Team? · Delivery · Lessons.
-    const consultancyTabs: ProjectTab[] = [
+    const designTabs: ProjectTab[] = [
       {
         slug: "measurement",
         label: "Measurement",
@@ -109,9 +108,18 @@ export function ProjectDetail() {
         label: "Moodboard",
         panel: <ProjectMoodboard projectId={id} />,
       },
+      { slug: "lessons", label: "Lessons", panel: <ProjectLessons projectId={id} /> },
+    ];
+
+    const deliveryTabs: ProjectTab[] = [
+      {
+        slug: "delivery",
+        label: "Delivery",
+        panel: <ProjectDeliveryPanel projectId={id} />,
+      },
     ];
     if (canInvoice) {
-      consultancyTabs.push({
+      deliveryTabs.push({
         slug: "invoices",
         label: "Invoices",
         panel: (
@@ -124,39 +132,32 @@ export function ProjectDetail() {
       });
     }
     if (canFees) {
-      consultancyTabs.push({
+      deliveryTabs.push({
         slug: "estimation",
         label: "Estimation",
         panel: <ProjectEstimates projectId={id} />,
       });
     }
     if (canWrite) {
-      consultancyTabs.push({
+      deliveryTabs.push({
         slug: "purchase-orders",
         label: "Purchase Orders",
         panel: <ProjectPurchaseOrders projectId={id} />,
       });
-      consultancyTabs.push({
+      deliveryTabs.push({
         slug: "tenders",
         label: "Tenders",
         panel: <ProjectTenders projectId={id} />,
       });
     }
     if (showTeam) {
-      consultancyTabs.push({ slug: "team", label: "Team", panel: <ProjectTeam projectId={id} /> });
+      deliveryTabs.push({ slug: "team", label: "Team", panel: <ProjectTeam projectId={id} /> });
     }
-    consultancyTabs.push(
-      {
-        slug: "delivery",
-        label: "Delivery",
-        panel: <ProjectDeliveryPanel projectId={id} />,
-      },
-      { slug: "lessons", label: "Lessons", panel: <ProjectLessons projectId={id} /> },
-    );
 
     return [
       { slug: "setup", label: "Setup", tabs: setupTabs },
-      { slug: "consultancy", label: "Project workspace", tabs: consultancyTabs },
+      { slug: "design", label: "Design", tabs: designTabs },
+      { slug: "delivery", label: "Delivery", tabs: deliveryTabs },
     ];
   }, [
     id,
@@ -219,7 +220,6 @@ export function ProjectDetail() {
       <RailLayout title="Loading project…" description="Fetching project details">
         <Stack spacing={1.5} aria-busy="true" aria-label="Loading project">
           <Skeleton variant="rectangular" height={40} />
-          <Skeleton variant="rectangular" height={36} />
           <Skeleton variant="rectangular" height={220} />
           <Skeleton variant="rectangular" height={120} />
         </Stack>

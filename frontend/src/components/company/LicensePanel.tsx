@@ -1,11 +1,18 @@
-import { Button, Column, Grid, InlineNotification, Stack, TextInput } from "@carbon/react";
+import {
+  Alert,
+  Box,
+  Button,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { StatusDot, Surface, RADIUS } from "@hcw/ui-kit";
 import { STANDARD_LICENCE_LABEL, type LicenseStatus } from "@esti/contracts";
 import { useState } from "react";
-import { CarbonScope } from "../../carbon/CarbonScope.js";
-import { StatusDot } from "../../carbon/adapters/index.js";
+import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
 import { trpc } from "../../lib/trpc.js";
 
-const STATUS_TAG: Record<LicenseStatus, "green" | "teal" | "red" | "gray"> = {
+const STATUS_TAG: Record<LicenseStatus, string> = {
   VALID: "green",
   GRACE: "teal",
   EXPIRED: "red",
@@ -24,7 +31,7 @@ const STATUS_LABEL: Record<LicenseStatus, string> = {
 const cap = (n: number | null) => (n === null ? "Unlimited" : String(n));
 const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString() : "—");
 
-/** Firm licence — activation + status. The plan is licence-derived (owner only). Wave 3 (Carbon). */
+/** Firm licence — activation + status. The plan is licence-derived (owner only). */
 export function LicensePanel() {
   const utils = trpc.useUtils();
   const q = trpc.license.status.useQuery();
@@ -53,107 +60,112 @@ export function LicensePanel() {
   const view = q.data;
   const status = view?.status ?? "UNLICENSED";
 
+  // Odd peer strip (3 seats + validity called out separately below when needed).
   const seatTiles = view
     ? [
         { label: "Staff seats", value: cap(view.seats.staff) },
         { label: "Accountant seats", value: cap(view.seats.accountants) },
         { label: "HR seats", value: cap(view.seats.hrManagers) },
-        { label: "Valid until", value: fmtDate(view.expiresAt) },
       ]
     : [];
 
   return (
-    <CarbonScope>
-      <div style={{ padding: "1rem", maxWidth: 760 }}>
-        <Stack gap={5}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-            <h3 className="esti-label" style={{ margin: 0 }}>
-              Licence
-            </h3>
-            {view && <StatusDot color="blue" label={STANDARD_LICENCE_LABEL} />}
-            <StatusDot color={STATUS_TAG[status]} label={STATUS_LABEL[status]} />
-          </div>
+    <Box sx={{ p: COMPOSITION_RHYTHM.md, maxWidth: 760 }}>
+      <Stack spacing={COMPOSITION_RHYTHM.md}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+          <Typography variant="subtitle1" className="esti-label" sx={{ m: 0 }}>
+            Licence
+          </Typography>
+          {view && <StatusDot color="blue" label={STANDARD_LICENCE_LABEL} />}
+          <StatusDot color={STATUS_TAG[status]} label={STATUS_LABEL[status]} />
+        </Box>
 
-          {view && view.status !== "UNLICENSED" && (
-            <Grid>
-              {seatTiles.map((k) => (
-                <Column key={k.label} sm={2} md={2} lg={4}>
-                  <p className="esti-label esti-label--secondary" style={{ margin: 0 }}>
-                    {k.label}
-                  </p>
-                  <p className="cds--type-body-01" style={{ margin: "0.25rem 0 0" }}>
-                    {k.value}
-                  </p>
-                </Column>
-              ))}
-            </Grid>
-          )}
-
-          {status === "GRACE" && view?.graceDaysLeft != null && (
-            <InlineNotification
-              kind="warning"
-              lowContrast
-              hideCloseButton
-              title="Licence expired — grace period"
-              subtitle={`Reconnect to renew. ${view.graceDaysLeft} day(s) of grace remaining before writes are blocked.`}
-            />
-          )}
-          {status === "EXPIRED" && (
-            <InlineNotification
-              kind="error"
-              lowContrast
-              hideCloseButton
-              title="Licence expired"
-              subtitle="Writes are blocked until the licence is renewed. Activate a current key below."
-            />
-          )}
-          {status === "SUSPENDED" && (
-            <InlineNotification
-              kind="error"
-              lowContrast
-              hideCloseButton
-              title="Licence suspended"
-              subtitle="Billing hold — writes are blocked until the operator reinstates the licence. Refresh after payment clears, or contact support."
-            />
-          )}
-
-          <Stack gap={3}>
-            <TextInput
-              id="lic-key"
-              labelText="Activation key"
-              placeholder="ESTI-XXXX-XXXX-XXXX-XXXX"
-              value={key}
-              onChange={(e) => setKey(e.target.value)}
-            />
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-              <Button onClick={() => activate.mutate({ key })} disabled={!key.trim() || activate.isPending}>
-                {activate.isPending ? "Activating…" : "Activate"}
-              </Button>
-              <Button
-                kind="ghost"
-                onClick={() => refresh.mutate()}
-                disabled={refresh.isPending || status === "UNLICENSED"}
+        {view && view.status !== "UNLICENSED" && (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gap: COMPOSITION_RHYTHM.sm,
+            }}
+          >
+            {seatTiles.map((k) => (
+              <Surface
+                key={k.label}
+                layer="soft"
+                sx={{ borderRadius: `${RADIUS}px`, p: COMPOSITION_RHYTHM.sm }}
               >
-                {refresh.isPending ? "Refreshing…" : "Refresh now"}
-              </Button>
-            </div>
-            {activate.error && (
-              <InlineNotification
-                kind="error"
-                lowContrast
-                hideCloseButton
-                title="Could not activate"
-                subtitle={activate.error.message}
-              />
-            )}
-          </Stack>
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                  {k.label}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 0.5 }}>
+                  {k.value}
+                </Typography>
+              </Surface>
+            ))}
+          </Box>
+        )}
 
-          <p className="esti-label esti-label--helper" style={{ margin: 0 }}>
-            Standard AORMS licence — billing and storage add-ons are handled by Human Centric Works.
-            Keys are issued when you subscribe or renew.
-          </p>
+        {view && view.status !== "UNLICENSED" && (
+          <Typography variant="body2" color="text.secondary">
+            Valid until {fmtDate(view.expiresAt)}
+          </Typography>
+        )}
+
+        {status === "GRACE" && view?.graceDaysLeft != null && (
+          <Alert severity="warning">
+            Licence expired — grace period. Reconnect to renew. {view.graceDaysLeft} day(s) of
+            grace remaining before writes are blocked.
+          </Alert>
+        )}
+        {status === "EXPIRED" && (
+          <Alert severity="error">
+            Licence expired. Writes are blocked until the licence is renewed. Activate a current
+            key below.
+          </Alert>
+        )}
+        {status === "SUSPENDED" && (
+          <Alert severity="error">
+            Licence suspended. Billing hold — writes are blocked until the operator reinstates the
+            licence. Refresh after payment clears, or contact support.
+          </Alert>
+        )}
+
+        <Stack spacing={COMPOSITION_RHYTHM.xs}>
+          <TextField
+            id="lic-key"
+            label="Activation key"
+            placeholder="ESTI-XXXX-XXXX-XXXX-XXXX"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+            size="small"
+            fullWidth
+          />
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+            <Button
+              variant="contained"
+              onClick={() => activate.mutate({ key })}
+              disabled={!key.trim() || activate.isPending}
+            >
+              {activate.isPending ? "Activating…" : "Activate"}
+            </Button>
+            <Button
+              variant="text"
+              onClick={() => refresh.mutate()}
+              disabled={refresh.isPending || status === "UNLICENSED"}
+            >
+              {refresh.isPending ? "Refreshing…" : "Refresh now"}
+            </Button>
+          </Box>
+          {activate.error && (
+            <Alert severity="error">Could not activate — {activate.error.message}</Alert>
+          )}
         </Stack>
-      </div>
-    </CarbonScope>
+
+        <Typography variant="caption" color="text.secondary" className="esti-label esti-label--helper">
+          Standard AORMS licence — billing and storage add-ons are handled by Human Centric Works.
+          Keys are issued when you subscribe or renew.
+        </Typography>
+      </Stack>
+    </Box>
   );
 }
