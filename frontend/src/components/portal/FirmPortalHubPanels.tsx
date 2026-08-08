@@ -45,6 +45,17 @@ type RaBillRow = {
   periodEnd: string | null;
   certifiedAt: string | Date | null;
 };
+/** Consultancy running bills (SyncEntity `runningBill`) — distinct from AProc pmc RA. */
+type RunningBillRow = {
+  id: string;
+  ref: string;
+  title: string | null;
+  billType: string | null;
+  status: string;
+  measurementDate: string | null;
+  totalPaise: number | null;
+  netPayablePaise: number | null;
+};
 type ProjectSummary = {
   ref: string;
   title: string;
@@ -303,13 +314,16 @@ export function FirmPortalDocumentsPanel({
   invoices,
   approvals,
   raBills,
+  runningBills,
 }: {
   loading: boolean;
   invoices: InvoiceRow[];
   approvals: ApprovalRow[];
   raBills?: RaBillRow[];
+  runningBills?: RunningBillRow[];
 }) {
   const ra = raBills ?? [];
+  const rb = runningBills ?? [];
   const invCols: GridColDef[] = [
     { field: "ref", headerName: "Ref", flex: 1, minWidth: 120 },
     { field: "documentKind", headerName: "Kind", flex: 1, minWidth: 100 },
@@ -354,15 +368,38 @@ export function FirmPortalDocumentsPanel({
       valueGetter: (v) => v ?? "—",
     },
   ];
+  const rbCols: GridColDef[] = [
+    { field: "ref", headerName: "Ref", flex: 1, minWidth: 120 },
+    { field: "title", headerName: "Title", flex: 1.5, minWidth: 140, valueGetter: (v) => v ?? "—" },
+    { field: "billType", headerName: "Type", flex: 0.6, minWidth: 70, valueGetter: (v) => v ?? "—" },
+    { field: "status", headerName: "Status", flex: 1, minWidth: 110 },
+    {
+      field: "netPayablePaise",
+      headerName: "Net payable",
+      flex: 1,
+      minWidth: 110,
+      valueGetter: (v: number | null) => (v != null ? formatINR(v) : "—"),
+    },
+    {
+      field: "measurementDate",
+      headerName: "Measured",
+      flex: 1,
+      minWidth: 110,
+      valueGetter: (v) => v ?? "—",
+    },
+  ];
   return (
-    <PanelShell title="Documents" hint="Issued invoices, approvals, and certified RA bills — finals and numbers only.">
+    <PanelShell
+      title="Documents"
+      hint="Issued invoices, approvals, certified RA bills, and consultancy running bills — finals and numbers only."
+    >
       <DataState
         loading={loading}
-        isEmpty={!loading && invoices.length === 0 && approvals.length === 0 && ra.length === 0}
+        isEmpty={!loading && invoices.length === 0 && approvals.length === 0 && ra.length === 0 && rb.length === 0}
         columnCount={4}
         empty={{
           title: "No documents yet",
-          description: "Issued invoices, approvals, and certified RA bills will list here.",
+          description: "Issued invoices, approvals, and certified bills will list here.",
         }}
       >
         <Stack spacing={3}>
@@ -396,6 +433,20 @@ export function FirmPortalDocumentsPanel({
                 rows={ra}
                 getRowId={(r) => r.id}
                 columns={raCols}
+                disableRowSelectionOnClick
+                autoHeight
+              />
+            </Box>
+          )}
+          {rb.length > 0 && (
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
+                Running bills
+              </Typography>
+              <DataGrid
+                rows={rb}
+                getRowId={(r) => r.id}
+                columns={rbCols}
                 disableRowSelectionOnClick
                 autoHeight
               />

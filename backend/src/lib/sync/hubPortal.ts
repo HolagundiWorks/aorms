@@ -7,8 +7,13 @@ import type { DB } from "../../db/index.js";
 import {
   approvals,
   drawings,
+  feasibilityReports,
+  inspections,
   invoices,
   progressReports,
+  runningBills,
+  siteVisits,
+  tenders,
   transmittals,
 } from "../../db/schema.js";
 import { env } from "../../env.js";
@@ -276,4 +281,266 @@ export async function portalSentApprovals(db: DB, projectId: string): Promise<Po
     .from(approvals)
     .where(and(eq(approvals.projectId, projectId), ne(approvals.status, "DRAFT")))
     .orderBy(desc(approvals.createdAt));
+}
+
+const RUNNING_BILL_PORTAL_STATUSES = ["CERTIFIED", "SENT_TO_CLIENT", "CLOSED"] as const;
+
+export type PortalRunningBillRow = {
+  id: string;
+  ref: string;
+  title: string | null;
+  billType: string | null;
+  status: string;
+  measurementDate: string | null;
+  totalPaise: number | null;
+  netPayablePaise: number | null;
+};
+
+/** Consultancy running bills visible to portals (CERTIFIED onward). Note: AProc pmcRaBills are separate. */
+export async function portalPublishedRunningBills(
+  db: DB,
+  projectId: string,
+): Promise<PortalRunningBillRow[]> {
+  if (portalReadsFromHub()) {
+    return publishedPayloadRows<{
+      ref: string;
+      title: string | null;
+      billType: string | null;
+      status: string;
+      measurementDate: string | null;
+      totalPaise: number | null;
+      netPayablePaise: number | null;
+    }>(await hubPublishedForProject(db, "runningBill", projectId))
+      .filter((r) =>
+        (RUNNING_BILL_PORTAL_STATUSES as readonly string[]).includes(r.status),
+      )
+      .map((r) => ({
+        id: r.id,
+        ref: r.ref,
+        title: r.title,
+        billType: r.billType,
+        status: r.status,
+        measurementDate: r.measurementDate,
+        totalPaise: r.totalPaise,
+        netPayablePaise: r.netPayablePaise,
+      }));
+  }
+  return db
+    .select({
+      id: runningBills.id,
+      ref: runningBills.ref,
+      title: runningBills.title,
+      billType: runningBills.billType,
+      status: runningBills.status,
+      measurementDate: runningBills.measurementDate,
+      totalPaise: runningBills.totalPaise,
+      netPayablePaise: runningBills.netPayablePaise,
+    })
+    .from(runningBills)
+    .where(
+      and(
+        eq(runningBills.projectId, projectId),
+        inArray(runningBills.status, [...RUNNING_BILL_PORTAL_STATUSES]),
+      ),
+    )
+    .orderBy(desc(runningBills.updatedAt));
+}
+
+export type PortalInspectionRow = {
+  id: string;
+  ref: string;
+  dateVisit: string | null;
+  status: string;
+  inspectorName: string | null;
+  progress: string | null;
+  pdfUrl: string | null;
+};
+
+/** ISSUED inspections (PDF issued to portal). */
+export async function portalIssuedInspections(
+  db: DB,
+  projectId: string,
+): Promise<PortalInspectionRow[]> {
+  if (portalReadsFromHub()) {
+    const pub = publishedPayloadRows<{
+      ref: string;
+      dateVisit: string | null;
+      status: string;
+      inspectorName: string | null;
+      progress: string | null;
+      pdfStatus: string;
+    }>(await hubPublishedForProject(db, "inspection", projectId));
+    return Promise.all(
+      pub
+        .filter((r) => r.status === "ISSUED")
+        .map(async (r) => ({
+          id: r.id,
+          ref: r.ref,
+          dateVisit: r.dateVisit,
+          status: r.status,
+          inspectorName: r.inspectorName,
+          progress: r.progress,
+          pdfUrl:
+            r.fileKeys[0] && r.pdfStatus === "READY"
+              ? await presignedGet(r.fileKeys[0]).catch(() => null)
+              : null,
+        })),
+    );
+  }
+  const rows = await db
+    .select({
+      id: inspections.id,
+      ref: inspections.ref,
+      dateVisit: inspections.dateVisit,
+      status: inspections.status,
+      inspectorName: inspections.inspectorName,
+      progress: inspections.progress,
+      pdfKey: inspections.pdfKey,
+      pdfStatus: inspections.pdfStatus,
+    })
+    .from(inspections)
+    .where(and(eq(inspections.projectId, projectId), eq(inspections.status, "ISSUED")))
+    .orderBy(desc(inspections.createdAt));
+  return Promise.all(
+    rows.map(async ({ pdfKey, pdfStatus, ...r }) => ({
+      ...r,
+      pdfUrl:
+        pdfKey && pdfStatus === "READY"
+          ? await presignedGet(pdfKey).catch(() => null)
+          : null,
+    })),
+  );
+}
+
+export type PortalSiteVisitRow = {
+  id: string;
+  plannedDate: string;
+  status: string;
+  notes: string | null;
+};
+
+/** CONFIRMED site visits. */
+export async function portalConfirmedSiteVisits(
+  db: DB,
+  projectId: string,
+): Promise<PortalSiteVisitRow[]> {
+  if (portalReadsFromHub()) {
+    return publishedPayloadRows<{
+      plannedDate: string;
+      status: string;
+      notes: string | null;
+    }>(await hubPublishedForProject(db, "siteVisit", projectId))
+      .filter((r) => r.status === "CONFIRMED")
+      .map((r) => ({
+        id: r.id,
+        plannedDate: r.plannedDate,
+        status: r.status,
+        notes: r.notes,
+      }));
+  }
+  return db
+    .select({
+      id: siteVisits.id,
+      plannedDate: siteVisits.plannedDate,
+      status: siteVisits.status,
+      notes: siteVisits.notes,
+    })
+    .from(siteVisits)
+    .where(and(eq(siteVisits.projectId, projectId), eq(siteVisits.status, "CONFIRMED")))
+    .orderBy(desc(siteVisits.plannedDate));
+}
+
+export type PortalTenderRow = {
+  id: string;
+  title: string;
+  category: string | null;
+  status: string;
+  dueDate: string | null;
+  awardedContractorId: string | null;
+};
+
+/** AWARDED tenders. */
+export async function portalAwardedTenders(db: DB, projectId: string): Promise<PortalTenderRow[]> {
+  if (portalReadsFromHub()) {
+    return publishedPayloadRows<{
+      title: string;
+      category: string | null;
+      status: string;
+      dueDate: string | null;
+      awardedContractorId: string | null;
+    }>(await hubPublishedForProject(db, "tender", projectId))
+      .filter((r) => r.status === "AWARDED")
+      .map((r) => ({
+        id: r.id,
+        title: r.title,
+        category: r.category,
+        status: r.status,
+        dueDate: r.dueDate,
+        awardedContractorId: r.awardedContractorId,
+      }));
+  }
+  return db
+    .select({
+      id: tenders.id,
+      title: tenders.title,
+      category: tenders.category,
+      status: tenders.status,
+      dueDate: tenders.dueDate,
+      awardedContractorId: tenders.awardedContractorId,
+    })
+    .from(tenders)
+    .where(and(eq(tenders.projectId, projectId), eq(tenders.status, "AWARDED")))
+    .orderBy(desc(tenders.updatedAt));
+}
+
+export type PortalSiteReferenceRow = {
+  id: string;
+  pdfStatus: string | null;
+  generatedAt: Date | string | null;
+  pdfUrl: string | null;
+};
+
+/** Frozen feasibility / site-reference PDF (latest published). */
+export async function portalSiteReference(
+  db: DB,
+  projectId: string,
+): Promise<PortalSiteReferenceRow | null> {
+  if (portalReadsFromHub()) {
+    const rows = publishedPayloadRows<{
+      pdfStatus: string | null;
+      generatedAt: Date | string | null;
+    }>(await hubPublishedForProject(db, "siteReference", projectId));
+    const r = rows[0];
+    if (!r) return null;
+    return {
+      id: r.id,
+      pdfStatus: r.pdfStatus,
+      generatedAt: r.generatedAt,
+      pdfUrl:
+        r.fileKeys[0] && r.pdfStatus === "READY"
+          ? await presignedGet(r.fileKeys[0]).catch(() => null)
+          : null,
+    };
+  }
+  const [r] = await db
+    .select({
+      id: feasibilityReports.id,
+      pdfStatus: feasibilityReports.pdfStatus,
+      generatedAt: feasibilityReports.generatedAt,
+      pdfKey: feasibilityReports.pdfKey,
+    })
+    .from(feasibilityReports)
+    .where(eq(feasibilityReports.projectId, projectId))
+    .orderBy(desc(feasibilityReports.generatedAt))
+    .limit(1);
+  if (!r) return null;
+  return {
+    id: r.id,
+    pdfStatus: r.pdfStatus,
+    generatedAt: r.generatedAt,
+    pdfUrl:
+      r.pdfKey && r.pdfStatus === "READY"
+        ? await presignedGet(r.pdfKey).catch(() => null)
+        : null,
+  };
 }

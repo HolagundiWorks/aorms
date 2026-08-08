@@ -36,7 +36,17 @@ import { runAiGateway } from "../../lib/ai/gateway.js";
 import { getFirm } from "../../lib/firm.js";
 import { assertPlanFeature } from "../../lib/plan.js";
 import { getOrgSettings } from "../../lib/settings.js";
-import { portalIssuedInvoices, portalIssuedTransmittals, portalReadyDrawings, portalSentApprovals } from "../../lib/sync/hubPortal.js";
+import {
+  portalAwardedTenders,
+  portalConfirmedSiteVisits,
+  portalIssuedInspections,
+  portalIssuedInvoices,
+  portalIssuedTransmittals,
+  portalPublishedRunningBills,
+  portalReadyDrawings,
+  portalSentApprovals,
+  portalSiteReference,
+} from "../../lib/sync/hubPortal.js";
 import { presignedGet } from "../../lib/storage.js";
 import { addMessage, listMessages } from "../../lib/submissionThread.js";
 import { clientProcedure, router } from "../../trpc/trpc.js";
@@ -107,9 +117,20 @@ export const portalRouter = router({
 
       // Only drawings the worker has finished processing.
       const drawingRows = await portalReadyDrawings(ctx.db, input.projectId);
-
-      // Drawing / deliverable transmittals that have actually been issued to the client.
       const transmittalRows = await portalIssuedTransmittals(ctx.db, input.projectId);
+      const [
+        runningBillRows,
+        inspectionRows,
+        siteVisitRows,
+        tenderRows,
+        siteReference,
+      ] = await Promise.all([
+        portalPublishedRunningBills(ctx.db, input.projectId),
+        portalIssuedInspections(ctx.db, input.projectId),
+        portalConfirmedSiteVisits(ctx.db, input.projectId),
+        portalAwardedTenders(ctx.db, input.projectId),
+        portalSiteReference(ctx.db, input.projectId),
+      ]);
       return {
         project: {
           ref: project.ref,
@@ -130,6 +151,11 @@ export const portalRouter = router({
         approvals: approvalRows,
         drawings: drawingRows,
         transmittals: transmittalRows,
+        runningBills: runningBillRows,
+        inspections: inspectionRows,
+        siteVisits: siteVisitRows,
+        tenders: tenderRows,
+        siteReference,
       };
     }),
 

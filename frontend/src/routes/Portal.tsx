@@ -550,6 +550,7 @@ export function Portal() {
           periodEnd: b.periodEnd,
           certifiedAt: b.certifiedAt,
         }))}
+        runningBills={d?.runningBills ?? []}
       />
     ),
   };

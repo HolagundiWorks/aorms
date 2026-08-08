@@ -131,7 +131,7 @@ Unchanged from HUB-API / contracts:
 | 2 | AQC | `aorms_bridge` activate + Flush meta smoke |
 | 3 | AQC | Artifact ingest + portal read via hub |
 | 4 | shared | Package bridge for AStudio / AConsulting forks |
-| 5 | esti hub | 🟡 Shared helpers: drawings · transmittals · progressReport · invoice · approval. Still open: tender · runningBill · inspection · siteVisit · siteReference |
+| 5 | esti hub | ✅ Shared `hubPortal` helpers cover full SyncEntity allow-list (`portalReadyDrawings` · `portalIssuedTransmittals` · `portalIssuedInvoices` · `portalSentApprovals` · `portalIssuedProgressReports` · `portalAwardedTenders` · `portalPublishedRunningBills` · `portalIssuedInspections` · `portalConfirmedSiteVisits` · `portalSiteReference`). Client `projectDetail` returns the new rows; Documents shows consultancy running bills. AProc `pmcRaBills` remain live Postgres (not SyncEntity). |
 
 Spike tracker: [AQC-BRIDGE-SPIKE.md](AQC-BRIDGE-SPIKE.md).
 
