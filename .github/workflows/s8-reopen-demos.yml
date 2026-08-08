@@ -26,33 +26,43 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
+      - name: Start ssh-agent (normalize VPS_SSH_KEY newlines)
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Trust VPS host key
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          set -euo pipefail
+          test -n "${VPS_HOST:-}" || { echo "Missing secret VPS_HOST"; exit 1; }
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
       - name: SSH and run deploy/s8-reopen-demos.sh
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
           MODE: ${{ inputs.mode }}
         run: |
           set -euo pipefail
           test -n "${VPS_HOST:-}" || { echo "Missing secret VPS_HOST"; exit 1; }
           test -n "${VPS_USER:-}" || { echo "Missing secret VPS_USER"; exit 1; }
-          test -n "${VPS_SSH_KEY:-}" || { echo "Missing secret VPS_SSH_KEY"; exit 1; }
-
-          mkdir -p ~/.ssh
-          # Preserve PEM newlines from the GitHub secret
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
 
           REMOTE_CMD='CONFIRM=yes bash deploy/s8-reopen-demos.sh'
           if [[ "$MODE" == "dry-run" ]]; then
             REMOTE_CMD+=' --dry-run'
           fi
 
-          ssh -i ~/.ssh/id_ed25519 \
-            -o IdentitiesOnly=yes \
+          # Diagnose which identities the agent holds (fingerprints only).
+          ssh-add -l || true
+
+          ssh -o IdentitiesOnly=yes \
             -o StrictHostKeyChecking=yes \
             -o BatchMode=yes \
+            -o PreferredAuthentications=publickey \
             "${VPS_USER}@${VPS_HOST}" \
             "set -euo pipefail
              cd /opt/esti
