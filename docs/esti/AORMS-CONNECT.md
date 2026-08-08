@@ -51,30 +51,35 @@ flowchart TB
 2. Connect persists session + `syncToken` (or successor) under  
    `%LocalAppData%\AORMS-Connect\` (shared firm store: `firm.db` via Bridge).  
 3. Suite apps launch from Connect with Connect-issued credentials — **no per-app login**.  
-4. **C2:** shared auth file or localhost session broker so sibling processes read the same session. Until C2 ships, Connect Activate writes Bridge auth; sibling apps may still Activate for smoke — product UX target remains Connect-only login.
+4. **C2 (shipped):** Connect writes `session.json` after Activate; suite apps import it via `AormsBridge.TryImportConnectSession` (default path or `--connect-session`). Product UX remains Connect-only login.
 
-### C2 session / catalog contract (implement next)
+### C2 session / catalog contract
 
 | Artifact | Path / API | Writer | Readers |
 | --- | --- | --- | --- |
 | Bridge firm DB | `%LocalAppData%\AORMS-Connect\firm.db` | Connect Activate / Flush | Connect |
-| Session export (C2) | `%LocalAppData%\AORMS-Connect\session.json` (planned) | Connect on login | Suite apps at launch |
-| Project catalog | `%LocalAppData%\AORMS-Connect\catalog.json` | Connect UI (C1) | Suite apps (C2) |
+| Session export | `%LocalAppData%\AORMS-Connect\session.json` | Connect after Activate | Suite apps via Bridge `ConnectSession` |
+| Project catalog | `%LocalAppData%\AORMS-Connect\catalog.json` | Connect UI (`ConnectCatalog`) | Suite apps via `ConnectCatalog.List` |
 | Hub | `ESTI_HUB_URL` · activate · ops | Connect | Apps via shared `syncToken` |
+
+**Bridge API (AQC SoT — `Aorms.Bridge`):**
+
+- `ConnectSession` / `ConnectSessionFile` — read/write `session.json`; CLI flag `--connect-session`.  
+- `ConnectCatalog` / `CatalogProject` — read `catalog.json` (`id`, `ref`, `title`, `status`, `updatedAt`).  
+- `AormsBridge.TryImportConnectSession(overwrite:)` — apply session into the app’s `firm.db`.
 
 **Rules for C2:**
 
 - Connect is the **only** desktop surface that runs full user login against the hub.  
-- On successful login/activate, write `session.json` with `{ syncToken, hubUrl, userId, expiresAt }` (shape TBD in Bridge).  
-- Sibling apps, when launched from Connect, receive `--connect-session` path or read the default `session.json` — **do not** prompt for HLP key if a valid session exists.  
+- On successful Activate, write `session.json` with `{ syncToken, hubUrl, licenseApiUrl, licenseToken, deviceId, writtenAt }` (`expiresAt` / `userId` optional).  
+- Sibling apps import the default `session.json` at bridge create (`overwrite: true`); Connect Open also passes `--connect-session`. Do **not** prompt for HLP key when a valid session exists.  
 - `catalog.json` entries use stable UUID `id` + firm `ref` + `title` + `status`; apps must not invent parallel project ids for the same engagement.  
 - Soft-launch marketing gate (`VITE_MARKETING_ONLY`) is **unrelated** — do not flip apex login as part of Connect work.
 
 ## Project catalog (consistency)
 
 Connect owns the **canonical project register** (id, ref, title, status).  
-C1 writes `catalog.json` locally. Estimation / BBS / PM / managers / AADT will
-resolve projects from that catalog in **C2** so details stay consistent. Apps may
+Connect writes `catalog.json`; siblings read via `ConnectCatalog` (C2). Apps may
 append published meta via Bridge; they do not fork divergent project identities.
 
 ## Launcher + installers
@@ -102,12 +107,12 @@ deferred. Do not invent Stripe / Standard licence metering in Connect copy.
 
 ## Delivery waves
 
-| Wave | Outcome |
-| --- | --- |
-| **C0** | This canon + nomenclature + downloads stub |
-| **C1** | WinUI shell: login · launcher · installer links · projects list · licence stub |
-| **C2** | Session broker + catalog API for sibling apps |
-| **C3** | Licence Manager surface |
+| Wave | Outcome | Status |
+| --- | --- | --- |
+| **C0** | This canon + nomenclature + downloads stub | ✅ |
+| **C1** | WinUI shell: login · launcher · installer links · projects list · licence stub | ✅ |
+| **C2** | Session broker + catalog API for sibling apps | ✅ |
+| **C3** | Licence Manager surface | 🔲 |
 
 See [ROADMAP.md](ROADMAP.md).
 
