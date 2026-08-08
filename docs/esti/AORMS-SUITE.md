@@ -162,7 +162,7 @@ Postgres in this monorepo is **transitional** until hub APIs are fully Mongo-bac
 | **C2–C3** | Session broker · Licence surface | ✅ |
 | **S8** | Reopen apex auth / portal demos (`VITE_MARKETING_ONLY=false`) | 🟡 code ✅ · VPS flip 🔲 |
 | **S9** | Per-app MSIX (AQC-*) | 🟡 unsigned ✅ |
-| **S10** | Firm portal depth | 🟡 |
+| **S10** | Firm portal depth | ✅ |
 | **D6** | Signed installers + portal tenants | 🔲 |
 
 See [ROADMAP.md](ROADMAP.md).

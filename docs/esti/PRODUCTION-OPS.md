@@ -172,6 +172,9 @@ docker compose -f compose.prod.yaml exec backend pnpm --filter @esti/backend see
 | Account | Email | Password |
 |---------|-------|----------|
 | Team demo | `principal@demo.aorms.in` | `demo1234` (or `SEED_DEMO_PASSWORD`) |
+| Client portal | `client@demo.aorms.in` | same → `/login?tab=portals` |
+| Contractor portal | `contractor@demo.aorms.in` | same |
+| Collaborator portal | `collab@demo.aorms.in` | same |
 
 See [DEMO-AND-HR-MODE.md](DEMO-AND-HR-MODE.md).
 

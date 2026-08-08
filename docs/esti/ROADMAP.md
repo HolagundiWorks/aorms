@@ -42,7 +42,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | **C3** | Licence Manager surface in Connect | Connect | ✅ local status · admin.aorms.in link |
 | **S8** | Reopen apex auth / portal demos | esti | 🟡 code ready (gate-aware CTAs · `s8-reopen-demos.sh`) · VPS flip 🔲 |
 | **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🟡 unsigned MSIX ✅ · code sign 🔲 D6 |
-| **S10** | Firm portal depth | esti portals | ✅ collab tx+ack · client Documents+RA · contractor Drawings |
+| **S10** | Firm portal depth | esti portals | ✅ collab tx+ack · Documents+RA · contractor/site Drawings · collab demo login |
 
 ---
 
@@ -87,9 +87,9 @@ Desktop firm login target: **AORMS Connect** (not apex).
 
 ### Then
 
-1. **S8 VPS flip** — `CONFIRM=yes bash deploy/s8-reopen-demos.sh` when ready to reopen `/login` demos.  
+1. **S8 VPS flip** — `CONFIRM=yes bash deploy/s8-reopen-demos.sh` when ready to reopen `/login` demos (seed has client/contractor/collab portals).  
 2. **D6** — Trusted Authenticode → upload → `apply-installer-manifest.ps1 -ConfirmFlip` → release flag + rebuild. Prefer Connect first.  
-3. Portal tenants (D6 remainder) when signed installers are live.
+3. Hub-portal allow-list parity · portal tenants when signed installers are live.
 
 ## Deferred
 

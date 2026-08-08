@@ -17,6 +17,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
 import {
+  FirmPortalDrawingsPanel,
   FirmPortalProgressPanel,
   FirmPortalProjectPanel,
 } from "../components/portal/FirmPortalHubPanels.js";
@@ -102,6 +103,24 @@ export function SitePortal() {
             loading={projectDetailQ.isLoading || progressQ.isLoading}
             reports={progressQ.data ?? []}
             phases={projectDetailQ.data?.phases}
+          />
+        ),
+        drawings: (
+          <FirmPortalDrawingsPanel
+            loading={projectDetailQ.isLoading}
+            drawings={(projectDetailQ.data?.drawings ?? []).map((dr) => ({
+              id: dr.id,
+              ref: dr.ref,
+              title: dr.title,
+              status: dr.status,
+            }))}
+            transmittals={(projectDetailQ.data?.transmittals ?? []).map((t) => ({
+              id: t.id,
+              ref: t.ref,
+              purpose: t.purpose,
+              channel: t.channel,
+              dateIssued: t.dateIssued,
+            }))}
           />
         ),
       }

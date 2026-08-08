@@ -82,7 +82,7 @@ const DEMO_PASSWORD = process.env.SEED_DEMO_PASSWORD ?? "demo1234";
 const DEMO_EMAILS = [
   "principal@demo.aorms.in", "lead@demo.aorms.in", "site@demo.aorms.in",
   "junior@demo.aorms.in", "intern@demo.aorms.in", "accounts@demo.aorms.in", "client@demo.aorms.in",
-  "contractor@demo.aorms.in",
+  "contractor@demo.aorms.in", "collab@demo.aorms.in",
 ];
 
 /**
@@ -144,6 +144,8 @@ async function backfillStudioDemo(principalId: string, pwHash: string): Promise<
   await ensureDemoConsultancyPlatformOrg();
   await ensureDemoPmcPlatformOrg();
   await ensureDemoClientPortalUser(pwHash);
+  await ensureDemoContractorPortalUser(pwHash);
+  await ensureDemoCollaboratorPortalUser(pwHash);
   const projectRows = await db
     .select({ id: projectOffices.id })
     .from(projectOffices)
@@ -214,6 +216,88 @@ async function ensureDemoClientPortalUser(pwHash: string): Promise<void> {
   });
 }
 
+/**
+ * Contractor portal login (`contractor@demo.aorms.in`) — first seeded contractor row.
+ */
+async function ensureDemoContractorPortalUser(pwHash: string): Promise<void> {
+  const portalEmail = "contractor@demo.aorms.in";
+  const [contractor] = await db
+    .select({ id: contractors.id, name: contractors.name })
+    .from(contractors)
+    .limit(1);
+  if (!contractor) return;
+
+  const [existingUser] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(emailMatches(users.email, portalEmail))
+    .limit(1);
+  if (existingUser) {
+    await db
+      .update(users)
+      .set({
+        passwordHash: pwHash,
+        isDemo: true,
+        role: "CONTRACTOR",
+        contractorId: contractor.id,
+        disabled: false,
+        fullName: contractor.name,
+      })
+      .where(eq(users.id, existingUser.id));
+    return;
+  }
+
+  await db.insert(users).values({
+    email: portalEmail,
+    fullName: contractor.name,
+    role: "CONTRACTOR",
+    contractorId: contractor.id,
+    passwordHash: pwHash,
+    isDemo: true,
+  });
+}
+
+/**
+ * Collaborator portal login (`collab@demo.aorms.in`) — first seeded consultant with engagements.
+ */
+async function ensureDemoCollaboratorPortalUser(pwHash: string): Promise<void> {
+  const portalEmail = "collab@demo.aorms.in";
+  const [consultant] = await db
+    .select({ id: consultants.id, name: consultants.name })
+    .from(consultants)
+    .limit(1);
+  if (!consultant) return;
+
+  const [existingUser] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(emailMatches(users.email, portalEmail))
+    .limit(1);
+  if (existingUser) {
+    await db
+      .update(users)
+      .set({
+        passwordHash: pwHash,
+        isDemo: true,
+        role: "CONSULTANT",
+        consultantId: consultant.id,
+        disabled: false,
+        fullName: consultant.name,
+      })
+      .where(eq(users.id, existingUser.id));
+    return;
+  }
+
+  await db.insert(users).values({
+    email: portalEmail,
+    fullName: consultant.name,
+    role: "CONSULTANT",
+    consultantId: consultant.id,
+    passwordHash: pwHash,
+    isDemo: true,
+  });
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
   const principalEmail = "principal@demo.aorms.in";
@@ -229,6 +313,7 @@ async function main() {
     await backfillStudioDemo(exists.id, pwHash);
     console.log("✓ demo workspace present — studio backfill applied (SEED_DEMO_FORCE=1 to wipe and re-seed)");
     console.log(`    company account: ${principalEmail} / ${DEMO_PASSWORD}`);
+    console.log(`    portals: client@ · contractor@ · collab@demo.aorms.in / ${DEMO_PASSWORD} (/login?tab=portals)`);
     return;
   }
   if (exists && process.env.SEED_DEMO_FORCE) {
@@ -275,7 +360,7 @@ async function main() {
     { name: "Tanvi Desai",                               kind: "INDIVIDUAL", city: "Belagavi",  state: "Karnataka",     email: "tanvi.desai@example.in",     phone: "+91 98450 99006" },
   ]).returning();
 
-  // Client portal login for Kapoor Family (docs/esti/DEMO-AND-HR-MODE.md).
+  // Client / contractor / collaborator portal logins (docs/esti/DEMO-AND-HR-MODE.md).
   await ensureDemoClientPortalUser(pwHash);
 
   // ── Consultants ───────────────────────────────────────────────────────────
@@ -296,22 +381,8 @@ async function main() {
     { name: "Apex Interior Fit-out",     category: "Interior",  companyName: "Apex Interiors Pvt Ltd",          email: "projects@apexinteriors.in",   phone: "+91 98440 10005", city: "Bengaluru", state: "Karnataka", qualityRating: 4, timelinessRating: 4, safetyRating: 4, createdById: principal.id },
   ]).returning();
 
-  // Contractor portal login (bids via /access).
-  const contractorPortalEmail = "contractor@demo.aorms.in";
-  const [existingContractorUser] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.email, contractorPortalEmail));
-  if (!existingContractorUser && contractorRows[0]) {
-    await db.insert(users).values({
-      email: contractorPortalEmail,
-      fullName: contractorRows[0].name,
-      role: "CONTRACTOR",
-      contractorId: contractorRows[0].id,
-      passwordHash: pwHash,
-      isDemo: true,
-    });
-  }
+  await ensureDemoContractorPortalUser(pwHash);
+  await ensureDemoCollaboratorPortalUser(pwHash);
 
   // ── Projects ──────────────────────────────────────────────────────────────
   type ProjDef = {
@@ -768,8 +839,9 @@ async function main() {
   console.log("✓ seeded demo workspace (Studio Intelligence tuned)");
   console.log(`    principal: ${principalEmail} / ${DEMO_PASSWORD}`);
   console.log(`    team logins: lead@ · site@ · junior@ · accounts@demo.aorms.in (same password)`);
-  console.log(`    client portal: client@demo.aorms.in / ${DEMO_PASSWORD} (sign in at /access)`);
-  console.log(`    contractor portal: contractor@demo.aorms.in / ${DEMO_PASSWORD} (sign in at /access)`);
+  console.log(`    client portal: client@demo.aorms.in / ${DEMO_PASSWORD} (sign in at /login?tab=portals)`);
+  console.log(`    contractor portal: contractor@demo.aorms.in / ${DEMO_PASSWORD} (sign in at /login?tab=portals)`);
+  console.log(`    collaborator portal: collab@demo.aorms.in / ${DEMO_PASSWORD} (sign in at /login?tab=portals)`);
   console.log(`    ${projectDefs.length} projects · ${clientRows.length} clients · ${DEMO_LEADS.length} leads`);
   console.log(`    delivery: OPEN tender + 2 sealed bids · RA bill 01 (certified) · concept moodboard`);
   console.log(`    consultancy: EQ-DEMO-001 → C-DEMO-001 (BILLABLE fee stage)`);

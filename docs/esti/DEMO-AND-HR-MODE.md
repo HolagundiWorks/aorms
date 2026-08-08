@@ -17,6 +17,8 @@ Quick reference for demo logins and how they relate to production org mode.
 | Junior architect | same seed | `junior@demo.aorms.in` | same |
 | Studio manager | same seed | `accounts@demo.aorms.in` | same |
 | **Client portal** | same seed | `client@demo.aorms.in` via `/login?tab=portals` (legacy `/access`) | same |
+| **Contractor portal** | same seed | `contractor@demo.aorms.in` via `/login?tab=portals` | same |
+| **Collaborator portal** | same seed | `collab@demo.aorms.in` via `/login?tab=portals` | same |
 
 Demo workspaces mirror live upload behaviour. File uploads require the **upload password** (same as the demo login password unless `SEED_DEMO_PASSWORD` was changed). Owners can toggle this gate under **Company account → Administration → Upload protection** on live firms too.
 
@@ -50,6 +52,8 @@ Set `DEMO_MASTER_PASSWORD` in `compose.yaml` / production env before shipping a 
 | CRIF + comments | **Sharma / Verde / Patel HQ** → Overview or Decisions |
 | Leads pipeline | `/leads` — 10 enquiries across statuses |
 | Client portal | `client@demo.aorms.in` — Kapoor Residence (sign in at `/login?tab=portals`) |
+| Collaborator portal | `collab@demo.aorms.in` — engagements (e.g. structural on Sharma Villa) · Drawings + tx ack |
+| Contractor portal | `contractor@demo.aorms.in` — tender invitations · Project/Drawings |
 
 Re-run `seed:demo` on an existing workspace to **backfill** studio glance data (team, leads, MOMs, visits — idempotent). Use `SEED_DEMO_FORCE=1` to wipe and rebuild billing links.
 
