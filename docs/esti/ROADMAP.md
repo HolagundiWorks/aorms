@@ -39,7 +39,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | **C0** | AORMS Connect canon + nomenclature + downloads stub | esti | ✅ [AORMS-CONNECT.md](AORMS-CONNECT.md) |
 | **C1** | Connect WinUI shell (login · launcher · catalog stub) | AORMS-Connect | ✅ shell scaffold · deepen C2 |
 | **C2** | Session broker + project catalog for sibling apps | Connect · Bridge | ✅ `session.json` · `ConnectCatalog` · sibling import |
-| **C3** | Licence Manager surface in Connect | Connect | 🔲 |
+| **C3** | Licence Manager surface in Connect | Connect | ✅ local status · admin.aorms.in link |
 | **S8** | Reopen apex auth / portal demos | esti | 🔲 prep ✅ · env flip 🔲 |
 | **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🟡 unsigned MSIX ✅ · code sign 🔲 D6 |
 | **S10** | Firm portal depth | esti portals | 🟡 contractor/site/collab Project+Progress ✅ · docs tabs 🔲 |
@@ -74,7 +74,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | C0 Canon · nomenclature · `aorms-connect` manifest stub | ✅ |
 | C1 WinUI: Sign in · Suite apps · Projects · Licence stub | ✅ scaffold |
 | C2 Shared session + catalog API for siblings | ✅ |
-| C3 Licence Manager surface | 🔲 |
+| C3 Licence Manager surface | ✅ |
 
 ### S8 — Reopen apex auth (when demos are honest)
 
@@ -82,10 +82,9 @@ Prep ✅ (honest portal tabs · installers decoupled). Env flip 🔲 when ready.
 
 ### Then
 
-1. **C3** — Licence Manager surface in Connect (stub → real).  
-2. **D6** — Code-signed MSIX URLs + sha256 + `VITE_PORTAL_USE_RELEASE_INSTALLERS`.  
-3. **S10** — Documents panels · collab transmittals.  
-4. **S8 flip** when portal demos stay honest.
+1. **D6** — Code-signed MSIX URLs + sha256 + `VITE_PORTAL_USE_RELEASE_INSTALLERS`.  
+2. **S10** — Documents panels · collab transmittals.  
+3. **S8 flip** when portal demos stay honest.
 
 ## Deferred
 

@@ -98,10 +98,17 @@ Connect itself is listed on `/downloads` (`aorms-connect` offer) — Coming soon
 - Hub bind for Mongo ops metadata (same Bridge lineage as AQC apps).  
 - Ops browse depth may deepen later; Connect is the desktop entry for firm DB bind, not a second `/ops-db` mega-UI on day one.
 
-## Licence Manager (C3 — future)
+## Licence Manager (C3)
 
-Stub surface in Connect (“Coming soon”). Full parity with `admin.aorms.in` is
-deferred. Do not invent Stripe / Standard licence metering in Connect copy.
+Connect shows **local seat status** (licence state, install id, hub / license API
+URLs, `firm.db` + `session.json` paths) and links to the operator console at
+`admin.aorms.in` (**HCW License Manager**). Actions: copy install id, rewrite
+`session.json` from `firm.db`, clear local tokens (does not revoke on hub).
+
+Full issue / revoke / device admin stays on `admin.aorms.in` — not duplicated in
+Connect. Do not invent Stripe / Standard licence metering in Connect copy.
+
+Bridge: `AormsBridge.LicenceSnapshot()` · `ClearLocalLicence()`.
 
 ---
 
@@ -112,7 +119,7 @@ deferred. Do not invent Stripe / Standard licence metering in Connect copy.
 | **C0** | This canon + nomenclature + downloads stub | ✅ |
 | **C1** | WinUI shell: login · launcher · installer links · projects list · licence stub | ✅ |
 | **C2** | Session broker + catalog API for sibling apps | ✅ |
-| **C3** | Licence Manager surface | 🔲 |
+| **C3** | Licence Manager surface (local status + admin link) | ✅ |
 
 See [ROADMAP.md](ROADMAP.md).
 
