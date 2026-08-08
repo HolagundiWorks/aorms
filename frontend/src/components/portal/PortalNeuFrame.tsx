@@ -1,16 +1,15 @@
-import { AnalogueClock, Surface, colors, RADIUS } from "@hcw/ui-kit";
+import { Surface, colors, RADIUS } from "@hcw/ui-kit";
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
+import { AormsAnalogueClock } from "../AormsAnalogueClock.js";
 import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
-import {
-  MARKETING_CONTENT_MAX_PX,
-  marketingContentColumnSx,
-} from "../../lib/marketing-layout.js";
+import { marketingContentColumnSx } from "../../lib/marketing-layout.js";
+import { PORTAL_CHROME, portalChromeCssVars } from "../../lib/portal-chrome.js";
 
 /**
- * Shared no-rail portal chrome — soft top bar · full-width stage · optional
- * taskbar footer · analogue clock. Same spatial model as staff apps.
- * Spacing: COMPOSITION_RHYTHM. Canon: docs/esti/COMPOSITION-PRINCIPLES.md
+ * Shared no-rail portal chrome — soft top bar · 1200px stage · floating
+ * FirmPortalFooter · AormsAnalogueClock. Tokens: `lib/portal-chrome.ts`.
+ * Canon: docs/esti/PAGE-STRUCTURE.md · COMPOSITION-PRINCIPLES.md
  */
 export function PortalNeuFrame({
   topBar,
@@ -19,12 +18,13 @@ export function PortalNeuFrame({
   mainId = "esti-main",
 }: {
   topBar: ReactNode;
-  /** Soft neu taskbar (calc · nav · tray). When set, clock clears the footer. */
+  /** Floating soft-neu taskbar (calc · nav · tray). When set, clock clears the footer. */
   footer?: ReactNode;
   children: ReactNode;
   mainId?: string;
 }) {
   const hasFooter = Boolean(footer);
+  const insetPx = PORTAL_CHROME.chromeInsetPx;
 
   return (
     <Box
@@ -34,8 +34,7 @@ export function PortalNeuFrame({
         backgroundColor: colors.background,
         display: "flex",
         flexDirection: "column",
-        // Match staff shell so FloatingCalculator / clock clear the taskbar.
-        "--esti-footer-height": hasFooter ? "56px" : "0px",
+        ...portalChromeCssVars(hasFooter),
       }}
     >
       <a href={`#${mainId}`} className="esti-skip-link">
@@ -46,8 +45,8 @@ export function PortalNeuFrame({
         className="esti-portal-neu__top-wrap"
         sx={{
           position: "sticky",
-          top: COMPOSITION_RHYTHM.chromeInsetMd * 8,
-          zIndex: 50,
+          top: insetPx,
+          zIndex: PORTAL_CHROME.topBarZIndex,
           width: "100%",
           px: { xs: COMPOSITION_RHYTHM.gutter.xs, md: COMPOSITION_RHYTHM.gutter.md },
           mt: COMPOSITION_RHYTHM.sm,
@@ -68,7 +67,7 @@ export function PortalNeuFrame({
             flexDirection: "column",
             gap: COMPOSITION_RHYTHM.sm,
             borderRadius: `${RADIUS}px`,
-            minHeight: 56,
+            minHeight: PORTAL_CHROME.topBarMinHeightPx,
           }}
         >
           {topBar}
@@ -84,7 +83,7 @@ export function PortalNeuFrame({
           flex: 1,
           minWidth: 0,
           width: "100%",
-          maxWidth: MARKETING_CONTENT_MAX_PX,
+          maxWidth: PORTAL_CHROME.contentMaxPx,
           mx: "auto",
           px: { xs: COMPOSITION_RHYTHM.gutter.xs, md: COMPOSITION_RHYTHM.gutter.md },
           py: COMPOSITION_RHYTHM.portalStageY,
@@ -100,22 +99,52 @@ export function PortalNeuFrame({
         {children}
       </Box>
 
-      {footer}
+      {footer ? (
+        <Box
+          className="esti-portal-neu__footer-wrap"
+          sx={{
+            position: "fixed",
+            left: 0,
+            right: 0,
+            bottom: insetPx,
+            zIndex: PORTAL_CHROME.footerZIndex,
+            width: "100%",
+            px: { xs: COMPOSITION_RHYTHM.gutter.xs, md: COMPOSITION_RHYTHM.gutter.md },
+            boxSizing: "border-box",
+            pointerEvents: "none",
+          }}
+        >
+          <Box
+            sx={{
+              ...marketingContentColumnSx,
+              pointerEvents: "auto",
+            }}
+          >
+            {footer}
+          </Box>
+        </Box>
+      ) : null}
 
       <Box
         className="esti-portal-neu__clock"
         sx={{
           position: "fixed",
-          right: { xs: 16, md: 24 },
+          right: {
+            xs: PORTAL_CHROME.clockRightPx.xs,
+            md: PORTAL_CHROME.clockRightPx.md,
+          },
           bottom: hasFooter
-            ? "calc(var(--esti-footer-height, 56px) + 16px)"
-            : { xs: 16, md: 24 },
-          zIndex: 40,
+            ? `calc(var(--esti-footer-height) + ${PORTAL_CHROME.dockGapPx}px)`
+            : {
+                xs: PORTAL_CHROME.clockRightPx.xs,
+                md: PORTAL_CHROME.clockRightPx.md,
+              },
+          zIndex: PORTAL_CHROME.clockZIndex,
           pointerEvents: "none",
         }}
         aria-hidden
       >
-        <AnalogueClock size={72} />
+        <AormsAnalogueClock size={PORTAL_CHROME.clockSizePx} />
       </Box>
     </Box>
   );

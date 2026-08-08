@@ -59,7 +59,8 @@ import { trpc } from "./lib/trpc.js";
 import { LegacyModuleRedirect } from "./components/LegacyModuleRedirect.js";
 import { AiAgentCommand } from "./components/AiAgentCommand.js";
 import { RightSlot } from "./components/shell/RightSlot.js";
-import { ActionDock, ActionDockProvider, ActionOutcomeBanner, AnalogueClock } from "@hcw/ui-kit";
+import { ActionDock, ActionDockProvider, ActionOutcomeBanner } from "@hcw/ui-kit";
+import { AormsAnalogueClock } from "./components/AormsAnalogueClock.js";
 import { AppRibbon } from "./components/shell/AppRibbon.js";
 import { AppFooterBar } from "./components/shell/AppFooterBar.js";
 import { UsageIdentity } from "./components/identity/UsageIdentity.js";
@@ -80,6 +81,7 @@ import { ForceWorkspaceProfile } from "./routes/ForceWorkspaceProfile.js";
 import { ForgotPassword } from "./routes/ForgotPassword.js";
 import { ResetPassword } from "./routes/ResetPassword.js";
 import { isMarketingAuthPath, isMarketingOnly } from "./lib/marketing-gate.js";
+import { portalChromeCssVars } from "./lib/portal-chrome.js";
 
 // Build variant gate. The public marketing site (landing, blog, investors, one-click
 // demo) is included only when VITE_PUBLIC_SITE !== "false". Set it to "false" for the
@@ -422,15 +424,19 @@ function AppWorkspace() {
   if (user.mustCompleteWorkspaceProfile) return <ForceWorkspaceProfile />;
 
   // Client-role users get the read-only portal, not the office workspace.
+  // ActionDockProvider must wrap the route tree so Portal's useScreenActions can publish.
   if (user.role === "CLIENT")
     return (
-      <div>
-        <Routes>
-          <Route path="/" element={<Portal />} />
-          <Route path="/projects/:projectId" element={<Portal />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
+      <ActionDockProvider>
+        <div className="esti-firm-portal-root" style={portalChromeCssVars(true)}>
+          <Routes>
+            <Route path="/" element={<Portal />} />
+            <Route path="/projects/:projectId" element={<Portal />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <ActionDock />
+        </div>
+      </ActionDockProvider>
     );
   // External consultants (scoped to a consultant record) get the collaborator portal.
   if (user.role === "CONSULTANT" && user.consultantId)
@@ -920,8 +926,7 @@ function AppWorkspace() {
           {/* Outcome channel — publishes from DockAction.outcome / publishOutcome. */}
           <ActionOutcomeBanner />
           {/* Fixed bottom-right analogue clock (single staff clock). */}
-          <AnalogueClock
-            size={112}
+          <AormsAnalogueClock
             className="esti-analogue-clock"
             sx={{
               position: "fixed",

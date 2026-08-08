@@ -82,7 +82,8 @@ soft chrome, Radiant Orange only for true accent.
 ## Spatial model — Ribbon · Stage · Footer · Dock · Clock
 
 **Canon:** [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) (2026-08). **Left rail retired** on
-marketing, staff apps, and portals. Soft neu everywhere; single AnalogueClock;
+marketing, staff apps, and portals. Soft neu everywhere; single `AormsAnalogueClock`
+(100px · AORMS mark in dial · `PORTAL_CHROME` / `AMBIENT_ANALOGUE_CLOCK_SIZE_PX`);
 no floating staff watermark.
 
 ```
@@ -103,7 +104,7 @@ no floating staff watermark.
 | **TaskbarFooter** | full width · staff only | Soft (L2) | Calculator · launcher cluster · tray (no digital clock). Absent on marketing/portals. |
 | **ActionDock** | staff · bottom | Soft tray | Page-level CTAs via `useScreenActions`. |
 | **MarketingLandingDock** | marketing · bottom | Soft | Section spy + Sign in / Downloads / Calculator. |
-| **Clock** | fixed bottom-right | Soft | Marketing `MarketingClockPomodoro`; staff/portals kit `AnalogueClock` only. |
+| **Clock** | fixed bottom-right | Soft | `AormsAnalogueClock` (100px) everywhere; marketing wraps Pomodoro ring. Portal clears floating footer via `--esti-footer-height`. |
 
 ### Marketing shell — public site (`MarketingNeuFrame`)
 

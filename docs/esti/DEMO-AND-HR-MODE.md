@@ -51,7 +51,7 @@ Set `DEMO_MASTER_PASSWORD` in `compose.yaml` / production env before shipping a 
 | Drawings + takeoff | **Sharma Villa** or **Verde Commercial Block** → Drawings tab |
 | CRIF + comments | **Sharma / Verde / Patel HQ** → Overview or Decisions |
 | Leads pipeline | `/leads` — 10 enquiries across statuses |
-| Client portal | `client@demo.aorms.in` — Kapoor Residence (sign in at `/login?tab=portals`) |
+| Client portal | `client@demo.aorms.in` — Kapoor Residence full walkthrough (approvals · drawings · progress · RA · MoM · activity) — `/login?tab=portals` |
 | Collaborator portal | `collab@demo.aorms.in` — engagements (e.g. structural on Sharma Villa) · Drawings + tx ack |
 | Contractor portal | `contractor@demo.aorms.in` — tender invitations · Project/Drawings |
 

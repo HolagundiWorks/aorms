@@ -1,16 +1,17 @@
 import { Box, Tooltip, Typography } from "@mui/material";
-import { AnalogueClock, colors } from "@hcw/ui-kit";
+import { colors } from "@hcw/ui-kit";
 import { useEffect, useRef, useState } from "react";
+import { AormsAnalogueClock } from "../AormsAnalogueClock.js";
 import { fmtPomTime, usePomodoro } from "../../contexts/PomodoroContext.js";
 import { bindingFor, matchShellKey } from "../../lib/keymap.js";
+import { AMBIENT_ANALOGUE_CLOCK_SIZE_PX } from "../../lib/portal-chrome.js";
 
-/** Outer chrome for the marketing clock + single Pomodoro ring. */
-const OUTER = 132;
-const CLOCK = 104;
+/** Dial matches ambient clocks; outer chrome keeps the Pomodoro ring clearance. */
+const OUTER = Math.round(AMBIENT_ANALOGUE_CLOCK_SIZE_PX * (165 / 130));
 const CX = OUTER / 2;
 const CY = OUTER / 2;
 /** Progress ring sits just outside the analogue face. */
-const R = 58;
+const R = OUTER * (72.5 / 165);
 /** Was 8 — reduced to 30%. */
 const RING_STROKE = 8 * 0.3;
 /** Was r=10 — reduced to 50%. */
@@ -245,7 +246,7 @@ export function MarketingClockPomodoro() {
               pointerEvents: "none",
             }}
           >
-            <AnalogueClock size={CLOCK} showSeconds={!pom.running} />
+            <AormsAnalogueClock showSeconds={!pom.running} />
           </Box>
 
           <Box

@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
-import { AnalogueClock, RADIUS, colors } from "@hcw/ui-kit";
+import { RADIUS, colors } from "@hcw/ui-kit";
+import { AormsAnalogueClock } from "./AormsAnalogueClock.js";
 import { HcwAttribution } from "./brand/HcwAttribution.js";
 import { MarketingFooter } from "./landing/MarketingFooter.js";
 import { MarketingTopBar } from "./landing/MarketingTopBar.js";
@@ -11,6 +12,7 @@ import {
   MARKETING_CONTENT_GUTTER,
   marketingContentColumnSx,
 } from "../lib/marketing-layout.js";
+import { PORTAL_CHROME } from "../lib/portal-chrome.js";
 
 /**
  * Unauthenticated auth shell — landing MarketingTopBar + Fog Gray entourage +
@@ -136,14 +138,20 @@ export function AuthRailLayout({
         className="esti-auth-clock"
         sx={{
           position: "fixed",
-          right: { xs: 16, md: 24 },
-          bottom: { xs: 16, md: 24 },
-          zIndex: 40,
+          right: {
+            xs: PORTAL_CHROME.clockRightPx.xs,
+            md: PORTAL_CHROME.clockRightPx.md,
+          },
+          bottom: {
+            xs: PORTAL_CHROME.clockRightPx.xs,
+            md: PORTAL_CHROME.clockRightPx.md,
+          },
+          zIndex: PORTAL_CHROME.clockZIndex,
           pointerEvents: "none",
         }}
         aria-hidden
       >
-        <AnalogueClock size={72} />
+        <AormsAnalogueClock size={PORTAL_CHROME.clockSizePx} />
       </Box>
 
       {showMarketingFooter ? (

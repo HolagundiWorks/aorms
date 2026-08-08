@@ -136,14 +136,18 @@ Do **not** invent per-route spacing. Shells carry the rhythm:
 | `StudioAbstract` | Studio Intelligence `/` | Brief + stage column rhythm |
 | `AppRibbon` + `AppFooterBar` | Staff chrome | Sticky inset · gutters (`--esti-shell-gutter: 24px`) |
 | `ActionDock` | Staff CTAs | Von Restorff zones (destroy · create · commit) |
-| `PortalNeuFrame` | Client / consultant / contractor / site / account | Top bar + stage air + clock clear |
+| `PortalNeuFrame` + `PORTAL_CHROME` | Client / consultant / contractor / site / account | Top bar · floating 60px footer · 100px clock · ActionDock clear |
 | `AdminConsoleShell` | Licensing | Header · chips · stage pad |
-| `AuthRailLayout` | `/login` (unified tabs) / reset / forgot | Horizontal soft card pad · pinned tab header |
+| `AuthRailLayout` | `/login` (unified tabs) / reset / forgot | Horizontal soft card pad · pinned tab header · ambient clock |
 | `MarketingNeuFrame` + `MARKETING_RHYTHM` | Landing / blog / downloads | Section air · odd groups |
 
-Executable tokens: `frontend/src/lib/composition.ts` (`COMPOSITION_RHYTHM`). Marketing re-exports via `marketing-layout.ts`.
+Executable tokens:
 
-When adding a screen: wrap in the correct shell; use `COMPOSITION_RHYTHM` for any local Stack/Grid gaps; keep peer groups odd; isolate one primary CTA.
+- `frontend/src/lib/composition.ts` — `COMPOSITION_RHYTHM` (8px grid · gutters · section air)
+- `frontend/src/lib/portal-chrome.ts` — `PORTAL_CHROME` · `portalChromeCssVars` · `AMBIENT_ANALOGUE_CLOCK_SIZE_PX`
+- Marketing re-exports via `marketing-layout.ts`
+
+When adding a screen: wrap in the correct shell; use `COMPOSITION_RHYTHM` for local Stack/Grid gaps; firm portals must go through `PortalNeuFrame` / `FirmPortalShell` (never invent footer height or clock size); keep peer groups odd; isolate one primary CTA.
 
 ---
 
@@ -158,6 +162,7 @@ When adding a screen: wrap in the correct shell; use `COMPOSITION_RHYTHM` for an
 | Misaligned card edges / mixed gutters | Single content column + 8px grid |
 | Two hero clocks / watermark + clock | One AnalogueClock |
 | Per-route magic spacing (13px, 18px) | `COMPOSITION_RHYTHM` steps only |
+| Hard-coded portal bar / clock px | `PORTAL_CHROME` + CSS vars from `portalChromeCssVars` |
 
 ---
 

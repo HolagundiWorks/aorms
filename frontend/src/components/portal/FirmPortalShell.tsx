@@ -16,8 +16,10 @@ export { FIRM_PORTAL_SECTIONS, visibleFirmPortalSections };
 /**
  * Firm-branded portal chrome — soft top identity bar + taskbar footer
  * (calc · section nav · power sign-out), matching staff `AppFooterBar` language.
- * No staff ribbon / ActionDock. Data must come from hub published records only.
- * Canon: docs/esti/PORTAL-SYNC-BRIDGE.md · AORMS-SURFACE-URLS.md
+ * Chrome sizes/location: `lib/portal-chrome.ts` (`PORTAL_CHROME`) via PortalNeuFrame.
+ * Client CTAs: App wraps CLIENT routes in ActionDockProvider + ActionDock;
+ * Portal publishes via useScreenActions. Data from hub published records only.
+ * Canon: docs/esti/PAGE-STRUCTURE.md · FIRM-PORTAL-SECTIONS.md · PORTAL-SYNC-BRIDGE.md
  */
 export function FirmPortalShell({
   companyName,

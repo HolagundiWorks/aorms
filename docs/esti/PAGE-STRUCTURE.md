@@ -1,6 +1,6 @@
 # AORMS — page structure, colours, elements & tokens
 
-**Status:** Canonical · **Adopted:** 2026-08-06 · **Updated:** 2026-08-07 · **Owner:** HCW  
+**Status:** Canonical · **Adopted:** 2026-08-06 · **Updated:** 2026-08-08 · **Owner:** HCW  
 **Reference UI:** platform landing (`Landing.tsx` + `MarketingNeuFrame`) — final language for marketing, staff apps, and portals.
 
 Where this disagrees with older “glass rail · 20%” wording, **this wins**. Historical notes stay in [CARBON-MIGRATION.md](CARBON-MIGRATION.md).
@@ -27,11 +27,11 @@ Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Composition: [COMPOSITION-PR
 
 | Region | Marketing | Staff apps (AStudio / AConsulting / AProc) | Portals |
 | --- | --- | --- | --- |
-| **Top ribbon** | `MarketingTopBar` — logo + expansion | `AppRibbon` — soft sticky neu bar + primary nav | `PortalNeuFrame` top bar — brand/nav or portal identity + sign-out |
-| **Stage** | Full width · content column **1200px** | `.esti-app-content2` full width under ribbon | Full width · **1200px** (`PortalNeuFrame`) |
-| **Bottom dock** | `MarketingLandingDock` — section spy + Sign in / Create / Downloads / Calculator | Kit `ActionDock` + `useScreenActions` | None (dock-less by design) |
-| **Footer** | Inline marketing footer in content | `AppFooterBar` — calc · launchers · tray | `FirmPortalFooter` — calc · section nav · power sign-out |
-| **Clock** | `MarketingClockPomodoro` bottom-right | Kit `AnalogueClock` bottom-right (single — no watermark) | Kit `AnalogueClock` bottom-right |
+| **Top ribbon** | `MarketingTopBar` — logo + expansion | `AppRibbon` — soft sticky neu bar + primary nav | `PortalNeuFrame` soft top — identity (1200px column · 16px inset) |
+| **Stage** | Full width · content column **1200px** | `.esti-app-content2` full width under ribbon | Full width · **1200px** (`PORTAL_CHROME.contentMaxPx`) |
+| **Bottom dock** | `MarketingLandingDock` — section spy + Sign in / Create / Downloads / Calculator | Kit `ActionDock` + `useScreenActions` | Client: `ActionDock` (Change request · Feedback · Schedule meeting) while a project is open; provider wraps CLIENT routes in `App.tsx` |
+| **Footer** | Inline marketing footer in content | `AppFooterBar` — calc · launchers · tray | **Floating** `FirmPortalFooter` — same width as top bar · **60px** · calc · section nav · power |
+| **Clock** | `MarketingClockPomodoro` (`AormsAnalogueClock` **100px**) | `AormsAnalogueClock` bottom-right (AORMS mark in dial) | Same ambient clock · clears floating footer |
 | **Left rail** | **Retired** | **Retired** | **Retired** |
 
 **Retired:** GlassRail / SoftRail as primary chrome · marketing clear-glass floating rail · `RailLayout` left Carbon column · staff `esti-app-logo-float` watermark · `MarketingRailNav` / `.lp2-rail` · `PublicAuthStageLayout` / `MarketingConversionDock`.
@@ -62,7 +62,27 @@ Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Composition: [COMPOSITION-PR
 | Accent glow | `transparent` | **No glow** |
 | Soft radius | **8px** · kit `RADIUS` · `--lp-radius` / `--esti-mkt-chrome-radius` | Soft-square product radius |
 | Brand font | **Urbanist** (`--lp-font`) | All UI; calculator result may use VT323 |
-| Content max | **1200px** · `MARKETING_CONTENT_MAX_PX` | Marketing column; staff stage uses shell gutters |
+| Content max | **1200px** · `MARKETING_CONTENT_MAX_PX` / `PORTAL_CHROME.contentMaxPx` | Marketing + portal column; staff stage uses shell gutters |
+| Portal chrome | `frontend/src/lib/portal-chrome.ts` | Floating footer · insets · clock · hit targets — **all firm portals** |
+
+### Portal chrome tokens (`PORTAL_CHROME`)
+
+Executable: [`frontend/src/lib/portal-chrome.ts`](../../frontend/src/lib/portal-chrome.ts). Applied on every firm-portal screen via `PortalNeuFrame` (+ CLIENT root for ActionDock clearance).
+
+| Token | Value | CSS var / use |
+| --- | --- | --- |
+| `contentMaxPx` | **1200** | Top bar · floating footer · stage column |
+| `chromeInsetPx` | **16** | Sticky top inset · floating footer bottom inset |
+| `topBarMinHeightPx` | **56** | Soft identity bar |
+| `footerHeightPx` | **60** | `--esti-portal-footer-height` — floating taskbar |
+| `footerStackPx` | **76** | `--esti-footer-height` (60 + 16 inset) — clock / dock clear |
+| `dockGapPx` | **16** | `--esti-dock-bottom` = stack + gap |
+| `footerHitPx` | **35** | `--esti-portal-hit` — calc · section · power chips |
+| `clockSizePx` | **100** | `AMBIENT_ANALOGUE_CLOCK_SIZE_PX` — staff · portal · auth · marketing |
+| `clockMarkRatio` | **0.2** | AORMS mark in dial centre |
+| `clockRightPx` | **16 / 24** | Fixed bottom-right |
+
+Do **not** hard-code portal bar heights in SCSS/components — change `PORTAL_CHROME` and re-vendor CSS var fallbacks only if needed.
 
 **Layers (opaque pure neumorphism — no glass chrome):**
 
@@ -114,9 +134,11 @@ Unauthenticated `/access`, `/company-account`, and `/platform-admin` **redirect*
 
 | Element | Role |
 | --- | --- |
-| `PortalNeuFrame` | Shared no-rail frame — soft top bar · 1200px stage · AnalogueClock |
+| `PortalNeuFrame` | Shared no-rail frame — soft top · 1200px stage · **floating** `FirmPortalFooter` · `AormsAnalogueClock` (tokens via `portalChromeCssVars`) |
+| `FirmPortalShell` / `FirmPortalFooter` | Identity top · floating taskbar (calc · sections · power) |
+| `ExternalPortalShell` | Client / consultant / contractor / site — section chrome + hub panels |
 | `PortalShell` | Account / company / licensing hub — horizontal nav in top bar |
-| `ExternalPortalShell` | Client / consultant / contractor / site — identity + sign-out in top bar |
+| Client ActionDock | `App.tsx` CLIENT wrap — Change request · Feedback · Schedule meeting (`Portal.tsx` `useScreenActions`) |
 
 ---
 
@@ -141,15 +163,17 @@ Primary create/commit actions still belong in **ActionDock**, not duplicated as 
 
 **Do**
 
-- One spatial model: ribbon · stage · dock · (staff) footer · clock  
+- One spatial model: ribbon · stage · dock · footer · clock  
 - Soft neu chrome; flat content; Radiant Orange only for true accent  
-- Marketing content width 1200px; wellbeing in-flow on Rhythm  
+- Marketing / portal content width 1200px; wellbeing in-flow on Rhythm  
+- Portal heights / clock / hits from `PORTAL_CHROME` on **every** firm-portal screen  
 
 **Don’t**
 
 - Reintroduce a left glass / SoftRail on staff, marketing, or portals  
 - Put glass on every card or invent accent glows  
-- Put staff ActionDock on marketing (use `MarketingLandingDock`) or portals  
+- Put staff ActionDock on marketing (use `MarketingLandingDock`)  
+- Hard-code portal footer/clock px outside `portal-chrome.ts`  
 - Apply building entourage inside authenticated apps or portals  
 - Mount a floating staff watermark beside the AnalogueClock  
 - Leave dead SoftRail / `.lp2-rail` / conversion-dock code in product paths  

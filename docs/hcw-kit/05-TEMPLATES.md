@@ -64,12 +64,14 @@ AuthRailLayout: horizontal soft-neu brand|form card on Fog Gray
 ## T6 — Portal (external + account hubs) (reference: `Portal.tsx` + `ExternalPortalShell` / `PortalShell`)
 
 ```
-PortalNeuFrame (no left SoftRail):
-├ soft top bar — portal identity + Sign out  OR  account hub nav + Sign out
-├ stage — 1200px · PortalCard soft panels / request forms / account tabs
-└ AnalogueClock (fixed bottom-right)
-No taskbar, no ActionDock — portal-class surfaces are dock-less by design.
+PortalNeuFrame (no left SoftRail) — tokens: lib/portal-chrome.ts
+├ soft top bar — 1200px column · 16px inset · min-height 56
+├ stage — 1200px · hub panels / request forms / account tabs
+├ floating FirmPortalFooter — 60px · same column as top · calc · sections · power
+├ ActionDock (CLIENT only) — Change request · Feedback · Schedule meeting
+└ AormsAnalogueClock 100px (AORMS mark in dial) — clears footer stack
 Account hubs: PortalCard (soft) for Overview / Companies / Profile / Security panels.
+All firm portals inherit heights/location via PortalNeuFrame + PORTAL_CHROME.
 ```
 
 ## T7 — Marketing page (reference: `Landing.tsx` + `MarketingNeuFrame`)

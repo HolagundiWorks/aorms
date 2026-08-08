@@ -120,14 +120,14 @@ export function FloatingCalculator({
           {displayResult}
         </Typography>
         {showInvalid ? (
-          <Alert severity="error">Invalid expression</Alert>
+          <Alert severity="error">Invalid</Alert>
         ) : null}
         <TextField
           id="calc-screen"
-          label="Expression (m · m² · m³ · ft · in)"
           size="small"
           autoFocus
-          placeholder={`e.g. 25+36'3" or 25m2`}
+          hiddenLabel
+          aria-label="Calculator input"
           value={expr}
           onChange={(e) => setExpr(e.target.value)}
           onKeyDown={(e) => {
@@ -141,11 +141,6 @@ export function FloatingCalculator({
             },
           }}
         />
-        <Typography variant="caption" color="text.secondary">
-          Input: bare numbers = m; area <code>m2</code>/<code>m²</code>; volume{" "}
-          <code>m3</code>/<code>m³</code>; imperial <code>36&apos;3&quot;</code>,{" "}
-          <code>12&apos;</code>, <code>6&quot;</code>. Output: m / m² / m³ or ft·in / ft² / ft³.
-        </Typography>
       </Stack>
     </Popover>
   );

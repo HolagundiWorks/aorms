@@ -1,33 +1,36 @@
-import ArchitectureOutlined from "@mui/icons-material/ArchitectureOutlined";
 import CalculateOutlined from "@mui/icons-material/CalculateOutlined";
-import DescriptionOutlined from "@mui/icons-material/DescriptionOutlined";
-import FolderOutlined from "@mui/icons-material/FolderOutlined";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
-import TimelineOutlined from "@mui/icons-material/TimelineOutlined";
-import UpdateOutlined from "@mui/icons-material/UpdateOutlined";
-import { Box, IconButton, Stack, Tooltip } from "@mui/material";
-import { chromeIconSx } from "@hcw/ui-kit";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
+import { RADIUS, chromeIconSx } from "@hcw/ui-kit";
+import { useEffect, useRef, useState } from "react";
 import { FloatingCalculator } from "../FloatingCalculator.js";
 import { matchShellKey, tooltipWithChord } from "../../lib/keymap.js";
+import { PORTAL_CHROME } from "../../lib/portal-chrome.js";
 import {
   FIRM_PORTAL_SECTIONS,
   type FirmPortalSection,
 } from "./FirmPortalSections.js";
 
-const SECTION_ICON: Record<FirmPortalSection, ReactNode> = {
-  updates: <UpdateOutlined />,
-  project: <ArchitectureOutlined />,
-  progress: <TimelineOutlined />,
-  drawings: <FolderOutlined />,
-  documents: <DescriptionOutlined />,
-};
+const R8 = `${RADIUS}px`;
+const HIT = PORTAL_CHROME.footerHitPx;
+
+/** Footer icon chips — `PORTAL_CHROME.footerHitPx`. */
+const portalChromeIconSx = {
+  ...chromeIconSx,
+  width: HIT,
+  height: HIT,
+  '[data-hcw-coga="calm"] &': {
+    width: HIT,
+    height: HIT,
+  },
+} as const;
 
 /**
- * Firm portal taskbar — same soft-neu footer language as staff `AppFooterBar`:
+ * Floating firm-portal taskbar (`PORTAL_CHROME.footerHeightPx`):
  *   LEFT   — calculator
- *   CENTER — section launchers (Updates · Project · Progress · Drawings · Documents)
+ *   CENTER — section text launchers (Updates · Project · Progress · Drawings · Documents)
  *   RIGHT  — power sign-out
+ * Width matches top bar via `PortalNeuFrame` content column.
  */
 export function FirmPortalFooter({
   sections,
@@ -76,7 +79,7 @@ export function FirmPortalFooter({
             color={showCalc ? "primary" : "default"}
             onClick={() => setShowCalc((o) => !o)}
             aria-label="Calculator"
-            sx={chromeIconSx}
+            sx={portalChromeIconSx}
           >
             <CalculateOutlined />
           </IconButton>
@@ -87,24 +90,30 @@ export function FirmPortalFooter({
         direction="row"
         spacing={0.5}
         className="esti-app-footer__launcher-anchor"
-        sx={{ alignItems: "center" }}
+        sx={{ alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}
         role="navigation"
         aria-label="Portal sections"
       >
         {tabDefs.map((s) => {
           const active = section === s.id;
           return (
-            <Tooltip key={s.id} title={s.label}>
-              <IconButton
-                onClick={() => onSectionChange?.(s.id)}
-                aria-label={s.label}
-                aria-current={active ? "page" : undefined}
-                color={active ? "primary" : "default"}
-                sx={chromeIconSx}
-              >
-                {SECTION_ICON[s.id]}
-              </IconButton>
-            </Tooltip>
+            <Button
+              key={s.id}
+              size="small"
+              variant={active ? "contained" : "text"}
+              color={active ? "primary" : "inherit"}
+              onClick={() => onSectionChange?.(s.id)}
+              aria-current={active ? "page" : undefined}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: R8,
+                minHeight: HIT,
+                px: 1.5,
+              }}
+            >
+              {s.label}
+            </Button>
           );
         })}
       </Stack>
@@ -123,7 +132,7 @@ export function FirmPortalFooter({
                 }}
                 disabled={signingOut}
                 aria-label="Sign out"
-                sx={chromeIconSx}
+                sx={portalChromeIconSx}
               >
                 <PowerSettingsNew />
               </IconButton>

@@ -76,6 +76,7 @@ import {
   upsertDemoFirm,
 } from "./demoStudioSeed.js";
 import { clearDemoConsultancyRows, seedDemoConsultancy } from "./demoConsultancySeed.js";
+import { seedDemoClientPortalExtras } from "./demoClientPortalSeed.js";
 
 const DEMO_PASSWORD = process.env.SEED_DEMO_PASSWORD ?? "demo1234";
 
@@ -156,6 +157,7 @@ async function backfillStudioDemo(principalId: string, pwHash: string): Promise<
   await rebalanceDemoTaskAssignees(db);
   if (projectIds[0]) await seedDemoTakeoff(db, projectIds[0]);
   await seedDemoConsultancy(db, principalId);
+  await seedDemoClientPortalExtras(db, principalId);
 }
 
 /**
@@ -165,11 +167,20 @@ async function backfillStudioDemo(principalId: string, pwHash: string): Promise<
 async function ensureDemoClientPortalUser(pwHash: string): Promise<void> {
   const portalEmail = "client@demo.aorms.in";
 
+  // Prefer the Kapoor Family row that owns Kapoor Residence (avoid duplicate CRM orphans).
   let [kapoor] = await db
     .select({ id: clients.id, name: clients.name })
     .from(clients)
-    .where(eq(clients.email, portalEmail))
+    .innerJoin(projectOffices, eq(projectOffices.clientId, clients.id))
+    .where(eq(projectOffices.title, "Kapoor Residence — Sarjapur"))
     .limit(1);
+  if (!kapoor) {
+    [kapoor] = await db
+      .select({ id: clients.id, name: clients.name })
+      .from(clients)
+      .where(eq(clients.email, portalEmail))
+      .limit(1);
+  }
   if (!kapoor) {
     const [created] = await db
       .insert(clients)
@@ -398,7 +409,7 @@ async function main() {
     { client: clientRows[0]!,  title: "Sharma Villa — Whitefield",              projectType: "Residential Architecture",  value: 45_00_00_000,  status: "ACTIVE",    phaseProgress: 3 },
     { client: clientRows[1]!,  title: "Rao House — Mysuru",                     projectType: "Residential Architecture",  value:  1_20_00_000,  status: "ACTIVE",    phaseProgress: 1 },
     { client: clientRows[2]!,  title: "Verde Commercial Block",                  projectType: "Commercial Architecture",   value:  8_50_00_000,  status: "ACTIVE",    phaseProgress: 2 },
-    { client: clientRows[3]!,  title: "Kapoor Residence — Sarjapur",             projectType: "Residential Architecture",  value:  2_10_00_000,  status: "ACTIVE",    phaseProgress: 0 },
+    { client: clientRows[3]!,  title: "Kapoor Residence — Sarjapur",             projectType: "Residential Architecture",  value:  2_10_00_000,  status: "ACTIVE",    phaseProgress: 2 },
     { client: clientRows[4]!,  title: "Patel Corp HQ — Pune",                   projectType: "Commercial Architecture",   value: 22_50_00_000,  status: "ACTIVE",    phaseProgress: 2 },
     { client: clientRows[5]!,  title: "St. Francis School Expansion",            projectType: "Institutional Architecture",value:  6_80_00_000,  status: "ACTIVE",    phaseProgress: 1 },
     { client: clientRows[6]!,  title: "Reddy Beach Retreat — Goa",              projectType: "Residential Architecture",  value:  3_40_00_000,  status: "ON_HOLD",   phaseProgress: 1 },
@@ -836,6 +847,8 @@ async function main() {
     }
   }
 
+  await seedDemoClientPortalExtras(db, principal.id);
+
   console.log("✓ seeded demo workspace (Studio Intelligence tuned)");
   console.log(`    principal: ${principalEmail} / ${DEMO_PASSWORD}`);
   console.log(`    team logins: lead@ · site@ · junior@ · accounts@demo.aorms.in (same password)`);
@@ -844,6 +857,7 @@ async function main() {
   console.log(`    collaborator portal: collab@demo.aorms.in / ${DEMO_PASSWORD} (sign in at /login?tab=portals)`);
   console.log(`    ${projectDefs.length} projects · ${clientRows.length} clients · ${DEMO_LEADS.length} leads`);
   console.log(`    delivery: OPEN tender + 2 sealed bids · RA bill 01 (certified) · concept moodboard`);
+  console.log(`    client portal: Kapoor Residence — approvals · drawings · progress · RA · MoM · activity`);
   console.log(`    consultancy: EQ-DEMO-001 → C-DEMO-001 (BILLABLE fee stage)`);
 }
 

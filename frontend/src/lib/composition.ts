@@ -50,8 +50,13 @@ export const COMPOSITION_RHYTHM = {
   headMb: 5, // 40px
   /** Sticky chrome inset from viewport edge */
   chromeInset: 1.5, // 12px — keep with 8px module via 8+4; prefer 2 (16) when redesigning
-  chromeInsetMd: 2, // 16px
+  chromeInsetMd: 2, // 16px — also `PORTAL_CHROME.chromeInsetPx` (portal top/footer float)
 } as const;
+
+/**
+ * Firm-portal heights / clock / hit targets live in `./portal-chrome.ts`
+ * (`PORTAL_CHROME` · `portalChromeCssVars`). Do not hard-code portal bar px.
+ */
 
 /** Prefer these peer counts when grouping UI (odd). */
 export const COMPOSITION_ODD_GROUPS = [1, 3, 5, 7] as const;

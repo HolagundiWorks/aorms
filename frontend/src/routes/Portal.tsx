@@ -1,4 +1,7 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EventAvailableOutlined from "@mui/icons-material/EventAvailableOutlined";
+import FeedbackOutlined from "@mui/icons-material/FeedbackOutlined";
+import PublishedWithChangesOutlined from "@mui/icons-material/PublishedWithChangesOutlined";
 import {
   Alert,
   AlertTitle,
@@ -59,7 +62,7 @@ import { StatusDot, StatusTag } from "../components/StatusTag.js";
 import { SubmissionThread } from "../components/SubmissionThread.js";
 import { trpc } from "../lib/trpc.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
-import { Surface, RADIUS } from "@hcw/ui-kit";
+import { Surface, RADIUS, useScreenActions } from "@hcw/ui-kit";
 
 /** Pin dialog paper to Constitution 8px (kit NEU_POP uses numeric RADIUS → 64px via MUI). */
 const PORTAL_DIALOG_SLOT = {
@@ -218,6 +221,41 @@ export function Portal() {
     meta: { errorTitle: "Couldn't send the reply" },
     onSuccess: () => utils.portal.submissionThread.invalidate(),
   });
+
+  // ActionDock — create intents while a project is open; clear when a dialog owns the CTA.
+  const dockDialogOpen =
+    requestOpen || feedbackOpen || meetingOpen || !!decision || !!impactResponse || !!threadFor;
+  useScreenActions(
+    openId && !dockDialogOpen
+      ? [
+          {
+            id: "portal-change-request",
+            zone: "center" as const,
+            tone: "primary" as const,
+            label: "Change request",
+            icon: <PublishedWithChangesOutlined />,
+            onClick: () => setRequestOpen(true),
+          },
+          {
+            id: "portal-feedback",
+            zone: "center" as const,
+            tone: "default" as const,
+            label: "Feedback",
+            icon: <FeedbackOutlined />,
+            onClick: () => setFeedbackOpen(true),
+          },
+          {
+            id: "portal-meeting",
+            zone: "center" as const,
+            tone: "default" as const,
+            label: "Schedule meeting",
+            icon: <EventAvailableOutlined />,
+            onClick: () => setMeetingOpen(true),
+          },
+        ]
+      : [],
+    [openId, dockDialogOpen],
+  );
 
   // ── revision stats pie data ───────────────────────────────────────────────
   const revStats = revisionStatsQ.data;
@@ -681,14 +719,9 @@ export function Portal() {
                 </span>
                 <StatusDot color="cool-gray" label={d.project.status} />
               </Stack>
-              <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap" }}>
-                <Button size="small" variant="contained" onClick={() => setRequestOpen(true)}>Raise change request</Button>
-                <Button size="small" variant="outlined" onClick={() => setFeedbackOpen(true)}>Leave feedback</Button>
-                <Button size="small" variant="outlined" onClick={() => setMeetingOpen(true)}>Schedule a meeting</Button>
-              </Stack>
               <Alert severity="info">
                 <AlertTitle>Revision categories</AlertTitle>
-                Classify every change request and revision response as Minor (small tweak), Major (scope or fee impact), or Critical (stop-work / safety). Your architect uses the same categories in the CRIF decision ledger.
+                Classify every change request and revision response as Minor (small tweak), Major (scope or fee impact), or Critical (stop-work / safety). Your architect uses the same categories in the CRIF decision ledger. Use the action dock for change requests, feedback, and meeting requests.
               </Alert>
             </Stack>
 

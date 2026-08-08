@@ -693,6 +693,11 @@ $neu-input-radius: 0;
   --esti-dock-stack: 68px;
 }
 
+// CLIENT portal root — ActionDock clears floating taskbar (vars from portal-chrome.ts).
+.esti-firm-portal-root {
+  min-height: 100dvh;
+}
+
 // ActionDock + dialog chrome → @hcw/ui-kit/portal-chrome.scss (imported in main.tsx).
 
 // Studio Intelligence — rail + stage flush to the top (no ribbon header).
@@ -744,6 +749,35 @@ $neu-input-radius: 0;
   justify-content: space-between;
   gap: 12px;
   padding: 0 12px 12px;
+
+  // Firm portals — floating soft-neu bar. Sizes from `lib/portal-chrome.ts`
+  // via --esti-portal-* CSS vars set on `.esti-portal-neu` / `.esti-firm-portal-root`.
+  &.esti-portal-footer {
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    height: var(--esti-portal-footer-height, 60px);
+    min-height: var(--esti-portal-footer-height, 60px);
+    padding: 0 var(--esti-portal-footer-pad-x, 16px);
+    gap: 12px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    // Floating tray — soft raised neu (all sides), not docked edge shadow.
+    box-shadow:
+      8px 8px 16px rgba(20, 21, 23, 0.12),
+      -6px -6px 14px rgba(255, 255, 255, 0.9) !important;
+
+    .MuiIconButton-root {
+      width: var(--esti-portal-hit, 35px);
+      height: var(--esti-portal-hit, 35px);
+    }
+
+    .MuiButton-root {
+      min-height: var(--esti-portal-hit, 35px);
+    }
+  }
   background-color: var(--esti-neu-fill, #eceef2);
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;

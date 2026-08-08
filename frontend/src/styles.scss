@@ -3314,3 +3314,9 @@ html:has(.esti-studio-abstract-page) body { min-height: 100dvh; }
   width: 20px;
   height: 20px;
 }
+// AORMS mark centred on AnalogueClock dial (size from hub box).
+.esti-analogue-clock__mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

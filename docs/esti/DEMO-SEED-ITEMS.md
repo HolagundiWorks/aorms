@@ -8,7 +8,7 @@ podman exec esti-backend sh -c "cd /app/esti/backend && pnpm seed:demo"
 
 Force wipe + rebuild: `SEED_DEMO_FORCE=1 pnpm seed:demo`
 
-Implementation: `backend/src/scripts/seedDemo.ts` + `backend/src/scripts/demoStudioSeed.ts` + `backend/src/scripts/demoConsultancySeed.ts`
+Implementation: `backend/src/scripts/seedDemo.ts` + `backend/src/scripts/demoStudioSeed.ts` + `backend/src/scripts/demoConsultancySeed.ts` + `backend/src/scripts/demoClientPortalSeed.ts`
 
 ---
 
@@ -77,7 +77,7 @@ Firm profile: **Studio Sharma & Associates** (Indiranagar, Bengaluru) — shown 
 | 0 | Sharma Villa — Whitefield | ACTIVE | 3 (Construction docs) | **Showcase** — overdue invoice, stale approval, site visit today, MOM today |
 | 1 | Rao House — Mysuru | ACTIVE | 1 | Schematic design |
 | 2 | Verde Commercial Block | ACTIVE | 2 | **Showcase** — overdue invoice, REVISIONS approval |
-| 3 | Kapoor Residence — Sarjapur | ACTIVE | 0 | Inception |
+| 3 | Kapoor Residence — Sarjapur | ACTIVE | 2 | **Client portal showcase** — see Client portal section |
 | 4 | Patel Corp HQ — Pune | ACTIVE | 2 | Interstate GST · overdue invoice |
 | 5 | St. Francis School Expansion | ACTIVE | 1 | Institutional |
 | 6 | Reddy Beach Retreat — Goa | ON_HOLD | 1 | CRZ context |
@@ -191,6 +191,28 @@ Some tasks carry `interventionRequired: true` for ESTI Pulse demos.
 | `SEED_DEMO_FORCE=1` | Wipe demo users/projects + consultancy demo rows + full re-seed |
 
 Phase-linked billing is written on **fresh** seed only. To refresh billing signals on an old demo DB, use `SEED_DEMO_FORCE=1`.
+
+---
+
+## Client portal (`client@demo.aorms.in`)
+
+Sign in at `/login?tab=portals`. Project: **Kapoor Residence — Sarjapur** (`demoClientPortalSeed.ts`).
+
+| Portal tab / feature | Seeded rows (portal-visible statuses) |
+|----------------------|----------------------------------------|
+| Updates — activity | `esti_activity` · visibility **ALL** |
+| Updates — approvals | **SENT** + **REVISIONS** (respond demo) |
+| Updates — MoMs | **ISSUED** concept review minutes |
+| Updates — submissions | CHANGE_REQUEST + FEEDBACK samples |
+| Updates — revision stats | Drawing R2 with `rootId` + revision note |
+| Project — stages | Phase progress 2 (fresh seed) |
+| Project — tenders | **AWARDED** civil package |
+| Project — site reference | Feasibility snapshot |
+| Progress | **ISSUED** progress report · **ISSUED** inspection · **CONFIRMED** site visit |
+| Drawings | 2–3 **READY** drawings (+ revision chain) · issued transmittal (base seed) |
+| Documents | ISSUED/PAID invoices · CERTIFIED consultancy RA · AProc CERTIFIED RA + steel cert |
+
+Re-run / backfill calls `seedDemoClientPortalExtras` (idempotent). Force wipe: `SEED_DEMO_FORCE=1`.
 
 ---
 
