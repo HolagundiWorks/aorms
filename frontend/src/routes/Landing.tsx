@@ -45,8 +45,10 @@ import {
   ESTI,
   HUMAN_CENTRIC_WORKS,
 } from "../lib/product-nomenclature.js";
-import { applyLandingSeo, injectLandingJsonLd, LANDING_FAQ } from "../lib/landing-seo.js";
+import { applyLandingSeo, getLandingFaq, injectLandingJsonLd } from "../lib/landing-seo.js";
 import { useLandingVisitCounter } from "../lib/landing-visit.js";
+import { isMarketingOnly } from "../lib/marketing-gate.js";
+import { installersComingSoonForced } from "../lib/desktop-installers.js";
 import { MARKETING_CONTENT_GUTTER, MARKETING_RHYTHM, marketingContentColumnSx } from "../lib/marketing-layout.js";
 
 /**
@@ -274,18 +276,31 @@ export function Landing() {
                   {AORMS_PLATFORM.tagline}. Desktop apps for practice work — firm portals for
                   clients. Marketing and demos live here.
                 </Typography>
-                {/* Soft launch: downloads coming soon; no demo login */}
+                {/* Soft launch: no apex login CTAs. S8 (marketing gate off): portals/demo login. */}
                 <Stack direction="row" spacing={MARKETING_RHYTHM.sm} sx={{ flexWrap: "wrap", gap: MARKETING_RHYTHM.sm }}>
-                  <Button
-                    component={RouterLink}
-                    to="/downloads"
-                    variant="contained"
-                    color="primary"
-                    endIcon={<ArrowForward />}
-                    sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 48, px: 3 }}
-                  >
-                    Downloads — coming soon
-                  </Button>
+                  {isMarketingOnly() ? (
+                    <Button
+                      component={RouterLink}
+                      to="/downloads"
+                      variant="contained"
+                      color="primary"
+                      endIcon={<ArrowForward />}
+                      sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 48, px: 3 }}
+                    >
+                      Downloads — coming soon
+                    </Button>
+                  ) : (
+                    <Button
+                      component={RouterLink}
+                      to="/login?tab=portals"
+                      variant="contained"
+                      color="primary"
+                      endIcon={<ArrowForward />}
+                      sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 48, px: 3 }}
+                    >
+                      Firm portal demos
+                    </Button>
+                  )}
                   <Button
                     component="a"
                     href="#platform"
@@ -295,6 +310,17 @@ export function Landing() {
                   >
                     Suite map
                   </Button>
+                  {!isMarketingOnly() && (
+                    <Button
+                      component={RouterLink}
+                      to="/downloads"
+                      variant="outlined"
+                      color="inherit"
+                      sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
+                    >
+                      {installersComingSoonForced() ? "Downloads — coming soon" : "Downloads"}
+                    </Button>
+                  )}
                   <Button
                     component={RouterLink}
                     to="/blog"
@@ -756,7 +782,7 @@ export function Landing() {
             Questions practices ask first
           </Typography>
           <Box sx={{ maxWidth: 820 }}>
-            {LANDING_FAQ.map((item) => (
+            {getLandingFaq().map((item) => (
               <Accordion
                 key={item.question}
                 disableGutters
@@ -846,7 +872,11 @@ export function Landing() {
         </Box>
       </Container>
 
-        <MarketingLandingDock sections={SECTIONS} />
+        <MarketingLandingDock
+          sections={SECTIONS}
+          signInHref={isMarketingOnly() ? "/" : "/login?tab=portals"}
+          signInLabel={isMarketingOnly() ? "Home" : "Sign in"}
+        />
       </Box>
     </MarketingNeuFrame>
   );

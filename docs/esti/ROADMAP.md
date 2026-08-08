@@ -40,7 +40,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | **C1** | Connect WinUI shell (login · launcher · catalog stub) | AORMS-Connect | ✅ shell scaffold · deepen C2 |
 | **C2** | Session broker + project catalog for sibling apps | Connect · Bridge | ✅ `session.json` · `ConnectCatalog` · sibling import |
 | **C3** | Licence Manager surface in Connect | Connect | ✅ local status · admin.aorms.in link |
-| **S8** | Reopen apex auth / portal demos | esti | 🔲 prep ✅ · env flip 🔲 |
+| **S8** | Reopen apex auth / portal demos | esti | 🟡 code ready (gate-aware CTAs · `s8-reopen-demos.sh`) · VPS flip 🔲 |
 | **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🟡 unsigned MSIX ✅ · code sign 🔲 D6 |
 | **S10** | Firm portal depth | esti portals | ✅ collab tx+ack · client Documents+RA · contractor Drawings |
 
@@ -78,12 +78,17 @@ Desktop firm login target: **AORMS Connect** (not apex).
 
 ### S8 — Reopen apex auth (when demos are honest)
 
-Prep ✅ (honest portal tabs · installers decoupled). Env flip 🔲 when ready.
+| Slice | Status |
+| --- | --- |
+| Honest portal tabs · installers decoupled from auth gate | ✅ |
+| Landing/dock CTAs + FAQ follow marketing gate | ✅ |
+| `deploy/s8-reopen-demos.sh` (`CONFIRM=yes`) | ✅ |
+| VPS env flip (`VITE_MARKETING_ONLY=false`) | 🔲 operator |
 
 ### Then
 
-1. **D6** — Operator: trusted Authenticode → upload → `apply-installer-manifest.ps1 -ConfirmFlip` → `VITE_PORTAL_USE_RELEASE_INSTALLERS=true` + `VITE_INSTALLERS_COMING_SOON=false` + rebuild. Prefer Connect first.  
-2. **S8 flip** — `VITE_MARKETING_ONLY=false` when portal demos stay honest.  
+1. **S8 VPS flip** — `CONFIRM=yes bash deploy/s8-reopen-demos.sh` when ready to reopen `/login` demos.  
+2. **D6** — Trusted Authenticode → upload → `apply-installer-manifest.ps1 -ConfirmFlip` → release flag + rebuild. Prefer Connect first.  
 3. Portal tenants (D6 remainder) when signed installers are live.
 
 ## Deferred

@@ -34,9 +34,22 @@ PROFILE=landing DOMAIN=aorms.in ADMIN_EMAIL=ops@aorms.in \
   | sudo -E bash
 ```
 
-Reopen demos later (S8): set `VITE_MARKETING_ONLY=false` in `/opt/esti/.env`, then
-`bash deploy/update.sh`. Keep installers Coming soon until D6 (signed URL + sha256)
-even after the marketing gate is off — see [ROADMAP.md](ROADMAP.md) § S8.
+### S8 — Reopen apex auth / portal demos
+
+**When:** Firm portal tabs are honest (see [FIRM-PORTAL-SECTIONS.md](FIRM-PORTAL-SECTIONS.md)).  
+**Does not:** Flip signed Windows Download CTAs (that is **D6**).  
+**Staff ERP:** Still desktop via **AORMS Connect** — apex reopens portal/demo login only.
+
+```bash
+# On the VPS — requires explicit CONFIRM=yes
+CONFIRM=yes bash deploy/s8-reopen-demos.sh
+# Preview only:
+CONFIRM=yes bash deploy/s8-reopen-demos.sh --dry-run
+```
+
+Manual equivalent: set `VITE_MARKETING_ONLY=false` in `/opt/esti/.env`, then
+`bash deploy/update.sh`. Keep `VITE_INSTALLERS_COMING_SOON` default / true until D6
+(signed URL + sha256 + `VITE_PORTAL_USE_RELEASE_INSTALLERS`). See [ROADMAP.md](ROADMAP.md).
 
 ---
 

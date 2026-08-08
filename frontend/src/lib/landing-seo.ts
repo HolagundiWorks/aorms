@@ -11,6 +11,7 @@ import {
   ESTI,
   SHILPIDB,
 } from "./product-nomenclature.js";
+import { isMarketingOnly } from "./marketing-gate.js";
 
 export const LANDING_SEO = {
   title: `AORMS | ${AORMS_PLATFORM.expansion}`,
@@ -78,6 +79,19 @@ export const LANDING_FAQ = [
       "Read the blog posts “Why the AORMS suite matters”, “How the AORMS suite solves fragmented practice tools”, and “AORMS suite map” at aorms.in/blog.",
   },
 ] as const;
+
+/** FAQ rows for the SPA — sign-in answer follows the S8 marketing gate. */
+export function getLandingFaq(): ReadonlyArray<{ question: string; answer: string }> {
+  return LANDING_FAQ.map((item) => {
+    if (item.question !== "Can I sign in on aorms.in today?") return item;
+    if (isMarketingOnly()) return item;
+    return {
+      question: item.question,
+      answer:
+        "Firm portal demos and account sign-in are available on aorms.in/login (portals tab). Staff practice work runs on desktop via AORMS Connect — not the marketing apex.",
+    };
+  });
+}
 
 export function applyLandingSeo(): void {
   document.title = LANDING_SEO.title;
@@ -165,7 +179,7 @@ export function injectLandingJsonLd(): void {
       {
         "@type": "FAQPage",
         "@id": "https://aorms.in/#faq",
-        mainEntity: LANDING_FAQ.map((f) => ({
+        mainEntity: getLandingFaq().map((f) => ({
           "@type": "Question",
           name: f.question,
           acceptedAnswer: { "@type": "Answer", text: f.answer },

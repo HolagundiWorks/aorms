@@ -20,8 +20,9 @@ export function ComingSoonAuth() {
               Sign-in coming soon
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              {AORMS_PLATFORM.name} is live for the suite home and blog. Workspace login,
-              firm portals, and demo accounts will open here when the soft launch ends.
+              {AORMS_PLATFORM.name} is live for the suite home and blog. Firm-portal demos
+              and account sign-in reopen on S8. Staff practice apps sign in through AORMS
+              Connect on the desktop — not this marketing apex.
             </Typography>
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ pt: 1 }}>
               <Button component={RouterLink} to="/" variant="contained" color="primary">

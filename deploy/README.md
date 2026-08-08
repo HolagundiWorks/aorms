@@ -30,7 +30,7 @@ sudo bash deploy/install.sh
 ```bash
 sudo bash deploy/install-landing.sh
 # or: PROFILE=landing sudo -E bash deploy/bootstrap-vps.sh
-# Reopen demos later: VITE_MARKETING_ONLY=false in .env → bash deploy/update.sh
+# Reopen demos later (S8): CONFIRM=yes bash deploy/s8-reopen-demos.sh
 ```
 
 **Customer/self-hosted enterprise:** firm workspace only — no landing, no demo,
