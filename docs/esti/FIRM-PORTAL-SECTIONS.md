@@ -2,6 +2,7 @@
 
 **Status:** ACTIVE · **Updated:** 2026-08-08  
 **Chrome:** [`FirmPortalShell`](../../frontend/src/components/portal/FirmPortalShell.tsx) ·  
+[`FirmPortalFooter`](../../frontend/src/components/portal/FirmPortalFooter.tsx) (calc · sections · power sign-out) ·  
 [`FirmPortalStage`](../../frontend/src/components/portal/FirmPortalSection.tsx) ·  
 [`FirmPortalHubPanels`](../../frontend/src/components/portal/FirmPortalHubPanels.tsx)
 

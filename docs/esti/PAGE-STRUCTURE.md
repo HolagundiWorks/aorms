@@ -30,7 +30,7 @@ Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Composition: [COMPOSITION-PR
 | **Top ribbon** | `MarketingTopBar` — logo + expansion | `AppRibbon` — soft sticky neu bar + primary nav | `PortalNeuFrame` top bar — brand/nav or portal identity + sign-out |
 | **Stage** | Full width · content column **1200px** | `.esti-app-content2` full width under ribbon | Full width · **1200px** (`PortalNeuFrame`) |
 | **Bottom dock** | `MarketingLandingDock` — section spy + Sign in / Create / Downloads / Calculator | Kit `ActionDock` + `useScreenActions` | None (dock-less by design) |
-| **Footer** | Inline marketing footer in content | `AppFooterBar` — calc · launchers · tray | None |
+| **Footer** | Inline marketing footer in content | `AppFooterBar` — calc · launchers · tray | `FirmPortalFooter` — calc · section nav · power sign-out |
 | **Clock** | `MarketingClockPomodoro` bottom-right | Kit `AnalogueClock` bottom-right (single — no watermark) | Kit `AnalogueClock` bottom-right |
 | **Left rail** | **Retired** | **Retired** | **Retired** |
 

@@ -8,19 +8,24 @@ import {
 } from "../../lib/marketing-layout.js";
 
 /**
- * Shared no-rail portal chrome — soft top bar · full-width stage · analogue clock.
- * Same spatial model as marketing (`MarketingNeuFrame`) and staff apps.
+ * Shared no-rail portal chrome — soft top bar · full-width stage · optional
+ * taskbar footer · analogue clock. Same spatial model as staff apps.
  * Spacing: COMPOSITION_RHYTHM. Canon: docs/esti/COMPOSITION-PRINCIPLES.md
  */
 export function PortalNeuFrame({
   topBar,
+  footer,
   children,
   mainId = "esti-main",
 }: {
   topBar: ReactNode;
+  /** Soft neu taskbar (calc · nav · tray). When set, clock clears the footer. */
+  footer?: ReactNode;
   children: ReactNode;
   mainId?: string;
 }) {
+  const hasFooter = Boolean(footer);
+
   return (
     <Box
       className="esti-portal-neu"
@@ -29,6 +34,8 @@ export function PortalNeuFrame({
         backgroundColor: colors.background,
         display: "flex",
         flexDirection: "column",
+        // Match staff shell so FloatingCalculator / clock clear the taskbar.
+        "--esti-footer-height": hasFooter ? "56px" : "0px",
       }}
     >
       <a href={`#${mainId}`} className="esti-skip-link">
@@ -81,7 +88,9 @@ export function PortalNeuFrame({
           mx: "auto",
           px: { xs: COMPOSITION_RHYTHM.gutter.xs, md: COMPOSITION_RHYTHM.gutter.md },
           py: COMPOSITION_RHYTHM.portalStageY,
-          pb: COMPOSITION_RHYTHM.portalStagePb,
+          pb: hasFooter
+            ? { xs: 12, md: 14 }
+            : COMPOSITION_RHYTHM.portalStagePb,
           boxSizing: "border-box",
           display: "flex",
           flexDirection: "column",
@@ -91,12 +100,16 @@ export function PortalNeuFrame({
         {children}
       </Box>
 
+      {footer}
+
       <Box
         className="esti-portal-neu__clock"
         sx={{
           position: "fixed",
           right: { xs: 16, md: 24 },
-          bottom: { xs: 16, md: 24 },
+          bottom: hasFooter
+            ? "calc(var(--esti-footer-height, 56px) + 16px)"
+            : { xs: 16, md: 24 },
           zIndex: 40,
           pointerEvents: "none",
         }}
