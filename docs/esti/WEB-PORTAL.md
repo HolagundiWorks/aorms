@@ -26,10 +26,11 @@ See [ROADMAP.md](ROADMAP.md).
 Host: platform apex (`aorms.in`). Code: `frontend/src/routes/Downloads.tsx` ·
 resolver `frontend/src/lib/desktop-installers.ts`.
 
-### Offers (all default `web_fallback`)
+### Offers (all default `web_fallback` / Coming soon until D6)
 
 | App | Manifest |
 | --- | --- |
+| **AORMS Connect** (first) | `aorms-connect.json` |
 | AStudio | `astudio.json` |
 | AConsulting | `aconsulting.json` |
 | AQC Estimation | `aqc-estimation.json` |
@@ -90,13 +91,26 @@ VITE_ACONSULTING_INSTALLER_URL=https://cdn.example.com/AConsulting-Setup-1.0.0.e
 | `version` | yes | Semver / packaging version |
 | `status` | yes | Set to `"available"` (placeholder is `"web_fallback"`) |
 
-2. Set `VITE_PORTAL_USE_RELEASE_INSTALLERS=true` and rebuild.
+2. Set `VITE_PORTAL_USE_RELEASE_INSTALLERS=true` and
+   `VITE_INSTALLERS_COMING_SOON=false`, then rebuild.
 
-Without the flag, filled manifests stay inert (safe default).
+Without the release flag, filled manifests stay inert (safe default).
+Coming-soon force stays on until you explicitly opt out.
+
+### Helper scripts (operator machine)
+
+| Script | Role |
+| --- | --- |
+| `desktop/scripts/sign-winui.ps1` | Authenticode + handoff JSON (sha256) |
+| `desktop/scripts/publish-winui-release.ps1` | HTTPS upload (GitHub Release); optional `-FillManifests` when `chainTrusted` |
+| `desktop/scripts/apply-installer-manifest.ps1` | Manual fill for any suite app (`-ConfirmFlip` required) |
+
+**Never invent sha256.** ACO-dev signatures are not portal-ready.
 
 ## Placeholders in tree
 
 ```
+frontend/public/update-manifests/aorms-connect.json
 frontend/public/update-manifests/astudio.json
 frontend/public/update-manifests/aconsulting.json
 frontend/public/update-manifests/aqc-estimation.json

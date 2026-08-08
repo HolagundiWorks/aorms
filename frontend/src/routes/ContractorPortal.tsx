@@ -23,14 +23,17 @@ import { pushToast, Surface, RADIUS } from "@hcw/ui-kit";
 import { useState } from "react";
 import { DataState } from "../components/DataState.js";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
-import { FirmPortalProjectPanel } from "../components/portal/FirmPortalHubPanels.js";
+import {
+  FirmPortalDrawingsPanel,
+  FirmPortalProjectPanel,
+} from "../components/portal/FirmPortalHubPanels.js";
 import { StatusTag } from "../components/StatusTag.js";
 import { trpc } from "../lib/trpc.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
 
 /**
  * Contractor portal — invited tenders and lump-sum bidding.
- * Project tab: invitation-scoped summary (S10).
+ * Project + Drawings tabs: invitation-scoped (S10).
  */
 export function ContractorPortal() {
   const utils = trpc.useUtils();
@@ -85,13 +88,32 @@ export function ContractorPortal() {
 
   const rows = listQ.data ?? [];
   const detail = detailQ.data;
+  const pd = projectQ.data;
   const portalPanels = {
     project: (
       <FirmPortalProjectPanel
         loading={!!focusId && projectQ.isLoading}
-        project={projectQ.data?.project ?? null}
-        phases={projectQ.data?.phases ?? []}
+        project={pd?.project ?? null}
+        phases={pd?.phases ?? []}
         pickProjectHint="Open a tender invitation from Updates to see the project summary and stages."
+      />
+    ),
+    drawings: (
+      <FirmPortalDrawingsPanel
+        loading={!!focusId && projectQ.isLoading}
+        drawings={(pd?.drawings ?? []).map((dr) => ({
+          id: dr.id,
+          ref: dr.ref,
+          title: dr.title,
+          status: dr.status,
+        }))}
+        transmittals={(pd?.transmittals ?? []).map((t) => ({
+          id: t.id,
+          ref: t.ref,
+          purpose: t.purpose,
+          channel: t.channel,
+          dateIssued: t.dateIssued,
+        }))}
       />
     ),
   };

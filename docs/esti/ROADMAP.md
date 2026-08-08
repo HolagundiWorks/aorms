@@ -42,7 +42,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | **C3** | Licence Manager surface in Connect | Connect | ✅ local status · admin.aorms.in link |
 | **S8** | Reopen apex auth / portal demos | esti | 🔲 prep ✅ · env flip 🔲 |
 | **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🟡 unsigned MSIX ✅ · code sign 🔲 D6 |
-| **S10** | Firm portal depth | esti portals | 🟡 collab tx list+ack ✅ · client Documents+RA ✅ · contractor Drawings 🔲 |
+| **S10** | Firm portal depth | esti portals | ✅ collab tx+ack · client Documents+RA · contractor Drawings |
 
 ---
 
@@ -51,7 +51,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | Wave | Outcome | Status |
 | --- | --- | --- |
 | **D0–D5** | Bridge · siblings · WinUI shells · portal panels | ✅ |
-| **D6** | Signed installers · portal tenants | 🔲 (pairs with S8/S9/C1) |
+| **D6** | Signed installers · portal tenants | 🟡 tooling ✅ · blocked on SmartScreen-trusted cert + HTTPS |
 
 ---
 
@@ -82,9 +82,9 @@ Prep ✅ (honest portal tabs · installers decoupled). Env flip 🔲 when ready.
 
 ### Then
 
-1. **D6** — Code-signed MSIX URLs + sha256 + `VITE_PORTAL_USE_RELEASE_INSTALLERS`.  
-2. **S10** — remaining portal depth (contractor Drawings if product wants).  
-3. **S8 flip** when portal demos stay honest.
+1. **D6** — Operator: trusted Authenticode → upload → `apply-installer-manifest.ps1 -ConfirmFlip` → `VITE_PORTAL_USE_RELEASE_INSTALLERS=true` + `VITE_INSTALLERS_COMING_SOON=false` + rebuild. Prefer Connect first.  
+2. **S8 flip** — `VITE_MARKETING_ONLY=false` when portal demos stay honest.  
+3. Portal tenants (D6 remainder) when signed installers are live.
 
 ## Deferred
 
