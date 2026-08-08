@@ -68,10 +68,12 @@ PortalNeuFrame (no left SoftRail) — tokens: lib/portal-chrome.ts
 ├ soft top bar — 1200px column · 16px inset · min-height 56
 ├ stage — 1200px · hub panels / request forms / account tabs
 ├ floating FirmPortalFooter — 60px · same column as top · calc · sections · power
-├ ActionDock (CLIENT only) — Change request · Feedback · Schedule meeting
+├ ActionDock — CLIENT: change · feedback · meeting
+│            — CONTRACTOR (invitation focused): ticket · visit · drawing · meeting · RA
 └ AormsAnalogueClock 100px (AORMS mark in dial) — clears footer stack
 Account hubs: PortalCard (soft) for Overview / Companies / Profile / Security panels.
 All firm portals inherit heights/location via PortalNeuFrame + PORTAL_CHROME.
+Contractor kinds: packages/contracts/src/contractor-portal.ts · FIRM-PORTAL-SECTIONS.md.
 ```
 
 ## T7 — Marketing page (reference: `Landing.tsx` + `MarketingNeuFrame`)

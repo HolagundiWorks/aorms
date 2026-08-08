@@ -53,7 +53,7 @@ Set `DEMO_MASTER_PASSWORD` in `compose.yaml` / production env before shipping a 
 | Leads pipeline | `/leads` — 10 enquiries across statuses |
 | Client portal | `client@demo.aorms.in` — Kapoor Residence full walkthrough (approvals · drawings · progress · RA · MoM · activity) — `/login?tab=portals` |
 | Collaborator portal | `collab@demo.aorms.in` — engagements (e.g. structural on Sharma Villa) · Drawings + tx ack |
-| Contractor portal | `contractor@demo.aorms.in` — tender invitations · Project/Drawings |
+| Contractor portal | `contractor@demo.aorms.in` — Sharma Villa tenders · ActionDock tickets/visits/RA · Project/Drawings/Documents |
 
 Re-run `seed:demo` on an existing workspace to **backfill** studio glance data (team, leads, MOMs, visits — idempotent). Use `SEED_DEMO_FORCE=1` to wipe and rebuild billing links.
 

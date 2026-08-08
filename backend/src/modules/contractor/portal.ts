@@ -1,21 +1,56 @@
-import { TenderBidSubmit } from "@esti/contracts";
+import {
+  CONTRACTOR_PORTAL_SUBMISSION_KIND_LABEL,
+  ContractorPortalSubmitInput,
+  TenderBidSubmit,
+} from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import {
+  contractorSubmissions,
   firm,
   phases,
   projectOffices,
+  siteVisits,
   tenderBids,
   tenderInvitations,
   tenders,
 } from "../../db/schema.js";
 import { writeAudit } from "../../lib/audit.js";
-import { portalIssuedTransmittals, portalReadyDrawings } from "../../lib/sync/hubPortal.js";
+import {
+  portalIssuedTransmittals,
+  portalPublishedRunningBills,
+  portalReadyDrawings,
+} from "../../lib/sync/hubPortal.js";
 import { contractorProcedure, contractorWriteProcedure, router } from "../../trpc/trpc.js";
+import type { DB } from "../../db/index.js";
+
+async function invitationProject(
+  db: DB,
+  contractorId: string,
+  invitationId: string,
+): Promise<{ projectId: string; projectTitle: string; invitationId: string }> {
+  const [row] = await db
+    .select({
+      invitationId: tenderInvitations.id,
+      projectId: projectOffices.id,
+      projectTitle: projectOffices.title,
+    })
+    .from(tenderInvitations)
+    .innerJoin(tenders, eq(tenderInvitations.tenderId, tenders.id))
+    .innerJoin(projectOffices, eq(tenders.projectId, projectOffices.id))
+    .where(
+      and(
+        eq(tenderInvitations.id, invitationId),
+        eq(tenderInvitations.contractorId, contractorId),
+      ),
+    );
+  if (!row) throw new TRPCError({ code: "NOT_FOUND" });
+  return row;
+}
 
 /**
- * Contractor portal — invited tenders and sealed lump-sum bids.
+ * Contractor portal — invited tenders, sealed bids, and site coordination tickets.
  * Scoped strictly by `ctx.user.contractorId`.
  */
 export const contractorPortalRouter = router({
@@ -302,6 +337,105 @@ export const contractorPortalRouter = router({
         entityId: input.invitationId,
         action: "DECLINE",
         actorId: ctx.user.id,
+      });
+      return row!;
+    }),
+
+  /** Certified / sent RA bills for the invitation's project (Documents tab). */
+  myRunningBills: contractorProcedure
+    .input(z.object({ invitationId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const contractorId = ctx.user.contractorId!;
+      const { projectId } = await invitationProject(ctx.db, contractorId, input.invitationId);
+      return portalPublishedRunningBills(ctx.db, projectId);
+    }),
+
+  mySubmissions: contractorProcedure
+    .input(z.object({ invitationId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const contractorId = ctx.user.contractorId!;
+      const { projectId } = await invitationProject(ctx.db, contractorId, input.invitationId);
+      return ctx.db
+        .select({
+          id: contractorSubmissions.id,
+          kind: contractorSubmissions.kind,
+          subject: contractorSubmissions.subject,
+          body: contractorSubmissions.body,
+          status: contractorSubmissions.status,
+          responseNote: contractorSubmissions.responseNote,
+          createdAt: contractorSubmissions.createdAt,
+        })
+        .from(contractorSubmissions)
+        .where(
+          and(
+            eq(contractorSubmissions.projectId, projectId),
+            eq(contractorSubmissions.contractorId, contractorId),
+          ),
+        )
+        .orderBy(desc(contractorSubmissions.createdAt));
+    }),
+
+  /**
+   * Raise a coordination ticket (ticket · RFI · drawing · meeting · site visit ·
+   * joint measurement). Site-visit requests also create a PLANNED `esti_site_visit`.
+   */
+  submitRequest: contractorWriteProcedure
+    .input(ContractorPortalSubmitInput)
+    .mutation(async ({ ctx, input }) => {
+      const contractorId = ctx.user.contractorId!;
+      const { projectId, projectTitle } = await invitationProject(
+        ctx.db,
+        contractorId,
+        input.invitationId,
+      );
+
+      const kindLabel = CONTRACTOR_PORTAL_SUBMISSION_KIND_LABEL[input.kind];
+      const bodyParts = [
+        input.body?.trim() || null,
+        input.preferredDate ? `Preferred date: ${input.preferredDate}` : null,
+      ].filter(Boolean);
+
+      const [row] = await ctx.db
+        .insert(contractorSubmissions)
+        .values({
+          projectId,
+          contractorId,
+          kind: input.kind,
+          subject: input.subject.trim(),
+          body: bodyParts.length > 0 ? bodyParts.join("\n\n") : null,
+          status: "OPEN",
+          submittedById: ctx.user.id,
+        })
+        .returning();
+
+      if (
+        (input.kind === "SITE_VISIT_REQUEST" || input.kind === "JOINT_MEASUREMENT") &&
+        input.preferredDate
+      ) {
+        await ctx.db.insert(siteVisits).values({
+          projectId,
+          plannedDate: input.preferredDate,
+          contractorId,
+          status: "PLANNED",
+          notes:
+            input.kind === "JOINT_MEASUREMENT"
+              ? `Joint measurement request — ${input.subject.trim()}`
+              : `Site visit request — ${input.subject.trim()}`,
+          createdById: ctx.user.id,
+        });
+      }
+
+      await writeAudit(ctx.db, {
+        entity: "contractor_submission",
+        entityId: row!.id,
+        action: "CREATE",
+        actorId: ctx.user.id,
+        after: {
+          kind: input.kind,
+          projectId,
+          projectTitle,
+          invitationId: input.invitationId,
+        },
       });
       return row!;
     }),

@@ -450,15 +450,18 @@ function AppWorkspace() {
       </div>
     );
 
-  // Contractors (scoped to a contractor record) get the login-based contractor portal.
+  // Contractors — firm portal chrome + ActionDock (tickets · visits · RA).
   if (user.role === "CONTRACTOR" && user.contractorId)
     return (
-      <div>
-        <Routes>
-          <Route path="/" element={<ContractorPortal />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
+      <ActionDockProvider>
+        <div className="esti-firm-portal-root" style={portalChromeCssVars(true)}>
+          <Routes>
+            <Route path="/" element={<ContractorPortal />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <ActionDock />
+        </div>
+      </ActionDockProvider>
     );
 
   // Dedicated site supervisors get the mobile-first site portal only (no office workspace).

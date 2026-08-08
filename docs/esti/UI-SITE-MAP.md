@@ -53,7 +53,7 @@ form body scrolls inside the fixed-height card.
 | Staff (AConsulting) | `/consultancy/*` on consultancy host | same staff shell · `consultancyNav` | full | soft sticky | footer + dock | AnalogueClock | No |
 | Staff (AProc) | `/pmc` on proc host | same staff shell · `pmcNav` + `PmcHome` | full | soft sticky | footer home → `/pmc` | AnalogueClock | No |
 | Studio home | `/` on studio | `StudioAbstract` | full | soft AppRibbon | footer + dock | AnalogueClock | No |
-| External portals | client / consultant / contractor / site | `PortalNeuFrame` + `PORTAL_CHROME` | 1200px | soft top · floating 60px footer | CLIENT ActionDock | `AormsAnalogueClock` 100px | No |
+| External portals | client / consultant / contractor / site | `PortalNeuFrame` + `PORTAL_CHROME` | 1200px | soft top · floating 60px footer | CLIENT + CONTRACTOR ActionDock | `AormsAnalogueClock` 100px | No |
 | Account hubs | `/account`, `/company-account` | `PortalNeuFrame` + soft `PortalCard` | 1200px | soft sticky · logo → home · hub nav | none | `AormsAnalogueClock` | No |
 | Licensing admin | `/platform-admin` | `PortalShell` + horizontal sections | 1200px | portal top bar | none | `AormsAnalogueClock` | No |
 

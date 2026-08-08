@@ -77,6 +77,7 @@ import {
 } from "./demoStudioSeed.js";
 import { clearDemoConsultancyRows, seedDemoConsultancy } from "./demoConsultancySeed.js";
 import { seedDemoClientPortalExtras } from "./demoClientPortalSeed.js";
+import { seedDemoContractorPortalExtras } from "./demoContractorPortalSeed.js";
 
 const DEMO_PASSWORD = process.env.SEED_DEMO_PASSWORD ?? "demo1234";
 
@@ -158,6 +159,7 @@ async function backfillStudioDemo(principalId: string, pwHash: string): Promise<
   if (projectIds[0]) await seedDemoTakeoff(db, projectIds[0]);
   await seedDemoConsultancy(db, principalId);
   await seedDemoClientPortalExtras(db, principalId);
+  await seedDemoContractorPortalExtras(db, principalId);
 }
 
 /**
@@ -848,6 +850,7 @@ async function main() {
   }
 
   await seedDemoClientPortalExtras(db, principal.id);
+  await seedDemoContractorPortalExtras(db, principal.id);
 
   console.log("✓ seeded demo workspace (Studio Intelligence tuned)");
   console.log(`    principal: ${principalEmail} / ${DEMO_PASSWORD}`);
@@ -858,6 +861,7 @@ async function main() {
   console.log(`    ${projectDefs.length} projects · ${clientRows.length} clients · ${DEMO_LEADS.length} leads`);
   console.log(`    delivery: OPEN tender + 2 sealed bids · RA bill 01 (certified) · concept moodboard`);
   console.log(`    client portal: Kapoor Residence — approvals · drawings · progress · RA · MoM · activity`);
+  console.log(`    contractor portal: Sharma Villa — tickets · visits · drawings · RA · joint measure`);
   console.log(`    consultancy: EQ-DEMO-001 → C-DEMO-001 (BILLABLE fee stage)`);
 }
 

@@ -29,7 +29,7 @@ Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Composition: [COMPOSITION-PR
 | --- | --- | --- | --- |
 | **Top ribbon** | `MarketingTopBar` — logo + expansion | `AppRibbon` — soft sticky neu bar + primary nav | `PortalNeuFrame` soft top — identity (1200px column · 16px inset) |
 | **Stage** | Full width · content column **1200px** | `.esti-app-content2` full width under ribbon | Full width · **1200px** (`PORTAL_CHROME.contentMaxPx`) |
-| **Bottom dock** | `MarketingLandingDock` — section spy + Sign in / Create / Downloads / Calculator | Kit `ActionDock` + `useScreenActions` | Client: `ActionDock` (Change request · Feedback · Schedule meeting) while a project is open; provider wraps CLIENT routes in `App.tsx` |
+| **Bottom dock** | `MarketingLandingDock` — section spy + Sign in / Create / Downloads / Calculator | Kit `ActionDock` + `useScreenActions` | Client + Contractor: `ActionDock` (client: change/feedback/meeting; contractor: ticket/visit/drawing/meeting/RA) while focused; provider wraps routes in `App.tsx` |
 | **Footer** | Inline marketing footer in content | `AppFooterBar` — calc · launchers · tray | **Floating** `FirmPortalFooter` — same width as top bar · **60px** · calc · section nav · power |
 | **Clock** | `MarketingClockPomodoro` (`AormsAnalogueClock` **100px**) | `AormsAnalogueClock` bottom-right (AORMS mark in dial) | Same ambient clock · clears floating footer |
 | **Left rail** | **Retired** | **Retired** | **Retired** |
@@ -138,7 +138,8 @@ Unauthenticated `/access`, `/company-account`, and `/platform-admin` **redirect*
 | `FirmPortalShell` / `FirmPortalFooter` | Identity top · floating taskbar (calc · sections · power) |
 | `ExternalPortalShell` | Client / consultant / contractor / site — section chrome + hub panels |
 | `PortalShell` | Account / company / licensing hub — horizontal nav in top bar |
-| Client ActionDock | `App.tsx` CLIENT wrap — Change request · Feedback · Schedule meeting (`Portal.tsx` `useScreenActions`) |
+| Client ActionDock | `App.tsx` CLIENT wrap — Change request · Feedback · Schedule meeting (`Portal.tsx`) |
+| Contractor ActionDock | `App.tsx` CONTRACTOR wrap — ticket · site visit · drawing · meeting · RA (`ContractorPortal.tsx`) |
 
 ---
 

@@ -52,7 +52,7 @@ License control plane stays on **admin.aorms.in**.
 | Data source | Hub published `esti_sync_record` + meta only — [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) |
 | IA | Home (updates) · Project · Progress · Drawings · Documents / numbers |
 | Writes | Thin only — approval respond, bid, visit confirm |
-| Chrome | Soft neu firm shell — floating `FirmPortalFooter` (60px · `PORTAL_CHROME`) · CLIENT ActionDock for create intents · no staff ribbon |
+| Chrome | Soft neu firm shell — floating `FirmPortalFooter` (60px · `PORTAL_CHROME`) · CLIENT + CONTRACTOR ActionDock · no staff ribbon |
 
 ---
 

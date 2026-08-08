@@ -54,6 +54,7 @@ export * from "./commercial.js";
 export * from "./portal.js";
 export * from "./consultant-portal.js";
 export * from "./contractor.js";
+export * from "./contractor-portal.js";
 export * from "./vendor.js";
 export * from "./nbc-compliance.js";
 export * from "./zonal-compliance/index.js";

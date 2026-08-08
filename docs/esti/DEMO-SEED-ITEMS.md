@@ -8,7 +8,7 @@ podman exec esti-backend sh -c "cd /app/esti/backend && pnpm seed:demo"
 
 Force wipe + rebuild: `SEED_DEMO_FORCE=1 pnpm seed:demo`
 
-Implementation: `backend/src/scripts/seedDemo.ts` + `backend/src/scripts/demoStudioSeed.ts` + `backend/src/scripts/demoConsultancySeed.ts` + `backend/src/scripts/demoClientPortalSeed.ts`
+Implementation: `backend/src/scripts/seedDemo.ts` + `backend/src/scripts/demoStudioSeed.ts` + `backend/src/scripts/demoConsultancySeed.ts` + `backend/src/scripts/demoClientPortalSeed.ts` + `backend/src/scripts/demoContractorPortalSeed.ts`
 
 ---
 
@@ -225,6 +225,21 @@ Re-run / backfill calls `seedDemoClientPortalExtras` (idempotent). Force wipe: `
 | Collaborator portal | `collab@demo.aorms.in` / demo password → `/login?tab=portals` (first consultant) |
 
 Routes: Project → Tenders · Office → Tenders · contractor portal home.
+
+## Contractor portal (`contractor@demo.aorms.in`)
+
+Sign in at `/login?tab=portals`. Focus: **Sharma Villa** invitation (Vinayaka Civil).
+Extras: `demoContractorPortalSeed.ts`.
+
+| Feature | Seeded |
+|---------|--------|
+| Tender + sealed bid | OPEN civil package · invitation |
+| READY drawings | Foundation plan + column schedule |
+| PLANNED site visit | Joint check — plinth beam |
+| CERTIFIED RA | RA Bill 01 (base seed) — Documents / Running bills dock |
+| Tickets | TICKET · RFI · DRAWING_REQUEST · MEETING_REQUEST · SITE_VISIT_REQUEST · JOINT_MEASUREMENT |
+
+ActionDock (select invitation first): Raise ticket · Site visit · Drawing · Meeting · Running bills.
 
 ---
 
