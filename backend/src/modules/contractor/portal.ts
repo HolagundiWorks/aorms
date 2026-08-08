@@ -1,8 +1,9 @@
 import { TenderBidSubmit } from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import {
+  phases,
   projectOffices,
   tenderBids,
   tenderInvitations,
@@ -115,6 +116,71 @@ export const contractorPortalRouter = router({
         projectTitle: row.projectTitle,
         bid: bid ?? null,
         canBid: row.tenderStatus === "OPEN" && invitationStatus !== "DECLINED",
+      };
+    }),
+
+  /**
+   * Project summary + stages for an invitation the contractor holds.
+   * Scoped by invitation → tender → project (S10 firm portal depth).
+   */
+  projectDetail: contractorProcedure
+    .input(z.object({ invitationId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const contractorId = ctx.user.contractorId!;
+      const [row] = await ctx.db
+        .select({
+          projectId: projectOffices.id,
+          ref: projectOffices.ref,
+          title: projectOffices.title,
+          status: projectOffices.status,
+          projectType: projectOffices.projectType,
+          jurisdiction: projectOffices.jurisdiction,
+          currentPhaseId: projectOffices.currentPhaseId,
+        })
+        .from(tenderInvitations)
+        .innerJoin(tenders, eq(tenderInvitations.tenderId, tenders.id))
+        .innerJoin(projectOffices, eq(tenders.projectId, projectOffices.id))
+        .where(
+          and(
+            eq(tenderInvitations.id, input.invitationId),
+            eq(tenderInvitations.contractorId, contractorId),
+          ),
+        );
+      if (!row) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const phaseRows = await ctx.db
+        .select({
+          id: phases.id,
+          code: phases.code,
+          label: phases.label,
+          billingPct: phases.billingPct,
+          sortOrder: phases.sortOrder,
+        })
+        .from(phases)
+        .where(eq(phases.projectId, row.projectId))
+        .orderBy(asc(phases.sortOrder));
+      const currentSortOrder =
+        phaseRows.find((p) => p.id === row.currentPhaseId)?.sortOrder ?? -1;
+
+      return {
+        project: {
+          ref: row.ref,
+          title: row.title,
+          status: row.status,
+          projectType: row.projectType,
+          jurisdiction: row.jurisdiction,
+        },
+        phases: phaseRows.map((ph) => ({
+          code: ph.code,
+          label: ph.label,
+          billingPct: ph.billingPct,
+          status:
+            ph.sortOrder < currentSortOrder
+              ? "Complete"
+              : ph.id === row.currentPhaseId
+                ? "Active"
+                : "Pending",
+        })),
       };
     }),
 

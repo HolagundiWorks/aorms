@@ -41,8 +41,9 @@
 | Check | Done when | Status |
 | --- | --- | --- |
 | Distinct package identity | Estimation · BBS · PM each have `ApplicationId` | ✅ `in.aorms.aqc.{estimation,bbs,pm}` |
-| Engine pin | Submodule/tag → `HolagundiWorks/AQC` `bbs_engine` (no fork) | 🔲 |
-| MSIX / WinUI shell | Real installer project per repo | 🔲 |
+| Engine pin | Submodule → `HolagundiWorks/AQC` (Bridge; no fork) | ✅ |
+| Unpackaged WinUI shell | Activate / Flush hub host per repo | ✅ |
+| MSIX Package.appxmanifest | Per-app identity (unsigned until D6) | 🔲 |
 | Manifest stubs | Matching `update-manifests/aqc-*.json` in aorms hub | ✅ prep |
 | Honesty | No public Download CTA until D6 signed URL + sha256 | ✅ |
 

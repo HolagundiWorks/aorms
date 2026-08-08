@@ -14,9 +14,13 @@
 | **Documents** | `invoice` · `approval` (+ RA later) | Client only |
 
 **Honesty (S8 prep):** chrome tabs are **hidden** when `panels` omits a section —
-no hub-placeholder Alert stubs. Contractor / site = Updates only until S10 depth.
+no hub-placeholder Alert stubs.
 
 Thin writes (approve / bid / visit) stay on the **Updates** tab body, not new chrome.
 
-`Portal.tsx` / `CollaboratorPortal.tsx` pass `panels` into `ExternalPortalShell`.
-Contractor / site omit `panels` → Updates-only chrome.
+| Portal | Wired panels |
+| --- | --- |
+| Client | Project · Progress · Drawings · Documents |
+| Collaborator | Project · Drawings (Progress/Documents later) |
+| Contractor | Project (invitation-scoped; S10) |
+| Site | Updates only until S10 |

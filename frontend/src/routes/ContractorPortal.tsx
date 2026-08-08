@@ -23,12 +23,14 @@ import { pushToast, Surface, RADIUS } from "@hcw/ui-kit";
 import { useState } from "react";
 import { DataState } from "../components/DataState.js";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
+import { FirmPortalProjectPanel } from "../components/portal/FirmPortalHubPanels.js";
 import { StatusTag } from "../components/StatusTag.js";
 import { trpc } from "../lib/trpc.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
 
 /**
  * Contractor portal — invited tenders and lump-sum bidding.
+ * Project tab: invitation-scoped summary (S10).
  */
 export function ContractorPortal() {
   const utils = trpc.useUtils();
@@ -38,7 +40,10 @@ export function ContractorPortal() {
   });
   const brandingQ = trpc.contractorPortal.branding.useQuery();
   const listQ = trpc.contractorPortal.myTenders.useQuery();
+  /** Invitation open in bid dialog. */
   const [openId, setOpenId] = useState<string | null>(null);
+  /** Invitation selected for Project tab (survives dialog close). */
+  const [focusId, setFocusId] = useState<string | null>(null);
   const [amountRupees, setAmountRupees] = useState("");
   const [weeks, setWeeks] = useState("");
   const [notes, setNotes] = useState("");
@@ -47,6 +52,18 @@ export function ContractorPortal() {
     { invitationId: openId! },
     { enabled: !!openId },
   );
+  const projectQ = trpc.contractorPortal.projectDetail.useQuery(
+    { invitationId: focusId! },
+    { enabled: !!focusId },
+  );
+
+  function selectInvitation(invitationId: string) {
+    setOpenId(invitationId);
+    setFocusId(invitationId);
+    setAmountRupees("");
+    setWeeks("");
+    setNotes("");
+  }
 
   const submit = trpc.contractorPortal.submitBid.useMutation({
     meta: { errorTitle: "Couldn't submit the bid" },
@@ -68,6 +85,16 @@ export function ContractorPortal() {
 
   const rows = listQ.data ?? [];
   const detail = detailQ.data;
+  const portalPanels = {
+    project: (
+      <FirmPortalProjectPanel
+        loading={!!focusId && projectQ.isLoading}
+        project={projectQ.data?.project ?? null}
+        phases={projectQ.data?.phases ?? []}
+        pickProjectHint="Open a tender invitation from Updates to see the project summary and stages."
+      />
+    ),
+  };
 
   return (
     <ExternalPortalShell
@@ -75,6 +102,7 @@ export function ContractorPortal() {
       portalLabel={AORMS_PORTALS.contractor.label}
       onSignOut={() => logout.mutate()}
       signingOut={logout.isPending}
+      panels={portalPanels}
     >
       <Stack spacing={2}>
         <Box>
@@ -106,18 +134,13 @@ export function ContractorPortal() {
                   p: 1.5,
                   cursor: "pointer",
                 }}
-                onClick={() => {
-                  setOpenId(r.invitationId);
-                  setAmountRupees("");
-                  setWeeks("");
-                  setNotes("");
-                }}
+                onClick={() => selectInvitation(r.invitationId)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setOpenId(r.invitationId);
+                    selectInvitation(r.invitationId);
                   }
                 }}
               >

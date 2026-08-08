@@ -35,9 +35,9 @@ Gate: `VITE_MARKETING_ONLY` (default on for public builds) · `frontend/src/lib/
 | S5 | Online ops DB manager | esti | ✅ `/ops-db` |
 | S6 | Soft-launch marketing | esti | ✅ Landing · blog · SEO · marketing-only gate · VPS bootstrap |
 | S7 | Soft-launch ops + agent law | esti | ✅ [PRODUCTION-OPS](PRODUCTION-OPS.md) § Soft launch · CLAUDE/AGENTS · this roadmap |
-| **S8** | Reopen apex auth / portal demos | esti | 🔲 `VITE_MARKETING_ONLY=false` + honest portal tabs |
-| **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🔲 Estimation · BBS · PM identities · pin `bbs_engine` |
-| **S10** | Firm portal depth | esti portals | 🔲 Contractor/collab real panels (or hide empties) |
+| **S8** | Reopen apex auth / portal demos | esti | 🔲 prep ✅ · env flip 🔲 |
+| **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🟡 WinUI shells + AQC pin ✅ · MSIX/sign 🔲 |
+| **S10** | Firm portal depth | esti portals | 🟡 contractor Project ✅ · site/collab depth 🔲 |
 
 ---
 
@@ -80,11 +80,29 @@ Do **not** flip until portal tabs show real or empty-honest UI (no broken demos)
 4. Keep `/downloads` Coming soon **until D6** — default `VITE_INSTALLERS_COMING_SOON` (gate off ≠ installers live).
 5. Mark this row ✅ in the Suite waves table.
 
+### S9 progress (2026-08-08)
+
+| Slice | Status |
+| --- | --- |
+| Distinct `ApplicationId` | ✅ `in.aorms.aqc.{estimation,bbs,pm}` |
+| `vendor/AQC` submodule (not gitignored) | ✅ |
+| Unpackaged WinUI + Activate/Flush bridge host | ✅ builds Release\|x64 |
+| Domain UI · Package.appxmanifest · code sign | 🔲 (D6) |
+
+### S10 progress
+
+| Slice | Status |
+| --- | --- |
+| Hide unused chrome tabs | ✅ (S8 prep) |
+| Contractor `projectDetail` + Project panel | ✅ |
+| Collab progress/docs · site panels | 🔲 |
+
 ### Then
 
-1. **S9** — Real WinUI/MSIX shells in AQC-* product repos (pin `bbs_engine` from AQC; no divergent engines). Package ids seeded: `in.aorms.aqc.{estimation,bbs,pm}`.  
-2. **D6** — Code-signed URLs + sha256 into `update-manifests/` + `VITE_PORTAL_USE_RELEASE_INSTALLERS`.  
-3. **S10** — Contractor/collab portal depth (progress/docs APIs) beyond hide-empties.
+1. **S8 flip** when ready — `VITE_MARKETING_ONLY=false` on VPS.  
+2. **S9** — MSIX manifests per app (still unsigned until D6).  
+3. **D6** — Code-signed URLs + sha256 + `VITE_PORTAL_USE_RELEASE_INSTALLERS`.  
+4. **S10** — Site portal panels · collab issued-progress.
 
 ## Deferred
 
