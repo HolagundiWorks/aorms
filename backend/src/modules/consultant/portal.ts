@@ -2,7 +2,15 @@ import { ConsultantSubmitInput } from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, ne } from "drizzle-orm";
 import { z } from "zod";
-import { activities, consultantSubmissions, drawings, engagements, phases, projectOffices } from "../../db/schema.js";
+import {
+  activities,
+  consultantSubmissions,
+  drawings,
+  engagements,
+  phases,
+  progressReports,
+  projectOffices,
+} from "../../db/schema.js";
 import type { DB } from "../../db/index.js";
 import { writeActivity } from "../../lib/activity.js";
 import { getFirm } from "../../lib/firm.js";
@@ -103,6 +111,30 @@ export const collaboratorRouter = router({
         })),
         drawings: drawingRows,
       };
+    }),
+
+  /** Issued progress reports for an engaged project (S10 Progress tab). */
+  issuedProgressReports: collaboratorProcedure
+    .input(z.object({ projectId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      await assertEngaged(ctx, input.projectId);
+      return ctx.db
+        .select({
+          id: progressReports.id,
+          periodStart: progressReports.periodStart,
+          periodEnd: progressReports.periodEnd,
+          physicalProgressPct: progressReports.physicalProgressPct,
+          openSnagCount: progressReports.openSnagCount,
+          status: progressReports.status,
+        })
+        .from(progressReports)
+        .where(
+          and(
+            eq(progressReports.projectId, input.projectId),
+            eq(progressReports.status, "ISSUED"),
+          ),
+        )
+        .orderBy(desc(progressReports.periodEnd));
     }),
 
   /** This consultant's own submissions for a project (read-back of their writes). */

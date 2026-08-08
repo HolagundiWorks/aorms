@@ -35,6 +35,7 @@ import { DataState } from "../components/DataState.js";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
 import {
   FirmPortalDrawingsPanel,
+  FirmPortalProgressPanel,
   FirmPortalProjectPanel,
 } from "../components/portal/FirmPortalHubPanels.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
@@ -70,6 +71,10 @@ export function CollaboratorPortal() {
     { enabled: !!openId },
   );
   const assignedQ = trpc.collab.assignedTasks.useQuery(
+    { projectId: openId ?? "" },
+    { enabled: !!openId },
+  );
+  const progressQ = trpc.collab.issuedProgressReports.useQuery(
     { projectId: openId ?? "" },
     { enabled: !!openId },
   );
@@ -251,7 +256,13 @@ export function CollaboratorPortal() {
         pickProjectHint="Open an engagement from Updates to see summary and stages."
       />
     ),
-    // Progress omitted until collab issued-progress API exists (S10) — hide empty tab.
+    progress: (
+      <FirmPortalProgressPanel
+        loading={!!openId && (detailQ.isLoading || progressQ.isLoading)}
+        reports={progressQ.data ?? []}
+        phases={d?.phases}
+      />
+    ),
     drawings: (
       <FirmPortalDrawingsPanel
         loading={!!openId && detailQ.isLoading}

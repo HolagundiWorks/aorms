@@ -36,8 +36,8 @@ Gate: `VITE_MARKETING_ONLY` (default on for public builds) · `frontend/src/lib/
 | S6 | Soft-launch marketing | esti | ✅ Landing · blog · SEO · marketing-only gate · VPS bootstrap |
 | S7 | Soft-launch ops + agent law | esti | ✅ [PRODUCTION-OPS](PRODUCTION-OPS.md) § Soft launch · CLAUDE/AGENTS · this roadmap |
 | **S8** | Reopen apex auth / portal demos | esti | 🔲 prep ✅ · env flip 🔲 |
-| **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🟡 WinUI shells + AQC pin ✅ · MSIX/sign 🔲 |
-| **S10** | Firm portal depth | esti portals | 🟡 contractor Project ✅ · site/collab depth 🔲 |
+| **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🟡 unsigned MSIX ✅ · code sign 🔲 D6 |
+| **S10** | Firm portal depth | esti portals | 🟡 contractor/site/collab Project+Progress ✅ · docs tabs 🔲 |
 
 ---
 
@@ -86,8 +86,9 @@ Do **not** flip until portal tabs show real or empty-honest UI (no broken demos)
 | --- | --- |
 | Distinct `ApplicationId` | ✅ `in.aorms.aqc.{estimation,bbs,pm}` |
 | `vendor/AQC` submodule (not gitignored) | ✅ |
-| Unpackaged WinUI + Activate/Flush bridge host | ✅ builds Release\|x64 |
-| Domain UI · Package.appxmanifest · code sign | 🔲 (D6) |
+| Unpackaged WinUI + Activate/Flush bridge host | ✅ |
+| `Package.appxmanifest` + `build-msix.cmd` (unsigned) | ✅ |
+| Domain UI · code-signed Store/sideload | 🔲 D6 |
 
 ### S10 progress
 
@@ -95,14 +96,15 @@ Do **not** flip until portal tabs show real or empty-honest UI (no broken demos)
 | --- | --- |
 | Hide unused chrome tabs | ✅ (S8 prep) |
 | Contractor `projectDetail` + Project panel | ✅ |
-| Collab progress/docs · site panels | 🔲 |
+| Site `sitePortal` Project + Progress | ✅ |
+| Collab `issuedProgressReports` + Progress panel | ✅ |
+| Documents tabs (invoices/approvals where applicable) | 🔲 |
 
 ### Then
 
 1. **S8 flip** when ready — `VITE_MARKETING_ONLY=false` on VPS.  
-2. **S9** — MSIX manifests per app (still unsigned until D6).  
-3. **D6** — Code-signed URLs + sha256 + `VITE_PORTAL_USE_RELEASE_INSTALLERS`.  
-4. **S10** — Site portal panels · collab issued-progress.
+2. **D6** — Code-signed MSIX URLs + sha256 + `VITE_PORTAL_USE_RELEASE_INSTALLERS`.  
+3. **S10** — Documents panels · collab transmittals.
 
 ## Deferred
 

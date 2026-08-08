@@ -16,6 +16,10 @@ import {
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
+import {
+  FirmPortalProgressPanel,
+  FirmPortalProjectPanel,
+} from "../components/portal/FirmPortalHubPanels.js";
 import { ProjectSiteReference } from "../components/ProjectSiteReference.js";
 import { StatusDot } from "../components/StatusTag.js";
 import { trpc } from "../lib/trpc.js";
@@ -74,11 +78,41 @@ export function SitePortal() {
   });
   const resetForm = () => setForm({ dateVisit: "", weather: "", attendees: "", progress: "", observations: "", instructions: "" });
 
+  const projectDetailQ = trpc.sitePortal.projectDetail.useQuery(
+    { projectId: projectId! },
+    { enabled: !!projectId },
+  );
+  const progressQ = trpc.sitePortal.issuedProgressReports.useQuery(
+    { projectId: projectId! },
+    { enabled: !!projectId },
+  );
+
+  const portalPanels = projectId
+    ? {
+        project: (
+          <FirmPortalProjectPanel
+            loading={projectDetailQ.isLoading}
+            project={projectDetailQ.data?.project ?? null}
+            phases={projectDetailQ.data?.phases ?? []}
+            pickProjectHint="Pick a project from Updates to see summary and stages."
+          />
+        ),
+        progress: (
+          <FirmPortalProgressPanel
+            loading={projectDetailQ.isLoading || progressQ.isLoading}
+            reports={progressQ.data ?? []}
+            phases={projectDetailQ.data?.phases}
+          />
+        ),
+      }
+    : undefined;
+
   const shellProps = {
     companyName: user?.fullName ?? "Site supervisor",
     portalLabel: AORMS_PORTALS.site.label,
     onSignOut: () => logout.mutate(),
     signingOut: logout.isPending,
+    panels: portalPanels,
   };
 
   if (!projectId) {
