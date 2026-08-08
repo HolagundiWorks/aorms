@@ -1,9 +1,12 @@
 import { Box, Button, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import { RADIUS } from "@hcw/ui-kit";
 import type { ReactNode } from "react";
 import { DataState } from "../DataState.js";
 import { StatusDot } from "../StatusTag.js";
 import { formatINR } from "@esti/contracts";
+
+const R8 = `${RADIUS}px`;
 
 type PhaseRow = { code: string; label: string; billingPct: number; status: string };
 type ProgressRow = {
@@ -265,7 +268,7 @@ export function FirmPortalProgressPanel({
           </Typography>
           <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
             {phases.map((ph) => (
-              <Box key={ph.code} sx={{ py: 0.5, px: 1, border: 1, borderColor: "divider", borderRadius: "8px" }}>
+              <Box key={ph.code} sx={{ py: 0.5, px: 1, border: 1, borderColor: "divider", borderRadius: R8 }}>
                 <Typography variant="caption" sx={{ fontWeight: 600, display: "block" }}>
                   {ph.label}
                 </Typography>

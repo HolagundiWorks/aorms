@@ -50,7 +50,9 @@ export function PortalNeuFrame({
         <Surface
           layer="soft"
           component="header"
-          className="esti-portal-neu__topbar"
+          // Keep `hcw-surface` — kit Surface puts className last; without it,
+          // numeric RADIUS (8) × theme.shape.borderRadius (8) → 64px corners.
+          className="hcw-surface esti-portal-neu__topbar"
           sx={{
             ...marketingContentColumnSx,
             px: COMPOSITION_RHYTHM.headerPad,

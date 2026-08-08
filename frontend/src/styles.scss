@@ -160,6 +160,38 @@ body,
   border-radius: 8px !important;
 }
 
+/* Firm portals — kit theme passes numeric RADIUS into MUI styleOverrides;
+ * emotion multiplies by shape.borderRadius (8×8=64). Pin Constitution 8px.
+ * Dialogs render in a portal (outside .esti-portal-neu) — mark with
+ * `esti-portal-dialog` on Paper. */
+.esti-portal-neu {
+  .MuiButton-root {
+    border-radius: 8px !important;
+  }
+
+  .MuiOutlinedInput-root,
+  .MuiFilledInput-root,
+  .MuiInputBase-root {
+    border-radius: 8px !important;
+  }
+
+  .MuiTab-root {
+    border-radius: 8px !important;
+  }
+
+  .MuiCardActionArea-root {
+    border-radius: 8px;
+  }
+}
+
+.esti-portal-neu__topbar {
+  border-radius: 8px !important;
+}
+
+.MuiDialog-paper.esti-portal-dialog {
+  border-radius: 8px !important;
+}
+
 // Horizontal tile headers (title + tag/arrow) — layout only; spacing-05 (16px).
 .esti-row {
   display: flex;

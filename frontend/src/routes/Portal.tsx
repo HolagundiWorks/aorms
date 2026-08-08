@@ -61,6 +61,11 @@ import { trpc } from "../lib/trpc.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
 import { Surface, RADIUS } from "@hcw/ui-kit";
 
+/** Pin dialog paper to Constitution 8px (kit NEU_POP uses numeric RADIUS → 64px via MUI). */
+const PORTAL_DIALOG_SLOT = {
+  paper: { className: "esti-portal-dialog", sx: { borderRadius: `${RADIUS}px` } },
+} as const;
+
 const INV_TAG: Record<string, "blue" | "green"> = {
   ISSUED: "blue",
   PAID: "green",
@@ -589,8 +594,15 @@ export function Portal() {
             <Grid container spacing={2}>
               {(projectsQ.data ?? []).map((p) => (
                 <Grid key={p.id} size={{ xs: 12, md: 6, lg: 3 }}>
-                  <Surface layer="soft" sx={{ borderRadius: `${RADIUS}px`, height: 1, overflow: "hidden" }}>
-                    <CardActionArea onClick={() => navigate(`/projects/${p.id}`)} sx={{ p: 2, height: 1 }}>
+                  <Surface
+                    layer="soft"
+                    className="hcw-surface"
+                    sx={{ borderRadius: `${RADIUS}px`, height: 1, overflow: "hidden" }}
+                  >
+                    <CardActionArea
+                      onClick={() => navigate(`/projects/${p.id}`)}
+                      sx={{ p: 2, height: 1, borderRadius: `${RADIUS}px` }}
+                    >
                       <Stack spacing={1}>
                         <Typography variant="body2" color="text.secondary">{p.ref}</Typography>
                         <Typography variant="h6" component="h3">{p.title}</Typography>
@@ -1041,6 +1053,7 @@ export function Portal() {
           onClose={() => setDecision(null)}
           fullWidth
           maxWidth="sm"
+          slotProps={PORTAL_DIALOG_SLOT}
         >
           <DialogTitle id="portal-respond-title">{decision ? `Respond — ${decision.title}` : "Respond"}</DialogTitle>
           {decision && (
@@ -1118,6 +1131,7 @@ export function Portal() {
           onClose={() => setRequestOpen(false)}
           fullWidth
           maxWidth="sm"
+          slotProps={PORTAL_DIALOG_SLOT}
         >
           <DialogTitle id="portal-change-request-title">Raise a change request</DialogTitle>
           <DialogContent>
@@ -1205,6 +1219,7 @@ export function Portal() {
           onClose={() => setFeedbackOpen(false)}
           fullWidth
           maxWidth="sm"
+          slotProps={PORTAL_DIALOG_SLOT}
         >
           <DialogTitle id="portal-feedback-title">Leave feedback</DialogTitle>
           <DialogContent>
@@ -1249,6 +1264,7 @@ export function Portal() {
           onClose={() => setMeetingOpen(false)}
           fullWidth
           maxWidth="sm"
+          slotProps={PORTAL_DIALOG_SLOT}
         >
           <DialogTitle id="portal-meeting-title">Schedule a meeting</DialogTitle>
           <DialogContent>
@@ -1295,6 +1311,7 @@ export function Portal() {
           onClose={() => setImpactResponse(null)}
           fullWidth
           maxWidth="sm"
+          slotProps={PORTAL_DIALOG_SLOT}
         >
           <DialogTitle id="portal-impact-title">
             {impactResponse ? `Impact assessment — ${impactResponse.subject}` : "Impact assessment"}
@@ -1381,6 +1398,7 @@ export function Portal() {
           onClose={() => setThreadFor(null)}
           fullWidth
           maxWidth="sm"
+          slotProps={PORTAL_DIALOG_SLOT}
         >
           <DialogTitle id="portal-conversation-title">{threadFor ? `Conversation — ${threadFor.subject}` : "Conversation"}</DialogTitle>
           <DialogContent>

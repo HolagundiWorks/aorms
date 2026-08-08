@@ -66,6 +66,7 @@ withdraws. Agents: update this file in the same change that alters a fact
 
 - Remaining company-admin / platform-admin Carbon panels (DashboardTab, StorageSettings, Migration, etc.)
 - Knowledge Bank public vs staff path clarification
+- Kit Surface `className` overwrites `hcw-surface` (8×8=64px) — portal fixed via merge + CSS; prefer SoftSurface / re-vendor Surface to concat classNames
 
 ### Empirical maturity (industry-reference bar)
 

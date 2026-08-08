@@ -6,10 +6,13 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
+import { RADIUS } from "@hcw/ui-kit";
 import type { ReactNode } from "react";
 import { PortalNeuFrame } from "./PortalNeuFrame.js";
 import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
 import { AORMS_PORTALS } from "../../lib/product-nomenclature.js";
+
+const R8 = `${RADIUS}px`;
 
 /** Firm portal IA — read-mostly; thin writes stay inside section bodies. */
 export type FirmPortalSection =
@@ -108,7 +111,7 @@ export function FirmPortalShell({
                 onClick={() => {
                   if (!signingOut) onSignOut();
                 }}
-                sx={{ flexShrink: 0, minHeight: 40, borderRadius: "8px" }}
+                sx={{ flexShrink: 0, minHeight: 40, borderRadius: R8 }}
               >
                 Sign out
               </Button>
@@ -128,7 +131,7 @@ export function FirmPortalShell({
                   minHeight: 40,
                   textTransform: "none",
                   fontWeight: 600,
-                  borderRadius: "8px",
+                  borderRadius: R8,
                 },
               }}
             >
