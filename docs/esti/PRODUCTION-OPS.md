@@ -51,15 +51,18 @@ gh workflow run s8-reopen-demos.yml -f mode=dry-run
 gh workflow run s8-reopen-demos.yml -f mode=apply
 ```
 
-If Actions fails with `Permission denied (publickey)`, the droplet no longer
-trusts `VPS_SSH_KEY`. Via the provider console (or any working SSH session), append
-the deploy pubkey to `~/.ssh/authorized_keys` for `VPS_USER` (usually `root`):
+If Actions fails with `Permission denied (publickey)`, the VPS no longer
+trusts `VPS_SSH_KEY`. Production is **Hostinger** (`srv1742242.hstgr.cloud` /
+`187.127.178.205`). Open **hPanel → VPS → Browser terminal**, then:
 
-```text
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzNk7P4spTM1FBfiiZiIa9k6asphlWNgW4lanTI04DT aorms-deploy-github-actions
+```bash
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzNk7P4spTM1FBfiiZiIa9k6asphlWNgW4lanTI04DT aorms-deploy-github-actions' >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
 ```
 
-Then re-run `gh workflow run s8-reopen-demos.yml -f mode=apply`.
+Then re-run `gh workflow run s8-reopen-demos.yml -f mode=apply` (or say “key added”
+in chat and the agent will run it).
 
 
 Manual equivalent: set `VITE_MARKETING_ONLY=false` in `/opt/esti/.env`, then
