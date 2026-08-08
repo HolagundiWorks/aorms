@@ -34,6 +34,7 @@ import { AormsLogo } from "../components/AormsLogo.js";
 import {
   AORMS_PLATFORM,
   PLATFORM_FRAMEWORKS,
+  SUITE_CORE_APPS,
   SUITE_MANAGER_APPS,
   SUITE_TECHNICAL_APPS,
   SHILPIDB,
@@ -387,7 +388,7 @@ export function Landing() {
           <SectionHead
             eyebrow="Suite"
             title="Managers. Technical apps. Drafting. Shared drawings."
-            lead="Practice managers sync communications to firm portals. Estimation, BBS, and project management run locally on a shared engine. AADT drafts into ShilpiDB."
+            lead="AORMS Connect is the suite core — sign in once and launch every app. Practice managers sync communications to firm portals. Estimation, BBS, and project management run locally on a shared engine. AADT drafts into ShilpiDB."
           />
           <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
             {Object.values(PLATFORM_FRAMEWORKS).map((fw) => (
@@ -400,6 +401,53 @@ export function Landing() {
                     {fw.summary}
                   </Typography>
                 </SoftSurface>
+              </Grid>
+            ))}
+          </Grid>
+          <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em", display: "block", mb: MARKETING_RHYTHM.sm }}>
+            Suite core
+          </Typography>
+          <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
+            {SUITE_CORE_APPS.map((app) => (
+              <Grid key={app.id} size={{ xs: 12, md: 6 }}>
+                <Surface layer="flat" id={app.id} sx={{ p: MARKETING_RHYTHM.cardPad, height: "100%", border: (t) => `1px solid ${t.palette.divider}` }}>
+                  <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+                    <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
+                      {app.workspace}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        px: 1,
+                        py: 0.25,
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                        color: "text.disabled",
+                        border: (t) => `1px solid ${t.palette.divider}`,
+                      }}
+                    >
+                      Preview
+                    </Typography>
+                  </Stack>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+                    {app.subtitle}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
+                    {app.body}
+                  </Typography>
+                  <Button
+                    component="a"
+                    href={app.href}
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    endIcon={<ArrowForward />}
+                    sx={{ mt: MARKETING_RHYTHM.md, textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px` }}
+                  >
+                    {app.cta}
+                  </Button>
+                </Surface>
               </Grid>
             ))}
           </Grid>

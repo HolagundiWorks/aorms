@@ -9,6 +9,7 @@
  */
 import {
   AADT,
+  AORMS_CONNECT,
   AORMS_CONSULTANCY,
   AORMS_PMC,
   AORMS_STUDIO,
@@ -18,6 +19,7 @@ import {
 } from "./product-nomenclature.js";
 
 export type DesktopInstallerApp =
+  | "aorms-connect"
   | "astudio"
   | "aconsulting"
   | "aqc-estimation"
@@ -65,6 +67,13 @@ const APP_META: Record<
   DesktopInstallerApp,
   { title: string; expansion: string; webUrl: string; repoUrl?: string; manifest: string }
 > = {
+  "aorms-connect": {
+    title: AORMS_CONNECT.title,
+    expansion: AORMS_CONNECT.expansion,
+    webUrl: AORMS_CONNECT.appUrl,
+    repoUrl: "https://github.com/HolagundiWorks/AORMS-Connect",
+    manifest: "/update-manifests/aorms-connect.json",
+  },
   astudio: {
     title: AORMS_STUDIO.title,
     expansion: AORMS_STUDIO.expansion,
@@ -261,6 +270,7 @@ export async function fetchUpdateManifest(
 
 export async function loadDesktopInstallerOffers(): Promise<DesktopInstallerOffer[]> {
   const apps: DesktopInstallerApp[] = [
+    "aorms-connect",
     "astudio",
     "aconsulting",
     "aqc-estimation",

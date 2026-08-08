@@ -1,7 +1,7 @@
 /**
  * Product naming — keep in sync with docs/esti/AORMS-PLATFORM-NOMENCLATURE.md
  * and docs/esti/AORMS-SUITE.md.
- * Suite: managers (AStudio · AConsulting) + AQC Estimation/BBS/PM + AADT + ShilpiDB.
+ * Suite: Connect (core) + managers (AStudio · AConsulting) + AQC Estimation/BBS/PM + AADT + ShilpiDB.
  */
 import { platformPageUrl } from "./aorms-surface-urls.js";
 export const AORMS_PLATFORM = {
@@ -44,10 +44,27 @@ export const PLATFORM_FRAMEWORKS = {
 
 /**
  * The AORMS suite apps.
- * Managers: AStudio · AConsulting. Technical: AProc/AQC-PM · Estimation · BBS. Drafting: AADT.
+ * Core: AORMS Connect. Managers: AStudio · AConsulting. Technical: AProc/AQC-PM · Estimation · BBS. Drafting: AADT.
  * Legacy marketing names AORMS-Studio / AORMS-Consultancy / AORMS-PMC redirect.
  */
 export const AORMS_APPS = {
+  connect: {
+    slug: "aorms-connect",
+    legacySlugs: ["connect"] as const,
+    title: "AORMS Connect",
+    expansion: "AORMS suite core",
+    discipline: "Suite core",
+    role: "suite_core" as const,
+    packageId: "in.aorms.connect",
+    tagline:
+      "Suite core — sign in once, launch every app, shared projects, installer links",
+    audience: "Every AORMS firm — the desktop entry point for the suite",
+    appUrl: "https://aorms.in/downloads",
+    marketingPath: "/downloads",
+    landingHref: "/#connect",
+    wikiPath: "/wiki",
+    status: "preview" as const,
+  },
   studio: {
     slug: "astudio",
     legacySlugs: ["aorms-studio", "hived", "aorms-architecture"] as const,
@@ -153,6 +170,9 @@ export const AORMS_APPS = {
   },
 } as const;
 
+/** Suite core — login · launcher · catalog. */
+export const AORMS_CONNECT = AORMS_APPS.connect;
+
 /** Architecture app — this monorepo (Indian architecture consultancies). */
 export const AORMS_STUDIO = AORMS_APPS.studio;
 /** @deprecated Prefer ASTUDIO — same object. */
@@ -189,8 +209,27 @@ export function isAormsPmcLegacySlug(slug: string): boolean {
   );
 }
 
-/** Platform landing — suite map (managers + technical + drafting). */
+/** Platform landing — suite map (core + managers + technical + drafting). */
 export const PLATFORM_APPS = [
+  {
+    id: "connect",
+    status: AORMS_CONNECT.status,
+    kind: "suite_core" as const,
+    title: AORMS_CONNECT.discipline,
+    workspace: AORMS_CONNECT.title,
+    expansion: AORMS_CONNECT.expansion,
+    subtitle: "Suite core · login & launcher",
+    body:
+      "Sign in once, launch AStudio, AConsulting, and AQC apps, keep projects consistent, and open installer links. Licence Manager surface comes later.",
+    bullets: [
+      "Single firm login (SSO for the suite)",
+      "Launcher · shared project catalog",
+      "DB connector · installer links",
+    ],
+    workspaceSlug: AORMS_CONNECT.slug,
+    href: AORMS_CONNECT.appUrl,
+    cta: "Downloads — coming soon",
+  },
   {
     id: "studio",
     status: AORMS_STUDIO.status,
@@ -200,7 +239,7 @@ export const PLATFORM_APPS = [
     expansion: AORMS_STUDIO.expansion,
     subtitle: "Practice manager · architecture",
     body:
-      "Tasks, office, HR, payroll, and client portals for architecture practices. Technical calc stays in AQC apps; drafting in AADT.",
+      "Tasks, office, HR, payroll, and client portals for architecture practices. Technical calc stays in AQC apps; drafting in AADT. Launch from Connect.",
     bullets: [
       "Tasks · Office · HR · Payroll",
       "Client & third-party communications",
@@ -219,7 +258,7 @@ export const PLATFORM_APPS = [
     expansion: AORMS_CONSULTANCY.expansion,
     subtitle: "Practice manager · engineering",
     body:
-      "Same practice-manager surface for engineering consultancies — engagements, deliverables, and governed communications.",
+      "Same practice-manager surface for engineering consultancies — engagements, deliverables, and governed communications. Launch from Connect.",
     bullets: [
       "Engagements · RACI · deliverables",
       "Timesheets · office docs",
@@ -297,6 +336,9 @@ export const SUITE_TECHNICAL_APPS = [
     cta: "GitHub",
   },
 ] as const;
+
+/** Suite core tiles (landing — before practice managers). */
+export const SUITE_CORE_APPS = PLATFORM_APPS.filter((a) => a.kind === "suite_core");
 
 /** Practice-manager tiles only (landing primary app row). */
 export const SUITE_MANAGER_APPS = PLATFORM_APPS.filter((a) => a.kind === "manager");

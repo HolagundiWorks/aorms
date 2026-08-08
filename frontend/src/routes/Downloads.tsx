@@ -125,6 +125,7 @@ export function Downloads() {
 
 function placeholderOffers(): DesktopInstallerOffer[] {
   const apps: DesktopInstallerApp[] = [
+    "aorms-connect",
     "astudio",
     "aconsulting",
     "aqc-estimation",

@@ -4,13 +4,14 @@
 duplicate product law here.
 
 **Suite law:** [docs/esti/AORMS-SUITE.md](docs/esti/AORMS-SUITE.md) ·
-[docs/esti/ROADMAP.md](docs/esti/ROADMAP.md) (S0–S7 ✅ · next S8) ·
+[docs/esti/AORMS-CONNECT.md](docs/esti/AORMS-CONNECT.md) ·
+[docs/esti/ROADMAP.md](docs/esti/ROADMAP.md) (S0–S7 ✅ · C0 ✅ · next C1/S8) ·
 [docs/esti/LOCAL-FIRST.md](docs/esti/LOCAL-FIRST.md).
 
 **Soft launch (aorms.in):** landing + blog only. Keep
 `VITE_MARKETING_ONLY=true` on public builds until S8. Installers stay Coming
-soon until signed URL + sha256 (D6). Gate:
-`frontend/src/lib/marketing-gate.ts`.
+soon until signed URL + sha256 (D6). Desktop firm login → **AORMS Connect**.
+Gate: `frontend/src/lib/marketing-gate.ts`.
 
 **UI:** `@hcw/ui-kit` v1.5.0 (HCW-UI-Kit, vendored from hcwux) on every surface —
 see [`docs/hcw-kit/README.md`](docs/hcw-kit/README.md) and [`docs/HCW-UX.md`](docs/HCW-UX.md).

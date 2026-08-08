@@ -5,13 +5,16 @@
 > Bridge: [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · Repos: [DESKTOP-REPOS.md](DESKTOP-REPOS.md) ·  
 > Roadmap: [ROADMAP.md](ROADMAP.md)
 
-**AORMS is a product suite.** Practice managers (**AStudio** / **AConsulting**) and
-technical apps (**AQC Estimation** · **AQC BBS** · **AQC Project Management**) ship
-as native Windows apps. **AADT** drafts locally; **ShilpiDB** holds geometry;
-**MongoDB** holds all non-drawing cloud ops/comms. Technical work and AI stay on
-the machine. Firm-branded **portals** + ops DB manager live online.
+**AORMS is a product suite.** **AORMS Connect** is the desktop suite core
+(login · launcher · shared project catalog · DB connector). Practice managers
+(**AStudio** / **AConsulting**) and technical apps (**AQC Estimation** · **AQC BBS** ·
+**AQC Project Management**) ship as native Windows apps launched from Connect.
+**AADT** drafts locally; **ShilpiDB** holds geometry; **MongoDB** holds all
+non-drawing cloud ops/comms. Technical work and AI stay on the machine.
+Firm-branded **portals** + ops DB manager live online.
 
 `aorms.in` is **marketing + blog** — no firm ERP logins on the apex.
+Desktop firm login belongs in **Connect** ([AORMS-CONNECT.md](AORMS-CONNECT.md)).
 **Soft launch (2026-08):** landing and blog live; apex `/login` and Windows
 installers show **Coming soon** (`VITE_MARKETING_ONLY=true` by default on public builds).
 Set `VITE_MARKETING_ONLY=false` and rebuild when demos reopen ([ROADMAP.md](ROADMAP.md) S8).
@@ -24,7 +27,8 @@ The esti monorepo staff SPA is a **reference archive** — not the shipping staf
 
 | # | Choice |
 | --- | --- |
-| Suite shape | Managers + three AQC installers + AADT + ShilpiDB ([AORMS-SUITE.md](AORMS-SUITE.md)) |
+| Suite shape | **Connect** + managers + three AQC installers + AADT + ShilpiDB ([AORMS-SUITE.md](AORMS-SUITE.md)) |
+| Desktop login | **AORMS Connect only** — suite apps launch with Connect session (C2 broker) |
 | Staff runtime | **Native desktop** — no browser staff ERP |
 | Engine SoT | **C++** `bbs_engine` — shared by Estimation / BBS / PM |
 | Ops cloud | **MongoDB** (firm-scoped) — not CAD entities |

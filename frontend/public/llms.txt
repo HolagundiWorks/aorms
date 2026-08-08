@@ -5,6 +5,7 @@ AORMS stands for Accelerated Operational Resources Management System — a **pro
 AORMS is NOT contractor ERP and NOT a full Primavera/MSP replacement. Practice managers handle communications; technical work (estimation, BBS, programme, drafting) stays on the desktop. Firm portals publish updates online. **aorms.in** is marketing and blog (soft launch — sign-in and Windows installers coming soon). Licensing is **open source for now**.
 
 Suite map:
+- **AORMS Connect** — suite core (single login · launcher · shared projects · installer links)
 - **AStudio** / **AConsulting** — practice managers (architecture / engineering)
 - **AQC Estimation** · **AQC BBS** · **AQC Project Management (AProc)** — technical desktop installers sharing bbs_engine
 - **AADT** — 2D drafting · **ShilpiDB** — geometry store

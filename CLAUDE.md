@@ -5,7 +5,8 @@
 
 | Plane | Products |
 | --- | --- |
-| Practice managers | **AStudio** · **AConsulting** (desktop) |
+| Suite core | **AORMS Connect** (desktop — login · launcher · catalog · DB connector) |
+| Practice managers | **AStudio** · **AConsulting** (desktop; launched from Connect) |
 | Technical | **AQC Estimation** · **AQC BBS** · **AQC Project Management** / **AProc** (desktop, shared `bbs_engine`) |
 | Drafting / geometry | **AADT** · **ShilpiDB** |
 | Online | Firm portals · hub · Mongo ops · **aorms.in** marketing |
@@ -15,6 +16,7 @@ Code identifiers (`@esti/*`, `esti_*`, repo folder `esti`) keep the `esti` coden
 GitHub remote may be `HolagundiWorks/aorms`.
 
 Canon: [`docs/esti/AORMS-SUITE.md`](docs/esti/AORMS-SUITE.md) ·
+[`docs/esti/AORMS-CONNECT.md`](docs/esti/AORMS-CONNECT.md) ·
 [`docs/esti/LOCAL-FIRST.md`](docs/esti/LOCAL-FIRST.md) ·
 [`docs/esti/ROADMAP.md`](docs/esti/ROADMAP.md) ·
 [`docs/esti/AORMS-PLATFORM-NOMENCLATURE.md`](docs/esti/AORMS-PLATFORM-NOMENCLATURE.md).
@@ -45,14 +47,16 @@ VPS: [`docs/esti/VPS-INSTALL.md`](docs/esti/VPS-INSTALL.md) ·
 ## Product naming (agent memory — 2026-08)
 
 **Executable constants:** `frontend/src/lib/product-nomenclature.ts` — import
-`AORMS_PLATFORM`, `AORMS_APPS`, `AORMS_STUDIO` / `ASTUDIO`, `AORMS_CONSULTANCY` /
-`ACONSULTING`, `AORMS_PMC` / `APROC`, `AQC_ESTIMATION`, `AQC_BBS`, `AADT`,
-`SHILPIDB`, `SUITE_MANAGER_APPS`, `SUITE_TECHNICAL_APPS`, `AORMS_PORTALS`,
-`EOMS`, `ESTI`. Do not hard-code product strings in UI/SEO.
+`AORMS_PLATFORM`, `AORMS_APPS`, `AORMS_CONNECT`, `AORMS_STUDIO` / `ASTUDIO`,
+`AORMS_CONSULTANCY` / `ACONSULTING`, `AORMS_PMC` / `APROC`, `AQC_ESTIMATION`,
+`AQC_BBS`, `AADT`, `SHILPIDB`, `SUITE_CORE_APPS`, `SUITE_MANAGER_APPS`,
+`SUITE_TECHNICAL_APPS`, `AORMS_PORTALS`, `EOMS`, `ESTI`. Do not hard-code product
+strings in UI/SEO.
 
 | Name | Role |
 | --- | --- |
 | **AORMS** | Suite brand + cloud spine |
+| **AORMS Connect** | Suite core desktop — SSO · launcher · catalog · DB connector; slug `aorms-connect` |
 | **AStudio** | Architecture practice manager — desktop; slug `astudio` |
 | **AConsulting** | Engineering practice manager — desktop; slug `aconsulting` |
 | **AProc** / **AQC PM** | Project management technical app — desktop; slug `aproc` |
@@ -63,25 +67,26 @@ VPS: [`docs/esti/VPS-INSTALL.md`](docs/esti/VPS-INSTALL.md) ·
 | **`esti` / `aorms`** | Hub monorepo — never use `esti` in marketing copy |
 
 **Retired in new copy:** web-parity staff ERP on apex · Standard licence metering
-claims · wiki as primary docs · AORMS-Studio / EmOI / HiveD · “one mega platform app”.
+claims · wiki as primary docs · AORMS-Studio / EmOI / HiveD · “one mega platform app” ·
+per-app login as the primary suite UX (use Connect).
 
 **Public marketing surfaces (soft launch):**
 
 | Path / host | Role |
 | --- | --- |
-| `/` · **aorms.in** | Suite landing |
+| `/` · **aorms.in** | Suite landing (incl. Connect in suite map) |
 | `/blog` | Suite explainers + practice notes |
-| `/downloads` | Installer list — Coming soon |
-| `/login` | Coming soon (marketing-only gate) |
+| `/downloads` | Installer list — Coming soon (Connect first) |
+| `/login` | Coming soon (marketing-only gate); desktop login → Connect |
 | `/wiki*` | Redirect → `/` |
 | **studio.** / **consultancy.** / **proc.** | App hosts (desktop-era; not apex marketing) |
-| **admin.aorms.in** | Licence Manager (when enabled) |
+| **admin.aorms.in** | Licence Manager (when enabled; Connect C3 surfaces status) |
 
 Frozen hosts: [`docs/esti/AORMS-SURFACE-URLS.md`](docs/esti/AORMS-SURFACE-URLS.md).
 
 **Operator:** **Human Centric Works (HCW)** — `@hcw/ui-kit` + AORMS.
 - [`docs/marketing/LANDING-REDESIGN-CONTEXT.md`](docs/marketing/LANDING-REDESIGN-CONTEXT.md)
-- [`docs/esti/ROADMAP.md`](docs/esti/ROADMAP.md) — S0–S7 ✅; next S8–S10 · D6
+- [`docs/esti/ROADMAP.md`](docs/esti/ROADMAP.md) — S0–S7 ✅; **C0–C3** Connect · next S8–S10 · D6
 - [`docs/esti/MARKET-FIT.md`](docs/esti/MARKET-FIT.md)
 
 When editing wiki markdown under `frontend/src/content/wiki/`, rebuild the AI wiki
@@ -91,7 +96,7 @@ index only if Ask ESTI should see it (wiki is not a public marketing surface).
 
 | Do | Don't |
 | --- | --- |
-| Prefer suite nomenclature + `marketing-gate` | Claim web staff ERP or live signed installers |
+| Prefer suite nomenclature + `marketing-gate` · Connect for desktop login | Claim web staff ERP or live signed installers · invent per-app login as primary UX |
 | Keep `/downloads` honest (`coming_soon` / `web_fallback`) | Point CTAs at unsigned `Setup.exe` |
 | Update `landing-seo.ts` + `index.html` together | Leave Standard/InStock commercial JSON-LD |
 | Pin AQC engine from HolagundiWorks/AQC | Fork divergent `bbs_engine` in product repos |
