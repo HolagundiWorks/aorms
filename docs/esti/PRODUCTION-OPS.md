@@ -40,6 +40,17 @@ PROFILE=landing DOMAIN=aorms.in ADMIN_EMAIL=ops@aorms.in \
 **Does not:** Flip signed Windows Download CTAs (that is **D6**).  
 **Staff ERP:** Still desktop via **AORMS Connect** — apex reopens portal/demo login only.
 
+**Local first (docker compose):**
+
+```powershell
+powershell -File deploy/s8-local.ps1
+# optional demo accounts:
+powershell -File deploy/s8-local.ps1 -SeedDemo
+```
+
+Opens `http://localhost:5173/login` (compose defaults `VITE_MARKETING_ONLY=false`).
+Prod VPS stays gated until the Hostinger deploy-key step below + `mode=apply`.
+
 ```bash
 # On the VPS — requires explicit CONFIRM=yes
 CONFIRM=yes bash deploy/s8-reopen-demos.sh

@@ -83,6 +83,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | Honest portal tabs · installers decoupled from auth gate | ✅ |
 | Landing/dock CTAs + FAQ follow marketing gate | ✅ |
 | `deploy/s8-reopen-demos.sh` (`CONFIRM=yes`) | ✅ |
+| Local smoke (`compose` · `VITE_MARKETING_ONLY=false`) | ✅ `deploy/s8-local.ps1` |
 | VPS env flip (`VITE_MARKETING_ONLY=false`) | 🔲 blocked — deploy key not in VPS `authorized_keys` |
 | Actions runner | ✅ `gh workflow run s8-reopen-demos.yml` (needs pubkey auth) |
 
