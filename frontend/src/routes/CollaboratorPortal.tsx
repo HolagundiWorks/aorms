@@ -85,6 +85,13 @@ export function CollaboratorPortal() {
       utils.collab.activityFeed.invalidate();
     },
   });
+  const acknowledgeTx = trpc.collab.acknowledgeTransmittal.useMutation({
+    meta: { errorTitle: "Couldn't acknowledge the receipt" },
+    onSuccess: () => {
+      utils.collab.projectDetail.invalidate();
+      utils.collab.activityFeed.invalidate();
+    },
+  });
   const d = detailQ.data;
 
   useEffect(() => {
@@ -244,6 +251,56 @@ export function CollaboratorPortal() {
           {row.actorName && <div className="esti-label esti-label--secondary">{row.actorName}</div>}
         </div>
       ),
+    },
+  ];
+
+  const transmittalColumns: GridColDef[] = [
+    { field: "ref", headerName: "Ref", flex: 1, minWidth: 120 },
+    { field: "purpose", headerName: "Purpose", flex: 2, minWidth: 160 },
+    { field: "channel", headerName: "Channel", flex: 1, minWidth: 110 },
+    {
+      field: "dateIssued",
+      headerName: "Issued",
+      flex: 1,
+      minWidth: 110,
+      valueGetter: (v) => v ?? "—",
+    },
+    {
+      field: "ack",
+      headerName: "Acknowledgment",
+      flex: 1.2,
+      minWidth: 140,
+      sortable: false,
+      renderCell: (p) =>
+        p.row.acknowledgedAt
+          ? `Ack · ${p.row.acknowledgedBy ?? "you"}`
+          : "Awaiting",
+    },
+    {
+      field: "acknowledge",
+      headerName: "",
+      width: 200,
+      sortable: false,
+      filterable: false,
+      renderCell: (p) =>
+        p.row.acknowledgedAt ? (
+          "—"
+        ) : (
+          <RowActionsMenu
+            actions={[
+              {
+                label: "Acknowledge receipt",
+                disabled: acknowledgeTx.isPending,
+                onClick: () =>
+                  acknowledgeTx.mutate({
+                    projectId: openId!,
+                    transmittalId: p.row.id,
+                    note: `Transmittal ${p.row.ref}`,
+                  }),
+              },
+            ]}
+          />
+        ),
     },
   ];
 
@@ -436,6 +493,29 @@ export function CollaboratorPortal() {
                 hideFooter
                 autoHeight
               />
+            </Stack>
+
+            <Stack spacing={1}>
+              <Typography variant="h6" component="h3">Issued transmittals</Typography>
+              <DataState
+                loading={detailQ.isLoading}
+                isEmpty={(d.transmittals ?? []).length === 0}
+                columnCount={4}
+                empty={{
+                  title: "No transmittals yet",
+                  description: "Issued drawing packages for this engagement will list here for acknowledgement.",
+                }}
+              >
+                <DataGrid
+                  rows={d.transmittals ?? []}
+                  columns={transmittalColumns}
+                  getRowId={(row) => row.id}
+                  density="compact"
+                  disableRowSelectionOnClick
+                  hideFooter
+                  autoHeight
+                />
+              </DataState>
             </Stack>
 
             <Stack spacing={1}>

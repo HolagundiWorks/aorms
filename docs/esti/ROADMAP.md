@@ -42,7 +42,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | **C3** | Licence Manager surface in Connect | Connect | ✅ local status · admin.aorms.in link |
 | **S8** | Reopen apex auth / portal demos | esti | 🔲 prep ✅ · env flip 🔲 |
 | **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🟡 unsigned MSIX ✅ · code sign 🔲 D6 |
-| **S10** | Firm portal depth | esti portals | 🟡 collab transmittals ✅ · client Documents+RA ✅ · more depth 🔲 |
+| **S10** | Firm portal depth | esti portals | 🟡 collab tx list+ack ✅ · client Documents+RA ✅ · contractor Drawings 🔲 |
 
 ---
 
@@ -83,7 +83,7 @@ Prep ✅ (honest portal tabs · installers decoupled). Env flip 🔲 when ready.
 ### Then
 
 1. **D6** — Code-signed MSIX URLs + sha256 + `VITE_PORTAL_USE_RELEASE_INSTALLERS`.  
-2. **S10** — remaining portal depth (collab ack · contractor Drawings if product wants).  
+2. **S10** — remaining portal depth (contractor Drawings if product wants).  
 3. **S8 flip** when portal demos stay honest.
 
 ## Deferred

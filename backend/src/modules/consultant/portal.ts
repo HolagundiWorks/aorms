@@ -1,4 +1,4 @@
-import { ConsultantSubmitInput } from "@esti/contracts";
+import { canAcknowledgeTransmittal, ConsultantSubmitInput } from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, isNotNull, ne } from "drizzle-orm";
 import { z } from "zod";
@@ -152,6 +152,55 @@ export const collaboratorRouter = router({
           ),
         )
         .orderBy(desc(progressReports.periodEnd));
+    }),
+
+  /** Acknowledge receipt of an issued drawing transmittal (S10 · SOP §3). */
+  acknowledgeTransmittal: collaboratorProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        transmittalId: z.string().uuid(),
+        note: z.string().trim().max(200).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertEngaged(ctx, input.projectId);
+      const [row] = await ctx.db
+        .select()
+        .from(transmittals)
+        .where(
+          and(
+            eq(transmittals.id, input.transmittalId),
+            eq(transmittals.projectId, input.projectId),
+          ),
+        );
+      if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Transmittal not found." });
+      const gate = canAcknowledgeTransmittal(row);
+      if (!gate.ok)
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: gate.reason });
+
+      const subject = input.note?.trim() || `Transmittal ${row.ref}`;
+      await ctx.db
+        .update(transmittals)
+        .set({
+          acknowledgedAt: new Date(),
+          acknowledgedBy: ctx.user.fullName,
+          acknowledgmentNote: subject,
+          updatedAt: new Date(),
+        })
+        .where(eq(transmittals.id, row.id));
+
+      await writeActivity(ctx.db, {
+        projectId: input.projectId,
+        objectType: "transmittal",
+        objectId: row.id,
+        eventType: "consultant.transmittal_ack",
+        actorId: ctx.user.id,
+        actorName: ctx.user.fullName,
+        visibility: "ALL",
+        summary: `Consultant acknowledged: ${subject}`,
+      });
+      return { ok: true as const };
     }),
 
   /** This consultant's own submissions for a project (read-back of their writes). */

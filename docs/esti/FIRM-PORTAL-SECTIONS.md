@@ -21,6 +21,6 @@ Thin writes (approve / bid / visit) stay on the **Updates** tab body, not new ch
 | Portal | Wired panels |
 | --- | --- |
 | Client | Project · Progress · Drawings · Documents (invoices · approvals · certified RA) |
-| Collaborator | Project · Progress · Drawings (issued transmittals) |
+| Collaborator | Project · Progress · Drawings · Updates ack on issued transmittals |
 | Contractor | Project (invitation-scoped) |
 | Site | Project · Progress (`sitePortal`) |
