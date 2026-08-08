@@ -2,11 +2,18 @@
 // SPDX-FileCopyrightText: 2026 Human Centric Works, Hospet
 
 import { type SyncEntity } from "@esti/contracts";
-import { and, desc, eq, isNotNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, ne } from "drizzle-orm";
 import type { DB } from "../../db/index.js";
-import { drawings, progressReports, transmittals } from "../../db/schema.js";
+import {
+  approvals,
+  drawings,
+  invoices,
+  progressReports,
+  transmittals,
+} from "../../db/schema.js";
 import { env } from "../../env.js";
 import { publishedForProject, publishedWherePayload } from "../../modules/sync/service.js";
+import { presignedGet } from "../storage.js";
 
 /**
  * When the process is the cloud hub, portal reads should prefer the published
@@ -168,4 +175,105 @@ export async function portalIssuedProgressReports(
       and(eq(progressReports.projectId, projectId), eq(progressReports.status, "ISSUED")),
     )
     .orderBy(desc(progressReports.periodEnd));
+}
+
+export type PortalInvoiceRow = {
+  ref: string;
+  documentKind: string | null;
+  status: string;
+  grandTotalPaise: number | null;
+  dateInvoice: string | null;
+  pdfUrl: string | null;
+};
+
+/** ISSUED/PAID invoices — hub published store or live table (+ optional PDF URL). */
+export async function portalIssuedInvoices(db: DB, projectId: string): Promise<PortalInvoiceRow[]> {
+  if (portalReadsFromHub()) {
+    const pub = publishedPayloadRows<{
+      ref: string;
+      documentKind: string | null;
+      status: string;
+      grandTotalPaise: number | null;
+      dateInvoice: string | null;
+      pdfStatus: string;
+    }>(await hubPublishedForProject(db, "invoice", projectId));
+    return Promise.all(
+      pub
+        .filter((iv) => iv.status === "ISSUED" || iv.status === "PAID")
+        .map(async (iv) => ({
+          ref: iv.ref,
+          documentKind: iv.documentKind,
+          status: iv.status,
+          grandTotalPaise: iv.grandTotalPaise,
+          dateInvoice: iv.dateInvoice,
+          pdfUrl:
+            iv.fileKeys[0] && iv.pdfStatus === "READY"
+              ? await presignedGet(iv.fileKeys[0]).catch(() => null)
+              : null,
+        })),
+    );
+  }
+  const invoiceRowsRaw = await db
+    .select({
+      ref: invoices.ref,
+      documentKind: invoices.documentKind,
+      status: invoices.status,
+      grandTotalPaise: invoices.grandTotalPaise,
+      dateInvoice: invoices.dateInvoice,
+      pdfKey: invoices.pdfKey,
+      pdfStatus: invoices.pdfStatus,
+    })
+    .from(invoices)
+    .where(and(eq(invoices.projectId, projectId), inArray(invoices.status, ["ISSUED", "PAID"])))
+    .orderBy(desc(invoices.createdAt));
+  return Promise.all(
+    invoiceRowsRaw.map(async ({ pdfKey, ...iv }) => ({
+      ...iv,
+      pdfUrl:
+        pdfKey && iv.pdfStatus === "READY"
+          ? await presignedGet(pdfKey).catch(() => null)
+          : null,
+    })),
+  );
+}
+
+export type PortalApprovalRow = {
+  id: string;
+  title: string;
+  entityType: string;
+  status: string;
+  sentDate: string | null;
+  responseDate: string | null;
+};
+
+/** Non-draft approvals — hub published store or live table. */
+export async function portalSentApprovals(db: DB, projectId: string): Promise<PortalApprovalRow[]> {
+  if (portalReadsFromHub()) {
+    return publishedPayloadRows<{
+      title: string;
+      entityType: string;
+      status: string;
+      sentDate: string | null;
+      responseDate: string | null;
+    }>(await hubPublishedForProject(db, "approval", projectId)).map((r) => ({
+      id: r.id,
+      title: r.title,
+      entityType: r.entityType,
+      status: r.status,
+      sentDate: r.sentDate,
+      responseDate: r.responseDate,
+    }));
+  }
+  return db
+    .select({
+      id: approvals.id,
+      title: approvals.title,
+      entityType: approvals.entityType,
+      status: approvals.status,
+      sentDate: approvals.sentDate,
+      responseDate: approvals.responseDate,
+    })
+    .from(approvals)
+    .where(and(eq(approvals.projectId, projectId), ne(approvals.status, "DRAFT")))
+    .orderBy(desc(approvals.createdAt));
 }

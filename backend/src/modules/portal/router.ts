@@ -20,7 +20,6 @@ import {
   consDeliverables,
   consEngagements,
   drawings,
-  invoices,
   moms,
   phases,
   pmcRaBills,
@@ -37,7 +36,7 @@ import { runAiGateway } from "../../lib/ai/gateway.js";
 import { getFirm } from "../../lib/firm.js";
 import { assertPlanFeature } from "../../lib/plan.js";
 import { getOrgSettings } from "../../lib/settings.js";
-import { hubPublishedForProject, portalIssuedProgressReports, portalIssuedTransmittals, portalReadyDrawings, portalReadsFromHub, publishedPayloadRows } from "../../lib/sync/hubPortal.js";
+import { portalIssuedInvoices, portalIssuedTransmittals, portalReadyDrawings, portalSentApprovals } from "../../lib/sync/hubPortal.js";
 import { presignedGet } from "../../lib/storage.js";
 import { addMessage, listMessages } from "../../lib/submissionThread.js";
 import { clientProcedure, router } from "../../trpc/trpc.js";
@@ -101,104 +100,10 @@ export const portalRouter = router({
       const currentSortOrder = phaseRows.find((p) => p.id === project.currentPhaseId)?.sortOrder ?? -1;
 
       // Only issued/paid invoices are visible to the client.
-      // On hub: prefer published artifact store (finalized outbox payloads).
-      let invoiceRows: Array<{
-        ref: string;
-        documentKind: string | null;
-        status: string;
-        grandTotalPaise: number | null;
-        dateInvoice: string | null;
-        pdfUrl: string | null;
-      }>;
-      if (portalReadsFromHub()) {
-        const pub = publishedPayloadRows<{
-          ref: string;
-          documentKind: string | null;
-          status: string;
-          grandTotalPaise: number | null;
-          dateInvoice: string | null;
-          pdfStatus: string;
-        }>(await hubPublishedForProject(ctx.db, "invoice", input.projectId));
-        invoiceRows = await Promise.all(
-          pub
-            .filter((iv) => iv.status === "ISSUED" || iv.status === "PAID")
-            .map(async (iv) => ({
-              ref: iv.ref,
-              documentKind: iv.documentKind,
-              status: iv.status,
-              grandTotalPaise: iv.grandTotalPaise,
-              dateInvoice: iv.dateInvoice,
-              pdfUrl:
-                iv.fileKeys[0] && iv.pdfStatus === "READY"
-                  ? await presignedGet(iv.fileKeys[0]).catch(() => null)
-                  : null,
-            })),
-        );
-      } else {
-        const invoiceRowsRaw = await ctx.db
-          .select({
-            ref: invoices.ref,
-            documentKind: invoices.documentKind,
-            status: invoices.status,
-            grandTotalPaise: invoices.grandTotalPaise,
-            dateInvoice: invoices.dateInvoice,
-            pdfKey: invoices.pdfKey,
-            pdfStatus: invoices.pdfStatus,
-          })
-          .from(invoices)
-          .where(
-            and(eq(invoices.projectId, input.projectId), inArray(invoices.status, ["ISSUED", "PAID"])),
-          )
-          .orderBy(desc(invoices.createdAt));
-        invoiceRows = await Promise.all(
-          invoiceRowsRaw.map(async ({ pdfKey, ...iv }) => ({
-            ...iv,
-            pdfUrl:
-              pdfKey && iv.pdfStatus === "READY"
-                ? await presignedGet(pdfKey).catch(() => null)
-                : null,
-          })),
-        );
-      }
+      const invoiceRows = await portalIssuedInvoices(ctx.db, input.projectId);
 
       // Approvals that have actually been sent (no drafts).
-      let approvalRows: Array<{
-        id: string;
-        title: string;
-        entityType: string;
-        status: string;
-        sentDate: string | null;
-        responseDate: string | null;
-      }>;
-      if (portalReadsFromHub()) {
-        approvalRows = publishedPayloadRows<{
-          title: string;
-          entityType: string;
-          status: string;
-          sentDate: string | null;
-          responseDate: string | null;
-        }>(await hubPublishedForProject(ctx.db, "approval", input.projectId)).map((r) => ({
-          id: r.id,
-          title: r.title,
-          entityType: r.entityType,
-          status: r.status,
-          sentDate: r.sentDate,
-          responseDate: r.responseDate,
-        }));
-      } else {
-        approvalRows = await ctx.db
-          .select({
-            id: approvals.id,
-            title: approvals.title,
-            entityType: approvals.entityType,
-            status: approvals.status,
-            sentDate: approvals.sentDate,
-            responseDate: approvals.responseDate,
-          })
-          .from(approvals)
-          .where(and(eq(approvals.projectId, input.projectId), ne(approvals.status, "DRAFT")))
-          .orderBy(desc(approvals.createdAt));
-      }
+      const approvalRows = await portalSentApprovals(ctx.db, input.projectId);
 
       // Only drawings the worker has finished processing.
       const drawingRows = await portalReadyDrawings(ctx.db, input.projectId);
