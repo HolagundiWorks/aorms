@@ -45,6 +45,10 @@ PROFILE=landing DOMAIN=aorms.in ADMIN_EMAIL=ops@aorms.in \
 CONFIRM=yes bash deploy/s8-reopen-demos.sh
 # Preview only:
 CONFIRM=yes bash deploy/s8-reopen-demos.sh --dry-run
+
+# From a workstation (GitHub Actions + VPS_* secrets):
+gh workflow run s8-reopen-demos.yml -f mode=dry-run
+gh workflow run s8-reopen-demos.yml -f mode=apply
 ```
 
 Manual equivalent: set `VITE_MARKETING_ONLY=false` in `/opt/esti/.env`, then
