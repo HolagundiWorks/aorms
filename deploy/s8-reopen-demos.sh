@@ -47,7 +47,7 @@ if [[ "${CONFIRM:-}" != "yes" ]]; then
 fi
 
 if [[ ! -f "$ENV_FILE" ]]; then
-  die "Missing $ENV_FILE — run bootstrap/install first."
+  error "Missing $ENV_FILE — run bootstrap/install first."
 fi
 
 section "S8 preflight"
