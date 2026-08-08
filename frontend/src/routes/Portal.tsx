@@ -538,9 +538,18 @@ export function Portal() {
     ),
     documents: (
       <FirmPortalDocumentsPanel
-        loading={!!openId && detailQ.isLoading}
+        loading={!!openId && (detailQ.isLoading || raBillsQ.isLoading)}
         invoices={d?.invoices ?? []}
         approvals={d?.approvals ?? []}
+        raBills={(raBillsQ.data ?? []).map((b) => ({
+          id: b.id,
+          ref: b.ref,
+          billNo: b.billNo,
+          status: b.status,
+          grossPaise: b.grossPaise,
+          periodEnd: b.periodEnd,
+          certifiedAt: b.certifiedAt,
+        }))}
       />
     ),
   };

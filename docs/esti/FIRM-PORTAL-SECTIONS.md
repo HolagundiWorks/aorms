@@ -8,10 +8,10 @@
 | Tab | Hub source | UI (now) |
 | --- | --- | --- |
 | **Updates** | Meta activity + recent artifacts | Full portal children (always shown) |
-| **Project** | `projectStatus` meta / projectDetail | Client + collaborator when wired |
-| **Progress** | `phaseProgress` · `progressReport` | Client only (collab/contractor/site hide until API) |
-| **Drawings** | `drawing` READY · `transmittal` | Client + collaborator when wired |
-| **Documents** | `invoice` · `approval` (+ RA later) | Client only |
+| **Project** | `projectStatus` meta / projectDetail | Client · collaborator · contractor · site |
+| **Progress** | `phaseProgress` · `progressReport` | Client · collaborator · site |
+| **Drawings** | `drawing` READY · `transmittal` | Client · collaborator (issued transmittals) |
+| **Documents** | `invoice` · `approval` · certified RA | Client |
 
 **Honesty (S8 prep):** chrome tabs are **hidden** when `panels` omits a section —
 no hub-placeholder Alert stubs.
@@ -20,7 +20,7 @@ Thin writes (approve / bid / visit) stay on the **Updates** tab body, not new ch
 
 | Portal | Wired panels |
 | --- | --- |
-| Client | Project · Progress · Drawings · Documents |
-| Collaborator | Project · Progress · Drawings (Documents later) |
+| Client | Project · Progress · Drawings · Documents (invoices · approvals · certified RA) |
+| Collaborator | Project · Progress · Drawings (issued transmittals) |
 | Contractor | Project (invitation-scoped) |
 | Site | Project · Progress (`sitePortal`) |

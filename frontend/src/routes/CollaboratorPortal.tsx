@@ -272,7 +272,13 @@ export function CollaboratorPortal() {
           title: dr.title,
           status: "READY",
         }))}
-        transmittals={[]}
+        transmittals={(d?.transmittals ?? []).map((t) => ({
+          id: t.id,
+          ref: t.ref,
+          purpose: t.purpose,
+          channel: t.channel,
+          dateIssued: t.dateIssued,
+        }))}
       />
     ),
   };

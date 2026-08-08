@@ -1,6 +1,6 @@
 import { ConsultantSubmitInput } from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, ne } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, ne } from "drizzle-orm";
 import { z } from "zod";
 import {
   activities,
@@ -10,6 +10,7 @@ import {
   phases,
   progressReports,
   projectOffices,
+  transmittals,
 } from "../../db/schema.js";
 import type { DB } from "../../db/index.js";
 import { writeActivity } from "../../lib/activity.js";
@@ -87,6 +88,21 @@ export const collaboratorRouter = router({
         .where(and(eq(drawings.projectId, input.projectId), eq(drawings.status, "READY")))
         .orderBy(desc(drawings.createdAt));
 
+      // Issued drawing transmittals (S10 Drawings tab — same shape as client portal).
+      const transmittalRows = await ctx.db
+        .select({
+          id: transmittals.id,
+          ref: transmittals.ref,
+          purpose: transmittals.purpose,
+          channel: transmittals.channel,
+          dateIssued: transmittals.dateIssued,
+          acknowledgedAt: transmittals.acknowledgedAt,
+          acknowledgedBy: transmittals.acknowledgedBy,
+        })
+        .from(transmittals)
+        .where(and(eq(transmittals.projectId, input.projectId), isNotNull(transmittals.dateIssued)))
+        .orderBy(desc(transmittals.dateIssued));
+
       return {
         project: {
           ref: project!.ref,
@@ -110,6 +126,7 @@ export const collaboratorRouter = router({
             : "Pending",
         })),
         drawings: drawingRows,
+        transmittals: transmittalRows,
       };
     }),
 
