@@ -3,6 +3,9 @@
 #
 #   gh workflow run s8-reopen-demos.yml -f mode=dry-run
 #   gh workflow run s8-reopen-demos.yml -f mode=apply
+#
+# If SSH fails: the job prints the deploy pubkey — add it to
+# ~/.ssh/authorized_keys for VPS_USER (or root) on the droplet, then re-run.
 name: s8-reopen-demos
 
 on:
@@ -41,7 +44,7 @@ jobs:
           chmod 700 ~/.ssh
           ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
 
-      - name: SSH and run deploy/s8-reopen-demos.sh
+      - name: Resolve SSH login + run S8
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
@@ -51,19 +54,51 @@ jobs:
           test -n "${VPS_HOST:-}" || { echo "Missing secret VPS_HOST"; exit 1; }
           test -n "${VPS_USER:-}" || { echo "Missing secret VPS_USER"; exit 1; }
 
+          echo "::group::Deploy public key (add to VPS authorized_keys if auth fails)"
+          ssh-add -L || true
+          ssh-add -l || true
+          echo "::endgroup::"
+
           REMOTE_CMD='CONFIRM=yes bash deploy/s8-reopen-demos.sh'
           if [[ "$MODE" == "dry-run" ]]; then
             REMOTE_CMD+=' --dry-run'
           fi
 
-          # Diagnose which identities the agent holds (fingerprints only).
-          ssh-add -l || true
+          # Prefer configured user, then common droplet logins.
+          CANDIDATES=("$VPS_USER")
+          for u in root ubuntu debian esti deploy; do
+            if [[ "$u" != "$VPS_USER" ]]; then
+              CANDIDATES+=("$u")
+            fi
+          done
+
+          LOGIN=""
+          for u in "${CANDIDATES[@]}"; do
+            echo "Trying ${u}@${VPS_HOST} …"
+            if ssh -o IdentitiesOnly=yes \
+              -o StrictHostKeyChecking=yes \
+              -o BatchMode=yes \
+              -o PreferredAuthentications=publickey \
+              -o ConnectTimeout=12 \
+              "${u}@${VPS_HOST}" "echo ok" 2>/dev/null; then
+              LOGIN="$u"
+              echo "Authenticated as ${LOGIN}"
+              break
+            fi
+          done
+
+          if [[ -z "$LOGIN" ]]; then
+            echo "::error::SSH publickey rejected for all candidates (${CANDIDATES[*]})."
+            echo "Add the deploy public key above to authorized_keys on the VPS, then re-run."
+            echo "Fingerprint: $(ssh-add -l | head -1)"
+            exit 1
+          fi
 
           ssh -o IdentitiesOnly=yes \
             -o StrictHostKeyChecking=yes \
             -o BatchMode=yes \
             -o PreferredAuthentications=publickey \
-            "${VPS_USER}@${VPS_HOST}" \
+            "${LOGIN}@${VPS_HOST}" \
             "set -euo pipefail
              cd /opt/esti
              git fetch origin main
