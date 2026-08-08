@@ -25,7 +25,6 @@ import {
   pmcRaBills,
   pmcSteelCerts,
   portalSubmissions,
-  progressReports,
   projectOffices,
   teamMembers,
   transmittals,
@@ -41,6 +40,7 @@ import {
   portalConfirmedSiteVisits,
   portalIssuedInspections,
   portalIssuedInvoices,
+  portalIssuedProgressReports,
   portalIssuedTransmittals,
   portalPublishedRunningBills,
   portalReadyDrawings,
@@ -336,44 +336,57 @@ export const portalRouter = router({
       .orderBy(desc(consDeliverables.issuedAt));
   }),
 
-  /** AProc — issued progress reports for the client's projects. */
+  /** Issued progress reports for the client's projects (hub published store when ESTI_ROLE=hub). */
   issuedProgressReports: clientProcedure
     .input(z.object({ projectId: z.string().uuid() }).optional())
     .query(async ({ ctx, input }) => {
       const owned = await ctx.db
-        .select({ id: projectOffices.id })
+        .select({
+          id: projectOffices.id,
+          ref: projectOffices.ref,
+          title: projectOffices.title,
+        })
         .from(projectOffices)
         .where(eq(projectOffices.clientId, ctx.user.clientId));
-      const ids = owned.map((p) => p.id);
-      if (ids.length === 0) return [];
-      if (input?.projectId) {
-        if (!ids.includes(input.projectId)) throw new TRPCError({ code: "FORBIDDEN" });
+      if (owned.length === 0) return [];
+      if (input?.projectId && !owned.some((p) => p.id === input.projectId)) {
+        throw new TRPCError({ code: "FORBIDDEN" });
       }
-      return ctx.db
-        .select({
-          id: progressReports.id,
-          projectId: progressReports.projectId,
-          projectRef: projectOffices.ref,
-          projectTitle: projectOffices.title,
-          periodStart: progressReports.periodStart,
-          periodEnd: progressReports.periodEnd,
-          physicalProgressPct: progressReports.physicalProgressPct,
-          openSnagCount: progressReports.openSnagCount,
-          status: progressReports.status,
-          pdfKey: progressReports.pdfKey,
-          pdfStatus: progressReports.pdfStatus,
-        })
-        .from(progressReports)
-        .innerJoin(projectOffices, eq(progressReports.projectId, projectOffices.id))
-        .where(
-          and(
-            eq(progressReports.status, "ISSUED"),
-            input?.projectId
-              ? eq(progressReports.projectId, input.projectId)
-              : inArray(progressReports.projectId, ids),
-          ),
-        )
-        .orderBy(desc(progressReports.periodEnd));
+      const targets = input?.projectId
+        ? owned.filter((p) => p.id === input.projectId)
+        : owned;
+      const out: Array<{
+        id: string;
+        projectId: string;
+        projectRef: string;
+        projectTitle: string;
+        periodStart: string;
+        periodEnd: string;
+        physicalProgressPct: number | null;
+        openSnagCount: number | null;
+        status: string;
+        pdfKey: string | null;
+        pdfStatus: string;
+      }> = [];
+      for (const proj of targets) {
+        const rows = await portalIssuedProgressReports(ctx.db, proj.id);
+        for (const r of rows) {
+          out.push({
+            id: r.id,
+            projectId: proj.id,
+            projectRef: proj.ref,
+            projectTitle: proj.title,
+            periodStart: r.periodStart,
+            periodEnd: r.periodEnd,
+            physicalProgressPct: r.physicalProgressPct,
+            openSnagCount: r.openSnagCount,
+            status: r.status,
+            pdfKey: null,
+            pdfStatus: "NONE",
+          });
+        }
+      }
+      return out;
     }),
 
   /** AProc — certified / sent RA bills for the client's projects. */

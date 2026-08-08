@@ -513,6 +513,8 @@ export function Portal() {
         loading={!!openId && detailQ.isLoading}
         project={d?.project ?? null}
         phases={d?.phases ?? []}
+        tenders={d?.tenders ?? []}
+        siteReference={d?.siteReference ?? null}
       />
     ),
     progress: (
@@ -520,6 +522,8 @@ export function Portal() {
         loading={!!openId && (detailQ.isLoading || progressReportsQ.isLoading)}
         reports={progressReportsQ.data ?? []}
         phases={d?.phases}
+        inspections={d?.inspections ?? []}
+        siteVisits={d?.siteVisits ?? []}
       />
     ),
     drawings: (

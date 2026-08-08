@@ -1,4 +1,4 @@
-import { Box, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Button, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import type { ReactNode } from "react";
 import { DataState } from "../DataState.js";
@@ -13,6 +13,34 @@ type ProgressRow = {
   physicalProgressPct: number | null;
   openSnagCount: number | null;
   status: string;
+};
+type InspectionRow = {
+  id: string;
+  ref: string;
+  dateVisit: string | null;
+  status: string;
+  inspectorName: string | null;
+  progress: string | null;
+  pdfUrl: string | null;
+};
+type SiteVisitRow = {
+  id: string;
+  plannedDate: string;
+  status: string;
+  notes: string | null;
+};
+type TenderRow = {
+  id: string;
+  title: string;
+  category: string | null;
+  status: string;
+  dueDate: string | null;
+};
+type SiteReferenceRow = {
+  id: string;
+  pdfStatus: string | null;
+  generatedAt: Date | string | null;
+  pdfUrl: string | null;
 };
 type DrawingRow = { id: string; ref: string; title: string; status: string };
 type TransmittalRow = {
@@ -85,13 +113,19 @@ export function FirmPortalProjectPanel({
   loading,
   project,
   phases,
+  tenders,
+  siteReference,
   pickProjectHint,
 }: {
   loading: boolean;
   project: ProjectSummary | null;
   phases: PhaseRow[];
+  tenders?: TenderRow[];
+  siteReference?: SiteReferenceRow | null;
   pickProjectHint?: string;
 }) {
+  const awarded = tenders ?? [];
+  const siteRef = siteReference ?? null;
   if (!project && !loading) {
     return (
       <PanelShell title="Project" hint={pickProjectHint ?? "Open a project from Updates to see summary and stages."}>
@@ -102,7 +136,7 @@ export function FirmPortalProjectPanel({
     );
   }
   return (
-    <PanelShell title="Project" hint="Published project summary and stage status.">
+    <PanelShell title="Project" hint="Published project summary, stages, awarded tenders, and site reference.">
       <DataState loading={loading} isEmpty={!project} columnCount={2} empty={{ title: "No project", description: "" }}>
         {project && (
           <Stack spacing={2}>
@@ -140,6 +174,60 @@ export function FirmPortalProjectPanel({
                 </TableBody>
               </Table>
             </Box>
+            {siteRef && (
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
+                  Site reference
+                </Typography>
+                {siteRef.pdfUrl ? (
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => window.open(siteRef.pdfUrl!, "_blank", "noopener,noreferrer")}
+                  >
+                    Download feasibility PDF
+                  </Button>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    {siteRef.pdfStatus === "READY"
+                      ? "PDF unavailable"
+                      : `Feasibility report · ${siteRef.pdfStatus ?? "NONE"}`}
+                  </Typography>
+                )}
+              </Box>
+            )}
+            {awarded.length > 0 && (
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
+                  Awarded tenders
+                </Typography>
+                <DataGrid
+                  rows={awarded}
+                  getRowId={(r) => r.id}
+                  columns={[
+                    { field: "title", headerName: "Title", flex: 2, minWidth: 160 },
+                    {
+                      field: "category",
+                      headerName: "Category",
+                      flex: 1,
+                      minWidth: 100,
+                      valueGetter: (v) => v ?? "—",
+                    },
+                    { field: "status", headerName: "Status", flex: 0.8, minWidth: 90 },
+                    {
+                      field: "dueDate",
+                      headerName: "Due",
+                      flex: 1,
+                      minWidth: 110,
+                      valueGetter: (v) => v ?? "—",
+                    },
+                  ]}
+                  disableRowSelectionOnClick
+                  autoHeight
+                  hideFooter
+                />
+              </Box>
+            )}
           </Stack>
         )}
       </DataState>
@@ -147,20 +235,28 @@ export function FirmPortalProjectPanel({
   );
 }
 
-/** Progress tab — issued progress reports (+ optional stage %). */
+/** Progress tab — issued progress reports, inspections, confirmed site visits. */
 export function FirmPortalProgressPanel({
   loading,
   reports,
   phases,
+  inspections,
+  siteVisits,
 }: {
   loading: boolean;
   reports: ProgressRow[];
   phases?: PhaseRow[];
+  inspections?: InspectionRow[];
+  siteVisits?: SiteVisitRow[];
 }) {
+  const insp = inspections ?? [];
+  const visits = siteVisits ?? [];
+  const empty =
+    !loading && reports.length === 0 && insp.length === 0 && visits.length === 0;
   return (
     <PanelShell
       title="Progress"
-      hint="Phase status and issued progress reports from the firm (hub-published when on hub role)."
+      hint="Phase status, issued progress reports, inspections, and confirmed site visits (hub-published when on hub role)."
     >
       {phases && phases.length > 0 && (
         <Box sx={{ mb: 1 }}>
@@ -183,26 +279,110 @@ export function FirmPortalProgressPanel({
       )}
       <DataState
         loading={loading}
-        isEmpty={!loading && reports.length === 0}
+        isEmpty={empty}
         columnCount={3}
         empty={{
-          title: "No progress reports yet",
-          description: "Issued period reports will list here once the firm publishes them.",
+          title: "No progress yet",
+          description: "Issued reports, inspections, and confirmed visits will list here once the firm publishes them.",
         }}
       >
-        <Stack spacing={1}>
-          {reports.map((r) => (
-            <Box key={r.id} sx={{ py: 1, borderBottom: 1, borderColor: "divider" }}>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {r.periodStart} → {r.periodEnd}
+        <Stack spacing={3}>
+          {reports.length > 0 && (
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
+                Progress reports
               </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {r.physicalProgressPct != null ? `${r.physicalProgressPct}% physical · ` : ""}
-                {r.openSnagCount != null ? `${r.openSnagCount} open snags · ` : ""}
-                {r.status}
-              </Typography>
+              <Stack spacing={1}>
+                {reports.map((r) => (
+                  <Box key={r.id} sx={{ py: 1, borderBottom: 1, borderColor: "divider" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {r.periodStart} → {r.periodEnd}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {r.physicalProgressPct != null ? `${r.physicalProgressPct}% physical · ` : ""}
+                      {r.openSnagCount != null ? `${r.openSnagCount} open snags · ` : ""}
+                      {r.status}
+                    </Typography>
+                  </Box>
+                ))}
+              </Stack>
             </Box>
-          ))}
+          )}
+          {insp.length > 0 && (
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
+                Inspections
+              </Typography>
+              <DataGrid
+                rows={insp}
+                getRowId={(r) => r.id}
+                columns={[
+                  { field: "ref", headerName: "Ref", flex: 1, minWidth: 110 },
+                  {
+                    field: "dateVisit",
+                    headerName: "Visit",
+                    flex: 1,
+                    minWidth: 110,
+                    valueGetter: (v) => v ?? "—",
+                  },
+                  {
+                    field: "inspectorName",
+                    headerName: "Inspector",
+                    flex: 1,
+                    minWidth: 120,
+                    valueGetter: (v) => v ?? "—",
+                  },
+                  { field: "status", headerName: "Status", flex: 0.8, minWidth: 90 },
+                  {
+                    field: "pdfUrl",
+                    headerName: "PDF",
+                    flex: 0.7,
+                    minWidth: 90,
+                    sortable: false,
+                    renderCell: (p) =>
+                      p.row.pdfUrl ? (
+                        <Button
+                          size="small"
+                          onClick={() => window.open(p.row.pdfUrl!, "_blank", "noopener,noreferrer")}
+                        >
+                          Open
+                        </Button>
+                      ) : (
+                        "—"
+                      ),
+                  },
+                ]}
+                disableRowSelectionOnClick
+                autoHeight
+                hideFooter
+              />
+            </Box>
+          )}
+          {visits.length > 0 && (
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
+                Confirmed site visits
+              </Typography>
+              <DataGrid
+                rows={visits}
+                getRowId={(r) => r.id}
+                columns={[
+                  { field: "plannedDate", headerName: "Date", flex: 1, minWidth: 120 },
+                  { field: "status", headerName: "Status", flex: 0.8, minWidth: 100 },
+                  {
+                    field: "notes",
+                    headerName: "Notes",
+                    flex: 2,
+                    minWidth: 160,
+                    valueGetter: (v) => v ?? "—",
+                  },
+                ]}
+                disableRowSelectionOnClick
+                autoHeight
+                hideFooter
+              />
+            </Box>
+          )}
         </Stack>
       </DataState>
     </PanelShell>
