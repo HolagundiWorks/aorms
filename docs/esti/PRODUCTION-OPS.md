@@ -51,6 +51,17 @@ gh workflow run s8-reopen-demos.yml -f mode=dry-run
 gh workflow run s8-reopen-demos.yml -f mode=apply
 ```
 
+If Actions fails with `Permission denied (publickey)`, the droplet no longer
+trusts `VPS_SSH_KEY`. Via the provider console (or any working SSH session), append
+the deploy pubkey to `~/.ssh/authorized_keys` for `VPS_USER` (usually `root`):
+
+```text
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzNk7P4spTM1FBfiiZiIa9k6asphlWNgW4lanTI04DT aorms-deploy-github-actions
+```
+
+Then re-run `gh workflow run s8-reopen-demos.yml -f mode=apply`.
+
+
 Manual equivalent: set `VITE_MARKETING_ONLY=false` in `/opt/esti/.env`, then
 `bash deploy/update.sh`. Keep `VITE_INSTALLERS_COMING_SOON` default / true until D6
 (signed URL + sha256 + `VITE_PORTAL_USE_RELEASE_INSTALLERS`). See [ROADMAP.md](ROADMAP.md).

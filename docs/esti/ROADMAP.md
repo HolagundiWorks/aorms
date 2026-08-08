@@ -83,11 +83,13 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | Honest portal tabs · installers decoupled from auth gate | ✅ |
 | Landing/dock CTAs + FAQ follow marketing gate | ✅ |
 | `deploy/s8-reopen-demos.sh` (`CONFIRM=yes`) | ✅ |
-| VPS env flip (`VITE_MARKETING_ONLY=false`) | 🔲 operator |
+| VPS env flip (`VITE_MARKETING_ONLY=false`) | 🔲 blocked — deploy key not in VPS `authorized_keys` |
+| Actions runner | ✅ `gh workflow run s8-reopen-demos.yml` (needs pubkey auth) |
 
 ### Then
 
-1. **S8 VPS flip** — `CONFIRM=yes bash deploy/s8-reopen-demos.sh` when ready to reopen `/login` demos (seed has client/contractor/collab portals).  
+1. **S8 VPS flip** — add deploy pubkey below to the droplet, then `gh workflow run s8-reopen-demos.yml -f mode=apply` (or `CONFIRM=yes bash deploy/s8-reopen-demos.sh` on the box).  
+   Pubkey: `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzNk7P4spTM1FBfiiZiIa9k6asphlWNgW4lanTI04DT aorms-deploy-github-actions`  
 2. **D6** — Trusted Authenticode → upload → `apply-installer-manifest.ps1 -ConfirmFlip` → release flag + rebuild. Prefer Connect first.  
 3. Hub-portal SyncEntity allow-list ✅ · client portal UI surfaces tenders/inspections/visits/siteRef/running bills · AProc pmc RA stays live · portal tenants after D6.
 
