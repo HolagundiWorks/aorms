@@ -1,18 +1,17 @@
 import { TenderBidSubmit } from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, isNotNull } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import {
-  drawings,
   firm,
   phases,
   projectOffices,
   tenderBids,
   tenderInvitations,
   tenders,
-  transmittals,
 } from "../../db/schema.js";
 import { writeAudit } from "../../lib/audit.js";
+import { portalIssuedTransmittals, portalReadyDrawings } from "../../lib/sync/hubPortal.js";
 import { contractorProcedure, contractorWriteProcedure, router } from "../../trpc/trpc.js";
 
 /**
@@ -164,28 +163,8 @@ export const contractorPortalRouter = router({
       const currentSortOrder =
         phaseRows.find((p) => p.id === row.currentPhaseId)?.sortOrder ?? -1;
 
-      const drawingRows = await ctx.db
-        .select({
-          id: drawings.id,
-          ref: drawings.ref,
-          title: drawings.title,
-          status: drawings.status,
-        })
-        .from(drawings)
-        .where(and(eq(drawings.projectId, row.projectId), eq(drawings.status, "READY")))
-        .orderBy(desc(drawings.createdAt));
-
-      const transmittalRows = await ctx.db
-        .select({
-          id: transmittals.id,
-          ref: transmittals.ref,
-          purpose: transmittals.purpose,
-          channel: transmittals.channel,
-          dateIssued: transmittals.dateIssued,
-        })
-        .from(transmittals)
-        .where(and(eq(transmittals.projectId, row.projectId), isNotNull(transmittals.dateIssued)))
-        .orderBy(desc(transmittals.dateIssued));
+      const drawingRows = await portalReadyDrawings(ctx.db, row.projectId);
+      const transmittalRows = await portalIssuedTransmittals(ctx.db, row.projectId);
 
       return {
         project: {
@@ -207,7 +186,13 @@ export const contractorPortalRouter = router({
                 : "Pending",
         })),
         drawings: drawingRows,
-        transmittals: transmittalRows,
+        transmittals: transmittalRows.map((t) => ({
+          id: t.id,
+          ref: t.ref,
+          purpose: t.purpose,
+          channel: t.channel,
+          dateIssued: t.dateIssued,
+        })),
       };
     }),
 

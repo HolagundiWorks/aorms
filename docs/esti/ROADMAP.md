@@ -89,7 +89,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 
 1. **S8 VPS flip** — `CONFIRM=yes bash deploy/s8-reopen-demos.sh` when ready to reopen `/login` demos (seed has client/contractor/collab portals).  
 2. **D6** — Trusted Authenticode → upload → `apply-installer-manifest.ps1 -ConfirmFlip` → release flag + rebuild. Prefer Connect first.  
-3. Hub-portal allow-list parity · portal tenants when signed installers are live.
+3. Hub-portal allow-list parity (drawings/tx/progress ✅ · invoice/approval/RA/inspection next) · portal tenants when signed installers are live.
 
 ## Deferred
 

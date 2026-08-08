@@ -1,20 +1,20 @@
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, isNotNull } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
-import {
-  drawings,
-  phases,
-  progressReports,
-  projectOffices,
-  transmittals,
-} from "../../db/schema.js";
+import { phases, projectOffices } from "../../db/schema.js";
 import { assertProjectAccess } from "../../lib/projectAccess.js";
+import {
+  portalIssuedProgressReports,
+  portalIssuedTransmittals,
+  portalReadyDrawings,
+} from "../../lib/sync/hubPortal.js";
 import { siteProcedure } from "../inspection/siteProcedure.js";
 import { router } from "../../trpc/trpc.js";
 
 /**
  * Site supervisor firm-portal depth (S10) — project · progress · drawings.
  * Scoped via assertProjectAccess (assigned / created projects).
+ * Hub role: published artifact store via hubPortal helpers.
  */
 export const sitePortalRouter = router({
   projectDetail: siteProcedure
@@ -48,28 +48,8 @@ export const sitePortalRouter = router({
       const currentSortOrder =
         phaseRows.find((p) => p.id === project.currentPhaseId)?.sortOrder ?? -1;
 
-      const drawingRows = await ctx.db
-        .select({
-          id: drawings.id,
-          ref: drawings.ref,
-          title: drawings.title,
-          status: drawings.status,
-        })
-        .from(drawings)
-        .where(and(eq(drawings.projectId, input.projectId), eq(drawings.status, "READY")))
-        .orderBy(desc(drawings.createdAt));
-
-      const transmittalRows = await ctx.db
-        .select({
-          id: transmittals.id,
-          ref: transmittals.ref,
-          purpose: transmittals.purpose,
-          channel: transmittals.channel,
-          dateIssued: transmittals.dateIssued,
-        })
-        .from(transmittals)
-        .where(and(eq(transmittals.projectId, input.projectId), isNotNull(transmittals.dateIssued)))
-        .orderBy(desc(transmittals.dateIssued));
+      const drawingRows = await portalReadyDrawings(ctx.db, input.projectId);
+      const transmittalRows = await portalIssuedTransmittals(ctx.db, input.projectId);
 
       return {
         project: {
@@ -91,7 +71,13 @@ export const sitePortalRouter = router({
                 : "Pending",
         })),
         drawings: drawingRows,
-        transmittals: transmittalRows,
+        transmittals: transmittalRows.map((t) => ({
+          id: t.id,
+          ref: t.ref,
+          purpose: t.purpose,
+          channel: t.channel,
+          dateIssued: t.dateIssued,
+        })),
       };
     }),
 
@@ -99,22 +85,6 @@ export const sitePortalRouter = router({
     .input(z.object({ projectId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       await assertProjectAccess(ctx.db, ctx.user, input.projectId);
-      return ctx.db
-        .select({
-          id: progressReports.id,
-          periodStart: progressReports.periodStart,
-          periodEnd: progressReports.periodEnd,
-          physicalProgressPct: progressReports.physicalProgressPct,
-          openSnagCount: progressReports.openSnagCount,
-          status: progressReports.status,
-        })
-        .from(progressReports)
-        .where(
-          and(
-            eq(progressReports.projectId, input.projectId),
-            eq(progressReports.status, "ISSUED"),
-          ),
-        )
-        .orderBy(desc(progressReports.periodEnd));
+      return portalIssuedProgressReports(ctx.db, input.projectId);
     }),
 });

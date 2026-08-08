@@ -9,7 +9,7 @@ import {
   PortalFeedbackInput,
 } from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "../../db/index.js";
 import {
@@ -37,7 +37,7 @@ import { runAiGateway } from "../../lib/ai/gateway.js";
 import { getFirm } from "../../lib/firm.js";
 import { assertPlanFeature } from "../../lib/plan.js";
 import { getOrgSettings } from "../../lib/settings.js";
-import { hubPublishedForProject, portalReadsFromHub, publishedPayloadRows } from "../../lib/sync/hubPortal.js";
+import { hubPublishedForProject, portalIssuedProgressReports, portalIssuedTransmittals, portalReadyDrawings, portalReadsFromHub, publishedPayloadRows } from "../../lib/sync/hubPortal.js";
 import { presignedGet } from "../../lib/storage.js";
 import { addMessage, listMessages } from "../../lib/submissionThread.js";
 import { clientProcedure, router } from "../../trpc/trpc.js";
@@ -201,67 +201,10 @@ export const portalRouter = router({
       }
 
       // Only drawings the worker has finished processing.
-      let drawingRows: Array<{ id: string; ref: string; title: string; status: string }>;
-      if (portalReadsFromHub()) {
-        drawingRows = publishedPayloadRows<{
-          ref: string;
-          title: string;
-          status: string;
-        }>(await hubPublishedForProject(ctx.db, "drawing", input.projectId))
-          .filter((d) => d.status === "READY")
-          .map((d) => ({ id: d.id, ref: d.ref, title: d.title, status: d.status }));
-      } else {
-        drawingRows = await ctx.db
-          .select({ id: drawings.id, ref: drawings.ref, title: drawings.title, status: drawings.status })
-          .from(drawings)
-          .where(and(eq(drawings.projectId, input.projectId), eq(drawings.status, "READY")))
-          .orderBy(desc(drawings.createdAt));
-      }
+      const drawingRows = await portalReadyDrawings(ctx.db, input.projectId);
 
       // Drawing / deliverable transmittals that have actually been issued to the client.
-      let transmittalRows: Array<{
-        id: string;
-        ref: string;
-        recipient: string | null;
-        purpose: string | null;
-        channel: string | null;
-        dateIssued: string | null;
-        acknowledgedAt: Date | null;
-        acknowledgedBy: string | null;
-      }>;
-      if (portalReadsFromHub()) {
-        transmittalRows = publishedPayloadRows<{
-          ref: string;
-          recipient: string | null;
-          purpose: string | null;
-          channel: string | null;
-          dateIssued: string | null;
-        }>(await hubPublishedForProject(ctx.db, "transmittal", input.projectId)).map((t) => ({
-          id: t.id,
-          ref: t.ref,
-          recipient: t.recipient,
-          purpose: t.purpose,
-          channel: t.channel,
-          dateIssued: t.dateIssued,
-          acknowledgedAt: null,
-          acknowledgedBy: null,
-        }));
-      } else {
-        transmittalRows = await ctx.db
-          .select({
-            id: transmittals.id,
-            ref: transmittals.ref,
-            recipient: transmittals.recipient,
-            purpose: transmittals.purpose,
-            channel: transmittals.channel,
-            dateIssued: transmittals.dateIssued,
-            acknowledgedAt: transmittals.acknowledgedAt,
-            acknowledgedBy: transmittals.acknowledgedBy,
-          })
-          .from(transmittals)
-          .where(and(eq(transmittals.projectId, input.projectId), isNotNull(transmittals.dateIssued)))
-          .orderBy(desc(transmittals.dateIssued));
-      }
+      const transmittalRows = await portalIssuedTransmittals(ctx.db, input.projectId);
       return {
         project: {
           ref: project.ref,

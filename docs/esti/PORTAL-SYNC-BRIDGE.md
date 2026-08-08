@@ -131,7 +131,7 @@ Unchanged from HUB-API / contracts:
 | 2 | AQC | `aorms_bridge` activate + Flush meta smoke |
 | 3 | AQC | Artifact ingest + portal read via hub |
 | 4 | shared | Package bridge for AStudio / AConsulting forks |
-| 5 | esti hub | Extend `hubPortal` coverage for all allow-list entities |
+| 5 | esti hub | 🟡 Shared helpers: drawings · transmittals · progressReport on all firm portals. Still open: invoice · approval · tender · runningBill · inspection · siteVisit · siteReference |
 
 Spike tracker: [AQC-BRIDGE-SPIKE.md](AQC-BRIDGE-SPIKE.md).
 

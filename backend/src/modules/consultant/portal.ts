@@ -1,20 +1,19 @@
 import { canAcknowledgeTransmittal, ConsultantSubmitInput } from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, isNotNull, ne } from "drizzle-orm";
+import { and, asc, desc, eq, ne } from "drizzle-orm";
 import { z } from "zod";
 import {
   activities,
   consultantSubmissions,
-  drawings,
   engagements,
   phases,
-  progressReports,
   projectOffices,
   transmittals,
 } from "../../db/schema.js";
 import type { DB } from "../../db/index.js";
 import { writeActivity } from "../../lib/activity.js";
 import { getFirm } from "../../lib/firm.js";
+import { portalIssuedProgressReports, portalIssuedTransmittals, portalReadyDrawings } from "../../lib/sync/hubPortal.js";
 import { presignedGet } from "../../lib/storage.js";
 import { addMessage, listMessages } from "../../lib/submissionThread.js";
 import { collaboratorProcedure, router } from "../../trpc/trpc.js";
@@ -82,26 +81,8 @@ export const collaboratorRouter = router({
         .orderBy(asc(phases.sortOrder));
       const currentSortOrder = phaseRows.find((p) => p.id === project!.currentPhaseId)?.sortOrder ?? -1;
 
-      const drawingRows = await ctx.db
-        .select({ ref: drawings.ref, title: drawings.title })
-        .from(drawings)
-        .where(and(eq(drawings.projectId, input.projectId), eq(drawings.status, "READY")))
-        .orderBy(desc(drawings.createdAt));
-
-      // Issued drawing transmittals (S10 Drawings tab — same shape as client portal).
-      const transmittalRows = await ctx.db
-        .select({
-          id: transmittals.id,
-          ref: transmittals.ref,
-          purpose: transmittals.purpose,
-          channel: transmittals.channel,
-          dateIssued: transmittals.dateIssued,
-          acknowledgedAt: transmittals.acknowledgedAt,
-          acknowledgedBy: transmittals.acknowledgedBy,
-        })
-        .from(transmittals)
-        .where(and(eq(transmittals.projectId, input.projectId), isNotNull(transmittals.dateIssued)))
-        .orderBy(desc(transmittals.dateIssued));
+      const drawingRows = await portalReadyDrawings(ctx.db, input.projectId);
+      const transmittalRows = await portalIssuedTransmittals(ctx.db, input.projectId);
 
       return {
         project: {
@@ -125,7 +106,7 @@ export const collaboratorRouter = router({
             : ph.id === project!.currentPhaseId ? "Active"
             : "Pending",
         })),
-        drawings: drawingRows,
+        drawings: drawingRows.map((d) => ({ ref: d.ref, title: d.title })),
         transmittals: transmittalRows,
       };
     }),
@@ -135,23 +116,7 @@ export const collaboratorRouter = router({
     .input(z.object({ projectId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       await assertEngaged(ctx, input.projectId);
-      return ctx.db
-        .select({
-          id: progressReports.id,
-          periodStart: progressReports.periodStart,
-          periodEnd: progressReports.periodEnd,
-          physicalProgressPct: progressReports.physicalProgressPct,
-          openSnagCount: progressReports.openSnagCount,
-          status: progressReports.status,
-        })
-        .from(progressReports)
-        .where(
-          and(
-            eq(progressReports.projectId, input.projectId),
-            eq(progressReports.status, "ISSUED"),
-          ),
-        )
-        .orderBy(desc(progressReports.periodEnd));
+      return portalIssuedProgressReports(ctx.db, input.projectId);
     }),
 
   /** Acknowledge receipt of an issued drawing transmittal (S10 · SOP §3). */
