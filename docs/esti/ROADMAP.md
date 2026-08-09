@@ -102,6 +102,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | W2 | **S12** Remove remaining `@carbon/react` from esti SPA | ✅ |
 | W3 | AConsulting Engagements/Projects stage on HCW dock | ✅ |
 | W4 | AStudio S2c Portfolio / Focus polish | ✅ |
+| W5+ | Pin Connect · AStudio · AConsulting `vendor/AQC` → `5f553cb` (JM + OutboxCounts) | ✅ |
 
 ### Ops-blocked (need human)
 
