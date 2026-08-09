@@ -1,4 +1,11 @@
-import { Button, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
+import {
+  Alert,
+  AlertTitle,
+  Button,
+  MenuItem,
+  Stack,
+  TextField,
+} from "@mui/material";
 import { Add } from "@carbon/icons-react";
 import { MasterPlanCategory } from "@esti/contracts";
 import { useRef, useState } from "react";
@@ -119,25 +126,14 @@ export function MasterPlanLibrary() {
       title="Master Plan Library"
       description="Reference master plans — PDF, DWG, zoning and development plans."
       aside={
-        <Stack gap={4}>
-          <TextInput
-            id="mp-name"
-            labelText="Name"
-            placeholder="e.g. Whitefield zoning plan"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <Select
-            id="mp-cat"
-            labelText="Category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
+        <Stack spacing={2}>
+          <TextField id="mp-name" label="Name" placeholder="e.g. Whitefield zoning plan" value={name} onChange={(e) => setName(e.target.value)} size="small" />
+          <TextField id="mp-cat" label="Category" value={category} onChange={(e) => setCategory(e.target.value)} select size="small">
             {MasterPlanCategory.options.map((c) => (
-              <SelectItem key={c} value={c} text={c} />
+              <MenuItem key={c} value={c}>{c}</MenuItem>
             ))}
-          </Select>
-          <Button kind="tertiary" onClick={() => fileRef.current?.click()}>
+          </TextField>
+          <Button variant="outlined" onClick={() => fileRef.current?.click()}>
             {file ? file.name : "Choose file"}
           </Button>
           <input
@@ -148,13 +144,7 @@ export function MasterPlanLibrary() {
             style={{ display: "none" }}
           />
           {error && (
-            <InlineNotification
-              kind="error"
-              lowContrast
-              title="Upload failed"
-              subtitle={error}
-              onCloseButtonClick={() => setError(null)}
-            />
+            <Alert severity="error" onClose={() => setError(null)}><AlertTitle>Upload failed</AlertTitle>{error}</Alert>
           )}
         </Stack>
       }

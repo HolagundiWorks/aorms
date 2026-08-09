@@ -1,4 +1,11 @@
-﻿**2026-08-09 — AEC landing redesign.** Full-bleed Entourage hero (brand · AEC
+﻿**2026-08-09 — Carbon React removed from SPA.** Zero `@carbon/react` imports
+under `frontend/src` (incl. platform-admin). Adapters: DataGrid →
+`@mui/x-data-grid`; PageBreadcrumb → kit; CarbonScope passthrough. Routes/components
+use MUI Dialog/TextField/Alert/DataGrid + kit primitives. Dependency
+`@carbon/react` dropped from `frontend/package.json`. Frozen `--cds-*` in
+`styles.scss` + `@carbon/styles` / `@carbon/icons-react` remain for compat.
+
+**2026-08-09 — AEC landing redesign.** Full-bleed Entourage hero (brand · AEC
 headline · Coming soon); Architecture / Engineering audience peers; Outcomes as
 list bands; managers-first Platform; hero stagger + reveal + entourage drift
 (`prefers-reduced-motion`). SEO + LANDING-REDESIGN-CONTEXT synced.

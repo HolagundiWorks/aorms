@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react";
 import {
+  Alert,
+  AlertTitle,
   Button,
-  InlineNotification,
-  Modal,
-  Select,
-  SelectItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
   Stack,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+} from "@mui/material";
+import { useEffect, useState } from "react";
 import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { DataGrid, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../lib/trpc";
@@ -103,7 +106,7 @@ export default function ApiKeysTab() {
       width: 110,
       renderCell: (p) =>
         p.row.status === "ACTIVE" ? (
-          <Button kind="danger--ghost" size="sm" onClick={() => revoke(p.row.id)}>
+          <Button color="error" variant="text" size="small" onClick={() => revoke(p.row.id)}>
             Revoke
           </Button>
         ) : null,
@@ -112,27 +115,19 @@ export default function ApiKeysTab() {
 
   return (
     <CarbonScope>
-      <Stack gap={5}>
+      <Stack spacing={2.5}>
         <div>
-          <Button
-            onClick={() => {
+          <Button onClick={() => {
               setGenerated(null);
               setError(null);
               setOpen(true);
-            }}
-          >
+            }}>
             Generate API key
           </Button>
         </div>
 
         {generated && (
-          <InlineNotification
-            kind="success"
-            lowContrast
-            title="API key created"
-            subtitle={`Copy it now (shown once): ${generated}`}
-            onCloseButtonClick={() => setGenerated(null)}
-          />
+          <Alert severity="success" onClose={() => setGenerated(null)}><AlertTitle>API key created</AlertTitle>{`Copy it now (shown once): ${generated}`}</Alert>
         )}
 
         <DataGrid
@@ -145,38 +140,32 @@ export default function ApiKeysTab() {
           autoHeight
         />
 
-        <Modal
-          open={open}
-          size="sm"
-          modalHeading="Generate API key"
-          primaryButtonText="Generate"
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!productId || !label}
-          onRequestClose={() => setOpen(false)}
-          onRequestSubmit={generate}
-        >
-          <Stack gap={5}>
-            <Select id="ak-product" labelText="Product" value={productId} onChange={(e) => setProductId(e.target.value)}>
+        <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>Generate API key</DialogTitle>
+      <DialogContent>
+
+          <Stack spacing={2.5}>
+            <TextField id="ak-product" label="Product" value={productId} onChange={(e) => setProductId(e.target.value)} select size="small">
               {products.map((p) => (
-                <SelectItem key={p.id} value={p.id} text={p.name} />
+                <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
               ))}
-            </Select>
-            <Select
-              id="ak-org"
-              labelText="Bind to organization"
-              helperText="Recommended for a per-install key — it can then only act for this customer. Leave as product-wide only for a shared/legacy key."
-              value={orgId}
-              onChange={(e) => setOrgId(e.target.value)}
-            >
-              <SelectItem value="" text="Product-wide (no org binding)" />
+            </TextField>
+            <TextField id="ak-org" label="Bind to organization" helperText="Recommended for a per-install key — it can then only act for this customer. Leave as product-wide only for a shared/legacy key." value={orgId} onChange={(e) => setOrgId(e.target.value)} select size="small">
+              <MenuItem value="">Product-wide (no org binding)</MenuItem>
               {orgs.map((o) => (
-                <SelectItem key={o.id} value={o.id} text={o.name} />
+                <MenuItem key={o.id} value={o.id}>{o.name}</MenuItem>
               ))}
-            </Select>
-            <TextInput id="ak-label" labelText="Label" value={label} onChange={(e) => setLabel(e.target.value)} />
-            {error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={error} />}
+            </TextField>
+            <TextField id="ak-label" label="Label" value={label} onChange={(e) => setLabel(e.target.value)} size="small" />
+            {error && <Alert severity="error"><AlertTitle>Error</AlertTitle>{error}</Alert>}
           </Stack>
-        </Modal>
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setOpen(false)}>Cancel</Button>
+        <Button variant="contained" disabled={!productId || !label} onClick={generate}>Generate</Button>
+      </DialogActions>
+    </Dialog>
       </Stack>
     </CarbonScope>
   );

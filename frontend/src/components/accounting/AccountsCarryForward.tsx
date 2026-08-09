@@ -1,6 +1,5 @@
-import { Stack } from "@carbon/react";
+import { Stack, Typography } from "@mui/material";
 import { formatINR, type PeriodFilterInput } from "@esti/contracts";
-import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { StatusDot } from "../../carbon/adapters/index.js";
 import { PeriodFilter } from "../PeriodFilter.js";
 import { trpc } from "../../lib/trpc.js";
@@ -10,7 +9,7 @@ const SECONDARY = { color: "var(--cds-text-secondary)" } as const;
 
 /**
  * Financial-year bar for the accounts rail — period selector plus carried-forward
- * summaries. Single-column for the rail. Wave 3 (Carbon).
+ * summaries. Single-column for the rail.
  */
 export function AccountsCarryForward({
   period,
@@ -23,62 +22,63 @@ export function AccountsCarryForward({
   const cf = cfQ.data;
 
   return (
-    <CarbonScope>
-      <Stack gap={4} style={{ minWidth: 0, width: "100%" }}>
-        <PeriodFilter layout="rail" value={period} onChange={onPeriodChange} />
+    <Stack spacing={2} sx={{ minWidth: 0, width: "100%" }}>
+      <PeriodFilter layout="rail" value={period} onChange={onPeriodChange} />
 
-        <div style={{ padding: "0.5rem 0", borderTop: SUBTLE, borderBottom: SUBTLE }}>
-          <Stack gap={2}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-              <StatusDot color="teal" label="Running" />
-              <span className="cds--type-caption-01" style={SECONDARY}>Running projects</span>
+      <div style={{ padding: "0.5rem 0", borderTop: SUBTLE, borderBottom: SUBTLE }}>
+        <Stack spacing={1}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+            <StatusDot color="teal" label="Running" />
+            <Typography variant="caption" sx={SECONDARY}>
+              Running projects
+            </Typography>
+          </div>
+          <Typography variant="body2" sx={{ m: 0, wordBreak: "break-word" }}>
+            {cf ? `${cf.runningCount} active / on-hold` : "—"}
+          </Typography>
+          <Typography variant="caption" sx={{ ...SECONDARY, wordBreak: "break-word" }}>
+            Contract value: {cf ? formatINR(cf.runningContractPaise) : "—"}
+          </Typography>
+        </Stack>
+      </div>
+
+      <div style={{ padding: "0.5rem 0", borderBottom: SUBTLE }}>
+        <Stack spacing={1}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+            <StatusDot color="magenta" label="Receivables" />
+            <Typography variant="caption" sx={SECONDARY}>
+              Prior-year receivables
+            </Typography>
+          </div>
+          <Typography variant="body2" sx={{ m: 0, wordBreak: "break-word" }}>
+            {cf ? formatINR(cf.priorReceivablePaise) : "—"}
+          </Typography>
+          <Typography variant="caption" sx={{ ...SECONDARY, wordBreak: "break-word" }}>
+            {cf ? `${cf.priorReceivableCount} unpaid invoice(s) from closed projects` : "—"}
+          </Typography>
+        </Stack>
+      </div>
+
+      {cf && cf.priorReceivables.length > 0 && (
+        <Stack spacing={1}>
+          <Typography variant="caption" sx={SECONDARY}>
+            Prior receivables
+          </Typography>
+          {cf.priorReceivables.map((r) => (
+            <div key={r.id} style={{ padding: "0.5rem 0", borderBottom: SUBTLE, minWidth: 0 }}>
+              <Typography variant="caption" sx={{ fontWeight: 600, wordBreak: "break-word", display: "block" }}>
+                {r.ref}
+              </Typography>
+              <Typography variant="caption" sx={{ ...SECONDARY, display: "block", wordBreak: "break-word" }}>
+                {r.projectTitle}
+              </Typography>
+              <Typography variant="caption" sx={{ display: "block" }}>
+                {formatINR(r.netReceivablePaise ?? 0)}
+              </Typography>
             </div>
-            <p className="cds--type-body-01" style={{ margin: 0, wordBreak: "break-word" }}>
-              {cf ? `${cf.runningCount} active / on-hold` : "—"}
-            </p>
-            <span className="cds--type-caption-01" style={{ ...SECONDARY, wordBreak: "break-word" }}>
-              Contract value: {cf ? formatINR(cf.runningContractPaise) : "—"}
-            </span>
-          </Stack>
-        </div>
-
-        <div style={{ padding: "0.5rem 0", borderBottom: SUBTLE }}>
-          <Stack gap={2}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-              <StatusDot color="magenta" label="Receivables" />
-              <span className="cds--type-caption-01" style={SECONDARY}>Prior-year receivables</span>
-            </div>
-            <p className="cds--type-body-01" style={{ margin: 0, wordBreak: "break-word" }}>
-              {cf ? formatINR(cf.priorReceivablePaise) : "—"}
-            </p>
-            <span className="cds--type-caption-01" style={{ ...SECONDARY, wordBreak: "break-word" }}>
-              {cf ? `${cf.priorReceivableCount} unpaid invoice(s) from closed projects` : "—"}
-            </span>
-          </Stack>
-        </div>
-
-        {cf && cf.priorReceivables.length > 0 && (
-          <Stack gap={2}>
-            <span className="cds--type-label-01" style={SECONDARY}>Prior receivables</span>
-            {cf.priorReceivables.map((r) => (
-              <div key={r.id} style={{ padding: "0.5rem 0", borderBottom: SUBTLE, minWidth: 0 }}>
-                <span className="cds--type-label-01" style={{ fontWeight: 600, wordBreak: "break-word" }}>
-                  {r.ref}
-                </span>
-                <span
-                  className="cds--type-caption-01"
-                  style={{ ...SECONDARY, display: "block", wordBreak: "break-word" }}
-                >
-                  {r.projectTitle}
-                </span>
-                <span className="cds--type-caption-01" style={{ display: "block" }}>
-                  {formatINR(r.netReceivablePaise ?? 0)}
-                </span>
-              </div>
-            ))}
-          </Stack>
-        )}
-      </Stack>
-    </CarbonScope>
+          ))}
+        </Stack>
+      )}
+    </Stack>
   );
 }

@@ -1,4 +1,7 @@
-import { SkeletonPlaceholder, SkeletonText, Stack } from "@carbon/react";
+import {
+  Skeleton,
+  Stack,
+} from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { CarbonScope } from "../carbon/CarbonScope.js";
 import {
@@ -91,7 +94,7 @@ function AlertTable({ title, alerts }: { title: string; alerts: AlertRow[] }) {
   ];
 
   return (
-    <Stack gap={3}>
+    <Stack spacing={1.5}>
       <p className="cds--type-heading-compact-01" style={{ margin: 0 }}>{title}</p>
       <DataState
         loading={false}
@@ -137,9 +140,9 @@ export function Alerts() {
       >
         <PageBreadcrumb items={[{ label: "Alerts" }]} />
         <CarbonScope>
-          <Stack gap={5} aria-busy="true" aria-label="Loading alerts">
-            <SkeletonText width="180px" heading />
-            <SkeletonPlaceholder style={{ height: 220, width: "100%" }} />
+          <Stack spacing={2.5} aria-busy="true" aria-label="Loading alerts">
+            <Skeleton variant="text" width={180} height={32} />
+            <Skeleton variant="rounded" style={{ height: 220, width: "100%" }} />
           </Stack>
         </CarbonScope>
       </RailLayout>
@@ -153,13 +156,13 @@ export function Alerts() {
     >
       <PageBreadcrumb items={[{ label: "Alerts" }]} />
       <CarbonScope>
-        <Stack gap={6}>
+        <Stack spacing={3}>
           <AlertTable title={`Immediate action (${alerts.length})`} alerts={alerts} />
 
           {digest && (
             <>
               <hr style={{ border: 0, borderTop: "1px solid var(--cds-border-subtle)", margin: 0 }} />
-              <Stack gap={4}>
+              <Stack spacing={2}>
                 <h3 className="cds--type-heading-03" style={{ margin: 0 }}>
                   Daily digest · {digest.date}
                 </h3>

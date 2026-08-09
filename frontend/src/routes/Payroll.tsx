@@ -1,4 +1,13 @@
-import { Modal, Select, SelectItem, Stack, TextInput } from "@carbon/react";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
+  Stack,
+  TextField,
+} from "@mui/material";
 import { Add } from "@carbon/icons-react";
 import { formatINR, parseRupeeInput } from "@esti/contracts";
 import { useState } from "react";
@@ -120,60 +129,39 @@ export function Payroll() {
       </RailLayout>
 
       <CarbonScope>
-        <Modal
-          open={open}
-          size="sm"
-          modalHeading="Generate payslip"
-          primaryButtonText={generate.isPending ? "Generating…" : "Generate"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!py.teamMemberId || !/^\d{4}-\d{2}$/.test(py.month) || generate.isPending}
-          onRequestClose={() => setOpen(false)}
-          onRequestSubmit={() =>
+        <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>Generate payslip</DialogTitle>
+      <DialogContent>
+
+          <Stack spacing={2.5}>
+            <TextField id="py-m" label="Member" value={py.teamMemberId} onChange={(e) => setPy((f) => ({ ...f, teamMemberId: e.target.value }))} select size="small">
+              <MenuItem value="">Select…</MenuItem>
+              {team.map((m) => (
+                <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>
+              ))}
+            </TextField>
+            <TextField id="py-month" label="Month (YYYY-MM)" placeholder="2026-06" value={py.month} onChange={(e) => setPy((f) => ({ ...f, month: e.target.value }))} size="small" />
+            {canSalary && (
+              <TextField id="py-gross" label="Gross (₹) — defaults to monthly salary" value={py.gross} onChange={(e) => setPy((f) => ({ ...f, gross: e.target.value }))} size="small" />
+            )}
+            {canSalary && (
+              <TextField id="py-ded" label="Deductions (₹)" value={py.deductions} onChange={(e) => setPy((f) => ({ ...f, deductions: e.target.value }))} size="small" />
+            )}
+          </Stack>
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setOpen(false)}>Cancel</Button>
+        <Button variant="contained" disabled={!py.teamMemberId || !/^\d{4}-\d{2}$/.test(py.month) || generate.isPending} onClick={() =>
             generate.mutate({
               teamMemberId: py.teamMemberId,
               month: py.month,
               grossPaise: py.gross ? parseRupeeInput(py.gross) : undefined,
               deductionsPaise: py.deductions ? parseRupeeInput(py.deductions) : 0,
             })
-          }
-        >
-          <Stack gap={5}>
-            <Select
-              id="py-m"
-              labelText="Member"
-              value={py.teamMemberId}
-              onChange={(e) => setPy((f) => ({ ...f, teamMemberId: e.target.value }))}
-            >
-              <SelectItem value="" text="Select…" />
-              {team.map((m) => (
-                <SelectItem key={m.id} value={m.id} text={m.name} />
-              ))}
-            </Select>
-            <TextInput
-              id="py-month"
-              labelText="Month (YYYY-MM)"
-              placeholder="2026-06"
-              value={py.month}
-              onChange={(e) => setPy((f) => ({ ...f, month: e.target.value }))}
-            />
-            {canSalary && (
-              <TextInput
-                id="py-gross"
-                labelText="Gross (₹) — defaults to monthly salary"
-                value={py.gross}
-                onChange={(e) => setPy((f) => ({ ...f, gross: e.target.value }))}
-              />
-            )}
-            {canSalary && (
-              <TextInput
-                id="py-ded"
-                labelText="Deductions (₹)"
-                value={py.deductions}
-                onChange={(e) => setPy((f) => ({ ...f, deductions: e.target.value }))}
-              />
-            )}
-          </Stack>
-        </Modal>
+          }>{generate.isPending ? "Generating…" : "Generate"}</Button>
+      </DialogActions>
+    </Dialog>
       </CarbonScope>
     </>
   );

@@ -1,4 +1,14 @@
-import { Button, InlineNotification, Modal, Select, SelectItem, Stack, TextInput } from "@carbon/react";
+import {
+  Alert,
+  AlertTitle,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
+  Stack,
+  TextField,
+} from "@mui/material";
 import { Close, Filter } from "@carbon/icons-react";
 import { useState } from "react";
 import { useScreenActions } from "@hcw/ui-kit";
@@ -19,13 +29,13 @@ function jsonDetail(value: unknown) {
 const fmtTime = (v: string | number | Date) =>
   new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(v));
 
-const PRE_STYLE: React.CSSProperties = {
+const PRE_STYLE = {
   margin: 0,
   padding: "0.75rem",
   fontFamily: "'IBM Plex Mono', monospace",
   fontSize: 12,
-  whiteSpace: "pre-wrap",
-  overflowX: "auto",
+  whiteSpace: "pre-wrap" as const,
+  overflowX: "auto" as const,
   background: "var(--cds-layer)",
   border: "1px solid var(--cds-border-subtle)",
 };
@@ -100,49 +110,30 @@ export function AuditLog({ embedded = false }: { embedded?: boolean }) {
       }}
     >
       <div style={embedded ? { minWidth: 200, flex: 1 } : undefined}>
-        <TextInput
-          id="audit-search"
-          labelText="Search actor, entity, or action"
-          size="sm"
-          value={filters.search}
-          onChange={(e) => setFilters((c) => ({ ...c, search: e.target.value }))}
-          onKeyDown={(e) => e.key === "Enter" && applyFilters()}
-        />
+        <TextField id="audit-search" label="Search actor, entity, or action" size="small" value={filters.search} onChange={(e) => setFilters((c) => ({ ...c, search: e.target.value }))} onKeyDown={(e) => e.key === "Enter" && applyFilters()} />
       </div>
       <div style={embedded ? { minWidth: 140 } : undefined}>
-        <Select
-          id="audit-entity"
-          labelText="Entity"
-          size="sm"
-          value={filters.entity}
-          onChange={(e) => setFilters((c) => ({ ...c, entity: e.target.value }))}
-        >
-          <SelectItem value="" text="All entities" />
+        <TextField id="audit-entity" label="Entity" size="small" value={filters.entity} onChange={(e) => setFilters((c) => ({ ...c, entity: e.target.value }))} select>
+          <MenuItem value="">All entities</MenuItem>
           {(list.data?.filters.entities ?? []).map((entity) => (
-            <SelectItem key={entity} value={entity} text={entity} />
+            <MenuItem key={entity} value={entity}>{entity}</MenuItem>
           ))}
-        </Select>
+        </TextField>
       </div>
       <div style={embedded ? { minWidth: 140 } : undefined}>
-        <Select
-          id="audit-action"
-          labelText="Action"
-          size="sm"
-          value={filters.action}
-          onChange={(e) => setFilters((c) => ({ ...c, action: e.target.value }))}
-        >
-          <SelectItem value="" text="All actions" />
+        <TextField id="audit-action" label="Action" size="small" value={filters.action} onChange={(e) => setFilters((c) => ({ ...c, action: e.target.value }))} select>
+          <MenuItem value="">All actions</MenuItem>
           {(list.data?.filters.actions ?? []).map((action) => (
-            <SelectItem key={action} value={action} text={action} />
+            <MenuItem key={action} value={action}>{action}</MenuItem>
           ))}
-        </Select>
+        </TextField>
       </div>
       {embedded && (
         <>
-          <Button kind="secondary" size="sm" renderIcon={Close} onClick={clearFilters}>
+          <Button variant="outlined" size="small" startIcon={<Close />} onClick={clearFilters}>
             Clear
           </Button>
-          <Button size="sm" renderIcon={Filter} onClick={applyFilters}>
+          <Button size="small" startIcon={<Filter />} onClick={applyFilters}>
             Apply filters
           </Button>
         </>
@@ -153,7 +144,7 @@ export function AuditLog({ embedded = false }: { embedded?: boolean }) {
   const grid = (
     <>
       {list.error && (
-        <InlineNotification kind="error" lowContrast hideCloseButton title="Couldn't load audit log" subtitle={list.error.message} />
+        <Alert severity="error"><AlertTitle>Couldn't load audit log</AlertTitle>{list.error.message}</Alert>
       )}
       <DataGrid
         rows={rows}
@@ -175,7 +166,7 @@ export function AuditLog({ embedded = false }: { embedded?: boolean }) {
       {embedded ? (
         <CarbonScope>
           <div style={{ padding: "0.5rem" }}>
-            <Stack gap={5}>
+            <Stack spacing={2.5}>
               <h2 className="cds--type-heading-03" style={{ margin: 0 }}>
                 Audit log
               </h2>
@@ -198,15 +189,12 @@ export function AuditLog({ embedded = false }: { embedded?: boolean }) {
       )}
 
       <CarbonScope>
-        <Modal
-          open={selected !== null}
-          passiveModal
-          size="lg"
-          modalHeading={selected ? `${selected.entity} · ${selected.action}` : "Audit details"}
-          onRequestClose={() => setSelectedId(null)}
-        >
+        <Dialog open={selected !== null} onClose={() => setSelectedId(null)} fullWidth maxWidth="md">
+      <DialogTitle>{selected ? `${selected.entity} · ${selected.action}` : "Audit details"}</DialogTitle>
+      <DialogContent>
+
           {selected && (
-            <Stack gap={4}>
+            <Stack spacing={2}>
               <p className="cds--type-body-01" style={{ margin: 0 }}>
                 Record: {selected.entityId ?? "Not associated with a domain record"}
               </p>
@@ -214,7 +202,7 @@ export function AuditLog({ embedded = false }: { embedded?: boolean }) {
                 Actor: {selected.actorName ?? selected.actorEmail ?? selected.actorId ?? "System"}
               </p>
               {(["before", "after"] as const).map((k) => (
-                <Stack gap={2} key={k}>
+                <Stack spacing={1} key={k}>
                   <p className="cds--type-heading-compact-01" style={{ margin: 0, textTransform: "capitalize" }}>
                     {k}
                   </p>
@@ -223,7 +211,9 @@ export function AuditLog({ embedded = false }: { embedded?: boolean }) {
               ))}
             </Stack>
           )}
-        </Modal>
+        
+      </DialogContent>
+    </Dialog>
       </CarbonScope>
     </>
   );

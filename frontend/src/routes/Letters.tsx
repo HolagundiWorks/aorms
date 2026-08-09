@@ -1,12 +1,13 @@
 import {
   Button,
-  Modal,
-  Select,
-  SelectItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
   Stack,
-  TextArea,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+} from "@mui/material";
 import { Add } from "@carbon/icons-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -139,7 +140,7 @@ export function Letters() {
         description="Office correspondence on firm letterhead."
         aside={
           <CarbonScope>
-            <Button kind="ghost" size="sm" onClick={() => navigate("/office/documents")}>
+            <Button variant="text" size="small" onClick={() => navigate("/office/documents")}>
               Document register
             </Button>
           </CarbonScope>
@@ -180,15 +181,38 @@ export function Letters() {
       />
 
       <CarbonScope>
-        <Modal
-          open={open}
-          size="lg"
-          modalHeading="New letter"
-          primaryButtonText={create.isPending ? "Creating…" : "Create"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!f.recipient || !f.subject || !f.body || create.isPending}
-          onRequestClose={() => setOpen(false)}
-          onRequestSubmit={() =>
+        <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md">
+      <DialogTitle>New letter</DialogTitle>
+      <DialogContent>
+
+          <Stack spacing={2.5}>
+            <TextField id="l-tpl" label="Start from template (optional)" value="" onChange={(e) => {
+                const t = (templatesQ.data ?? []).find((x) => x.id === e.target.value);
+                if (t) setF((x) => ({ ...x, subject: t.title, body: t.body }));
+              }} select size="small">
+              <MenuItem value="">— blank letter —</MenuItem>
+              {(templatesQ.data ?? []).map((t) => (
+                <MenuItem key={t.id} value={t.id}>{t.title}</MenuItem>
+              ))}
+            </TextField>
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <TextField id="l-to" label="Recipient" value={f.recipient} onChange={set("recipient")} size="small" />
+              <TextField id="l-date" label="Date" type="date" value={f.dateLetter} onChange={set("dateLetter")} size="small" />
+            </div>
+            <TextField id="l-proj" label="Related project (optional)" value={f.projectId} onChange={set("projectId")} select size="small">
+              <MenuItem value="">— none —</MenuItem>
+              {(projectsQ.data ?? []).map((p) => (
+                <MenuItem key={p.id} value={p.id}>{`${p.ref} — ${p.title}`}</MenuItem>
+              ))}
+            </TextField>
+            <TextField id="l-subj" label="Subject" value={f.subject} onChange={set("subject")} size="small" />
+            <TextField id="l-body" label="Body" rows={10} value={f.body} onChange={set("body")} multiline fullWidth></TextField>
+          </Stack>
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setOpen(false)}>Cancel</Button>
+        <Button variant="contained" disabled={!f.recipient || !f.subject || !f.body || create.isPending} onClick={() =>
             create.mutate({
               projectId: f.projectId || undefined,
               recipient: f.recipient,
@@ -196,37 +220,9 @@ export function Letters() {
               body: f.body,
               dateLetter: f.dateLetter || undefined,
             })
-          }
-        >
-          <Stack gap={5}>
-            <Select
-              id="l-tpl"
-              labelText="Start from template (optional)"
-              value=""
-              onChange={(e) => {
-                const t = (templatesQ.data ?? []).find((x) => x.id === e.target.value);
-                if (t) setF((x) => ({ ...x, subject: t.title, body: t.body }));
-              }}
-            >
-              <SelectItem value="" text="— blank letter —" />
-              {(templatesQ.data ?? []).map((t) => (
-                <SelectItem key={t.id} value={t.id} text={t.title} />
-              ))}
-            </Select>
-            <div style={{ display: "flex", gap: "1rem" }}>
-              <TextInput id="l-to" labelText="Recipient" value={f.recipient} onChange={set("recipient")} />
-              <TextInput id="l-date" labelText="Date" type="date" value={f.dateLetter} onChange={set("dateLetter")} />
-            </div>
-            <Select id="l-proj" labelText="Related project (optional)" value={f.projectId} onChange={set("projectId")}>
-              <SelectItem value="" text="— none —" />
-              {(projectsQ.data ?? []).map((p) => (
-                <SelectItem key={p.id} value={p.id} text={`${p.ref} — ${p.title}`} />
-              ))}
-            </Select>
-            <TextInput id="l-subj" labelText="Subject" value={f.subject} onChange={set("subject")} />
-            <TextArea id="l-body" labelText="Body" rows={10} value={f.body} onChange={set("body")} />
-          </Stack>
-        </Modal>
+          }>{create.isPending ? "Creating…" : "Create"}</Button>
+      </DialogActions>
+    </Dialog>
       </CarbonScope>
     </>
   );

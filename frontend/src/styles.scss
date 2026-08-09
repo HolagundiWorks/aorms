@@ -2,9 +2,9 @@
 
 // Design tokens as static CSS custom properties — Carbon-independent.
 //
-// These values were originally generated at build time by @carbon/react's Sass
-// theme engine + its <Theme theme="white"> component (light/"white" theme only —
-// this app never used dark mode). @carbon/react was removed (2026-07); the exact
+// These values were originally generated at build time by Carbon's Sass theme
+// engine + its <Theme theme="white"> component (light/"white" theme only —
+// this app never used dark mode). Carbon React was removed (2026-07); the exact
 // values it produced are captured here as a static, hand-owned :root block so
 // every existing var(--cds-*) call site keeps resolving identically with zero
 // code churn. New code should prefer @hcw/ui-kit tokens
@@ -30,7 +30,7 @@
   --cds-grid-gutter: 2rem;
   --cds-border-radius-lg: 0; // HCW-UI-Kit: square surfaces; BUTTON_RADIUS for buttons only
 
-  // Theme colours — extracted verbatim from @carbon/react's compiled `.cds--white`
+  // Theme colours — extracted verbatim from Carbon's compiled `.cds--white`
   // theme block (the only theme this app ever mounted).
   --cds-background: #ffffff;
   --cds-background-hover: rgba(141, 141, 141, 0.12);

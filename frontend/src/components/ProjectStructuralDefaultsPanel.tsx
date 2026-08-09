@@ -1,4 +1,4 @@
-import { Button, InlineNotification, Stack, TextInput } from "@carbon/react";
+import { Alert, AlertTitle, Button, Stack, TextField, Typography } from "@mui/material";
 import {
   DEFAULT_BEAM_DEPTH_MM,
   DEFAULT_LINTEL_HEIGHT_MM,
@@ -6,7 +6,6 @@ import {
   deriveElementHeightMm,
 } from "@esti/contracts";
 import { useEffect, useMemo, useState } from "react";
-import { CarbonScope } from "../carbon/CarbonScope.js";
 import { trpc } from "../lib/trpc.js";
 
 function mmToM(mm: number): string {
@@ -21,7 +20,6 @@ function mToMm(value: string): number | null {
 
 /**
  * Project Setup — slab / beam / lintel deductions that drive auto column & wall heights.
- * Wave 3 (Carbon).
  */
 export function ProjectStructuralDefaultsPanel({ projectId }: { projectId: string }) {
   const utils = trpc.useUtils();
@@ -72,106 +70,96 @@ export function ProjectStructuralDefaultsPanel({ projectId }: { projectId: strin
   const wallH = deriveElementHeightMm({ storeyHeightMm: previewStorey, recipe: "WALL", deductions });
 
   return (
-    <CarbonScope>
-      <Stack gap={5} style={{ marginTop: "1rem", maxWidth: 720 }}>
-        <Stack gap={2}>
-          <h3 className="cds--type-heading-03" style={{ margin: 0 }}>
-            Structural deductions
-          </h3>
-          <p className="esti-label--secondary" style={{ margin: 0 }}>
-            Project defaults for auto column / wall heights. Individual levels (and rows) can
-            override beam depth and lintel when they vary — leave those blank to inherit these
-            values.
-            <br />
-            <strong>Column</strong> = lvl − slab − beam &nbsp;·&nbsp;
-            <strong>Wall</strong> = lvl − slab − beam − lintel
-          </p>
-        </Stack>
-
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-          <div style={{ width: 160 }}>
-            <TextInput
-              id="sd-slab"
-              labelText="Slab thickness (m)"
-              size="sm"
-              value={slabM}
-              onChange={(e) => {
-                setSlabM(e.target.value);
-                setSaved(false);
-              }}
-            />
-          </div>
-          <div style={{ width: 160 }}>
-            <TextInput
-              id="sd-beam"
-              labelText="Beam depth (m)"
-              size="sm"
-              value={beamM}
-              onChange={(e) => {
-                setBeamM(e.target.value);
-                setSaved(false);
-              }}
-            />
-          </div>
-          <div style={{ width: 160 }}>
-            <TextInput
-              id="sd-lintel"
-              labelText="Lintel height (m)"
-              size="sm"
-              value={lintelM}
-              onChange={(e) => {
-                setLintelM(e.target.value);
-                setSaved(false);
-              }}
-            />
-          </div>
-        </div>
-
+    <Stack spacing={2.5} sx={{ mt: 2, maxWidth: 720 }}>
+      <Stack spacing={1}>
+        <Typography variant="h6" sx={{ m: 0 }}>
+          Structural deductions
+        </Typography>
         <p className="esti-label--secondary" style={{ margin: 0 }}>
-          Preview on{" "}
-          {previewLevel ? `${previewLevel.code} (${mmToM(previewStorey)} m)` : "3.000 m storey"}:
-          column clear ≈ {mmToM(columnH ?? 0)} m · wall clear ≈ {mmToM(wallH ?? 0)} m
+          Project defaults for auto column / wall heights. Individual levels (and rows) can
+          override beam depth and lintel when they vary — leave those blank to inherit these
+          values.
+          <br />
+          <strong>Column</strong> = lvl − slab − beam &nbsp;·&nbsp;
+          <strong>Wall</strong> = lvl − slab − beam − lintel
         </p>
-
-        {error && (
-          <InlineNotification
-            kind="error"
-            lowContrast
-            title="Could not save"
-            subtitle={error}
-            onCloseButtonClick={() => setError(null)}
-          />
-        )}
-        {saved && !error && (
-          <InlineNotification
-            kind="success"
-            lowContrast
-            title="Deductions saved"
-            subtitle={`Linked measurement rows updated${
-              syncedRows > 0 ? ` (${syncedRows} row${syncedRows === 1 ? "" : "s"})` : ""
-            }. Column / wall clear heights now use these deductions.`}
-            onCloseButtonClick={() => setSaved(false)}
-          />
-        )}
-
-        <div>
-          <Button
-            disabled={save.isPending}
-            onClick={() => {
-              const slabThicknessMm = mToMm(slabM);
-              const beamDepthMm = mToMm(beamM);
-              const lintelHeightMm = mToMm(lintelM);
-              if (slabThicknessMm == null || beamDepthMm == null || lintelHeightMm == null) {
-                setError("Enter non-negative thicknesses in metres.");
-                return;
-              }
-              save.mutate({ projectId, slabThicknessMm, beamDepthMm, lintelHeightMm });
-            }}
-          >
-            {save.isPending ? "Saving…" : "Save deductions"}
-          </Button>
-        </div>
       </Stack>
-    </CarbonScope>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+        <TextField
+          id="sd-slab"
+          label="Slab thickness (m)"
+          size="small"
+          sx={{ width: 160 }}
+          value={slabM}
+          onChange={(e) => {
+            setSlabM(e.target.value);
+            setSaved(false);
+          }}
+        />
+        <TextField
+          id="sd-beam"
+          label="Beam depth (m)"
+          size="small"
+          sx={{ width: 160 }}
+          value={beamM}
+          onChange={(e) => {
+            setBeamM(e.target.value);
+            setSaved(false);
+          }}
+        />
+        <TextField
+          id="sd-lintel"
+          label="Lintel height (m)"
+          size="small"
+          sx={{ width: 160 }}
+          value={lintelM}
+          onChange={(e) => {
+            setLintelM(e.target.value);
+            setSaved(false);
+          }}
+        />
+      </div>
+
+      <p className="esti-label--secondary" style={{ margin: 0 }}>
+        Preview on{" "}
+        {previewLevel ? `${previewLevel.code} (${mmToM(previewStorey)} m)` : "3.000 m storey"}:
+        column clear ≈ {mmToM(columnH ?? 0)} m · wall clear ≈ {mmToM(wallH ?? 0)} m
+      </p>
+
+      {error && (
+        <Alert severity="error" onClose={() => setError(null)}>
+          <AlertTitle>Could not save</AlertTitle>
+          {error}
+        </Alert>
+      )}
+      {saved && !error && (
+        <Alert severity="success" onClose={() => setSaved(false)}>
+          <AlertTitle>Deductions saved</AlertTitle>
+          {`Linked measurement rows updated${
+            syncedRows > 0 ? ` (${syncedRows} row${syncedRows === 1 ? "" : "s"})` : ""
+          }. Column / wall clear heights now use these deductions.`}
+        </Alert>
+      )}
+
+      <div>
+        <Button
+          variant="contained"
+          disabled={save.isPending}
+          onClick={() => {
+            const slabThicknessMm = mToMm(slabM);
+            const beamDepthMm = mToMm(beamM);
+            const lintelHeightMm = mToMm(lintelM);
+            if (slabThicknessMm == null || beamDepthMm == null || lintelHeightMm == null) {
+              setError("Enter non-negative thicknesses in metres.");
+              return;
+            }
+            save.mutate({ projectId, slabThicknessMm, beamDepthMm, lintelHeightMm });
+          }}
+        >
+          {save.isPending ? "Saving…" : "Save deductions"}
+        </Button>
+      </div>
+    </Stack>
   );
 }

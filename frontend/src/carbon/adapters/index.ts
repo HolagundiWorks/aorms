@@ -1,13 +1,11 @@
 /**
- * Carbon adapters — Wave 3a: kit primitives re-exported under the adapter path
- * so call-sites that swapped to `../carbon/adapters` keep working on `@hcw/ui-kit`
- * (StatusDot · DataState · ConfirmModal · StatusTag). DataGrid / PageBreadcrumb
- * remain Carbon-side shims until their waves land.
+ * Adapters under `carbon/adapters` — kit / MUI re-exports so legacy import
+ * paths keep working after S12 de-Carbon. StatusDot · DataState · ConfirmModal
+ * · StatusTag · PageBreadcrumb → `@hcw/ui-kit`; DataGrid → `@mui/x-data-grid`.
  *
  *   import { StatusDot, DataState } from "../carbon/adapters";
  *
- * Bucket-2 primitives with no Carbon analogue (ActionDock, KpiStrip, …) are NOT
- * shimmed here — import those from `@hcw/ui-kit` directly.
+ * Bucket-2 primitives (ActionDock, KpiStrip, …) import from `@hcw/ui-kit`.
  */
 export { StatusDot, StatusTag, statusShapeFor, type StatusShape } from "./StatusDot.js";
 export { DataState } from "./DataState.js";

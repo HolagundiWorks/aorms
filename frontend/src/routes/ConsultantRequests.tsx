@@ -1,12 +1,15 @@
 import {
-  InlineNotification,
-  Modal,
-  Select,
-  SelectItem,
+  Alert,
+  AlertTitle,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
   Stack,
-  TextArea,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+} from "@mui/material";
 import { Add } from "@carbon/icons-react";
 import {
   CONSULTANT_SUBMISSION_KIND_LABEL,
@@ -192,7 +195,7 @@ export function ConsultantRequests({ embedded = false }: { embedded?: boolean })
 
   return (
     <CarbonScope>
-      <Stack gap={6}>
+      <Stack spacing={3}>
         {!embedded && (
           <PageHeader
             title="Consultant requests"
@@ -202,37 +205,25 @@ export function ConsultantRequests({ embedded = false }: { embedded?: boolean })
 
         <div style={{ display: "flex", alignItems: "flex-end", gap: "1rem", flexWrap: "wrap" }}>
           <div style={{ minWidth: 180 }}>
-            <Select
-              id="cnr-status"
-              size="sm"
-              labelText="Status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <SelectItem value="" text="All statuses" />
+            <TextField id="cnr-status" size="small" label="Status" value={status} onChange={(e) => setStatus(e.target.value)} select>
+              <MenuItem value="">All statuses</MenuItem>
               {ConsultantSubmissionStatus.options.map((s) => (
-                <SelectItem key={s} value={s} text={CONSULTANT_SUBMISSION_STATUS_LABEL[s]} />
+                <MenuItem key={s} value={s}>{CONSULTANT_SUBMISSION_STATUS_LABEL[s]}</MenuItem>
               ))}
-            </Select>
+            </TextField>
           </div>
           <div style={{ minWidth: 180 }}>
-            <Select
-              id="cnr-kind"
-              size="sm"
-              labelText="Kind"
-              value={kind}
-              onChange={(e) => setKind(e.target.value)}
-            >
-              <SelectItem value="" text="All kinds" />
+            <TextField id="cnr-kind" size="small" label="Kind" value={kind} onChange={(e) => setKind(e.target.value)} select>
+              <MenuItem value="">All kinds</MenuItem>
               {ConsultantSubmissionKind.options.map((k) => (
-                <SelectItem key={k} value={k} text={CONSULTANT_SUBMISSION_KIND_LABEL[k]} />
+                <MenuItem key={k} value={k}>{CONSULTANT_SUBMISSION_KIND_LABEL[k]}</MenuItem>
               ))}
-            </Select>
+            </TextField>
           </div>
         </div>
 
         {listQ.error && (
-          <InlineNotification kind="error" lowContrast hideCloseButton title="Could not load consultant requests" subtitle={listQ.error.message} />
+          <Alert severity="error"><AlertTitle>Could not load consultant requests</AlertTitle>{listQ.error.message}</Alert>
         )}
 
         <DataState
@@ -252,56 +243,42 @@ export function ConsultantRequests({ embedded = false }: { embedded?: boolean })
           />
         </DataState>
 
-        <Modal
-          open={triage !== null}
-          size="sm"
-          modalHeading={triage ? `Triage — ${triage.subject}` : "Triage"}
-          primaryButtonText={setStatusM.isPending ? "Saving…" : "Save"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={setStatusM.isPending}
-          onRequestClose={() => setTriage(null)}
-          onRequestSubmit={() =>
+        <Dialog open={triage !== null} onClose={() => setTriage(null)} fullWidth maxWidth="sm">
+      <DialogTitle>{triage ? `Triage — ${triage.subject}` : "Triage"}</DialogTitle>
+      <DialogContent>
+
+          {triage && (
+            <Stack spacing={2.5}>
+              <TextField id="cnr-tr-status" label="Status" value={triage.status} onChange={(e) => setTriage({ ...triage, status: e.target.value as SubmissionStatus })} select size="small">
+                {ConsultantSubmissionStatus.options.map((s) => (
+                  <MenuItem key={s} value={s}>{CONSULTANT_SUBMISSION_STATUS_LABEL[s]}</MenuItem>
+                ))}
+              </TextField>
+              <TextField id="cnr-tr-note" label="Response to consultant (optional)" rows={3} value={triage.responseNote} onChange={(e) => setTriage({ ...triage, responseNote: e.target.value })} multiline fullWidth></TextField>
+              {setStatusM.error && (
+                <Alert severity="error"><AlertTitle>Could not save</AlertTitle>{setStatusM.error.message}</Alert>
+              )}
+            </Stack>
+          )}
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setTriage(null)}>Cancel</Button>
+        <Button variant="contained" disabled={setStatusM.isPending} onClick={() =>
             triage &&
             setStatusM.mutate({
               id: triage.id,
               status: triage.status,
               responseNote: triage.responseNote || undefined,
             })
-          }
-        >
-          {triage && (
-            <Stack gap={5}>
-              <Select
-                id="cnr-tr-status"
-                labelText="Status"
-                value={triage.status}
-                onChange={(e) => setTriage({ ...triage, status: e.target.value as SubmissionStatus })}
-              >
-                {ConsultantSubmissionStatus.options.map((s) => (
-                  <SelectItem key={s} value={s} text={CONSULTANT_SUBMISSION_STATUS_LABEL[s]} />
-                ))}
-              </Select>
-              <TextArea
-                id="cnr-tr-note"
-                labelText="Response to consultant (optional)"
-                rows={3}
-                value={triage.responseNote}
-                onChange={(e) => setTriage({ ...triage, responseNote: e.target.value })}
-              />
-              {setStatusM.error && (
-                <InlineNotification kind="error" lowContrast hideCloseButton title="Could not save" subtitle={setStatusM.error.message} />
-              )}
-            </Stack>
-          )}
-        </Modal>
+          }>{setStatusM.isPending ? "Saving…" : "Save"}</Button>
+      </DialogActions>
+    </Dialog>
 
-        <Modal
-          open={threadFor !== null}
-          size="sm"
-          passiveModal
-          modalHeading={threadFor ? `Conversation — ${threadFor.subject}` : "Conversation"}
-          onRequestClose={() => setThreadFor(null)}
-        >
+        <Dialog open={threadFor !== null} onClose={() => setThreadFor(null)} fullWidth maxWidth="sm">
+      <DialogTitle>{threadFor ? `Conversation — ${threadFor.subject}` : "Conversation"}</DialogTitle>
+      <DialogContent>
+
           {threadFor && (
             <SubmissionThread
               messages={threadQ.data ?? []}
@@ -310,68 +287,47 @@ export function ConsultantRequests({ embedded = false }: { embedded?: boolean })
               onReply={(body) => reply.mutate({ id: threadFor.id, body })}
             />
           )}
-        </Modal>
+        
+      </DialogContent>
+    </Dialog>
 
-        <Modal
-          open={assignOpen}
-          size="sm"
-          modalHeading="Assign a task to a consultant"
-          primaryButtonText={assignM.isPending ? "Assigning…" : "Assign"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!assign.projectId || !assign.consultantId || !assign.subject || assignM.isPending}
-          onRequestClose={() => setAssignOpen(false)}
-          onRequestSubmit={() =>
+        <Dialog open={assignOpen} onClose={() => setAssignOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>Assign a task to a consultant</DialogTitle>
+      <DialogContent>
+
+          <Stack spacing={2.5}>
+            <TextField id="as-proj" label="Project" value={assign.projectId} onChange={(e) => setAssign((a) => ({ ...a, projectId: e.target.value, consultantId: "" }))} select size="small">
+              <MenuItem value="">— select a project —</MenuItem>
+              {(projectsQ.data ?? []).map((p) => (
+                <MenuItem key={p.id} value={p.id}>{`${p.ref} ${p.title}`}</MenuItem>
+              ))}
+            </TextField>
+            <TextField id="as-cons" label="Consultant" disabled={!assign.projectId || (engagementsQ.data?.rows ?? []).length === 0} helperText={noEngagements ? "No consultants engaged on this project" : undefined} value={assign.consultantId} onChange={(e) => setAssign((a) => ({ ...a, consultantId: e.target.value }))} select size="small">
+              <MenuItem value="">— select a consultant —</MenuItem>
+              {(engagementsQ.data?.rows ?? []).map((en) => (
+                <MenuItem key={en.consultantId} value={en.consultantId}>{en.consultantName ?? en.consultantId}</MenuItem>
+              ))}
+            </TextField>
+            <TextField id="as-subject" label="Task" value={assign.subject} onChange={(e) => setAssign((a) => ({ ...a, subject: e.target.value }))} size="small" />
+            <TextField id="as-body" label="Details (optional)" rows={3} value={assign.body} onChange={(e) => setAssign((a) => ({ ...a, body: e.target.value }))} multiline fullWidth></TextField>
+            {assignM.error && (
+              <Alert severity="error"><AlertTitle>Could not assign</AlertTitle>{assignM.error.message}</Alert>
+            )}
+          </Stack>
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setAssignOpen(false)}>Cancel</Button>
+        <Button variant="contained" disabled={!assign.projectId || !assign.consultantId || !assign.subject || assignM.isPending} onClick={() =>
             assignM.mutate({
               projectId: assign.projectId,
               consultantId: assign.consultantId,
               subject: assign.subject,
               body: assign.body || undefined,
             })
-          }
-        >
-          <Stack gap={5}>
-            <Select
-              id="as-proj"
-              labelText="Project"
-              value={assign.projectId}
-              onChange={(e) => setAssign((a) => ({ ...a, projectId: e.target.value, consultantId: "" }))}
-            >
-              <SelectItem value="" text="— select a project —" />
-              {(projectsQ.data ?? []).map((p) => (
-                <SelectItem key={p.id} value={p.id} text={`${p.ref} ${p.title}`} />
-              ))}
-            </Select>
-            <Select
-              id="as-cons"
-              labelText="Consultant"
-              disabled={!assign.projectId || (engagementsQ.data?.rows ?? []).length === 0}
-              helperText={noEngagements ? "No consultants engaged on this project" : undefined}
-              value={assign.consultantId}
-              onChange={(e) => setAssign((a) => ({ ...a, consultantId: e.target.value }))}
-            >
-              <SelectItem value="" text="— select a consultant —" />
-              {(engagementsQ.data?.rows ?? []).map((en) => (
-                <SelectItem key={en.consultantId} value={en.consultantId} text={en.consultantName ?? en.consultantId} />
-              ))}
-            </Select>
-            <TextInput
-              id="as-subject"
-              labelText="Task"
-              value={assign.subject}
-              onChange={(e) => setAssign((a) => ({ ...a, subject: e.target.value }))}
-            />
-            <TextArea
-              id="as-body"
-              labelText="Details (optional)"
-              rows={3}
-              value={assign.body}
-              onChange={(e) => setAssign((a) => ({ ...a, body: e.target.value }))}
-            />
-            {assignM.error && (
-              <InlineNotification kind="error" lowContrast hideCloseButton title="Could not assign" subtitle={assignM.error.message} />
-            )}
-          </Stack>
-        </Modal>
+          }>{assignM.isPending ? "Assigning…" : "Assign"}</Button>
+      </DialogActions>
+    </Dialog>
       </Stack>
     </CarbonScope>
   );

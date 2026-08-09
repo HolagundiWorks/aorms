@@ -1,12 +1,15 @@
 import {
-  InlineNotification,
-  Modal,
-  Select,
-  SelectItem,
+  Alert,
+  AlertTitle,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
   Stack,
-  TextArea,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+} from "@mui/material";
 import { Add } from "@carbon/icons-react";
 import {
   CONTRACT_TYPE_LABEL,
@@ -148,23 +151,16 @@ export function Contracts() {
       renderCell: (p) => (
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <div style={{ minWidth: 120 }}>
-            <Select
-              id={`c-st-${p.row.id}`}
-              labelText="Status"
-              hideLabel
-              size="sm"
-              value={p.row.status}
-              onChange={(e) =>
+            <TextField id={`c-st-${p.row.id}`} label="Status" size="small" value={p.row.status} onChange={(e) =>
                 updateStatus.mutate({
                   id: p.row.id,
                   status: e.target.value as (typeof ContractStatus.options)[number],
                 })
-              }
-            >
+              } select>
               {ContractStatus.options.map((st) => (
-                <SelectItem key={st} value={st} text={st} />
+                <MenuItem key={st} value={st}>{st}</MenuItem>
               ))}
-            </Select>
+            </TextField>
           </div>
           <StatusTag value={p.row.status} map={STATUS_TAG} />
         </div>
@@ -233,15 +229,51 @@ export function Contracts() {
       />
 
       <CarbonScope>
-        <Modal
-          open={open}
-          size="lg"
-          modalHeading="New contract"
-          primaryButtonText={create.isPending ? "Creating…" : "Create"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!f.title || !f.party || create.isPending}
-          onRequestClose={() => setOpen(false)}
-          onRequestSubmit={() =>
+        <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md">
+      <DialogTitle>New contract</DialogTitle>
+      <DialogContent>
+
+          <Stack spacing={2.5}>
+            {(templatesQ.data ?? []).length > 0 && (
+              <TextField id="ct-tpl" label="Start from template (optional)" value="" onChange={(e) => {
+                  const t = (templatesQ.data ?? []).find((x) => x.id === e.target.value);
+                  if (!t) return;
+                  setF((x) => ({ ...x, title: x.title || t.title, notes: t.body }));
+                }} select size="small">
+                <MenuItem value="">— none —</MenuItem>
+                {(templatesQ.data ?? []).map((t) => (
+                  <MenuItem key={t.id} value={t.id}>{t.title}</MenuItem>
+                ))}
+              </TextField>
+            )}
+            <TextField id="ct-title" label="Title" value={f.title} onChange={set("title")} size="small" />
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <TextField id="ct-party" label="Party" value={f.party} onChange={set("party")} size="small" />
+              <TextField id="ct-type" label="Type" value={f.contractType} onChange={set("contractType")} select size="small">
+                {ContractType.options.map((t) => (
+                  <MenuItem key={t} value={t}>{CONTRACT_TYPE_LABEL[t]}</MenuItem>
+                ))}
+              </TextField>
+            </div>
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <TextField id="ct-val" label="Value (₹)" type="number" value={f.value} onChange={set("value")} size="small" />
+              <TextField id="ct-start" label="Start date" type="date" value={f.startDate} onChange={set("startDate")} size="small" />
+              <TextField id="ct-end" label="End date" type="date" value={f.endDate} onChange={set("endDate")} size="small" />
+            </div>
+            <TextField id="ct-proj" label="Related project (optional)" value={f.projectId} onChange={set("projectId")} select size="small">
+              <MenuItem value="">— none —</MenuItem>
+              {(projectsQ.data ?? []).map((p) => (
+                <MenuItem key={p.id} value={p.id}>{`${p.ref} — ${p.title}`}</MenuItem>
+              ))}
+            </TextField>
+            <TextField id="ct-notes" label="Notes (optional)" rows={3} value={f.notes} onChange={set("notes")} multiline fullWidth></TextField>
+            {create.error && <Alert severity="error"><AlertTitle>Error</AlertTitle>{create.error.message}</Alert>}
+          </Stack>
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setOpen(false)}>Cancel</Button>
+        <Button variant="contained" disabled={!f.title || !f.party || create.isPending} onClick={() =>
             create.mutate({
               projectId: f.projectId || undefined,
               title: f.title,
@@ -253,50 +285,9 @@ export function Contracts() {
               endDate: f.endDate || undefined,
               notes: f.notes || undefined,
             })
-          }
-        >
-          <Stack gap={5}>
-            {(templatesQ.data ?? []).length > 0 && (
-              <Select
-                id="ct-tpl"
-                labelText="Start from template (optional)"
-                value=""
-                onChange={(e) => {
-                  const t = (templatesQ.data ?? []).find((x) => x.id === e.target.value);
-                  if (!t) return;
-                  setF((x) => ({ ...x, title: x.title || t.title, notes: t.body }));
-                }}
-              >
-                <SelectItem value="" text="— none —" />
-                {(templatesQ.data ?? []).map((t) => (
-                  <SelectItem key={t.id} value={t.id} text={t.title} />
-                ))}
-              </Select>
-            )}
-            <TextInput id="ct-title" labelText="Title" value={f.title} onChange={set("title")} />
-            <div style={{ display: "flex", gap: "1rem" }}>
-              <TextInput id="ct-party" labelText="Party" value={f.party} onChange={set("party")} />
-              <Select id="ct-type" labelText="Type" value={f.contractType} onChange={set("contractType")}>
-                {ContractType.options.map((t) => (
-                  <SelectItem key={t} value={t} text={CONTRACT_TYPE_LABEL[t]} />
-                ))}
-              </Select>
-            </div>
-            <div style={{ display: "flex", gap: "1rem" }}>
-              <TextInput id="ct-val" labelText="Value (₹)" type="number" value={f.value} onChange={set("value")} />
-              <TextInput id="ct-start" labelText="Start date" type="date" value={f.startDate} onChange={set("startDate")} />
-              <TextInput id="ct-end" labelText="End date" type="date" value={f.endDate} onChange={set("endDate")} />
-            </div>
-            <Select id="ct-proj" labelText="Related project (optional)" value={f.projectId} onChange={set("projectId")}>
-              <SelectItem value="" text="— none —" />
-              {(projectsQ.data ?? []).map((p) => (
-                <SelectItem key={p.id} value={p.id} text={`${p.ref} — ${p.title}`} />
-              ))}
-            </Select>
-            <TextArea id="ct-notes" labelText="Notes (optional)" rows={3} value={f.notes} onChange={set("notes")} />
-            {create.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={create.error.message} />}
-          </Stack>
-        </Modal>
+          }>{create.isPending ? "Creating…" : "Create"}</Button>
+      </DialogActions>
+    </Dialog>
       </CarbonScope>
     </>
   );

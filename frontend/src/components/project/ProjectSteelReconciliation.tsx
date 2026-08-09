@@ -1,12 +1,15 @@
 import {
+  Alert,
+  AlertTitle,
   Button,
-  InlineNotification,
-  Modal,
-  Select,
-  SelectItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
   Stack,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+} from "@mui/material";
 import { Add } from "@carbon/icons-react";
 import {
   STEEL_RECON_STATUS_LABEL,
@@ -22,7 +25,7 @@ import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { DataGrid, DataState, StatusTag, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../../lib/trpc.js";
 
-const SUBTLE: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
+const SUBTLE = { margin: 0, color: "var(--cds-text-secondary)" } as const;
 
 /** Project › Steel — scheduled (BBS) vs issued vs consumed by diameter. */
 export function ProjectSteelReconciliation({ projectId }: { projectId: string }) {
@@ -122,21 +125,13 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
         width: 120,
         renderCell: (p) =>
           draft ? (
-            <TextInput
-              id={`issued-${p.row.id}`}
-              labelText="Issued"
-              hideLabel
-              size="sm"
-              type="number"
-              defaultValue={p.row.issuedKg}
-              onBlur={(e) =>
+            <TextField id={`issued-${p.row.id}`} label="Issued" size="small" type="number" defaultValue={p.row.issuedKg} onBlur={(e) =>
                 updateLine.mutate({
                   id: p.row.id,
                   reconciliationId: detail.id,
                   issuedKg: Number(e.target.value) || 0,
                 })
-              }
-            />
+              } />
           ) : (
             p.row.issuedKg
           ),
@@ -147,21 +142,13 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
         width: 120,
         renderCell: (p) =>
           draft ? (
-            <TextInput
-              id={`consumed-${p.row.id}`}
-              labelText="Consumed"
-              hideLabel
-              size="sm"
-              type="number"
-              defaultValue={p.row.consumedKg}
-              onBlur={(e) =>
+            <TextField id={`consumed-${p.row.id}`} label="Consumed" size="small" type="number" defaultValue={p.row.consumedKg} onBlur={(e) =>
                 updateLine.mutate({
                   id: p.row.id,
                   reconciliationId: detail.id,
                   consumedKg: Number(e.target.value) || 0,
                 })
-              }
-            />
+              } />
           ) : (
             p.row.consumedKg
           ),
@@ -192,9 +179,9 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
     return (
       <>
         <CarbonScope>
-          <Stack gap={4}>
+          <Stack spacing={2}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-              <Button size="sm" kind="ghost" onClick={() => setOpenId(null)}>
+              <Button size="small" variant="text" onClick={() => setOpenId(null)}>
                 ← All
               </Button>
               <span className="cds--type-heading-compact-01">{detail.ref} — {detail.title}</span>
@@ -212,25 +199,25 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
             {draft && (
               <div style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem", flexWrap: "wrap" }}>
                 <div style={{ minWidth: 220 }}>
-                  <Select id="seed-bbs" size="sm" labelText="Seed from BBS" value={bbsId} onChange={(e) => setBbsId(e.target.value)}>
-                    <SelectItem value="" text="Select…" />
+                  <TextField id="seed-bbs" size="small" label="Seed from BBS" value={bbsId} onChange={(e) => setBbsId(e.target.value)} select>
+                    <MenuItem value="">Select…</MenuItem>
                     {(bbsQ.data ?? []).map((b) => (
-                      <SelectItem key={b.id} value={b.id} text={`${b.ref} — ${b.title}`} />
+                      <MenuItem key={b.id} value={b.id}>{`${b.ref} — ${b.title}`}</MenuItem>
                     ))}
-                  </Select>
+                  </TextField>
                 </div>
-                <Button size="sm" kind="tertiary" disabled={!bbsId || seed.isPending} onClick={() => seed.mutate({ reconciliationId: detail.id, bbsId })}>
+                <Button size="small" variant="outlined" disabled={!bbsId || seed.isPending} onClick={() => seed.mutate({ reconciliationId: detail.id, bbsId })}>
                   Seed
                 </Button>
-                <Button size="sm" kind="tertiary" onClick={() => setLineOpen(true)}>
+                <Button size="small" variant="outlined" onClick={() => setLineOpen(true)}>
                   Add diameter
                 </Button>
-                <Button size="sm" disabled={finalize.isPending || detail.lines.length === 0} onClick={() => finalize.mutate({ id: detail.id })}>
+                <Button size="small" disabled={finalize.isPending || detail.lines.length === 0} onClick={() => finalize.mutate({ id: detail.id })}>
                   Finalize
                 </Button>
               </div>
             )}
-            {finalize.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={finalize.error.message} />}
+            {finalize.error && <Alert severity="error"><AlertTitle>Error</AlertTitle>{finalize.error.message}</Alert>}
 
             <DataGrid
               rows={detail.lines}
@@ -245,14 +232,20 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
         </CarbonScope>
 
         <CarbonScope>
-          <Modal
-            open={lineOpen}
-            size="xs"
-            modalHeading="Add diameter line"
-            primaryButtonText="Add"
-            secondaryButtonText="Cancel"
-            onRequestClose={() => setLineOpen(false)}
-            onRequestSubmit={() =>
+          <Dialog open={lineOpen} onClose={() => setLineOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>Add diameter line</DialogTitle>
+      <DialogContent>
+
+            <Stack spacing={2.5}>
+              {(["diaMm", "scheduledKg", "issuedKg", "consumedKg"] as const).map((k) => (
+                <TextField key={k} id={`line-${k}`} label={k} value={line[k]} onChange={(e) => setLine({ ...line, [k]: e.target.value })} size="small" />
+              ))}
+            </Stack>
+          
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setLineOpen(false)}>Cancel</Button>
+        <Button variant="contained" onClick={() =>
               addLine.mutate({
                 reconciliationId: detail.id,
                 diaMm: Number(line.diaMm),
@@ -260,20 +253,9 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
                 issuedKg: Number(line.issuedKg) || 0,
                 consumedKg: Number(line.consumedKg) || 0,
               })
-            }
-          >
-            <Stack gap={5}>
-              {(["diaMm", "scheduledKg", "issuedKg", "consumedKg"] as const).map((k) => (
-                <TextInput
-                  key={k}
-                  id={`line-${k}`}
-                  labelText={k}
-                  value={line[k]}
-                  onChange={(e) => setLine({ ...line, [k]: e.target.value })}
-                />
-              ))}
-            </Stack>
-          </Modal>
+            }>Add</Button>
+      </DialogActions>
+    </Dialog>
         </CarbonScope>
       </>
     );
@@ -282,7 +264,7 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
   return (
     <>
       <CarbonScope>
-        <Stack gap={4}>
+        <Stack spacing={2}>
           <p className="cds--type-body-01" style={SUBTLE}>
             Compare BBS scheduled steel with issued and consumed quantities by diameter. Wastage =
             issued − consumed (warn &gt;3%, exceed &gt;5%).
@@ -295,7 +277,7 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
               title: "No steel reconciliations",
               description: "Create one and seed diameters from a project BBS.",
               action: (
-                <Button size="sm" kind="tertiary" onClick={() => setCreateOpen(true)}>
+                <Button size="small" variant="outlined" onClick={() => setCreateOpen(true)}>
                   New reconciliation
                 </Button>
               ),
@@ -335,33 +317,33 @@ export function ProjectSteelReconciliation({ projectId }: { projectId: string })
       </CarbonScope>
 
       <CarbonScope>
-        <Modal
-          open={createOpen}
-          size="sm"
-          modalHeading="New steel reconciliation"
-          primaryButtonText="Create"
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!title || create.isPending}
-          onRequestClose={() => setCreateOpen(false)}
-          onRequestSubmit={() =>
+        <Dialog open={createOpen} onClose={() => setCreateOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>New steel reconciliation</DialogTitle>
+      <DialogContent>
+
+          <Stack spacing={2.5}>
+            <TextField id="sr-title" label="Title" value={title} onChange={(e) => setTitle(e.target.value)} size="small" />
+            <TextField id="sr-bbs" label="Seed from BBS (optional)" value={bbsId} onChange={(e) => setBbsId(e.target.value)} select size="small">
+              <MenuItem value="">— none —</MenuItem>
+              {(bbsQ.data ?? []).map((b) => (
+                <MenuItem key={b.id} value={b.id}>{`${b.ref} — ${b.title}`}</MenuItem>
+              ))}
+            </TextField>
+            {create.error && <Alert severity="error"><AlertTitle>Error</AlertTitle>{create.error.message}</Alert>}
+          </Stack>
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
+        <Button variant="contained" disabled={!title || create.isPending} onClick={() =>
             create.mutate({
               projectId,
               title,
               bbsId: bbsId || undefined,
             })
-          }
-        >
-          <Stack gap={5}>
-            <TextInput id="sr-title" labelText="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-            <Select id="sr-bbs" labelText="Seed from BBS (optional)" value={bbsId} onChange={(e) => setBbsId(e.target.value)}>
-              <SelectItem value="" text="— none —" />
-              {(bbsQ.data ?? []).map((b) => (
-                <SelectItem key={b.id} value={b.id} text={`${b.ref} — ${b.title}`} />
-              ))}
-            </Select>
-            {create.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={create.error.message} />}
-          </Stack>
-        </Modal>
+          }>Create</Button>
+      </DialogActions>
+    </Dialog>
       </CarbonScope>
     </>
   );

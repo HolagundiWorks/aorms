@@ -1,13 +1,15 @@
 import {
+  Alert,
+  AlertTitle,
   Button,
-  InlineNotification,
-  Modal,
-  Select,
-  SelectItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
   Stack,
-  TextArea,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+} from "@mui/material";
 import {
   TENDER_INVITATION_STATUS_LABEL,
   TENDER_INVITATION_STATUS_TAG,
@@ -20,12 +22,12 @@ import {
 } from "@esti/contracts";
 import { Add } from "@carbon/icons-react";
 import { pushToast, useScreenActions } from "@hcw/ui-kit";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { DataGrid, DataState, StatusTag, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../../lib/trpc.js";
 
-const SUBTLE: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
+const SUBTLE: CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
 
 /**
  * Project › Tenders — firm issues tenders; invited contractors bid in the portal.
@@ -142,7 +144,7 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
   return (
     <>
       <CarbonScope>
-        <Stack gap={4}>
+        <Stack spacing={2}>
           <p className="cds--type-body-01" style={SUBTLE}>
             Issue a tender to invited contractors. They bid in the contractor portal; amounts stay
             sealed until you close the tender.
@@ -155,7 +157,7 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
               title: "No tenders yet",
               description: "Draft a tender, invite contractors, then open bidding.",
               action: (
-                <Button size="sm" kind="tertiary" onClick={() => setCreateOpen(true)}>
+                <Button size="small" variant="outlined" onClick={() => setCreateOpen(true)}>
                   New tender
                 </Button>
               ),
@@ -175,15 +177,23 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
       </CarbonScope>
 
       <CarbonScope>
-        <Modal
-          open={createOpen}
-          size="sm"
-          modalHeading="New tender"
-          primaryButtonText={create.isPending ? "Saving…" : "Create draft"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!form.title || create.isPending}
-          onRequestClose={() => setCreateOpen(false)}
-          onRequestSubmit={() =>
+        <Dialog open={createOpen} onClose={() => setCreateOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>New tender</DialogTitle>
+      <DialogContent>
+
+          <Stack spacing={2.5}>
+            <TextField id="tn-title" label="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} size="small" />
+            <TextField id="tn-cat" label="Category (optional)" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Civil · Structural · MEP…" size="small" />
+            <TextField id="tn-due" type="date" label="Due date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} size="small" />
+            <TextField id="tn-scope" label="Scope" rows={3} value={form.scope} onChange={(e) => setForm({ ...form, scope: e.target.value })} multiline fullWidth></TextField>
+            <TextField id="tn-instr" label="Instructions to bidders" rows={2} value={form.instructions} onChange={(e) => setForm({ ...form, instructions: e.target.value })} multiline fullWidth></TextField>
+            {create.error && <Alert severity="error"><AlertTitle>Error</AlertTitle>{create.error.message}</Alert>}
+          </Stack>
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
+        <Button variant="contained" disabled={!form.title || create.isPending} onClick={() =>
             create.mutate({
               projectId,
               title: form.title,
@@ -192,29 +202,18 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
               scope: form.scope || undefined,
               instructions: form.instructions || undefined,
             })
-          }
-        >
-          <Stack gap={5}>
-            <TextInput id="tn-title" labelText="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-            <TextInput id="tn-cat" labelText="Category (optional)" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Civil · Structural · MEP…" />
-            <TextInput id="tn-due" type="date" labelText="Due date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />
-            <TextArea id="tn-scope" labelText="Scope" rows={3} value={form.scope} onChange={(e) => setForm({ ...form, scope: e.target.value })} />
-            <TextArea id="tn-instr" labelText="Instructions to bidders" rows={2} value={form.instructions} onChange={(e) => setForm({ ...form, instructions: e.target.value })} />
-            {create.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={create.error.message} />}
-          </Stack>
-        </Modal>
+          }>{create.isPending ? "Saving…" : "Create draft"}</Button>
+      </DialogActions>
+    </Dialog>
 
-        <Modal
-          open={!!detailId}
-          size="md"
-          passiveModal
-          modalHeading={tender?.title ?? "Tender"}
-          onRequestClose={() => setDetailId(null)}
-        >
+        <Dialog open={!!detailId} onClose={() => setDetailId(null)} fullWidth maxWidth="sm">
+      <DialogTitle>{tender?.title ?? "Tender"}</DialogTitle>
+      <DialogContent>
+
           {detailQ.isLoading || !tender || !detail ? (
             <p className="cds--type-body-01" style={{ margin: 0 }}>Loading…</p>
           ) : (
-            <Stack gap={5}>
+            <Stack spacing={2.5}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
                 <StatusTag
                   value={tender.status as TenderStatus}
@@ -235,13 +234,7 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
               <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                 {(["OPEN", "CLOSED", "CANCELLED"] as TenderStatus[]).map((s) =>
                   canTransitionTenderStatus(tender.status, s) && s !== tender.status ? (
-                    <Button
-                      key={s}
-                      size="sm"
-                      kind={s === "OPEN" ? "primary" : "tertiary"}
-                      disabled={setStatus.isPending}
-                      onClick={() => setStatus.mutate({ id: tender.id, status: s })}
-                    >
+                    <Button key={s} size="small" variant="contained" disabled={setStatus.isPending} onClick={() => setStatus.mutate({ id: tender.id, status: s })}>
                       Mark {TENDER_STATUS_LABEL[s]}
                     </Button>
                   ) : null,
@@ -253,37 +246,25 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
                   winner.
                 </p>
               )}
-              {setStatus.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={setStatus.error.message} />}
+              {setStatus.error && <Alert severity="error"><AlertTitle>Error</AlertTitle>{setStatus.error.message}</Alert>}
 
               <div>
                 <p className="cds--type-label-01" style={{ ...SUBTLE, textTransform: "uppercase", letterSpacing: "0.02em" }}>Invitations</p>
                 <div style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem", margin: "0.5rem 0" }}>
                   <div style={{ minWidth: 220 }}>
-                    <Select
-                      id="tn-invite"
-                      size="sm"
-                      labelText="Contractor"
-                      value={inviteId}
-                      onChange={(e) => setInviteId(e.target.value)}
-                      disabled={tender.status === "AWARDED" || tender.status === "CANCELLED"}
-                    >
-                      <SelectItem value="" text="Select…" />
+                    <TextField id="tn-invite" size="small" label="Contractor" value={inviteId} onChange={(e) => setInviteId(e.target.value)} disabled={tender.status === "AWARDED" || tender.status === "CANCELLED"} select>
+                      <MenuItem value="">Select…</MenuItem>
                       {(contractorsQ.data ?? []).map((c) => (
-                        <SelectItem key={c.id} value={c.id} text={c.name} />
+                        <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
                       ))}
-                    </Select>
+                    </TextField>
                   </div>
-                  <Button
-                    size="sm"
-                    kind="tertiary"
-                    disabled={!inviteId || invite.isPending}
-                    onClick={() => invite.mutate({ tenderId: tender.id, contractorId: inviteId })}
-                  >
+                  <Button size="small" variant="outlined" disabled={!inviteId || invite.isPending} onClick={() => invite.mutate({ tenderId: tender.id, contractorId: inviteId })}>
                     Invite
                   </Button>
                 </div>
-                {invite.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={invite.error.message} />}
-                <Stack gap={2}>
+                {invite.error && <Alert severity="error"><AlertTitle>Error</AlertTitle>{invite.error.message}</Alert>}
+                <Stack spacing={1}>
                   {detail.invitations.map((i) => (
                     <div
                       key={i.id}
@@ -302,10 +283,7 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
                         }
                       />
                       {tender.status === "CLOSED" && i.status === "SUBMITTED" && (
-                        <Button
-                          size="sm"
-                          onClick={() => award.mutate({ tenderId: tender.id, contractorId: i.contractorId })}
-                        >
+                        <Button size="small" onClick={() => award.mutate({ tenderId: tender.id, contractorId: i.contractorId })}>
                           Award
                         </Button>
                       )}
@@ -324,7 +302,7 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
                 {detail.bids.length === 0 ? (
                   <p className="cds--type-body-01" style={{ ...SUBTLE, marginTop: "0.25rem" }}>No bids submitted yet.</p>
                 ) : (
-                  <Stack gap={2} style={{ marginTop: "0.25rem" }}>
+                  <Stack spacing={1} sx={{ marginTop: "0.25rem" }}>
                     {detail.bids.map((b) => {
                       const invRow = detail.invitations.find((i) => i.id === b.invitationId);
                       return (
@@ -347,10 +325,12 @@ export function ProjectTenders({ projectId }: { projectId: string }) {
                   </p>
                 )}
               </div>
-              {award.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={award.error.message} />}
+              {award.error && <Alert severity="error"><AlertTitle>Error</AlertTitle>{award.error.message}</Alert>}
             </Stack>
           )}
-        </Modal>
+        
+      </DialogContent>
+    </Dialog>
       </CarbonScope>
     </>
   );

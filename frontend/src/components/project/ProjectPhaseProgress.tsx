@@ -1,6 +1,5 @@
-import { Select, SelectItem, SkeletonText, Stack } from "@carbon/react";
+import { MenuItem, Skeleton, Stack, TextField, Typography } from "@mui/material";
 import { can } from "@esti/contracts";
-import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { StatusDot } from "../../carbon/adapters/index.js";
 import { useAuth } from "../../lib/auth.js";
 import { trpc } from "../../lib/trpc.js";
@@ -17,7 +16,7 @@ const STATUS_LABEL: Record<string, string> = {
   COMPLETE: "Complete",
 };
 
-/** CA / handover live stages — AProc W1.6 (`phaseProgress`). Wave 3 (Carbon). */
+/** CA / handover live stages — AProc W1.6 (`phaseProgress`). */
 export function ProjectPhaseProgress({ projectId }: { projectId: string }) {
   const { user } = useAuth();
   const utils = trpc.useUtils();
@@ -39,89 +38,90 @@ export function ProjectPhaseProgress({ projectId }: { projectId: string }) {
   }
 
   return (
-    <CarbonScope>
-      <Stack gap={5}>
-        <Stack gap={2}>
-          <h4 className="cds--type-heading-03" style={{ margin: 0 }}>
-            Phase stages
-          </h4>
-          <p className="cds--type-body-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
-            Live stages within Construction Administration and Handover — owner-side progress for
-            the client, not a contractor CPM network.
-          </p>
-        </Stack>
-
-        {listQ.isLoading && <SkeletonText paragraph lineCount={3} />}
-
-        {!listQ.isLoading && rows.length === 0 && (
-          <p className="cds--type-body-01">
-            No live stages yet. Add Construction Administration or Handover phases on this project
-            to seed stage checklists.
-          </p>
-        )}
-
-        {[...byPhase.entries()].map(([phaseId, stages]) => {
-          const label = stages[0]?.phaseLabel ?? "Phase";
-          const code = stages[0]?.phaseCode ?? "";
-          return (
-            <Stack key={phaseId} gap={3}>
-              <p className="cds--type-heading-compact-01" style={{ margin: 0 }}>
-                {label}
-                {code ? (
-                  <span
-                    className="cds--type-caption-01"
-                    style={{ marginLeft: "0.5rem", color: "var(--cds-text-secondary)" }}
-                  >
-                    {code}
-                  </span>
-                ) : null}
-              </p>
-              {stages.map((s) => (
-                <div
-                  key={s.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "0.5rem 0",
-                    borderBottom: "1px solid var(--cds-border-subtle)",
-                    flexWrap: "wrap",
-                    gap: "0.5rem",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <StatusDot color={STATUS_TAG[s.status] ?? "gray"} label={STATUS_LABEL[s.status] ?? s.status} />
-                    <span className="cds--type-body-01">{s.label}</span>
-                  </div>
-                  {canWrite ? (
-                    <div style={{ minWidth: 160 }}>
-                      <Select
-                        id={`phs-${s.id}`}
-                        labelText="Status"
-                        hideLabel
-                        size="sm"
-                        value={s.status}
-                        disabled={update.isPending}
-                        onChange={(e) =>
-                          update.mutate({
-                            id: s.id,
-                            projectId,
-                            status: e.target.value as "NOT_STARTED" | "IN_PROGRESS" | "COMPLETE",
-                          })
-                        }
-                      >
-                        <SelectItem value="NOT_STARTED" text="Not started" />
-                        <SelectItem value="IN_PROGRESS" text="In progress" />
-                        <SelectItem value="COMPLETE" text="Complete" />
-                      </Select>
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-            </Stack>
-          );
-        })}
+    <Stack spacing={2.5}>
+      <Stack spacing={1}>
+        <Typography variant="h6" sx={{ m: 0 }}>
+          Phase stages
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>
+          Live stages within Construction Administration and Handover — owner-side progress for
+          the client, not a contractor CPM network.
+        </Typography>
       </Stack>
-    </CarbonScope>
+
+      {listQ.isLoading && (
+        <Stack spacing={1}>
+          <Skeleton />
+          <Skeleton />
+          <Skeleton width="60%" />
+        </Stack>
+      )}
+
+      {!listQ.isLoading && rows.length === 0 && (
+        <Typography variant="body2">
+          No live stages yet. Add Construction Administration or Handover phases on this project
+          to seed stage checklists.
+        </Typography>
+      )}
+
+      {[...byPhase.entries()].map(([phaseId, stages]) => {
+        const label = stages[0]?.phaseLabel ?? "Phase";
+        const code = stages[0]?.phaseCode ?? "";
+        return (
+          <Stack key={phaseId} spacing={1.5}>
+            <Typography variant="subtitle2" sx={{ m: 0 }}>
+              {label}
+              {code ? (
+                <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                  {code}
+                </Typography>
+              ) : null}
+            </Typography>
+            {stages.map((s) => (
+              <div
+                key={s.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0.5rem 0",
+                  borderBottom: "1px solid var(--cds-border-subtle)",
+                  flexWrap: "wrap",
+                  gap: "0.5rem",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <StatusDot color={STATUS_TAG[s.status] ?? "gray"} label={STATUS_LABEL[s.status] ?? s.status} />
+                  <Typography variant="body2">{s.label}</Typography>
+                </div>
+                {canWrite ? (
+                  <TextField
+                    id={`phs-${s.id}`}
+                    select
+                    label="Status"
+                    size="small"
+                    sx={{ minWidth: 160 }}
+                    value={s.status}
+                    disabled={update.isPending}
+                    InputLabelProps={{ shrink: true }}
+                    onChange={(e) =>
+                      update.mutate({
+                        id: s.id,
+                        projectId,
+                        status: e.target.value as "NOT_STARTED" | "IN_PROGRESS" | "COMPLETE",
+                      })
+                    }
+                  >
+                    <MenuItem value="NOT_STARTED">Not started</MenuItem>
+                    <MenuItem value="IN_PROGRESS">In progress</MenuItem>
+                    <MenuItem value="COMPLETE">Complete</MenuItem>
+                  </TextField>
+                ) : null}
+              </div>
+            ))}
+          </Stack>
+        );
+      })}
+    </Stack>
   );
 }

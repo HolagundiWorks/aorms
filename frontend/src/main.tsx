@@ -9,9 +9,9 @@ import "@hcw/ui-kit/portal-chrome.scss";
 import "@hcw/ui-kit/tokens.css";
 import "./landing.scss";
 import "./glass.scss";
-// Carbon migration Wave 1 — Carbon global CSS in a low-priority @layer so it
-// never overrides the app's own styles. Theme is applied per-subtree via
-// CarbonScope, not :root. See docs/esti/CARBON-MIGRATION.md.
+// Legacy Carbon stylesheet (tree-shaken @carbon/styles) in a low-priority
+// @layer for residual cds class names. SPA UI is MUI + @hcw/ui-kit; --cds-*
+// tokens also live in styles.scss. See docs/esti/CARBON-MIGRATION.md.
 import "./carbon/carbon.css";
 import {
   MutationCache,

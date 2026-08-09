@@ -1,6 +1,6 @@
 # AQC ↔ Joint measurement sync contract
 
-**Status:** Hub stub (esti) · AQC desktop consume TBD  
+**Status:** Hub live · AQC desktop consume ✅ (BBSApp Outputs › Pull JM · Bridge `PullJointMeasurementsAsync`) 
 **Related:** [PLAN-MEASUREMENT-ARCHITECTURE.md](PLAN-MEASUREMENT-ARCHITECTURE.md) · [AORMS-CONNECT.md](AORMS-CONNECT.md) · [ROADMAP.md](ROADMAP.md) S11
 
 ## Purpose
@@ -52,9 +52,10 @@ the target book. JM id is the idempotency key for MB import (`source` note in au
 
 ## Connect / Bridge responsibilities
 
-1. On hub event `jointMeasurement` APPROVED → catalog row for the project.
-2. AQC Estimation “Pull joint measurements” reads catalog → lines → local MB / rate book.
-3. Rate edits in AQC may push back as metadata `estimateTotals` later (out of scope here).
+1. On hub event `jointMeasurement` APPROVED → sync record + optional catalog row for the project.
+2. Desktop: `GET /api/ops/joint-measurements?projectId=` (Bearer `syncToken`) returns APPROVED bundles + lines.
+3. AQC BBSApp **Outputs › Pull JM** (and `AQC.Estimation pull-jm`) → rate-book seed (rate 0) + earthwork MB rows; idempotent on `JM:{lineId}` mark / itemCode.
+4. Rate edits in AQC may push back as metadata `estimateTotals` later (out of scope here).
 
 ## Esti surfaces (live)
 

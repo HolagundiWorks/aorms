@@ -1,13 +1,18 @@
 import {
-  InlineNotification,
-  Modal,
-  Select,
-  SelectItem,
-  SkeletonPlaceholder,
+  Alert,
+  AlertTitle,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  MenuItem,
+  Skeleton,
   Stack,
-  TextInput,
-  Toggle,
-} from "@carbon/react";
+  Switch,
+  TextField,
+} from "@mui/material";
 import {
   EXPENSE_BILLING_CLASS_LABEL,
   EXPENSE_CATEGORY_LABEL,
@@ -60,9 +65,9 @@ type ExpenseRow = {
 
 function LoadingRows() {
   return (
-    <Stack gap={2}>
+    <Stack spacing={1}>
       {Array.from({ length: 3 }).map((_, i) => (
-        <SkeletonPlaceholder key={i} style={{ height: 32, width: "100%" }} />
+        <Skeleton variant="rounded" style={{ height: 32, width: "100%" }} />
       ))}
     </Stack>
   );
@@ -103,15 +108,44 @@ function ExpenseFormModal({
 
   return (
     <CarbonScope>
-      <Modal
-        open={open}
-        size="sm"
-        modalHeading={scope === "OFFICE" ? "New office expense" : "New project expense"}
-        primaryButtonText={create.isPending ? "Saving…" : "Save draft"}
-        secondaryButtonText="Cancel"
-        primaryButtonDisabled={create.isPending || !amountPaise || amountPaise <= 0}
-        onRequestClose={onClose}
-        onRequestSubmit={() =>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{scope === "OFFICE" ? "New office expense" : "New project expense"}</DialogTitle>
+      <DialogContent>
+
+        <Stack spacing={2.5}>
+          <TextField id="exp-cat" label="Category" value={category} onChange={(e) => setCategory(e.target.value)} select size="small">
+            {ExpenseCategory.options.map((c) => (
+              <MenuItem key={c} value={c}>{EXPENSE_CATEGORY_LABEL[c]}</MenuItem>
+            ))}
+          </TextField>
+          <TextField id="exp-amt" label="Amount (₹)" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} size="small" />
+          <TextField id="exp-date" label="Expense date" type="date" value={expenseDate} onChange={(e) => setExpenseDate(e.target.value)} size="small" />
+          <TextField id="exp-payee" label="Payee" value={payee} onChange={(e) => setPayee(e.target.value)} size="small" />
+          <TextField id="exp-desc" label="Description" value={description} onChange={(e) => setDescription(e.target.value)} size="small" />
+          <FormControlLabel
+            control={<Switch id="exp-cash" checked={cashVoucher} onChange={(_e, v) => setCashVoucher(v)} />}
+            label="Cash voucher"
+          />
+          {!cashVoucher && (
+            <TextField id="exp-pay" label="Payment method" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} select size="small">
+              {ExpensePaymentMethod.options.map((m) => (
+                <MenuItem key={m} value={m}>{EXPENSE_PAYMENT_METHOD_LABEL[m]}</MenuItem>
+              ))}
+            </TextField>
+          )}
+          {scope === "PROJECT" && (
+            <FormControlLabel
+              control={<Switch id="exp-bill" checked={billable} onChange={(_e, v) => setBillable(v)} />}
+              label={`Billing class — ${billable ? EXPENSE_BILLING_CLASS_LABEL.BILLABLE : EXPENSE_BILLING_CLASS_LABEL.NON_BILLABLE}`}
+            />
+          )}
+          {create.error && <Alert severity="error"><AlertTitle>Error</AlertTitle>{create.error.message}</Alert>}
+        </Stack>
+      
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button variant="contained" disabled={create.isPending || !amountPaise || amountPaise <= 0} onClick={() =>
           create.mutate({
             scope,
             projectId,
@@ -123,39 +157,9 @@ function ExpenseFormModal({
             description: description || undefined,
             billingClass: scope === "PROJECT" && billable ? "BILLABLE" : "NON_BILLABLE",
           })
-        }
-      >
-        <Stack gap={5}>
-          <Select id="exp-cat" labelText="Category" value={category} onChange={(e) => setCategory(e.target.value)}>
-            {ExpenseCategory.options.map((c) => (
-              <SelectItem key={c} value={c} text={EXPENSE_CATEGORY_LABEL[c]} />
-            ))}
-          </Select>
-          <TextInput id="exp-amt" labelText="Amount (₹)" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
-          <TextInput id="exp-date" labelText="Expense date" type="date" value={expenseDate} onChange={(e) => setExpenseDate(e.target.value)} />
-          <TextInput id="exp-payee" labelText="Payee" value={payee} onChange={(e) => setPayee(e.target.value)} />
-          <TextInput id="exp-desc" labelText="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
-          <Toggle id="exp-cash" labelText="Cash voucher" labelA="No" labelB="Yes" toggled={cashVoucher} onToggle={(v) => setCashVoucher(v)} />
-          {!cashVoucher && (
-            <Select id="exp-pay" labelText="Payment method" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-              {ExpensePaymentMethod.options.map((m) => (
-                <SelectItem key={m} value={m} text={EXPENSE_PAYMENT_METHOD_LABEL[m]} />
-              ))}
-            </Select>
-          )}
-          {scope === "PROJECT" && (
-            <Toggle
-              id="exp-bill"
-              labelText={`Billing class — ${billable ? EXPENSE_BILLING_CLASS_LABEL.BILLABLE : EXPENSE_BILLING_CLASS_LABEL.NON_BILLABLE}`}
-              labelA="Non-billable"
-              labelB="Billable"
-              toggled={billable}
-              onToggle={(v) => setBillable(v)}
-            />
-          )}
-          {create.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={create.error.message} />}
-        </Stack>
-      </Modal>
+        }>{create.isPending ? "Saving…" : "Save draft"}</Button>
+      </DialogActions>
+    </Dialog>
     </CarbonScope>
   );
 }
@@ -356,7 +360,7 @@ export function CashBook() {
         title="Cash book"
         description="Petty cash and physical cash outflows. Balance reflects closed cash vouchers in the selected financial year."
         aside={
-          <Stack gap={4}>
+          <Stack spacing={2}>
             <AccountsCarryForward period={period} onPeriodChange={setPeriod} />
             {cashAccount && (
               <p className="cds--type-body-01" style={{ margin: 0, wordBreak: "break-word" }}>

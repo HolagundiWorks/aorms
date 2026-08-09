@@ -51,6 +51,7 @@ import {
 } from "./lib/ai/ollama-config.js";
 import { registerSyncRoutes } from "./modules/sync/routes.js";
 import { registerMongoOpsRoutes } from "./modules/mongoOps/routes.js";
+import { registerJmOpsRoutes } from "./modules/mongoOps/jmRoutes.js";
 import { initMongoOps } from "./lib/mongo/ops.js";
 import { drainOutbox } from "./lib/sync/outbox.js";
 import { proposePulseActions, runDueStandups } from "./lib/pulseEngine.js";
@@ -295,6 +296,7 @@ registerCalendarFeed(app);
 registerLicenseRoutes(app);
 registerSyncRoutes(app);
 registerMongoOpsRoutes(app);
+registerJmOpsRoutes(app);
 
 await app.register(fastifyTRPCPlugin, {
   prefix: "/trpc",

@@ -1,13 +1,15 @@
 import {
+  Alert,
+  AlertTitle,
   Button,
-  InlineNotification,
-  Modal,
-  PasswordInput,
-  Select,
-  SelectItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
   Stack,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+} from "@mui/material";
 import { Add, Renew } from "@carbon/icons-react";
 import {
   ASSIGNABLE_STAFF_ROLES,
@@ -43,7 +45,7 @@ const TYPE_TAG_COLOR: Record<string, "purple" | "gray" | "blue" | "teal" | "cyan
   CONTRACTOR: "cyan",
 };
 
-const LABEL_STYLE: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
+const LABEL_STYLE = { margin: 0, color: "var(--cds-text-secondary)" } as const;
 
 export function Users({ embedded = false }: { embedded?: boolean }) {
   const { user } = useAuth();
@@ -214,23 +216,16 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
         if (!isSelf && u.role !== "OWNER" && !u.clientId && !u.consultantId) {
           return (
             <div style={{ minWidth: 150 }}>
-              <Select
-                id={`role-${u.id}`}
-                labelText="User role"
-                hideLabel
-                size="sm"
-                value={isStaffRole(u.role) ? u.role : "ASSOCIATE"}
-                onChange={(e) =>
+              <TextField id={`role-${u.id}`} label="User role" size="small" value={isStaffRole(u.role) ? u.role : "ASSOCIATE"} onChange={(e) =>
                   setRole.mutate({
                     id: u.id,
                     role: e.target.value as (typeof ASSIGNABLE_STAFF_ROLES)[number],
                   })
-                }
-              >
+                } select>
                 {roleOptions.map((r) => (
-                  <SelectItem key={r} value={r} text={STAFF_ROLE_LABEL[r]} />
+                  <MenuItem key={r} value={r}>{STAFF_ROLE_LABEL[r]}</MenuItem>
                 ))}
-              </Select>
+              </TextField>
             </div>
           );
         }
@@ -293,8 +288,8 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
 
   const body = (
     <CarbonScope>
-      <Stack gap={5}>
-        <Stack gap={3}>
+      <Stack spacing={2.5}>
+        <Stack spacing={1.5}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <h3 className="cds--type-heading-compact-01" style={{ margin: 0 }}>Active logins</h3>
             <StatusDot color="blue" label={STANDARD_LICENCE_LABEL} />
@@ -310,12 +305,12 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
         </Stack>
 
         {msg && (
-          <InlineNotification kind="success" lowContrast title="Done" subtitle={msg} onCloseButtonClick={() => setMsg(null)} />
+          <Alert severity="success" onClose={() => setMsg(null)}><AlertTitle>Done</AlertTitle>{msg}</Alert>
         )}
 
         <hr style={{ border: 0, borderTop: "1px solid var(--cds-border-subtle)", margin: 0 }} />
 
-        <Stack gap={3}>
+        <Stack spacing={1.5}>
           <h3 className="cds--type-heading-compact-01" style={{ margin: 0 }}>Logins</h3>
           <DataGrid
             rows={rows}
@@ -337,15 +332,15 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
       {embedded ? (
         <CarbonScope>
           <div style={{ padding: "0.5rem" }}>
-            <Stack gap={5}>
+            <Stack spacing={2.5}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
                 <h2 className="cds--type-heading-03" style={{ margin: 0, flex: 1 }}>
                   Users &amp; access
                 </h2>
-                <Button size="sm" renderIcon={Add} onClick={() => setAddOpen(true)}>
+                <Button size="small" startIcon={<Add />} onClick={() => setAddOpen(true)}>
                   Add staff login
                 </Button>
-                <Button kind="secondary" size="sm" renderIcon={Renew} disabled={resync.isPending} onClick={() => resync.mutate()}>
+                <Button variant="outlined" size="small" startIcon={<Renew />} disabled={resync.isPending} onClick={() => resync.mutate()}>
                   {resync.isPending ? "Syncing…" : "Resync identity types"}
                 </Button>
               </div>
@@ -367,124 +362,82 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
       )}
 
       <CarbonScope>
-        <Modal
-          open={addOpen}
-          size="sm"
-          modalHeading="Add staff login"
-          primaryButtonText={createStaff.isPending ? "Creating…" : "Create"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={
-            !form.email ||
-            form.fullName.length < 2 ||
-            form.password.length < 8 ||
-            createStaff.isPending
-          }
-          onRequestClose={() => setAddOpen(false)}
-          onRequestSubmit={() => createStaff.mutate(form)}
-        >
-          <Stack gap={5}>
+        <Dialog open={addOpen} onClose={() => setAddOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>Add staff login</DialogTitle>
+      <DialogContent>
+
+          <Stack spacing={2.5}>
             <p className="cds--type-body-01" style={{ margin: 0 }}>Creates an office staff login at the chosen seniority tier.</p>
-            <TextInput
-              id="u-name"
-              labelText="Full name"
-              autoComplete="name"
-              value={form.fullName}
-              onChange={(e) => setForm((f) => ({ ...f, fullName: e.target.value }))}
-              helperText="Shown on ID cards and assignments."
-              invalid={form.fullName.length > 0 && form.fullName.trim().length < 2}
-              invalidText="At least 2 characters."
-            />
-            <TextInput
-              id="u-email"
-              labelText="Login email"
-              type="email"
-              autoComplete="email"
-              value={form.email}
-              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              helperText={!form.email.trim() ? "Required for sign-in." : undefined}
-            />
-            <Select
-              id="u-role"
-              labelText="Role (seniority tier)"
-              value={form.role}
-              onChange={(e) =>
+            <TextField id="u-name" label="Full name" autoComplete="name" value={form.fullName} onChange={(e) => setForm((f) => ({ ...f, fullName: e.target.value }))} helperText="Shown on ID cards and assignments." invalid={form.fullName.length > 0 && form.fullName.trim().length < 2} invalidText="At least 2 characters." size="small" />
+            <TextField id="u-email" label="Login email" type="email" autoComplete="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} helperText={!form.email.trim() ? "Required for sign-in." : undefined} size="small" />
+            <TextField id="u-role" label="Role (seniority tier)" value={form.role} onChange={(e) =>
                 setForm((f) => ({
                   ...f,
                   role: e.target.value as (typeof ASSIGNABLE_STAFF_ROLES)[number],
                 }))
-              }
-            >
+              } select size="small">
               {roleOptions.map((r) => (
-                <SelectItem key={r} value={r} text={STAFF_ROLE_LABEL[r]} />
+                <MenuItem key={r} value={r}>{STAFF_ROLE_LABEL[r]}</MenuItem>
               ))}
-            </Select>
-            <PasswordInput
-              id="u-pw"
-              labelText="Temporary password (min 8 chars)"
-              autoComplete="new-password"
-              value={form.password}
-              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              helperText="They can change this after first login."
-              invalid={form.password.length > 0 && form.password.length < 8}
-              invalidText="Use at least 8 characters."
-            />
+            </TextField>
+            <TextField id="u-pw" label="Temporary password (min 8 chars)" autoComplete="new-password" value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} helperText="They can change this after first login." invalid={form.password.length > 0 && form.password.length < 8} invalidText="Use at least 8 characters." type="password" />
             {createBlockedReason && !createStaff.isPending && (
               <p className="cds--type-label-01" style={LABEL_STYLE}>{createBlockedReason}</p>
             )}
             {createStaff.error && (
-              <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={createStaff.error.message} />
+              <Alert severity="error"><AlertTitle>Error</AlertTitle>{createStaff.error.message}</Alert>
             )}
           </Stack>
-        </Modal>
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setAddOpen(false)}>Cancel</Button>
+        <Button variant="contained" disabled={
+            !form.email ||
+            form.fullName.length < 2 ||
+            form.password.length < 8 ||
+            createStaff.isPending
+          } onClick={() => createStaff.mutate(form)}>{createStaff.isPending ? "Creating…" : "Create"}</Button>
+      </DialogActions>
+    </Dialog>
 
-        <Modal
-          open={reset !== null}
-          size="sm"
-          modalHeading={`Reset password — ${reset?.email ?? ""}`}
-          primaryButtonText={resetPassword.isPending ? "Saving…" : "Reset"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={resetPw.length < 8 || resetPassword.isPending}
-          onRequestClose={() => setReset(null)}
-          onRequestSubmit={() => reset && resetPassword.mutate({ id: reset.id, password: resetPw })}
-        >
-          <PasswordInput
-            id="u-reset"
-            labelText="New password (min 8 chars)"
-            value={resetPw}
-            onChange={(e) => setResetPw(e.target.value)}
-          />
-        </Modal>
+        <Dialog open={reset !== null} onClose={() => setReset(null)} fullWidth maxWidth="sm">
+      <DialogTitle>{`Reset password — ${reset?.email ?? ""}`}</DialogTitle>
+      <DialogContent>
 
-        <Modal
-          open={link !== null}
-          size="sm"
-          modalHeading={`Link identity — ${link?.email ?? ""}`}
-          primaryButtonText={linkIdentity.isPending ? "Saving…" : "Save"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={linkIdentity.isPending}
-          onRequestClose={() => setLink(null)}
-          onRequestSubmit={() =>
-            link &&
-            linkIdentity.mutate({ id: link.id, accountPublicId: linkVal.trim() || null })
-          }
-        >
-          <Stack gap={5}>
+          <TextField id="u-reset" label="New password (min 8 chars)" value={resetPw} onChange={(e) => setResetPw(e.target.value)} type="password" />
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setReset(null)}>Cancel</Button>
+        <Button variant="contained" disabled={resetPw.length < 8 || resetPassword.isPending} onClick={() => reset && resetPassword.mutate({ id: reset.id, password: resetPw })}>{resetPassword.isPending ? "Saving…" : "Reset"}</Button>
+      </DialogActions>
+    </Dialog>
+
+        <Dialog open={link !== null} onClose={() => setLink(null)} fullWidth maxWidth="sm">
+      <DialogTitle>{`Link identity — ${link?.email ?? ""}`}</DialogTitle>
+      <DialogContent>
+
+          <Stack spacing={2.5}>
             <p className="cds--type-body-01" style={{ margin: 0 }}>
               Link this firm login to a person&apos;s portable AORMS-U identity so their
               certifications and growth follow them. Leave blank to unlink.
             </p>
-            <TextInput
-              id="u-link"
-              labelText="AORMS-U handle"
-              placeholder="AORMS-U-2K4P9F"
-              value={linkVal}
-              onChange={(e) => setLinkVal(e.target.value)}
-            />
+            <TextField id="u-link" label="AORMS-U handle" placeholder="AORMS-U-2K4P9F" value={linkVal} onChange={(e) => setLinkVal(e.target.value)} size="small" />
             {linkIdentity.error && (
-              <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={linkIdentity.error.message} />
+              <Alert severity="error"><AlertTitle>Error</AlertTitle>{linkIdentity.error.message}</Alert>
             )}
           </Stack>
-        </Modal>
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setLink(null)}>Cancel</Button>
+        <Button variant="contained" disabled={linkIdentity.isPending} onClick={() =>
+            link &&
+            linkIdentity.mutate({ id: link.id, accountPublicId: linkVal.trim() || null })
+          }>{linkIdentity.isPending ? "Saving…" : "Save"}</Button>
+      </DialogActions>
+    </Dialog>
       </CarbonScope>
     </>
   );

@@ -23,7 +23,7 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         // Sass 1.77+ logs legacy-js-api deprecation warnings for packages
-        // (like @carbon/react) that haven't fully migrated to the modern API.
+        // (like @carbon/styles) that haven't fully migrated to the modern API.
         // Silence them so they don't become build errors in strict mode.
         silenceDeprecations: ["legacy-js-api"],
         quietDeps: true,
@@ -67,7 +67,7 @@ export default defineConfig({
       output: {
         // Split the heavy libraries into their own cacheable chunks. xlsx is only
         // reached from lazy (authenticated) routes, so it stays off the landing's
-        // critical path; carbon (the design system) is one shared chunk.
+        // critical path; @carbon/icons + @carbon/styles stay one shared chunk.
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
           if (id.includes("xlsx")) return "vendor-xlsx";

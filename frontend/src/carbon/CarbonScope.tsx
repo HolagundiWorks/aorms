@@ -1,34 +1,23 @@
-import type { ComponentProps, ReactNode } from "react";
-import { Theme } from "@carbon/react";
-
-/** Carbon theme schemes (Wave 1 maps app light/dark → these). */
-export type CarbonTheme = "white" | "g10" | "g90" | "g100";
-
-type ThemeExtra = Omit<ComponentProps<typeof Theme>, "theme" | "children">;
+import { createElement, type ComponentPropsWithoutRef, type ElementType, type ReactNode } from "react";
 
 /**
- * The single sanctioned entry point for a Carbon subtree during the migration.
- *
- * Wraps children in a Carbon `<Theme>`, which sets the `--cds-*` tokens and
- * IBM Plex type on its **container element only** — never on `:root`. That keeps
- * Carbon screens pure Carbon (§0 of docs/esti/CARBON-MIGRATION.md) while
- * unmigrated HCW-UI-Kit screens, which read the frozen `--cds-*` compat block
- * from `:root`, are completely untouched.
- *
- * Carbon's component CSS is loaded once, globally, in a cascade layer via
- * `carbon.css` (imported in main.tsx) so the app's own styles always win.
- *
- * Forwards `as`/`className`/`style` to `<Theme>` so inline call-sites can use
- * `as="span"` and avoid breaking a flex/inline row.
+ * Former Carbon `<Theme>` wrapper. Kept as a passthrough so call-sites that
+ * still wrap migrated screens keep layout/`as`/`className` behaviour without
+ * pulling the Carbon React package. Theme tokens come from kit / frozen `--cds-*`.
  */
-export function CarbonScope({
-  theme = "g10",
+export type CarbonTheme = "white" | "g10" | "g90" | "g100";
+
+type CarbonScopeProps<T extends ElementType = "div"> = {
+  theme?: CarbonTheme;
+  children: ReactNode;
+  as?: T;
+} & Omit<ComponentPropsWithoutRef<T>, "as" | "children" | "theme">;
+
+export function CarbonScope<T extends ElementType = "div">({
+  theme: _theme,
   children,
+  as,
   ...rest
-}: { theme?: CarbonTheme; children: ReactNode } & ThemeExtra) {
-  return (
-    <Theme theme={theme} {...rest}>
-      {children}
-    </Theme>
-  );
+}: CarbonScopeProps<T>) {
+  return createElement((as ?? "div") as ElementType, rest, children);
 }

@@ -46,8 +46,8 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | **S8** | Reopen apex auth / portal demos | esti | 🟡 code ready (gate-aware CTAs · `s8-reopen-demos.sh`) · VPS flip 🔲 |
 | **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🟡 unsigned MSIX ✅ · code sign 🔲 D6 |
 | **S10** | Firm portal depth | esti portals | ✅ collab tx+ack · Documents+RA · contractor/site Drawings · collab demo login |
-| **S11** | Joint measurement → approval → rate books · PDF annotate · AQC sync contract | esti · AQC | ✅ hub recorder/approve/rate seed · [AQC-JM-SYNC.md](AQC-JM-SYNC.md) · AQC desktop pull 🔲 |
-| **S12** | UX audit wave (1B+2C) — landing honesty · portal docks · SPA de-Carbon · manager HCW chrome start | esti · AStudio · AConsulting | ✅ [2026-08-09-UX-AUDIT-WAVE.md](../hcw-kit/11-audits/2026-08-09-UX-AUDIT-WAVE.md) · remaining Carbon ~38 files 🔲 · AQC chrome 🔲 |
+| **S11** | Joint measurement → approval → rate books · PDF annotate · AQC sync contract | esti · AQC | ✅ hub + [AQC-JM-SYNC.md](AQC-JM-SYNC.md) · **AQC Pull JM** ✅ (`GET /api/ops/joint-measurements` · Bridge · BBSApp Outputs) |
+| **S12** | UX audit wave (1B+2C) — landing honesty · portal docks · SPA de-Carbon · manager HCW chrome start | esti · AStudio · AConsulting | ✅ [2026-08-09-UX-AUDIT-WAVE.md](../hcw-kit/11-audits/2026-08-09-UX-AUDIT-WAVE.md) · SPA `@carbon/react` removed ✅ · AConsulting Engagements ✅ · AStudio S2c polish ✅ · AQC chrome out of S12 |
 
 ---
 
@@ -56,7 +56,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | Wave | Outcome | Status |
 | --- | --- | --- |
 | **D0–D5** | Bridge · siblings · WinUI shells · portal panels | ✅ |
-| **D5b** | AStudio / AConsulting HCW geography scaffold (ribbon · stage · dock · tray) | ✅ WinUI shells · domain UI next |
+| **D5b** | AStudio / AConsulting HCW geography scaffold (ribbon · stage · dock · tray) | ✅ shells + Engagements/Portfolio domain slices |
 | **D6** | Signed installers · portal tenants | 🟡 tooling ✅ · blocked on SmartScreen-trusted cert + HTTPS |
 
 ---
@@ -94,14 +94,22 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | VPS env flip (`VITE_MARKETING_ONLY=false`) | 🔲 blocked — deploy key not in VPS `authorized_keys` |
 | Actions runner | ✅ `gh workflow run s8-reopen-demos.yml` (needs pubkey auth) |
 
-### Then
+### Autopilot in-repo (2026-08-09)
 
-1. **S8 VPS flip** — add deploy pubkey below to the droplet, then `gh workflow run s8-reopen-demos.yml -f mode=apply` (or `CONFIRM=yes bash deploy/s8-reopen-demos.sh` on the box).  
+| Wave | Work | Status |
+| --- | --- | --- |
+| W1 | **S11** AQC Estimation Pull joint measurements | ✅ |
+| W2 | **S12** Remove remaining `@carbon/react` from esti SPA | ✅ |
+| W3 | AConsulting Engagements/Projects stage on HCW dock | ✅ |
+| W4 | AStudio S2c Portfolio / Focus polish | ✅ |
+
+### Ops-blocked (need human)
+
+1. **S8 VPS flip** — add deploy pubkey to the droplet, then `gh workflow run s8-reopen-demos.yml -f mode=apply` (or `CONFIRM=yes bash deploy/s8-reopen-demos.sh` on the box).  
    Pubkey: `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzNk7P4spTM1FBfiiZiIa9k6asphlWNgW4lanTI04DT aorms-deploy-github-actions`  
 2. **D6** — Trusted Authenticode → upload → `apply-installer-manifest.ps1 -ConfirmFlip` → release flag + rebuild. Prefer Connect first.  
-3. Hub-portal SyncEntity allow-list ✅ · client portal UI surfaces tenders/inspections/visits/siteRef/running bills · AProc pmc RA stays live · portal tenants after D6.  
-4. **S11** Joint measurement ✅ on esti · AQC desktop consume via [AQC-JM-SYNC.md](AQC-JM-SYNC.md) 🔲.  
-5. **S12 follow-ons** — finish remaining `@carbon/react` (~38 files); deepen AStudio/AConsulting domain UI on HCW geography; AQC Estimation/BBS/PM native chrome (out of S12).
+
+Hub-portal SyncEntity allow-list ✅ · portal tenants after D6 · AQC Estimation/BBS/PM native chrome out of S12.
 
 ## Deferred
 

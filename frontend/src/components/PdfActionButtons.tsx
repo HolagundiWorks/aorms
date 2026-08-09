@@ -1,6 +1,5 @@
-import { Share } from "@carbon/icons-react";
-import { Button } from "@carbon/react";
-import { CarbonScope } from "../carbon/CarbonScope.js";
+import ShareIcon from "@mui/icons-material/Share";
+import { Button } from "@mui/material";
 import { pdfUiState } from "../lib/pdfUi.js";
 import { shareViaWhatsApp } from "../lib/whatsapp.js";
 
@@ -21,7 +20,7 @@ type PdfActionButtonsProps = {
   };
 };
 
-/** Shared PDF generate / poll / open UI for document action cells. Wave 3 (Carbon). */
+/** Shared PDF generate / poll / open UI for document action cells. */
 export function PdfActionButtons({
   status,
   url,
@@ -40,35 +39,33 @@ export function PdfActionButtons({
 
   if (ui === "open" && url) {
     return (
-      <CarbonScope as="span">
-        <span style={{ display: "inline-flex", gap: "0.25rem" }}>
-          <Button kind="ghost" size="sm" href={url} target="_blank" rel="noreferrer">
-            {openLabel}
+      <span style={{ display: "inline-flex", gap: "0.25rem" }}>
+        <Button size="small" variant="text" href={url} target="_blank" rel="noreferrer">
+          {openLabel}
+        </Button>
+        {share && (
+          <Button
+            size="small"
+            variant="text"
+            startIcon={<ShareIcon fontSize="small" />}
+            onClick={() =>
+              void shareViaWhatsApp({
+                fileUrl: url,
+                fileName: share.fileName,
+                text: share.text ?? "Please find the attached document.",
+                phone: share.phone,
+              })
+            }
+          >
+            WhatsApp
           </Button>
-          {share && (
-            <Button
-              kind="ghost"
-              size="sm"
-              renderIcon={Share}
-              onClick={() =>
-                void shareViaWhatsApp({
-                  fileUrl: url,
-                  fileName: share.fileName,
-                  text: share.text ?? "Please find the attached document.",
-                  phone: share.phone,
-                })
-              }
-            >
-              WhatsApp
-            </Button>
-          )}
-          {showRegenerateWhenReady && canManage && (
-            <Button kind="ghost" size="sm" disabled={generatePending} onClick={onGenerate}>
-              Regenerate
-            </Button>
-          )}
-        </span>
-      </CarbonScope>
+        )}
+        {showRegenerateWhenReady && canManage && (
+          <Button size="small" variant="text" disabled={generatePending} onClick={onGenerate}>
+            Regenerate
+          </Button>
+        )}
+      </span>
     );
   }
   if (ui === "generating") {
@@ -78,10 +75,8 @@ export function PdfActionButtons({
     return <span>—</span>;
   }
   return (
-    <CarbonScope as="span">
-      <Button kind="ghost" size="sm" disabled={generatePending} onClick={onGenerate}>
-        {ui === "retry" ? retryLabel : generateLabel}
-      </Button>
-    </CarbonScope>
+    <Button size="small" variant="text" disabled={generatePending} onClick={onGenerate}>
+      {ui === "retry" ? retryLabel : generateLabel}
+    </Button>
   );
 }

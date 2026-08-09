@@ -1,4 +1,4 @@
-import { Select, SelectItem } from "@carbon/react";
+import { MenuItem, TextField, Typography } from "@mui/material";
 import {
   INVOICE_STATUS_TAG,
   InvoiceStatus,
@@ -73,26 +73,28 @@ export function ProjectInvoicesPanel({
         sortable: false,
         renderCell: (iv) => (
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <div style={{ minWidth: 110 }}>
-              <Select
-                id={`pinv-st-${iv.row.id}`}
-                labelText="Invoice status"
-                hideLabel
-                size="sm"
-                value={iv.row.status}
-                disabled={!canManage || iv.row.status === "PAID" || iv.row.status === "CANCELLED"}
-                onChange={(e) =>
-                  updateStatus.mutate({
-                    id: iv.row.id,
-                    status: e.target.value as (typeof InvoiceStatus.options)[number],
-                  })
-                }
-              >
-                {InvoiceStatus.options.map((st) => (
-                  <SelectItem key={st} value={st} text={st} />
-                ))}
-              </Select>
-            </div>
+            <TextField
+              id={`pinv-st-${iv.row.id}`}
+              select
+              label="Invoice status"
+              size="small"
+              sx={{ minWidth: 110 }}
+              value={iv.row.status}
+              disabled={!canManage || iv.row.status === "PAID" || iv.row.status === "CANCELLED"}
+              InputLabelProps={{ shrink: true }}
+              onChange={(e) =>
+                updateStatus.mutate({
+                  id: iv.row.id,
+                  status: e.target.value as (typeof InvoiceStatus.options)[number],
+                })
+              }
+            >
+              {InvoiceStatus.options.map((st) => (
+                <MenuItem key={st} value={st}>
+                  {st}
+                </MenuItem>
+              ))}
+            </TextField>
             <StatusDot color={INVOICE_STATUS_TAG[iv.row.status as InvoiceStatusT] ?? "gray"} label={iv.row.status} />
           </div>
         ),
@@ -129,9 +131,9 @@ export function ProjectInvoicesPanel({
         getRowClassName={(p) => (p.id === highlightInvoiceId ? "esti-row-highlight" : "")}
       />
       {highlightInvoiceId && (
-        <p className="cds--type-caption-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
           Highlighting invoice selected from Studio Intelligence.
-        </p>
+        </Typography>
       )}
     </DataState>
   );

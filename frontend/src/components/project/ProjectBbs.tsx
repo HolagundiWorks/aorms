@@ -1,12 +1,15 @@
 import {
+  Alert,
+  AlertTitle,
   Button,
-  InlineNotification,
-  Modal,
-  Select,
-  SelectItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
   Stack,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+} from "@mui/material";
 import { Add } from "@carbon/icons-react";
 import {
   BBS_ELEMENT_LABEL,
@@ -22,16 +25,16 @@ import {
   type BbsStatus,
 } from "@esti/contracts";
 import { pushToast, useScreenActions } from "@hcw/ui-kit";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { ConfirmModal, DataGrid, DataState, StatusTag, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../../lib/trpc.js";
 
 type MemberKind = BbsElement;
 
-const SUBTLE: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
-const OVERLINE: React.CSSProperties = { ...SUBTLE, textTransform: "uppercase", letterSpacing: "0.02em" };
-const ROW: React.CSSProperties = { display: "flex", gap: "0.5rem" };
+const SUBTLE: CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
+const OVERLINE: CSSProperties = { ...SUBTLE, textTransform: "uppercase", letterSpacing: "0.02em" };
+const ROW: CSSProperties = { display: "flex", gap: "0.5rem" };
 
 const emptyColumn = () => ({
   mark: "",
@@ -257,7 +260,7 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
       width: 90,
       sortable: false,
       renderCell: (p) => (
-        <Button kind="ghost" size="sm" onClick={() => removeItem.mutate({ id: p.row.id })}>
+        <Button variant="text" size="small" onClick={() => removeItem.mutate({ id: p.row.id })}>
           Remove
         </Button>
       ),
@@ -364,161 +367,169 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
   };
 
   const memberModal = (
-    <Modal
-      open={memberOpen}
-      size="sm"
-      modalHeading="Add member"
-      primaryButtonText={addMember.isPending ? "Computing…" : "Compute & add"}
-      secondaryButtonText="Cancel"
-      primaryButtonDisabled={addMember.isPending}
-      onRequestClose={() => setMemberOpen(false)}
-      onRequestSubmit={submitMember}
-    >
-      <Stack gap={5}>
-        <Select
-          id="bbs-elem"
-          labelText="Element"
-          value={memberKind}
-          onChange={(e) => setMemberKind(e.target.value as MemberKind)}
-        >
+    <Dialog open={memberOpen} onClose={() => setMemberOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>Add member</DialogTitle>
+      <DialogContent>
+
+      <Stack spacing={2.5}>
+        <TextField id="bbs-elem" label="Element" value={memberKind} onChange={(e) => setMemberKind(e.target.value as MemberKind)} select size="small">
           {(Object.keys(BBS_ELEMENT_LABEL) as BbsElement[]).map((k) => (
-            <SelectItem key={k} value={k} text={BBS_ELEMENT_LABEL[k]} />
+            <MenuItem key={k} value={k}>{BBS_ELEMENT_LABEL[k]}</MenuItem>
           ))}
-        </Select>
+        </TextField>
 
         {memberKind === "COLUMN" && (
           <>
-            <TextInput id="c-mark" labelText="Mark" value={columnForm.mark} onChange={(e) => setColumnForm({ ...columnForm, mark: e.target.value })} />
+            <TextField id="c-mark" label="Mark" value={columnForm.mark} onChange={(e) => setColumnForm({ ...columnForm, mark: e.target.value })} size="small" />
             <div style={ROW}>
-              <TextInput id="c-w" labelText="Width mm" value={columnForm.widthMm} onChange={(e) => setColumnForm({ ...columnForm, widthMm: e.target.value })} />
-              <TextInput id="c-d" labelText="Depth mm" value={columnForm.depthMm} onChange={(e) => setColumnForm({ ...columnForm, depthMm: e.target.value })} />
-              <TextInput id="c-h" labelText="Height mm" value={columnForm.heightMm} onChange={(e) => setColumnForm({ ...columnForm, heightMm: e.target.value })} />
+              <TextField id="c-w" label="Width mm" value={columnForm.widthMm} onChange={(e) => setColumnForm({ ...columnForm, widthMm: e.target.value })} size="small" />
+              <TextField id="c-d" label="Depth mm" value={columnForm.depthMm} onChange={(e) => setColumnForm({ ...columnForm, depthMm: e.target.value })} size="small" />
+              <TextField id="c-h" label="Height mm" value={columnForm.heightMm} onChange={(e) => setColumnForm({ ...columnForm, heightMm: e.target.value })} size="small" />
             </div>
             <div style={ROW}>
-              <TextInput id="c-cov" labelText="Cover mm" value={columnForm.coverMm} onChange={(e) => setColumnForm({ ...columnForm, coverMm: e.target.value })} />
-              <Select id="c-tie" labelText="Tie Ø" value={columnForm.stirrupDiaMm} onChange={(e) => setColumnForm({ ...columnForm, stirrupDiaMm: e.target.value })}>
-                {STANDARD_BAR_DIAMETERS_MM.map((d) => <SelectItem key={d} value={String(d)} text={String(d)} />)}
-              </Select>
-              <TextInput id="c-sp" labelText="Spacing mm" value={columnForm.spacingMm} onChange={(e) => setColumnForm({ ...columnForm, spacingMm: e.target.value })} />
+              <TextField id="c-cov" label="Cover mm" value={columnForm.coverMm} onChange={(e) => setColumnForm({ ...columnForm, coverMm: e.target.value })} size="small" />
+              <TextField id="c-tie" label="Tie Ø" value={columnForm.stirrupDiaMm} onChange={(e) => setColumnForm({ ...columnForm, stirrupDiaMm: e.target.value })} select size="small">
+                {STANDARD_BAR_DIAMETERS_MM.map((d) => <MenuItem key={d} value={String(d)}>{String(d)}</MenuItem>)}
+              </TextField>
+              <TextField id="c-sp" label="Spacing mm" value={columnForm.spacingMm} onChange={(e) => setColumnForm({ ...columnForm, spacingMm: e.target.value })} size="small" />
             </div>
             <div style={ROW}>
-              <Select id="c-hook" labelText="Hook" value={columnForm.hookAngle} onChange={(e) => setColumnForm({ ...columnForm, hookAngle: e.target.value })}>
-                {[90, 135, 180].map((a) => <SelectItem key={a} value={String(a)} text={`${a}°`} />)}
-              </Select>
-              <Select id="c-tt" labelText="Tie type" value={columnForm.tieType} onChange={(e) => setColumnForm({ ...columnForm, tieType: e.target.value as typeof columnForm.tieType })}>
-                {ColumnTieType.options.map((t) => <SelectItem key={t} value={t} text={t} />)}
-              </Select>
+              <TextField id="c-hook" label="Hook" value={columnForm.hookAngle} onChange={(e) => setColumnForm({ ...columnForm, hookAngle: e.target.value })} select size="small">
+                {[90, 135, 180].map((a) => <MenuItem key={a} value={String(a)}>{`${a}°`}</MenuItem>)}
+              </TextField>
+              <TextField id="c-tt" label="Tie type" value={columnForm.tieType} onChange={(e) => setColumnForm({ ...columnForm, tieType: e.target.value as typeof columnForm.tieType })} select size="small">
+                {ColumnTieType.options.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+              </TextField>
             </div>
             <div style={ROW}>
-              <Select id="c-md" labelText="Main Ø" value={columnForm.mainDiaMm} onChange={(e) => setColumnForm({ ...columnForm, mainDiaMm: e.target.value })}>
-                {STANDARD_BAR_DIAMETERS_MM.map((d) => <SelectItem key={d} value={String(d)} text={String(d)} />)}
-              </Select>
-              <TextInput id="c-mn" labelText="Main nos" value={columnForm.mainCount} onChange={(e) => setColumnForm({ ...columnForm, mainCount: e.target.value })} />
+              <TextField id="c-md" label="Main Ø" value={columnForm.mainDiaMm} onChange={(e) => setColumnForm({ ...columnForm, mainDiaMm: e.target.value })} select size="small">
+                {STANDARD_BAR_DIAMETERS_MM.map((d) => <MenuItem key={d} value={String(d)}>{String(d)}</MenuItem>)}
+              </TextField>
+              <TextField id="c-mn" label="Main nos" value={columnForm.mainCount} onChange={(e) => setColumnForm({ ...columnForm, mainCount: e.target.value })} size="small" />
             </div>
           </>
         )}
 
         {memberKind === "BEAM" && (
           <>
-            <TextInput id="b-mark" labelText="Mark" value={beamForm.mark} onChange={(e) => setBeamForm({ ...beamForm, mark: e.target.value })} />
+            <TextField id="b-mark" label="Mark" value={beamForm.mark} onChange={(e) => setBeamForm({ ...beamForm, mark: e.target.value })} size="small" />
             <div style={ROW}>
-              <TextInput id="b-span" labelText="Clear span mm" value={beamForm.clearSpanMm} onChange={(e) => setBeamForm({ ...beamForm, clearSpanMm: e.target.value })} />
-              <TextInput id="b-b" labelText="b mm" value={beamForm.widthMm} onChange={(e) => setBeamForm({ ...beamForm, widthMm: e.target.value })} />
-              <TextInput id="b-D" labelText="D mm" value={beamForm.depthMm} onChange={(e) => setBeamForm({ ...beamForm, depthMm: e.target.value })} />
+              <TextField id="b-span" label="Clear span mm" value={beamForm.clearSpanMm} onChange={(e) => setBeamForm({ ...beamForm, clearSpanMm: e.target.value })} size="small" />
+              <TextField id="b-b" label="b mm" value={beamForm.widthMm} onChange={(e) => setBeamForm({ ...beamForm, widthMm: e.target.value })} size="small" />
+              <TextField id="b-D" label="D mm" value={beamForm.depthMm} onChange={(e) => setBeamForm({ ...beamForm, depthMm: e.target.value })} size="small" />
             </div>
             <div style={ROW}>
-              <Select id="b-conc" labelText="Concrete" value={beamForm.concreteGrade} onChange={(e) => setBeamForm({ ...beamForm, concreteGrade: e.target.value as typeof beamForm.concreteGrade })}>
-                {ConcreteGrade.options.map((g) => <SelectItem key={g} value={g} text={g} />)}
-              </Select>
-              <Select id="b-steel" labelText="Steel" value={beamForm.steelGrade} onChange={(e) => setBeamForm({ ...beamForm, steelGrade: e.target.value as typeof beamForm.steelGrade })}>
-                {SteelGrade.options.map((g) => <SelectItem key={g} value={g} text={g} />)}
-              </Select>
-              <Select id="b-top" labelText="Top bars" value={beamForm.topBarType} onChange={(e) => setBeamForm({ ...beamForm, topBarType: e.target.value as typeof beamForm.topBarType })}>
-                {BeamTopBarType.options.map((t) => <SelectItem key={t} value={t} text={t} />)}
-              </Select>
+              <TextField id="b-conc" label="Concrete" value={beamForm.concreteGrade} onChange={(e) => setBeamForm({ ...beamForm, concreteGrade: e.target.value as typeof beamForm.concreteGrade })} select size="small">
+                {ConcreteGrade.options.map((g) => <MenuItem key={g} value={g}>{g}</MenuItem>)}
+              </TextField>
+              <TextField id="b-steel" label="Steel" value={beamForm.steelGrade} onChange={(e) => setBeamForm({ ...beamForm, steelGrade: e.target.value as typeof beamForm.steelGrade })} select size="small">
+                {SteelGrade.options.map((g) => <MenuItem key={g} value={g}>{g}</MenuItem>)}
+              </TextField>
+              <TextField id="b-top" label="Top bars" value={beamForm.topBarType} onChange={(e) => setBeamForm({ ...beamForm, topBarType: e.target.value as typeof beamForm.topBarType })} select size="small">
+                {BeamTopBarType.options.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+              </TextField>
             </div>
             <div style={ROW}>
-              <TextInput id="b-ss" labelText="Stirrup spacing support" value={beamForm.spacingSupportMm} onChange={(e) => setBeamForm({ ...beamForm, spacingSupportMm: e.target.value })} />
-              <TextInput id="b-sm" labelText="Middle" value={beamForm.spacingMiddleMm} onChange={(e) => setBeamForm({ ...beamForm, spacingMiddleMm: e.target.value })} />
-              <Select id="b-legs" labelText="Legs" value={beamForm.stirrupLegs} onChange={(e) => setBeamForm({ ...beamForm, stirrupLegs: e.target.value })}>
-                <SelectItem value="2" text="2" />
-                <SelectItem value="4" text="4" />
-              </Select>
+              <TextField id="b-ss" label="Stirrup spacing support" value={beamForm.spacingSupportMm} onChange={(e) => setBeamForm({ ...beamForm, spacingSupportMm: e.target.value })} size="small" />
+              <TextField id="b-sm" label="Middle" value={beamForm.spacingMiddleMm} onChange={(e) => setBeamForm({ ...beamForm, spacingMiddleMm: e.target.value })} size="small" />
+              <TextField id="b-legs" label="Legs" value={beamForm.stirrupLegs} onChange={(e) => setBeamForm({ ...beamForm, stirrupLegs: e.target.value })} select size="small">
+                <MenuItem value="2">2</MenuItem>
+                <MenuItem value="4">4</MenuItem>
+              </TextField>
             </div>
             <div style={ROW}>
-              <TextInput id="b-td" labelText="Top Ø / nos" value={beamForm.topDiaMm} onChange={(e) => setBeamForm({ ...beamForm, topDiaMm: e.target.value })} />
-              <TextInput id="b-tn" labelText="Top nos" hideLabel value={beamForm.topCount} onChange={(e) => setBeamForm({ ...beamForm, topCount: e.target.value })} />
-              <TextInput id="b-bd" labelText="Bot Ø / nos" value={beamForm.bottomDiaMm} onChange={(e) => setBeamForm({ ...beamForm, bottomDiaMm: e.target.value })} />
-              <TextInput id="b-bn" labelText="Bot nos" hideLabel value={beamForm.bottomCount} onChange={(e) => setBeamForm({ ...beamForm, bottomCount: e.target.value })} />
+              <TextField id="b-td" label="Top Ø / nos" value={beamForm.topDiaMm} onChange={(e) => setBeamForm({ ...beamForm, topDiaMm: e.target.value })} size="small" />
+              <TextField id="b-tn" label="Top nos" value={beamForm.topCount} onChange={(e) => setBeamForm({ ...beamForm, topCount: e.target.value })} size="small" />
+              <TextField id="b-bd" label="Bot Ø / nos" value={beamForm.bottomDiaMm} onChange={(e) => setBeamForm({ ...beamForm, bottomDiaMm: e.target.value })} size="small" />
+              <TextField id="b-bn" label="Bot nos" value={beamForm.bottomCount} onChange={(e) => setBeamForm({ ...beamForm, bottomCount: e.target.value })} size="small" />
             </div>
           </>
         )}
 
         {memberKind === "SLAB" && (
           <>
-            <TextInput id="s-mark" labelText="Mark" value={slabForm.mark} onChange={(e) => setSlabForm({ ...slabForm, mark: e.target.value })} />
+            <TextField id="s-mark" label="Mark" value={slabForm.mark} onChange={(e) => setSlabForm({ ...slabForm, mark: e.target.value })} size="small" />
             <div style={ROW}>
-              <TextInput id="s-x" labelText="Span X mm" value={slabForm.spanXMm} onChange={(e) => setSlabForm({ ...slabForm, spanXMm: e.target.value })} />
-              <TextInput id="s-y" labelText="Span Y mm" value={slabForm.spanYMm} onChange={(e) => setSlabForm({ ...slabForm, spanYMm: e.target.value })} />
-              <TextInput id="s-t" labelText="Thickness" value={slabForm.thicknessMm} onChange={(e) => setSlabForm({ ...slabForm, thicknessMm: e.target.value })} />
+              <TextField id="s-x" label="Span X mm" value={slabForm.spanXMm} onChange={(e) => setSlabForm({ ...slabForm, spanXMm: e.target.value })} size="small" />
+              <TextField id="s-y" label="Span Y mm" value={slabForm.spanYMm} onChange={(e) => setSlabForm({ ...slabForm, spanYMm: e.target.value })} size="small" />
+              <TextField id="s-t" label="Thickness" value={slabForm.thicknessMm} onChange={(e) => setSlabForm({ ...slabForm, thicknessMm: e.target.value })} size="small" />
             </div>
             <div style={ROW}>
-              <Select id="s-type" labelText="Type" value={slabForm.slabType} onChange={(e) => setSlabForm({ ...slabForm, slabType: e.target.value as typeof slabForm.slabType })}>
-                {SlabType.options.map((t) => <SelectItem key={t} value={t} text={t} />)}
-              </Select>
-              <Select id="s-conc" labelText="Concrete" value={slabForm.concreteGrade} onChange={(e) => setSlabForm({ ...slabForm, concreteGrade: e.target.value as typeof slabForm.concreteGrade })}>
-                {ConcreteGrade.options.map((g) => <SelectItem key={g} value={g} text={g} />)}
-              </Select>
-              <Select id="s-steel" labelText="Steel" value={slabForm.steelGrade} onChange={(e) => setSlabForm({ ...slabForm, steelGrade: e.target.value as typeof slabForm.steelGrade })}>
-                {SteelGrade.options.map((g) => <SelectItem key={g} value={g} text={g} />)}
-              </Select>
+              <TextField id="s-type" label="Type" value={slabForm.slabType} onChange={(e) => setSlabForm({ ...slabForm, slabType: e.target.value as typeof slabForm.slabType })} select size="small">
+                {SlabType.options.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+              </TextField>
+              <TextField id="s-conc" label="Concrete" value={slabForm.concreteGrade} onChange={(e) => setSlabForm({ ...slabForm, concreteGrade: e.target.value as typeof slabForm.concreteGrade })} select size="small">
+                {ConcreteGrade.options.map((g) => <MenuItem key={g} value={g}>{g}</MenuItem>)}
+              </TextField>
+              <TextField id="s-steel" label="Steel" value={slabForm.steelGrade} onChange={(e) => setSlabForm({ ...slabForm, steelGrade: e.target.value as typeof slabForm.steelGrade })} select size="small">
+                {SteelGrade.options.map((g) => <MenuItem key={g} value={g}>{g}</MenuItem>)}
+              </TextField>
             </div>
             <div style={ROW}>
-              <TextInput id="s-dx" labelText="ØX / c/c" value={slabForm.diaXMm} onChange={(e) => setSlabForm({ ...slabForm, diaXMm: e.target.value })} />
-              <TextInput id="s-spx" labelText="c/c X" hideLabel value={slabForm.spacingXMm} onChange={(e) => setSlabForm({ ...slabForm, spacingXMm: e.target.value })} />
-              <TextInput id="s-dy" labelText="ØY / c/c" value={slabForm.diaYMm} onChange={(e) => setSlabForm({ ...slabForm, diaYMm: e.target.value })} />
-              <TextInput id="s-spy" labelText="c/c Y" hideLabel value={slabForm.spacingYMm} onChange={(e) => setSlabForm({ ...slabForm, spacingYMm: e.target.value })} />
+              <TextField id="s-dx" label="ØX / c/c" value={slabForm.diaXMm} onChange={(e) => setSlabForm({ ...slabForm, diaXMm: e.target.value })} size="small" />
+              <TextField id="s-spx" label="c/c X" value={slabForm.spacingXMm} onChange={(e) => setSlabForm({ ...slabForm, spacingXMm: e.target.value })} size="small" />
+              <TextField id="s-dy" label="ØY / c/c" value={slabForm.diaYMm} onChange={(e) => setSlabForm({ ...slabForm, diaYMm: e.target.value })} size="small" />
+              <TextField id="s-spy" label="c/c Y" value={slabForm.spacingYMm} onChange={(e) => setSlabForm({ ...slabForm, spacingYMm: e.target.value })} size="small" />
             </div>
           </>
         )}
 
         {memberKind === "FOOTING" && (
           <>
-            <TextInput id="f-mark" labelText="Mark" value={footingForm.mark} onChange={(e) => setFootingForm({ ...footingForm, mark: e.target.value })} />
+            <TextField id="f-mark" label="Mark" value={footingForm.mark} onChange={(e) => setFootingForm({ ...footingForm, mark: e.target.value })} size="small" />
             <div style={ROW}>
-              <TextInput id="f-l" labelText="L mm" value={footingForm.lengthMm} onChange={(e) => setFootingForm({ ...footingForm, lengthMm: e.target.value })} />
-              <TextInput id="f-b" labelText="B mm" value={footingForm.widthMm} onChange={(e) => setFootingForm({ ...footingForm, widthMm: e.target.value })} />
-              <TextInput id="f-d" labelText="Depth" value={footingForm.depthMm} onChange={(e) => setFootingForm({ ...footingForm, depthMm: e.target.value })} />
+              <TextField id="f-l" label="L mm" value={footingForm.lengthMm} onChange={(e) => setFootingForm({ ...footingForm, lengthMm: e.target.value })} size="small" />
+              <TextField id="f-b" label="B mm" value={footingForm.widthMm} onChange={(e) => setFootingForm({ ...footingForm, widthMm: e.target.value })} size="small" />
+              <TextField id="f-d" label="Depth" value={footingForm.depthMm} onChange={(e) => setFootingForm({ ...footingForm, depthMm: e.target.value })} size="small" />
             </div>
             <div style={ROW}>
-              <TextInput id="f-cl" labelText="Col L" value={footingForm.columnLengthMm} onChange={(e) => setFootingForm({ ...footingForm, columnLengthMm: e.target.value })} />
-              <TextInput id="f-cb" labelText="Col B" value={footingForm.columnWidthMm} onChange={(e) => setFootingForm({ ...footingForm, columnWidthMm: e.target.value })} />
-              <TextInput id="f-cov" labelText="Cover" value={footingForm.coverMm} onChange={(e) => setFootingForm({ ...footingForm, coverMm: e.target.value })} />
+              <TextField id="f-cl" label="Col L" value={footingForm.columnLengthMm} onChange={(e) => setFootingForm({ ...footingForm, columnLengthMm: e.target.value })} size="small" />
+              <TextField id="f-cb" label="Col B" value={footingForm.columnWidthMm} onChange={(e) => setFootingForm({ ...footingForm, columnWidthMm: e.target.value })} size="small" />
+              <TextField id="f-cov" label="Cover" value={footingForm.coverMm} onChange={(e) => setFootingForm({ ...footingForm, coverMm: e.target.value })} size="small" />
             </div>
             <div style={ROW}>
-              <TextInput id="f-dl" labelText="ØL / c/c" value={footingForm.diaLMm} onChange={(e) => setFootingForm({ ...footingForm, diaLMm: e.target.value })} />
-              <TextInput id="f-spl" labelText="c/c L" hideLabel value={footingForm.spacingLMm} onChange={(e) => setFootingForm({ ...footingForm, spacingLMm: e.target.value })} />
-              <TextInput id="f-db" labelText="ØB / c/c" value={footingForm.diaBMm} onChange={(e) => setFootingForm({ ...footingForm, diaBMm: e.target.value })} />
-              <TextInput id="f-spb" labelText="c/c B" hideLabel value={footingForm.spacingBMm} onChange={(e) => setFootingForm({ ...footingForm, spacingBMm: e.target.value })} />
+              <TextField id="f-dl" label="ØL / c/c" value={footingForm.diaLMm} onChange={(e) => setFootingForm({ ...footingForm, diaLMm: e.target.value })} size="small" />
+              <TextField id="f-spl" label="c/c L" value={footingForm.spacingLMm} onChange={(e) => setFootingForm({ ...footingForm, spacingLMm: e.target.value })} size="small" />
+              <TextField id="f-db" label="ØB / c/c" value={footingForm.diaBMm} onChange={(e) => setFootingForm({ ...footingForm, diaBMm: e.target.value })} size="small" />
+              <TextField id="f-spb" label="c/c B" value={footingForm.spacingBMm} onChange={(e) => setFootingForm({ ...footingForm, spacingBMm: e.target.value })} size="small" />
             </div>
           </>
         )}
 
-        {addMember.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={addMember.error.message} />}
+        {addMember.error && <Alert severity="error"><AlertTitle>Error</AlertTitle>{addMember.error.message}</Alert>}
       </Stack>
-    </Modal>
+    
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setMemberOpen(false)}>Cancel</Button>
+        <Button variant="contained" disabled={addMember.isPending} onClick={submitMember}>{addMember.isPending ? "Computing…" : "Compute & add"}</Button>
+      </DialogActions>
+    </Dialog>
   );
 
   const manualModal = (
-    <Modal
-      open={manualOpen}
-      size="sm"
-      modalHeading="Manual bar line"
-      primaryButtonText="Add"
-      secondaryButtonText="Cancel"
-      primaryButtonDisabled={!manual.barMark || !manual.cuttingLengthMm || addItem.isPending}
-      onRequestClose={() => setManualOpen(false)}
-      onRequestSubmit={() =>
+    <Dialog open={manualOpen} onClose={() => setManualOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>Manual bar line</DialogTitle>
+      <DialogContent>
+
+      <Stack spacing={2.5}>
+        <TextField id="m-mark" label="Bar mark" value={manual.barMark} onChange={(e) => setManual({ ...manual, barMark: e.target.value })} size="small" />
+        <TextField id="m-member" label="Member" value={manual.member} onChange={(e) => setManual({ ...manual, member: e.target.value })} size="small" />
+        <div style={ROW}>
+          <TextField id="m-dia" label="Ø mm" value={manual.diaMm} onChange={(e) => setManual({ ...manual, diaMm: e.target.value })} select size="small">
+            {STANDARD_BAR_DIAMETERS_MM.map((d) => <MenuItem key={d} value={String(d)}>{String(d)}</MenuItem>)}
+          </TextField>
+          <TextField id="m-nos" label="Members" value={manual.noOfMembers} onChange={(e) => setManual({ ...manual, noOfMembers: e.target.value })} size="small" />
+          <TextField id="m-bpm" label="Bars / member" value={manual.barsPerMember} onChange={(e) => setManual({ ...manual, barsPerMember: e.target.value })} size="small" />
+        </div>
+        <TextField id="m-cut" label="Cutting length mm" value={manual.cuttingLengthMm} onChange={(e) => setManual({ ...manual, cuttingLengthMm: e.target.value })} size="small" />
+        {addItem.error && <Alert severity="error"><AlertTitle>Error</AlertTitle>{addItem.error.message}</Alert>}
+      </Stack>
+    
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setManualOpen(false)}>Cancel</Button>
+        <Button variant="contained" disabled={!manual.barMark || !manual.cuttingLengthMm || addItem.isPending} onClick={() =>
         openId &&
         addItem.mutate({
           bbsId: openId,
@@ -529,22 +540,9 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
           barsPerMember: Number(manual.barsPerMember) || 1,
           cuttingLengthMm: Number(manual.cuttingLengthMm),
         })
-      }
-    >
-      <Stack gap={5}>
-        <TextInput id="m-mark" labelText="Bar mark" value={manual.barMark} onChange={(e) => setManual({ ...manual, barMark: e.target.value })} />
-        <TextInput id="m-member" labelText="Member" value={manual.member} onChange={(e) => setManual({ ...manual, member: e.target.value })} />
-        <div style={ROW}>
-          <Select id="m-dia" labelText="Ø mm" value={manual.diaMm} onChange={(e) => setManual({ ...manual, diaMm: e.target.value })}>
-            {STANDARD_BAR_DIAMETERS_MM.map((d) => <SelectItem key={d} value={String(d)} text={String(d)} />)}
-          </Select>
-          <TextInput id="m-nos" labelText="Members" value={manual.noOfMembers} onChange={(e) => setManual({ ...manual, noOfMembers: e.target.value })} />
-          <TextInput id="m-bpm" labelText="Bars / member" value={manual.barsPerMember} onChange={(e) => setManual({ ...manual, barsPerMember: e.target.value })} />
-        </div>
-        <TextInput id="m-cut" labelText="Cutting length mm" value={manual.cuttingLengthMm} onChange={(e) => setManual({ ...manual, cuttingLengthMm: e.target.value })} />
-        {addItem.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={addItem.error.message} />}
-      </Stack>
-    </Modal>
+      }>Add</Button>
+      </DialogActions>
+    </Dialog>
   );
 
   if (openId && detail) {
@@ -552,9 +550,9 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
     return (
       <>
         <CarbonScope>
-          <Stack gap={4}>
+          <Stack spacing={2}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-              <Button size="sm" kind="ghost" onClick={() => setOpenId(null)}>
+              <Button size="small" variant="text" onClick={() => setOpenId(null)}>
                 ← All schedules
               </Button>
               <span className="cds--type-heading-compact-01">{s.ref} — {s.title}</span>
@@ -565,17 +563,17 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
               />
               <div style={{ flex: 1 }} />
               {s.status === "DRAFT" && (
-                <Button size="sm" kind="tertiary" onClick={() => setStatus.mutate({ id: s.id, status: "ISSUED" })}>
+                <Button size="small" variant="outlined" onClick={() => setStatus.mutate({ id: s.id, status: "ISSUED" })}>
                   Mark issued
                 </Button>
               )}
-              <Button size="sm" kind="tertiary" onClick={() => setMemberOpen(true)}>
+              <Button size="small" variant="outlined" onClick={() => setMemberOpen(true)}>
                 Add member
               </Button>
-              <Button size="sm" kind="tertiary" onClick={() => setManualOpen(true)}>
+              <Button size="small" variant="outlined" onClick={() => setManualOpen(true)}>
                 Manual line
               </Button>
-              <Button size="sm" kind="danger--ghost" onClick={() => setConfirmId(s.id)}>
+              <Button size="small" color="error" variant="text" onClick={() => setConfirmId(s.id)}>
                 Delete
               </Button>
             </div>
@@ -586,7 +584,7 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
             </p>
 
             {(detail.members.length > 0 || detail.checks.length > 0) && (
-              <Stack gap={3}>
+              <Stack spacing={1.5}>
                 <p className="cds--type-label-01" style={OVERLINE}>Members</p>
                 {detail.members.map((m) => (
                   <div
@@ -596,7 +594,7 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
                     <span className="cds--type-body-01" style={{ flex: 1 }}>
                       {BBS_ELEMENT_LABEL[m.element as BbsElement] ?? m.element} — {m.mark ?? "—"}
                     </span>
-                    <Button size="sm" kind="ghost" onClick={() => removeMember.mutate({ id: m.id })}>
+                    <Button size="small" variant="text" onClick={() => removeMember.mutate({ id: m.id })}>
                       Remove
                     </Button>
                   </div>
@@ -605,14 +603,7 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
                   <>
                     <p className="cds--type-label-01" style={OVERLINE}>Checks</p>
                     {detail.checks.map((c, i) => (
-                      <InlineNotification
-                        key={`${c.mark}-${c.label}-${i}`}
-                        kind={c.ok ? "success" : "warning"}
-                        lowContrast
-                        hideCloseButton
-                        title={`${c.mark}: ${c.label}`}
-                        subtitle={`${c.value} vs min ${c.limit} — ${c.message}`}
-                      />
+                      <Alert severity={c.ok ? "success" : "warning"}><AlertTitle>{`${c.mark}: ${c.label}`}</AlertTitle>{`${c.value} vs min ${c.limit} — ${c.message}`}</Alert>
                     ))}
                   </>
                 )}
@@ -646,7 +637,7 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
             {detail.summary.length > 0 && (
               <div>
                 <p className="cds--type-label-01" style={OVERLINE}>Steel summary by diameter</p>
-                <Stack gap={2} style={{ marginTop: "0.25rem" }}>
+                <Stack spacing={1} sx={{ marginTop: "0.25rem" }}>
                   {detail.summary.map((r) => (
                     <p key={r.diaMm} className="cds--type-body-01" style={{ margin: 0 }}>
                       Ø{r.diaMm} — {r.nos} nos · {r.totalLengthM.toFixed(2)} m · {r.weightKg.toFixed(2)} kg
@@ -680,7 +671,7 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
   return (
     <>
       <CarbonScope>
-        <Stack gap={4}>
+        <Stack spacing={2}>
           <p className="cds--type-body-01" style={SUBTLE}>
             Project bar bending schedules — compute cutting lengths from member geometry, or enter
             lines manually. Consultancy quantities only (no site steel reconciliation).
@@ -693,7 +684,7 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
               title: "No BBS yet",
               description: "Create a schedule, then add columns, beams, slabs, or footings.",
               action: (
-                <Button size="sm" kind="tertiary" onClick={() => setCreateOpen(true)}>
+                <Button size="small" variant="outlined" onClick={() => setCreateOpen(true)}>
                   New BBS
                 </Button>
               ),
@@ -713,21 +704,21 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
       </CarbonScope>
 
       <CarbonScope>
-        <Modal
-          open={createOpen}
-          size="sm"
-          modalHeading="New BBS"
-          primaryButtonText="Create"
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!title || create.isPending}
-          onRequestClose={() => setCreateOpen(false)}
-          onRequestSubmit={() => create.mutate({ projectId, title })}
-        >
-          <Stack gap={5}>
-            <TextInput id="bbs-title" labelText="Title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ground floor RCC" />
-            {create.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={create.error.message} />}
+        <Dialog open={createOpen} onClose={() => setCreateOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>New BBS</DialogTitle>
+      <DialogContent>
+
+          <Stack spacing={2.5}>
+            <TextField id="bbs-title" label="Title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ground floor RCC" size="small" />
+            {create.error && <Alert severity="error"><AlertTitle>Error</AlertTitle>{create.error.message}</Alert>}
           </Stack>
-        </Modal>
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
+        <Button variant="contained" disabled={!title || create.isPending} onClick={() => create.mutate({ projectId, title })}>Create</Button>
+      </DialogActions>
+    </Dialog>
       </CarbonScope>
     </>
   );

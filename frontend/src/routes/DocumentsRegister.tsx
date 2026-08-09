@@ -1,19 +1,18 @@
 import {
   Button,
-  Modal,
-  Select,
-  SelectItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
   Stack,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
-  TableHeader,
   TableRow,
-  TextArea,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+} from "@mui/material";
 import { Add, Download } from "@carbon/icons-react";
 import {
   DOCUMENT_ENTITY_LABEL,
@@ -167,30 +166,18 @@ export function DocumentsRegister() {
         description="Unified view of issued office and project documents — numbers, versions, and PDF status."
         aside={
           <CarbonScope>
-            <Stack gap={4}>
-              <Select
-                id="doc-type-filter"
-                size="sm"
-                labelText="Type"
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-              >
-                <SelectItem value="" text="All types" />
+            <Stack spacing={2}>
+              <TextField id="doc-type-filter" size="small" label="Type" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} select>
+                <MenuItem value="">All types</MenuItem>
                 {ENTITY_TYPES.map((t) => (
-                  <SelectItem key={t} value={t} text={DOCUMENT_ENTITY_LABEL[t]} />
+                  <MenuItem key={t} value={t}>{DOCUMENT_ENTITY_LABEL[t]}</MenuItem>
                 ))}
-              </Select>
-              <Select
-                id="doc-status-filter"
-                size="sm"
-                labelText="Status"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <SelectItem value="" text="All statuses" />
-                <SelectItem value="DRAFT" text="Draft" />
-                <SelectItem value="ISSUED" text="Issued" />
-              </Select>
+              </TextField>
+              <TextField id="doc-status-filter" size="small" label="Status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} select>
+                <MenuItem value="">All statuses</MenuItem>
+                <MenuItem value="DRAFT">Draft</MenuItem>
+                <MenuItem value="ISSUED">Issued</MenuItem>
+              </TextField>
             </Stack>
           </CarbonScope>
         }
@@ -209,14 +196,11 @@ export function DocumentsRegister() {
 
         {isOwner && (
           <CarbonScope>
-            <Stack gap={4}>
+            <Stack spacing={2}>
               <h2 className="cds--type-heading-03" style={{ margin: 0 }}>Numbering patterns</h2>
               <p className="esti-label esti-label--helper">Override FY-sequential prefixes per document scope.</p>
               <div>
-                <Button
-                  size="sm"
-                  disabled={setPatterns.isPending}
-                  onClick={() => {
+                <Button size="small" disabled={setPatterns.isPending} onClick={() => {
                     const next = { ...(patternsQ.data ?? {}) };
                     for (const [scope, edit] of Object.entries(patternEdits)) {
                       if (!edit.prefix && !edit.padding) continue;
@@ -226,18 +210,17 @@ export function DocumentsRegister() {
                       };
                     }
                     setPatterns.mutate(next);
-                  }}
-                >
+                  }}>
                   Save numbering defaults
                 </Button>
               </div>
               <TableContainer>
-                <Table size="sm">
+                <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableHeader>Scope</TableHeader>
-                      <TableHeader>Default</TableHeader>
-                      <TableHeader>Prefix override</TableHeader>
+                      <TableCell>Scope</TableCell>
+                      <TableCell>Default</TableCell>
+                      <TableCell>Prefix override</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -246,19 +229,12 @@ export function DocumentsRegister() {
                         <TableCell>{scope}</TableCell>
                         <TableCell>{def.prefix}</TableCell>
                         <TableCell>
-                          <TextInput
-                            id={`np-${scope}`}
-                            size="sm"
-                            labelText="Prefix"
-                            hideLabel
-                            placeholder={def.prefix}
-                            onChange={(e) =>
+                          <TextField id={`np-${scope}`} size="small" label="Prefix" placeholder={def.prefix} onChange={(e) =>
                               setPatternEdits((p) => ({
                                 ...p,
                                 [scope]: { prefix: e.target.value, padding: String(def.padding) },
                               }))
-                            }
-                          />
+                            } />
                         </TableCell>
                       </TableRow>
                     ))}
@@ -270,7 +246,7 @@ export function DocumentsRegister() {
         )}
 
         <CarbonScope>
-          <Stack gap={4}>
+          <Stack spacing={2}>
             <h2 className="cds--type-heading-03" style={{ margin: 0 }}>Office templates</h2>
             <DataGrid
               rows={templatesQ.data ?? []}
@@ -308,38 +284,33 @@ export function DocumentsRegister() {
       </RailLayout>
 
       <CarbonScope>
-        <Modal
-          open={tplOpen}
-          size="sm"
-          modalHeading="New office template"
-          primaryButtonText={createTemplate.isPending ? "Saving…" : "Save"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!tplForm.title || !tplForm.body || createTemplate.isPending}
-          onRequestClose={() => setTplOpen(false)}
-          onRequestSubmit={() => {
+        <Dialog open={tplOpen} onClose={() => setTplOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>New office template</DialogTitle>
+      <DialogContent>
+
+          <Stack spacing={2.5}>
+            <TextField id="tpl-kind" label="Kind" value={tplForm.kind} onChange={(e) => setTplForm((f) => ({ ...f, kind: e.target.value as OfficeTemplateKind }))} select size="small">
+              {(Object.keys(OFFICE_TEMPLATE_KIND_LABEL) as OfficeTemplateKind[]).map((k) => (
+                <MenuItem key={k} value={k}>{OFFICE_TEMPLATE_KIND_LABEL[k]}</MenuItem>
+              ))}
+            </TextField>
+            <TextField id="tpl-title" label="Title" value={tplForm.title} onChange={(e) => setTplForm((f) => ({ ...f, title: e.target.value }))} size="small" />
+            <TextField id="tpl-body" label="Body" rows={8} value={tplForm.body} onChange={(e) => setTplForm((f) => ({ ...f, body: e.target.value }))} multiline fullWidth></TextField>
+          </Stack>
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setTplOpen(false)}>Cancel</Button>
+        <Button variant="contained" disabled={!tplForm.title || !tplForm.body || createTemplate.isPending} onClick={() => {
             createTemplate.mutate(tplForm, {
               onSuccess: () => {
                 setTplOpen(false);
                 setTplForm({ kind: "LETTER", title: "", body: "" });
               },
             });
-          }}
-        >
-          <Stack gap={5}>
-            <Select
-              id="tpl-kind"
-              labelText="Kind"
-              value={tplForm.kind}
-              onChange={(e) => setTplForm((f) => ({ ...f, kind: e.target.value as OfficeTemplateKind }))}
-            >
-              {(Object.keys(OFFICE_TEMPLATE_KIND_LABEL) as OfficeTemplateKind[]).map((k) => (
-                <SelectItem key={k} value={k} text={OFFICE_TEMPLATE_KIND_LABEL[k]} />
-              ))}
-            </Select>
-            <TextInput id="tpl-title" labelText="Title" value={tplForm.title} onChange={(e) => setTplForm((f) => ({ ...f, title: e.target.value }))} />
-            <TextArea id="tpl-body" labelText="Body" rows={8} value={tplForm.body} onChange={(e) => setTplForm((f) => ({ ...f, body: e.target.value }))} />
-          </Stack>
-        </Modal>
+          }}>{createTemplate.isPending ? "Saving…" : "Save"}</Button>
+      </DialogActions>
+    </Dialog>
       </CarbonScope>
     </>
   );

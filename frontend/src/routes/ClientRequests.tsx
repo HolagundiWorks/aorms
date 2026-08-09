@@ -1,13 +1,18 @@
 import {
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
   Checkbox,
-  InlineNotification,
-  Modal,
-  Select,
-  SelectItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  MenuItem,
   Stack,
-  TextArea,
-  Tile,
-} from "@carbon/react";
+  TextField,
+} from "@mui/material";
 import {
   PORTAL_SUBMISSION_KIND_LABEL,
   PORTAL_SUBMISSION_STATUS_LABEL,
@@ -41,7 +46,7 @@ const KIND_TAG: Record<string, "purple" | "blue" | "teal"> = {
   FEEDBACK: "blue",
 };
 
-const HELPER: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
+const HELPER = { margin: 0, color: "var(--cds-text-secondary)" } as const;
 
 export function ClientRequests({ embedded = false }: { embedded?: boolean }) {
   const utils = trpc.useUtils();
@@ -254,7 +259,7 @@ export function ClientRequests({ embedded = false }: { embedded?: boolean }) {
 
   return (
     <CarbonScope>
-      <Stack gap={6}>
+      <Stack spacing={3}>
         {!embedded && (
           <PageHeader
             title="Client requests"
@@ -264,37 +269,25 @@ export function ClientRequests({ embedded = false }: { embedded?: boolean }) {
 
         <div style={{ display: "flex", alignItems: "flex-end", gap: "1rem", flexWrap: "wrap" }}>
           <div style={{ minWidth: 180 }}>
-            <Select
-              id="cr-status"
-              size="sm"
-              labelText="Status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <SelectItem value="" text="All statuses" />
+            <TextField id="cr-status" size="small" label="Status" value={status} onChange={(e) => setStatus(e.target.value)} select>
+              <MenuItem value="">All statuses</MenuItem>
               {PortalSubmissionStatus.options.map((s) => (
-                <SelectItem key={s} value={s} text={PORTAL_SUBMISSION_STATUS_LABEL[s]} />
+                <MenuItem key={s} value={s}>{PORTAL_SUBMISSION_STATUS_LABEL[s]}</MenuItem>
               ))}
-            </Select>
+            </TextField>
           </div>
           <div style={{ minWidth: 180 }}>
-            <Select
-              id="cr-kind"
-              size="sm"
-              labelText="Kind"
-              value={kind}
-              onChange={(e) => setKind(e.target.value)}
-            >
-              <SelectItem value="" text="All kinds" />
+            <TextField id="cr-kind" size="small" label="Kind" value={kind} onChange={(e) => setKind(e.target.value)} select>
+              <MenuItem value="">All kinds</MenuItem>
               {PortalSubmissionKind.options.map((k) => (
-                <SelectItem key={k} value={k} text={PORTAL_SUBMISSION_KIND_LABEL[k]} />
+                <MenuItem key={k} value={k}>{PORTAL_SUBMISSION_KIND_LABEL[k]}</MenuItem>
               ))}
-            </Select>
+            </TextField>
           </div>
         </div>
 
         {listQ.error && (
-          <InlineNotification kind="error" lowContrast hideCloseButton title="Could not load client requests" subtitle={listQ.error.message} />
+          <Alert severity="error"><AlertTitle>Could not load client requests</AlertTitle>{listQ.error.message}</Alert>
         )}
 
         <DataState
@@ -315,15 +308,82 @@ export function ClientRequests({ embedded = false }: { embedded?: boolean }) {
         </DataState>
 
         {/* ── Impact Assessment modal ──────────────────────────────────────── */}
-        <Modal
-          open={impact !== null}
-          size="sm"
-          modalHeading={impact ? `Impact assessment — ${impact.subject}` : "Impact assessment"}
-          primaryButtonText={sendImpact.isPending ? "Sending…" : "Send to client"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={sendImpact.isPending}
-          onRequestClose={() => setImpact(null)}
-          onRequestSubmit={() =>
+        <Dialog open={impact !== null} onClose={() => setImpact(null)} fullWidth maxWidth="sm">
+      <DialogTitle>{impact ? `Impact assessment — ${impact.subject}` : "Impact assessment"}</DialogTitle>
+      <DialogContent>
+
+          {impact && (
+            <Stack spacing={2.5}>
+              {impact.body && (
+                <Box sx={{ p: 1.5, border: "1px solid var(--cds-border-subtle)", borderRadius: "8px" }}>
+                  <p className="cds--type-label-01" style={HELPER}>Client&apos;s request</p>
+                  <p className="cds--type-body-01" style={{ margin: "0.25rem 0 0" }}>{impact.body}</p>
+                  {impact.refDrawingRef && (
+                    <p className="cds--type-label-01" style={{ ...HELPER, marginTop: "0.5rem" }}>
+                      Reference drawing: {impact.refDrawingRef}{impact.refDrawingTitle ? ` — ${impact.refDrawingTitle}` : ""}
+                    </p>
+                  )}
+                </Box>
+              )}
+              <p className="cds--type-body-01" style={{ margin: 0 }}>Tick all that apply to this change:</p>
+              <Stack spacing={2}>
+                <div>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        id="ia-costing"
+                        checked={impact.affectsCosting}
+                        onChange={(_e, checked) => setImpact({ ...impact, affectsCosting: checked })}
+                      />
+                    }
+                    label="Affects costing"
+                  />
+                  <p className="cds--type-label-01" style={{ ...HELPER, marginLeft: "1.5rem" }}>
+                    This change will require a revised fee or additional costing.
+                  </p>
+                </div>
+                <div>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        id="ia-timeline"
+                        checked={impact.affectsTimeline}
+                        onChange={(_e, checked) => setImpact({ ...impact, affectsTimeline: checked })}
+                      />
+                    }
+                    label="Affects timeline / delivery schedule"
+                  />
+                  <p className="cds--type-label-01" style={{ ...HELPER, marginLeft: "1.5rem" }}>
+                    This change will extend or shift the project delivery dates.
+                  </p>
+                </div>
+                <div>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        id="ia-billable"
+                        checked={impact.isBillable}
+                        onChange={(_e, checked) => setImpact({ ...impact, isBillable: checked })}
+                      />
+                    }
+                    label="Billable additional work"
+                  />
+                  <p className="cds--type-label-01" style={{ ...HELPER, marginLeft: "1.5rem" }}>
+                    This change is outside the original scope and will be billed separately.
+                  </p>
+                </div>
+              </Stack>
+              <TextField id="ia-comment" label="Your comment to the client (optional)" helperText="Explain the impact in plain terms. The client will see this before approving." rows={4} value={impact.architectComment} onChange={(e) => setImpact({ ...impact, architectComment: e.target.value })} multiline fullWidth></TextField>
+              {sendImpact.error && (
+                <Alert severity="error"><AlertTitle>Could not send</AlertTitle>{sendImpact.error.message}</Alert>
+              )}
+            </Stack>
+          )}
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setImpact(null)}>Cancel</Button>
+        <Button variant="contained" disabled={sendImpact.isPending} onClick={() =>
             impact &&
             sendImpact.mutate({
               submissionId: impact.id,
@@ -332,124 +392,48 @@ export function ClientRequests({ embedded = false }: { embedded?: boolean }) {
               isBillable: impact.isBillable,
               architectComment: impact.architectComment || undefined,
             })
-          }
-        >
-          {impact && (
-            <Stack gap={5}>
-              {impact.body && (
-                <Tile>
-                  <p className="cds--type-label-01" style={HELPER}>Client&apos;s request</p>
-                  <p className="cds--type-body-01" style={{ margin: "0.25rem 0 0" }}>{impact.body}</p>
-                  {impact.refDrawingRef && (
-                    <p className="cds--type-label-01" style={{ ...HELPER, marginTop: "0.5rem" }}>
-                      Reference drawing: {impact.refDrawingRef}{impact.refDrawingTitle ? ` — ${impact.refDrawingTitle}` : ""}
-                    </p>
-                  )}
-                </Tile>
-              )}
-              <p className="cds--type-body-01" style={{ margin: 0 }}>Tick all that apply to this change:</p>
-              <Stack gap={4}>
-                <div>
-                  <Checkbox
-                    id="ia-costing"
-                    checked={impact.affectsCosting}
-                    onChange={(_e, { checked }) => setImpact({ ...impact, affectsCosting: checked })}
-                    labelText="Affects costing"
-                  />
-                  <p className="cds--type-label-01" style={{ ...HELPER, marginLeft: "1.5rem" }}>
-                    This change will require a revised fee or additional costing.
-                  </p>
-                </div>
-                <div>
-                  <Checkbox
-                    id="ia-timeline"
-                    checked={impact.affectsTimeline}
-                    onChange={(_e, { checked }) => setImpact({ ...impact, affectsTimeline: checked })}
-                    labelText="Affects timeline / delivery schedule"
-                  />
-                  <p className="cds--type-label-01" style={{ ...HELPER, marginLeft: "1.5rem" }}>
-                    This change will extend or shift the project delivery dates.
-                  </p>
-                </div>
-                <div>
-                  <Checkbox
-                    id="ia-billable"
-                    checked={impact.isBillable}
-                    onChange={(_e, { checked }) => setImpact({ ...impact, isBillable: checked })}
-                    labelText="Billable additional work"
-                  />
-                  <p className="cds--type-label-01" style={{ ...HELPER, marginLeft: "1.5rem" }}>
-                    This change is outside the original scope and will be billed separately.
-                  </p>
-                </div>
-              </Stack>
-              <TextArea
-                id="ia-comment"
-                labelText="Your comment to the client (optional)"
-                helperText="Explain the impact in plain terms. The client will see this before approving."
-                rows={4}
-                value={impact.architectComment}
-                onChange={(e) => setImpact({ ...impact, architectComment: e.target.value })}
-              />
-              {sendImpact.error && (
-                <InlineNotification kind="error" lowContrast hideCloseButton title="Could not send" subtitle={sendImpact.error.message} />
+          }>{sendImpact.isPending ? "Sending…" : "Send to client"}</Button>
+      </DialogActions>
+    </Dialog>
+
+        {/* ── Triage modal ─────────────────────────────────────────────────── */}
+        <Dialog open={triage !== null} onClose={() => setTriage(null)} fullWidth maxWidth="sm">
+      <DialogTitle>{triage ? `Triage — ${triage.subject}` : "Triage"}</DialogTitle>
+      <DialogContent>
+
+          {triage && (
+            <Stack spacing={2.5}>
+              <TextField id="tr-status" label="Status" value={triage.status} onChange={(e) => setTriage({ ...triage, status: e.target.value as PortalSubmissionStatusT })} select size="small">
+                {PortalSubmissionStatus.options.map((s) => (
+                  <MenuItem key={s} value={s}>{PORTAL_SUBMISSION_STATUS_LABEL[s]}</MenuItem>
+                ))}
+              </TextField>
+              <TextField id="tr-note" label="Response to client (optional)" rows={3} value={triage.responseNote} onChange={(e) => setTriage({ ...triage, responseNote: e.target.value })} multiline fullWidth></TextField>
+              {setStatusM.error && (
+                <Alert severity="error"><AlertTitle>Could not save</AlertTitle>{setStatusM.error.message}</Alert>
               )}
             </Stack>
           )}
-        </Modal>
-
-        {/* ── Triage modal ─────────────────────────────────────────────────── */}
-        <Modal
-          open={triage !== null}
-          size="sm"
-          modalHeading={triage ? `Triage — ${triage.subject}` : "Triage"}
-          primaryButtonText={setStatusM.isPending ? "Saving…" : "Save"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={setStatusM.isPending}
-          onRequestClose={() => setTriage(null)}
-          onRequestSubmit={() =>
+        
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setTriage(null)}>Cancel</Button>
+        <Button variant="contained" disabled={setStatusM.isPending} onClick={() =>
             triage &&
             setStatusM.mutate({
               id: triage.id,
               status: triage.status,
               responseNote: triage.responseNote || undefined,
             })
-          }
-        >
-          {triage && (
-            <Stack gap={5}>
-              <Select
-                id="tr-status"
-                labelText="Status"
-                value={triage.status}
-                onChange={(e) => setTriage({ ...triage, status: e.target.value as PortalSubmissionStatusT })}
-              >
-                {PortalSubmissionStatus.options.map((s) => (
-                  <SelectItem key={s} value={s} text={PORTAL_SUBMISSION_STATUS_LABEL[s]} />
-                ))}
-              </Select>
-              <TextArea
-                id="tr-note"
-                labelText="Response to client (optional)"
-                rows={3}
-                value={triage.responseNote}
-                onChange={(e) => setTriage({ ...triage, responseNote: e.target.value })}
-              />
-              {setStatusM.error && (
-                <InlineNotification kind="error" lowContrast hideCloseButton title="Could not save" subtitle={setStatusM.error.message} />
-              )}
-            </Stack>
-          )}
-        </Modal>
+          }>{setStatusM.isPending ? "Saving…" : "Save"}</Button>
+      </DialogActions>
+    </Dialog>
 
         {/* ── Thread modal ─────────────────────────────────────────────────── */}
-        <Modal
-          open={threadFor !== null}
-          size="sm"
-          passiveModal
-          modalHeading={threadFor ? `Conversation — ${threadFor.subject}` : "Conversation"}
-          onRequestClose={() => setThreadFor(null)}
-        >
+        <Dialog open={threadFor !== null} onClose={() => setThreadFor(null)} fullWidth maxWidth="sm">
+      <DialogTitle>{threadFor ? `Conversation — ${threadFor.subject}` : "Conversation"}</DialogTitle>
+      <DialogContent>
+
           {threadFor && (
             <SubmissionThread
               messages={threadQ.data ?? []}
@@ -458,7 +442,9 @@ export function ClientRequests({ embedded = false }: { embedded?: boolean }) {
               onReply={(body) => reply.mutate({ id: threadFor.id, body })}
             />
           )}
-        </Modal>
+        
+      </DialogContent>
+    </Dialog>
       </Stack>
     </CarbonScope>
   );
