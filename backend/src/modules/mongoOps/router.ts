@@ -1,8 +1,9 @@
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "../../db/index.js";
-import { projectOffices } from "../../db/schema.js";
+import { metaEvents, projectOffices, syncRecords } from "../../db/schema.js";
+import { env } from "../../env.js";
 import { getFirm } from "../../lib/firm.js";
 import {
   listAllOpsForFirm,
@@ -12,8 +13,9 @@ import {
   upsertOpsTask,
   upsertPublishedArtifact,
 } from "../../lib/mongo/ops.js";
+import { getOrgSettings } from "../../lib/settings.js";
 import { shilpiHealth, shilpiHttpConfigured } from "../../lib/shilpi/client.js";
-import { clientProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
+import { clientProcedure, ownerProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
 
 async function assertOwnedProject(
   ctx: { db: DB; user: { clientId: string } },
@@ -111,5 +113,75 @@ export const mongoOpsRouter = router({
   adminBrowse: protectedProcedure.query(async ({ ctx }) => {
     const firm = await getFirm(ctx.db);
     return listAllOpsForFirm(firm.id);
+  }),
+
+  /**
+   * Ops DB Manager — connector strip + recent hub sync/meta rows from desktop Flush.
+   * Firm-scoped; firm:admin. Does not expose SQLite firm.db (LOCAL-FIRST).
+   */
+  adminConnectorSummary: ownerProcedure.query(async ({ ctx }) => {
+    const firm = await getFirm(ctx.db);
+    const { syncToken } = await getOrgSettings(ctx.db);
+    const hub = env.ESTI_HUB_URL.replace(/\/+$/, "");
+    const [records, events] = await Promise.all([
+      ctx.db
+        .select({
+          id: syncRecords.id,
+          entity: syncRecords.entity,
+          entityId: syncRecords.entityId,
+          contentHash: syncRecords.contentHash,
+          updatedAt: syncRecords.updatedAt,
+        })
+        .from(syncRecords)
+        .where(eq(syncRecords.firmId, firm.id))
+        .orderBy(desc(syncRecords.updatedAt))
+        .limit(40),
+      ctx.db
+        .select({
+          id: metaEvents.id,
+          entity: metaEvents.entity,
+          entityId: metaEvents.entityId,
+          op: metaEvents.op,
+          stream: metaEvents.stream,
+          seq: metaEvents.seq,
+          createdAt: metaEvents.createdAt,
+        })
+        .from(metaEvents)
+        .where(eq(metaEvents.firmId, firm.id))
+        .orderBy(desc(metaEvents.seq))
+        .limit(40),
+    ]);
+
+    return {
+      firmId: firm.id,
+      opsMode: mongoOpsMode(),
+      shilpiConfigured: shilpiHttpConfigured(),
+      shilpi: await shilpiHealth(),
+      role: env.ESTI_ROLE,
+      hubUrl: hub || null,
+      /** Redacted — presence only (never return the bearer). */
+      hasSyncToken: Boolean(syncToken),
+      /** Hub can receive desktop Flush regardless of node syncReady. */
+      desktopConnectorHint:
+        "Activate + Flush from AORMS Connect (or AStudio). This page browses published Mongo ops and hub sync/meta only.",
+      syncRecords: records.map((r) => ({
+        id: r.id,
+        entity: r.entity,
+        entityId: r.entityId,
+        contentHash: r.contentHash,
+        updatedAt: r.updatedAt?.toISOString?.() ?? String(r.updatedAt),
+        source: "esti_sync_record" as const,
+      })),
+      metaEvents: events.map((e) => ({
+        id: e.id,
+        entity: e.entity,
+        entityId: e.entityId,
+        op: e.op,
+        stream: e.stream,
+        seq: e.seq,
+        updatedAt: e.createdAt?.toISOString?.() ?? String(e.createdAt),
+        source: "esti_meta_event" as const,
+      })),
+    };
   }),
 });

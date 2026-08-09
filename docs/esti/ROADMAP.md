@@ -81,6 +81,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | C1 WinUI: Sign in · Suite apps · Projects · Licence stub | ✅ scaffold |
 | C2 Shared session + catalog API for siblings | ✅ |
 | C3 Licence Manager surface | ✅ |
+| C2+/S5 Connect DB connector + Ops DB Manager wire | ✅ Connect Flush/outbox UI · Bridge `OutboxCounts` · `/ops-db` connector strip + sync/meta browse |
 
 ### S8 — Reopen apex auth (when demos are honest)
 

@@ -85,7 +85,7 @@ Footer home on PMC opens `/pmc`.
 | **Library · Design** | Specification · Standard items · Rate Books |
 | **Library · Codes** | Compliance · Master Plans · Standards |
 | **Library · Knowledge** | Knowledge Bank portal |
-| **Admin** | Archived projects · System |
+| **Admin** | Archived projects · Connection manager (`/ops-db`) · System |
 
 ### Taskbar footer (chrome)
 LEFT wellness · calculator · CENTER module nav + Admin · RIGHT sync (desktop) · sign out.

@@ -33,9 +33,12 @@ Postgres remains transitional for legacy tables until fully migrated.
 | `trpc.mongoOps.publishTask` | Staff session | Manager publish |
 | `trpc.mongoOps.portalTasks` | Client portal | Portal read |
 | `trpc.mongoOps.portalDrawingPackages` | Client portal | Drawing packages |
-| `trpc.mongoOps.adminBrowse` | Staff session | Ops DB manager |
+| `trpc.mongoOps.adminBrowse` | Staff session | Ops DB manager (tasks · artifacts) |
+| `trpc.mongoOps.adminConnectorSummary` | `firm:admin` | Connector strip + recent `esti_sync_record` / `esti_meta_event` after desktop Flush |
 
-Code: `backend/src/lib/mongo/ops.ts` · `backend/src/modules/mongoOps/`.
+**Desktop ↔ web:** [AORMS Connect](AORMS-CONNECT.md) Activate → outbox → Flush → hub `/api/sync/meta` + `/api/ops/*`. Browse results on **Connection manager** (`/ops-db` · alias `/connection-manager`; Admin menu). The web manager never edits `firm.db` ([LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md)).
+
+Code: `backend/src/lib/mongo/ops.ts` · `backend/src/modules/mongoOps/` · `frontend/src/routes/OpsDbManager.tsx`.
 
 ## Compose
 

@@ -84,8 +84,11 @@ AQC, then AStudio / AConsulting.
 | `EnqueueMeta(event)` | local outbox | No network |
 | `EnqueueArtifact(entity, bytes, dto)` | local outbox | Content-hash skip |
 | `Flush()` | `POST /api/sync/meta` + `POST /api/sync/ingest` | Bearer `syncToken` |
+| `OutboxCounts()` | local | Pending meta/artifact rows (Connect DB connector) |
 | `PullMeta()` | `GET /api/sync/meta/catch-up` | Multi-seat wave 2 |
 | `HubConfigured` | local | `{ hubUrl, hasSyncToken, syncReady }` |
+
+**Connect UI:** DB connector panel Flush + outbox counts. **Web:** `/ops-db` (`mongoOps.adminConnectorSummary`) shows hub sync/meta after Flush.
 
 Env / settings (align HUB-API):
 

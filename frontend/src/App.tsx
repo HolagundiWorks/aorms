@@ -33,6 +33,7 @@ import {
   Rule,
   Straighten,
   Store,
+  CloudSync,
   Terminal,
   Build as Tools,
   Person as User,
@@ -683,6 +684,11 @@ function AppWorkspace() {
         ...(can(user.role, "project:delete")
           ? [{ label: "Archived projects", to: "/archived-projects", icon: Archive }]
           : []),
+        {
+          label: "Connection manager",
+          to: "/ops-db",
+          icon: CloudSync,
+        },
         ...(user.isSystemAdmin ? [{ label: "System", to: "/system-admin", icon: Terminal }] : []),
       ],
     },
@@ -884,6 +890,7 @@ function AppWorkspace() {
                 )}
                 {can(user.role, "firm:admin") && (
                   <Route path="/ops-db" element={<OpsDbManager />} />
+                  <Route path="/connection-manager" element={<OpsDbManager />} />
                 )}
                 <Route path="/account" element={<AccountPortal />} />
                 <Route path="/company-account" element={<CompanyAccountPortal />} />

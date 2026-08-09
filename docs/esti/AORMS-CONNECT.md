@@ -94,9 +94,11 @@ Connect itself is listed on `/downloads` (`aorms-connect` offer) — Coming soon
 
 ## DB connector
 
-- Local SQLite / firm catalog beside session store.  
-- Hub bind for Mongo ops metadata (same Bridge lineage as AQC apps).  
-- Ops browse depth may deepen later; Connect is the desktop entry for firm DB bind, not a second `/ops-db` mega-UI on day one.
+- Local SQLite (`firm.db`) beside session store — Bridge `AormsBridgeHost`.  
+- Hub bind for Mongo ops + sync meta (same Bridge lineage as AQC apps).  
+- **Connect UI (shipped):** firm.db path · hub syncReady · pending meta/artifact outbox counts · **Enqueue test meta** · **Flush to hub** · last result log.  
+- Bridge: `OutboxCounts()` · `FlushAsync()` · `EnqueueMeta()`.  
+- **Web:** hub **Connection manager** (`/ops-db` · Admin menu · [`OpsDbManager.tsx`](../../frontend/src/routes/OpsDbManager.tsx)) browses published Mongo ops + `esti_sync_record` / `esti_meta_event` after Flush — it does **not** edit `firm.db` ([LOCAL-FIRST.md](LOCAL-FIRST.md)).
 
 ## Licence Manager (C3)
 
