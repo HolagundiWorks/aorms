@@ -243,18 +243,26 @@ ActionDock (select invitation first): Raise ticket · Site visit · Drawing · M
 
 ---
 
-## Consultancy spine (AORMS-Consultancy)
+## Consultancy portfolio (AConsulting)
+
+Sign-in: `principal@demo.aorms.in` / `demo1234` on **consultancy.aorms.in** (same seed as Studio).
 
 | Record | Value |
 |--------|-------|
-| Enquiry | `EQ-DEMO-001` — Apex PEB warehouse (WON) |
-| Engagement | `C-DEMO-001` — Apex PEB warehouse — Whitefield structural |
-| Client | Apex Precast Structures Pvt Ltd |
-| Fee | Lump sum ₹18,00,000 · stages: INVOICED kickoff · **BILLABLE** schematic · PENDING GFC |
-| Deliverable | `STR-CAL-001` Foundation & column schedule (DRAFT) |
+| Enquiry (won) | `EQ-DEMO-001` — Apex PEB warehouse → `C-DEMO-001` |
+| Enquiry (open) | `EQ-DEMO-002` — Orbit hospital MEP (RECEIVED — score go/no-go) |
+| Enquiry (lost) | `EQ-DEMO-003` — Retail podium peer review (LOST) |
+| Engagement | `C-DEMO-001` — Apex PEB Whitefield structural · ACTIVE · Schematic |
+| Engagement | `C-DEMO-002` — Orbit diagnostics MEP · ACTIVE · Concept · T&M |
+| Clients | Apex Precast Structures · Orbit Healthcare |
+| Fee (`C-DEMO-001`) | Lump sum ₹18,00,000 · INVOICED kickoff · **BILLABLE** schematic · PENDING GFC |
+| Fee (`C-DEMO-002`) | T&M ₹9,50,000 · INVOICED retainer · PENDING schematic/detailed |
+| Deliverables | `STR-CAL-001` · `STR-GA-001` · `MEP-SCH-001` |
+| Ops extras (`C-DEMO-001`) | TQ-001 open · MOM-DEMO-001 issued · timesheet · field report FR#1 |
 | Rate card | PRINCIPAL · SENIOR_ENGINEER · ENGINEER grades |
 
 Platform org: `engineering-demo` (CONSULTANCY) via `ensureDemoConsultancyPlatformOrg()`.
+Seed: `backend/src/scripts/demoConsultancySeed.ts` (idempotent backfill).
 
 Walkthrough: [docs/holagundi/DEMO-SCRIPT.md](../holagundi/DEMO-SCRIPT.md) · [P9V-CONSULTANCY-WALKTHROUGH.md](P9V-CONSULTANCY-WALKTHROUGH.md)
 

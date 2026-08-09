@@ -11,7 +11,7 @@ Quick reference for demo logins and how they relate to production org mode.
 
 | Persona | Seed | Login | Password |
 | ------- | ---- | ----- | -------- |
-| **Principal** | `pnpm seed:demo` | `principal@demo.aorms.in` | `demo1234` |
+| **Principal** (AStudio + AConsulting) | `pnpm seed:demo` | `principal@demo.aorms.in` | `demo1234` |
 | Design lead | same seed | `lead@demo.aorms.in` | same |
 | Site architect | same seed | `site@demo.aorms.in` | same |
 | Junior architect | same seed | `junior@demo.aorms.in` | same |

@@ -25,15 +25,17 @@ Clients → Projects → Proposals → Invoices.
 
 ---
 
-## B. AORMS-Consultancy (engineering) — ~7 minutes
+## B. AConsulting (engineering) — ~8 minutes
 
 | Min | Action | Say |
 |---|---|---|
-| 0 | Open **consultancy.aorms.in** (same credentials via Account Hub) | “Engineering workspace — not Studio with extra URLs.” |
-| 1 | Ribbon: **Enquiries** · **Engagements** | “Enquiry register before a job number exists.” |
-| 2 | Open `EQ-DEMO-001` → converted `C-DEMO-001` | “Go/no-go scored; job code allocated.” |
-| 3 | Engagement fee stages — find **BILLABLE** schematic package | “Stage billing tied to issue — raise Studio tax invoice from here.” |
-| 4 | Optional: raise invoice from BILLABLE stage | “Same GST spine as architecture.” |
+| 0 | Open **consultancy.aorms.in** as `principal@demo.aorms.in` | “Engineering practice workspace — not Studio with extra URLs.” |
+| 1 | Taskbar **Practice** → Enquiries · Engagements | “Enquiry register before a job number; Office/Finance match Studio groups.” |
+| 2 | Enquiries: open `EQ-DEMO-002` (Orbit MEP) — score go/no-go | “Live register — decide before a job code.” |
+| 3 | Open `EQ-DEMO-001` → engagement `C-DEMO-001` | “Won enquiry converted; structural job active.” |
+| 4 | Fee stages — **BILLABLE** schematic package | “Stage billing tied to issue — raise tax invoice from here.” |
+| 5 | Optional: TQ-001 · MoM · field report on same engagement | “Ops spine on the job — not a separate mega-app.” |
+| 6 | Engagements list also shows `C-DEMO-002` (MEP) | “Multi-job portfolio for capacity talk.” |
 
 ---
 

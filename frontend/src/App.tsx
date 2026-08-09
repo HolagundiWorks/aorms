@@ -583,10 +583,17 @@ function AppWorkspace() {
     financeMenu,
   ];
 
-  // AConsulting — Enquiries · Engagements · Clients · Projects · People · Office · Finance
+  // AConsulting — Practice peers + same Office/Finance grouping as AStudio.
   const consultancyNav: NavNode[] = [
-    { label: "Enquiries", to: "/consultancy/enquiries", icon: ContactPage },
-    { label: "Engagements", to: "/consultancy/engagements", icon: Engineering },
+    {
+      kind: "menu",
+      label: "Practice",
+      icon: Engineering,
+      items: [
+        { label: "Enquiries", to: "/consultancy/enquiries", icon: ContactPage },
+        { label: "Engagements", to: "/consultancy/engagements", icon: Engineering },
+      ],
+    },
     ...(can(user.role, "write")
       ? [{ label: "Clients", to: "/clients", icon: User }]
       : []),
@@ -604,12 +611,31 @@ function AppWorkspace() {
             ...(can(user.role, "fees:manage")
               ? [{ label: "Proposals", to: "/office/proposals", icon: Document }]
               : []),
+            ...(can(user.role, "write")
+              ? [{ label: "Tenders", to: "/office/tenders", icon: Gavel }]
+              : []),
+          ],
+        },
+        {
+          kind: "menu",
+          label: "Papers",
+          items: [
+            ...(can(user.role, "write")
+              ? [
+                  { label: "Documents", to: "/office/documents", icon: Document },
+                  { label: "Contracts", to: "/office/contracts", icon: License },
+                  { label: "Letters", to: "/office/letters", icon: Email },
+                ]
+              : []),
           ],
         },
         {
           kind: "menu",
           label: "References",
-          items: [{ label: "Standards", to: "/libraries/standards", icon: Book }],
+          items: [
+            { label: "Standards", to: "/libraries/standards", icon: Book },
+            { label: "Specification", to: "/libraries/spec-catalog", icon: ListChecked },
+          ],
         },
       ],
     },

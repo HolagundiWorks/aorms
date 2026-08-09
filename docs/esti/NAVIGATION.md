@@ -40,15 +40,14 @@ search · health/dues · greeting · alerts.
 
 | Item | Kind | Destinations |
 |---|---|---|
-| **Enquiries** | link | `/consultancy/enquiries` |
-| **Engagements** | link | `/consultancy/engagements` |
+| **Practice** | menu | Enquiries · Engagements |
 | **Clients** | link | `/clients` (`write`) |
 | **Projects** | link | `/projects` |
 | **People** | menu | Teams · Performance · HR |
-| **Office** | menu | **Capture:** Proposals · **References:** Standards |
+| **Office** | menu | **Capture:** Proposals · Tenders · **Papers:** Documents · Contracts · Letters · **References:** Standards · Specification |
 | **Finance** | menu | same Finance menu as Studio |
 
-Footer home on consultancy opens Enquiries.
+Footer home on consultancy opens Enquiries. Sign in with `principal@demo.aorms.in` (same demo firm; Account Hub / host selects AConsulting).
 
 ### AProc (`proc.aorms.in` / `/pmc`)
 
