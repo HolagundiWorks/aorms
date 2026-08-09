@@ -145,6 +145,12 @@ export function Portal() {
     }
   }, [openId, detailQ.isError, navigate]);
 
+  useEffect(() => {
+    const base = AORMS_PORTALS.client.label;
+    document.title =
+      openId && d?.project?.title ? `${d.project.title} — ${base}` : base;
+  }, [openId, d?.project?.title]);
+
   // ── write state ──────────────────────────────────────────────────────────
   const [decision, setDecision] = useState<
     {

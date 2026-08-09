@@ -1,5 +1,6 @@
 import ArrowBack from "@mui/icons-material/ArrowBack";
-import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
+import { Alert, AlertTitle, Box, Button, Stack, Typography } from "@mui/material";
+import { DataState } from "@hcw/ui-kit";
 import { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import { Link as RouterLink, Navigate } from "react-router-dom";
 import { DemoAdminUnlock } from "../components/DemoAdminUnlock.js";
@@ -126,9 +127,14 @@ export function AccountPortal() {
   if (checking) {
     return (
       <PortalShell active="account">
-        <Box sx={{ display: "flex", justifyContent: "center", py: COMPOSITION_RHYTHM.lg }}>
-          <CircularProgress />
-        </Box>
+        <DataState
+          loading
+          isEmpty={false}
+          columnCount={2}
+          empty={{ title: "Loading account" }}
+        >
+          <Box />
+        </DataState>
       </PortalShell>
     );
   }
@@ -193,9 +199,14 @@ export function AccountPortal() {
 
         <Suspense
           fallback={
-            <Box sx={{ display: "flex", justifyContent: "center", py: COMPOSITION_RHYTHM.lg }}>
-              <CircularProgress />
-            </Box>
+            <DataState
+              loading
+              isEmpty={false}
+              columnCount={2}
+              empty={{ title: "Loading section" }}
+            >
+              <Box />
+            </DataState>
           }
         >
           <PortalTabPanel active={tab === 0}>

@@ -1,6 +1,6 @@
 # HCW Kit & AORMS — audit index
 
-**Updated:** 2026-07-22 · **Living queue:** [DESIGN-DEBT-REGISTER.md](DESIGN-DEBT-REGISTER.md) —
+**Updated:** 2026-08-09 · **Living queue:** [DESIGN-DEBT-REGISTER.md](DESIGN-DEBT-REGISTER.md) —
 kit roadmap halves D15/D16 closed in **1.4.0** ([13-ROADMAPS.md](../13-ROADMAPS.md)) ·
 Case studies: [case-studies/](case-studies/) · Governance **00–14** · gzip budget
 **56 KB** · Canonical: **github.com/HolagundiWorks/hcwux**
@@ -18,6 +18,7 @@ audits after major feature waves; update the debt register in the same PR as fix
 | **Public pages & URLs** | Marketing, wiki, blog, auth, SEO landings | [PUBLIC-PAGES-AUDIT-2026-07-11.md](../../marketing/PUBLIC-PAGES-AUDIT-2026-07-11.md) |
 | **Public pages UI/UX** | Same scope — checklist + T7 layer compliance | [PUBLIC-PAGES-UX-AUDIT-2026-07-11.md](../../marketing/PUBLIC-PAGES-UX-AUDIT-2026-07-11.md) |
 | **Security** | API, tRPC, storage, CSP, sessions, deploy | [SECURITY-AUDIT-2026-07-11.md](../../esti/SECURITY-AUDIT-2026-07-11.md) |
+| **UX audit wave 1B+2C** | Landing · portals · SPA de-Carbon · AStudio/AConsulting shell | [2026-08-09-UX-AUDIT-WAVE.md](2026-08-09-UX-AUDIT-WAVE.md) |
 
 **Checklists:** [07-UX-REVIEW-CHECKLISTS.md](../07-UX-REVIEW-CHECKLISTS.md) ·
 [HCW-UI-UX-PRINCIPLES.md](../../esti/HCW-UI-UX-PRINCIPLES.md)

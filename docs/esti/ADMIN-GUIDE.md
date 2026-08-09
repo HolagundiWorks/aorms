@@ -199,10 +199,11 @@ build-only container and atomic-swaps `frontend/dist`, served statically by ngin
 
 ### 6b. Desktop node (local-first)
 
-AORMS ships a **local-first desktop node** (same SPA + local Postgres/worker/Ollama)
-that syncs metadata and finalized artifacts to the cloud hub — see
-[LOCAL-FIRST.md](LOCAL-FIRST.md) and [`desktop/`](../../desktop/). Packaging
-waves (signed Tauri installer) are tracked in [ROADMAP.md](ROADMAP.md) § Local-first.
+AORMS ships **desktop suite apps** (Connect → AStudio / AConsulting / AQC) with
+**local AI (Ollama / Foundry Local)** on the machine. The cloud hub syncs
+metadata and finalized artifacts only — **no VPS Ollama**. See
+[LOCAL-FIRST.md](LOCAL-FIRST.md) · [AORMS-SUITE.md](AORMS-SUITE.md) § AI.
+Packaging / signing: [ROADMAP.md](ROADMAP.md) § D6.
 
 **Permanently retired (do not revive):**
 

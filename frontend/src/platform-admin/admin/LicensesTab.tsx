@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import {
+  Alert,
+  Box,
   Button,
-  InlineNotification,
-  Modal,
-  Select,
-  SelectItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
   Stack,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+  Typography,
+} from "@mui/material";
 import { licensingPlanLabel } from "@esti/contracts";
-import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { DataGrid, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
 import { RowActionsMenu } from "../../components/RowActionsMenu.js";
 import { trpc } from "../lib/trpc";
@@ -198,8 +201,9 @@ export default function LicensesTab() {
       renderCell: (p) =>
         p.row.status === "ACTIVE" && detail ? (
           <Button
-            kind="danger--ghost"
-            size="sm"
+            size="small"
+            color="error"
+            variant="text"
             onClick={() => deactivateDevice(p.row.id, detail.license.id)}
           >
             Deactivate
@@ -221,106 +225,133 @@ export default function LicensesTab() {
   ];
 
   return (
-    <CarbonScope>
-      <Stack gap={5}>
-        <div>
-          <Button
-            onClick={() => {
-              setNewKey(null);
-              setError(null);
-              setCreateOpen(true);
-            }}
-          >
-            New license
-          </Button>
-        </div>
-
-        {newKey && (
-          <InlineNotification kind="success" lowContrast title="License created" subtitle={`Key: ${newKey}`} onCloseButtonClick={() => setNewKey(null)} />
-        )}
-
-        <DataGrid
-          rows={licenses}
-          columns={columns}
-          getRowId={(r) => r.id}
-          density="compact"
-          disableRowSelectionOnClick
-          hideFooter
-          autoHeight
-        />
-
-        <Modal
-          open={createOpen}
-          size="sm"
-          modalHeading="New license"
-          primaryButtonText="Create"
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!orgId || !productId || !planId}
-          onRequestClose={() => setCreateOpen(false)}
-          onRequestSubmit={create}
+    <Stack spacing={2}>
+      <Box>
+        <Button
+          variant="contained"
+          onClick={() => {
+            setNewKey(null);
+            setError(null);
+            setCreateOpen(true);
+          }}
         >
-          <Stack gap={5}>
-            <Select id="lic-org" labelText="Organization" value={orgId} onChange={(e) => setOrgId(e.target.value)}>
+          New license
+        </Button>
+      </Box>
+
+      {newKey && (
+        <Alert severity="success" onClose={() => setNewKey(null)}>
+          License created — Key: {newKey}
+        </Alert>
+      )}
+
+      <DataGrid
+        rows={licenses}
+        columns={columns}
+        getRowId={(r) => r.id}
+        density="compact"
+        disableRowSelectionOnClick
+        hideFooter
+        autoHeight
+      />
+
+      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>New license</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField
+              id="lic-org"
+              select
+              label="Organization"
+              value={orgId}
+              onChange={(e) => setOrgId(e.target.value)}
+              fullWidth
+            >
               {orgs.map((o) => (
-                <SelectItem key={o.id} value={o.id} text={o.name} />
+                <MenuItem key={o.id} value={o.id}>{o.name}</MenuItem>
               ))}
-            </Select>
-            <Select id="lic-product" labelText="Product" value={productId} onChange={(e) => setProductId(e.target.value)}>
+            </TextField>
+            <TextField
+              id="lic-product"
+              select
+              label="Product"
+              value={productId}
+              onChange={(e) => setProductId(e.target.value)}
+              fullWidth
+            >
               {products.map((p) => (
-                <SelectItem key={p.id} value={p.id} text={p.name} />
+                <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
               ))}
-            </Select>
+            </TextField>
             {singlePlan ? (
-              <p className="cds--type-body-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
+              <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>
                 Plan: {licensingPlanLabel()}
-              </p>
+              </Typography>
             ) : (
-              <Select id="lic-plan" labelText="Plan" value={planId} onChange={(e) => setPlanId(e.target.value)}>
+              <TextField
+                id="lic-plan"
+                select
+                label="Plan"
+                value={planId}
+                onChange={(e) => setPlanId(e.target.value)}
+                fullWidth
+              >
                 {plansForProduct.map((pl) => (
-                  <SelectItem key={pl.id} value={pl.id} text={pl.name} />
+                  <MenuItem key={pl.id} value={pl.id}>{pl.name}</MenuItem>
                 ))}
-              </Select>
+              </TextField>
             )}
-            <TextInput
+            <TextField
               id="lic-expires"
               type="date"
-              labelText="Expires (optional — blank = perpetual)"
+              label="Expires (optional — blank = perpetual)"
               value={expires}
               onChange={(e) => setExpires(e.target.value)}
+              fullWidth
+              slotProps={{ inputLabel: { shrink: true } }}
             />
-            {error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={error} />}
+            {error && <Alert severity="error">{error}</Alert>}
           </Stack>
-        </Modal>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setCreateOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={!orgId || !productId || !planId}
+            onClick={() => void create()}
+          >
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        <Modal
-          open={extendId !== null}
-          size="sm"
-          modalHeading="Extend / set expiry"
-          primaryButtonText="Save"
-          secondaryButtonText="Cancel"
-          onRequestClose={() => setExtendId(null)}
-          onRequestSubmit={doExtend}
-        >
-          <TextInput
+      <Dialog open={extendId !== null} onClose={() => setExtendId(null)} fullWidth maxWidth="sm">
+        <DialogTitle>Extend / set expiry</DialogTitle>
+        <DialogContent>
+          <TextField
             id="ext-date"
             type="date"
-            labelText="New expiry (blank = perpetual)"
+            label="New expiry (blank = perpetual)"
             value={extendDate}
             onChange={(e) => setExtendDate(e.target.value)}
+            fullWidth
+            sx={{ mt: 1 }}
+            slotProps={{ inputLabel: { shrink: true } }}
           />
-        </Modal>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setExtendId(null)}>Cancel</Button>
+          <Button variant="contained" onClick={() => void doExtend()}>Save</Button>
+        </DialogActions>
+      </Dialog>
 
-        <Modal
-          open={detail !== null}
-          size="lg"
-          passiveModal
-          modalHeading={detail ? `License ${detail.license.key}` : ""}
-          onRequestClose={() => setDetail(null)}
-        >
+      <Dialog open={detail !== null} onClose={() => setDetail(null)} fullWidth maxWidth="md">
+        <DialogTitle>{detail ? `License ${detail.license.key}` : ""}</DialogTitle>
+        <DialogContent>
           {detail && (
-            <Stack gap={6}>
-              <Stack gap={3}>
-                <h4 className="cds--type-heading-03" style={{ margin: 0 }}>Devices</h4>
+            <Stack spacing={2.5} sx={{ mt: 1 }}>
+              <Stack spacing={1}>
+                <Typography variant="h6" component="h4" sx={{ m: 0 }}>Devices</Typography>
                 <DataGrid
                   rows={detail.devices}
                   columns={deviceColumns}
@@ -332,8 +363,8 @@ export default function LicensesTab() {
                 />
               </Stack>
 
-              <Stack gap={3}>
-                <h4 className="cds--type-heading-03" style={{ margin: 0 }}>Event log</h4>
+              <Stack spacing={1}>
+                <Typography variant="h6" component="h4" sx={{ m: 0 }}>Event log</Typography>
                 <DataGrid
                   rows={detail.events}
                   columns={eventColumns}
@@ -346,8 +377,11 @@ export default function LicensesTab() {
               </Stack>
             </Stack>
           )}
-        </Modal>
-      </Stack>
-    </CarbonScope>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setDetail(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    </Stack>
   );
 }

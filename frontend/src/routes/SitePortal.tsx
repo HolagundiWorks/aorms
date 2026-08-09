@@ -8,14 +8,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Skeleton,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { JOINT_MEASUREMENT_STATUS_LABEL } from "@esti/contracts";
-import { RADIUS, Surface, useScreenActions } from "@hcw/ui-kit";
-import { useMemo, useState } from "react";
+import { DataState, RADIUS, Surface, useScreenActions } from "@hcw/ui-kit";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
 import {
@@ -33,12 +32,16 @@ const PORTAL_DIALOG_SLOT = {
   paper: { className: "esti-portal-dialog", sx: { borderRadius: `${RADIUS}px` } },
 } as const;
 
-const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red" | "teal"> = {
+const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red" | "teal" | "cool-gray"> = {
   DRAFT: "gray",
   SUBMITTED: "blue",
   APPROVED: "green",
   REJECTED: "red",
   ISSUED: "teal",
+  ACTIVE: "blue",
+  ON_HOLD: "cool-gray",
+  COMPLETED: "green",
+  ARCHIVED: "cool-gray",
 };
 
 export function SitePortal() {
@@ -100,6 +103,19 @@ export function SitePortal() {
     { projectId: projectId! },
     { enabled: !!projectId },
   );
+
+  const projectTitle = projectDetailQ.data?.project?.title;
+  const projectRef = projectDetailQ.data?.project?.ref;
+  const projectStatus = projectDetailQ.data?.project?.status;
+
+  useEffect(() => {
+    const base = AORMS_PORTALS.site.label;
+    if (projectId && (projectRef || projectTitle)) {
+      document.title = `${projectRef ? `${projectRef} — ` : ""}${projectTitle ?? "Site"} — ${base}`;
+    } else {
+      document.title = base;
+    }
+  }, [projectId, projectRef, projectTitle]);
 
   const dockDialogOpen = createOpen || jmOpen;
   const dockActions = useMemo(() => {
@@ -175,6 +191,7 @@ export function SitePortal() {
   };
 
   if (!projectId) {
+    const projects = projectsQ.data ?? [];
     return (
       <ExternalPortalShell {...shellProps}>
         <Stack spacing={3}>
@@ -184,59 +201,57 @@ export function SitePortal() {
               Field view — pick a project
             </Typography>
           </Stack>
-          {projectsQ.isLoading && (
-            <Stack spacing={1.5} aria-busy="true" aria-label="Loading projects">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} variant="rectangular" height={72} sx={{ borderRadius: "8px !important" }} />
+          <DataState
+            loading={projectsQ.isLoading}
+            isEmpty={!projectsQ.isLoading && projects.length === 0}
+            columnCount={2}
+            empty={{
+              title: "No projects assigned yet",
+              description: "When the firm assigns you to a project, it appears here.",
+            }}
+          >
+            <Stack spacing={1.5}>
+              {projects.map((p) => (
+                <Surface
+                  key={p.id}
+                  layer="soft"
+                  className="hcw-surface"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/projects/${p.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`/projects/${p.id}`);
+                    }
+                  }}
+                  sx={{
+                    p: 2,
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    outline: "none",
+                    "&:focus-visible": { boxShadow: (t) => `0 0 0 2px ${t.palette.primary.main}` },
+                  }}
+                >
+                  <Stack spacing={1}>
+                    <Typography variant="body1">
+                      <strong>{p.ref}</strong> — {p.title}
+                    </Typography>
+                    <Box>
+                      <StatusDot color={STATUS_TAG[p.status] ?? "cool-gray"} label={p.status} />
+                    </Box>
+                  </Stack>
+                </Surface>
               ))}
             </Stack>
-          )}
-          {(projectsQ.data ?? []).length === 0 && !projectsQ.isLoading && (
-            <Box sx={{ p: 3 }}>
-              <Typography variant="body2">No projects assigned yet.</Typography>
-            </Box>
-          )}
-          <Stack spacing={1.5}>
-            {(projectsQ.data ?? []).map((p) => (
-              <Surface
-                key={p.id}
-                layer="soft"
-                className="hcw-surface"
-                role="button"
-                tabIndex={0}
-                onClick={() => navigate(`/projects/${p.id}`)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    navigate(`/projects/${p.id}`);
-                  }
-                }}
-                sx={{
-                  p: 2,
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  outline: "none",
-                  "&:focus-visible": { boxShadow: (t) => `0 0 0 2px ${t.palette.primary.main}` },
-                }}
-              >
-                <Stack spacing={1}>
-                  <Typography variant="body1">
-                    <strong>{p.ref}</strong> — {p.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">{p.status}</Typography>
-                </Stack>
-              </Surface>
-            ))}
-          </Stack>
+          </DataState>
         </Stack>
       </ExternalPortalShell>
     );
   }
 
   const inspections = inspectionsQ.data ?? [];
-
-  const projectTitle = projectDetailQ.data?.project?.title;
-  const projectRef = projectDetailQ.data?.project?.ref;
+  const jmRows = jmListQ.data ?? [];
 
   return (
     <ExternalPortalShell {...shellProps}>
@@ -255,9 +270,14 @@ export function SitePortal() {
             {projectRef ? `${projectRef} — ` : ""}
             {projectTitle ?? "Site"}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Field view — inspections, visits, joint measurement
-          </Typography>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+            <Typography variant="body2" color="text.secondary">
+              Field view — inspections, visits, joint measurement
+            </Typography>
+            {projectStatus ? (
+              <StatusDot color={STATUS_TAG[projectStatus] ?? "cool-gray"} label={projectStatus} />
+            ) : null}
+          </Stack>
         </Stack>
 
         {/* Site visits requiring supervisor confirmation */}
@@ -291,144 +311,120 @@ export function SitePortal() {
         <ProjectSiteReference projectId={projectId} compact />
 
         <Stack spacing={1.5}>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}
+          <Typography variant="h6" component="h3">
+            Joint measurements
+          </Typography>
+          <DataState
+            loading={jmListQ.isLoading}
+            isEmpty={!jmListQ.isLoading && jmRows.length === 0}
+            columnCount={2}
+            empty={{
+              title: "No joint measurements yet",
+              description: "Use the action dock to record a joint measurement abstract, then submit for office approval.",
+            }}
           >
-            <Typography variant="h6" component="h3" sx={{ flex: 1, minWidth: 140 }}>
-              Joint measurements
-            </Typography>
-            <Button
-              size="small"
-              variant="contained"
-              startIcon={<SquareFootOutlined />}
-              onClick={() => {
-                setJmId(null);
-                setJmOpen(true);
-              }}
-            >
-              Record
-            </Button>
-          </Stack>
-          {jmListQ.isLoading ? (
-            <Skeleton variant="rectangular" height={64} sx={{ borderRadius: "8px !important" }} />
-          ) : null}
-          {(jmListQ.data ?? []).length === 0 && !jmListQ.isLoading ? (
-            <Typography variant="body2" color="text.secondary">
-              Record a joint measurement abstract (or use the action dock), then submit for office approval.
-            </Typography>
-          ) : null}
-          {(jmListQ.data ?? []).map((jm) => (
-            <Surface
-              key={jm.id}
-              layer="soft"
-              className="hcw-surface"
-              role="button"
-              tabIndex={0}
-              onClick={() => {
-                setJmId(jm.id);
-                setJmOpen(true);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setJmId(jm.id);
-                  setJmOpen(true);
-                }
-              }}
-              sx={{
-                p: 1.5,
-                borderRadius: "8px",
-                cursor: "pointer",
-                outline: "none",
-                "&:focus-visible": { boxShadow: (t) => `0 0 0 2px ${t.palette.primary.main}` },
-              }}
-            >
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <Typography variant="subtitle2" sx={{ flex: 1 }}>
-                  {jm.subject}
-                </Typography>
-                <StatusDot
-                  color={STATUS_TAG[jm.status] ?? "gray"}
-                  label={
-                    JOINT_MEASUREMENT_STATUS_LABEL[
-                      jm.status as keyof typeof JOINT_MEASUREMENT_STATUS_LABEL
-                    ] ?? jm.status
-                  }
-                />
-              </Stack>
-              {jm.measuredOn ? (
-                <Typography variant="caption" color="text.secondary">
-                  Measured {jm.measuredOn}
-                </Typography>
-              ) : null}
-            </Surface>
-          ))}
+            <Stack spacing={1.5}>
+              {jmRows.map((jm) => (
+                <Surface
+                  key={jm.id}
+                  layer="soft"
+                  className="hcw-surface"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    setJmId(jm.id);
+                    setJmOpen(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setJmId(jm.id);
+                      setJmOpen(true);
+                    }
+                  }}
+                  sx={{
+                    p: 1.5,
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    outline: "none",
+                    "&:focus-visible": { boxShadow: (t) => `0 0 0 2px ${t.palette.primary.main}` },
+                  }}
+                >
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                    <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                      {jm.subject}
+                    </Typography>
+                    <StatusDot
+                      color={STATUS_TAG[jm.status] ?? "gray"}
+                      label={
+                        JOINT_MEASUREMENT_STATUS_LABEL[
+                          jm.status as keyof typeof JOINT_MEASUREMENT_STATUS_LABEL
+                        ] ?? jm.status
+                      }
+                    />
+                  </Stack>
+                  {jm.measuredOn ? (
+                    <Typography variant="caption" color="text.secondary">
+                      Measured {jm.measuredOn}
+                    </Typography>
+                  ) : null}
+                </Surface>
+              ))}
+            </Stack>
+          </DataState>
         </Stack>
-
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}
-        >
-          <Typography variant="h6" component="h3" sx={{ flex: 1, minWidth: 140 }}>
-            Inspections
-          </Typography>
-          <Button variant="contained" size="small" onClick={() => setCreateOpen(true)}>
-            New inspection
-          </Button>
-        </Stack>
-
-        {inspectionsQ.isLoading && (
-          <Stack spacing={0.5}>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} variant="rectangular" height={32} />
-            ))}
-          </Stack>
-        )}
-        {inspections.length === 0 && !inspectionsQ.isLoading && (
-          <Typography variant="body2" color="text.secondary">
-            No inspection reports yet. Use New inspection or the action dock.
-          </Typography>
-        )}
 
         <Stack spacing={1.5}>
-          {inspections.map((insp) => (
-            <Surface key={insp.id} layer="soft" className="hcw-surface" sx={{ p: 2, borderRadius: "8px" }}>
-              <Stack spacing={1.5}>
-                <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-                  <Typography variant="body1"><strong>{insp.ref}</strong></Typography>
-                  <StatusDot color={STATUS_TAG[insp.status] ?? "gray"} label={insp.status} />
-                </Stack>
-                {insp.dateVisit && (
-                  <Typography variant="body2" color="text.secondary">Visit: {insp.dateVisit}</Typography>
-                )}
-                {insp.progress && (
-                  <Typography variant="body2">
-                    {insp.progress.slice(0, 120)}{insp.progress.length > 120 ? "…" : ""}
-                  </Typography>
-                )}
-                {insp.status === "REJECTED" && insp.rejectionNote && (
-                  <Alert severity="error">
-                    <strong>Rejected</strong> — {insp.rejectionNote}
-                  </Alert>
-                )}
-                {insp.status === "DRAFT" && (
-                  <Box>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      disabled={submit.isPending}
-                      onClick={() => submit.mutate({ id: insp.id })}
-                    >
-                      {submit.isPending ? "Submitting…" : "Submit for approval"}
-                    </Button>
-                  </Box>
-                )}
-              </Stack>
-            </Surface>
-          ))}
+          <Typography variant="h6" component="h3">
+            Inspections
+          </Typography>
+          <DataState
+            loading={inspectionsQ.isLoading}
+            isEmpty={!inspectionsQ.isLoading && inspections.length === 0}
+            columnCount={2}
+            empty={{
+              title: "No inspection reports yet",
+              description: "Use the action dock to create a new inspection.",
+            }}
+          >
+            <Stack spacing={1.5}>
+              {inspections.map((insp) => (
+                <Surface key={insp.id} layer="soft" className="hcw-surface" sx={{ p: 2, borderRadius: "8px" }}>
+                  <Stack spacing={1.5}>
+                    <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                      <Typography variant="body1"><strong>{insp.ref}</strong></Typography>
+                      <StatusDot color={STATUS_TAG[insp.status] ?? "gray"} label={insp.status} />
+                    </Stack>
+                    {insp.dateVisit && (
+                      <Typography variant="body2" color="text.secondary">Visit: {insp.dateVisit}</Typography>
+                    )}
+                    {insp.progress && (
+                      <Typography variant="body2">
+                        {insp.progress.slice(0, 120)}{insp.progress.length > 120 ? "…" : ""}
+                      </Typography>
+                    )}
+                    {insp.status === "REJECTED" && insp.rejectionNote && (
+                      <Alert severity="error">
+                        <strong>Rejected</strong> — {insp.rejectionNote}
+                      </Alert>
+                    )}
+                    {insp.status === "DRAFT" && (
+                      <Box>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          disabled={submit.isPending}
+                          onClick={() => submit.mutate({ id: insp.id })}
+                        >
+                          {submit.isPending ? "Submitting…" : "Submit for approval"}
+                        </Button>
+                      </Box>
+                    )}
+                  </Stack>
+                </Surface>
+              ))}
+            </Stack>
+          </DataState>
         </Stack>
       </Stack>
 

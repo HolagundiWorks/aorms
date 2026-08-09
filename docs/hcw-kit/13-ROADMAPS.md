@@ -32,5 +32,6 @@
 4. **Wire** [HCW-UX-ADOPTION-PLAYBOOK.md](../esti/HCW-UX-ADOPTION-PLAYBOOK.md) in esti (KPI sink, fatigue banner, audit DB)
 5. Implement [HCW-CONSTRUCTION-PATTERNS.md](../esti/HCW-CONSTRUCTION-PATTERNS.md) CP-01…11 in product
 6. Run [VALIDATION-PROTOCOL.md](11-audits/VALIDATION-PROTOCOL.md) studies; calibrate via [HCW-UX-CALIBRATION.md](../esti/HCW-UX-CALIBRATION.md)
+7. **S12 follow-on** — remaining `@carbon/react` strangler (~38 files); AQC native HCW chrome — see [2026-08-09-UX-AUDIT-WAVE.md](11-audits/2026-08-09-UX-AUDIT-WAVE.md) · product [ROADMAP.md](../esti/ROADMAP.md)
 
 Track those outside the kit defect Open queue.

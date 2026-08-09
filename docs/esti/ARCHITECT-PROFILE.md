@@ -50,7 +50,7 @@ row/object scope in the backend, including REST uploads and downloads.
 | Accounting | invoices, GST/TDS, filing, reconciliation | Exports and mapping |
 | Cost Management (rebuilding) | Construction Knowledge Bank (Material/Labour/Item libraries, Specifications, Recipes), CMS Element spine + Estimate + BOQ + Final Estimation Set; takeoff (ESTICAD capture + web read); PO | Measurement, Work Orders, Bill Certification (CMS-3–8, planned) |
 | Search | permission-aware universal search | New entity types quietly |
-| AI Studio | Ollama drafts, provenance, `/office/ai-studio` | **No new web draft kinds** — CAD kinds in ESTICAD only (Phase 13D) |
+| AI Studio | Desktop ESTI (local Ollama); SPA `/office/ai-studio` is reference only | **No cloud Hosted AI** — CAD kinds retired with ESTICAD |
 | ESTI agent | Alt+A read-only advisor (live AORMS context) | Prompt/rules only — no execute/upload |
 | Administration | users, roles, audit review, release metadata, demo tools | Device admin (Phase 13E) |
 

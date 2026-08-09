@@ -69,6 +69,10 @@ function MemberScoreCard({
   onGrant: (m: AspRfMemberScore) => void;
 }) {
   const band = member.band as PerformanceBand | null;
+  // Capacity: ≤4 KPIs visible — show top-3 weights; disclose the rest on demand.
+  const [showMoreKpis, setShowMoreKpis] = useState(false);
+  const secondaryCount =
+    2 + (member.wellbeingOptIn && member.kpi.wellbeing !== null ? 1 : 0);
   return (
     <Grid size={{ xs: 12, md: 6 }}>
       <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
@@ -101,11 +105,27 @@ function MemberScoreCard({
             <KpiMeter label="Reliability" value={member.kpi.reliability} weight="30%" />
             <KpiMeter label="Quality" value={member.kpi.quality} weight="25%" />
             <KpiMeter label="Client Impact" value={member.kpi.clientImpact} weight="15%" />
-            <KpiMeter label="Collaboration" value={member.kpi.collaboration} weight="15%" />
-            <KpiMeter label="Learning" value={member.kpi.learning} weight="10%" />
-            {member.wellbeingOptIn && member.kpi.wellbeing !== null && (
-              <KpiMeter label="Wellbeing" value={member.kpi.wellbeing} weight="5%" />
+            {showMoreKpis && (
+              <>
+                <KpiMeter label="Collaboration" value={member.kpi.collaboration} weight="15%" />
+                <KpiMeter label="Learning" value={member.kpi.learning} weight="10%" />
+                {member.wellbeingOptIn && member.kpi.wellbeing !== null && (
+                  <KpiMeter label="Wellbeing" value={member.kpi.wellbeing} weight="5%" />
+                )}
+              </>
             )}
+            <Box>
+              <Button
+                size="small"
+                variant="text"
+                onClick={() => setShowMoreKpis((v) => !v)}
+                aria-expanded={showMoreKpis}
+              >
+                {showMoreKpis
+                  ? "Show fewer dimensions"
+                  : `Show ${secondaryCount} more dimensions`}
+              </Button>
+            </Box>
           </Stack>
 
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>

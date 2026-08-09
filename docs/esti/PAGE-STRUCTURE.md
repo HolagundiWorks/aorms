@@ -29,7 +29,7 @@ Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Composition: [COMPOSITION-PR
 | --- | --- | --- | --- |
 | **Top ribbon** | `MarketingTopBar` — logo + expansion | `AppRibbon` — brand · search · health/dues · greeting → `/account` · AlertsBell | `PortalNeuFrame` soft top — identity (1200px column · 16px inset) |
 | **Stage** | Full width · content column **1200px** | `.esti-app-content2` full width under ribbon | Full width · **1200px** (`PORTAL_CHROME.contentMaxPx`) |
-| **Bottom dock** | `MarketingLandingDock` — section spy + Sign in / Create / Downloads / Calculator | Kit `ActionDock` + `useScreenActions` — `bottom: var(--esti-dock-bottom)` | Client + Contractor: `ActionDock` (client: change/feedback/meeting; contractor: ticket/visit/drawing/meeting/RA) while focused; provider wraps routes in `App.tsx` |
+| **Bottom dock** | `MarketingLandingDock` — section spy + Blog / Downloads / Home / Calculator | Kit `ActionDock` + `useScreenActions` — `bottom: var(--esti-dock-bottom)` | **Client · Collaborator · Contractor · Site:** `ActionDock` while focused; provider wraps each role in `App.tsx` |
 | **Footer** | Inline marketing footer in content | **Floating** `AppFooterBar` — portal metrics (**60px** · **35px** hits) · LEFT wellness/calc · CENTER module nav · RIGHT sync/sign-out | **Floating** `FirmPortalFooter` — same width as top bar · **60px** · calc · section nav · power |
 | **Clock** | `MarketingClockPomodoro` (`AormsAnalogueClock` **100px**) | Same `MarketingClockPomodoro` — clears footer stack + `dockGapPx` | Same ambient clock · clears floating footer |
 | **Left rail** | **Retired** | **Retired** | **Retired** |
@@ -151,7 +151,9 @@ Unauthenticated `/access`, `/company-account`, and `/platform-admin` **redirect*
 | `ExternalPortalShell` | Client / consultant / contractor / site — section chrome + hub panels |
 | `PortalShell` | Account / company / licensing hub — horizontal nav in top bar |
 | Client ActionDock | `App.tsx` CLIENT wrap — Change request · Feedback · Schedule meeting (`Portal.tsx`) |
-| Contractor ActionDock | `App.tsx` CONTRACTOR wrap — ticket · site visit · drawing · meeting · RA (`ContractorPortal.tsx`) |
+| Collaborator ActionDock | `App.tsx` CONSULTANT wrap — Submit deliverable · Raise RFI · Add note (`CollaboratorPortal.tsx`) |
+| Contractor ActionDock | `App.tsx` CONTRACTOR wrap — joint measurement · ticket · site visit · drawing · meeting · RA (`ContractorPortal.tsx`) |
+| Site ActionDock | `App.tsx` SITE wrap — Joint measurement · Inspection (`SitePortal.tsx`) |
 
 ---
 

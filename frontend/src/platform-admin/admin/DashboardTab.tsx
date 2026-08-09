@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
-import { ProgressBar, Stack, Tag, Tile } from "@carbon/react";
-import { CarbonScope } from "../../carbon/CarbonScope.js";
+import {
+  Box,
+  Chip,
+  LinearProgress,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { DataGrid, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../lib/trpc";
 
@@ -33,23 +39,22 @@ const STATUS_COLOR: Record<string, string> = {
 const fmtDate = (d: Date | string | null) => (d ? new Date(d).toLocaleDateString() : "—");
 const fmtDateTime = (d: Date | string) => new Date(d).toLocaleString();
 
-const SUBTLE: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
-
 function Kpi({ label, value, tone, onClick }: { label: string; value: number | string; tone?: "warn" | "default"; onClick?: () => void }) {
   const warn = tone === "warn" && Number(value) > 0;
   return (
-    <Tile
-      style={{ height: "100%", cursor: onClick ? "pointer" : undefined }}
+    <Paper
+      variant="outlined"
+      sx={{ p: 2, height: "100%", cursor: onClick ? "pointer" : undefined }}
       onClick={onClick}
     >
-      <p className="cds--type-body-01" style={SUBTLE}>{label}</p>
-      <p
-        className="cds--type-productive-heading-05"
-        style={{ margin: "0.25rem 0 0", color: warn ? "var(--cds-support-warning)" : undefined }}
+      <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>{label}</Typography>
+      <Typography
+        variant="h5"
+        sx={{ mt: 0.5, mb: 0, color: warn ? "warning.main" : undefined }}
       >
         {value}
-      </p>
-    </Tile>
+      </Typography>
+    </Paper>
   );
 }
 
@@ -101,108 +106,105 @@ export default function DashboardTab({ onGoTo }: { onGoTo: (section: "licenses" 
   ];
 
   return (
-    <CarbonScope>
-      <Stack gap={6}>
-        <div style={KPI_GRID}>
-          <Kpi label="Total licenses" value={data.totalLicenses} />
-          <Kpi label="Organizations" value={data.totalOrgs} />
-          <Kpi label="Active devices" value={data.activeDevices} />
-          <Kpi label="New this month" value={data.newThisMonth} />
-          <Kpi label="Pending requests" value={data.pendingRequests} tone="warn" onClick={() => onGoTo("requests")} />
-          <Kpi label="Unlicensed orgs" value={data.unlicensedOrgs} tone="warn" onClick={() => onGoTo("orgs")} />
-          <Kpi label="Expiring in 30 days" value={data.expiringSoon.length} tone="warn" onClick={() => onGoTo("licenses")} />
-          <Kpi
-            label="Suspended / revoked"
-            value={(data.byStatus.SUSPENDED ?? 0) + (data.byStatus.REVOKED ?? 0)}
-            tone="warn"
-          />
-        </div>
+    <Stack spacing={2.5}>
+      <div style={KPI_GRID}>
+        <Kpi label="Total licenses" value={data.totalLicenses} />
+        <Kpi label="Organizations" value={data.totalOrgs} />
+        <Kpi label="Active devices" value={data.activeDevices} />
+        <Kpi label="New this month" value={data.newThisMonth} />
+        <Kpi label="Pending requests" value={data.pendingRequests} tone="warn" onClick={() => onGoTo("requests")} />
+        <Kpi label="Unlicensed orgs" value={data.unlicensedOrgs} tone="warn" onClick={() => onGoTo("orgs")} />
+        <Kpi label="Expiring in 30 days" value={data.expiringSoon.length} tone="warn" onClick={() => onGoTo("licenses")} />
+        <Kpi
+          label="Suspended / revoked"
+          value={(data.byStatus.SUSPENDED ?? 0) + (data.byStatus.REVOKED ?? 0)}
+          tone="warn"
+        />
+      </div>
 
-        {usage && (
-          <div>
-            <h3 className="cds--type-heading-03" style={{ margin: "0 0 0.5rem" }}>
-              {usage.source === "reports"
-                ? `Metered usage — ${usage.reportedOrgCount} org${usage.reportedOrgCount === 1 ? "" : "s"} reported`
-                : "Metered usage — this workspace"}
-            </h3>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem" }}>
-              <Tile style={{ height: "100%" }}>
-                <p className="cds--type-body-01" style={SUBTLE}>Storage used</p>
-                <p className="cds--type-productive-heading-05" style={{ margin: "0.25rem 0" }}>{fmtBytes(usage.storageUsedBytes)}</p>
-                <div style={{ margin: "0.5rem 0" }}>
-                  <ProgressBar
-                    label="Storage used"
-                    hideLabel
-                    value={storagePct}
-                    max={100}
-                    status={storagePct >= 90 ? "error" : "active"}
-                  />
-                </div>
-                <p className="cds--type-body-01" style={SUBTLE}>
-                  {storagePct.toFixed(1)}% of {fmtBytes(usage.storageQuotaBytes)}
-                  {usage.storagePurchasedBytes > 0 &&
-                    ` (incl. ${fmtBytes(usage.storagePurchasedBytes)} add-on)`}
-                </p>
-              </Tile>
-            </div>
-            {usage.source === "reports" && usage.reports.length > 1 && (
-              <Stack gap={2} style={{ marginTop: "0.75rem" }}>
-                {usage.reports.slice(0, 8).map((r) => (
-                  <p key={`${r.orgId}-${r.productCode}`} className="cds--type-body-01" style={SUBTLE}>
-                    {`${r.orgName}: ${fmtBytes(r.storageUsedBytes)}`}
-                  </p>
-                ))}
-              </Stack>
-            )}
-          </div>
-        )}
-
-        <div>
-          <h3 className="cds--type-heading-03" style={{ margin: "0 0 0.5rem" }}>Licenses by status</h3>
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-            {Object.entries(data.byStatus).map(([status, n]) => (
-              <StatusDot key={status} color={STATUS_COLOR[status] ?? "gray"} label={`${STATUS_LABEL[status] ?? status}: ${n}`} />
-            ))}
-          </div>
-        </div>
-
-        {data.byProduct.length > 0 && (
-          <div>
-            <h3 className="cds--type-heading-03" style={{ margin: "0 0 0.5rem" }}>Licenses by product</h3>
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-              {data.byProduct.map((p) => (
-                <Tag key={p.code} type="outline">{`${p.name}: ${p.n}`}</Tag>
+      {usage && (
+        <Box>
+          <Typography variant="h6" component="h3" sx={{ m: 0, mb: 1 }}>
+            {usage.source === "reports"
+              ? `Metered usage — ${usage.reportedOrgCount} org${usage.reportedOrgCount === 1 ? "" : "s"} reported`
+              : "Metered usage — this workspace"}
+          </Typography>
+          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 2 }}>
+            <Paper variant="outlined" sx={{ p: 2, height: "100%" }}>
+              <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>Storage used</Typography>
+              <Typography variant="h5" sx={{ my: 0.5 }}>{fmtBytes(usage.storageUsedBytes)}</Typography>
+              <Box sx={{ my: 1 }}>
+                <LinearProgress
+                  variant="determinate"
+                  value={storagePct}
+                  color={storagePct >= 90 ? "error" : "primary"}
+                  aria-label="Storage used"
+                />
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>
+                {storagePct.toFixed(1)}% of {fmtBytes(usage.storageQuotaBytes)}
+                {usage.storagePurchasedBytes > 0 &&
+                  ` (incl. ${fmtBytes(usage.storagePurchasedBytes)} add-on)`}
+              </Typography>
+            </Paper>
+          </Box>
+          {usage.source === "reports" && usage.reports.length > 1 && (
+            <Stack spacing={0.5} sx={{ mt: 1.5 }}>
+              {usage.reports.slice(0, 8).map((r) => (
+                <Typography key={`${r.orgId}-${r.productCode}`} variant="body2" color="text.secondary" sx={{ m: 0 }}>
+                  {`${r.orgName}: ${fmtBytes(r.storageUsedBytes)}`}
+                </Typography>
               ))}
-            </div>
-          </div>
-        )}
+            </Stack>
+          )}
+        </Box>
+      )}
 
-        <div>
-          <h3 className="cds--type-heading-03" style={{ margin: "0 0 0.5rem" }}>Expiring in the next 30 days</h3>
-          <DataGrid
-            rows={data.expiringSoon}
-            columns={expiringColumns}
-            getRowId={(r) => r.id}
-            density="compact"
-            disableRowSelectionOnClick
-            hideFooter
-            autoHeight
-          />
-        </div>
+      <Box>
+        <Typography variant="h6" component="h3" sx={{ m: 0, mb: 1 }}>Licenses by status</Typography>
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+          {Object.entries(data.byStatus).map(([status, n]) => (
+            <StatusDot key={status} color={STATUS_COLOR[status] ?? "gray"} label={`${STATUS_LABEL[status] ?? status}: ${n}`} />
+          ))}
+        </Box>
+      </Box>
 
-        <div>
-          <h3 className="cds--type-heading-03" style={{ margin: "0 0 0.5rem" }}>Recent license activity</h3>
-          <DataGrid
-            rows={data.recentEvents}
-            columns={eventColumns}
-            getRowId={(r) => r.id}
-            density="compact"
-            disableRowSelectionOnClick
-            hideFooter
-            autoHeight
-          />
-        </div>
-      </Stack>
-    </CarbonScope>
+      {data.byProduct.length > 0 && (
+        <Box>
+          <Typography variant="h6" component="h3" sx={{ m: 0, mb: 1 }}>Licenses by product</Typography>
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+            {data.byProduct.map((p) => (
+              <Chip key={p.code} variant="outlined" size="small" label={`${p.name}: ${p.n}`} />
+            ))}
+          </Box>
+        </Box>
+      )}
+
+      <Box>
+        <Typography variant="h6" component="h3" sx={{ m: 0, mb: 1 }}>Expiring in the next 30 days</Typography>
+        <DataGrid
+          rows={data.expiringSoon}
+          columns={expiringColumns}
+          getRowId={(r) => r.id}
+          density="compact"
+          disableRowSelectionOnClick
+          hideFooter
+          autoHeight
+        />
+      </Box>
+
+      <Box>
+        <Typography variant="h6" component="h3" sx={{ m: 0, mb: 1 }}>Recent license activity</Typography>
+        <DataGrid
+          rows={data.recentEvents}
+          columns={eventColumns}
+          getRowId={(r) => r.id}
+          density="compact"
+          disableRowSelectionOnClick
+          hideFooter
+          autoHeight
+        />
+      </Box>
+    </Stack>
   );
 }

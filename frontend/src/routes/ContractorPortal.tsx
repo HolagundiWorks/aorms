@@ -1,7 +1,6 @@
 import AssignmentOutlined from "@mui/icons-material/AssignmentOutlined";
 import ConstructionOutlined from "@mui/icons-material/ConstructionOutlined";
 import DrawingOutlined from "@mui/icons-material/ArchitectureOutlined";
-import EventAvailableOutlined from "@mui/icons-material/EventAvailableOutlined";
 import HelpOutlineOutlined from "@mui/icons-material/HelpOutlineOutlined";
 import ReceiptLongOutlined from "@mui/icons-material/ReceiptLongOutlined";
 import SquareFootOutlined from "@mui/icons-material/SquareFootOutlined";
@@ -21,17 +20,20 @@ import {
 import {
   CONTRACTOR_PORTAL_SUBMISSION_KIND_LABEL,
   CONTRACTOR_PORTAL_SUBMISSION_STATUS_LABEL,
+  RUNNING_BILL_STATUS_LABEL,
+  RUNNING_BILL_STATUS_TAG,
   TENDER_INVITATION_STATUS_LABEL,
   TENDER_INVITATION_STATUS_TAG,
   TENDER_STATUS_LABEL,
   TENDER_STATUS_TAG,
   formatINR,
   type ContractorPortalSubmissionKind,
+  type RunningBillStatus,
   type TenderInvitationStatus,
   type TenderStatus,
 } from "@esti/contracts";
 import { pushToast, Surface, RADIUS, useScreenActions } from "@hcw/ui-kit";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DataState } from "../components/DataState.js";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
 import {
@@ -39,7 +41,7 @@ import {
   FirmPortalDrawingsPanel,
   FirmPortalProjectPanel,
 } from "../components/portal/FirmPortalHubPanels.js";
-import { StatusTag } from "../components/StatusTag.js";
+import { StatusDot, StatusTag } from "../components/StatusTag.js";
 import { trpc } from "../lib/trpc.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
 
@@ -175,9 +177,17 @@ export function ContractorPortal() {
     if (!focusId || dockDialogOpen) return [];
     return [
       {
-        id: "c-ticket",
+        id: "c-jm",
         zone: "center" as const,
         tone: "primary" as const,
+        label: "Joint measurement",
+        icon: <SquareFootOutlined />,
+        onClick: () => openRequest("JOINT_MEASUREMENT"),
+      },
+      {
+        id: "c-ticket",
+        zone: "center" as const,
+        tone: "default" as const,
         label: "Raise ticket",
         icon: <AssignmentOutlined />,
         onClick: () => openRequest("TICKET", false),
@@ -199,14 +209,6 @@ export function ContractorPortal() {
         onClick: () => openRequest("DRAWING_REQUEST"),
       },
       {
-        id: "c-meeting",
-        zone: "center" as const,
-        tone: "default" as const,
-        label: "Meeting",
-        icon: <EventAvailableOutlined />,
-        onClick: () => openRequest("MEETING_REQUEST"),
-      },
-      {
         id: "c-bills",
         zone: "right" as const,
         tone: "primary" as const,
@@ -222,6 +224,12 @@ export function ContractorPortal() {
   const rows = listQ.data ?? [];
   const detail = detailQ.data;
   const pd = projectQ.data;
+
+  useEffect(() => {
+    const base = AORMS_PORTALS.contractor.label;
+    const title = pd?.project?.title;
+    document.title = focusId && title ? `${title} — ${base}` : base;
+  }, [focusId, pd?.project?.title]);
   const submissions = submissionsQ.data ?? [];
   const teamMembers = teamQ.data ?? [];
   const approvedJm = approvedJmQ.data ?? [];
@@ -368,13 +376,6 @@ export function ContractorPortal() {
                 onClick={() => openRequest("RFI")}
               >
                 Clarification
-              </Button>
-              <Button
-                size="small"
-                startIcon={<SquareFootOutlined />}
-                onClick={() => openRequest("JOINT_MEASUREMENT")}
-              >
-                Joint measurement
               </Button>
             </Stack>
             <DataState
@@ -659,14 +660,25 @@ export function ContractorPortal() {
               <Stack spacing={1}>
                 {runningBills.map((b) => (
                   <Surface key={b.id} layer="soft" sx={{ borderRadius: `${RADIUS}px`, p: 1.5 }}>
-                    <Typography variant="subtitle2">
-                      {b.ref}
-                      {b.title ? ` — ${b.title}` : ""}
-                    </Typography>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+                      <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                        {b.ref}
+                        {b.title ? ` — ${b.title}` : ""}
+                      </Typography>
+                      <StatusDot
+                        color={
+                          RUNNING_BILL_STATUS_TAG[b.status as RunningBillStatus] ?? "cool-gray"
+                        }
+                        label={
+                          RUNNING_BILL_STATUS_LABEL[b.status as RunningBillStatus] ?? b.status
+                        }
+                      />
+                    </Stack>
                     <Typography variant="body2" color="text.secondary">
-                      {b.status}
-                      {b.netPayablePaise != null ? ` · ${formatINR(b.netPayablePaise)}` : ""}
-                      {b.measurementDate ? ` · ${b.measurementDate}` : ""}
+                      {b.netPayablePaise != null ? formatINR(b.netPayablePaise) : null}
+                      {b.measurementDate
+                        ? `${b.netPayablePaise != null ? " · " : ""}${b.measurementDate}`
+                        : ""}
                     </Typography>
                   </Surface>
                 ))}

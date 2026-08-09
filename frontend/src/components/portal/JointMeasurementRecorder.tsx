@@ -8,8 +8,6 @@ import {
   DialogTitle,
   MenuItem,
   Stack,
-  Tab,
-  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -23,6 +21,7 @@ import {
 } from "@esti/contracts";
 import { pushToast, RADIUS, Surface } from "@hcw/ui-kit";
 import { useEffect, useState, type MouseEvent } from "react";
+import { ProjectFacetTabs } from "../project/ProjectFacetTabs.js";
 import { StatusDot } from "../StatusTag.js";
 import { trpc } from "../../lib/trpc.js";
 
@@ -90,7 +89,7 @@ export function JointMeasurementRecorder({
 }: Props) {
   const utils = trpc.useUtils();
   const [jmId, setJmId] = useState<string | null>(jointMeasurementId ?? null);
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState("sheet");
   const [subject, setSubject] = useState("Joint measurement");
   const [measuredOn, setMeasuredOn] = useState("");
   const [details, setDetails] = useState("");
@@ -117,7 +116,7 @@ export function JointMeasurementRecorder({
   useEffect(() => {
     if (open) {
       setJmId(jointMeasurementId ?? null);
-      setTab(0);
+      setTab("sheet");
       if (!jointMeasurementId) {
         setSubject("Joint measurement");
         setMeasuredOn("");
@@ -311,372 +310,387 @@ export function JointMeasurementRecorder({
               Rejected — {reviewNote}
             </Typography>
           ) : null}
-          <Tabs value={tab} onChange={(_, v) => setTab(v)}>
-            <Tab label="Sheet" />
-            <Tab label="Annotate" />
-          </Tabs>
+          <ProjectFacetTabs
+            ariaLabel="Joint measurement sections"
+            value={tab}
+            onChange={setTab}
+            facets={[
+              {
+                id: "sheet",
+                label: "Sheet",
+                panel: (
+                  <Stack spacing={2}>
+                    <TextField
+                      label="Subject"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      fullWidth
+                      required
+                      disabled={!editable}
+                    />
+                    <TextField
+                      label="Measured on"
+                      type="date"
+                      value={measuredOn}
+                      onChange={(e) => setMeasuredOn(e.target.value)}
+                      fullWidth
+                      disabled={!editable}
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                    <TextField
+                      label="Details"
+                      value={details}
+                      onChange={(e) => setDetails(e.target.value)}
+                      fullWidth
+                      multiline
+                      minRows={2}
+                      disabled={!editable}
+                    />
+                    {team.length > 0 ? (
+                      <TextField
+                        select
+                        label="Tag team member (optional)"
+                        helperText="Which firm team member should approve / handle this?"
+                        value={attentionToId}
+                        onChange={(e) => setAttentionToId(e.target.value)}
+                        fullWidth
+                        disabled={!editable}
+                      >
+                        <MenuItem value="">— any team member —</MenuItem>
+                        {team.map((m) => (
+                          <MenuItem key={m.id} value={m.id}>
+                            {`${m.fullName} (${m.role})`}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    ) : null}
 
-          {tab === 0 ? (
-            <Stack spacing={2}>
-              <TextField
-                label="Subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                fullWidth
-                required
-                disabled={!editable}
-              />
-              <TextField
-                label="Measured on"
-                type="date"
-                value={measuredOn}
-                onChange={(e) => setMeasuredOn(e.target.value)}
-                fullWidth
-                disabled={!editable}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
-              <TextField
-                label="Details"
-                value={details}
-                onChange={(e) => setDetails(e.target.value)}
-                fullWidth
-                multiline
-                minRows={2}
-                disabled={!editable}
-              />
-              {team.length > 0 ? (
-                <TextField
-                  select
-                  label="Tag team member (optional)"
-                  helperText="Which firm team member should approve / handle this?"
-                  value={attentionToId}
-                  onChange={(e) => setAttentionToId(e.target.value)}
-                  fullWidth
-                  disabled={!editable}
-                >
-                  <MenuItem value="">— any team member —</MenuItem>
-                  {team.map((m) => (
-                    <MenuItem key={m.id} value={m.id}>
-                      {`${m.fullName} (${m.role})`}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              ) : null}
-
-              <Typography variant="subtitle2">Items</Typography>
-              <Stack spacing={1}>
-                {lines.map((line, idx) => (
-                  <Surface
-                    key={line.key}
-                    layer="soft"
-                    className="hcw-surface"
-                    sx={{ p: 1.5, borderRadius: "8px" }}
-                  >
+                    <Typography variant="subtitle2">Items</Typography>
                     <Stack spacing={1}>
-                      <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        spacing={1}
-                        sx={{ alignItems: { sm: "flex-start" } }}
-                      >
-                        <TextField
-                          label="Code"
-                          value={line.code}
-                          disabled={!editable}
-                          onChange={(e) =>
-                            setLines((rows) =>
-                              rows.map((r, i) =>
-                                i === idx ? { ...r, code: e.target.value } : r,
-                              ),
-                            )
-                          }
-                          sx={{ width: { xs: "100%", sm: 100 } }}
-                          size="small"
-                        />
-                        <TextField
-                          label="Particulars"
-                          value={line.description}
-                          disabled={!editable}
-                          onChange={(e) =>
-                            setLines((rows) =>
-                              rows.map((r, i) =>
-                                i === idx ? { ...r, description: e.target.value } : r,
-                              ),
-                            )
-                          }
-                          fullWidth
-                          size="small"
-                        />
-                        <TextField
-                          select
-                          label="UOM"
-                          value={line.uom}
-                          disabled={!editable}
-                          onChange={(e) =>
-                            setLines((rows) =>
-                              rows.map((r, i) =>
-                                i === idx
-                                  ? { ...r, uom: e.target.value as MeasurementUomT }
-                                  : r,
-                              ),
-                            )
-                          }
-                          sx={{ width: { xs: "100%", sm: 110 } }}
-                          size="small"
+                      {lines.map((line, idx) => (
+                        <Surface
+                          key={line.key}
+                          layer="soft"
+                          className="hcw-surface"
+                          sx={{ p: 1.5, borderRadius: "8px" }}
                         >
-                          {UOMS.map((u) => (
-                            <MenuItem key={u} value={u}>
-                              {MEASUREMENT_UOM_LABEL[u]}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </Stack>
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        useFlexGap
-                        sx={{ flexWrap: "wrap" }}
-                      >
-                        <TextField
-                          label="L (mm)"
-                          value={line.lengthMm}
-                          disabled={!editable}
-                          onChange={(e) =>
-                            setLines((rows) =>
-                              rows.map((r, i) =>
-                                i === idx ? { ...r, lengthMm: e.target.value } : r,
-                              ),
-                            )
-                          }
-                          size="small"
-                          sx={{ flex: "1 1 72px", minWidth: 72 }}
-                        />
-                        <TextField
-                          label="B (mm)"
-                          value={line.breadthMm}
-                          disabled={!editable}
-                          onChange={(e) =>
-                            setLines((rows) =>
-                              rows.map((r, i) =>
-                                i === idx ? { ...r, breadthMm: e.target.value } : r,
-                              ),
-                            )
-                          }
-                          size="small"
-                          sx={{ flex: "1 1 72px", minWidth: 72 }}
-                        />
-                        <TextField
-                          label="H (mm)"
-                          value={line.heightMm}
-                          disabled={!editable}
-                          onChange={(e) =>
-                            setLines((rows) =>
-                              rows.map((r, i) =>
-                                i === idx ? { ...r, heightMm: e.target.value } : r,
-                              ),
-                            )
-                          }
-                          size="small"
-                          sx={{ flex: "1 1 72px", minWidth: 72 }}
-                        />
-                        <TextField
-                          label="Nos"
-                          value={line.countNos}
-                          disabled={!editable}
-                          onChange={(e) =>
-                            setLines((rows) =>
-                              rows.map((r, i) =>
-                                i === idx ? { ...r, countNos: e.target.value } : r,
-                              ),
-                            )
-                          }
-                          size="small"
-                          sx={{ width: 72 }}
-                        />
-                        {editable && lines.length > 1 ? (
+                          <Stack spacing={1}>
+                            <Stack
+                              direction={{ xs: "column", sm: "row" }}
+                              spacing={1}
+                              sx={{ alignItems: { sm: "flex-start" } }}
+                            >
+                              <TextField
+                                label="Code"
+                                value={line.code}
+                                disabled={!editable}
+                                onChange={(e) =>
+                                  setLines((rows) =>
+                                    rows.map((r, i) =>
+                                      i === idx ? { ...r, code: e.target.value } : r,
+                                    ),
+                                  )
+                                }
+                                sx={{ width: { xs: "100%", sm: 100 } }}
+                                size="small"
+                              />
+                              <TextField
+                                label="Particulars"
+                                value={line.description}
+                                disabled={!editable}
+                                onChange={(e) =>
+                                  setLines((rows) =>
+                                    rows.map((r, i) =>
+                                      i === idx ? { ...r, description: e.target.value } : r,
+                                    ),
+                                  )
+                                }
+                                fullWidth
+                                size="small"
+                              />
+                              <TextField
+                                select
+                                label="UOM"
+                                value={line.uom}
+                                disabled={!editable}
+                                onChange={(e) =>
+                                  setLines((rows) =>
+                                    rows.map((r, i) =>
+                                      i === idx
+                                        ? { ...r, uom: e.target.value as MeasurementUomT }
+                                        : r,
+                                    ),
+                                  )
+                                }
+                                sx={{ width: { xs: "100%", sm: 110 } }}
+                                size="small"
+                              >
+                                {UOMS.map((u) => (
+                                  <MenuItem key={u} value={u}>
+                                    {MEASUREMENT_UOM_LABEL[u]}
+                                  </MenuItem>
+                                ))}
+                              </TextField>
+                            </Stack>
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              useFlexGap
+                              sx={{ flexWrap: "wrap" }}
+                            >
+                              <TextField
+                                label="L (mm)"
+                                value={line.lengthMm}
+                                disabled={!editable}
+                                onChange={(e) =>
+                                  setLines((rows) =>
+                                    rows.map((r, i) =>
+                                      i === idx ? { ...r, lengthMm: e.target.value } : r,
+                                    ),
+                                  )
+                                }
+                                size="small"
+                                sx={{ flex: "1 1 72px", minWidth: 72 }}
+                              />
+                              <TextField
+                                label="B (mm)"
+                                value={line.breadthMm}
+                                disabled={!editable}
+                                onChange={(e) =>
+                                  setLines((rows) =>
+                                    rows.map((r, i) =>
+                                      i === idx ? { ...r, breadthMm: e.target.value } : r,
+                                    ),
+                                  )
+                                }
+                                size="small"
+                                sx={{ flex: "1 1 72px", minWidth: 72 }}
+                              />
+                              <TextField
+                                label="H (mm)"
+                                value={line.heightMm}
+                                disabled={!editable}
+                                onChange={(e) =>
+                                  setLines((rows) =>
+                                    rows.map((r, i) =>
+                                      i === idx ? { ...r, heightMm: e.target.value } : r,
+                                    ),
+                                  )
+                                }
+                                size="small"
+                                sx={{ flex: "1 1 72px", minWidth: 72 }}
+                              />
+                              <TextField
+                                label="Nos"
+                                value={line.countNos}
+                                disabled={!editable}
+                                onChange={(e) =>
+                                  setLines((rows) =>
+                                    rows.map((r, i) =>
+                                      i === idx ? { ...r, countNos: e.target.value } : r,
+                                    ),
+                                  )
+                                }
+                                size="small"
+                                sx={{ width: 72 }}
+                              />
+                              {editable && lines.length > 1 ? (
+                                <Button
+                                  variant="text"
+                                  color="error"
+                                  size="small"
+                                  onClick={() =>
+                                    setLines((rows) => rows.filter((_, i) => i !== idx))
+                                  }
+                                >
+                                  Remove
+                                </Button>
+                              ) : null}
+                            </Stack>
+                          </Stack>
+                        </Surface>
+                      ))}
+                    </Stack>
+                    {editable ? (
+                      <Button variant="outlined" onClick={() => setLines((r) => [...r, blankLine()])}>
+                        Add line
+                      </Button>
+                    ) : null}
+                  </Stack>
+                ),
+              },
+              {
+                id: "annotate",
+                label: "Annotate",
+                panel: (
+                  <Stack spacing={2}>
+                    <TextField
+                      select
+                      label="Drawing"
+                      value={drawingId}
+                      onChange={(e) => setDrawingId(e.target.value)}
+                      fullWidth
+                      disabled={!editable}
+                    >
+                      <MenuItem value="">Select drawing…</MenuItem>
+                      {drawings.map((d) => (
+                        <MenuItem key={d.id} value={d.id}>
+                          {d.ref} — {d.title}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    {editable ? (
+                      <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+                        {(["PEN", "HIGHLIGHT", "PIN", "CLOUD"] as const).map((t) => (
                           <Button
-                            variant="text"
-                            color="error"
+                            key={t}
                             size="small"
-                            onClick={() =>
-                              setLines((rows) => rows.filter((_, i) => i !== idx))
-                            }
+                            variant={tool === t ? "contained" : "outlined"}
+                            onClick={() => {
+                              setTool(t);
+                              setDraftPoints([]);
+                            }}
                           >
-                            Remove
+                            {t}
+                          </Button>
+                        ))}
+                        <TextField
+                          size="small"
+                          label="Label"
+                          value={annLabel}
+                          onChange={(e) => setAnnLabel(e.target.value)}
+                          sx={{ minWidth: 160 }}
+                        />
+                        {tool !== "PIN" ? (
+                          <Button
+                            size="small"
+                            variant="contained"
+                            disabled={draftPoints.length < 2}
+                            onClick={() => void finishPathAnnotation()}
+                          >
+                            Finish mark
                           </Button>
                         ) : null}
                       </Stack>
-                    </Stack>
-                  </Surface>
-                ))}
-              </Stack>
-              {editable ? (
-                <Button variant="outlined" onClick={() => setLines((r) => [...r, blankLine()])}>
-                  Add line
-                </Button>
-              ) : null}
-            </Stack>
-          ) : (
-            <Stack spacing={2}>
-              <TextField
-                select
-                label="Drawing"
-                value={drawingId}
-                onChange={(e) => setDrawingId(e.target.value)}
-                fullWidth
-                disabled={!editable}
-              >
-                <MenuItem value="">Select drawing…</MenuItem>
-                {drawings.map((d) => (
-                  <MenuItem key={d.id} value={d.id}>
-                    {d.ref} — {d.title}
-                  </MenuItem>
-                ))}
-              </TextField>
-              {editable ? (
-                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-                  {(["PEN", "HIGHLIGHT", "PIN", "CLOUD"] as const).map((t) => (
-                    <Button
-                      key={t}
-                      size="small"
-                      variant={tool === t ? "contained" : "outlined"}
-                      onClick={() => {
-                        setTool(t);
-                        setDraftPoints([]);
+                    ) : null}
+                    <Typography variant="caption" color="text.secondary">
+                      Click on the sheet to place pins or path points (normalized coordinates).
+                      Annotations lock after submit.
+                    </Typography>
+                    <Box
+                      sx={{
+                        border: 1,
+                        borderColor: "divider",
+                        borderRadius: `${RADIUS}px`,
+                        bgcolor: "background.default",
+                        height: 280,
+                        overflow: "hidden",
                       }}
                     >
-                      {t}
-                    </Button>
-                  ))}
-                  <TextField
-                    size="small"
-                    label="Label"
-                    value={annLabel}
-                    onChange={(e) => setAnnLabel(e.target.value)}
-                    sx={{ minWidth: 160 }}
-                  />
-                  {tool !== "PIN" ? (
-                    <Button
-                      size="small"
-                      variant="contained"
-                      disabled={draftPoints.length < 2}
-                      onClick={() => void finishPathAnnotation()}
-                    >
-                      Finish mark
-                    </Button>
-                  ) : null}
-                </Stack>
-              ) : null}
-              <Typography variant="caption" color="text.secondary">
-                Click on the sheet to place pins or path points (normalized coordinates).
-                Annotations lock after submit.
-              </Typography>
-              <Box
-                sx={{
-                  border: 1,
-                  borderColor: "divider",
-                  borderRadius: `${RADIUS}px`,
-                  bgcolor: "background.default",
-                  height: 280,
-                  overflow: "hidden",
-                }}
-              >
-                <svg
-                  width="100%"
-                  height="100%"
-                  viewBox="0 0 1000 1000"
-                  onClick={onCanvasClick}
-                  style={{ cursor: editable && drawingId ? "crosshair" : "default" }}
-                >
-                  <rect x={0} y={0} width={1000} height={1000} fill="#F2F4F7" />
-                  {localAnns
-                    .filter((a) => !drawingId || true)
-                    .map((a, i) => {
-                      if (a.tool === "PIN" && a.points[0]) {
-                        return (
-                          <g key={a.id ?? i}>
-                            <circle
-                              cx={a.points[0].x}
-                              cy={a.points[0].y}
-                              r={14}
-                              fill="#FF4F18"
-                            />
-                            {a.label ? (
-                              <text
-                                x={a.points[0].x + 18}
-                                y={a.points[0].y + 4}
-                                fontSize={22}
-                                fill="#141517"
-                              >
-                                {a.label}
-                              </text>
-                            ) : null}
-                          </g>
-                        );
-                      }
-                      if (a.points.length < 2) return null;
-                      const d = a.points
-                        .map((p, pi) => `${pi === 0 ? "M" : "L"} ${p.x} ${p.y}`)
-                        .join(" ");
-                      return (
-                        <path
-                          key={a.id ?? i}
-                          d={d}
-                          fill={a.tool === "CLOUD" || a.tool === "HIGHLIGHT" ? "rgba(255,79,24,0.15)" : "none"}
-                          stroke="#FF4F18"
-                          strokeWidth={a.tool === "HIGHLIGHT" ? 28 : 4}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      );
-                    })}
-                  {draftPoints.length > 0 ? (
-                    <polyline
-                      points={draftPoints.map((p) => `${p.x},${p.y}`).join(" ")}
-                      fill="none"
-                      stroke="#141517"
-                      strokeWidth={3}
-                      strokeDasharray="8 6"
-                    />
-                  ) : null}
-                </svg>
-              </Box>
-              {editable && localAnns.length > 0 ? (
-                <Stack spacing={0.5}>
-                  {localAnns.map((a) => (
-                    <Stack
-                      key={a.id ?? a.label}
-                      direction="row"
-                      spacing={1}
-                      sx={{ alignItems: "center" }}
-                    >
-                      <Typography variant="caption" sx={{ flex: 1 }}>
-                        {a.tool}
-                        {a.label ? ` — ${a.label}` : ""}
-                      </Typography>
-                      {a.id && jmId ? (
-                        <Button
-                          size="small"
-                          variant="text"
-                          color="error"
-                          onClick={() =>
-                            removeAnn.mutate(
-                              { id: a.id!, jointMeasurementId: jmId },
-                              {
-                                onSuccess: () =>
-                                  setLocalAnns((prev) => prev.filter((x) => x.id !== a.id)),
-                              },
-                            )
+                      <svg
+                        width="100%"
+                        height="100%"
+                        viewBox="0 0 1000 1000"
+                        onClick={onCanvasClick}
+                        style={{ cursor: editable && drawingId ? "crosshair" : "default" }}
+                      >
+                        <rect x={0} y={0} width={1000} height={1000} fill="#F2F4F7" />
+                        {localAnns.map((a, i) => {
+                          if (a.tool === "PIN" && a.points[0]) {
+                            return (
+                              <g key={a.id ?? i}>
+                                <circle
+                                  cx={a.points[0].x}
+                                  cy={a.points[0].y}
+                                  r={14}
+                                  fill="#FF4F18"
+                                />
+                                {a.label ? (
+                                  <text
+                                    x={a.points[0].x + 18}
+                                    y={a.points[0].y + 4}
+                                    fontSize={22}
+                                    fill="#141517"
+                                  >
+                                    {a.label}
+                                  </text>
+                                ) : null}
+                              </g>
+                            );
                           }
-                        >
-                          Remove
-                        </Button>
-                      ) : null}
-                    </Stack>
-                  ))}
-                </Stack>
-              ) : null}
-            </Stack>
-          )}
+                          if (a.points.length < 2) return null;
+                          const d = a.points
+                            .map((p, pi) => `${pi === 0 ? "M" : "L"} ${p.x} ${p.y}`)
+                            .join(" ");
+                          return (
+                            <path
+                              key={a.id ?? i}
+                              d={d}
+                              fill={
+                                a.tool === "CLOUD" || a.tool === "HIGHLIGHT"
+                                  ? "rgba(255,79,24,0.15)"
+                                  : "none"
+                              }
+                              stroke="#FF4F18"
+                              strokeWidth={a.tool === "HIGHLIGHT" ? 28 : 4}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          );
+                        })}
+                        {draftPoints.length > 0 ? (
+                          <polyline
+                            points={draftPoints.map((p) => `${p.x},${p.y}`).join(" ")}
+                            fill="none"
+                            stroke="#141517"
+                            strokeWidth={3}
+                            strokeDasharray="8 6"
+                          />
+                        ) : null}
+                      </svg>
+                    </Box>
+                    {editable && localAnns.length > 0 ? (
+                      <Stack spacing={0.5}>
+                        {localAnns.map((a) => (
+                          <Stack
+                            key={a.id ?? a.label}
+                            direction="row"
+                            spacing={1}
+                            sx={{ alignItems: "center" }}
+                          >
+                            <Typography variant="caption" sx={{ flex: 1 }}>
+                              {a.tool}
+                              {a.label ? ` — ${a.label}` : ""}
+                            </Typography>
+                            {a.id && jmId ? (
+                              <Button
+                                size="small"
+                                variant="text"
+                                color="error"
+                                onClick={() =>
+                                  removeAnn.mutate(
+                                    { id: a.id!, jointMeasurementId: jmId },
+                                    {
+                                      onSuccess: () =>
+                                        setLocalAnns((prev) =>
+                                          prev.filter((x) => x.id !== a.id),
+                                        ),
+                                    },
+                                  )
+                                }
+                              >
+                                Remove
+                              </Button>
+                            ) : null}
+                          </Stack>
+                        ))}
+                      </Stack>
+                    ) : null}
+                  </Stack>
+                ),
+              },
+            ]}
+          />
         </Stack>
       </DialogContent>
       <DialogActions>

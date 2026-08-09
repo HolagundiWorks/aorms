@@ -102,7 +102,8 @@ export function PortalShell({
                   size="small"
                   variant={selected ? "contained" : "text"}
                   color={selected ? "primary" : "inherit"}
-                  sx={{ borderRadius: "8px", textTransform: "none", minHeight: 36 }}
+                  aria-current={selected ? "page" : undefined}
+                  sx={{ borderRadius: "8px", textTransform: "none", minHeight: 44 }}
                 >
                   {item.label}
                 </Button>

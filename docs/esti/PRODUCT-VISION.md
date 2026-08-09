@@ -126,7 +126,8 @@ signals must not become covert surveillance or punitive monitoring.
 - Shipped app: **AORMS-Studio** (slug `aorms-studio`, architecture / Indian architecture consultancies).
 - Engineering app: **AORMS-Consultancy** (slug `aorms-consultancy`) — live (P9.V ✅ · P9.M ✅).
 - **EOMS** (Emergent Object Management System) — **knowledge bank** (standalone API).
-- **ESTI** (Embedded Studio Intelligence) — **internal AI agent** (live in **AORMS-Studio**).
+- **ESTI** (Embedded Studio Intelligence) — **internal AI agent** on **desktop**
+  managers (AStudio / AConsulting); not hosted on the cloud hub.
 - Company: **Holagundi Consulting Works (HCW)**.
 - The supplied ESI-AORMS document is treated as product input; repository and
   code naming keeps the `esti` codename.

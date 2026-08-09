@@ -1,22 +1,21 @@
 import {
+  Alert,
+  Box,
   Button,
-  InlineNotification,
-  Modal,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Stack,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Tag,
-  TextArea,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+  Typography,
+} from "@mui/material";
 import { Add } from "@carbon/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useScreenActions } from "@hcw/ui-kit";
-import { CarbonScope } from "../carbon/CarbonScope.js";
 import { DataGrid, DataState, PageBreadcrumb, type GridColDef } from "../carbon/adapters/index.js";
+import { ProjectFacetTabs } from "../components/project/ProjectFacetTabs.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
 import { useSignal } from "../lib/useSignal.js";
@@ -82,99 +81,112 @@ function DisciplinePanel({
   }
 
   return (
-    <CarbonScope>
-      <Stack gap={5}>
-        {error && (
-          <InlineNotification kind="error" lowContrast title="Upload failed" subtitle={error} onCloseButtonClick={() => setError(null)} />
-        )}
-        <DataState
-          loading={q.isLoading}
-          isEmpty={(q.data ?? []).length === 0}
-          columnCount={1}
-          empty={{ title: "No standards", description: `Add a ${discipline.toLowerCase()} standard with notes and drawings.` }}
-        >
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "0.5rem" }}>
-            {(q.data ?? []).map((s) => (
-              <div key={s.id} style={{ padding: "1rem", height: "100%", borderBottom: "1px solid var(--cds-border-subtle)" }}>
-                <Stack gap={3}>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                    <h4 className="cds--type-heading-compact-01" style={{ margin: 0, flex: 1 }}>{s.title}</h4>
-                    <RowActionsMenu
-                      actions={[
-                        {
-                          label: "Delete",
-                          danger: true,
-                          disabled: remove.isPending,
-                          onClick: () => remove.mutate({ id: s.id }),
-                        },
-                      ]}
-                    />
-                  </div>
-                  {s.notes && <p className="esti-label esti-label--secondary">{s.notes}</p>}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                    {(s.files ?? []).map((f) => (
-                      <Tag key={f.id} type="blue" filter onClose={() => removeFile.mutate({ id: f.id })}>
-                        {f.url ? (
-                          <a href={f.url} target="_blank" rel="noreferrer" className="cds--link">{f.kind}: {f.fileName}</a>
+    <Stack spacing={2}>
+      {error && (
+        <Alert severity="error" onClose={() => setError(null)}>
+          Upload failed — {error}
+        </Alert>
+      )}
+      <DataState
+        loading={q.isLoading}
+        isEmpty={(q.data ?? []).length === 0}
+        columnCount={1}
+        empty={{ title: "No standards", description: `Add a ${discipline.toLowerCase()} standard with notes and drawings.` }}
+      >
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 1 }}>
+          {(q.data ?? []).map((s) => (
+            <Box key={s.id} sx={{ p: 2, height: "100%", borderBottom: 1, borderColor: "divider" }}>
+              <Stack spacing={1}>
+                <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                  <Typography variant="subtitle2" sx={{ m: 0, flex: 1 }}>{s.title}</Typography>
+                  <RowActionsMenu
+                    actions={[
+                      {
+                        label: "Delete",
+                        danger: true,
+                        disabled: remove.isPending,
+                        onClick: () => remove.mutate({ id: s.id }),
+                      },
+                    ]}
+                  />
+                </Box>
+                {s.notes && <p className="esti-label esti-label--secondary">{s.notes}</p>}
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {(s.files ?? []).map((f) => (
+                    <Chip
+                      key={f.id}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                      onDelete={() => removeFile.mutate({ id: f.id })}
+                      label={
+                        f.url ? (
+                          <a href={f.url} target="_blank" rel="noreferrer">{f.kind}: {f.fileName}</a>
                         ) : (
                           `${f.kind}: ${f.fileName}`
-                        )}
-                      </Tag>
-                    ))}
-                  </div>
-                  <div>
-                    <Button
-                      kind="tertiary"
-                      size="sm"
-                      disabled={busyId === s.id}
-                      onClick={() => fileInputs.current[s.id]?.click()}
-                    >
-                      {busyId === s.id ? "Uploading…" : "Attach file"}
-                    </Button>
-                    <input
-                      ref={(el) => { fileInputs.current[s.id] = el; }}
-                      type="file"
-                      style={{ display: "none" }}
-                      accept=".pdf,.dwg,.dxf,.png,.jpg"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) void attach(s.id, "PDF", file);
-                        e.target.value = "";
-                      }}
+                        )
+                      }
                     />
-                  </div>
-                </Stack>
-              </div>
-            ))}
-          </div>
-        </DataState>
+                  ))}
+                </Box>
+                <Box>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    disabled={busyId === s.id}
+                    onClick={() => fileInputs.current[s.id]?.click()}
+                  >
+                    {busyId === s.id ? "Uploading…" : "Attach file"}
+                  </Button>
+                  <input
+                    ref={(el) => { fileInputs.current[s.id] = el; }}
+                    type="file"
+                    style={{ display: "none" }}
+                    accept=".pdf,.dwg,.dxf,.png,.jpg"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void attach(s.id, "PDF", file);
+                      e.target.value = "";
+                    }}
+                  />
+                </Box>
+              </Stack>
+            </Box>
+          ))}
+        </Box>
+      </DataState>
 
-        <Modal
-          open={open}
-          size="sm"
-          modalHeading="New standard"
-          primaryButtonText={create.isPending ? "Saving…" : "Create"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!title.trim() || create.isPending}
-          onRequestClose={() => setDialogOpen(false)}
-          onRequestSubmit={() => {
-            create.mutate({ discipline: discipline as never, title: title.trim(), notes: notes.trim() || undefined });
-            setDialogOpen(false);
-          }}
-        >
-          <Stack gap={5}>
-            <TextInput id="std-title" labelText="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-            <TextArea
+      <Dialog open={open} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>New standard</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField id="std-title" label="Title" value={title} onChange={(e) => setTitle(e.target.value)} fullWidth />
+            <TextField
               id="std-notes"
-              labelText="Technical notes"
+              label="Technical notes"
+              multiline
               rows={4}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              fullWidth
             />
           </Stack>
-        </Modal>
-      </Stack>
-    </CarbonScope>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={!title.trim() || create.isPending}
+            onClick={() => {
+              create.mutate({ discipline: discipline as never, title: title.trim(), notes: notes.trim() || undefined });
+              setDialogOpen(false);
+            }}
+          >
+            {create.isPending ? "Saving…" : "Create"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Stack>
   );
 }
 
@@ -206,15 +218,9 @@ function DocumentsTab() {
 
   if (allFiles.length === 0) {
     return (
-      <CarbonScope>
-        <InlineNotification
-          kind="info"
-          lowContrast
-          hideCloseButton
-          title="No documents yet"
-          subtitle="Attach files to standards in the Standards tab — they will appear here for quick reference."
-        />
-      </CarbonScope>
+      <Alert severity="info">
+        No documents yet — attach files to standards in the Standards tab and they will appear here for quick reference.
+      </Alert>
     );
   }
 
@@ -226,7 +232,7 @@ function DocumentsTab() {
       minWidth: 180,
       renderCell: (p) =>
         p.row.url
-          ? <a href={p.row.url} target="_blank" rel="noreferrer" className="cds--link">{p.row.fileName}</a>
+          ? <a href={p.row.url} target="_blank" rel="noreferrer">{p.row.fileName}</a>
           : p.row.fileName,
     },
     { field: "standardTitle", headerName: "Standard", flex: 1.2, minWidth: 160 },
@@ -246,15 +252,43 @@ function DocumentsTab() {
   );
 }
 
+function StandardsByDiscipline({
+  stdSignal,
+  onDialogOpenChange,
+}: {
+  stdSignal: number;
+  onDialogOpenChange: (open: boolean) => void;
+}) {
+  const [discFacet, setDiscFacet] = useState(DISCIPLINES[0]!.id);
+
+  return (
+    <ProjectFacetTabs
+      ariaLabel="Disciplines"
+      value={discFacet}
+      onChange={setDiscFacet}
+      facets={DISCIPLINES.map((d) => ({
+        id: d.id,
+        label: d.label,
+        panel: (
+          <DisciplinePanel
+            discipline={d.id}
+            openSignal={d.id === discFacet ? stdSignal : undefined}
+            onDialogOpenChange={onDialogOpenChange}
+          />
+        ),
+      }))}
+    />
+  );
+}
+
 /** Studio › Libraries › Standards Library — Documents tab (all attached files) + Standards tab (by discipline). */
 export function StandardsLibrary() {
-  const [tab, setTab] = useState(0);
-  const [discTab, setDiscTab] = useState(0);
+  const [tab, setTab] = useState("documents");
   const [stdSignal, setStdSignal] = useState(0);
   const [stdDialogOpen, setStdDialogOpen] = useState(false);
 
   useScreenActions(
-    tab === 1 && !stdDialogOpen
+    tab === "standards" && !stdDialogOpen
       ? [
           {
             id: "new-standard",
@@ -275,37 +309,28 @@ export function StandardsLibrary() {
       description="Office design standards by discipline — technical notes, drawings and standard details."
     >
       <PageBreadcrumb items={[{ label: "Library" }, { label: "Standards" }]} />
-      <CarbonScope>
-        <Tabs selectedIndex={tab} onChange={({ selectedIndex }) => setTab(selectedIndex)}>
-          <TabList aria-label="Standards library sections" contained>
-            <Tab>Documents</Tab>
-            <Tab>Standards</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <DocumentsTab />
-            </TabPanel>
-            <TabPanel>
-              <Tabs selectedIndex={discTab} onChange={({ selectedIndex }) => setDiscTab(selectedIndex)}>
-                <TabList aria-label="Disciplines" contained>
-                  {DISCIPLINES.map((d) => <Tab key={d.id}>{d.label}</Tab>)}
-                </TabList>
-                <TabPanels>
-                  {DISCIPLINES.map((d, i) => (
-                    <TabPanel key={d.id}>
-                      <DisciplinePanel
-                        discipline={d.id}
-                        openSignal={i === discTab ? stdSignal : undefined}
-                        onDialogOpenChange={setStdDialogOpen}
-                      />
-                    </TabPanel>
-                  ))}
-                </TabPanels>
-              </Tabs>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </CarbonScope>
+      <ProjectFacetTabs
+        ariaLabel="Standards library sections"
+        value={tab}
+        onChange={setTab}
+        facets={[
+          {
+            id: "documents",
+            label: "Documents",
+            panel: <DocumentsTab />,
+          },
+          {
+            id: "standards",
+            label: "Standards",
+            panel: (
+              <StandardsByDiscipline
+                stdSignal={stdSignal}
+                onDialogOpenChange={setStdDialogOpen}
+              />
+            ),
+          },
+        ]}
+      />
     </RailLayout>
   );
 }

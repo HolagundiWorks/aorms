@@ -5,7 +5,6 @@ import {
   Alert,
   Box,
   Button,
-  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -25,6 +24,7 @@ import {
   type AcademyModule,
   type AcademyModuleProgress,
 } from "@esti/contracts";
+import { StatusDot } from "./StatusTag.js";
 import { trpc } from "../lib/trpc.js";
 
 function ModuleRow({
@@ -53,18 +53,8 @@ function ModuleRow({
           {complete && <CheckCircle color="success" fontSize="small" />}
           <Typography sx={{ fontWeight: 600 }}>{mod.code}</Typography>
           <Typography sx={{ flex: 1 }}>{mod.title}</Typography>
-          <Chip
-            size="small"
-            variant={theoryDone ? "filled" : "outlined"}
-            color={theoryDone ? "success" : "default"}
-            label="Theory"
-          />
-          <Chip
-            size="small"
-            variant={practicalDone ? "filled" : "outlined"}
-            color={practicalDone ? "success" : "default"}
-            label="Practical"
-          />
+          <StatusDot color={theoryDone ? "green" : "gray"} label="Theory" />
+          <StatusDot color={practicalDone ? "green" : "gray"} label="Practical" />
         </Stack>
       </AccordionSummary>
       <AccordionDetails>

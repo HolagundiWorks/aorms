@@ -1,31 +1,32 @@
 # AORMS System Architecture
 
-**Status:** Canonical · **Owner:** Holagundi Consulting Works (HCW) · **Reviewed:** 2026-08-05
+**Status:** Canonical · **Owner:** Holagundi Consulting Works (HCW) · **Reviewed:** 2026-08-09
 
-> **Scope:** This describes **AORMS-Studio** — the workspace shipped from this
-> monorepo. Platform north-star: [AORMS-DEVELOPMENT-SPEC.md](AORMS-DEVELOPMENT-SPEC.md).
-> Naming: [AORMS-PLATFORM-NOMENCLATURE.md](AORMS-PLATFORM-NOMENCLATURE.md).
+> **Scope:** Historical monorepo shape + hub. **Shipping staff UI + ESTI AI** are
+> **desktop apps** ([LOCAL-FIRST.md](LOCAL-FIRST.md) · [AORMS-SUITE.md](AORMS-SUITE.md)).
+> This SPA is a **reference archive**. Platform north-star:
+> [AORMS-DEVELOPMENT-SPEC.md](AORMS-DEVELOPMENT-SPEC.md). Naming:
+> [AORMS-PLATFORM-NOMENCLATURE.md](AORMS-PLATFORM-NOMENCLATURE.md).
 
 ## System Shape
 
-**AORMS-Studio** is a single-firm, India-first application:
+**Hub / reference stack** (esti monorepo) — marketing, portals, transitional Postgres:
 
 ```text
-React SPA (@hcw/ui-kit) — browser and/or desktop shell (loopback)
-       |
-       | tRPC + restricted REST uploads/downloads
-       v
-Fastify/TypeScript backend ---- PostgreSQL (system of record)
+Marketing + firm portals (@hcw/ui-kit)     Desktop suite (Connect → managers / AQC)
+       |                                              |
+       | tRPC / hub APIs                              | local DB + local ESTI (Ollama)
+       v                                              v
+Fastify/TypeScript hub ---- PostgreSQL (transitional) / Mongo ops
        |        |
-       |        +---- MinIO/S3 or local FS (binaries)
+       |        +---- MinIO/S3 (published artifacts)
        |
        +---- Redis Streams ---- Python worker (DXF, PDF, imports)
-       +---- Ollama (local AI) · optional EOMS companion
+       +---- NO cloud Ollama  (AI is desktop-only)
 ```
 
-Clients are the **same SPA** in the browser (web parity) or in the desktop
-node shell (`desktop/` → loopback). ESTICAD / companion CAD is retired
-(2026-07-19). Sync planes: [LOCAL-FIRST.md](LOCAL-FIRST.md).
+ESTICAD / companion CAD is retired (2026-07-19). Sync planes:
+[LOCAL-FIRST.md](LOCAL-FIRST.md).
 
 The TypeScript backend owns domain rules, authorization, state transitions,
 money/tax, numbering, audit, and activity. The Python worker owns no

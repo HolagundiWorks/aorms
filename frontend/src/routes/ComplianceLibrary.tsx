@@ -1,21 +1,21 @@
 import {
+  Alert,
+  Box,
   Button,
-  InlineNotification,
-  Modal,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Stack,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Tag,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+  Typography,
+} from "@mui/material";
 import { Add } from "@carbon/icons-react";
 import { useRef, useState } from "react";
 import { useScreenActions } from "@hcw/ui-kit";
-import { CarbonScope } from "../carbon/CarbonScope.js";
 import { DataGrid, DataState, PageBreadcrumb, StatusDot, type GridColDef } from "../carbon/adapters/index.js";
+import { ProjectFacetTabs } from "../components/project/ProjectFacetTabs.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
 import { useSignal } from "../lib/useSignal.js";
@@ -93,49 +93,52 @@ function CrudPanel({
   ];
 
   return (
-    <CarbonScope>
-      <Stack gap={5}>
-        <DataState
-          loading={loading}
-          isEmpty={rows.length === 0}
-          columnCount={fields.length + 1}
-          empty={{ title: "No entries", description: "Add a compliance reference entry." }}
-        >
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            density="compact"
-            disableRowSelectionOnClick
-            hideFooter
-            autoHeight
-          />
-        </DataState>
+    <Stack spacing={2}>
+      <DataState
+        loading={loading}
+        isEmpty={rows.length === 0}
+        columnCount={fields.length + 1}
+        empty={{ title: "No entries", description: "Add a compliance reference entry." }}
+      >
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          density="compact"
+          disableRowSelectionOnClick
+          hideFooter
+          autoHeight
+        />
+      </DataState>
 
-        <Modal
-          open={open}
-          size="sm"
-          modalHeading="New entry"
-          primaryButtonText={creating ? "Saving…" : "Create"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={missingRequired || creating}
-          onRequestClose={() => setOpen(false)}
-          onRequestSubmit={() => { submit(); setOpen(false); }}
-        >
-          <Stack gap={5}>
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>New entry</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
             {fields.map((f) => (
-              <TextInput
+              <TextField
                 key={f.key}
                 id={`cmp-${f.key}`}
-                labelText={f.label + (f.required ? " *" : "")}
+                label={f.label + (f.required ? " *" : "")}
                 type={f.type === "number" ? "number" : "text"}
                 value={form[f.key] ?? ""}
                 onChange={set(f.key)}
+                fullWidth
               />
             ))}
           </Stack>
-        </Modal>
-      </Stack>
-    </CarbonScope>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={missingRequired || creating}
+            onClick={() => { submit(); setOpen(false); }}
+          >
+            {creating ? "Saving…" : "Create"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Stack>
   );
 }
 
@@ -334,7 +337,7 @@ function DocumentsTab({ openSignal }: { openSignal?: number }) {
       minWidth: 180,
       renderCell: (p) =>
         p.row.url
-          ? <a href={p.row.url} target="_blank" rel="noreferrer" className="cds--link">{p.row.fileName}</a>
+          ? <a href={p.row.url} target="_blank" rel="noreferrer">{p.row.fileName}</a>
           : p.row.fileName,
     },
     {
@@ -359,89 +362,114 @@ function DocumentsTab({ openSignal }: { openSignal?: number }) {
   ];
 
   return (
-    <CarbonScope>
-      <Stack gap={5}>
-        {showUpload && (
-          <div style={{ padding: "1rem", border: "1px solid var(--cds-border-subtle)" }}>
-            <Stack gap={5}>
-              <TextInput
-                id="cdoc-title"
-                labelText="Title"
-                placeholder="e.g. NBC 2016 Part 3"
-                value={uploadTitle}
-                onChange={(e) => setUploadTitle(e.target.value)}
-              />
-              <Stack gap={2}>
-                <p className="cds--type-label-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>Category</p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                  {DOC_CATEGORIES.map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      aria-pressed={uploadCategory === c}
-                      onClick={() => setUploadCategory(c)}
-                      style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer" }}
-                    >
-                      <Tag type={uploadCategory === c ? "blue" : "gray"}>{c}</Tag>
-                    </button>
-                  ))}
-                </div>
-              </Stack>
-              <div>
-                <Button kind="tertiary" size="sm" disabled={busy} onClick={() => fileInput.current?.click()}>
-                  {busy ? "Uploading…" : "Choose file (PDF / DWG / DXF / image)"}
-                </Button>
-                <input
-                  ref={fileInput}
-                  type="file"
-                  style={{ display: "none" }}
-                  accept=".pdf,.dwg,.dxf,.png,.jpg"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) void upload(file);
-                    e.target.value = "";
-                  }}
-                />
-              </div>
+    <Stack spacing={2}>
+      {showUpload && (
+        <Box sx={{ p: 2, border: 1, borderColor: "divider" }}>
+          <Stack spacing={2}>
+            <TextField
+              id="cdoc-title"
+              label="Title"
+              placeholder="e.g. NBC 2016 Part 3"
+              value={uploadTitle}
+              onChange={(e) => setUploadTitle(e.target.value)}
+              fullWidth
+            />
+            <Stack spacing={0.5}>
+              <Typography variant="caption" color="text.secondary" sx={{ m: 0 }}>Category</Typography>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {DOC_CATEGORIES.map((c) => (
+                  <Chip
+                    key={c}
+                    size="small"
+                    color={uploadCategory === c ? "primary" : "default"}
+                    variant={uploadCategory === c ? "filled" : "outlined"}
+                    label={c}
+                    onClick={() => setUploadCategory(c)}
+                    aria-pressed={uploadCategory === c}
+                  />
+                ))}
+              </Box>
             </Stack>
-          </div>
-        )}
+            <Box>
+              <Button variant="outlined" size="small" disabled={busy} onClick={() => fileInput.current?.click()}>
+                {busy ? "Uploading…" : "Choose file (PDF / DWG / DXF / image)"}
+              </Button>
+              <input
+                ref={fileInput}
+                type="file"
+                style={{ display: "none" }}
+                accept=".pdf,.dwg,.dxf,.png,.jpg"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void upload(file);
+                  e.target.value = "";
+                }}
+              />
+            </Box>
+          </Stack>
+        </Box>
+      )}
 
-        {error && (
-          <InlineNotification kind="error" lowContrast title="Upload failed" subtitle={error} onCloseButtonClick={() => setError(null)} />
-        )}
+      {error && (
+        <Alert severity="error" onClose={() => setError(null)}>
+          Upload failed — {error}
+        </Alert>
+      )}
 
-        <DataState
-          loading={q.isLoading}
-          isEmpty={(q.data ?? []).length === 0}
-          columnCount={4}
-          empty={{ title: "No documents", description: "Upload NBC books, FAR notifications, fire NOC drawings, and other compliance reference documents." }}
-        >
-          <DataGrid
-            rows={q.data ?? []}
-            columns={columns}
-            density="compact"
-            disableRowSelectionOnClick
-            hideFooter
-            autoHeight
-          />
-        </DataState>
-      </Stack>
-    </CarbonScope>
+      <DataState
+        loading={q.isLoading}
+        isEmpty={(q.data ?? []).length === 0}
+        columnCount={4}
+        empty={{ title: "No documents", description: "Upload NBC books, FAR notifications, fire NOC drawings, and other compliance reference documents." }}
+      >
+        <DataGrid
+          rows={q.data ?? []}
+          columns={columns}
+          density="compact"
+          disableRowSelectionOnClick
+          hideFooter
+          autoHeight
+        />
+      </DataState>
+    </Stack>
+  );
+}
+
+const RULE_FACETS = [
+  { id: "nbc", label: "NBC Rules", Panel: NbcPanel },
+  { id: "far", label: "FAR Rules", Panel: FarPanel },
+  { id: "setback", label: "Setbacks", Panel: SetbackPanel },
+  { id: "fire", label: "Fire Compliance", Panel: FirePanel },
+  { id: "regulation", label: "Regulations", Panel: RegulationPanel },
+] as const;
+
+function RulesTab({ ruleSignal }: { ruleSignal: number }) {
+  const [ruleFacet, setRuleFacet] = useState<string>(RULE_FACETS[0].id);
+
+  return (
+    <ProjectFacetTabs
+      ariaLabel="Compliance areas"
+      value={ruleFacet}
+      onChange={setRuleFacet}
+      facets={RULE_FACETS.map(({ id, label, Panel }) => ({
+        id,
+        label,
+        panel: <Panel openSignal={id === ruleFacet ? ruleSignal : undefined} />,
+      }))}
+    />
   );
 }
 
 /** Studio › Libraries › Compliance Library — Documents tab (uploaded PDFs) + Rules tab (NBC · FAR · Setbacks · Fire · Regulations). */
 export function ComplianceLibrary() {
-  const [tab, setTab] = useState(0);
-  const [ruleTab, setRuleTab] = useState(0);
+  const [tab, setTab] = useState("documents");
   // Rail-triggered create/upload — bump a counter to open the active panel's action.
   const [docSignal, setDocSignal] = useState(0);
   const [ruleSignal, setRuleSignal] = useState(0);
 
   useScreenActions(
     [
-      tab === 0
+      tab === "documents"
         ? {
             id: "upload-document",
             zone: "center",
@@ -462,8 +490,6 @@ export function ComplianceLibrary() {
     [tab],
   );
 
-  const rulePanels = [NbcPanel, FarPanel, SetbackPanel, FirePanel, RegulationPanel];
-
   return (
     <RailLayout
       title="Compliance Library"
@@ -475,37 +501,23 @@ export function ComplianceLibrary() {
           { label: "Compliance" },
         ]}
       />
-      <CarbonScope>
-        <Tabs selectedIndex={tab} onChange={({ selectedIndex }) => setTab(selectedIndex)}>
-          <TabList aria-label="Compliance library sections" contained>
-            <Tab>Documents</Tab>
-            <Tab>Rules</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <DocumentsTab openSignal={docSignal} />
-            </TabPanel>
-            <TabPanel>
-              <Tabs selectedIndex={ruleTab} onChange={({ selectedIndex }) => setRuleTab(selectedIndex)}>
-                <TabList aria-label="Compliance areas" contained>
-                  <Tab>NBC Rules</Tab>
-                  <Tab>FAR Rules</Tab>
-                  <Tab>Setbacks</Tab>
-                  <Tab>Fire Compliance</Tab>
-                  <Tab>Regulations</Tab>
-                </TabList>
-                <TabPanels>
-                  {rulePanels.map((Panel, i) => (
-                    <TabPanel key={i}>
-                      <Panel openSignal={i === ruleTab ? ruleSignal : undefined} />
-                    </TabPanel>
-                  ))}
-                </TabPanels>
-              </Tabs>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </CarbonScope>
+      <ProjectFacetTabs
+        ariaLabel="Compliance library sections"
+        value={tab}
+        onChange={setTab}
+        facets={[
+          {
+            id: "documents",
+            label: "Documents",
+            panel: <DocumentsTab openSignal={docSignal} />,
+          },
+          {
+            id: "rules",
+            label: "Rules",
+            panel: <RulesTab ruleSignal={ruleSignal} />,
+          },
+        ]}
+      />
     </RailLayout>
   );
 }

@@ -1,5 +1,5 @@
-import { Surface, RADIUS } from "@hcw/ui-kit";
-import { Box, Button, Chip, Stack, Typography } from "@mui/material";
+import { Surface, RADIUS, StatusDot } from "@hcw/ui-kit";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { AORMS_PORTALS } from "../../lib/product-nomenclature.js";
 import { COMPOSITION_RHYTHM } from "../../lib/composition.js";
@@ -61,11 +61,9 @@ export function AdminConsoleShell({
           </Typography>
         </Box>
         <Stack direction="row" spacing={COMPOSITION_RHYTHM.sm} sx={{ alignItems: "center", flexWrap: "wrap" }}>
-          <Chip
-            size="small"
+          <StatusDot
+            color={isPlatformAdmin ? "green" : "cool-gray"}
             label={isPlatformAdmin ? "Platform admin" : "Member"}
-            color={isPlatformAdmin ? "success" : "default"}
-            variant="outlined"
           />
           <Typography variant="body2" color="text.secondary">
             {email}
@@ -93,8 +91,9 @@ export function AdminConsoleShell({
               size="small"
               variant={selected ? "contained" : "text"}
               color={selected ? "primary" : "inherit"}
+              aria-current={selected ? "page" : undefined}
               onClick={() => onSectionChange(s.key)}
-              sx={{ borderRadius: `${RADIUS}px`, textTransform: "none", minHeight: 36 }}
+              sx={{ borderRadius: `${RADIUS}px`, textTransform: "none", minHeight: 44 }}
             >
               {label}
             </Button>

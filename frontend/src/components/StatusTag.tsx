@@ -39,7 +39,7 @@ export function StatusTag<T extends string>({
   severity,
 }: {
   value: T;
-  map: Record<T, TagColor>;
+  map: Record<T, TagColor | string>;
   label?: ReactNode;
   size?: "sm" | "md";
   /** Maps to kit STATUS_SHAPE (ok · watch · critical · inactive). */

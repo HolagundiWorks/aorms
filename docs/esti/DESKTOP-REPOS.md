@@ -56,11 +56,21 @@
 | --- | --- | --- |
 | Canon + nomenclature | [AORMS-CONNECT.md](AORMS-CONNECT.md) · `AORMS_CONNECT` | ✅ C0 |
 | WinUI shell | Login · launcher · projects · licence stub | ✅ C1 scaffold |
-| Session broker | Sibling apps consume Connect session | 🔲 C2 |
-| Licence surface | Beyond stub | 🔲 C3 |
+| Session broker | Sibling apps consume Connect session | ✅ C2 |
+| Licence surface | Local status · admin.aorms.in link | ✅ C3 |
 | Signed installer | `update-manifests/aorms-connect.json` + sha256 | 🔲 D6 |
+
+## D5b — Manager HCW geography (2026-08-09)
+
+| Check | Done when | Status |
+| --- | --- | --- |
+| AStudio shell | Ribbon · stage · ActionDock · tray (bridge Tasks in stage) | ✅ |
+| AConsulting shell | Practice nav labels · same geography | ✅ |
+| Docs | `WINUI-SHELL.md` in each repo · parity [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) | ✅ |
+| Domain UI | Office · HR · engagements beyond bridge smoke | 🔲 |
+| AQC chrome | Estimation / BBS / PM native HCW geography | 🔲 S12 follow-on |
 
 ## Related
 
 - [AORMS-SUITE.md](AORMS-SUITE.md) · [AORMS-CONNECT.md](AORMS-CONNECT.md) · [SHILPI-WIRE.md](SHILPI-WIRE.md) · [MONGO-OPS.md](MONGO-OPS.md)  
-- [ROADMAP.md](ROADMAP.md) · [WEB-PORTAL.md](WEB-PORTAL.md)  
+- [ROADMAP.md](ROADMAP.md) · [WEB-PORTAL.md](WEB-PORTAL.md) · [2026-08-09-UX-AUDIT-WAVE.md](../hcw-kit/11-audits/2026-08-09-UX-AUDIT-WAVE.md)  

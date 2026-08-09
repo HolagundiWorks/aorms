@@ -101,8 +101,10 @@ first client conversation to final account on site. **AORMS-Consultancy** is the
 **engineering app** — **code-complete** on the same spine (structural, MEP, civil,
 multidisciplinary); public live (P9.V ✅ · P9.M ✅).
 
-**ESTI = Embedded Studio Intelligence** — the **internal AI agent** in
-**AORMS-Studio** (ESTI AI, Ask ESTI, the cognition engine, ESTI Pulse).
+**ESTI = Embedded Studio Intelligence** — the **internal AI agent** on
+**desktop managers** (AStudio / AConsulting via Connect): Ask ESTI, cognition
+affordances, ESTI Pulse. **Not hosted on the cloud hub** — local Ollama /
+Foundry Local only ([LOCAL-FIRST.md](LOCAL-FIRST.md)).
 **EOMS = Emergent Object Management System** — the **external knowledge bank** on the
 AORMS platform (standard codebooks and compliance codes via a standalone API). The codebase is delivered as a single monorepo (pnpm:
 `packages/contracts`, `backend`, `frontend`, Python `worker`) gated two ways that
@@ -123,7 +125,7 @@ Status legend — **✅ Implemented** (shipped, in the live router) ·
 
 | Pillar | What it is | Primary live namespaces / routes | Status |
 |---|---|---|---|
-| **1. Ask OS** | Conversational + cognition layer — ask the office anything, AI-assisted decisions, AI Studio, public "Ask ESTI" | `ai.*` (`ai.generate`), `dashboard` cognition/Action Center, public `marketing.askEsti` | ◐ |
+| **1. Ask OS** | Conversational + cognition — **desktop ESTI** (Ask / AI Studio); SPA routes are reference only | Desktop managers; transitional `ai.*` / `dashboard` in esti SPA archive | ◐ |
 | **2. Project OS** | The project as the unit of delivery — design / consultancy delivery (not construction PM) | `projectOffice`, `phases`, `projectBrief`, `projectPrecon`, `drawings`, `transmittals`, `approvals`, `permits`, `proposals`, `feeStages`, `invoices`; `ProjectDetail.tsx` | ✅ |
 | **3. Task OS** | Everyone's work surface — tasks (billable/work-type/difficulty dimensions), assignments, workload, attendance, ASPRF | `team`, `assignments`, `workload`, `attendance`, `aspRf`, `rewards`; `Work.tsx` hub | ◐ |
 | **4. Estimation & cost** | Design-stage cost — a priced BOQ from firm rate books, plus office costing | `rateBooks`, `estimates`, `measurement`, `planMarkup` (project Estimation tab + browser plan takeoff); office costing (`accounts`, `expenses`, `purchaseOrders`) | ✅ |
@@ -133,9 +135,10 @@ Status legend — **✅ Implemented** (shipped, in the live router) ·
 ## Per-pillar: implemented vs needs-mapping vs needs-creation
 
 ### 1. Ask OS — ◐
-- **Implemented:** AI Studio + agent (`ai.generate`), dashboard cognition engine + Action Center, public "Ask ESTI" corner (`marketing.askEsti`). Backend AI lives behind `@hcw/aorms-ai-kit` (prompts + Ollama SDK).
-- **Needs mapping:** a single "ask the office" entry that spans projects, tasks, and cost data — today cognition is dashboard-scoped and AI Studio is its own route.
-- **Needs creation:** office-wide retrieval/decision surface that reads across all pillars; per-pillar AI affordances (e.g. "explain this deviation", "draft this letter") as first-class actions.
+- **Product law:** ESTI runs on **desktop apps** only — no cloud/VPS Ollama, no hub Hosted AI ([AORMS-SUITE.md](AORMS-SUITE.md) § AI).
+- **Reference archive (esti SPA):** AI Studio + agent (`ai.generate`), dashboard cognition, legacy `marketing.askEsti` — patterns to port; `@hcw/aorms-ai-kit` is for local/desktop use, not aorms.in ops.
+- **Needs mapping:** a single "ask the office" entry in desktop managers that spans projects, tasks, and cost data.
+- **Needs creation:** office-wide retrieval/decision surface on desktop; per-pillar AI affordances (e.g. "explain this deviation", "draft this letter") as first-class actions.
 
 ### 2. Project OS — ✅
 - **Implemented:** ProjectDetail (consultancy delivery), phases, project brief/Info, **pre-con R&O** (`projectPrecon` — risks, opportunities, CONCEPT→ISSUE_READINESS gates), drawings + transmittals (+ ack), MDR, approvals, permits, decisions + revision intelligence, proposals, fee stages ↔ Studio invoices, in-project invoicing, site supervision.

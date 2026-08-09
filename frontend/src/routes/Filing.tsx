@@ -1,11 +1,11 @@
-import { Stack, Tab, TabList, Tabs } from "@carbon/react";
+import { Box, Stack, Typography } from "@mui/material";
 import { Download } from "@carbon/icons-react";
 import { formatINR } from "@esti/contracts";
 import type { PeriodFilterInput } from "@esti/contracts";
 import { useState } from "react";
 import { useScreenActions } from "@hcw/ui-kit";
-import { CarbonScope } from "../carbon/CarbonScope.js";
 import { DataGrid, PageBreadcrumb, type GridColDef } from "../carbon/adapters/index.js";
+import { ProjectFacetTabs } from "../components/project/ProjectFacetTabs.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { PeriodFilter } from "../components/PeriodFilter.js";
 import { downloadXlsx } from "../lib/exportXlsx.js";
@@ -37,7 +37,7 @@ const tdsColumns: GridColDef[] = [
 
 export function Filing() {
   const [period, setPeriod] = useState<PeriodFilterInput>({ preset: "CURRENT_FY" });
-  const [tab, setTab] = useState(0);
+  const [facet, setFacet] = useState("gst");
 
   const gst = trpc.reports.gstAbstract.useQuery({ period });
   const tds = trpc.reports.tdsAbstract.useQuery({ period });
@@ -87,41 +87,48 @@ export function Filing() {
       title="Filing abstracts"
       description="GST output tax (GSTR-1 / GSTR-3B) and TDS deducted u/s 194J, aggregated by month from issued and paid invoices."
       aside={
-        <Stack gap={4}>
+        <Stack spacing={1.5}>
           <PeriodFilter value={period} onChange={setPeriod} />
           {gst.data && (
-            <p className="cds--type-body-01" style={{ margin: 0 }}>
+            <Typography variant="body2" sx={{ m: 0 }}>
               <strong>{gst.data.label}</strong> · {gst.data.from} to {gst.data.to}
-            </p>
+            </Typography>
           )}
         </Stack>
       }
     >
-      <CarbonScope>
-        <PageBreadcrumb items={[{ label: "Office" }, { label: "Financial Reports" }]} />
-        <Tabs selectedIndex={tab} onChange={({ selectedIndex }) => setTab(selectedIndex)}>
-          <TabList aria-label="Filing tabs" contained>
-            <Tab>GST abstract</Tab>
-            <Tab>TDS abstract</Tab>
-          </TabList>
-        </Tabs>
-        {tab === 0 && (
-          <div style={{ marginTop: "1rem" }}>
-            <p className="cds--type-heading-compact-01" style={{ margin: "0 0 0.5rem" }}>
-              GST by month
-            </p>
-            <DataGrid rows={gstRows} columns={gstColumns} loading={gst.isLoading} density="compact" autoHeight hideFooter disableRowSelectionOnClick />
-          </div>
-        )}
-        {tab === 1 && (
-          <div style={{ marginTop: "1rem" }}>
-            <p className="cds--type-heading-compact-01" style={{ margin: "0 0 0.5rem" }}>
-              TDS by month
-            </p>
-            <DataGrid rows={tdsRows} columns={tdsColumns} loading={tds.isLoading} density="compact" autoHeight hideFooter disableRowSelectionOnClick />
-          </div>
-        )}
-      </CarbonScope>
+      <PageBreadcrumb items={[{ label: "Office" }, { label: "Financial Reports" }]} />
+      <ProjectFacetTabs
+        ariaLabel="Filing tabs"
+        value={facet}
+        onChange={setFacet}
+        facets={[
+          {
+            id: "gst",
+            label: "GST abstract",
+            panel: (
+              <Box>
+                <Typography variant="subtitle2" sx={{ m: 0, mb: 1 }}>
+                  GST by month
+                </Typography>
+                <DataGrid rows={gstRows} columns={gstColumns} loading={gst.isLoading} density="compact" autoHeight hideFooter disableRowSelectionOnClick />
+              </Box>
+            ),
+          },
+          {
+            id: "tds",
+            label: "TDS abstract",
+            panel: (
+              <Box>
+                <Typography variant="subtitle2" sx={{ m: 0, mb: 1 }}>
+                  TDS by month
+                </Typography>
+                <DataGrid rows={tdsRows} columns={tdsColumns} loading={tds.isLoading} density="compact" autoHeight hideFooter disableRowSelectionOnClick />
+              </Box>
+            ),
+          },
+        ]}
+      />
     </RailLayout>
   );
 }

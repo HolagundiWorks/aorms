@@ -76,14 +76,16 @@ export const AORMS_APPS = {
     role: "practice_manager" as const,
     tagline: "Accelerated Studio — architecture practice manager (tasks, office, HR, portals)",
     audience: "Indian architecture and interior design consultancies",
-    appUrl: "https://studio.aorms.in",
+    appUrl: "https://aorms.in/downloads",
+    /** Desktop host when installers ship (soft launch: downloads Coming soon). */
+    desktopHostUrl: "https://studio.aorms.in",
     /** @deprecated Use studio.aorms.in — app.aorms.in redirects at nginx. */
     legacyAppUrl: "https://app.aorms.in",
-    marketingPath: "/login",
+    marketingPath: "/downloads",
     landingHref: "/#studio",
     wikiPath: "/wiki/astudio",
     wikiName: "AStudio docs",
-    status: "live" as const,
+    status: "preview" as const,
   },
   consultancy: {
     slug: "aconsulting",
@@ -97,12 +99,13 @@ export const AORMS_APPS = {
     tagline: "Accelerated Consulting — engineering practice manager",
     audience:
       "Structural, MEP, civil, and multidisciplinary engineering consultancies advising on built-environment projects",
-    appUrl: "https://consultancy.aorms.in",
-    marketingPath: "/aconsulting",
+    appUrl: "https://aorms.in/downloads",
+    desktopHostUrl: "https://consultancy.aorms.in",
+    marketingPath: "/downloads",
     legacyMarketingPath: "/aorms-consultancy",
     landingHref: "/#consultancy",
     wikiPath: "/wiki/aconsulting",
-    status: "live" as const,
+    status: "preview" as const,
   },
   pmc: {
     slug: "aproc",
@@ -116,8 +119,9 @@ export const AORMS_APPS = {
     tagline: "AQC Project Management — programme, packages, and site certification (desktop)",
     audience:
       "Project management consultancies that plan, coordinate, and certify delivery on behalf of clients — programme, packages, and site governance",
-    appUrl: "https://proc.aorms.in",
-    marketingPath: "/aproc",
+    appUrl: "https://aorms.in/downloads",
+    desktopHostUrl: "https://proc.aorms.in",
+    marketingPath: "/downloads",
     legacyMarketingPath: "/aorms-pmc",
     landingHref: "/#pmc",
     wikiPath: "/wiki/aproc",
@@ -247,7 +251,7 @@ export const PLATFORM_APPS = [
     ],
     workspaceSlug: AORMS_STUDIO.slug,
     href: AORMS_STUDIO.appUrl,
-    cta: `Open ${AORMS_STUDIO.title}`,
+    cta: "Downloads — coming soon",
   },
   {
     id: "consultancy",
@@ -266,7 +270,7 @@ export const PLATFORM_APPS = [
     ],
     workspaceSlug: AORMS_CONSULTANCY.slug,
     href: AORMS_CONSULTANCY.appUrl,
-    cta: `Open ${AORMS_CONSULTANCY.title}`,
+    cta: "Downloads — coming soon",
   },
   {
     id: "pmc",
@@ -285,7 +289,7 @@ export const PLATFORM_APPS = [
     ],
     workspaceSlug: AORMS_PMC.slug,
     href: AORMS_PMC.appUrl,
-    cta: `Open ${AORMS_PMC.title}`,
+    cta: "Downloads — coming soon",
   },
 ] as const;
 

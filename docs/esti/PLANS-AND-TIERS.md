@@ -19,7 +19,7 @@
 | **Users** | Unlimited staff on the firm’s desktop seats |
 | **Clients / contractors / consultants / projects** | Unlimited |
 | **Storage (cloud)** | **5 GB** published artifacts included; overage billed per GB-month |
-| **AI** | **Unmetered** on desktop (local Ollama and/or opt-in keys per app) — never required on hub for staff work |
+| **AI** | **Unmetered** on **desktop only** (local Ollama / Foundry Local and/or opt-in keys per app). **No hub / VPS Ollama** — staff AI never required online |
 | **Desktop** | **Only** staff runtime — WinUI 3 + C++ engine (fork [AQC](https://github.com/HolagundiWorks/AQC)) |
 | **Web** | Marketing/demos on `aorms.in` · firm-branded **portals** · License Manager |
 

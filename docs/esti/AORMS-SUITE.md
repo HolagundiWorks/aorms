@@ -1,6 +1,6 @@
 # AORMS Suite Architecture
 
-**Status:** Canonical product law · **Updated:** 2026-08-08  
+**Status:** Canonical product law · **Updated:** 2026-08-09  
 **Locked:** **AORMS Connect** = suite core (login · launcher · catalog) · AQC → **three separate installers** sharing `bbs_engine` · **MongoDB** for non-drawing cloud ops · **ShilpiDB** for drawings · **AADT** for drafting  
 **Runtime:** [LOCAL-FIRST.md](LOCAL-FIRST.md) · Connect: [AORMS-CONNECT.md](AORMS-CONNECT.md) · Bridge: [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · Repos: [DESKTOP-REPOS.md](DESKTOP-REPOS.md)
 
@@ -117,7 +117,7 @@ Monolithic [AQC](https://github.com/HolagundiWorks/AQC) = **engine + reference**
 | **admin.aorms.in** | Licence Manager (Connect surfaces status in C3) |
 
 **Roadmap:** [ROADMAP.md](ROADMAP.md) · **Repos:** [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · **VPS:** [VPS-INSTALL.md](VPS-INSTALL.md)  
-**Updated:** 2026-08-08
+**Updated:** 2026-08-09
 
 ---
 
@@ -141,12 +141,17 @@ Postgres in this monorepo is **transitional** until hub APIs are fully Mongo-bac
 
 ## AI (suite)
 
+**ESTI (internal AI) lives in desktop managers / technical apps only.** The cloud
+hub and marketing VPS do **not** host Ollama or a staff “Hosted AI” plane.
+
 | Layer | Runtime |
 | --- | --- |
-| Desktop technical | Local instruct (Ollama / Foundry Local) |
-| Vision / sheets | Local VL inside AADT |
-| Portal chat (optional) | Cloud API on **published** context only |
+| Desktop managers (AStudio / AConsulting) | Local instruct (Ollama / Foundry Local / opt-in keys) via Connect-launched apps |
+| Desktop technical (AQC · AADT) | Local instruct / VL on the machine |
+| Cloud hub / aorms.in | **No Ollama** — licence, Mongo ops, portals, marketing only |
+| Portal chat (optional, future) | Cloud API on **published** context only — never firm draft AI |
 | Embeddings | Local, beside Shilpi `SpatialGrid` |
+| AI transcripts | **Local only** — never sync to Mongo |
 
 **Propose, never auto-commit** geometry or money.
 

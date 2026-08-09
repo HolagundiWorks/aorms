@@ -218,7 +218,10 @@ Skill: `.claude/skills/hcw-design-audit`.
 6. Visual regression: `e2e/tests/visual-regression.spec.ts` (Playwright `visual`
    project; baselines under `e2e/tests/visual-regression.spec.ts-snapshots/`).
 
-**AORMS AI:** `@hcw/aorms-ai-kit` (prompts + Ollama SDK) — backend dependency; product docs stay in `docs/esti/`.
+**AORMS AI:** ESTI runs on **desktop apps only** (local Ollama / Foundry Local) —
+not on the cloud hub or aorms.in. `@hcw/aorms-ai-kit` is prompts + Ollama SDK for
+local/desktop use; canon: `docs/esti/LOCAL-FIRST.md` · `AORMS-SUITE.md` § AI ·
+`PRODUCTION-OPS.md` § ESTI AI.
 
 ### Structural CSS helpers (`styles.scss`, `landing.scss`)
 

@@ -7,7 +7,7 @@ repos on disk. Everything needed to run is inside this repository.
 | Package | Vendor path | Role |
 |---------|-------------|------|
 | `@hcw/ui-kit` | `vendor/hcw-ui-kit/` | HCW-UI-Kit design system (built `dist/` from [hcwux](https://github.com/HolagundiWorks/hcwux)) |
-| `@hcw/aorms-ai-kit` | `vendor/hcw-aorms-ai-kit/` | AORMS AI prompts + Ollama SDK (backend) |
+| `@hcw/aorms-ai-kit` | `vendor/hcw-aorms-ai-kit/` | AORMS AI prompts + Ollama SDK — **desktop / local** (not a cloud VPS requirement) |
 
 > **Retired kits — do not reintroduce.**
 > - `@hcw/carbon-agent-kit` was **internalised** (2026-07) as `frontend/scripts/
@@ -75,4 +75,5 @@ CI uses a **single checkout** — no sibling kit repos are cloned.
 - `pnpm --filter @esti/frontend lint` — eslint only (the Carbon policy guard was
   removed with `@carbon/react`, 2026-07).
 
-Ollama requirement for landing AI unchanged — see [PRODUCTION-OPS.md](esti/PRODUCTION-OPS.md).
+**Cloud / aorms.in:** no Ollama. ESTI AI is desktop-only — see
+[PRODUCTION-OPS.md](esti/PRODUCTION-OPS.md) § ESTI AI · [LOCAL-FIRST.md](esti/LOCAL-FIRST.md).

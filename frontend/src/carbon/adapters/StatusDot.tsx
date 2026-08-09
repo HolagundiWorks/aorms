@@ -1,75 +1,18 @@
-import type { ReactNode } from "react";
-import { Tag } from "@carbon/react";
-
 /**
- * Wave 2 adapter — kit `StatusDot` API → stock Carbon `<Tag>`.
+ * Wave 3a — re-export kit `StatusDot` (+ app `StatusTag` typing shim).
  *
- * Drop-in for `@hcw/ui-kit`'s StatusDot so call-sites migrate by import swap
- * (docs/esti/CARBON-MIGRATION.md § Wave 2). Per § 0 (pure Carbon) this renders
- * a stock `Tag` — the kit's dot+label becomes a Carbon status tag. The kit's
- * named colours map 1:1 onto Carbon Tag `type`s; unknown/raw colours fall back
- * to `gray` (Tag does not take arbitrary colours — no forking).
- */
-export type StatusShape = "circle" | "triangle" | "square";
-
-type TagType =
-  | "red" | "magenta" | "purple" | "blue" | "cyan" | "teal" | "green"
-  | "gray" | "cool-gray" | "warm-gray" | "high-contrast" | "outline";
-
-const TAG_TYPES = new Set<TagType>([
-  "red", "magenta", "purple", "blue", "cyan", "teal", "green",
-  "gray", "cool-gray", "warm-gray", "high-contrast", "outline",
-]);
-
-export function StatusDot({
-  color = "gray",
-  label,
-  size = "sm",
-}: {
-  color?: string;
-  label: ReactNode;
-  size?: "sm" | "md";
-  /** Accepted for API parity with the kit; Carbon Tag has no shape channel. */
-  shape?: StatusShape;
-}) {
-  const type: TagType = TAG_TYPES.has(color as TagType) ? (color as TagType) : "gray";
-  return (
-    <Tag type={type} size={size === "md" ? "md" : "sm"}>
-      {label}
-    </Tag>
-  );
-}
-
-/** API-parity shim for the kit helper — maps a severity to a nominal shape. */
-export function statusShapeFor(severity: string): StatusShape {
-  if (severity === "error" || severity === "critical") return "triangle";
-  if (severity === "warning") return "square";
-  return "circle";
-}
-
-/**
- * Wave 3 adapter — kit `StatusTag` API → Carbon `<Tag>` (via {@link StatusDot}).
+ * Wave 2 mapped the kit API onto Carbon `<Tag>`. Wave 3a restores the kit
+ * primitive so adapter import paths keep working while visuals stay on
+ * `@hcw/ui-kit` (docs/esti/CARBON-MIGRATION.md · HCW-UI-Kit canon).
  *
- * Every status/enum column renders through this so colour choices live in a
- * single shared map (in `@esti/contracts`). Unknown values fall back to `gray`.
- * The kit `severity`/`shape` channel is accepted for parity; Carbon Tag has no
- * shape channel, so it is a no-op here.
+ * `StatusTag` is not a kit export — re-exported from the app wrapper that
+ * adds `@esti/contracts` `TagColor` map typing over kit `StatusDot`.
  */
-export function StatusTag<T extends string>({
-  value,
-  map,
-  label,
-  size = "sm",
-  severity,
-}: {
-  value: T;
-  map: Record<T, string>;
-  label?: ReactNode;
-  size?: "sm" | "md";
-  severity?: "ok" | "watch" | "critical" | "inactive";
-}) {
-  const shape = severity ? statusShapeFor(severity) : undefined;
-  return <StatusDot color={map[value] ?? "gray"} label={label ?? value} size={size} shape={shape} />;
-}
+export {
+  StatusDot,
+  statusShapeFor,
+  type StatusShape,
+} from "@hcw/ui-kit";
+export { StatusTag } from "../../components/StatusTag.js";
 
-export default StatusDot;
+export { StatusDot as default } from "@hcw/ui-kit";

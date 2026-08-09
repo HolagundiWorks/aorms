@@ -1,15 +1,18 @@
 # HCW-UI-Kit → IBM Carbon Design System — migration & roadmap
 
-**Status:** Proposed · **Created:** 2026-08-02 · **Owner:** HCW / frontend
-**Scope:** Whole frontend — app screens, portals, licensing console, **and** the
-public landing / marketing pages.
+**Status:** Proposed (not active) · **Created:** 2026-08-02 · **Owner:** HCW / frontend  
+**Updated:** 2026-08-09 — product direction remains **`@hcw/ui-kit` pure neu**; S12 UX
+audit **removed** CarbonSpike and de-Carboned priority staff/portal surfaces. Remaining
+`@carbon/react` (~38 files) is strangler debt to clear toward the kit, **not** a
+restart of this Carbon migration.
 
-> This document plans the move **off** `@hcw/ui-kit` (+ MUI) **onto** the **IBM
-> Carbon Design System** (`@carbon/react` v11). It is the deliberate reverse of
-> the 2026-07 Carbon→MUI migration recorded in
-> [`HCW-UI-KIT.md`](HCW-UI-KIT.md); read that first for how the current system
-> came to be. Until Wave 6 completes, **`@hcw/ui-kit` remains canonical** — see
-> [`CLAUDE.md`](../../CLAUDE.md) § UI / design system.
+**Scope (historical plan):** Whole frontend — app screens, portals, licensing console,
+**and** the public landing / marketing pages.
+
+> This document once planned a move **off** `@hcw/ui-kit` (+ MUI) **onto** IBM
+> Carbon (`@carbon/react` v11). That programme is **not** the shipping direction.
+> Canon: [`HCW-UI-KIT.md`](HCW-UI-KIT.md) · [`CLAUDE.md`](../../CLAUDE.md) § UI ·
+> S12 note [2026-08-09-UX-AUDIT-WAVE.md](../hcw-kit/11-audits/2026-08-09-UX-AUDIT-WAVE.md).
 
 ---
 
@@ -248,7 +251,7 @@ bucket-1 adapters — `StatusDot`→`Tag` (302 uses), `DataState`→`SkeletonTex
 `Tile` empty-state (243), `PageBreadcrumb`→`Breadcrumb` + `document.title` (116),
 `ConfirmModal`→`Modal`(danger) (55) — each exposing the kit prop API so Wave 3
 call-sites migrate by import swap (`@hcw/ui-kit` → `../carbon/adapters`). All
-render stock Carbon, are exercised on `/carbon-spike`, and pass tsc/eslint/build;
+render stock Carbon (historically exercised on `/carbon-spike`, removed Wave 3c), and pass tsc/eslint/build;
 the `breadcrumb` component was added to `carbon-tree.scss`. **Remaining bucket-1:**
 `pushToast`/`ToastHost`→`ToastNotification` global container. **Bucket-2**
 retirements are rewritten in Waves 3/5 as planned.
@@ -439,8 +442,10 @@ The governing rule settles these; recorded here for traceability.
 
 ## 9. Wave 0/1 spike — findings (done 2026-08-02)
 
-A probe screen (`frontend/src/routes/CarbonSpike.tsx`, route `/carbon-spike`)
-renders stock `@carbon/react` under a Carbon `<Theme>` inside the live app.
+A probe screen (`CarbonSpike.tsx`, route `/carbon-spike`) rendered stock
+`@carbon/react` under a Carbon `<Theme>` inside the live app. **Removed in
+Wave 3c (2026-08-09)** — route unregistered in `App.tsx` and the file deleted;
+findings below still stand for the migration plan.
 
 - **Integrates cleanly:** `@carbon/react@1.113` / `@carbon/icons-react@11` /
   `@carbon/styles@1.112` install and peer-support React 19; frontend `tsc` +
@@ -450,7 +455,7 @@ renders stock `@carbon/react` under a Carbon `<Theme>` inside the live app.
   reset + base type app-wide once loaded, and its `:root --cds-*` tokens overlap
   the frozen compat block in `styles.scss`. **Wave 1 must scope Carbon styles**
   (Sass `@use` with a layer, or a scoped build) before Carbon lands on shared
-  screens. The spike keeps it isolated to `/carbon-spike`.
+  screens. The former spike kept that risk isolated to `/carbon-spike`.
 - **Verdict:** the roadmap is sound; proceed to Wave 1 foundation.
 
 ---

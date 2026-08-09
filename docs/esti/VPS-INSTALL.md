@@ -49,11 +49,14 @@ One box runs containers behind the host's nginx (which terminates TLS):
    │  esti-redis   (Redis)      ─ internal only          │
    │  esti-mongo   (Mongo ops)  ─ suite portal ops       │
    │  esti-minio   (S3 storage) ─ internal only          │
-   │  esti-ollama  (local LLM)  ─ internal only          │
    │  frontend     (build-only) ─ compiles the SPA → dist│
    └────────────────────────────────────────────────────┘
 ```
 
+- **No cloud Ollama.** ESTI AI runs on **desktop apps** only
+  ([LOCAL-FIRST.md](LOCAL-FIRST.md) · [PRODUCTION-OPS.md](PRODUCTION-OPS.md) § ESTI AI).
+  A leftover `esti-ollama` service in compose is **not** a production requirement —
+  do not size the VPS for LLM inference.
 - Only the **backend** binds a host port, and only on **loopback** (`127.0.0.1:4000`).
   Postgres/Redis/Mongo/MinIO are never exposed to the internet.
 - The SPA is built once and served as static files by nginx from `/opt/esti/frontend/dist`.

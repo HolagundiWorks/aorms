@@ -20,6 +20,9 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import HelpOutlineOutlined from "@mui/icons-material/HelpOutlineOutlined";
+import NoteAddOutlined from "@mui/icons-material/NoteAddOutlined";
+import UploadFileOutlined from "@mui/icons-material/UploadFileOutlined";
 import {
   CONSULTANT_SUBMISSION_KIND_LABEL,
   CONSULTANT_SUBMISSION_STATUS_LABEL,
@@ -29,7 +32,7 @@ import {
   type ConsultantOriginKind as ConsultantOriginKindT,
   type ConsultantSubmissionKind as ConsultantSubmissionKindT,
 } from "@esti/contracts";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DataState } from "../components/DataState.js";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
@@ -43,7 +46,7 @@ import { StatusDot } from "../components/StatusTag.js";
 import { SubmissionThread } from "../components/SubmissionThread.js";
 import { trpc } from "../lib/trpc.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
-import { Surface, RADIUS } from "@hcw/ui-kit";
+import { Surface, RADIUS, useScreenActions } from "@hcw/ui-kit";
 
 type SubmissionStatus = keyof typeof CONSULTANT_SUBMISSION_STATUS_LABEL;
 
@@ -100,6 +103,12 @@ export function CollaboratorPortal() {
     }
   }, [openId, detailQ.isError, navigate]);
 
+  useEffect(() => {
+    const base = AORMS_PORTALS.consultant.label;
+    document.title =
+      openId && d?.project?.title ? `${d.project.title} — ${base}` : base;
+  }, [openId, d?.project?.title]);
+
   // ── write state ──────────────────────────────────────────────────────────
   const [form, setForm] = useState<{ kind: ConsultantOriginKindT; subject: string; body: string } | null>(null);
   const submit = trpc.collab.submit.useMutation({
@@ -113,6 +122,38 @@ export function CollaboratorPortal() {
 
   // ── conversation thread ────────────────────────────────────────────────────
   const [threadFor, setThreadFor] = useState<{ id: string; subject: string } | null>(null);
+
+  const dockDialogOpen = form !== null || threadFor !== null;
+  const dockActions = useMemo(() => {
+    if (!openId || dockDialogOpen) return [];
+    return [
+      {
+        id: "collab-deliverable",
+        zone: "center" as const,
+        tone: "primary" as const,
+        label: "Submit deliverable",
+        icon: <UploadFileOutlined />,
+        onClick: () => setForm({ kind: "DELIVERABLE", subject: "", body: "" }),
+      },
+      {
+        id: "collab-rfi",
+        zone: "center" as const,
+        tone: "default" as const,
+        label: "Raise RFI",
+        icon: <HelpOutlineOutlined />,
+        onClick: () => setForm({ kind: "RFI", subject: "", body: "" }),
+      },
+      {
+        id: "collab-note",
+        zone: "center" as const,
+        tone: "default" as const,
+        label: "Add note",
+        icon: <NoteAddOutlined />,
+        onClick: () => setForm({ kind: "NOTE", subject: "", body: "" }),
+      },
+    ];
+  }, [openId, dockDialogOpen]);
+  useScreenActions(dockActions, [dockActions]);
   const threadQ = trpc.collab.submissionThread.useQuery(
     { submissionId: threadFor?.id ?? "" },
     { enabled: !!threadFor },
@@ -408,29 +449,6 @@ export function CollaboratorPortal() {
                   {d.project.ref} · {d.project.projectType} · {d.project.jurisdiction} ·
                 </Typography>
                 <StatusDot color="cool-gray" label={d.project.status} />
-              </Stack>
-              <Stack direction="row" spacing={1}>
-                <Button
-                  size="small"
-                  variant="contained"
-                  onClick={() => setForm({ kind: "DELIVERABLE", subject: "", body: "" })}
-                >
-                  Submit deliverable
-                </Button>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  onClick={() => setForm({ kind: "RFI", subject: "", body: "" })}
-                >
-                  Raise RFI
-                </Button>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  onClick={() => setForm({ kind: "NOTE", subject: "", body: "" })}
-                >
-                  Add note
-                </Button>
               </Stack>
             </Stack>
 

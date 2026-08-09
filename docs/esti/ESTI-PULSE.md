@@ -65,7 +65,7 @@ Studio Intelligence dashboard + notifications
 | Today's Work Queue (top-20 by score) | `tasks.todayQueue` → Work hub / Studio Intelligence WORK tab | ✅ live |
 | Office-level cognition + Action Center | `cognition/engine.ts`, `dashboard` namespace | ✅ live |
 | Notifications, threaded comments, immutable activity | `notifications` / `comments` / `activity` | ✅ live |
-| AI runtime (Ollama, prompts) | `@hcw/aorms-ai-kit`, `ai` namespace (Pro-gated) | ✅ live |
+| AI runtime (Ollama, prompts) | Desktop local via `@hcw/aorms-ai-kit` — **not** hub/VPS | ✅ desktop law |
 | **Dependency graph** (P-1) | `esti_task_dependency` (migration `0145`) + `pulse.dependencies.*` | ✅ live |
 | **Missing-parameter detector** (P-1) | `esti_task_missing_param` + `detectMissingParameters()` + `pulse.detect` / `pulse.missingParameters.*` | ✅ live |
 | **Confidence score** (P-1) | `esti_task.confidenceScore` + `computeConfidenceScore()` | ✅ live |
@@ -298,7 +298,7 @@ esti_task_priority_log        id · task_id · old/new_priority_score · old/new
 | Engine + scheduler | Existing Fastify backend (TypeScript); standup cycles on the in-process scheduler; heavy scans can offload to the Python worker via Redis streams later |
 | Graph + tables | PostgreSQL relational tables (above); Neo4j only if graph queries outgrow SQL (not expected at office scale) |
 | Scoring | Deterministic TypeScript in `packages/contracts` (pure, unit-tested — same pattern as `computeTaskPriority` / ASPRF) |
-| LLM runtime | Ollama via `@hcw/aorms-ai-kit` (existing); vLLM documented as production-scale option |
+| LLM runtime | **Desktop** Ollama via `@hcw/aorms-ai-kit`; no cloud Ollama. Scale-up stays on the firm machine (or local vLLM) |
 | Agent orchestration | Deterministic state machine in the backend (stage-gated); LangGraph noted as a later option, not a day-1 dependency |
 | Vectors (phase 4) | pgvector first; Qdrant as scale option; `bge-m3` / `nomic-embed-text` embeddings |
 | Notifications | Existing `notifications` namespace; email via existing mail transport; WhatsApp later |

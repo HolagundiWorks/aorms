@@ -85,7 +85,7 @@ const OUTCOMES = [
   {
     icon: <DnsOutlined fontSize="small" />,
     title: "Technical work stays local",
-    body: "Estimation, BBS, project management, and drafting run on the desktop. Firm portals and this marketing site stay online — aorms.in is demos and downloads, not staff ERP.",
+    body: "Estimation, BBS, project management, and drafting run on the desktop. Firm portals and this marketing site stay online — aorms.in is marketing and downloads, not staff ERP.",
   },
   {
     icon: <SelfImprovementOutlined fontSize="small" />,
@@ -114,7 +114,7 @@ function SectionHead({
     <Stack spacing={MARKETING_RHYTHM.sm} sx={{ mb: MARKETING_RHYTHM.headMb, maxWidth: 720 }}>
       <Typography
         variant="overline"
-        color="primary"
+        color="text.secondary"
         sx={{ letterSpacing: "0.14em", fontFamily: "inherit" }}
       >
         {eyebrow}
@@ -261,22 +261,15 @@ export function Landing() {
                   {AORMS_PLATFORM.heroHeadline[0]}
                 </Typography>
                 <Typography
-                  variant="h5"
-                  component="p"
-                  color="text.secondary"
-                  sx={{ mt: MARKETING_RHYTHM.sm, fontWeight: 500, lineHeight: 1.35, maxWidth: 520 }}
-                >
-                  {AORMS_PLATFORM.heroHeadline[1]}
-                </Typography>
-                <Typography
                   variant="body1"
                   color="text.secondary"
                   sx={{ mt: MARKETING_RHYTHM.md, mb: MARKETING_RHYTHM.lg, maxWidth: 520, lineHeight: 1.55 }}
                 >
                   {AORMS_PLATFORM.tagline}. Desktop apps for practice work — firm portals for
-                  clients. Marketing and demos live here.
+                  clients. This site is marketing and product news; Windows installers are
+                  Coming soon.
                 </Typography>
-                {/* Soft launch: no apex login CTAs. S8 (marketing gate off): portals/demo login. */}
+                {/* Soft launch: one primary CTA. S8 (marketing gate off): portals/demo login. */}
                 <Stack direction="row" spacing={MARKETING_RHYTHM.sm} sx={{ flexWrap: "wrap", gap: MARKETING_RHYTHM.sm }}>
                   {isMarketingOnly() ? (
                     <Button
@@ -321,24 +314,15 @@ export function Landing() {
                       {installersComingSoonForced() ? "Downloads — coming soon" : "Downloads"}
                     </Button>
                   )}
-                  <Button
-                    component={RouterLink}
-                    to="/blog"
-                    variant="text"
-                    color="inherit"
-                    sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
-                  >
-                    Blog
-                  </Button>
                 </Stack>
                 <Stack
                   direction="row"
                   spacing={1}
                   sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 1, mt: MARKETING_RHYTHM.lg }}
                 >
-                  <StatusDot color="green" label="" size="sm" />
+                  <StatusDot color="green" label="Suite products" size="sm" />
                   <Typography variant="caption" color="text.secondary">
-                    Suite: managers · AQC Estimation/BBS/PM · AADT · ShilpiDB · firm portals
+                    Managers · AQC Estimation/BBS/PM · AADT · ShilpiDB · firm portals
                   </Typography>
                 </Stack>
               </Box>
@@ -347,35 +331,6 @@ export function Landing() {
               <WorkspacePreview />
             </Grid>
           </Grid>
-
-          <SoftSurface sx={{ p: { xs: MARKETING_RHYTHM.md, md: MARKETING_RHYTHM.lg }, mt: 0 }}>
-            <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em" }}>
-              Replaces the sprawl
-            </Typography>
-            <Stack direction="row" sx={{ flexWrap: "wrap", gap: MARKETING_RHYTHM.sm, mt: MARKETING_RHYTHM.sm }}>
-              {AORMS_PLATFORM.fragmentedTools.map((tool) => (
-                <Typography
-                  key={tool}
-                  variant="body2"
-                  sx={{
-                    px: 1.5,
-                    py: 0.5,
-                    color: "text.secondary",
-                    border: (t) => `1px solid ${t.palette.divider}`,
-                    borderRadius: `${RADIUS}px`,
-                  }}
-                >
-                  {tool}
-                </Typography>
-              ))}
-              <Typography
-                variant="body2"
-                sx={{ px: 1.5, py: 0.5, fontWeight: 700, color: "primary.main" }}
-              >
-                → {AORMS_PLATFORM.name}
-              </Typography>
-            </Stack>
-          </SoftSurface>
         </Box>
 
         {/* 2 — Outcomes: five cards (odd grouping) */}
@@ -411,6 +366,34 @@ export function Landing() {
 
         {/* 3 — Platform: frameworks, apps, AI, proof figures */}
         <Box id="platform" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
+          <SoftSurface sx={{ p: { xs: MARKETING_RHYTHM.md, md: MARKETING_RHYTHM.lg }, mb: MARKETING_RHYTHM.blockGap }}>
+            <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em" }}>
+              Replaces the sprawl
+            </Typography>
+            <Stack direction="row" sx={{ flexWrap: "wrap", gap: MARKETING_RHYTHM.sm, mt: MARKETING_RHYTHM.sm }}>
+              {AORMS_PLATFORM.fragmentedTools.map((tool) => (
+                <Typography
+                  key={tool}
+                  variant="body2"
+                  sx={{
+                    px: 1.5,
+                    py: 0.5,
+                    color: "text.secondary",
+                    border: (t) => `1px solid ${t.palette.divider}`,
+                    borderRadius: `${RADIUS}px`,
+                  }}
+                >
+                  {tool}
+                </Typography>
+              ))}
+              <Typography
+                variant="body2"
+                sx={{ px: 1.5, py: 0.5, fontWeight: 700, color: "primary.main" }}
+              >
+                → {AORMS_PLATFORM.name}
+              </Typography>
+            </Stack>
+          </SoftSurface>
           <SectionHead
             eyebrow="Suite"
             title="Managers. Technical apps. Drafting. Shared drawings."
@@ -463,10 +446,10 @@ export function Landing() {
                     {app.body}
                   </Typography>
                   <Button
-                    component="a"
-                    href={app.href}
-                    variant="contained"
-                    color="primary"
+                    component={RouterLink}
+                    to="/downloads"
+                    variant="outlined"
+                    color="inherit"
                     size="small"
                     endIcon={<ArrowForward />}
                     sx={{ mt: MARKETING_RHYTHM.md, textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px` }}
@@ -496,11 +479,11 @@ export function Landing() {
                         fontWeight: 700,
                         textTransform: "uppercase",
                         letterSpacing: "0.08em",
-                        color: app.status === "live" ? "text.primary" : "text.disabled",
+                        color: "text.disabled",
                         border: (t) => `1px solid ${t.palette.divider}`,
                       }}
                     >
-                      {app.status === "live" ? "Live" : app.status === "preview" ? "Preview" : "Roadmap"}
+                      Coming soon
                     </Typography>
                   </Stack>
                   <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
@@ -510,10 +493,10 @@ export function Landing() {
                     {app.body}
                   </Typography>
                   <Button
-                    component="a"
-                    href={app.href}
-                    variant={app.id === "studio" ? "contained" : "outlined"}
-                    color={app.id === "studio" ? "primary" : "inherit"}
+                    component={RouterLink}
+                    to="/downloads"
+                    variant="outlined"
+                    color="inherit"
                     size="small"
                     endIcon={<ArrowForward />}
                     sx={{ mt: MARKETING_RHYTHM.md, textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px` }}
@@ -719,7 +702,7 @@ export function Landing() {
                   Firm portals
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm }}>
-                  Clients and collaborators see published updates only. This apex site stays marketing and demos.
+                  Clients and collaborators see published updates only. This apex site stays marketing and product news.
                 </Typography>
               </SoftSurface>
             </Grid>

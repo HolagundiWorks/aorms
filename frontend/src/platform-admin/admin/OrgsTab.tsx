@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import {
+  Alert,
+  Box,
   Button,
-  InlineNotification,
-  Modal,
-  Select,
-  SelectItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
   Stack,
-  TextInput,
-} from "@carbon/react";
-import { CarbonScope } from "../../carbon/CarbonScope.js";
+  TextField,
+  Typography,
+} from "@mui/material";
 import { DataGrid, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../lib/trpc";
 
@@ -167,7 +170,7 @@ export default function OrgsTab() {
       filterable: false,
       width: 130,
       renderCell: (p) => (
-        <Button kind="ghost" size="sm" onClick={() => openMembers({ id: p.row.id, name: p.row.name })}>
+        <Button size="small" variant="text" onClick={() => openMembers({ id: p.row.id, name: p.row.name })}>
           Manage
         </Button>
       ),
@@ -180,8 +183,9 @@ export default function OrgsTab() {
       width: 100,
       renderCell: (p) => (
         <Button
-          kind="danger--ghost"
-          size="sm"
+          size="small"
+          color="error"
+          variant="text"
           onClick={() => {
             setDeleteError(null);
             setDeleteSlug("");
@@ -220,73 +224,67 @@ export default function OrgsTab() {
       filterable: false,
       width: 180,
       renderCell: (p) => (
-        <div style={{ display: "flex", gap: "0.5rem" }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
           {p.row.status !== "ACTIVE" && (
-            <Button kind="ghost" size="sm" onClick={() => setStatus(p.row.accountId, "ACTIVE")}>
+            <Button size="small" variant="text" onClick={() => setStatus(p.row.accountId, "ACTIVE")}>
               Approve
             </Button>
           )}
           {p.row.status !== "LEFT" && (
-            <Button kind="ghost" size="sm" onClick={() => setStatus(p.row.accountId, "LEFT")}>
+            <Button size="small" variant="text" onClick={() => setStatus(p.row.accountId, "LEFT")}>
               Remove
             </Button>
           )}
-        </div>
+        </Box>
       ),
     },
   ];
 
   return (
-    <CarbonScope>
-      <Stack gap={5}>
-        <div>
-          <Button onClick={() => setOpen(true)}>New organization</Button>
-        </div>
+    <Stack spacing={2}>
+      <Box>
+        <Button variant="contained" onClick={() => setOpen(true)}>New organization</Button>
+      </Box>
 
-        <DataGrid
-          rows={orgs}
-          columns={orgColumns}
-          getRowId={(r) => r.id}
-          density="compact"
-          disableRowSelectionOnClick
-          hideFooter
-          autoHeight
-        />
+      <DataGrid
+        rows={orgs}
+        columns={orgColumns}
+        getRowId={(r) => r.id}
+        density="compact"
+        disableRowSelectionOnClick
+        hideFooter
+        autoHeight
+      />
 
-        <Modal
-          open={open}
-          size="sm"
-          modalHeading="New organization"
-          primaryButtonText="Create"
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!name}
-          onRequestClose={() => setOpen(false)}
-          onRequestSubmit={create}
-        >
-          <Stack gap={5}>
-            <TextInput id="org-name" labelText="Name" value={name} onChange={(e) => setName(e.target.value)} />
-            <TextInput id="org-slug" labelText="Slug (optional — derived from name)" value={slug} onChange={(e) => setSlug(e.target.value)} />
-            <TextInput id="org-email" labelText="Billing email (optional)" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <TextInput
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>New organization</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField id="org-name" label="Name" value={name} onChange={(e) => setName(e.target.value)} fullWidth />
+            <TextField id="org-slug" label="Slug (optional — derived from name)" value={slug} onChange={(e) => setSlug(e.target.value)} fullWidth />
+            <TextField id="org-email" label="Billing email (optional)" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth />
+            <TextField
               id="org-login-domain"
-              labelText="Login domain (optional)"
+              label="Login domain (optional)"
               placeholder="acme.in"
               helperText="Lets members sign in by typing this domain at Step 1."
               value={loginDomain}
               onChange={(e) => setLoginDomain(e.target.value)}
+              fullWidth
             />
-            {error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={error} />}
+            {error && <Alert severity="error">{error}</Alert>}
           </Stack>
-        </Modal>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="contained" disabled={!name} onClick={() => void create()}>Create</Button>
+        </DialogActions>
+      </Dialog>
 
-        <Modal
-          open={manage !== null}
-          size="lg"
-          passiveModal
-          modalHeading={`Members — ${manage?.name ?? ""}`}
-          onRequestClose={() => setManage(null)}
-        >
-          <Stack gap={5}>
+      <Dialog open={manage !== null} onClose={() => setManage(null)} fullWidth maxWidth="md">
+        <DialogTitle>{`Members — ${manage?.name ?? ""}`}</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
             <DataGrid
               rows={members}
               columns={memberColumns}
@@ -297,84 +295,104 @@ export default function OrgsTab() {
               autoHeight
             />
 
-            <div style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem" }}>
-              <div style={{ flex: 1 }}>
-                <TextInput
-                  id="invite-email"
-                  labelText="Invite an existing account by email"
-                  placeholder="person@firm.in"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                />
-              </div>
-              <Button kind="secondary" disabled={!inviteEmail} onClick={invite}>
+            <Box sx={{ display: "flex", alignItems: "flex-end", gap: 1 }}>
+              <TextField
+                id="invite-email"
+                label="Invite an existing account by email"
+                placeholder="person@firm.in"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                sx={{ flex: 1 }}
+              />
+              <Button variant="outlined" disabled={!inviteEmail} onClick={() => void invite()}>
                 Invite
               </Button>
-            </div>
+            </Box>
             {memberError && (
-              <InlineNotification
-                kind="error"
-                lowContrast
-                hideCloseButton
-                title="Couldn't invite"
-                subtitle={memberError === "account_not_found"
+              <Alert severity="error">
+                {memberError === "account_not_found"
                   ? "No account with that email — they must sign up first."
                   : memberError}
-              />
+              </Alert>
             )}
 
-            <Stack gap={3}>
-              <h3 className="cds--type-heading-compact-01" style={{ margin: 0 }}>Issue a certification</h3>
-              <div style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem", flexWrap: "wrap" }}>
-                <div style={{ flex: 1, minWidth: 160 }}>
-                  <Select id="cert-who" labelText="To member" value={certWho} onChange={(e) => setCertWho(e.target.value)}>
-                    <SelectItem value="" text="Select a member…" />
-                    {certifiable.map((m) => (
-                      <SelectItem key={m.accountId} value={m.publicId ?? ""} text={m.email} />
-                    ))}
-                  </Select>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <TextInput id="cert-title" labelText="Title" placeholder="Registered Architect" value={certTitle} onChange={(e) => setCertTitle(e.target.value)} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <TextInput id="cert-issuer" labelText="Issuer (optional)" placeholder="Council of Architecture" value={certIssuer} onChange={(e) => setCertIssuer(e.target.value)} />
-                </div>
-                <Button kind="secondary" disabled={!certWho || !certTitle} onClick={issueCert}>
+            <Stack spacing={1}>
+              <Typography variant="subtitle2" sx={{ m: 0 }}>Issue a certification</Typography>
+              <Box sx={{ display: "flex", alignItems: "flex-end", gap: 1, flexWrap: "wrap" }}>
+                <TextField
+                  id="cert-who"
+                  select
+                  label="To member"
+                  value={certWho}
+                  onChange={(e) => setCertWho(e.target.value)}
+                  sx={{ flex: 1, minWidth: 160 }}
+                >
+                  <MenuItem value="">Select a member…</MenuItem>
+                  {certifiable.map((m) => (
+                    <MenuItem key={m.accountId} value={m.publicId ?? ""}>
+                      {m.email}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  id="cert-title"
+                  label="Title"
+                  placeholder="Registered Architect"
+                  value={certTitle}
+                  onChange={(e) => setCertTitle(e.target.value)}
+                  sx={{ flex: 1 }}
+                />
+                <TextField
+                  id="cert-issuer"
+                  label="Issuer (optional)"
+                  placeholder="Council of Architecture"
+                  value={certIssuer}
+                  onChange={(e) => setCertIssuer(e.target.value)}
+                  sx={{ flex: 1 }}
+                />
+                <Button variant="outlined" disabled={!certWho || !certTitle} onClick={() => void issueCert()}>
                   Issue
                 </Button>
-              </div>
-              {certNote && <InlineNotification kind="info" lowContrast hideCloseButton title="Certification" subtitle={certNote} />}
+              </Box>
+              {certNote && <Alert severity="info">{certNote}</Alert>}
             </Stack>
           </Stack>
-        </Modal>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setManage(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
 
-        <Modal
-          open={deleteTarget !== null}
-          size="sm"
-          danger
-          modalHeading="Delete organization"
-          primaryButtonText="Delete workspace"
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!deleteTarget || deleteSlug !== deleteTarget.slug}
-          onRequestClose={() => setDeleteTarget(null)}
-          onRequestSubmit={removeOrg}
-        >
-          <Stack gap={5}>
-            <p className="cds--type-body-01" style={{ margin: 0 }}>
+      <Dialog open={deleteTarget !== null} onClose={() => setDeleteTarget(null)} fullWidth maxWidth="sm">
+        <DialogTitle>Delete organization</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <Typography variant="body2" sx={{ m: 0 }}>
               Permanently delete <strong>{deleteTarget?.name}</strong> and revoke all licences,
               members, and API keys for this workspace. This cannot be undone.
-            </p>
-            <TextInput
+            </Typography>
+            <TextField
               id="delete-slug"
-              labelText={`Type slug to confirm: ${deleteTarget?.slug ?? ""}`}
+              label={`Type slug to confirm: ${deleteTarget?.slug ?? ""}`}
               value={deleteSlug}
               onChange={(e) => setDeleteSlug(e.target.value)}
+              fullWidth
             />
-            {deleteError && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={deleteError} />}
+            {deleteError && <Alert severity="error">{deleteError}</Alert>}
           </Stack>
-        </Modal>
-      </Stack>
-    </CarbonScope>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="error"
+            disabled={!deleteTarget || deleteSlug !== deleteTarget.slug}
+            onClick={() => void removeOrg()}
+          >
+            Delete workspace
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Stack>
   );
 }

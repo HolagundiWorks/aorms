@@ -9896,9 +9896,18 @@ $lp2-gap: 1px;               // shared border thickness
 
 /* Marketing neu frame — top ribbon + stage (left SoftRail retired) */
 .esti-lp-neu,
-.esti-mkt-topbar {
+.esti-mkt-topbar,
+.esti-mkt-shell,
+.esti-mkt-stage {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+/* Blog/Downloads shell — Fog Gray canvas (no lp2 white/glass stage) */
+.esti-mkt-shell,
+.esti-mkt-stage,
+.esti-mkt-content {
+  background: #f2f4f7 !important;
 }
 
 /* Shared content column — same as Landing Container maxWidth="lg" (1200px). */

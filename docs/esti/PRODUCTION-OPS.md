@@ -209,26 +209,26 @@ See [DEMO-AND-HR-MODE.md](DEMO-AND-HR-MODE.md).
 
 ---
 
-## Landing page ESTI AI (Ollama required)
+## ESTI AI — desktop only (no cloud Ollama)
 
-Prompts and Ollama client live in **`@hcw/aorms-ai-kit`** (vendored at `vendor/hcw-aorms-ai-kit/`). Rebuild backend after updating that package version. See [KITS.md](../KITS.md).
+**Product law (2026-08):** ESTI / staff AI runs inside **desktop apps**
+(AStudio · AConsulting · AQC / AADT via Connect) with **local** instruct
+(Ollama / Foundry Local / opt-in keys). See [LOCAL-FIRST.md](LOCAL-FIRST.md) ·
+[AORMS-SUITE.md](AORMS-SUITE.md) § AI.
 
-The public marketing site exposes **Ask ESTI** (`marketing.askEsti`) — product FAQ powered by on-server Ollama. There is **no mock fallback** on the landing page; if Ollama is down, visitors see a friendly unavailable message.
+| Surface | AI runtime |
+| --- | --- |
+| Desktop managers / technical apps | Local Ollama (or equivalent) on the machine |
+| aorms.in / hub VPS | **No Ollama** — do not require `esti-ollama` for production |
+| Firm portals | No staff LLM; optional future chat on **published** context only |
+| esti SPA `marketing.askEsti` / AI Studio | **Reference archive** — not a shipping cloud AI product |
 
-**Prerequisites**
+Prompts / SDK package **`@hcw/aorms-ai-kit`** may still exist in the monorepo for
+desktop or transitional local compose — it is **not** an ops requirement to pull
+models on the VPS. Soft-launch marketing does not depend on a live LLM.
 
-1. `esti-ollama` service running in `compose.prod.yaml` (or `OLLAMA_BASE_URL` pointing to a reachable host).
-2. Model pulled: `docker compose -f compose.prod.yaml exec esti-ollama ollama pull llama3.2` (or your `OLLAMA_MODEL`).
-3. Rebuild backend after deploy so `landing-gateway` is in the image.
-
-**Verify**
-
-```bash
-docker compose -f compose.prod.yaml exec esti-ollama ollama list
-curl -s http://127.0.0.1:11434/api/tags | head
-```
-
-Open the site → corner **Ask ESTI** → ask “What is CRIF?” — expect an answer about the project change register.
+**Do not** treat “Ask ESTI on the landing page” or hub **Hosted AI** as live
+product surfaces. Operators should not size VPS RAM/GPU for Ollama.
 
 ---
 

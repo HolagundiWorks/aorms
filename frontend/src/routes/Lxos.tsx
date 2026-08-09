@@ -1,8 +1,9 @@
-import { Alert, Box, Chip, Stack } from "@mui/material";
+import { Alert, Box, Stack } from "@mui/material";
 import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { LessonsBank } from "../components/ProjectLessons.js";
 import { AcademyPanel } from "../components/AcademyPanel.js";
+import { StatusDot } from "../components/StatusTag.js";
 
 /**
  * LXOS — Learning Exchange Operating System. Only live surfaces are shown as
@@ -28,7 +29,7 @@ export function Lxos() {
         <Box sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}>
           <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1 }}>
             <h4 style={{ margin: 0 }}>More LXOS layers</h4>
-            <Chip label="Coming soon" size="small" variant="outlined" />
+            <StatusDot color="cool-gray" label="Coming soon" />
           </Stack>
           <Alert severity="info" variant="outlined">
             Community Exchange and Professional Identity are planned. Use Lessons

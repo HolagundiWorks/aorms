@@ -7,8 +7,8 @@ import { MarketingLandingDock } from "./MarketingLandingDock.js";
 import { MarketingNeuFrame } from "./MarketingTopBar.js";
 
 /**
- * Marketing shell — soft-neu brand header + stage + landing action dock
- * (Calculator · Blog · Downloads · Sign in).
+ * Marketing shell — soft-neu brand header + Fog Gray stage + landing action dock
+ * (Calculator · Blog · Downloads · Home). Opaque neu — no glass/blur chrome.
  */
 export function MarketingShell({
   children,
@@ -40,7 +40,7 @@ export function MarketingShell({
   return (
     <MarketingNeuFrame mainId="lp2-main">
       <Box
-        className="lp2-shell esti-lp esti-lp-neu"
+        className="esti-lp esti-lp-neu esti-mkt-shell"
         sx={{
           flex: 1,
           minHeight: 0,
@@ -49,10 +49,11 @@ export function MarketingShell({
           width: 1,
           px: { xs: 1.5, md: 2 },
           pb: 10,
+          bgcolor: "background.default",
         }}
       >
         <Box
-          className="esti-dash-stage lp2-stage"
+          className="esti-dash-stage esti-mkt-stage"
           sx={{
             flex: 1,
             minWidth: 0,
@@ -60,6 +61,7 @@ export function MarketingShell({
             display: "flex",
             flexDirection: "column",
             position: "relative",
+            bgcolor: "background.default",
           }}
         >
           {contours ? (
@@ -67,7 +69,7 @@ export function MarketingShell({
               <LandingContours />
             </div>
           ) : null}
-          <div className="lp2-content">
+          <div className="esti-mkt-content">
             {children}
             {showFooter ? (
               <MarketingFooter visitCount={visitCount} variant={foot} />

@@ -1,11 +1,10 @@
 import ArrowBack from "@mui/icons-material/ArrowBack";
-import { Surface } from "@hcw/ui-kit";
+import { DataState, Surface } from "@hcw/ui-kit";
 import {
   Alert,
   AlertTitle,
   Box,
   Button,
-  CircularProgress,
   MenuItem,
   Stack,
   TextField,
@@ -154,9 +153,14 @@ export function CompanyAccountPortal() {
   if (checking) {
     return (
       <PortalShell active="company">
-        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-          <CircularProgress />
-        </Box>
+        <DataState
+          loading
+          isEmpty={false}
+          columnCount={2}
+          empty={{ title: "Loading company account" }}
+        >
+          <Box />
+        </DataState>
       </PortalShell>
     );
   }
@@ -268,7 +272,18 @@ export function CompanyAccountPortal() {
             ariaLabel="Company account sections"
           />
 
-          <Suspense fallback={<Box sx={{ display: "flex" }}><CircularProgress /></Box>}>
+          <Suspense
+            fallback={
+              <DataState
+                loading
+                isEmpty={false}
+                columnCount={2}
+                empty={{ title: "Loading section" }}
+              >
+                <Box />
+              </DataState>
+            }
+          >
             <PortalTabPanel active={tab === 0}>
               {license && <PortalLicenceCard title="Company licence" license={license} />}
               {!license && <RequestPlan />}

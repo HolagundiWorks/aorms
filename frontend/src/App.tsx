@@ -104,8 +104,6 @@ function lazyRoute(
 }
 
 const Alerts = lazyRoute(() => import("./routes/Alerts.js"), "Alerts");
-// Wave 1 Carbon migration spike — public probe screen (docs/esti/CARBON-MIGRATION.md).
-const CarbonSpike = lazyRoute(() => import("./routes/CarbonSpike.js"), "CarbonSpike");
 const ArchivedProjects = lazyRoute(() => import("./routes/ArchivedProjects.js"), "ArchivedProjects");
 const CollaboratorPortal = lazyRoute(() => import("./routes/CollaboratorPortal.js"), "CollaboratorPortal");
 const SitePortal = lazyRoute(() => import("./routes/SitePortal.js"), "SitePortal");
@@ -376,10 +374,6 @@ function AppWorkspace() {
   if (pathname === "/company-account")
     return <CompanyAccountPortal />;
 
-  // Wave 1 Carbon migration spike — standalone public probe, all build variants.
-  if (pathname === "/carbon-spike")
-    return <CarbonSpike />;
-
   // studio.aorms.in — staff sign-in lives at /login (no platform landing).
   if (surface === "studio" && pathname === "/" && !user && !isLoading)
     return <Navigate to="/login" replace />;
@@ -438,16 +432,19 @@ function AppWorkspace() {
         </div>
       </ActionDockProvider>
     );
-  // External consultants (scoped to a consultant record) get the collaborator portal.
+  // External consultants — firm portal chrome + ActionDock (deliverable · RFI · note).
   if (user.role === "CONSULTANT" && user.consultantId)
     return (
-      <div>
-        <Routes>
-          <Route path="/" element={<CollaboratorPortal />} />
-          <Route path="/projects/:projectId" element={<CollaboratorPortal />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
+      <ActionDockProvider>
+        <div className="esti-firm-portal-root" style={portalChromeCssVars(true)}>
+          <Routes>
+            <Route path="/" element={<CollaboratorPortal />} />
+            <Route path="/projects/:projectId" element={<CollaboratorPortal />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <ActionDock />
+        </div>
+      </ActionDockProvider>
     );
 
   // Contractors — firm portal chrome + ActionDock (tickets · visits · RA).

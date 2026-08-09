@@ -1,18 +1,16 @@
 import {
+  Alert,
+  Button,
   Checkbox,
-  InlineNotification,
-  Modal,
-  Select,
-  SelectItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  MenuItem,
   Stack,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  TextArea,
-  TextInput,
-} from "@carbon/react";
+  TextField,
+} from "@mui/material";
 import {
   LEAD_SOURCE_LABEL,
   LEAD_STATUS_LABEL,
@@ -28,7 +26,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Add } from "@carbon/icons-react";
 import { pushToast, useScreenActions } from "@hcw/ui-kit";
-import { CarbonScope } from "../carbon/CarbonScope.js";
 import {
   DataGrid,
   DataState,
@@ -36,6 +33,7 @@ import {
   StatusTag,
   type GridColDef,
 } from "../carbon/adapters/index.js";
+import { ProjectFacetTabs } from "../components/project/ProjectFacetTabs.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
 import { ComplianceCalculator } from "../components/compliance/ComplianceCalculator.js";
@@ -55,6 +53,7 @@ export function Leads() {
   const [open, setOpen] = useState(false);
   // Convert lead
   const [convertId, setConvertId] = useState<string | null>(null);
+  const [facet, setFacet] = useState("register");
 
   useScreenActions(
     open || !!convertId
@@ -157,7 +156,7 @@ export function Leads() {
       renderCell: (p) => {
         const l = p.row;
         return l.convertedProjectId ? (
-          <Link to={`/projects/${l.convertedProjectId}`} className="cds--link">{l.projectType || "View project"}</Link>
+          <Link to={`/projects/${l.convertedProjectId}`}>{l.projectType || "View project"}</Link>
         ) : (
           <div style={{ padding: "0.25rem 0" }}>
             <div>{l.projectType || "—"}</div>
@@ -181,20 +180,20 @@ export function Leads() {
             label={LEAD_STATUS_LABEL[l.status as LeadStatusT] ?? l.status}
           />
         ) : (
-          <div style={{ minWidth: 150 }}>
-            <Select
-              id={`st-${l.id}`}
-              labelText="Status"
-              hideLabel
-              size="sm"
-              value={l.status}
-              onChange={(e) => setStatus.mutate({ id: l.id, status: e.target.value as LeadStatusT })}
-            >
-              {STATUS_OPTIONS.map((s) => (
-                <SelectItem key={s} value={s} text={LEAD_STATUS_LABEL[s]} />
-              ))}
-            </Select>
-          </div>
+          <TextField
+            id={`st-${l.id}`}
+            select
+            label="Status"
+            size="small"
+            value={l.status}
+            onChange={(e) => setStatus.mutate({ id: l.id, status: e.target.value as LeadStatusT })}
+            sx={{ minWidth: 150 }}
+            slotProps={{ inputLabel: { shrink: true } }}
+          >
+            {STATUS_OPTIONS.map((s) => (
+              <MenuItem key={s} value={s}>{LEAD_STATUS_LABEL[s]}</MenuItem>
+            ))}
+          </TextField>
         );
       },
     },
@@ -243,14 +242,15 @@ export function Leads() {
         description="Inbound enquiries — qualify, then convert to a draft project."
       >
         <PageBreadcrumb items={[{ label: "Leads" }]} />
-        <CarbonScope>
-          <Tabs>
-            <TabList aria-label="Lead development sections" contained>
-              <Tab>Lead register</Tab>
-              <Tab>Permissible development</Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel>
+        <ProjectFacetTabs
+          ariaLabel="Lead development sections"
+          value={facet}
+          onChange={setFacet}
+          facets={[
+            {
+              id: "register",
+              label: "Lead register",
+              panel: (
                 <DataState
                   loading={listQ.isLoading}
                   isEmpty={leads.length === 0}
@@ -270,107 +270,156 @@ export function Leads() {
                     autoHeight
                   />
                 </DataState>
-              </TabPanel>
-              <TabPanel>
-                <ComplianceCalculator />
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
-        </CarbonScope>
+              ),
+            },
+            {
+              id: "permissible",
+              label: "Permissible development",
+              panel: <ComplianceCalculator />,
+            },
+          ]}
+        />
       </RailLayout>
 
-      <CarbonScope>
-        {/* Create lead */}
-        <Modal
-          open={open}
-          size="sm"
-          modalHeading="New lead"
-          primaryButtonText={create.isPending ? "Saving…" : "Capture lead"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!form.clientName || create.isPending}
-          onRequestClose={() => setOpen(false)}
-          onRequestSubmit={() =>
-            create.mutate({
-              clientName: form.clientName,
-              phone: form.phone || undefined,
-              email: form.email || undefined,
-              leadSource: form.leadSource as (typeof SOURCE_OPTIONS)[number],
-              projectType: form.projectType || undefined,
-              siteLocation: form.siteLocation || undefined,
-              city: form.city || undefined,
-              notes: form.notes || undefined,
-            })
-          }
-        >
-          <Stack gap={5}>
-            <TextInput id="ld-name" labelText="Enquirer name" value={form.clientName} onChange={(e) => setForm({ ...form, clientName: e.target.value })} />
-            <TextInput id="ld-phone" labelText="Phone (optional)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-            <TextInput id="ld-email" labelText="Email (optional)" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            <Select id="ld-src" labelText="Lead source" value={form.leadSource} onChange={(e) => setForm({ ...form, leadSource: e.target.value })}>
-              {SOURCE_OPTIONS.map((s) => <SelectItem key={s} value={s} text={LEAD_SOURCE_LABEL[s]} />)}
-            </Select>
-            <TextInput id="ld-ptype" labelText="Project type (optional)" value={form.projectType} onChange={(e) => setForm({ ...form, projectType: e.target.value })} />
-            <TextInput id="ld-loc" labelText="Site location (optional)" value={form.siteLocation} onChange={(e) => setForm({ ...form, siteLocation: e.target.value })} />
-            <TextInput id="ld-city" labelText="City (optional)" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
-            <TextArea id="ld-notes" labelText="Notes (optional)" rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-            {create.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={create.error.message} />}
+      {/* Create lead */}
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>New lead</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField id="ld-name" label="Enquirer name" value={form.clientName} onChange={(e) => setForm({ ...form, clientName: e.target.value })} fullWidth />
+            <TextField id="ld-phone" label="Phone (optional)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} fullWidth />
+            <TextField id="ld-email" label="Email (optional)" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} fullWidth />
+            <TextField
+              id="ld-src"
+              select
+              label="Lead source"
+              value={form.leadSource}
+              onChange={(e) => setForm({ ...form, leadSource: e.target.value })}
+              fullWidth
+            >
+              {SOURCE_OPTIONS.map((s) => (
+                <MenuItem key={s} value={s}>{LEAD_SOURCE_LABEL[s]}</MenuItem>
+              ))}
+            </TextField>
+            <TextField id="ld-ptype" label="Project type (optional)" value={form.projectType} onChange={(e) => setForm({ ...form, projectType: e.target.value })} fullWidth />
+            <TextField id="ld-loc" label="Site location (optional)" value={form.siteLocation} onChange={(e) => setForm({ ...form, siteLocation: e.target.value })} fullWidth />
+            <TextField id="ld-city" label="City (optional)" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} fullWidth />
+            <TextField id="ld-notes" label="Notes (optional)" multiline rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} fullWidth />
+            {create.error && <Alert severity="error">{create.error.message}</Alert>}
           </Stack>
-        </Modal>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={!form.clientName || create.isPending}
+            onClick={() =>
+              create.mutate({
+                clientName: form.clientName,
+                phone: form.phone || undefined,
+                email: form.email || undefined,
+                leadSource: form.leadSource as (typeof SOURCE_OPTIONS)[number],
+                projectType: form.projectType || undefined,
+                siteLocation: form.siteLocation || undefined,
+                city: form.city || undefined,
+                notes: form.notes || undefined,
+              })
+            }
+          >
+            {create.isPending ? "Saving…" : "Capture lead"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        {/* Convert lead */}
-        <Modal
-          open={!!convertId}
-          size="sm"
-          modalHeading="Convert lead to draft project"
-          primaryButtonText={convert.isPending ? "Converting…" : "Create draft project"}
-          secondaryButtonText="Cancel"
-          primaryButtonDisabled={!conv.projectTitle || !conv.projectType || !conv.conflictCheckDone || convert.isPending}
-          onRequestClose={() => setConvertId(null)}
-          onRequestSubmit={() => {
-            if (!convertId) return;
-            convert.mutate({
-              id: convertId,
-              projectTitle: conv.projectTitle,
-              projectType: conv.projectType as (typeof ProjectType.options)[number],
-              workType: conv.workType as (typeof ProjectWorkType.options)[number],
-              clientId: conv.clientId || undefined,
-              conflictCheckDone: conv.conflictCheckDone,
-              conflictCheckNotes: conv.conflictCheckNotes || undefined,
-            });
-          }}
-        >
-          <Stack gap={5}>
+      {/* Convert lead */}
+      <Dialog open={!!convertId} onClose={() => setConvertId(null)} fullWidth maxWidth="sm">
+        <DialogTitle>Convert lead to draft project</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
             <p className="esti-label--secondary">
               Creates a client (or reuses an existing one) and a draft project in ENQUIRY stage. The lead is marked Qualified.
             </p>
-            <TextInput id="cv-title" labelText="Project title" value={conv.projectTitle} onChange={(e) => setConv({ ...conv, projectTitle: e.target.value })} />
-            <Select id="cv-type" labelText="Project type" value={conv.projectType} onChange={(e) => setConv({ ...conv, projectType: e.target.value })}>
-              {ProjectType.options.map((t) => <SelectItem key={t} value={t} text={t} />)}
-            </Select>
-            <Select id="cv-work" labelText="Discipline" value={conv.workType} onChange={(e) => setConv({ ...conv, workType: e.target.value })}>
-              {ProjectWorkType.options.map((t) => <SelectItem key={t} value={t} text={PROJECT_WORK_TYPE_LABEL[t]} />)}
-            </Select>
-            <Select id="cv-client" labelText="Client" value={conv.clientId} onChange={(e) => setConv({ ...conv, clientId: e.target.value })}>
-              <SelectItem value="" text="— Create new client from lead —" />
-              {(clientsQ.data ?? []).map((c) => <SelectItem key={c.id} value={c.id} text={c.name} />)}
-            </Select>
-            <Checkbox
-              id="cv-conflict"
-              checked={conv.conflictCheckDone}
-              onChange={(_e, { checked }) => setConv({ ...conv, conflictCheckDone: checked })}
-              labelText="No conflict of interest identified — no other architect already holds this commission without a written release (COA Regulations, 1989)."
+            <TextField id="cv-title" label="Project title" value={conv.projectTitle} onChange={(e) => setConv({ ...conv, projectTitle: e.target.value })} fullWidth />
+            <TextField
+              id="cv-type"
+              select
+              label="Project type"
+              value={conv.projectType}
+              onChange={(e) => setConv({ ...conv, projectType: e.target.value })}
+              fullWidth
+            >
+              {ProjectType.options.map((t) => (
+                <MenuItem key={t} value={t}>{t}</MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              id="cv-work"
+              select
+              label="Discipline"
+              value={conv.workType}
+              onChange={(e) => setConv({ ...conv, workType: e.target.value })}
+              fullWidth
+            >
+              {ProjectWorkType.options.map((t) => (
+                <MenuItem key={t} value={t}>{PROJECT_WORK_TYPE_LABEL[t]}</MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              id="cv-client"
+              select
+              label="Client"
+              value={conv.clientId}
+              onChange={(e) => setConv({ ...conv, clientId: e.target.value })}
+              fullWidth
+            >
+              <MenuItem value="">— Create new client from lead —</MenuItem>
+              {(clientsQ.data ?? []).map((c) => (
+                <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+              ))}
+            </TextField>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={conv.conflictCheckDone}
+                  onChange={(e) => setConv({ ...conv, conflictCheckDone: e.target.checked })}
+                />
+              }
+              label="No conflict of interest identified — no other architect already holds this commission without a written release (COA Regulations, 1989)."
             />
-            <TextArea
+            <TextField
               id="cv-conflict-notes"
-              labelText="Conflict-check notes (optional)"
+              label="Conflict-check notes (optional)"
               value={conv.conflictCheckNotes}
               onChange={(e) => setConv({ ...conv, conflictCheckNotes: e.target.value })}
+              multiline
               rows={2}
+              fullWidth
             />
-            {convert.error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={convert.error.message} />}
+            {convert.error && <Alert severity="error">{convert.error.message}</Alert>}
           </Stack>
-        </Modal>
-      </CarbonScope>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setConvertId(null)}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={!conv.projectTitle || !conv.projectType || !conv.conflictCheckDone || convert.isPending}
+            onClick={() => {
+              if (!convertId) return;
+              convert.mutate({
+                id: convertId,
+                projectTitle: conv.projectTitle,
+                projectType: conv.projectType as (typeof ProjectType.options)[number],
+                workType: conv.workType as (typeof ProjectWorkType.options)[number],
+                clientId: conv.clientId || undefined,
+                conflictCheckDone: conv.conflictCheckDone,
+                conflictCheckNotes: conv.conflictCheckNotes || undefined,
+              });
+            }}
+          >
+            {convert.isPending ? "Converting…" : "Create draft project"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

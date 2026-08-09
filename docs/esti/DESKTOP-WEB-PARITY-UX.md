@@ -41,7 +41,7 @@ Desktop may add a **thin native menu** that invokes the **same command IDs** as 
 | Windows | Multi-window (AI / inspector / drawing) | Tabs + docked panels |
 | Files | Native dialogs + FS | Browser picker + drag-drop |
 | Print | Native / system PDF | Browser print |
-| AI compute | Local Ollama — badge **Local AI** | Hub Ollama — **same panel**, badge **Hosted AI** (`CapabilityBadge`); unmetered, no BYO |
+| AI compute | **Desktop only** — local Ollama / Foundry Local — badge **Local AI** | **No hub Hosted AI** — web/portals do not run staff LLM; optional future portal chat on published context only |
 | Sync | Offline queue in tray | Same chip; usually idle when fully online · tray “Web” hint |
 
 ## PR checklist
@@ -58,13 +58,13 @@ Code → Figma Variables bridge: [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) ·
 kit export [02-TOKEN-EXPORT.md](../hcw-kit/02-TOKEN-EXPORT.md).  
 Automation stub: `node scripts/figma-token-sync-check.mjs`.
 
-Inspector / Ask ESTI share **one right slot** on both hosts (properties ↔ AI) —
-do not add a menu-only AI path on desktop.
+Inspector / Ask ESTI share **one right slot on desktop managers** (properties ↔ AI) —
+do not add a menu-only AI path. The esti SPA `RightSlot` / `AskEstiPanel` pattern
+is a **reference archive**; shipping Ask ESTI is on desktop apps, not the hub.
 
-**Shipped (LF6, Aakash 2026-08):** `frontend/src/components/shell/RightSlot.tsx` —
-Properties ↔ Ask ESTI tabs; Ask ESTI opens via taskbar / `esti:ask` / Alt+A into
-this slot (`AskEstiPanel`); screens may `publishInspector()` / dispatch
-`esti:inspect`. No floating second AI chrome.
+**Reference (LF6, Aakash 2026-08):** `frontend/src/components/shell/RightSlot.tsx` —
+Properties ↔ Ask ESTI tabs — pattern to port into desktop shells, not a cloud AI
+surface.
 
 ## Related
 

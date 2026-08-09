@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button, InlineNotification } from "@carbon/react";
+import { Alert, Box, Button } from "@mui/material";
 import { licensingPlanLabel } from "@esti/contracts";
-import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { DataGrid, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../lib/trpc";
 
@@ -84,32 +83,26 @@ export default function RequestsTab() {
       width: 220,
       renderCell: (p) =>
         p.row.status === "PENDING" ? (
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <Button size="sm" disabled={busy === p.row.id} onClick={() => fulfil(p.row.id)}>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button size="small" variant="contained" disabled={busy === p.row.id} onClick={() => fulfil(p.row.id)}>
               Approve &amp; email
             </Button>
-            <Button kind="ghost" size="sm" disabled={busy === p.row.id} onClick={() => reject(p.row.id)}>
+            <Button size="small" variant="text" disabled={busy === p.row.id} onClick={() => reject(p.row.id)}>
               Reject
             </Button>
-          </div>
+          </Box>
         ) : null,
     },
   ];
 
   return (
-    <CarbonScope>
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        {note && (
-          <InlineNotification
-            kind={note.kind}
-            lowContrast
-            title={note.kind === "error" ? "Error" : "Done"}
-            subtitle={note.text}
-            onCloseButtonClick={() => setNote(null)}
-          />
-        )}
-        <DataGrid rows={rows} columns={columns} getRowId={(r) => r.id} density="compact" disableRowSelectionOnClick hideFooter autoHeight />
-      </div>
-    </CarbonScope>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      {note && (
+        <Alert severity={note.kind} onClose={() => setNote(null)}>
+          {note.text}
+        </Alert>
+      )}
+      <DataGrid rows={rows} columns={columns} getRowId={(r) => r.id} density="compact" disableRowSelectionOnClick hideFooter autoHeight />
+    </Box>
   );
 }

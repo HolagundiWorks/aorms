@@ -1,4 +1,15 @@
-﻿**2026-08-09 — Ask ESTI removed from AStudio / AConsulting staff SPA.** Footer
+﻿**2026-08-09 — UX audit wave (1B+2C).** Full pass: landing honesty + neu shell;
+portal docks for all four roles; carbon adapters → kit; Work/Leads/Filing/
+Libraries + company/platform-admin priority de-Carbon; Chip→StatusDot;
+Performance capacity; CarbonSpike gone; AStudio/AConsulting HCW geography
+scaffold. Detail: [2026-08-09-UX-AUDIT-WAVE.md](2026-08-09-UX-AUDIT-WAVE.md).
+
+**2026-08-09 — Portal UX Wave 2.** CONSULTANT routes get `ActionDockProvider` +
+dock (deliverable · RFI · note); Site/Contractor stage CTAs that duplicated the
+dock removed; `DataState` / `StatusDot` / `document.title` / nav `aria-current`
++ 44px hits on account + licensing shells; JM recorder uses `ProjectFacetTabs`.
+
+**2026-08-09 — Ask ESTI removed from AStudio / AConsulting staff SPA.** Footer
 button · Alt+A · right-slot Ask tab · AI Studio route · orchestration status
 stripped (not merely gated). Properties inspector + Priorities remain. Client
 portal MoM ESTI drafting removed earlier.
@@ -53,6 +64,13 @@ token; applied to `RailLayout`, Studio Intelligence, `PortalNeuFrame`,
 `AuthRailLayout`, `AppRibbon`, `AdminConsoleShell`, staff `--esti-shell-gutter: 24px`.
 Canon: [COMPOSITION-PRINCIPLES.md](../../esti/COMPOSITION-PRINCIPLES.md).
 
+**2026-08-09 — Wave 3c status + capacity.** Decorative MUI `Chip` status/promo
+uses → kit `StatusDot` (Lxos, AcademyPanel, AiStudio sources, RateBookManager,
+UserProfilePanel Planned, ComplianceCalculator rules version). `EstiAiExplainLabel`
+uses outlined `Button` (interactive explainability — not StatusDot, not filter Chip).
+Performance ASPRF member cards: 3 KpiMeters visible + progressive disclosure.
+Removed `/carbon-spike` route + deleted `CarbonSpike.tsx`.
+
 **2026-08-07 — Wave 4 studio polish.** Studio brief → `Surface layer="soft"`;
 `--esti-neu-fill` / kit `NEU_FILL` (#eceef2) documented as soft raised (not canvas).
 Footer + widgets use the same fill token.
@@ -90,7 +108,9 @@ withdraws. Agents: update this file in the same change that alters a fact
 
 ### Product chrome (optional polish)
 
-- Remaining company-admin / platform-admin Carbon panels (DashboardTab, StorageSettings, Migration, etc.)
+- Remaining `@carbon/react` (~38 files outside Wave 3b priority): ApiKeysTab,
+  AccountsTab, PeriodFilter, DataGrid/PageBreadcrumb adapters, Contracts,
+  Letters, Users, MasterPlanLibrary, some project panels — see audit note.
 - Knowledge Bank public vs staff path clarification
 - Kit Surface `className` overwrites `hcw-surface` (8×8=64px) — portal fixed via merge + CSS; prefer SoftSurface / re-vendor Surface to concat classNames
 - ~~Kit `portal-chrome.scss` ActionDock liquid-glass / 9999px~~ — **closed in `@hcw/ui-kit` 1.5.1** (opaque neu · 8px); product override removed from `glass.scss`

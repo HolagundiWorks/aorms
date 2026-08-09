@@ -89,8 +89,8 @@ export function MarketingLandingDock({
     textTransform: "none" as const,
     fontWeight: 700,
     borderRadius: `${RADIUS}px`,
-    minHeight: 40,
-    height: 40,
+    minHeight: 44,
+    height: 44,
     px: 1.5,
   };
 
@@ -150,6 +150,7 @@ export function MarketingLandingDock({
                     component="a"
                     href={s.href}
                     variant="body2"
+                    aria-current={active ? "location" : undefined}
                     sx={{
                       textDecoration: "none",
                       whiteSpace: "nowrap",
@@ -157,6 +158,9 @@ export function MarketingLandingDock({
                       color: active ? "primary.main" : "text.secondary",
                       borderBottom: active ? `2px solid ${colors.accent}` : "2px solid transparent",
                       pb: 0.25,
+                      minHeight: 44,
+                      display: "inline-flex",
+                      alignItems: "center",
                       transition: "color 120ms ease",
                       "&:hover": { color: "primary.main" },
                     }}
@@ -191,7 +195,7 @@ export function MarketingLandingDock({
                 aria-label="Calculator"
                 aria-pressed={showCalc}
                 size="small"
-                sx={{ ...chromeIconSx, borderRadius: `${RADIUS}px`, minWidth: 40, minHeight: 40 }}
+                sx={{ ...chromeIconSx, borderRadius: `${RADIUS}px`, minWidth: 44, minHeight: 44 }}
               >
                 <CalculateOutlined fontSize="small" />
               </IconButton>
@@ -202,7 +206,7 @@ export function MarketingLandingDock({
             <Button component={RouterLink} to="/downloads" variant="outlined" size="small" sx={btnSx}>
               Downloads
             </Button>
-            <Button component={RouterLink} to={signInHref} variant="contained" size="small" sx={btnSx}>
+            <Button component={RouterLink} to={signInHref} variant="outlined" size="small" sx={btnSx}>
               {signInLabel}
             </Button>
           </Stack>

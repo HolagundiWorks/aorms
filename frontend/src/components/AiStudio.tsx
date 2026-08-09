@@ -3,7 +3,6 @@ import {
   AlertTitle,
   Box,
   Button,
-  Chip,
   Grid,
   InputAdornment,
   MenuItem,
@@ -25,6 +24,7 @@ import { CapabilityBadge } from "./CapabilityBadge.js";
 import { EstiAiExplainLabel } from "./AiCarbon.js";
 import { PageBreadcrumb } from "./PageBreadcrumb.js";
 import { RailLayout } from "./RailLayout.js";
+import { StatusDot } from "./StatusTag.js";
 import { trpc } from "../lib/trpc.js";
 import { useAuth } from "../lib/auth.js";
 import { setEstiActivity } from "../lib/esti-activity.js";
@@ -228,16 +228,12 @@ export function AiDraftPanel({ projectId, defaultKind = "SUMMARY", compact }: Pr
           {sources.length > 0 && (
             <Stack spacing={0.5}>
               <span className="esti-label">Sources</span>
-              <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap" }}>
+              <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5 }}>
                 {sources.map((s, i) => (
-                  <Chip
+                  <StatusDot
                     key={i}
-                    size="small"
+                    color="cool-gray"
                     label={`${s.entityType}: ${s.label}`}
-                    sx={{
-                      backgroundColor: "var(--cds-tag-background-gray)",
-                      color: "var(--cds-tag-color-gray)",
-                    }}
                   />
                 ))}
               </Stack>

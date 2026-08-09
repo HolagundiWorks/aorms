@@ -1,10 +1,13 @@
 ﻿# AORMS Implementation Roadmap
 
-**Status:** ACTIVE (suite soft launch + Connect) · **Updated:** 2026-08-08  
+**Status:** ACTIVE (suite soft launch + Connect) · **Updated:** 2026-08-09  
 **Canon:** [AORMS-SUITE.md](AORMS-SUITE.md) · [AORMS-CONNECT.md](AORMS-CONNECT.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md) ·  
 [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [WEB-PORTAL.md](WEB-PORTAL.md) · [VPS-INSTALL.md](VPS-INSTALL.md)
 
 Open source for now; SaaS licensing deferred.
+
+**AI law:** ESTI / Ollama run on **desktop apps only** — not on the cloud hub or
+aorms.in VPS ([PRODUCTION-OPS.md](PRODUCTION-OPS.md) § ESTI AI).
 
 ---
 
@@ -44,6 +47,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🟡 unsigned MSIX ✅ · code sign 🔲 D6 |
 | **S10** | Firm portal depth | esti portals | ✅ collab tx+ack · Documents+RA · contractor/site Drawings · collab demo login |
 | **S11** | Joint measurement → approval → rate books · PDF annotate · AQC sync contract | esti · AQC | ✅ hub recorder/approve/rate seed · [AQC-JM-SYNC.md](AQC-JM-SYNC.md) · AQC desktop pull 🔲 |
+| **S12** | UX audit wave (1B+2C) — landing honesty · portal docks · SPA de-Carbon · manager HCW chrome start | esti · AStudio · AConsulting | ✅ [2026-08-09-UX-AUDIT-WAVE.md](../hcw-kit/11-audits/2026-08-09-UX-AUDIT-WAVE.md) · remaining Carbon ~38 files 🔲 · AQC chrome 🔲 |
 
 ---
 
@@ -52,6 +56,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | Wave | Outcome | Status |
 | --- | --- | --- |
 | **D0–D5** | Bridge · siblings · WinUI shells · portal panels | ✅ |
+| **D5b** | AStudio / AConsulting HCW geography scaffold (ribbon · stage · dock · tray) | ✅ WinUI shells · domain UI next |
 | **D6** | Signed installers · portal tenants | 🟡 tooling ✅ · blocked on SmartScreen-trusted cert + HTTPS |
 
 ---
@@ -94,8 +99,9 @@ Desktop firm login target: **AORMS Connect** (not apex).
    Pubkey: `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzNk7P4spTM1FBfiiZiIa9k6asphlWNgW4lanTI04DT aorms-deploy-github-actions`  
 2. **D6** — Trusted Authenticode → upload → `apply-installer-manifest.ps1 -ConfirmFlip` → release flag + rebuild. Prefer Connect first.  
 3. Hub-portal SyncEntity allow-list ✅ · client portal UI surfaces tenders/inspections/visits/siteRef/running bills · AProc pmc RA stays live · portal tenants after D6.  
-4. **S11** Joint measurement (site recorder → approve → MB/rate books · PDF annotate) ✅ on esti · AQC desktop consume via [AQC-JM-SYNC.md](AQC-JM-SYNC.md) 🔲.
+4. **S11** Joint measurement ✅ on esti · AQC desktop consume via [AQC-JM-SYNC.md](AQC-JM-SYNC.md) 🔲.  
+5. **S12 follow-ons** — finish remaining `@carbon/react` (~38 files); deepen AStudio/AConsulting domain UI on HCW geography; AQC Estimation/BBS/PM native chrome (out of S12).
 
 ## Deferred
 
-SaaS SKUs · Stripe · dual Postgres/Mongo forever · full WinUI domain split from BBSApp · wiki restore on apex · merging AStudio into Connect.
+SaaS SKUs · Stripe · dual Postgres/Mongo forever · full WinUI domain split from BBSApp · wiki restore on apex · merging AStudio into Connect · cloud Hosted AI / VPS Ollama.

@@ -15,7 +15,7 @@
 | **Platform north-star** | This spec (sections below) | Target architecture for AEC consulting firms — two apps on one spine |
 | **Public landing copy** | [`frontend/src/content/aorms-development-spec.md`](../../frontend/src/content/aorms-development-spec.md) | **Edit here for rendered `/` page** — keep in sync with this doc |
 | **Live system state** | [UNIFIED-ARCHITECTURE-V4.md](UNIFIED-ARCHITECTURE-V4.md) | What **AORMS-Studio** actually ships (Fastify + tRPC + Drizzle, not GraphQL) |
-| **Stack reality** | [ARCHITECTURE.md](ARCHITECTURE.md) | Postgres, Redis, S3, Python worker, Ollama via `@hcw/aorms-ai-kit` |
+| **Stack reality** | [ARCHITECTURE.md](ARCHITECTURE.md) | Hub: Postgres, Redis, S3, Python worker. **AI:** desktop Ollama via `@hcw/aorms-ai-kit` — not on VPS |
 
 The sections below summarise the platform specification. For the **full**
 markdown (diagrams, SQL, API sketches, roadmap checklists) open the frontend
@@ -88,7 +88,7 @@ Module detail, entity lists, and API sketches: see the [full content file](../..
 | --- | --- |
 | Backend | Node.js + TypeScript; Express/Fastify; optional GraphQL |
 | Data | PostgreSQL + pgvector; Redis; S3 |
-| AI | LangChain-style RAG; Claude/Ollama; embeddings in pgvector |
+| AI | Desktop-local RAG / instruct (Ollama / Foundry Local); embeddings local — not hub-hosted |
 | Frontend | React + TypeScript; component library + design tokens |
 | Ops | Docker; Kubernetes; CI/CD |
 
@@ -98,7 +98,7 @@ Module detail, entity lists, and API sketches: see the [full content file](../..
 | --- | --- |
 | Backend | **Fastify + tRPC** + Drizzle ORM |
 | Data | **PostgreSQL**, **Redis** (jobs), **S3** (MinIO in dev) |
-| AI | **@hcw/aorms-ai-kit** + Ollama |
+| AI | **@hcw/aorms-ai-kit** + **desktop** Ollama (no VPS requirement) |
 | Frontend | **React + Vite** + **@hcw/ui-kit** (MUI) |
 | Worker | **Python** Redis Streams consumer |
 | Ops | **Docker Compose** (`compose.yaml`) |

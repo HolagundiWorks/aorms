@@ -1,6 +1,5 @@
 import {
   Button,
-  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -20,6 +19,7 @@ import { pushToast, useScreenActions } from "@hcw/ui-kit";
 import { formatINR, parseRupeeInput } from "@esti/contracts";
 import { ConfirmModal } from "../ConfirmModal.js";
 import { DataState } from "../DataState.js";
+import { StatusDot } from "../StatusTag.js";
 import { trpc } from "../../lib/trpc.js";
 
 const blankItemForm = () => ({
@@ -209,7 +209,7 @@ export function RateBookManager() {
             </MenuItem>
           ))}
         </TextField>
-        {selectedBook?.locked && <Chip size="small" label="Locked" color="warning" variant="outlined" />}
+        {selectedBook?.locked && <StatusDot color="warm-gray" label="Locked" />}
       </Stack>
 
       <DataState

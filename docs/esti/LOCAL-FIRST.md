@@ -1,6 +1,6 @@
 # AORMS local-first suite + cloud hub
 
-> **Canonical runtime law** · **Updated:** 2026-08-08 (suite soft launch)  
+> **Canonical runtime law** · **Updated:** 2026-08-09 (desktop-only AI)  
 > Suite: [AORMS-SUITE.md](AORMS-SUITE.md) · Wire: [HUB-API.md](HUB-API.md) ·  
 > Bridge: [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · Repos: [DESKTOP-REPOS.md](DESKTOP-REPOS.md) ·  
 > Roadmap: [ROADMAP.md](ROADMAP.md)
@@ -10,8 +10,10 @@
 (**AStudio** / **AConsulting**) and technical apps (**AQC Estimation** · **AQC BBS** ·
 **AQC Project Management**) ship as native Windows apps launched from Connect.
 **AADT** drafts locally; **ShilpiDB** holds geometry; **MongoDB** holds all
-non-drawing cloud ops/comms. Technical work and AI stay on the machine.
-Firm-branded **portals** + ops DB manager live online.
+non-drawing cloud ops/comms. Technical work and **ESTI AI stay on the machine**
+(local Ollama / Foundry Local / opt-in keys inside desktop apps).
+**Ollama does not run on the cloud hub or aorms.in VPS.** Firm-branded
+**portals** + ops DB manager live online (no staff LLM runtime).
 
 `aorms.in` is **marketing + blog** — no firm ERP logins on the apex.
 Desktop firm login belongs in **Connect** ([AORMS-CONNECT.md](AORMS-CONNECT.md)).
@@ -34,6 +36,7 @@ The esti monorepo staff SPA is a **reference archive** — not the shipping staf
 | Ops cloud | **MongoDB** (firm-scoped) — not CAD entities |
 | Drawings | **ShilpiDB** — not Mongo |
 | Firm sync | Hub APIs + `syncToken`; portals read published data only |
+| **AI / ESTI** | **Desktop only** — local instruct (Ollama / Foundry Local / opt-in keys). **No hub Hosted AI · no VPS `esti-ollama` for product** |
 | Design system (web) | **`@hcw/ui-kit`** on marketing + portals |
 | Open source | Keep OSS for now |
 
@@ -76,9 +79,9 @@ flowchart LR
 | **AQC Estimation / BBS / PM** | Technical apps — shared `bbs_engine` |
 | **AADT** | 2D drafting |
 | **ShilpiDB** | Geometry spine (+ desktop manager) |
-| **Cloud hub** | Licence · Mongo ops · artifacts · portals · ops DB manager |
-| **`aorms.in`** | Marketing · demos · downloads |
-| **esti staff SPA** | Reference only |
+| **Cloud hub** | Licence · Mongo ops · artifacts · portals · ops DB manager — **no LLM / Ollama** |
+| **`aorms.in`** | Marketing · demos · downloads — **no Ask ESTI cloud runtime** |
+| **esti staff SPA** | Reference archive only (legacy AI routes are not the shipping surface) |
 
 ## Licence / sync scope
 

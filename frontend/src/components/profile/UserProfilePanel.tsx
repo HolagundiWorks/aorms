@@ -3,7 +3,6 @@ import {
   AlertTitle,
   Box,
   Button,
-  Chip,
   Grid,
   LinearProgress,
   Stack,
@@ -13,6 +12,7 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { useState, type ReactNode } from "react";
+import { StatusDot } from "../StatusTag.js";
 import { useAuth } from "../../lib/auth.js";
 import { trpc } from "../../lib/trpc.js";
 import { useCapabilities } from "../../lib/capabilities.js";
@@ -60,7 +60,7 @@ function PlannedGrid({ items }: { items: { title: string; description: string }[
                 {m.description}
               </Typography>
               <Box>
-                <Chip label="Planned" size="small" variant="outlined" />
+                <StatusDot color="cool-gray" label="Planned" />
               </Box>
             </Stack>
           </Box>

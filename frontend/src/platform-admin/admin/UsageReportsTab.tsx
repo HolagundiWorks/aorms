@@ -3,16 +3,18 @@
  */
 import { useEffect, useState } from "react";
 import {
+  Alert,
+  Box,
   Button,
-  InlineNotification,
-  Modal,
-  Select,
-  SelectItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
   Stack,
-  TextArea,
-  TextInput,
-} from "@carbon/react";
-import { CarbonScope } from "../../carbon/CarbonScope.js";
+  TextField,
+  Typography,
+} from "@mui/material";
 import { DataGrid, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
 import { RowActionsMenu } from "../../components/RowActionsMenu.js";
 import { trpc } from "../lib/trpc";
@@ -176,94 +178,96 @@ export default function UsageReportsTab() {
   ];
 
   return (
-    <CarbonScope>
-      <Stack gap={5}>
-        <p className="cds--type-body-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
-          Manual India invoice path — export CSV for offline GST billing, then mark rows billed.
-          Stripe is not wired.
-        </p>
-        {error && <InlineNotification kind="error" lowContrast hideCloseButton title="Error" subtitle={error} />}
-        <div style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem", flexWrap: "wrap" }}>
-          <TextInput
-            id="ur-period"
-            size="sm"
-            type="date"
-            labelText="Period start"
-            value={periodStart}
-            onChange={(e) => setPeriodStart(e.target.value)}
-          />
-          <div style={{ minWidth: 140 }}>
-            <Select
-              id="ur-filter"
-              size="sm"
-              labelText="Filter"
-              value={billed}
-              onChange={(e) => setBilled(e.target.value as typeof billed)}
-            >
-              <SelectItem value="all" text="All" />
-              <SelectItem value="unbilled" text="Unbilled" />
-              <SelectItem value="billed" text="Billed" />
-            </Select>
-          </div>
-          <div style={{ flex: 1 }} />
-          <Button kind="secondary" size="sm" onClick={() => void exportCsv()}>
-            Export CSV
-          </Button>
-        </div>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          getRowId={(r) => r.id}
-          density="compact"
-          disableRowSelectionOnClick
-          pageSizeOptions={[25, 50]}
-          paginationModel={{ page: 0, pageSize: 25 }}
-          autoHeight
+    <Stack spacing={2}>
+      <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>
+        Manual India invoice path — export CSV for offline GST billing, then mark rows billed.
+        Stripe is not wired.
+      </Typography>
+      {error && <Alert severity="error">{error}</Alert>}
+      <Box sx={{ display: "flex", alignItems: "flex-end", gap: 1, flexWrap: "wrap" }}>
+        <TextField
+          id="ur-period"
+          size="small"
+          type="date"
+          label="Period start"
+          value={periodStart}
+          onChange={(e) => setPeriodStart(e.target.value)}
+          slotProps={{ inputLabel: { shrink: true } }}
         />
-
-        <Modal
-          open={!!noteFor}
-          size="xs"
-          modalHeading="Mark usage billed"
-          primaryButtonText="Mark billed"
-          secondaryButtonText="Cancel"
-          onRequestClose={() => setNoteFor(null)}
-          onRequestSubmit={() => void markBilled()}
+        <TextField
+          id="ur-filter"
+          select
+          size="small"
+          label="Filter"
+          value={billed}
+          onChange={(e) => setBilled(e.target.value as typeof billed)}
+          sx={{ minWidth: 140 }}
         >
-          <TextInput
+          <MenuItem value="all">All</MenuItem>
+          <MenuItem value="unbilled">Unbilled</MenuItem>
+          <MenuItem value="billed">Billed</MenuItem>
+        </TextField>
+        <Box sx={{ flex: 1 }} />
+        <Button variant="outlined" size="small" onClick={() => void exportCsv()}>
+          Export CSV
+        </Button>
+      </Box>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        getRowId={(r) => r.id}
+        density="compact"
+        disableRowSelectionOnClick
+        pageSizeOptions={[25, 50]}
+        paginationModel={{ page: 0, pageSize: 25 }}
+        autoHeight
+      />
+
+      <Dialog open={!!noteFor} onClose={() => setNoteFor(null)} fullWidth maxWidth="xs">
+        <DialogTitle>Mark usage billed</DialogTitle>
+        <DialogContent>
+          <TextField
             id="ur-note"
-            labelText="Billing note (invoice ref)"
+            label="Billing note (invoice ref)"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="e.g. INV-2026-07-014"
+            fullWidth
+            sx={{ mt: 1 }}
           />
-        </Modal>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setNoteFor(null)}>Cancel</Button>
+          <Button variant="contained" onClick={() => void markBilled()}>Mark billed</Button>
+        </DialogActions>
+      </Dialog>
 
-        <Modal
-          open={!!suspendFor}
-          size="xs"
-          danger
-          modalHeading="Suspend for non-payment"
-          primaryButtonText="Suspend licence"
-          secondaryButtonText="Cancel"
-          onRequestClose={() => setSuspendFor(null)}
-          onRequestSubmit={() => void suspendForNonPayment()}
-        >
-          <Stack gap={4}>
-            <p className="cds--type-body-01" style={{ margin: 0, color: "var(--cds-text-secondary)" }}>
+      <Dialog open={!!suspendFor} onClose={() => setSuspendFor(null)} fullWidth maxWidth="xs">
+        <DialogTitle>Suspend for non-payment</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>
               Sets the org&apos;s product licence to SUSPENDED. The workspace blocks writes on its
               next licence refresh. Reinstate from Licences when payment clears.
-            </p>
-            <TextArea
+            </Typography>
+            <TextField
               id="ur-suspend-note"
-              labelText="Note"
+              label="Note"
               value={suspendNote}
               onChange={(e) => setSuspendNote(e.target.value)}
+              multiline
               rows={2}
+              fullWidth
             />
           </Stack>
-        </Modal>
-      </Stack>
-    </CarbonScope>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setSuspendFor(null)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={() => void suspendForNonPayment()}>
+            Suspend licence
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Stack>
   );
 }

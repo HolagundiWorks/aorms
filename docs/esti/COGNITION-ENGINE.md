@@ -50,7 +50,7 @@ Outcome measurement
 | Reasoning | Connect causes across client, project, finance, team, and compliance dependencies | TypeScript rules / graph logic |
 | Prediction | Forecast near-term delivery, workload, client, and recovery risks | Python worker |
 | Intervention | Convert pressure into owner actions with expected effect and risk if ignored | TypeScript backend |
-| Explanation | Produce clear human briefings from structured machine output | Ollama via AI gateway |
+| Explanation | Produce clear human briefings from structured machine output | Desktop Ollama / local AI gateway (not hub) |
 
 ## Current Implementation
 

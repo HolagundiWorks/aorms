@@ -1,14 +1,13 @@
 /**
- * Carbon adapters — stock @carbon/react exposed under the `@hcw/ui-kit` primitive
- * APIs so migration Wave 3 can flip call-sites by import swap:
+ * Carbon adapters — Wave 3a: kit primitives re-exported under the adapter path
+ * so call-sites that swapped to `../carbon/adapters` keep working on `@hcw/ui-kit`
+ * (StatusDot · DataState · ConfirmModal · StatusTag). DataGrid / PageBreadcrumb
+ * remain Carbon-side shims until their waves land.
  *
- *   -import { StatusDot, DataState } from "@hcw/ui-kit";
- *   +import { StatusDot, DataState } from "../carbon/adapters";
+ *   import { StatusDot, DataState } from "../carbon/adapters";
  *
- * Each adapter renders pure stock Carbon (§ 0, docs/esti/CARBON-MIGRATION.md) —
- * no new visual language. Bucket-2 primitives with no Carbon analogue
- * (ActionDock, GlassRail, KpiStrip, HealthGlassOrb, …) are NOT shimmed here;
- * their call-sites are rewritten onto Carbon patterns in Waves 3/5.
+ * Bucket-2 primitives with no Carbon analogue (ActionDock, KpiStrip, …) are NOT
+ * shimmed here — import those from `@hcw/ui-kit` directly.
  */
 export { StatusDot, StatusTag, statusShapeFor, type StatusShape } from "./StatusDot.js";
 export { DataState } from "./DataState.js";

@@ -15,7 +15,7 @@ export { MarketingHomeLink } from "./MarketingHomeLink.js";
 
 /**
  * Brand-only marketing top ribbon — logo + expansion.
- * Page actions (Blog, Downloads, Sign in, Calculator) live in MarketingLandingDock.
+ * Page actions (Blog, Downloads, Home, Calculator) live in MarketingLandingDock.
  */
 export function MarketingTopBar() {
   return (

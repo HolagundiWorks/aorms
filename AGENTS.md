@@ -19,7 +19,8 @@ Before UI work: [`DESIGN-DEBT-REGISTER.md`](docs/hcw-kit/11-audits/DESIGN-DEBT-R
 [`HCW-KIT-AI-KNOWLEDGE-BASE.md`](docs/esti/HCW-KIT-AI-KNOWLEDGE-BASE.md) (R1–R9).
 Re-vendor: [`docs/KITS.md`](docs/KITS.md). `@carbon/react` was removed (2026-07).
 
-**AORMS AI:** `@hcw/aorms-ai-kit` — prompts + Ollama SDK in backend.
+**AORMS AI:** desktop-only (local Ollama) — not on the VPS. `@hcw/aorms-ai-kit`
+for local/desktop; see `docs/esti/LOCAL-FIRST.md` · `PRODUCTION-OPS.md` § ESTI AI.
 
 **Cursor rule (local):** `.cursor/` is gitignored — create
 `.cursor/rules/aorms-suite-soft-launch.mdc` locally if you want always-on Cursor

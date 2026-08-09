@@ -1,6 +1,6 @@
 # AORMS — UI site map (chrome by surface)
 
-**Status:** Canonical inventory · **Updated:** 2026-08-07 · **Wave 1–8 chrome:** closed  
+**Status:** Canonical inventory · **Updated:** 2026-08-09 · **Wave 1–8 chrome + UX audit W1–W2:** closed  
 **Canon:** [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) · [HCW-UI-KIT.md](HCW-UI-KIT.md) · [HCW-UX.md](../HCW-UX.md) · [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md)
 
 One language everywhere: **no left rail · soft neu top bar · Fog Gray canvas · 8px radius · one clock · dock only where staff**.
@@ -53,7 +53,7 @@ form body scrolls inside the fixed-height card.
 | Staff (AConsulting) | `/consultancy/*` on consultancy host | same staff shell · `consultancyNav` | full | same ribbon | same floating footer + dock | same clock | No |
 | Staff (AProc) | `/pmc` on proc host | same staff shell · `pmcNav` + `PmcHome` | full | same ribbon | footer home → `/pmc` + dock | same clock | No |
 | Studio home | `/` on studio | `StudioAbstract` | full | soft AppRibbon | floating footer + dock | same clock | No |
-| External portals | client / consultant / contractor / site | `PortalNeuFrame` + `PORTAL_CHROME` | 1200px | soft top · floating 60px footer | CLIENT + CONTRACTOR ActionDock | `AormsAnalogueClock` 100px | No |
+| External portals | client / consultant / contractor / site | `PortalNeuFrame` + `PORTAL_CHROME` | 1200px | soft top · floating 60px footer | ActionDock on **all four** roles (client · collaborator · contractor · site) | `AormsAnalogueClock` 100px | No |
 | Account hubs | `/account`, `/company-account` | `PortalNeuFrame` + soft `PortalCard` | 1200px | soft sticky · logo → home · hub nav | none | `AormsAnalogueClock` | No |
 | Licensing admin | `/platform-admin` | `PortalShell` + horizontal sections | 1200px | portal top bar | none | `AormsAnalogueClock` | No |
 

@@ -3,7 +3,6 @@ import {
   Alert,
   Box,
   Button,
-  Chip,
   Grid,
   MenuItem,
   Stack,
@@ -151,7 +150,7 @@ export function ComplianceCalculator() {
               <Stack direction="row" spacing={1} className="esti-row">
                 <StatusDot color="blue" label={report.zoneLabel} />
                 <StatusDot color="cool-gray" label={`${report.siteAreaSqm} m²`} />
-                <Chip size="small" label={report.rulesVersion} variant="outlined" />
+                <StatusDot color="cool-gray" label={report.rulesVersion} />
               </Stack>
 
               {Object.entries(report.groups).map(([group, items]) => (

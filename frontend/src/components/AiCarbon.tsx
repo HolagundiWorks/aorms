@@ -1,8 +1,11 @@
 /**
  * ESTI explainability labels (formerly Carbon for AI). MUI implementation:
- * a small clickable "AI" chip that opens an explainability popover.
+ * a small outlined button that opens an explainability popover.
+ *
+ * Wave 3c: not a StatusDot (interactive control) and not a filter Chip —
+ * Button is the correct affordance for click-to-explain.
  */
-import { Box, Chip, Popover, Stack, Typography } from "@mui/material";
+import { Box, Button, Popover, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 
 export type EstiAiScope = "agent" | "draft" | "landing";
@@ -46,12 +49,16 @@ export function EstiAiExplainLabel({ scope }: { scope: EstiAiScope }) {
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
   return (
     <>
-      <Chip
+      <Button
         size="small"
         variant="outlined"
-        label={`AI · ${copy.textLabel}`}
+        color="inherit"
         onClick={(e) => setAnchor(e.currentTarget)}
-      />
+        aria-haspopup="dialog"
+        aria-expanded={Boolean(anchor)}
+      >
+        {`AI · ${copy.textLabel}`}
+      </Button>
       <Popover
         open={Boolean(anchor)}
         anchorEl={anchor}

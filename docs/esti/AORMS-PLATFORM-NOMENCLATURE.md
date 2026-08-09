@@ -166,14 +166,20 @@ Full design: **[EOMS-ARCHITECTURE.md](EOMS-ARCHITECTURE.md)**.
 
 ## ESTI — internal AI agent
 
-**ESTI** — *Embedded Studio Intelligence* — is the **internal AI agent**. It answers
-only from **validated firm repositories** inside the tenant boundary:
+**ESTI** — *Embedded Studio Intelligence* — is the **internal AI agent**. It runs
+**on the desktop** (AStudio / AConsulting / technical apps launched from
+**AORMS Connect**), using local instruct (Ollama / Foundry Local / opt-in keys).
+It answers only from **validated firm repositories** inside the tenant boundary:
 
-- Ask ESTI / ESTI AI / AI Studio
-- Cognition engine & Studio Intelligence home
-- ESTI Pulse
+- Ask ESTI / ESTI AI / AI Studio (desktop managers)
+- Cognition affordances & ESTI Pulse (desktop)
+- AI transcripts stay **local** — not on the hub
 
-**AStudio** ships ESTI today. **AConsulting** ships Ask / EOMS review on the same spine.
+**Not on cloud:** aorms.in marketing, firm portals, and the hub VPS do **not**
+host Ollama or a product “Ask ESTI” LLM. The esti SPA AI routes are a
+**reference archive**, not the shipping surface.
+
+**AStudio** / **AConsulting** ship ESTI on desktop. Hub stays licence · Mongo · portals.
 
 ### Agent split (governing rule)
 

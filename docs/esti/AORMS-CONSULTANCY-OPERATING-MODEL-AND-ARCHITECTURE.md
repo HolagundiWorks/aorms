@@ -158,7 +158,8 @@ verbatim — engineering only adds the *fee-model + timesheet* front end.
 - **Internal agent (ESTI-equivalent, code-complete Ask surface)** — answers only from validated firm
   repositories: **precedent search** (past engagements as governed patterns), **calc-lineage
   Q&A**, **TQ history**, and **capacity analytics** ("structural is over-committed in
-  September"). Uses the same on-server Ollama posture as ESTI — no external API keys.
+  September"). Uses the same **desktop-local** Ollama / Foundry Local posture as
+  ESTI — no cloud hub LLM and no required external API keys.
 
 ## 8. Codebase integration (where it lands in `esti`)
 
