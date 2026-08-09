@@ -1,10 +1,10 @@
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, Tooltip, Typography, type SxProps, type Theme } from "@mui/material";
 import { colors } from "@hcw/ui-kit";
 import { useEffect, useRef, useState } from "react";
 import { AormsAnalogueClock } from "../AormsAnalogueClock.js";
 import { fmtPomTime, usePomodoro } from "../../contexts/PomodoroContext.js";
 import { bindingFor, matchShellKey } from "../../lib/keymap.js";
-import { AMBIENT_ANALOGUE_CLOCK_SIZE_PX } from "../../lib/portal-chrome.js";
+import { AMBIENT_ANALOGUE_CLOCK_SIZE_PX, PORTAL_CHROME } from "../../lib/portal-chrome.js";
 
 /** Dial matches ambient clocks; outer chrome keeps the Pomodoro ring clearance. */
 const OUTER = Math.round(AMBIENT_ANALOGUE_CLOCK_SIZE_PX * (165 / 130));
@@ -54,10 +54,16 @@ function fracFromPointer(
 }
 
 /**
- * Marketing chrome: one Pomodoro timer built around the analogue clock.
+ * Pomodoro timer built around the analogue clock (landing · staff shell).
  * Crown follows the pointer while dragging; duration snaps to 5-min steps on release.
  */
-export function MarketingClockPomodoro() {
+export function MarketingClockPomodoro({
+  className = "esti-mkt-clock-pomodoro",
+  sx,
+}: {
+  className?: string;
+  sx?: SxProps<Theme>;
+} = {}) {
   const pom = usePomodoro();
   const svgRef = useRef<SVGSVGElement | null>(null);
   const draggingRef = useRef(false);
@@ -200,17 +206,21 @@ export function MarketingClockPomodoro() {
 
   return (
     <Box
-      className="esti-mkt-clock-pomodoro"
-      sx={{
-        position: "fixed",
-        right: 16,
-        bottom: 88,
-        zIndex: 45,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 0.75,
-      }}
+      className={className}
+      sx={[
+        {
+          position: "fixed",
+          right: { xs: PORTAL_CHROME.clockRightPx.xs, md: PORTAL_CHROME.clockRightPx.md },
+          bottom: 88,
+          zIndex: PORTAL_CHROME.clockZIndex + 5,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 0.75,
+          pointerEvents: "auto",
+        },
+        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+      ]}
     >
       <Tooltip
         title={

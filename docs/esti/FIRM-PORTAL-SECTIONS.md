@@ -1,13 +1,15 @@
 ﻿# Firm portal section map (Doc-6)
 
-**Status:** ACTIVE · **Updated:** 2026-08-08  
+**Status:** ACTIVE · **Updated:** 2026-08-09  
 **Chrome:** [`FirmPortalShell`](../../frontend/src/components/portal/FirmPortalShell.tsx) ·  
 [`FirmPortalFooter`](../../frontend/src/components/portal/FirmPortalFooter.tsx) ·  
 [`PortalNeuFrame`](../../frontend/src/components/portal/PortalNeuFrame.tsx) ·  
 [`FirmPortalStage`](../../frontend/src/components/portal/FirmPortalSection.tsx) ·  
 [`FirmPortalHubPanels`](../../frontend/src/components/portal/FirmPortalHubPanels.tsx)
 
-**Tokens (all firm-portal screens):** [`frontend/src/lib/portal-chrome.ts`](../../frontend/src/lib/portal-chrome.ts) — `PORTAL_CHROME` · `portalChromeCssVars`.  
+**Tokens:** [`frontend/src/lib/portal-chrome.ts`](../../frontend/src/lib/portal-chrome.ts) — `PORTAL_CHROME` · `portalChromeCssVars`.  
+Same stack / dock-gap / clock metrics apply to the **staff** floating taskbar
+(`AppFooterBar` + `.esti-app-shell2` `--esti-dock-bottom` in `glass.scss`).  
 Canon layout: [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) · [COMPOSITION-PRINCIPLES.md](COMPOSITION-PRINCIPLES.md).
 
 ## Spatial chrome
@@ -35,7 +37,9 @@ Canon layout: [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) · [COMPOSITION-PRINCIPLES.
 | Footer hit targets | `footerHitPx` | 35 |
 | Ambient clock | `clockSizePx` / `AMBIENT_ANALOGUE_CLOCK_SIZE_PX` | 100 |
 
-Change sizes in **`portal-chrome.ts` only** — `PortalNeuFrame`, `FirmPortalFooter`, `glass.scss` (`.esti-portal-footer`), CLIENT root, and ambient clocks read the tokens / CSS vars.
+Change sizes in **`portal-chrome.ts` only** — then sync staff `.esti-app-shell2`
+(`--esti-footer-height` · `--esti-dock-bottom`) in `glass.scss`. Consumers:
+`PortalNeuFrame`, `FirmPortalFooter`, `AppFooterBar`, ActionDock, ambient clocks.
 
 | Tab | Hub source | UI (now) |
 | --- | --- | --- |
@@ -51,12 +55,13 @@ no hub-placeholder Alert stubs.
 Thin writes (approve / bid / visit / collab tx ack) stay on the **Updates** tab body,
 not new chrome.
 
-**ActionDock create intents** (`App.tsx` wraps CLIENT + CONTRACTOR in `ActionDockProvider`):
+**ActionDock create intents** (`App.tsx` wraps CLIENT + CONTRACTOR + SITE_SUPERVISOR in `ActionDockProvider`):
 
 | Portal | Dock CTAs (while a project / invitation is focused) |
 | --- | --- |
 | Client | Change request · Feedback · Schedule meeting |
-| Contractor | Raise ticket · Site visit · Drawing · Meeting · Running bills (+ Clarification / Joint measurement from Updates) |
+| Contractor | Raise ticket · Site visit · Drawing · Meeting · Running bills (+ Clarification / Joint measurement *request* from Updates) |
+| Site | Joint measurement **recorder** (sheet + PDF annotate → submit for approval) |
 
 ### Contractor portal API + kinds
 
@@ -72,7 +77,8 @@ not new chrome.
 | `myTenders` · `getInvitation` · `submitBid` · `decline` | Tender bidding |
 | `projectDetail` | Stages · READY drawings · issued transmittals |
 | `myRunningBills` | Certified / sent / closed RA (Documents + Running bills dock) |
-| `mySubmissions` · `submitRequest` | Coordination tickets |
+| `projectTeam` | Assigned firm users (tag on raise) |
+| `mySubmissions` · `submitRequest` | Coordination tickets (`attentionToId` optional) |
 
 Kinds → `esti_contractor_submission.kind`:
 
@@ -83,16 +89,25 @@ Kinds → `esti_contractor_submission.kind`:
 | `DRAWING_REQUEST` | Drawing |
 | `MEETING_REQUEST` | Meeting |
 | `RFI` | Clarification (Updates) |
-| `JOINT_MEASUREMENT` | Joint measurement (Updates · Running bills dialog) |
+| `JOINT_MEASUREMENT` | Request only — opens linked site DRAFT recorder ([AQC-JM-SYNC.md](AQC-JM-SYNC.md)) |
 
 Select a tender invitation first — dock publishes only while focused (clears during bid/request dialogs).
+
+### Joint measurement (site → office)
+
+| Piece | Path |
+| --- | --- |
+| Site UI | [`SitePortal.tsx`](../../frontend/src/routes/SitePortal.tsx) · [`JointMeasurementRecorder.tsx`](../../frontend/src/components/portal/JointMeasurementRecorder.tsx) |
+| Staff approve | [`JointMeasurementQueue.tsx`](../../frontend/src/components/jointMeasurement/JointMeasurementQueue.tsx) on AProc home |
+| API | `jointMeasurement.*` · `rateBooks.createFromJointMeasurement` |
+| Sync | `SyncEntity.jointMeasurement` · [AQC-JM-SYNC.md](AQC-JM-SYNC.md) |
 
 | Portal | Wired panels |
 | --- | --- |
 | Client | Project · Progress · Drawings · Documents (invoices · approvals · certified RA) |
 | Collaborator | Project · Progress · Drawings · Updates ack on issued transmittals |
 | Contractor | Project · Drawings · Documents (certified running bills) — invitation-scoped |
-| Site | Project · Progress · Drawings (`sitePortal`) |
+| Site | Project · Progress · Drawings (`sitePortal`) · JM recorder |
 
-**Demo portals** (`pnpm seed:demo`): `client@` · `contractor@` · `collab@demo.aorms.in` at
-`/login?tab=portals` — Kapoor (client) + Sharma/Vinayaka (contractor) in [DEMO-SEED-ITEMS.md](DEMO-SEED-ITEMS.md).
+**Demo portals** (`pnpm seed:demo`): `client@` · `contractor@` · `collab@` · `site@demo.aorms.in` at
+`/login?tab=portals` — Kapoor (client) + Sharma/Vinayaka (contractor) + JM seed in [DEMO-SEED-ITEMS.md](DEMO-SEED-ITEMS.md).

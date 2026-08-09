@@ -1,7 +1,7 @@
 # AORMS — page structure, colours, elements & tokens
 
-**Status:** Canonical · **Adopted:** 2026-08-06 · **Updated:** 2026-08-08 · **Owner:** HCW  
-**Reference UI:** platform landing (`Landing.tsx` + `MarketingNeuFrame`) — final language for marketing, staff apps, and portals.
+**Status:** Canonical · **Adopted:** 2026-08-06 · **Updated:** 2026-08-09 · **Owner:** HCW  
+**Reference UI:** platform landing (`Landing.tsx` + `MarketingNeuFrame`) — final language for marketing, staff apps, and portals. Staff taskbar + ActionDock clearance share firm-portal chrome tokens (`PORTAL_CHROME`).
 
 Where this disagrees with older “glass rail · 20%” wording, **this wins**. Historical notes stay in [CARBON-MIGRATION.md](CARBON-MIGRATION.md).
 
@@ -13,25 +13,25 @@ Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Composition: [COMPOSITION-PR
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│  TOP RIBBON (soft neu) — brand / primary nav               │
+│  TOP RIBBON (soft neu) — brand / search / status / alerts  │
 ├────────────────────────────────────────────────────────────┤
 │                                                            │
 │  STAGE (full width) — working surface / story              │
 │                                                            │
-│                     ╭─ bottom dock ─╮                      │
-│                     │ section · CTA │                      │
+│                     ╭─ ActionDock (CTAs) ─╮                │
+│                     │  16px air above bar │                │
 ├────────────────────────────────────────────────────────────┤
-│  TASKBAR FOOTER (staff only) · CLOCK (± Pomodoro)         │
+│  FLOATING TASKBAR (60px · 16px inset) · CLOCK (± Pomodoro) │
 └────────────────────────────────────────────────────────────┘
 ```
 
 | Region | Marketing | Staff apps (AStudio / AConsulting / AProc) | Portals |
 | --- | --- | --- | --- |
-| **Top ribbon** | `MarketingTopBar` — logo + expansion | `AppRibbon` — soft sticky neu bar + primary nav | `PortalNeuFrame` soft top — identity (1200px column · 16px inset) |
+| **Top ribbon** | `MarketingTopBar` — logo + expansion | `AppRibbon` — brand · search · health/dues · greeting → `/account` · AlertsBell | `PortalNeuFrame` soft top — identity (1200px column · 16px inset) |
 | **Stage** | Full width · content column **1200px** | `.esti-app-content2` full width under ribbon | Full width · **1200px** (`PORTAL_CHROME.contentMaxPx`) |
-| **Bottom dock** | `MarketingLandingDock` — section spy + Sign in / Create / Downloads / Calculator | Kit `ActionDock` + `useScreenActions` | Client + Contractor: `ActionDock` (client: change/feedback/meeting; contractor: ticket/visit/drawing/meeting/RA) while focused; provider wraps routes in `App.tsx` |
-| **Footer** | Inline marketing footer in content | `AppFooterBar` — calc · launchers · tray | **Floating** `FirmPortalFooter` — same width as top bar · **60px** · calc · section nav · power |
-| **Clock** | `MarketingClockPomodoro` (`AormsAnalogueClock` **100px**) | `AormsAnalogueClock` bottom-right (AORMS mark in dial) | Same ambient clock · clears floating footer |
+| **Bottom dock** | `MarketingLandingDock` — section spy + Sign in / Create / Downloads / Calculator | Kit `ActionDock` + `useScreenActions` — `bottom: var(--esti-dock-bottom)` | Client + Contractor: `ActionDock` (client: change/feedback/meeting; contractor: ticket/visit/drawing/meeting/RA) while focused; provider wraps routes in `App.tsx` |
+| **Footer** | Inline marketing footer in content | **Floating** `AppFooterBar` — portal metrics (**60px** · **35px** hits) · LEFT wellness/calc · CENTER module nav · RIGHT sync/sign-out | **Floating** `FirmPortalFooter` — same width as top bar · **60px** · calc · section nav · power |
+| **Clock** | `MarketingClockPomodoro` (`AormsAnalogueClock` **100px**) | Same `MarketingClockPomodoro` — clears footer stack + `dockGapPx` | Same ambient clock · clears floating footer |
 | **Left rail** | **Retired** | **Retired** | **Retired** |
 
 **Retired:** GlassRail / SoftRail as primary chrome · marketing clear-glass floating rail · `RailLayout` left Carbon column · staff `esti-app-logo-float` watermark · `MarketingRailNav` / `.lp2-rail` · `PublicAuthStageLayout` / `MarketingConversionDock`.
@@ -62,27 +62,35 @@ Companion how-to: [HCW-UI-KIT.md](HCW-UI-KIT.md) · Composition: [COMPOSITION-PR
 | Accent glow | `transparent` | **No glow** |
 | Soft radius | **8px** · kit `RADIUS` · `--lp-radius` / `--esti-mkt-chrome-radius` | Soft-square product radius |
 | Brand font | **Urbanist** (`--lp-font`) | All UI; calculator result may use VT323 |
-| Content max | **1200px** · `MARKETING_CONTENT_MAX_PX` / `PORTAL_CHROME.contentMaxPx` | Marketing + portal column; staff stage uses shell gutters |
-| Portal chrome | `frontend/src/lib/portal-chrome.ts` | Floating footer · insets · clock · hit targets — **all firm portals** |
+| Content max | **1200px** · `MARKETING_CONTENT_MAX_PX` / `PORTAL_CHROME.contentMaxPx` | Marketing + portal column; staff stage uses shell gutters (`--esti-shell-gutter: 24px`) |
+| Shared chrome | `frontend/src/lib/portal-chrome.ts` | Floating footer · insets · clock · hit targets · ActionDock clearance — **firm portals + staff shell** |
 
-### Portal chrome tokens (`PORTAL_CHROME`)
+### Shared chrome tokens (`PORTAL_CHROME`)
 
-Executable: [`frontend/src/lib/portal-chrome.ts`](../../frontend/src/lib/portal-chrome.ts). Applied on every firm-portal screen via `PortalNeuFrame` (+ CLIENT root for ActionDock clearance).
+Executable: [`frontend/src/lib/portal-chrome.ts`](../../frontend/src/lib/portal-chrome.ts).
+
+| Surface | How vars apply |
+| --- | --- |
+| Firm portals | `PortalNeuFrame` → `portalChromeCssVars(hasFooter)` |
+| Staff shell | `.esti-app-shell2` in `glass.scss` mirrors stack / dock-bottom; `AppFooterBar` / clock read `PORTAL_CHROME` in TS |
 
 | Token | Value | CSS var / use |
 | --- | --- | --- |
-| `contentMaxPx` | **1200** | Top bar · floating footer · stage column |
+| `contentMaxPx` | **1200** | Portal top bar · floating footer · stage column |
 | `chromeInsetPx` | **16** | Sticky top inset · floating footer bottom inset |
-| `topBarMinHeightPx` | **56** | Soft identity bar |
-| `footerHeightPx` | **60** | `--esti-portal-footer-height` — floating taskbar |
+| `topBarMinHeightPx` | **56** | Soft identity bar (portals) |
+| `footerHeightPx` | **60** | `--esti-portal-footer-height` — floating taskbar height |
 | `footerStackPx` | **76** | `--esti-footer-height` (60 + 16 inset) — clock / dock clear |
-| `dockGapPx` | **16** | `--esti-dock-bottom` = stack + gap |
-| `footerHitPx` | **35** | `--esti-portal-hit` — calc · section · power chips |
+| `dockGapPx` | **16** | Air between ActionDock and footer stack |
+| — | **stack + gap** | `--esti-dock-bottom` — kit ActionDock `bottom` (staff + portals). Kit fallback `72px` **overlaps** a 76px stack — always set the var. |
+| `footerHitPx` | **35** | `--esti-portal-hit` — portal chips; staff footer hits override `chromeIconSx` to 35 |
 | `clockSizePx` | **100** | `AMBIENT_ANALOGUE_CLOCK_SIZE_PX` — staff · portal · auth · marketing |
 | `clockMarkRatio` | **0.2** | AORMS mark in dial centre |
 | `clockRightPx` | **16 / 24** | Fixed bottom-right |
 
-Do **not** hard-code portal bar heights in SCSS/components — change `PORTAL_CHROME` and re-vendor CSS var fallbacks only if needed.
+Staff stage pad when dock visible: `--esti-dock-stack: 68px` (gap + tray) on `.esti-app-shell2--dock-visible` — content `padding-bottom` = footer-stack + dock-stack + shell gutter.
+
+Do **not** hard-code footer / dock / clock px in SCSS or components — change `PORTAL_CHROME` (and keep `glass.scss` staff vars in sync).
 
 **Layers (opaque pure neumorphism — no glass chrome):**
 
@@ -116,8 +124,10 @@ Landing IA (five sections): **Overview · Outcomes · Platform · Rhythm · Star
 | --- | --- |
 | `RailLayout` | **Stage page shell** (name kept) — soft header (title · description · tabs · filters · actions) + full-width scrolling main. **No left column.** |
 | `PageBreadcrumb` | Wayfinding + `document.title` |
-| `ActionDock` / `useScreenActions` | Page-level CTAs only here (publish `[]` while dialogs open) |
-| `AppRibbon` · `AppFooterBar` · `AnalogueClock` | Global chrome in `App.tsx` |
+| `ActionDock` / `useScreenActions` | Page-level CTAs only here (publish `[]` while dialogs open); clears floating footer via `--esti-dock-bottom` |
+| `AppRibbon` | Top chrome — brand · search · office health/dues · greeting → `/account` · AlertsBell |
+| `AppFooterBar` | Floating taskbar (`PORTAL_CHROME`) — wellness · calculator · **module nav** (`RibbonNavCluster`) · sync · sign out |
+| `MarketingClockPomodoro` | Ambient clock + Pomodoro — `bottom: footerStack + dockGap` |
 | `Surface` · `StatusDot` · `DataState` · `KpiStrip` · `ConfirmModal` | Kit primitives |
 
 ### Auth
@@ -167,14 +177,16 @@ Primary create/commit actions still belong in **ActionDock**, not duplicated as 
 - One spatial model: ribbon · stage · dock · footer · clock  
 - Soft neu chrome; flat content; Radiant Orange only for true accent  
 - Marketing / portal content width 1200px; wellbeing in-flow on Rhythm  
-- Portal heights / clock / hits from `PORTAL_CHROME` on **every** firm-portal screen  
+- Footer / clock / hit / ActionDock clearance from `PORTAL_CHROME` on **firm portals and staff shell**  
+- Keep 16px air between ActionDock and floating taskbar (`dockGapPx` → `--esti-dock-bottom`)  
 
 **Don’t**
 
 - Reintroduce a left glass / SoftRail on staff, marketing, or portals  
 - Put glass on every card or invent accent glows  
 - Put staff ActionDock on marketing (use `MarketingLandingDock`)  
-- Hard-code portal footer/clock px outside `portal-chrome.ts`  
+- Hard-code footer / dock / clock px outside `portal-chrome.ts` (staff: also keep `glass.scss` vars synced)  
+- Rely on kit ActionDock fallback `bottom: 72px` under a 76px footer stack  
 - Apply building entourage inside authenticated apps or portals  
 - Mount a floating staff watermark beside the AnalogueClock  
 - Leave dead SoftRail / `.lp2-rail` / conversion-dock code in product paths  

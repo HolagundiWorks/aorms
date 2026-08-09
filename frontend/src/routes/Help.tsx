@@ -12,23 +12,23 @@ import {
 import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { SHELL_KEYMAP } from "../lib/keymap.js";
-import { AORMS_STUDIO, ESTI } from "../lib/product-nomenclature.js";
+import { AORMS_STUDIO } from "../lib/product-nomenclature.js";
 
 /**
- * Keyboard shortcuts Help — LF5 shared keymap surface for desktop + web.
- * Chords come from `lib/keymap.ts` so tooltips and this page stay aligned.
+ * Keyboard shortcuts Help — LF5 shell map (Ask ESTI omitted from this SPA).
  */
 export function HelpPage() {
+  const rows = SHELL_KEYMAP.filter((b) => b.id !== "askEsti");
+
   return (
     <RailLayout
       title="Keyboard shortcuts"
-      description={`Shared shell map for ${AORMS_STUDIO.title} on desktop and web. Canvas-local keys stay on their screens.`}
+      description={`Shared shell map for ${AORMS_STUDIO.title}. Canvas-local keys stay on their screens.`}
     >
       <PageBreadcrumb items={[{ label: "Help" }, { label: "Shortcuts" }]} />
       <Stack spacing={2}>
         <Typography variant="body2" color="text.secondary">
-          Open this page anytime with Ctrl+/ (⌘/ on Mac). {ESTI.name} opens with
-          Alt+A from any staff screen.
+          Open this page anytime with Ctrl+/ (⌘/ on Mac).
         </Typography>
         <TableContainer component={Paper} variant="outlined" sx={{ p: 0 }}>
           <Table size="small" aria-label="Keyboard shortcuts">
@@ -40,7 +40,7 @@ export function HelpPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {SHELL_KEYMAP.map((b) => (
+              {rows.map((b) => (
                 <TableRow key={b.id}>
                   <TableCell>{b.label}</TableCell>
                   <TableCell>

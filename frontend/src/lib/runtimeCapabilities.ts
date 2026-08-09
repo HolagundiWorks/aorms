@@ -6,6 +6,7 @@ import {
   WEB_PARITY_CAPABILITIES,
 } from "@esti/contracts";
 import { useAuth } from "./auth.js";
+import { isNativeDesktopShell } from "./desktopNativeBridge.js";
 import { trpc } from "./trpc.js";
 
 /**
@@ -16,6 +17,9 @@ import { trpc } from "./trpc.js";
  *
  * AI Local vs Hosted badges key off the **client** host (`buildTimeHost`), not
  * the hub process — a browser SPA against `ESTI_ROLE=hub` still shows Hosted AI.
+ *
+ * Desktop-only chrome (licence bind · sync queue · native bridge) must gate on
+ * {@link isDesktopClient} — staff SPA on web is a reference archive (LOCAL-FIRST).
  */
 
 export type AiComputeLocation = "local" | "hosted";
@@ -24,6 +28,14 @@ export function buildTimeHost(): RuntimeHost {
   const h = import.meta.env.VITE_RUNTIME_HOST;
   if (h === "desktop" || h === "hub") return h;
   return "web";
+}
+
+/**
+ * True when this SPA is the desktop node (Vite desktop host or WinUI WebView2).
+ * Use before mounting licence bind, offline sync tray, or native menu bridge.
+ */
+export function isDesktopClient(): boolean {
+  return buildTimeHost() === "desktop" || isNativeDesktopShell();
 }
 
 /** Static fallback before the capabilities query resolves. */
@@ -79,11 +91,12 @@ export function useRuntimeCapabilities() {
   };
 }
 
-/** Sync / offline queue strip for app chrome (pending artifact + meta counts). */
+/** Sync / offline queue strip for app chrome (pending artifact + meta counts). Desktop only. */
 export function useSyncStatus() {
   const { user } = useAuth();
+  const desktop = isDesktopClient();
   const q = trpc.sync.status.useQuery(undefined, {
-    enabled: Boolean(user),
+    enabled: Boolean(user) && desktop,
     retry: false,
     refetchInterval: 30_000,
   });

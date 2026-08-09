@@ -1,4 +1,25 @@
-﻿**2026-08-07 — Desktop-native SaaS pivot (D0–D4).** Staff ERP → desktop apps
+﻿**2026-08-09 — Ask ESTI removed from AStudio / AConsulting staff SPA.** Footer
+button · Alt+A · right-slot Ask tab · AI Studio route · orchestration status
+stripped (not merely gated). Properties inspector + Priorities remain. Client
+portal MoM ESTI drafting removed earlier.
+
+**2026-08-09 — Web strips desktop-only chrome.** `isDesktopClient()` gates
+licence bind, sync queue tray, sync status poll, and WinUI native bridge.
+Offline sync / bind dialogs stay desktop-only (LOCAL-FIRST).
+
+**2026-08-09 — Staff chrome = portal chrome metrics.** Floating `AppFooterBar`
+**60px** · **35px** hits · module nav in footer; ribbon = brand/search/status/alerts.
+`--esti-dock-bottom` = footer stack **76** + gap **16** (kit fallback 72 overlaps).
+Docs: PAGE-STRUCTURE · 02-TOKEN-GOVERNANCE · 10-ELEMENTS · 14-HCW-CATALOG.
+
+**2026-08-09 — AStudio / Studio Intelligence UI audit (wave 2).** Wave 1:
+flat orbs · ActionDock neu override · footer hit resize · Focus-first ESTI. Wave 2:
+`EstiOrchestrationStatus` off Carbon `Tile` → soft `Surface`; mobile footer
+opaque neu; Show-all signals collapsed; `hcw-surface` + `RADIUS` on ribbon /
+right slot; `.esti-neu-dash` primary (`.esti-glass-dash` alias); TabSplit on
+`COMPOSITION_RHYTHM`.
+
+**2026-08-07 — Desktop-native SaaS pivot (D0–D4).** Staff ERP → desktop apps
 forked from AQC (WinUI + C++ engine). `aorms.in` marketing/demos only. Firm
 portal shell: Updates · Project · Progress · Drawings · Documents.
 [PORTAL-SYNC-BRIDGE.md](../../esti/PORTAL-SYNC-BRIDGE.md). **Open source for now** —
@@ -50,7 +71,7 @@ stage header shell. Pure neumorphism 1.5.0 remains (glass banned on chrome).
 
 **The single queue of known design debt.** Every audit deposits here; every fix
 withdraws. Agents: update this file in the same change that alters a fact
-(Rulebook §14). Ordered by severity × reach. **Updated:** 2026-08-07.
+(Rulebook §14). Ordered by severity × reach. **Updated:** 2026-08-09.
 
 ## Open
 
@@ -67,6 +88,7 @@ withdraws. Agents: update this file in the same change that alters a fact
 - Remaining company-admin / platform-admin Carbon panels (DashboardTab, StorageSettings, Migration, etc.)
 - Knowledge Bank public vs staff path clarification
 - Kit Surface `className` overwrites `hcw-surface` (8×8=64px) — portal fixed via merge + CSS; prefer SoftSurface / re-vendor Surface to concat classNames
+- ~~Kit `portal-chrome.scss` ActionDock liquid-glass / 9999px~~ — **closed in `@hcw/ui-kit` 1.5.1** (opaque neu · 8px); product override removed from `glass.scss`
 
 ### Empirical maturity (industry-reference bar)
 

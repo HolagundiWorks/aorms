@@ -15,25 +15,19 @@ afterEach(() => {
 });
 
 describe("right-slot (LF6)", () => {
-  it("opens Ask ESTI on the ask tab", () => {
-    openRightSlot("ask");
-    const s = getRightSlotState();
-    expect(s.open).toBe(true);
-    expect(s.tab).toBe("ask");
-  });
-
-  it("toggles Ask ESTI closed when already on ask", () => {
-    openRightSlot("ask");
-    toggleAskEstiSlot();
-    expect(getRightSlotState().open).toBe(false);
-  });
-
-  it("switches to ask when open on properties", () => {
+  it("opens the properties inspector", () => {
     openRightSlot("properties");
-    toggleAskEstiSlot();
     const s = getRightSlotState();
     expect(s.open).toBe(true);
-    expect(s.tab).toBe("ask");
+    expect(s.tab).toBe("properties");
+  });
+
+  it("ignores Ask ESTI open requests", () => {
+    openRightSlot("ask");
+    expect(getRightSlotState().tab).toBe("properties");
+    toggleAskEstiSlot();
+    expect(getRightSlotState().open).toBe(true);
+    expect(getRightSlotState().tab).toBe("properties");
   });
 
   it("publishes inspector onto the properties tab", () => {
@@ -49,12 +43,10 @@ describe("right-slot (LF6)", () => {
     expect(s.inspector?.fields?.[0]?.value).toBe("Asha");
   });
 
-  it("keeps one slot when switching tabs", () => {
-    openRightSlot("ask");
-    setRightSlotTab("properties");
+  it("keeps properties when ask tab is requested", () => {
+    openRightSlot("properties");
+    setRightSlotTab("ask");
     expect(getRightSlotState().open).toBe(true);
     expect(getRightSlotState().tab).toBe("properties");
-    setRightSlotTab("ask");
-    expect(getRightSlotState().tab).toBe("ask");
   });
 });

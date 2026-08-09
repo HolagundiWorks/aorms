@@ -57,14 +57,15 @@ import { WIKI_PATH } from "./lib/wiki-url.js";
 import { useAuth } from "./lib/auth.js";
 import { trpc } from "./lib/trpc.js";
 import { LegacyModuleRedirect } from "./components/LegacyModuleRedirect.js";
-import { AiAgentCommand } from "./components/AiAgentCommand.js";
 import { RightSlot } from "./components/shell/RightSlot.js";
 import { ActionDock, ActionDockProvider, ActionOutcomeBanner } from "@hcw/ui-kit";
-import { AormsAnalogueClock } from "./components/AormsAnalogueClock.js";
+import { MarketingClockPomodoro } from "./components/landing/MarketingClockPomodoro.js";
+import { PORTAL_CHROME } from "./lib/portal-chrome.js";
 import { AppRibbon } from "./components/shell/AppRibbon.js";
 import { AppFooterBar } from "./components/shell/AppFooterBar.js";
 import { UsageIdentity } from "./components/identity/UsageIdentity.js";
 import { DesktopLicenceBind } from "./components/DesktopLicenceBind.js";
+import { isDesktopClient } from "./lib/runtimeCapabilities.js";
 import { PomodoroProvider } from "./contexts/PomodoroContext.js";
 import { UploadAuthProvider } from "./lib/uploadAuth.js";
 // Landing + Login stay eager so the first paint (marketing / sign-in) needs no extra
@@ -153,7 +154,6 @@ const Projects = lazyRoute(() => import("./routes/Projects.js"), "Projects");
 const Reconcile = lazyRoute(() => import("./routes/Reconcile.js"), "Reconcile");
 const SearchPage = lazyRoute(() => import("./routes/Search.js"), "SearchPage");
 const HelpPage = lazyRoute(() => import("./routes/Help.js"), "HelpPage");
-const AiStudioPage = lazyRoute(() => import("./components/AiStudio.js"), "AiStudioPage");
 const Work = lazyRoute(() => import("./routes/Work.js"), "Work");
 const Team = lazyRoute(() => import("./routes/Team.js"), "Team");
 const Hr = lazyRoute(() => import("./routes/Hr.js"), "Hr");
@@ -464,14 +464,19 @@ function AppWorkspace() {
       </ActionDockProvider>
     );
 
-  // Dedicated site supervisors get the mobile-first site portal only (no office workspace).
+  // Dedicated site supervisors — firm portal chrome + ActionDock (JM recorder).
   if (user.role === "SITE_SUPERVISOR")
     return (
-      <Routes>
-        <Route path="/" element={<SitePortal />} />
-        <Route path="/projects/:projectId" element={<SitePortal />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <ActionDockProvider>
+        <div className="esti-firm-portal-root" style={portalChromeCssVars(true)}>
+          <Routes>
+            <Route path="/" element={<SitePortal />} />
+            <Route path="/projects/:projectId" element={<SitePortal />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <ActionDock />
+        </div>
+      </ActionDockProvider>
     );
 
   // Navigation tree — ribbon: Projects · Teams · Office. Library / Third Parties /
@@ -708,7 +713,7 @@ function AppWorkspace() {
           <a href="#esti-main" className="esti-skip-link">
             Skip to main content
           </a>
-          <AppRibbon nav={nav} firmName={firmName} adminGroups={adminGroups} />
+          <AppRibbon firmName={firmName} />
           <div className="esti-app-content2">
             <RouteFocus />
             <main id="esti-main" className="esti-grow" tabIndex={-1}>
@@ -801,9 +806,8 @@ function AppWorkspace() {
                 {can(user.role, "write") && (
                   <Route path="/office/contracts" element={<Contracts />} />
                 )}
-                {atLeast(60) && (
-                  <Route path="/office/ai-studio" element={<AiStudioPage />} />
-                )}
+                {/* Ask ESTI / AI Studio not in this SPA — desktop managers only. */}
+                <Route path="/office/ai-studio" element={<Navigate to="/" replace />} />
                 <Route path="/tasks" element={<Work />} />
                 <Route path="/work" element={<Navigate to="/tasks" replace />} />
                 {/* AProc portfolio home — also served on proc.aorms.in */}
@@ -918,31 +922,28 @@ function AppWorkspace() {
             </main>
           </div>
           <UsageIdentity />
-          {/* LF6 — one right slot (Properties ↔ Ask ESTI); AiAgentCommand wires Alt+A. */}
+          {/* LF6 — Properties inspector (Ask ESTI not mounted in this SPA). */}
           <RightSlot />
-          <AiAgentCommand />
-          {/* LF4 desktop first-run — licence / hub syncToken bind (no-op on web). */}
-          <DesktopLicenceBind />
+          {/* LF4 desktop first-run — licence / hub syncToken bind (not mounted on web). */}
+          {isDesktopClient() && <DesktopLicenceBind />}
           {/* HCW-UI-Kit global action dock — screens publish CTAs via useScreenActions;
               renders nothing until they do (zero regression until adopted). */}
           <ActionDock />
           {/* Outcome channel — publishes from DockAction.outcome / publishOutcome. */}
           <ActionOutcomeBanner />
-          {/* Fixed bottom-right analogue clock (single staff clock). */}
-          <AormsAnalogueClock
-            className="esti-analogue-clock"
+          {/* Clock + Pomodoro (same as landing) — above floating portal-sized taskbar. */}
+          <MarketingClockPomodoro
+            className="esti-staff-clock-pomodoro"
             sx={{
-              position: "fixed",
-              right: 20,
-              bottom: "calc(var(--esti-footer-height, 56px) + 72px)",
-              zIndex: 40,
-              pointerEvents: "none",
+              bottom: `calc(var(--esti-footer-height, ${PORTAL_CHROME.footerStackPx}px) + ${PORTAL_CHROME.dockGapPx}px)`,
             }}
           />
-          {/* Taskbar footer — launchers CENTRE, tray RIGHT (no duplicate clock). */}
+          {/* Taskbar — portal chrome metrics (60px · floating · 35px hits). */}
           <AppFooterBar
             planClass="esti-app-header--pro"
             onSignOut={() => logout.mutate()}
+            nav={nav}
+            adminGroups={adminGroups}
           />
         </div>
       </ActionDockProvider>

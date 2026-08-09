@@ -576,7 +576,7 @@ export declare const LIQUID_GLASS_BUTTON: {
     readonly boxShadow: `6px 6px 14px rgba(20, 21, 23, 0.16), -6px -6px 14px rgba(255, 255, 255, 0.92), ${string}`;
 };
 /** ActionDock button hover/focus lift. */
-export declare const DOCK_BUTTON_LIFT = "translateY(-2px)";
+export declare const DOCK_BUTTON_LIFT = "translateY(-1px)";
 /**
  * @deprecated Opaque soft rail alias — was clear glass.
  */

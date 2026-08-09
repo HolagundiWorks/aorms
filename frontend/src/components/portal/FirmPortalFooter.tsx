@@ -1,7 +1,7 @@
 import CalculateOutlined from "@mui/icons-material/CalculateOutlined";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
 import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
-import { RADIUS, chromeIconSx } from "@hcw/ui-kit";
+import { Surface, chromeIconSx } from "@hcw/ui-kit";
 import { useEffect, useRef, useState } from "react";
 import { FloatingCalculator } from "../FloatingCalculator.js";
 import { matchShellKey, tooltipWithChord } from "../../lib/keymap.js";
@@ -11,7 +11,7 @@ import {
   type FirmPortalSection,
 } from "./FirmPortalSections.js";
 
-const R8 = `${RADIUS}px`;
+const R8 = "8px";
 const HIT = PORTAL_CHROME.footerHitPx;
 
 /** Footer icon chips — `PORTAL_CHROME.footerHitPx`. */
@@ -58,10 +58,25 @@ export function FirmPortalFooter({
   }, []);
 
   return (
-    <Box
+    <Surface
       component="footer"
-      className="esti-app-footer esti-portal-footer"
+      layer="soft"
+      // Keep `hcw-surface` — kit Surface puts className last; without it,
+      // numeric RADIUS × theme.shape.borderRadius → 64px corners.
+      className="hcw-surface esti-portal-neu__footerbar esti-portal-footer"
       aria-label="Portal taskbar"
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 1.5,
+        width: "100%",
+        height: PORTAL_CHROME.footerHeightPx,
+        minHeight: PORTAL_CHROME.footerHeightPx,
+        px: `${PORTAL_CHROME.footerPadXPx}px`,
+        boxSizing: "border-box",
+        borderRadius: R8,
+      }}
     >
       <Box
         sx={{
@@ -107,7 +122,7 @@ export function FirmPortalFooter({
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
-                borderRadius: R8,
+                borderRadius: `${R8} !important`,
                 minHeight: HIT,
                 px: 1.5,
               }}
@@ -146,6 +161,6 @@ export function FirmPortalFooter({
         onClose={() => setShowCalc(false)}
         triggerRef={calcTriggerRef}
       />
-    </Box>
+    </Surface>
   );
 }

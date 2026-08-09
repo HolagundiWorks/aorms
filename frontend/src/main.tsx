@@ -36,11 +36,16 @@ import { trpc } from "./lib/trpc.js";
 import {
   handleNativeShellCommand,
   installDesktopNativeBridge,
+  isNativeDesktopShell,
   onNativeShellCommand,
 } from "./lib/desktopNativeBridge.js";
+import { buildTimeHost } from "./lib/runtimeCapabilities.js";
 
-installDesktopNativeBridge();
-onNativeShellCommand(handleNativeShellCommand);
+// Native menu bridge is desktop / WinUI only — skip on browser web builds.
+if (buildTimeHost() === "desktop" || isNativeDesktopShell()) {
+  installDesktopNativeBridge();
+  onNativeShellCommand(handleNativeShellCommand);
+}
 
 /** Per-call toast context (Nielsen #9 — errors say WHAT failed):
  *  `meta: { errorTitle: "Couldn't save the lead" }` on any query/mutation gives

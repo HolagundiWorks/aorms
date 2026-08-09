@@ -88,23 +88,23 @@ no floating staff watermark.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│  TOP RIBBON (soft neu) — brand / primary nav                             │
+│  TOP RIBBON (soft neu) — brand / search / status / alerts                │
 ├──────────────────────────────────────────────────────────────────────────┤
 │  STAGE (full width) — page header + working surface                      │
-│                         ╭─ ActionDock / MarketingLandingDock ─╮          │
+│                         ╭─ ActionDock (+16px above taskbar) ─╮           │
 ├──────────────────────────────────────────────────────────────────────────┤
-│  Taskbar footer (staff) · AnalogueClock (± Pomodoro)                     │
+│  Floating taskbar 60px (staff · portals) · Clock (± Pomodoro)            │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
 | Region | Width | Layer | Role |
 |--------|-------|-------|------|
-| **Top ribbon** | full content / shell | Soft (L2) | Marketing: brand only. Staff: `AppRibbon` firm name + primary nav. Portals: identity / hub nav. |
+| **Top ribbon** | full content / shell | Soft (L2) | Marketing: brand only. Staff: `AppRibbon` — brand · search · health/dues · greeting · alerts. Portals: identity / hub nav. |
 | **Stage** | full width · 1200px mkt/portals | Flat (L1) + soft cards (L2) | Working surface. Staff lists use `RailLayout` as a **stage page shell** (header strip + full-width main — no left column). |
-| **TaskbarFooter** | full width · staff only | Soft (L2) | Calculator · launcher cluster · tray (no digital clock). Absent on marketing/portals. |
-| **ActionDock** | staff · bottom | Soft tray | Page-level CTAs via `useScreenActions`. |
+| **Taskbar** | floating · staff + portals | Soft (L2) | Product: `AppFooterBar` / `FirmPortalFooter` — **60px** · **16px** inset · **35px** hits (`PORTAL_CHROME`). Module nav lives in the staff footer. Kit `TaskbarFooter` (56) is not the product bar. |
+| **ActionDock** | staff · portals · bottom | Soft tray | Page-level CTAs via `useScreenActions`. `bottom: var(--esti-dock-bottom)` = footer stack **76** + gap **16**. |
 | **MarketingLandingDock** | marketing · bottom | Soft | Section spy + Sign in / Downloads / Calculator. |
-| **Clock** | fixed bottom-right | Soft | `AormsAnalogueClock` (100px) everywhere; marketing wraps Pomodoro ring. Portal clears floating footer via `--esti-footer-height`. |
+| **Clock** | fixed bottom-right | Soft | `MarketingClockPomodoro` / `AormsAnalogueClock` (100px); clears `--esti-footer-height` + `dockGapPx` on staff and portals. |
 
 ### Marketing shell — public site (`MarketingNeuFrame`)
 
@@ -176,8 +176,10 @@ Trust / outcome chips stay capacity-capped (Miller).
 
 ### Staff stage — canonical reference
 
-**Status: final UI (2026-08).** Shell: `App.tsx` — ribbon · stage · ActionDock ·
-footer · AnalogueClock. Page wrapper: `RailLayout` (stage header + full-width main).
+**Status: final UI (2026-08-09).** Shell: `App.tsx` — ribbon · stage · ActionDock ·
+floating `AppFooterBar` · `MarketingClockPomodoro`. Clearance tokens from
+`PORTAL_CHROME` / `glass.scss` (`--esti-dock-bottom`). Page wrapper: `RailLayout`
+(stage header + full-width main).
 
 Studio Intelligence (`StudioAbstract.tsx`) keeps KPI / zone / tab anatomy **in the
 stage** (no left SoftRail). Zone health and KPIs live in the stage head.
@@ -213,9 +215,10 @@ which lays them out in three fixed zones so the geography is identical everywher
 
 Create in the middle, commit on the right, destroy on the left — muscle memory
 across the whole product (and Fitts's-law-friendly big targets). The dock tray is
-a **neumorphic capsule** (`ACTION_DOCK_TRAY`); dock buttons are **flat pills at
-rest** and **lift to liquid-glass capsules** on hover/focus. The dock hides itself
-when no screen has published actions.
+a **neumorphic tray** (`ACTION_DOCK_TRAY`). Kit **1.5.1+** ships opaque soft-neu
+hover + **8px** in `portal-chrome.scss`. Position with `--esti-dock-bottom` (stack
+**76** + gap **16**) — never rely on the kit **72px** fallback under a floating
+taskbar. The dock hides itself when no screen has published actions.
 
 ```tsx
 // In a screen — declare actions; they appear in the dock, clear on unmount.
@@ -241,12 +244,13 @@ setUxEventSink((name, payload) => analytics.track(name, payload));
 
 <KitRoot density="comfortable" coga="default">
   <ActionDockProvider>
-    {/* Soft sticky AppRibbon / PortalNeuFrame top bar — not GlassRail */}
-    <Surface layer="soft">{/* brand · primary nav */}</Surface>
+    {/* Soft sticky AppRibbon / PortalNeuFrame — not GlassRail */}
+    {/* Set --esti-footer-height + --esti-dock-bottom from PORTAL_CHROME */}
+    <Surface layer="soft">{/* brand · search / identity */}</Surface>
     <main>{/* stage — RailLayout or 1200px portal column */}</main>
-    <ActionDock /> {/* staff only */}
-    <AnalogueClock /* fixed bottom-right */ />
-    {/* AppFooterBar / TaskbarFooter — staff only */}
+    <ActionDock /> {/* staff · CLIENT · CONTRACTOR · SITE */}
+    {/* MarketingClockPomodoro / AnalogueClock — above footer stack + dockGap */}
+    {/* AppFooterBar / FirmPortalFooter — floating 60px */}
   </ActionDockProvider>
 </KitRoot>
 ```

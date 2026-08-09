@@ -673,7 +673,7 @@ export function liquidGlassButtonFor(accent = colors.accent) {
 /** @deprecated Prefer neu hover recipes — opaque alias of liquidGlassButtonFor. */
 export const LIQUID_GLASS_BUTTON = liquidGlassButtonFor(colors.accent);
 /** ActionDock button hover/focus lift. */
-export const DOCK_BUTTON_LIFT = "translateY(-2px)";
+export const DOCK_BUTTON_LIFT = "translateY(-1px)";
 /**
  * @deprecated Opaque soft rail alias — was clear glass.
  */

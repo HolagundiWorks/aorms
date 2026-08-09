@@ -49,6 +49,10 @@ data-viz ladders · status shapes · breakpoints / z-index / opacity.
 - Pictogram SVG paths
 - Product copy / i18n strings
 - A Figma **component** library (DesignOps owns that file)
+- **Product chrome** (`PORTAL_CHROME` in `frontend/src/lib/portal-chrome.ts`) —
+  floating footer **60** · stack **76** · dock gap **16** · hit **35** · clock **100**.
+  These drive `--esti-footer-height` / `--esti-dock-bottom` for staff + firm portals
+  ([PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md)). Not part of kit `tokens.json`.
 
 ## Governance
 

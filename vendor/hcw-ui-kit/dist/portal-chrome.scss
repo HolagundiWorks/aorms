@@ -2,14 +2,16 @@
 // Canonical values live in src/tokens.ts + src/chrome-sx.ts.
 // Import once from the app entry (frontend/src/main.tsx). Do not duplicate in glass.scss.
 // Accent CSS vars mirror `colors.accent` (light scheme) — keep in sync with tokens.ts.
+// Pure neumorphism 1.5 — opaque soft neu · 8px · no blur / glass / capsules.
 
 :root {
-  --hcw-button-radius: 4px;
-  --hcw-dock-pill-radius: 9999px;
+  --hcw-button-radius: 8px;
+  --hcw-dock-pill-radius: 8px;
   --hcw-dialog-radius: 8px;
-  --hcw-marketing-dock-radius: 12px;
+  --hcw-marketing-dock-radius: 8px;
   --hcw-accent: #ff4f18;
-  --hcw-accent-glow: rgba(255, 79, 24, 0.07);
+  --hcw-accent-glow: transparent;
+  --hcw-neu-fill: #eceef2;
 }
 
 .MuiDialog-paper {
@@ -34,22 +36,16 @@
 
   &:hover,
   &:focus-visible {
-    background: linear-gradient(
-      165deg,
-      rgba(255, 255, 255, 0.58) 0%,
-      rgba(255, 255, 255, 0.18) 45%,
-      rgba(255, 255, 255, 0.42) 100%
-    ) !important;
-    backdrop-filter: blur(36px) saturate(2.25) brightness(1.14) !important;
-    -webkit-backdrop-filter: blur(36px) saturate(2.25) brightness(1.14) !important;
-    border: 1px solid rgba(255, 255, 255, 0.72) !important;
+    background: var(--hcw-neu-fill) !important;
+    background-color: var(--hcw-neu-fill) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(20, 21, 23, 0.08) !important;
     border-radius: var(--hcw-dock-pill-radius) !important;
     box-shadow:
-      0 12px 36px rgba(20, 21, 23, 0.11),
-      0 2px 10px var(--hcw-accent-glow),
-      inset 0 1.5px 0 rgba(255, 255, 255, 0.92),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.28) !important;
-    transform: translateY(-3px) !important;
+      4px 4px 10px rgba(163, 177, 198, 0.45),
+      -4px -4px 10px rgba(255, 255, 255, 0.9) !important;
+    transform: translateY(-1px) !important;
   }
 
   @media (prefers-reduced-motion: reduce) {

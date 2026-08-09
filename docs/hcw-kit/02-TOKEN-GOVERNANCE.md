@@ -42,14 +42,17 @@ square surfaces).
 | Concern | HCW contract | Token / helper |
 | --- | --- | --- |
 | **Grid** | **12 columns** via `layoutSx.grid` or themed Grid. | `LAYOUT.columns`, `LAYOUT.gutter` |
-| **Organisation** | Rail · Stage · Taskbar · Dock. Kit portals use fixed `LAYOUT.railWidth`; fluid workspace may use `railFraction`/`stageFraction` (20/80). | `LAYOUT.*`, `layoutSx.rail` / `.stage` / `.page` |
+| **Organisation** | **Ribbon · Stage · Taskbar · Dock · Clock** (left rail retired in product). Kit still exports `LAYOUT.railWidth` / fluid fractions for legacy kit demos only. | `LAYOUT.*`, `layoutSx.stage` / `.page` · product shells |
+| **Product chrome** | Floating taskbar **60px** + **16px** inset → stack **76**; ActionDock air **16** (`dockGapPx`). Shared by staff + firm portals. | Product `PORTAL_CHROME` · `--esti-footer-height` · `--esti-dock-bottom` — see [PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md) |
 | **Hierarchy** | Depth encodes importance (`ELEVATION` / layers). Type sizes only from `TYPE_SCALE`. Spacing only from `SPACING` (+ `compact`/`section`). | `TYPE_SCALE`, `SPACING`, `ELEVATION` |
-| **Density** | Productive touch/control heights. `KitRoot({ density })` / `createHcwTheme({ density })` — comfortable (default) or compact. Persistent chrome icons use `chromeIconSx` (44) regardless. | `DENSITY`, `densityFor`, `chromeIconSx` |
+| **Density** | Productive touch/control heights. `KitRoot({ density })` / `createHcwTheme({ density })` — comfortable (default) or compact. Persistent chrome icons use `chromeIconSx` (44) by default; **staff/portal floating taskbars** override hits to `PORTAL_CHROME.footerHitPx` (**35**). | `DENSITY`, `densityFor`, `chromeIconSx`, `PORTAL_CHROME.footerHitPx` |
 | **Charts** | Ordered palettes (categorical · sequential · diverging · semantic); chrome via `chartChromeFor` / `chartRootSx`; markers for WCAG 1.4.1; never brand accent as a default series hue. | `DATA_VIZ_*`, `chartPalette`, `withChartSeriesColors`, `CHART_MARKERS` |
 | **Pictograms / icons** | Kit-owned shapes (`PICTOGRAM`); injected glyphs via `ICON` slots — no icon font in the kit. | `PICTOGRAM`, `ICON`, [14-HCW-CATALOG.md](14-HCW-CATALOG.md) §5–6 |
 
 Call sites must not invent rem font sizes, shell widths, or gutters. Extend the
-ladder in `tokens.ts` first.
+ladder in `tokens.ts` first. Product floating-footer / dock clearance lives in
+`frontend/src/lib/portal-chrome.ts` (not kit `LAYOUT.taskbarHeight`) — keep
+`glass.scss` staff vars in sync when changing stack or gap.
 
 ## Cognitive contracts (psychology → tokens)
 

@@ -68,9 +68,9 @@ export function AlertsBell() {
         open={Boolean(anchor)}
         anchorEl={anchor}
         onClose={() => setAnchor(null)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        transformOrigin={{ vertical: "bottom", horizontal: "center" }}
-        slotProps={{ paper: { sx: { width: 340, maxHeight: 440, p: 1.5 } } }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        slotProps={{ paper: { sx: { width: 340, maxHeight: 440, p: 1.5, mt: 0.5 } } }}
       >
         <Stack spacing={1}>
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>

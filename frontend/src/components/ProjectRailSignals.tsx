@@ -163,7 +163,7 @@ export function ProjectRailSignals({ projectId }: { projectId: string }) {
               {healthDetail}
             </Typography>
           </Box>
-          <OfficeHealthGlyph state={healthState} variant="glass" title={healthDetail} />
+          <OfficeHealthGlyph state={healthState} title={healthDetail} />
         </Box>
       </Stack>
     </Box>

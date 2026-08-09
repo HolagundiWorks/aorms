@@ -983,8 +983,8 @@ export function Portal() {
               </DataState>
             </Section>
 
-            {/* ── Meeting minutes + ESTI-drafted revision requests ─────────── */}
-            <PortalMinutes projectId={openId} onSubmitted={refresh} />
+            {/* ── Meeting minutes (read-only; no ESTI on firm portals) ──────── */}
+            <PortalMinutes projectId={openId} />
 
             {/* ── Revision dashboard ───────────────────────────────────────── */}
             <Stack spacing={1.5}>

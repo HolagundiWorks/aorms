@@ -1,10 +1,10 @@
-﻿{
+{
   "name": "@hcw/ui-kit",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
   "type": "module",
   "sideEffects": ["*.scss", "*.css"],
-  "description": "HCW-UI-Kit — vendored BUILT copy of github.com/HolagundiWorks/hcwux @ 1.5.0 (pure neumorphism). Do not edit here; edit upstream and re-vendor dist/.",
+  "description": "HCW-UI-Kit � vendored BUILT copy of github.com/HolagundiWorks/hcwux @ 1.5.1 (pure neumorphism). Do not edit here; edit upstream and re-vendor dist/.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

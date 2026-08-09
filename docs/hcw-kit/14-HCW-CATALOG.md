@@ -59,8 +59,8 @@ dialogs, and the ActionDock capsule round.
 | `railWidthCollapsed` | `56` | |
 | `railFraction` / `stageFraction` | `0.2` / `0.8` | Fluid shells |
 | `contentMaxWidth` | `1280` | |
-| `taskbarHeight` | `56` | |
-| `dockClearance` | `16` | |
+| `taskbarHeight` | `56` | Kit `TaskbarFooter` only — **product** floating bars use `PORTAL_CHROME.footerHeightPx` **60** |
+| `dockClearance` | `16` | Matches product `PORTAL_CHROME.dockGapPx` (air above footer stack) |
 
 Helpers: `layoutSx.rail` · `.stage` · `.content` · `.grid` · `.page` · `.listToolbar` · `.formField`.
 
@@ -269,7 +269,7 @@ Class: `hcw-surface`. Always square.
 | Export | Attributes |
 | --- | --- |
 | `ActionDockProvider` | `children` |
-| `ActionDock` | (none) — reads published actions |
+| `ActionDock` | (none) — reads published actions; fixed `bottom: var(--esti-dock-bottom, 72px)` |
 | `useScreenActions(actions, deps?)` | publishes `DockAction[]` |
 | `useDockActions()` | reads current actions |
 
@@ -289,7 +289,9 @@ Class: `hcw-surface`. Always square.
 | `track` | bool | no — emit `ux.dock` (default true when `outcome` set) |
 
 **Zone law:** left = destroy/exit · center = create · right = commit. Hide dock while a create/edit dialog owns commit (`publish []`).  
-**Capacity:** > `CAPACITY.dockVisibleActions` → trim (prefer primary/danger) + `ux.capacity_warn`.
+**Capacity:** > `CAPACITY.dockVisibleActions` → trim (prefer primary/danger) + `ux.capacity_warn`.  
+**Clearance (product):** set `--esti-dock-bottom` to `footerStackPx + dockGapPx` (**76 + 16**). Kit fallback **72** overlaps a floating 60px + 16px-inset taskbar. Staff: `.esti-app-shell2` in `glass.scss`. Portals: `portalChromeCssVars`.  
+**Hover (1.5.1+):** opaque soft-neu + **8px** via kit `portal-chrome.scss` (no product override).
 
 ### KpiStrip
 
@@ -346,7 +348,8 @@ Exported type: `AwarenessStripProps`.
 | TaskbarButton `active` | bool | `false` |
 | TaskbarButton `onClick` | fn | — |
 
-Height token: `TASKBAR_HEIGHT` (56).
+Height token: `TASKBAR_HEIGHT` / `LAYOUT.taskbarHeight` (**56**) — kit primitive only.  
+**AORMS product** mounts `AppFooterBar` (staff) / `FirmPortalFooter` (portals): floating **60px**, inset **16**, hits **35**, radius **8** — see `PORTAL_CHROME` · [PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md).
 
 ### BrandMark
 

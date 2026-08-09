@@ -134,9 +134,9 @@ Do **not** invent per-route spacing. Shells carry the rhythm:
 | --- | --- | --- |
 | `RailLayout` | Most staff list/detail pages | Header pad · stage gap · main gap |
 | `StudioAbstract` | Studio Intelligence `/` | Brief + stage column rhythm |
-| `AppRibbon` + `AppFooterBar` | Staff chrome | Sticky inset · gutters (`--esti-shell-gutter: 24px`) |
-| `ActionDock` | Staff CTAs | Von Restorff zones (destroy · create · commit) |
-| `PortalNeuFrame` + `PORTAL_CHROME` | Client / consultant / contractor / site / account | Top bar · floating 60px footer · 100px clock · ActionDock clear |
+| `AppRibbon` + `AppFooterBar` | Staff chrome | Ribbon search/status; floating **60px** footer (`PORTAL_CHROME`); gutters `--esti-shell-gutter: 24px` |
+| `ActionDock` | Staff + portal CTAs | Von Restorff zones; `--esti-dock-bottom` = stack **76** + gap **16** |
+| `PortalNeuFrame` + `PORTAL_CHROME` | Client / consultant / contractor / site / account **and** staff footer/dock/clock metrics | Top bar · floating 60px footer · 100px clock · ActionDock clear |
 | `AdminConsoleShell` | Licensing | Header · chips · stage pad |
 | `AuthRailLayout` | `/login` (unified tabs) / reset / forgot | Horizontal soft card pad · pinned tab header · ambient clock |
 | `MarketingNeuFrame` + `MARKETING_RHYTHM` | Landing / blog / downloads | Section air · odd groups |
@@ -162,7 +162,7 @@ When adding a screen: wrap in the correct shell; use `COMPOSITION_RHYTHM` for lo
 | Misaligned card edges / mixed gutters | Single content column + 8px grid |
 | Two hero clocks / watermark + clock | One AnalogueClock |
 | Per-route magic spacing (13px, 18px) | `COMPOSITION_RHYTHM` steps only |
-| Hard-coded portal bar / clock px | `PORTAL_CHROME` + CSS vars from `portalChromeCssVars` |
+| Hard-coded footer / dock / clock px | `PORTAL_CHROME` (+ staff `glass.scss` vars kept in sync) |
 
 ---
 

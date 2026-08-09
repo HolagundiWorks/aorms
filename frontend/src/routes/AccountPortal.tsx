@@ -2,6 +2,7 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import { Link as RouterLink, Navigate } from "react-router-dom";
+import { DemoAdminUnlock } from "../components/DemoAdminUnlock.js";
 import { PortalLicenceCard } from "../components/portal/PortalLicenceCard.js";
 import {
   PortalCard,
@@ -200,6 +201,17 @@ export function AccountPortal() {
           <PortalTabPanel active={tab === 0}>
             <AccountHub me={me} />
             {license ? <PortalLicenceCard license={license} /> : <RequestPlan />}
+            {user?.isDemo ? (
+              <PortalCard>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                  Demo workspace
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  Unlock admin mutations for this demo session (users, credentials, firm settings).
+                </Typography>
+                <DemoAdminUnlock />
+              </PortalCard>
+            ) : null}
             <PortalCard>
               <Typography variant="body2" color="text.secondary">
                 {ownsCompany ? (

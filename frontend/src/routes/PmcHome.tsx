@@ -2,6 +2,7 @@ import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { AORMS_PMC, AORMS_PLATFORM } from "../lib/product-nomenclature.js";
+import { JointMeasurementQueue } from "../components/jointMeasurement/JointMeasurementQueue.js";
 import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { StatusDot } from "../components/StatusTag.js";
@@ -207,6 +208,8 @@ export function PmcHome() {
             ))}
           </Stack>
         )}
+
+        <JointMeasurementQueue />
 
         {(attentionMs.length > 0 || milestonesQ.isLoading) && (
           <Stack spacing={1}>

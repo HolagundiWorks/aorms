@@ -1,11 +1,12 @@
 # Page templates — canonical anatomies
 
-**Status:** Updated 2026-08-07 (no-rail soft neu · portals on `PortalNeuFrame`). These are not new inventions
-(Constitution VI): each template names its live reference — clone that, don't
-improvise. Shell contract: **ribbon · stage · taskbar footer · ActionDock · clock**
-([PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md) · [UI-SITE-MAP.md](../esti/UI-SITE-MAP.md)). Breadcrumb + `document.title` via
-`PageBreadcrumb`; CTAs via `useScreenActions`. **Left rail retired** on staff,
-marketing, and portals.
+**Status:** Updated 2026-08-09 (no-rail soft neu · shared `PORTAL_CHROME` floating
+taskbar + ActionDock clearance). These are not new inventions (Constitution VI):
+each template names its live reference — clone that, don't improvise. Shell
+contract: **ribbon · stage · floating taskbar · ActionDock · clock**
+([PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md) · [UI-SITE-MAP.md](../esti/UI-SITE-MAP.md)).
+Breadcrumb + `document.title` via `PageBreadcrumb`; CTAs via `useScreenActions`.
+**Left rail retired** on staff, marketing, and portals.
 
 ## T1 — Dashboard (reference: `StudioAbstract.tsx`, route `/`)
 
@@ -15,10 +16,10 @@ STAGE (full width under AppRibbon)
 ├ ≤4 KPI cards (TYPE_SCALE.kpi values)
 ├ tab strip (transparent, inset top alert line)
 └ per-tab: 4 KPIs + one DataGrid that scrolls inside its tile
-Footer · ActionDock · AnalogueClock (shell)
+Floating AppFooterBar (60px) · ActionDock (--esti-dock-bottom) · MarketingClockPomodoro (shell)
 ```
 Rules: ≤4 KPIs visible (Miller); health = shape + colour; numbers drill through.
-No left SoftRail / GlassRail.
+No left SoftRail / GlassRail. Dock clears footer by **16px** (`dockGapPx`).
 
 ## T2 — List / register (reference: `Consultants.tsx`, `Invoices.tsx`)
 

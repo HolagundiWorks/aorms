@@ -4,6 +4,16 @@ All notable changes to the HCW Design System package. Versioning follows semver;
 the package is workspace-consumed (source-only), so versions mark **design-contract**
 changes, not npm releases.
 
+## 1.5.1 — 2026-08-09
+
+### Fixed
+- **`portal-chrome.scss`** — ActionDock tray/buttons use opaque soft-neu hover +
+  **8px** radius (`--hcw-dock-pill-radius`). Removed leftover liquid-glass /
+  capsule (`9999px`) CSS that overrode Constitution Art. V tokens.
+- `--hcw-button-radius` / `--hcw-marketing-dock-radius` → **8px**; accent glow
+  disabled (`transparent`).
+- `DOCK_BUTTON_LIFT` → `translateY(-1px)` (matches soft neu dock).
+
 ## 1.5.0 — 2026-08-06
 
 ### Changed (breaking visual contract)

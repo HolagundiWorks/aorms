@@ -15,7 +15,7 @@ flowchart TB
     CardAuth["/login AuthSplitCard tabs"]
   end
   subgraph staff [Staff]
-    Shell["AppRibbon soft bar + footer + ActionDock + AnalogueClock"]
+    Shell["AppRibbon + floating AppFooterBar + ActionDock + clock"]
     Pages["RailLayout stage pages"]
     Home["StudioAbstract Fog Gray"]
   end
@@ -49,10 +49,10 @@ form body scrolls inside the fixed-height card.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Marketing | `/`, blog, downloads, 404 | `MarketingNeuFrame` / `MarketingShell` | 1200px | soft sticky · AormsLogo | `MarketingLandingDock` | Pomodoro clock | No |
 | Auth | `/login` (+ legacy `/access`); forgot/reset/force-pw; `/signup` bootstrap only | `AuthRailLayout` + `AuthSplitCard` | horizontal 1200px | `MarketingTopBar` | none | AnalogueClock | No |
-| Staff (AStudio) | office, library, projects, … | `.esti-app-shell2` + `AppRibbon` + `RailLayout` | full + gutters | soft sticky · mark + firm name | footer + ActionDock | AnalogueClock only | No |
-| Staff (AConsulting) | `/consultancy/*` on consultancy host | same staff shell · `consultancyNav` | full | soft sticky | footer + dock | AnalogueClock | No |
-| Staff (AProc) | `/pmc` on proc host | same staff shell · `pmcNav` + `PmcHome` | full | soft sticky | footer home → `/pmc` | AnalogueClock | No |
-| Studio home | `/` on studio | `StudioAbstract` | full | soft AppRibbon | footer + dock | AnalogueClock | No |
+| Staff (AStudio) | office, library, projects, … | `.esti-app-shell2` + `AppRibbon` + `RailLayout` | full + gutters | soft sticky · brand · search · greeting · alerts | floating 60px `AppFooterBar` (nav) + ActionDock | `MarketingClockPomodoro` 100px | No |
+| Staff (AConsulting) | `/consultancy/*` on consultancy host | same staff shell · `consultancyNav` | full | same ribbon | same floating footer + dock | same clock | No |
+| Staff (AProc) | `/pmc` on proc host | same staff shell · `pmcNav` + `PmcHome` | full | same ribbon | footer home → `/pmc` + dock | same clock | No |
+| Studio home | `/` on studio | `StudioAbstract` | full | soft AppRibbon | floating footer + dock | same clock | No |
 | External portals | client / consultant / contractor / site | `PortalNeuFrame` + `PORTAL_CHROME` | 1200px | soft top · floating 60px footer | CLIENT + CONTRACTOR ActionDock | `AormsAnalogueClock` 100px | No |
 | Account hubs | `/account`, `/company-account` | `PortalNeuFrame` + soft `PortalCard` | 1200px | soft sticky · logo → home · hub nav | none | `AormsAnalogueClock` | No |
 | Licensing admin | `/platform-admin` | `PortalShell` + horizontal sections | 1200px | portal top bar | none | `AormsAnalogueClock` | No |
