@@ -103,6 +103,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | W3 | AConsulting Engagements/Projects stage on HCW dock | ✅ |
 | W4 | AStudio S2c Portfolio / Focus polish | ✅ |
 | W5+ | Pin Connect · AStudio · AConsulting `vendor/AQC` → `5f553cb` (JM + OutboxCounts) | ✅ |
+| W6 | AConsulting **Office** enquiry go/no-go (`local_office_enquiries` · `officeEnquiry` meta) | ✅ |
 
 ### Ops-blocked (need human)
 
