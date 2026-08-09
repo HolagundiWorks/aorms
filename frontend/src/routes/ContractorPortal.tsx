@@ -87,7 +87,12 @@ export function ContractorPortal() {
   const [requestOpen, setRequestOpen] = useState(false);
   const [requestKind, setRequestKind] = useState<RequestKind>("TICKET");
   const [requestLockKind, setRequestLockKind] = useState(false);
-  const [request, setRequest] = useState({ subject: "", body: "", preferredDate: "" });
+  const [request, setRequest] = useState({
+    subject: "",
+    body: "",
+    preferredDate: "",
+    attentionToId: "",
+  });
   const [billsOpen, setBillsOpen] = useState(false);
 
   const detailQ = trpc.contractorPortal.getInvitation.useQuery(
@@ -98,11 +103,19 @@ export function ContractorPortal() {
     { invitationId: focusId! },
     { enabled: !!focusId },
   );
+  const teamQ = trpc.contractorPortal.projectTeam.useQuery(
+    { invitationId: focusId! },
+    { enabled: !!focusId },
+  );
   const billsQ = trpc.contractorPortal.myRunningBills.useQuery(
     { invitationId: focusId! },
     { enabled: !!focusId },
   );
   const submissionsQ = trpc.contractorPortal.mySubmissions.useQuery(
+    { invitationId: focusId! },
+    { enabled: !!focusId },
+  );
+  const approvedJmQ = trpc.contractorPortal.myApprovedJointMeasurements.useQuery(
     { invitationId: focusId! },
     { enabled: !!focusId },
   );
@@ -122,6 +135,7 @@ export function ContractorPortal() {
       subject: CONTRACTOR_PORTAL_SUBMISSION_KIND_LABEL[kind],
       body: "",
       preferredDate: "",
+      attentionToId: "",
     });
     setRequestOpen(true);
   }
@@ -209,6 +223,8 @@ export function ContractorPortal() {
   const detail = detailQ.data;
   const pd = projectQ.data;
   const submissions = submissionsQ.data ?? [];
+  const teamMembers = teamQ.data ?? [];
+  const approvedJm = approvedJmQ.data ?? [];
   const runningBills = (billsQ.data ?? []).map((b) => ({
     id: b.id,
     ref: b.ref,
@@ -388,6 +404,11 @@ export function ContractorPortal() {
                         ] ?? s.status}
                       </Typography>
                     </Stack>
+                    {s.attentionToName ? (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+                        Tagged: {s.attentionToName}
+                      </Typography>
+                    ) : null}
                     {s.body ? (
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                         {s.body}
@@ -397,6 +418,25 @@ export function ContractorPortal() {
                 ))}
               </Stack>
             </DataState>
+            {approvedJm.length > 0 ? (
+              <Stack spacing={1}>
+                <Typography variant="subtitle2">Approved joint measurements</Typography>
+                {approvedJm.map((jm) => (
+                  <Surface key={jm.id} layer="soft" sx={{ borderRadius: `${RADIUS}px`, p: 1.5 }}>
+                    <Typography variant="subtitle2">{jm.subject}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {jm.measuredOn ?? "—"} · {jm.lines.length} line(s)
+                    </Typography>
+                    {jm.lines.map((l) => (
+                      <Typography key={l.id} variant="body2" color="text.secondary">
+                        {l.code ? `${l.code} · ` : ""}
+                        {l.description} — {l.quantity} {l.uom}
+                      </Typography>
+                    ))}
+                  </Surface>
+                ))}
+              </Stack>
+            ) : null}
           </Stack>
         ) : null}
       </Stack>
@@ -539,7 +579,7 @@ export function ContractorPortal() {
                 value={request.preferredDate}
                 onChange={(e) => setRequest((r) => ({ ...r, preferredDate: e.target.value }))}
                 fullWidth
-                InputLabelProps={{ shrink: true }}
+                slotProps={{ inputLabel: { shrink: true } }}
               />
             ) : null}
             <TextField
@@ -550,6 +590,23 @@ export function ContractorPortal() {
               multiline
               minRows={3}
             />
+            {teamMembers.length > 0 ? (
+              <TextField
+                select
+                label="Tag team member (optional)"
+                helperText="Which firm team member should handle this?"
+                value={request.attentionToId}
+                fullWidth
+                onChange={(e) => setRequest((r) => ({ ...r, attentionToId: e.target.value }))}
+              >
+                <MenuItem value="">— any team member —</MenuItem>
+                {teamMembers.map((m) => (
+                  <MenuItem key={m.id} value={m.id}>
+                    {`${m.fullName} (${m.role})`}
+                  </MenuItem>
+                ))}
+              </TextField>
+            ) : null}
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -567,6 +624,7 @@ export function ContractorPortal() {
                 subject: request.subject.trim(),
                 body: request.body.trim() || undefined,
                 preferredDate: request.preferredDate || undefined,
+                attentionToId: request.attentionToId || undefined,
               });
             }}
           >

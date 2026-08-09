@@ -15,6 +15,7 @@ export * from "./repo-portal.js";
 export * from "./spec-catalog.js";
 export * from "./item-library.js";
 export * from "./measurement-plan.js";
+export * from "./joint-measurement.js";
 export * from "./vendor.js";
 export * from "./collaboration.js";
 export * from "./hr-work.js";

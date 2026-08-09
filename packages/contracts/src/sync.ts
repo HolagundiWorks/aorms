@@ -33,6 +33,7 @@ export const SyncEntity = z.enum([
   "siteVisit", // CONFIRMED
   "siteReference", // frozen feasibility + programme snapshot
   "progressReport", // ISSUED to client
+  "jointMeasurement", // APPROVED abstract (site JM → office)
 ]);
 export type SyncEntity = z.infer<typeof SyncEntity>;
 

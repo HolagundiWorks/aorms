@@ -90,6 +90,7 @@ import { pmcSteelCertsRouter } from "../modules/pmc/steelCerts.js";
 import { pmcDigestRouter } from "../modules/pmc/digest.js";
 import { contractorPortalRouter } from "../modules/contractor/portal.js";
 import { sitePortalRouter } from "../modules/site/portal.js";
+import { jointMeasurementRouter } from "../modules/jointMeasurement/router.js";
 import { tendersRouter } from "../modules/tender/router.js";
 import { runningBillsRouter } from "../modules/runningBill/router.js";
 import { siteVisitRouter } from "../modules/siteVisit/router.js";
@@ -221,6 +222,7 @@ export const appRouter = router({
   pmcDigest: pmcDigestRouter,
   contractorPortal: contractorPortalRouter,
   sitePortal: sitePortalRouter,
+  jointMeasurement: jointMeasurementRouter,
   leads: leadsRouter,
   projectDna: projectDnaRouter,
   assessment: assessmentRouter,

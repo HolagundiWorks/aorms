@@ -7,6 +7,7 @@ import {
   feasibilityReports,
   inspections,
   invoices,
+  jointMeasurements,
   progressReports,
   runningBills,
   siteVisits,
@@ -185,6 +186,25 @@ async function buildDto(db: DB, entity: SyncEntity, id: string): Promise<Dto | n
           pdfStatus: r.pdfStatus,
         },
         fileKeys: r.pdfKey ? [r.pdfKey] : [],
+      };
+    }
+    case "jointMeasurement": {
+      const [r] = await db
+        .select()
+        .from(jointMeasurements)
+        .where(eq(jointMeasurements.id, id))
+        .limit(1);
+      if (!r || r.status !== "APPROVED") return null;
+      return {
+        payload: {
+          projectId: r.projectId,
+          contractorId: r.contractorId,
+          subject: r.subject,
+          measuredOn: r.measuredOn,
+          status: r.status,
+          reviewedAt: r.reviewedAt,
+        },
+        fileKeys: [],
       };
     }
     default:

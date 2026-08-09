@@ -57,5 +57,7 @@ export const ContractorPortalSubmitInput = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(),
+  /** Firm team member to notify / handle (user id from projectTeam). */
+  attentionToId: z.string().uuid().optional(),
 });
 export type ContractorPortalSubmitInput = z.infer<typeof ContractorPortalSubmitInput>;

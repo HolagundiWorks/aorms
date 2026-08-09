@@ -1,8 +1,6 @@
 import {
   ClientImpactResponseInput,
   canAcknowledgeTransmittal,
-  parseAiSettings,
-  parseMomRevisionSuggestions,
   PortalAcknowledgeInput,
   PortalApprovalRespondInput,
   PortalChangeRequestInput,
@@ -14,7 +12,6 @@ import { z } from "zod";
 import type { DB } from "../../db/index.js";
 import {
   activities,
-  aiRuns,
   approvals,
   assignments,
   consDeliverables,
@@ -31,10 +28,7 @@ import {
   users,
 } from "../../db/schema.js";
 import { writeActivity } from "../../lib/activity.js";
-import { runAiGateway } from "../../lib/ai/gateway.js";
 import { getFirm } from "../../lib/firm.js";
-import { assertPlanFeature } from "../../lib/plan.js";
-import { getOrgSettings } from "../../lib/settings.js";
 import {
   portalAwardedTenders,
   portalConfirmedSiteVisits,
@@ -215,81 +209,16 @@ export const portalRouter = router({
     }),
 
   /**
-   * ESTI reads an issued MoM and drafts the revision requests the client
-   * would otherwise have to write. Suggestions are returned for the client to
-   * edit and submit via `submitChangeRequest` — nothing is sent to the office
-   * until the client explicitly pushes each one.
+   * @deprecated ESTI is desktop-only — firm portals no longer draft MoM revisions.
+   * Kept as a stub so older clients fail cleanly.
    */
   suggestMomRevisions: clientProcedure
     .input(z.object({ momId: z.string().uuid() }))
-    .mutation(async ({ ctx, input }) => {
-      const [mom] = await ctx.db.select().from(moms).where(eq(moms.id, input.momId));
-      if (!mom || mom.status !== "ISSUED") throw new TRPCError({ code: "NOT_FOUND" });
-      await assertOwnedProject(ctx, mom.projectId);
-      if (!mom.minutes.trim()) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "These minutes have no text to read." });
-      }
-
-      // Same gates as AI Studio: plan tier + firm-level AI settings.
-      await assertPlanFeature(ctx.db, "ai");
-      const org = await getOrgSettings(ctx.db);
-      const settings = parseAiSettings(org.aiSettings);
-      if (!settings.enabled) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "ESTI is not enabled for this office — ask your architect to enable AI Studio.",
-        });
-      }
-
-      const header = [
-        `Meeting: ${mom.title}`,
-        mom.meetingDate ? `Date: ${mom.meetingDate}` : null,
-        mom.attendees ? `Attendees: ${mom.attendees}` : null,
-      ]
-        .filter(Boolean)
-        .join("\n");
-      let result;
-      try {
-        result = await runAiGateway(ctx.db, ctx.user, settings, {
-          kind: "MOM_REVISIONS",
-          projectId: mom.projectId,
-          prompt: `${header}\n\n${mom.minutes}`.slice(0, 24_000),
-          contextQuery: mom.id,
-        });
-      } catch (e) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: e instanceof Error ? e.message : "ESTI could not read the minutes",
-        });
-      }
-
-      const suggestions = parseMomRevisionSuggestions(result.output);
-
-      // Provenance: every portal ESTI run is recorded like an AI Studio run.
-      const [run] = await ctx.db
-        .insert(aiRuns)
-        .values({
-          userId: ctx.user.id,
-          projectId: mom.projectId,
-          kind: "MOM_REVISIONS",
-          provider: result.provider,
-          model: result.model,
-          promptSummary: result.promptSummary,
-          sources: result.sources,
-          outputText: result.output,
-          approvalState: "DRAFT",
-          usedExternalApi: result.usedExternalApi ? "true" : "false",
-          tokenEstimate: result.tokenEstimate != null ? String(result.tokenEstimate) : null,
-          source: "portal",
-        })
-        .returning({ id: aiRuns.id });
-
-      if (!suggestions) {
-        // Either the minutes contain no change requests ([]) or the model's
-        // answer was unparseable — both read as "nothing to suggest".
-        return { runId: run!.id, momRef: mom.ref, suggestions: [] };
-      }
-      return { runId: run!.id, momRef: mom.ref, suggestions };
+    .mutation(async () => {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "ESTI is not available on the client portal — raise a change request manually.",
+      });
     }),
 
   /** Project team members the client can address a change request to. */

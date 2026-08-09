@@ -181,6 +181,7 @@ export async function seedDemoContractorPortalExtras(
         status: "ACKNOWLEDGED",
         responseNote: "Architect liaising with neighbour — use west gate meantime.",
         submittedById,
+        attentionToId: principalId,
       },
       {
         projectId,

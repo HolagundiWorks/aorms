@@ -14,8 +14,9 @@ import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import AddIcon from "@mui/icons-material/Add";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
+import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import { useEffect, useState } from "react";
-import { useScreenActions } from "@hcw/ui-kit";
+import { pushToast, useScreenActions } from "@hcw/ui-kit";
 import { formatINR, parseRupeeInput } from "@esti/contracts";
 import { ConfirmModal } from "../ConfirmModal.js";
 import { DataState } from "../DataState.js";
@@ -59,6 +60,11 @@ export function RateBookManager() {
 
   const [iOpen, setIOpen] = useState(false);
   const [iForm, setIForm] = useState(blankItemForm());
+  const [jmOpen, setJmOpen] = useState(false);
+  const [jmPick, setJmPick] = useState("");
+  const approvedJmQ = trpc.jointMeasurement.listApproved.useQuery(undefined, {
+    enabled: jmOpen,
+  });
   const upsertItem = trpc.rateBooks.upsertItem.useMutation({
     onSuccess: () => {
       utils.rateBooks.listItems.invalidate({ rateBookId });
@@ -68,6 +74,20 @@ export function RateBookManager() {
   });
   const removeItem = trpc.rateBooks.removeItem.useMutation({
     onSuccess: () => utils.rateBooks.listItems.invalidate({ rateBookId }),
+  });
+  const fromJm = trpc.rateBooks.createFromJointMeasurement.useMutation({
+    meta: { errorTitle: "Couldn't import from joint measurement" },
+    onSuccess: (res) => {
+      utils.rateBooks.list.invalidate();
+      utils.rateBooks.listItems.invalidate({ rateBookId: res.rateBookId });
+      setRateBookId(res.rateBookId);
+      setJmOpen(false);
+      setJmPick("");
+      pushToast({
+        kind: "success",
+        title: res.added > 0 ? `Added ${res.added} item(s) from JM` : "No new items (codes already present)",
+      });
+    },
   });
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
@@ -89,6 +109,14 @@ export function RateBookManager() {
         icon: <AddIcon />,
         disabled: !rateBookId || !!selectedBook?.locked,
         onClick: () => setIOpen(true),
+      },
+      {
+        id: "rb-from-jm",
+        zone: "center",
+        tone: "default",
+        label: "From joint measurement",
+        icon: <PlaylistAddIcon />,
+        onClick: () => setJmOpen(true),
       },
       ...(selectedBook
         ? [
@@ -118,10 +146,34 @@ export function RateBookManager() {
     { field: "unit", headerName: "Unit", flex: 0.6, minWidth: 80 },
     {
       field: "ratePaise",
-      headerName: "Rate",
-      flex: 0.8,
-      minWidth: 110,
-      renderCell: (p) => formatINR(p.row.ratePaise, { paise: false }),
+      headerName: "Rate (₹)",
+      flex: 1,
+      minWidth: 140,
+      renderCell: (p) =>
+        selectedBook?.locked ? (
+          formatINR(p.row.ratePaise, { paise: false })
+        ) : (
+          <TextField
+            size="small"
+            type="number"
+            defaultValue={(p.row.ratePaise / 100).toFixed(2)}
+            onBlur={(e) => {
+              const paise = parseRupeeInput(e.target.value);
+              if (paise === p.row.ratePaise) return;
+              upsertItem.mutate({
+                id: p.row.id,
+                rateBookId,
+                itemCode: p.row.itemCode ?? undefined,
+                description: p.row.description,
+                specification: p.row.specification ?? undefined,
+                unit: p.row.unit,
+                ratePaise: paise,
+              });
+            }}
+            sx={{ width: 120 }}
+            inputProps={{ step: "0.01", min: 0 }}
+          />
+        ),
     },
     {
       field: "actions",
@@ -257,6 +309,51 @@ export function RateBookManager() {
             }
           >
             {createBook.isPending ? "Creating…" : "Create"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={jmOpen} onClose={() => setJmOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Import from joint measurement</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              Seeds item codes, descriptions and units from an approved joint measurement.
+              Rates stay at ₹0 until you enter them in the grid.
+            </Typography>
+            <TextField
+              select
+              label="Approved joint measurement"
+              value={jmPick}
+              onChange={(e) => setJmPick(e.target.value)}
+              fullWidth
+            >
+              <MenuItem value="">Select…</MenuItem>
+              {(approvedJmQ.data ?? []).map((jm) => (
+                <MenuItem key={jm.id} value={jm.id}>
+                  {jm.subject}
+                  {jm.measuredOn ? ` (${jm.measuredOn})` : ""}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setJmOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            disabled={!jmPick || fromJm.isPending}
+            onClick={() =>
+              fromJm.mutate({
+                jointMeasurementId: jmPick,
+                rateBookId: rateBookId || undefined,
+                name: rateBookId ? undefined : "JM rate book",
+              })
+            }
+          >
+            {fromJm.isPending ? "Importing…" : rateBookId ? "Add to this book" : "Create book + import"}
           </Button>
         </DialogActions>
       </Dialog>

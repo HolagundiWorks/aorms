@@ -4,17 +4,22 @@ import {
   TenderBidSubmit,
 } from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
+  assignments,
   contractorSubmissions,
   firm,
+  jointMeasurementLines,
+  jointMeasurements,
   phases,
   projectOffices,
   siteVisits,
+  teamMembers,
   tenderBids,
   tenderInvitations,
   tenders,
+  users,
 } from "../../db/schema.js";
 import { writeAudit } from "../../lib/audit.js";
 import {
@@ -350,6 +355,21 @@ export const contractorPortalRouter = router({
       return portalPublishedRunningBills(ctx.db, projectId);
     }),
 
+  /** Firm team assigned to the invitation's project (for tagging on tickets). */
+  projectTeam: contractorProcedure
+    .input(z.object({ invitationId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const contractorId = ctx.user.contractorId!;
+      const { projectId } = await invitationProject(ctx.db, contractorId, input.invitationId);
+      return ctx.db
+        .select({ id: users.id, fullName: users.fullName, role: users.role })
+        .from(assignments)
+        .innerJoin(teamMembers, eq(teamMembers.id, assignments.teamMemberId))
+        .innerJoin(users, eq(users.id, teamMembers.userId))
+        .where(and(eq(assignments.projectId, projectId), sql`${users.id} IS NOT NULL`))
+        .orderBy(asc(users.fullName));
+    }),
+
   mySubmissions: contractorProcedure
     .input(z.object({ invitationId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
@@ -363,9 +383,12 @@ export const contractorPortalRouter = router({
           body: contractorSubmissions.body,
           status: contractorSubmissions.status,
           responseNote: contractorSubmissions.responseNote,
+          attentionToId: contractorSubmissions.attentionToId,
+          attentionToName: users.fullName,
           createdAt: contractorSubmissions.createdAt,
         })
         .from(contractorSubmissions)
+        .leftJoin(users, eq(users.id, contractorSubmissions.attentionToId))
         .where(
           and(
             eq(contractorSubmissions.projectId, projectId),
@@ -389,7 +412,29 @@ export const contractorPortalRouter = router({
         input.invitationId,
       );
 
-      const kindLabel = CONTRACTOR_PORTAL_SUBMISSION_KIND_LABEL[input.kind];
+      let attentionToId: string | null = null;
+      if (input.attentionToId) {
+        const [onTeam] = await ctx.db
+          .select({ id: users.id })
+          .from(assignments)
+          .innerJoin(teamMembers, eq(teamMembers.id, assignments.teamMemberId))
+          .innerJoin(users, eq(users.id, teamMembers.userId))
+          .where(
+            and(
+              eq(assignments.projectId, projectId),
+              eq(users.id, input.attentionToId),
+            ),
+          )
+          .limit(1);
+        if (!onTeam) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Tagged team member is not assigned to this project",
+          });
+        }
+        attentionToId = onTeam.id;
+      }
+
       const bodyParts = [
         input.body?.trim() || null,
         input.preferredDate ? `Preferred date: ${input.preferredDate}` : null,
@@ -405,6 +450,7 @@ export const contractorPortalRouter = router({
           body: bodyParts.length > 0 ? bodyParts.join("\n\n") : null,
           status: "OPEN",
           submittedById: ctx.user.id,
+          attentionToId,
         })
         .returning();
 
@@ -425,6 +471,21 @@ export const contractorPortalRouter = router({
         });
       }
 
+      /** JOINT_MEASUREMENT request opens a linked site DRAFT for the recorder. */
+      if (input.kind === "JOINT_MEASUREMENT") {
+        await ctx.db.insert(jointMeasurements).values({
+          projectId,
+          contractorId,
+          sourceSubmissionId: row!.id,
+          subject: input.subject.trim(),
+          measuredOn: input.preferredDate ?? null,
+          details: input.body?.trim() || null,
+          attentionToId,
+          status: "DRAFT",
+          submittedById: ctx.user.id,
+        });
+      }
+
       await writeAudit(ctx.db, {
         entity: "contractor_submission",
         entityId: row!.id,
@@ -435,8 +496,56 @@ export const contractorPortalRouter = router({
           projectId,
           projectTitle,
           invitationId: input.invitationId,
+          attentionToId,
+          kindLabel: CONTRACTOR_PORTAL_SUBMISSION_KIND_LABEL[input.kind],
         },
       });
       return row!;
+    }),
+
+  /** Approved joint measurement abstracts for this contractor (read-only). */
+  myApprovedJointMeasurements: contractorProcedure
+    .input(z.object({ invitationId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const contractorId = ctx.user.contractorId!;
+      const { projectId } = await invitationProject(ctx.db, contractorId, input.invitationId);
+      const headers = await ctx.db
+        .select({
+          id: jointMeasurements.id,
+          subject: jointMeasurements.subject,
+          measuredOn: jointMeasurements.measuredOn,
+          status: jointMeasurements.status,
+          reviewedAt: jointMeasurements.reviewedAt,
+          reviewNote: jointMeasurements.reviewNote,
+        })
+        .from(jointMeasurements)
+        .where(
+          and(
+            eq(jointMeasurements.projectId, projectId),
+            eq(jointMeasurements.contractorId, contractorId),
+            eq(jointMeasurements.status, "APPROVED"),
+          ),
+        )
+        .orderBy(desc(jointMeasurements.reviewedAt));
+
+      const result = [];
+      for (const h of headers) {
+        const lines = await ctx.db
+          .select({
+            id: jointMeasurementLines.id,
+            code: jointMeasurementLines.code,
+            description: jointMeasurementLines.description,
+            uom: jointMeasurementLines.uom,
+            lengthMm: jointMeasurementLines.lengthMm,
+            breadthMm: jointMeasurementLines.breadthMm,
+            heightMm: jointMeasurementLines.heightMm,
+            quantity: jointMeasurementLines.quantity,
+          })
+          .from(jointMeasurementLines)
+          .where(eq(jointMeasurementLines.jointMeasurementId, h.id))
+          .orderBy(asc(jointMeasurementLines.sortOrder));
+        result.push({ ...h, lines });
+      }
+      return result;
     }),
 });

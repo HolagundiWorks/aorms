@@ -88,5 +88,6 @@ Manual overrides set `derivation = OVERRIDE`.
 2. ✅ Plan reader — SVG canvas (from DXF render), calibration, markup tools, push to sheet
 3. ✅ PDF.js native plan upload — upload PDF drawings (READY immediately), render page 0 under the same markup overlay; DXF path unchanged
 4. 🔲 Export Excel/PDF abstract; rates when cost spine returns
+5. ✅ Site **joint measurement** recorder → staff approve → MB import + rate-book seed · PDF annotate (pen/highlight/pin/cloud) — see [AQC-JM-SYNC.md](./AQC-JM-SYNC.md)
 
 See also: [HCW-UI-KIT.md](./HCW-UI-KIT.md) (rail · stage for Plan studio).

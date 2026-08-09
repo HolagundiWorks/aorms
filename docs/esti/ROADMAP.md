@@ -43,6 +43,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | **S8** | Reopen apex auth / portal demos | esti | 🟡 code ready (gate-aware CTAs · `s8-reopen-demos.sh`) · VPS flip 🔲 |
 | **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🟡 unsigned MSIX ✅ · code sign 🔲 D6 |
 | **S10** | Firm portal depth | esti portals | ✅ collab tx+ack · Documents+RA · contractor/site Drawings · collab demo login |
+| **S11** | Joint measurement → approval → rate books · PDF annotate · AQC sync contract | esti · AQC | ✅ hub recorder/approve/rate seed · [AQC-JM-SYNC.md](AQC-JM-SYNC.md) · AQC desktop pull 🔲 |
 
 ---
 
@@ -92,7 +93,8 @@ Desktop firm login target: **AORMS Connect** (not apex).
 1. **S8 VPS flip** — add deploy pubkey below to the droplet, then `gh workflow run s8-reopen-demos.yml -f mode=apply` (or `CONFIRM=yes bash deploy/s8-reopen-demos.sh` on the box).  
    Pubkey: `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzNk7P4spTM1FBfiiZiIa9k6asphlWNgW4lanTI04DT aorms-deploy-github-actions`  
 2. **D6** — Trusted Authenticode → upload → `apply-installer-manifest.ps1 -ConfirmFlip` → release flag + rebuild. Prefer Connect first.  
-3. Hub-portal SyncEntity allow-list ✅ · client portal UI surfaces tenders/inspections/visits/siteRef/running bills · AProc pmc RA stays live · portal tenants after D6.
+3. Hub-portal SyncEntity allow-list ✅ · client portal UI surfaces tenders/inspections/visits/siteRef/running bills · AProc pmc RA stays live · portal tenants after D6.  
+4. **S11** Joint measurement (site recorder → approve → MB/rate books · PDF annotate) ✅ on esti · AQC desktop consume via [AQC-JM-SYNC.md](AQC-JM-SYNC.md) 🔲.
 
 ## Deferred
 

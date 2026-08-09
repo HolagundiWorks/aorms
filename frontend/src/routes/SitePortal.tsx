@@ -1,9 +1,9 @@
+import ArrowBackOutlined from "@mui/icons-material/ArrowBackOutlined";
+import SquareFootOutlined from "@mui/icons-material/SquareFootOutlined";
 import {
   Alert,
   Box,
   Button,
-  Card,
-  CardActionArea,
   Dialog,
   DialogActions,
   DialogContent,
@@ -13,7 +13,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { JOINT_MEASUREMENT_STATUS_LABEL } from "@esti/contracts";
+import { RADIUS, Surface, useScreenActions } from "@hcw/ui-kit";
+import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ExternalPortalShell } from "../components/portal/ExternalPortalShell.js";
 import {
@@ -21,10 +23,15 @@ import {
   FirmPortalProgressPanel,
   FirmPortalProjectPanel,
 } from "../components/portal/FirmPortalHubPanels.js";
+import { JointMeasurementRecorder } from "../components/portal/JointMeasurementRecorder.js";
 import { ProjectSiteReference } from "../components/ProjectSiteReference.js";
 import { StatusDot } from "../components/StatusTag.js";
 import { trpc } from "../lib/trpc.js";
 import { AORMS_PORTALS } from "../lib/product-nomenclature.js";
+
+const PORTAL_DIALOG_SLOT = {
+  paper: { className: "esti-portal-dialog", sx: { borderRadius: `${RADIUS}px` } },
+} as const;
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red" | "teal"> = {
   DRAFT: "gray",
@@ -74,6 +81,8 @@ export function SitePortal() {
   });
 
   const [createOpen, setCreateOpen] = useState(false);
+  const [jmOpen, setJmOpen] = useState(false);
+  const [jmId, setJmId] = useState<string | null>(null);
   const [form, setForm] = useState({
     dateVisit: "", weather: "", attendees: "", progress: "", observations: "", instructions: "",
   });
@@ -87,6 +96,37 @@ export function SitePortal() {
     { projectId: projectId! },
     { enabled: !!projectId },
   );
+  const jmListQ = trpc.jointMeasurement.listForSite.useQuery(
+    { projectId: projectId! },
+    { enabled: !!projectId },
+  );
+
+  const dockDialogOpen = createOpen || jmOpen;
+  const dockActions = useMemo(() => {
+    if (!projectId || dockDialogOpen) return [];
+    return [
+      {
+        id: "site-jm",
+        zone: "center" as const,
+        tone: "primary" as const,
+        label: "Joint measurement",
+        icon: <SquareFootOutlined />,
+        onClick: () => {
+          setJmId(null);
+          setJmOpen(true);
+        },
+      },
+      {
+        id: "site-inspection",
+        zone: "center" as const,
+        tone: "default" as const,
+        label: "Inspection",
+        onClick: () => setCreateOpen(true),
+      },
+    ];
+  }, [projectId, dockDialogOpen]);
+  // deps required — kit effect ignores `actions` unless listed (empty [] = mount-only).
+  useScreenActions(dockActions, [dockActions]);
 
   const portalPanels = projectId
     ? {
@@ -147,7 +187,7 @@ export function SitePortal() {
           {projectsQ.isLoading && (
             <Stack spacing={1.5} aria-busy="true" aria-label="Loading projects">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} variant="rectangular" height={72} sx={{ borderRadius: "8px" }} />
+                <Skeleton key={i} variant="rectangular" height={72} sx={{ borderRadius: "8px !important" }} />
               ))}
             </Stack>
           )}
@@ -158,16 +198,34 @@ export function SitePortal() {
           )}
           <Stack spacing={1.5}>
             {(projectsQ.data ?? []).map((p) => (
-              <Card key={p.id} elevation={0} sx={{ borderRadius: "8px", bgcolor: "background.paper" }}>
-                <CardActionArea onClick={() => navigate(`/projects/${p.id}`)} sx={{ p: 2 }}>
-                  <Stack spacing={1.5}>
-                    <Typography variant="body1">
-                      <strong>{p.ref}</strong> — {p.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">{p.status}</Typography>
-                  </Stack>
-                </CardActionArea>
-              </Card>
+              <Surface
+                key={p.id}
+                layer="soft"
+                className="hcw-surface"
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(`/projects/${p.id}`)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    navigate(`/projects/${p.id}`);
+                  }
+                }}
+                sx={{
+                  p: 2,
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  outline: "none",
+                  "&:focus-visible": { boxShadow: (t) => `0 0 0 2px ${t.palette.primary.main}` },
+                }}
+              >
+                <Stack spacing={1}>
+                  <Typography variant="body1">
+                    <strong>{p.ref}</strong> — {p.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">{p.status}</Typography>
+                </Stack>
+              </Surface>
             ))}
           </Stack>
         </Stack>
@@ -177,13 +235,28 @@ export function SitePortal() {
 
   const inspections = inspectionsQ.data ?? [];
 
+  const projectTitle = projectDetailQ.data?.project?.title;
+  const projectRef = projectDetailQ.data?.project?.ref;
+
   return (
     <ExternalPortalShell {...shellProps}>
       <Stack spacing={3}>
         <Stack spacing={1}>
-          <Typography variant="h5" component="h2">Site Inspections</Typography>
+          <Button
+            variant="text"
+            size="small"
+            startIcon={<ArrowBackOutlined />}
+            onClick={() => navigate("/")}
+            sx={{ alignSelf: "flex-start", px: 0 }}
+          >
+            All projects
+          </Button>
+          <Typography variant="h5" component="h2">
+            {projectRef ? `${projectRef} — ` : ""}
+            {projectTitle ?? "Site"}
+          </Typography>
           <Typography variant="body2" color="text.secondary">
-            Field view
+            Field view — inspections, visits, joint measurement
           </Typography>
         </Stack>
 
@@ -194,7 +267,7 @@ export function SitePortal() {
             {(visitsQ.data ?? [])
               .filter((v) => v.status === "PLANNED" && !v.supervisorConfirmedAt)
               .map((v) => (
-                <Box key={v.id} sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
+                <Surface key={v.id} layer="soft" className="hcw-surface" sx={{ p: 2, borderRadius: "8px" }}>
                   <Stack spacing={1.5}>
                     <Typography variant="body1"><strong>{v.plannedDate}</strong></Typography>
                     {v.notes && <Typography variant="body2" color="text.secondary">{v.notes}</Typography>}
@@ -209,7 +282,7 @@ export function SitePortal() {
                       </Button>
                     </Box>
                   </Stack>
-                </Box>
+                </Surface>
               ))}
           </Stack>
         )}
@@ -217,9 +290,95 @@ export function SitePortal() {
         {/* Agreed baseline (read-only source of truth) */}
         <ProjectSiteReference projectId={projectId} compact />
 
-        <Box>
-          <Button variant="contained" onClick={() => setCreateOpen(true)}>New inspection report</Button>
-        </Box>
+        <Stack spacing={1.5}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}
+          >
+            <Typography variant="h6" component="h3" sx={{ flex: 1, minWidth: 140 }}>
+              Joint measurements
+            </Typography>
+            <Button
+              size="small"
+              variant="contained"
+              startIcon={<SquareFootOutlined />}
+              onClick={() => {
+                setJmId(null);
+                setJmOpen(true);
+              }}
+            >
+              Record
+            </Button>
+          </Stack>
+          {jmListQ.isLoading ? (
+            <Skeleton variant="rectangular" height={64} sx={{ borderRadius: "8px !important" }} />
+          ) : null}
+          {(jmListQ.data ?? []).length === 0 && !jmListQ.isLoading ? (
+            <Typography variant="body2" color="text.secondary">
+              Record a joint measurement abstract (or use the action dock), then submit for office approval.
+            </Typography>
+          ) : null}
+          {(jmListQ.data ?? []).map((jm) => (
+            <Surface
+              key={jm.id}
+              layer="soft"
+              className="hcw-surface"
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                setJmId(jm.id);
+                setJmOpen(true);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setJmId(jm.id);
+                  setJmOpen(true);
+                }
+              }}
+              sx={{
+                p: 1.5,
+                borderRadius: "8px",
+                cursor: "pointer",
+                outline: "none",
+                "&:focus-visible": { boxShadow: (t) => `0 0 0 2px ${t.palette.primary.main}` },
+              }}
+            >
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                  {jm.subject}
+                </Typography>
+                <StatusDot
+                  color={STATUS_TAG[jm.status] ?? "gray"}
+                  label={
+                    JOINT_MEASUREMENT_STATUS_LABEL[
+                      jm.status as keyof typeof JOINT_MEASUREMENT_STATUS_LABEL
+                    ] ?? jm.status
+                  }
+                />
+              </Stack>
+              {jm.measuredOn ? (
+                <Typography variant="caption" color="text.secondary">
+                  Measured {jm.measuredOn}
+                </Typography>
+              ) : null}
+            </Surface>
+          ))}
+        </Stack>
+
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}
+        >
+          <Typography variant="h6" component="h3" sx={{ flex: 1, minWidth: 140 }}>
+            Inspections
+          </Typography>
+          <Button variant="contained" size="small" onClick={() => setCreateOpen(true)}>
+            New inspection
+          </Button>
+        </Stack>
 
         {inspectionsQ.isLoading && (
           <Stack spacing={0.5}>
@@ -229,16 +388,14 @@ export function SitePortal() {
           </Stack>
         )}
         {inspections.length === 0 && !inspectionsQ.isLoading && (
-          <Box sx={{ p: 3 }}>
-            <Typography variant="body2">
-              No inspection reports yet. Tap "New inspection report" to create one.
-            </Typography>
-          </Box>
+          <Typography variant="body2" color="text.secondary">
+            No inspection reports yet. Use New inspection or the action dock.
+          </Typography>
         )}
 
         <Stack spacing={1.5}>
           {inspections.map((insp) => (
-            <Box key={insp.id} sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
+            <Surface key={insp.id} layer="soft" className="hcw-surface" sx={{ p: 2, borderRadius: "8px" }}>
               <Stack spacing={1.5}>
                 <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                   <Typography variant="body1"><strong>{insp.ref}</strong></Typography>
@@ -270,7 +427,7 @@ export function SitePortal() {
                   </Box>
                 )}
               </Stack>
-            </Box>
+            </Surface>
           ))}
         </Stack>
       </Stack>
@@ -281,6 +438,7 @@ export function SitePortal() {
         onClose={() => { setCreateOpen(false); resetForm(); }}
         fullWidth
         maxWidth="sm"
+        slotProps={PORTAL_DIALOG_SLOT}
       >
         <DialogTitle id="site-portal-inspection-title">New inspection report</DialogTitle>
         <DialogContent>
@@ -361,6 +519,22 @@ export function SitePortal() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <JointMeasurementRecorder
+        projectId={projectId}
+        open={jmOpen}
+        jointMeasurementId={jmId}
+        drawings={(projectDetailQ.data?.drawings ?? []).map((d) => ({
+          id: d.id,
+          ref: d.ref,
+          title: d.title,
+        }))}
+        onClose={() => {
+          setJmOpen(false);
+          setJmId(null);
+          void jmListQ.refetch();
+        }}
+      />
     </ExternalPortalShell>
   );
 }
