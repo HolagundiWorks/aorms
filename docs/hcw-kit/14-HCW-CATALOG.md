@@ -85,8 +85,8 @@ Mount: `KitRoot density="comfortable" | "compact"` · `coga="default" | "calm"`.
 | `RADIUS` | `0` | Surfaces, panels |
 | `BUTTON_RADIUS` | `4` | Actions |
 | `DIALOG_RADIUS` | `8` | Confirm / dialogs |
-| `DOCK_PILL_RADIUS` | `9999` | ActionDock |
-| `MARKETING_DOCK_RADIUS` | `12` | SectionDock |
+| `DOCK_PILL_RADIUS` | `8` | ActionDock (1.5.0+) |
+| `MARKETING_DOCK_RADIUS` | `8` | SectionDock (1.5.0+) |
 
 ### Motion (`MOTION`)
 
