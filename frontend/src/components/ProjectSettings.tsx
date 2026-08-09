@@ -37,7 +37,9 @@ import { CurrentPhaseSelect } from "./CurrentPhaseSelect.js";
 import { ProjectEngagements } from "./ProjectEngagements.js";
 import { ProjectFloorsPanel } from "./ProjectFloorsPanel.js";
 import { ProjectStructuralDefaultsPanel } from "./ProjectStructuralDefaultsPanel.js";
+import { ProjectTeam } from "./ProjectTeam.js";
 import { StatusDot, StatusTag } from "./StatusTag.js";
+import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 
 const ACTIVITY_TAG: Record<
   string,
@@ -47,7 +49,14 @@ const ACTIVITY_TAG: Record<
   "note.created": "blue",
 };
 
-export function ProjectSettings({ projectId }: { projectId: string }) {
+export function ProjectSettings({
+  projectId,
+  showTeam = false,
+}: {
+  projectId: string;
+  /** When HR is enabled for managers — Team roster lives under Settings (Setup stays 3 peers). */
+  showTeam?: boolean;
+}) {
   const { canProjectDelete } = useCapabilities();
   const navigate = useNavigate();
   const utils = trpc.useUtils();
@@ -155,13 +164,22 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
   );
 
   return (
-    <Box sx={{ mt: 2 }}>
+    <Box sx={{ mt: 2 }} id="project-settings">
       {msg && (
         <Alert severity="success" onClose={() => setMsg(null)} sx={{ mb: 2 }}>
           <AlertTitle>Saved</AlertTitle>
           {msg}
         </Alert>
       )}
+
+      {showTeam ? (
+        <Box sx={{ mb: COMPOSITION_RHYTHM.md }} id="project-settings-team">
+          <Typography variant="subtitle1" component="h4" sx={{ mb: 1, px: 2 }}>
+            Team
+          </Typography>
+          <ProjectTeam projectId={projectId} />
+        </Box>
+      ) : null}
 
       {p && (
         <Box sx={{ maxWidth: 640, p: 2 }}>

@@ -1,10 +1,11 @@
-import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
-import { useRef } from "react";
+import { Box, Stack, Typography } from "@mui/material";
+import { useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { useScreenActions } from "@hcw/ui-kit";
 import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
 import { RailLayout } from "../components/RailLayout.js";
+import { ProjectSectionNav } from "../components/project/ProjectSectionNav.js";
 import { ActivityTab } from "../components/work/ActivityTab.js";
 import { AttendanceTab } from "../components/work/AttendanceTab.js";
 import { TaskBoardTab } from "../components/work/TaskBoardTab.js";
@@ -26,48 +27,56 @@ export function Work() {
   const settingsQ = trpc.settings.get.useQuery();
   const hrEnabled = settingsQ.data?.hrEnabled ?? false;
 
-  const canWrite = can(user?.role, "write");    // L4+ (ASSOCIATE and above)
-  const canHr = can(user?.role, "hr:manage");   // L2+ (PARTNER and above)
+  const canWrite = can(user?.role, "write");
+  const canHr = can(user?.role, "hr:manage");
 
   const tasksRef = useRef<TasksTabHandle>(null);
 
-  // Build the visible tab list based on role capabilities and module toggles
-  const allTabs: TabDef[] = [
-    { slug: "tasks", label: "Tasks", panel: <TasksTab ref={tasksRef} /> },
-    { slug: "board", label: "Board", panel: <TaskBoardTab /> },
-    { slug: "calendar", label: "Calendar", panel: <TaskCalendarTab /> },
-    // Workload: HR module + L2+ (hr:manage)
-    ...(hrEnabled && canHr
-      ? [{ slug: "workload" as WorkTabSlug, label: "Workload", panel: <WorkloadTab /> }]
-      : []),
-    { slug: "activity", label: "Activity", panel: <ActivityTab /> },
-    // Portal triage: one "Requests" tab, both queues stacked (Miller — the tab
-    // bar had hit 8; legacy client-/consultant-requests slugs alias here).
-    ...(canWrite
-      ? [
-          {
-            slug: "requests" as WorkTabSlug,
-            label: "Requests",
-            panel: (
-              <Stack spacing={4}>
-                <Stack spacing={1}>
-                  <Typography variant="h6" component="h2">Client requests</Typography>
-                  <ClientRequests embedded />
+  const allTabs: TabDef[] = useMemo(
+    () => [
+      { slug: "tasks", label: "Tasks", panel: <TasksTab ref={tasksRef} /> },
+      { slug: "board", label: "Board", panel: <TaskBoardTab /> },
+      { slug: "calendar", label: "Calendar", panel: <TaskCalendarTab /> },
+      ...(hrEnabled && canHr
+        ? [{ slug: "workload" as WorkTabSlug, label: "Workload", panel: <WorkloadTab /> }]
+        : []),
+      { slug: "activity", label: "Activity", panel: <ActivityTab /> },
+      ...(canWrite
+        ? [
+            {
+              slug: "requests" as WorkTabSlug,
+              label: "Requests",
+              panel: (
+                <Stack spacing={4}>
+                  <Stack spacing={1}>
+                    <Typography variant="h6" component="h2">
+                      Client requests
+                    </Typography>
+                    <ClientRequests embedded />
+                  </Stack>
+                  <Stack spacing={1}>
+                    <Typography variant="h6" component="h2">
+                      Consultant requests
+                    </Typography>
+                    <ConsultantRequests embedded />
+                  </Stack>
                 </Stack>
-                <Stack spacing={1}>
-                  <Typography variant="h6" component="h2">Consultant requests</Typography>
-                  <ConsultantRequests embedded />
-                </Stack>
-              </Stack>
-            ),
-          },
-        ]
-      : []),
-    // Attendance: HR module + L2+ (hr:manage)
-    ...(hrEnabled && canHr
-      ? [{ slug: "attendance" as WorkTabSlug, label: "Attendance", panel: <AttendanceTab /> }]
-      : []),
-  ];
+              ),
+            },
+          ]
+        : []),
+      ...(hrEnabled && canHr
+        ? [
+            {
+              slug: "attendance" as WorkTabSlug,
+              label: "Attendance",
+              panel: <AttendanceTab />,
+            },
+          ]
+        : []),
+    ],
+    [hrEnabled, canHr, canWrite],
+  );
 
   const tab = canonicalWorkTab((searchParams.get("tab") ?? "tasks") as WorkTabSlug);
   const tabIndex = Math.max(
@@ -75,6 +84,30 @@ export function Work() {
     allTabs.findIndex((t) => t.slug === tab),
   );
   const activeTab = allTabs[tabIndex]?.slug ?? "tasks";
+  const activePanel = allTabs.find((t) => t.slug === activeTab)?.panel ?? null;
+
+  const workGroups = useMemo(() => {
+    const bySlug = new Map(allTabs.map((t) => [t.slug, t]));
+    const pick = (...slugs: WorkTabSlug[]) =>
+      slugs
+        .filter((s) => bySlug.has(s))
+        .map((s) => ({ slug: s, label: bySlug.get(s)!.label }));
+
+    const groups = [
+      { slug: "execute", label: "Execute", tabs: pick("tasks", "board", "calendar") },
+      {
+        slug: "coordinate",
+        label: "Coordinate",
+        tabs: pick("requests", "activity"),
+      },
+      {
+        slug: "capacity",
+        label: "Capacity",
+        tabs: pick("workload", "attendance"),
+      },
+    ];
+    return groups.filter((g) => g.tabs.length > 0);
+  }, [allTabs]);
 
   useScreenActions(
     activeTab === "tasks"
@@ -101,18 +134,12 @@ export function Work() {
           : "Tasks, client and consultant requests, and activity — enable Team & HR for workload and attendance."
       }
       tabs={
-        <Tabs
-          orientation="vertical"
-          value={tabIndex}
-          onChange={(_e, v: number) =>
-            setSearchParams({ tab: allTabs[v]?.slug ?? "tasks" }, { replace: true })
-          }
-          aria-label="Work sections"
-        >
-          {allTabs.map((t) => (
-            <Tab key={t.slug} label={t.label} />
-          ))}
-        </Tabs>
+        <ProjectSectionNav
+          ariaLabel="Work sections"
+          groups={workGroups}
+          activeSlug={activeTab}
+          onSelect={(slug) => setSearchParams({ tab: slug }, { replace: true })}
+        />
       }
     >
       <PageBreadcrumb
@@ -121,7 +148,7 @@ export function Work() {
           { label: allTabs[tabIndex]?.label ?? "Tasks" },
         ]}
       />
-      <Box>{allTabs[tabIndex]?.panel}</Box>
+      <Box>{activePanel}</Box>
     </RailLayout>
   );
 }

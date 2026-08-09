@@ -11,17 +11,17 @@ import { trpc } from "../lib/trpc.js";
 const PILLARS = [
   {
     title: "Programme",
-    body: "Master programme milestones for client reporting — live under Project → Delivery → Programme.",
+    body: "Master programme milestones for client reporting — live under Project → Site › Coordination › Programme.",
     wave: "Wave 2 ✅",
   },
   {
     title: "Packages & tenders",
-    body: "Invite contractors from Delivery → Packages; they bid in the contractor portal (sealed until open).",
+    body: "Invite contractors from Project → Site › Coordination › Packages; they bid in the contractor portal (sealed until open).",
     wave: "Wave 2 ✅",
   },
   {
     title: "Site certification",
-    body: "RA bills and steel (issued/consumed kg) certification on Delivery — certify for the client.",
+    body: "RA bills and steel certification under Project → Site › Technical — certify for the client.",
     wave: "Wave 3 ✅",
   },
   {
@@ -76,7 +76,7 @@ export function PmcHome() {
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 56 * 8 }}>
             {AORMS_PMC.title} is the third {AORMS_PLATFORM.name} app — for project management
             consultancies that plan, coordinate, and certify delivery. Programme, packages, tenders,
-            RA and steel certification are live on each project’s Delivery tab.
+            RA and steel certification live under each project’s Site group (Coordination · Technical).
           </Typography>
           <Button
             size="small"
@@ -198,7 +198,7 @@ export function PmcHome() {
                 </Box>
                 <Button
                   component={RouterLink}
-                  to={`/projects/${b.projectId}?tab=delivery`}
+                  to={`/projects/${b.projectId}?tab=technical&facet=ra-certification`}
                   size="small"
                   variant="outlined"
                 >
@@ -246,7 +246,7 @@ export function PmcHome() {
                   />
                   <Button
                     component={RouterLink}
-                    to={`/projects/${m.projectId}?tab=delivery`}
+                    to={`/projects/${m.projectId}?tab=coordination&facet=programme`}
                     size="small"
                     variant="outlined"
                   >
@@ -286,11 +286,11 @@ export function PmcHome() {
                   <StatusDot color="red" label={`${row.openCount} open`} />
                   <Button
                     component={RouterLink}
-                    to={`/projects/${row.projectId}?tab=delivery`}
+                    to={`/projects/${row.projectId}?tab=site&facet=snags`}
                     size="small"
                     variant="outlined"
                   >
-                    Delivery
+                    Site
                   </Button>
                 </Stack>
               </Stack>

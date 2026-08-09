@@ -479,9 +479,8 @@ function AppWorkspace() {
       </ActionDockProvider>
     );
 
-  // Navigation tree — ribbon: Projects · Teams · Office. Library / Third Parties /
-  // Admin live in the ribbon hamburger. Studio · Tasks · Search live in the footer.
-  // Spec: docs/esti/NAVIGATION.md (synced 2026-07-10).
+  // Taskbar nav — Practice · People · Office · Finance (+ host-specific peers).
+  // Library / Third Parties / Admin live in the Admin menu. Spec: NAVIGATION.md.
   type NavLink = { label: string; to: string; icon?: ComponentType<any> };
   type NavNode =
     | (NavLink & { kind?: "link" })
@@ -489,7 +488,6 @@ function AppWorkspace() {
   const rank = ROLE_RANK[user.role] ?? 0;
   const atLeast = (r: number) => rank >= r;
 
-  // Prune empty menus recursively so a section with no permitted items disappears.
   const prune = (nodes: NavNode[]): NavNode[] =>
     nodes
       .map((n) =>
@@ -497,104 +495,103 @@ function AppWorkspace() {
       )
       .filter((n) => !("items" in n) || n.items.length > 0);
 
-  // Ribbon: Projects · Clients · Teams · Office (Studio host).
-  // Consultancy host: Enquiries · Engagements first — engineering workspace chrome.
-  // Spec: docs/esti/NAVIGATION.md.
+  const peopleMenu: NavNode = {
+    kind: "menu",
+    label: "People",
+    icon: UserMultiple,
+    items: [
+      ...(hrEnabled
+        ? [
+            { label: "Teams", to: "/team", icon: Events },
+            ...(atLeast(60)
+              ? [{ label: "Performance", to: "/performance", icon: Analytics }]
+              : []),
+            ...(can(user.role, "hr:manage")
+              ? [{ label: "HR", to: "/hr", icon: Identification }]
+              : []),
+          ]
+        : []),
+    ],
+  };
+
+  const officeCapturePapers: NavNode = {
+    kind: "menu",
+    label: "Office",
+    icon: Enterprise,
+    items: [
+      {
+        kind: "menu",
+        label: "Capture",
+        items: [
+          ...(can(user.role, "write")
+            ? [
+                { label: "Leads", to: "/leads", icon: ContactPage },
+                { label: "Tenders", to: "/office/tenders", icon: Gavel },
+              ]
+            : []),
+          ...(can(user.role, "fees:manage")
+            ? [{ label: "Proposals", to: "/office/proposals", icon: Document }]
+            : []),
+        ],
+      },
+      {
+        kind: "menu",
+        label: "Papers",
+        items: [
+          ...(can(user.role, "write")
+            ? [
+                { label: "Documents", to: "/office/documents", icon: Document },
+                { label: "Contracts", to: "/office/contracts", icon: License },
+                { label: "Letters", to: "/office/letters", icon: Email },
+              ]
+            : []),
+        ],
+      },
+    ],
+  };
+
+  const financeMenu: NavNode = {
+    kind: "menu",
+    label: "Finance",
+    icon: Receipt,
+    items: [
+      ...(can(user.role, "invoice:manage")
+        ? [
+            { label: "Invoices", to: "/invoices", icon: Receipt },
+            { label: "Reconcile", to: "/reconcile", icon: CompareArrows },
+            { label: "Cashbook", to: "/accounting/cash-book", icon: Wallet },
+            { label: "Office Expenses", to: "/accounting/office-expenses", icon: Purchase },
+          ]
+        : []),
+      ...(hrEnabled && can(user.role, "hr:manage")
+        ? [{ label: "Payroll", to: "/finance/payroll", icon: Money }]
+        : []),
+      ...(can(user.role, "reports:view")
+        ? [{ label: "Financial Reports", to: "/filing", icon: Report }]
+        : []),
+    ],
+  };
+
+  // AStudio — Projects · Clients · People · Office · Finance
   const studioNav: NavNode[] = [
     { label: "Projects", to: "/projects", icon: Building },
     ...(can(user.role, "write")
       ? [{ label: "Clients", to: "/clients", icon: User }]
       : []),
-    {
-      kind: "menu",
-      label: "Teams",
-      icon: UserMultiple,
-      items: [
-        ...(hrEnabled
-          ? [
-              { label: "Teams", to: "/team", icon: Events },
-              ...(atLeast(60)
-                ? [{ label: "Performance", to: "/performance", icon: Analytics }]
-                : []),
-              ...(can(user.role, "hr:manage") ? [{ label: "HR", to: "/hr", icon: Identification }] : []),
-            ]
-          : []),
-      ],
-    },
-    {
-      kind: "menu",
-      label: "Office",
-      icon: Enterprise,
-      // Two labelled groups (Hick/Miller — the flat list hit 11 items). The
-      // ribbon renders nested menus as ListSubheader groups; `prune` drops an
-      // empty group when a role has none of its items.
-      items: [
-        {
-          kind: "menu",
-          label: "Office",
-          items: [
-            ...(can(user.role, "write")
-              ? [
-                  { label: "Leads", to: "/leads", icon: ContactPage },
-                  { label: "Tenders", to: "/office/tenders", icon: Gavel },
-                ]
-              : []),
-            ...(can(user.role, "fees:manage") ? [{ label: "Proposals", to: "/office/proposals", icon: Document }] : []),
-            ...(can(user.role, "write")
-              ? [
-                  { label: "Documents", to: "/office/documents", icon: Document },
-                  { label: "Contracts", to: "/office/contracts", icon: License },
-                  { label: "Letters", to: "/office/letters", icon: Email },
-                ]
-              : []),
-          ],
-        },
-        {
-          kind: "menu",
-          label: "Finance",
-          items: [
-            ...(can(user.role, "invoice:manage")
-              ? [
-                  { label: "Consultancy Invoices", to: "/invoices", icon: Receipt },
-                  { label: "Reconcile", to: "/reconcile", icon: CompareArrows },
-                  { label: "Cashbook", to: "/accounting/cash-book", icon: Wallet },
-                  { label: "Office Expenses", to: "/accounting/office-expenses", icon: Purchase },
-                ]
-              : []),
-            ...(hrEnabled && can(user.role, "hr:manage")
-              ? [{ label: "Payroll", to: "/finance/payroll", icon: Money }]
-              : []),
-            ...(can(user.role, "reports:view")
-              ? [{ label: "Financial Reports", to: "/filing", icon: Report }]
-              : []),
-          ],
-        },
-      ],
-    },
+    peopleMenu,
+    officeCapturePapers,
+    financeMenu,
   ];
 
+  // AConsulting — Enquiries · Engagements · Clients · Projects · People · Office · Finance
   const consultancyNav: NavNode[] = [
     { label: "Enquiries", to: "/consultancy/enquiries", icon: ContactPage },
     { label: "Engagements", to: "/consultancy/engagements", icon: Engineering },
     ...(can(user.role, "write")
       ? [{ label: "Clients", to: "/clients", icon: User }]
       : []),
-    {
-      kind: "menu",
-      label: "Teams",
-      icon: UserMultiple,
-      items: [
-        ...(hrEnabled
-          ? [
-              { label: "Teams", to: "/team", icon: Events },
-              ...(atLeast(60)
-                ? [{ label: "Performance", to: "/performance", icon: Analytics }]
-                : []),
-              ...(can(user.role, "hr:manage") ? [{ label: "HR", to: "/hr", icon: Identification }] : []),
-            ]
-          : []),
-      ],
-    },
+    { label: "Projects", to: "/projects", icon: Building },
+    peopleMenu,
     {
       kind: "menu",
       label: "Office",
@@ -602,59 +599,47 @@ function AppWorkspace() {
       items: [
         {
           kind: "menu",
-          label: "Finance",
+          label: "Capture",
           items: [
-            ...(can(user.role, "invoice:manage")
-              ? [
-                  { label: "Invoices", to: "/invoices", icon: Receipt },
-                  { label: "Reconcile", to: "/reconcile", icon: CompareArrows },
-                  { label: "Cashbook", to: "/accounting/cash-book", icon: Wallet },
-                ]
-              : []),
-            ...(can(user.role, "reports:view")
-              ? [{ label: "Financial Reports", to: "/filing", icon: Report }]
+            ...(can(user.role, "fees:manage")
+              ? [{ label: "Proposals", to: "/office/proposals", icon: Document }]
               : []),
           ],
         },
         {
           kind: "menu",
-          label: "Studio link",
-          items: [
-            { label: "Projects", to: "/projects", icon: Building },
-            ...(can(user.role, "fees:manage")
-              ? [{ label: "Proposals", to: "/office/proposals", icon: Document }]
-              : []),
-            { label: "Standards", to: "/libraries/standards", icon: Book },
-          ],
+          label: "References",
+          items: [{ label: "Standards", to: "/libraries/standards", icon: Book }],
         },
       ],
     },
+    financeMenu,
   ];
 
+  // AProc — Home · Projects · Clients · Delivery · People · Finance
   const pmcNav: NavNode[] = [
     { label: "Home", to: "/pmc", icon: Home },
     { label: "Projects", to: "/projects", icon: Building },
     ...(can(user.role, "write")
-      ? [
-          { label: "Clients", to: "/clients", icon: User },
-          { label: "Contractors", to: "/contractors", icon: Tools },
-        ]
+      ? [{ label: "Clients", to: "/clients", icon: User }]
       : []),
     {
       kind: "menu",
-      label: "Teams",
-      icon: UserMultiple,
+      label: "Delivery",
+      icon: Tools,
       items: [
-        ...(hrEnabled
+        ...(can(user.role, "write")
           ? [
-              { label: "Teams", to: "/team", icon: Events },
+              { label: "Contractors", to: "/contractors", icon: Tools },
               ...(atLeast(60)
-                ? [{ label: "Performance", to: "/performance", icon: Analytics }]
+                ? [{ label: "Consultants", to: "/consultants", icon: UserProfile }]
                 : []),
             ]
           : []),
       ],
     },
+    peopleMenu,
+    financeMenu,
   ];
 
   const nav: NavNode[] = prune(
@@ -665,7 +650,7 @@ function AppWorkspace() {
         : studioNav,
   );
 
-  // Admin hamburger: remaining Third Parties, Library, system.
+  // Admin menu — Third Parties · Library (Design / Codes / Knowledge) · Admin
   const adminGroups: { heading: string; items: NavLink[] }[] = [
     {
       heading: "Third Parties",
@@ -673,24 +658,40 @@ function AppWorkspace() {
         ...(atLeast(60)
           ? [
               { label: "Consultants", to: "/consultants", icon: UserProfile },
-              { label: "Contractors", to: "/contractors", icon: Tools },
+              ...(surface !== "pmc"
+                ? [{ label: "Contractors", to: "/contractors", icon: Tools }]
+                : []),
             ]
           : []),
         ...(atLeast(60) ? [{ label: "Vendors", to: "/vendors", icon: Store }] : []),
       ],
     },
     {
-      heading: "Library",
+      heading: "Library · Design",
       items: [
-        { label: "Specification catalogue", to: "/libraries/spec-catalog", icon: ListChecked },
+        { label: "Specification", to: "/libraries/spec-catalog", icon: ListChecked },
         { label: "Standard items", to: "/libraries/items", icon: Straighten },
         ...(can(user.role, "fees:manage")
           ? [{ label: "Rate Books", to: "/libraries/rate-books", icon: Calculator }]
           : []),
-        { label: "Compliance Library", to: "/libraries/compliance", icon: Rule },
-        { label: "Master Plan Library", to: "/libraries/master-plans", icon: MapIcon },
-        { label: "Standards Library", to: "/libraries/standards", icon: Book },
-        { label: "Knowledge Bank portal", to: "/libraries/knowledge-bank-portal", icon: AutoStoriesIcon },
+      ],
+    },
+    {
+      heading: "Library · Codes",
+      items: [
+        { label: "Compliance", to: "/libraries/compliance", icon: Rule },
+        { label: "Master Plans", to: "/libraries/master-plans", icon: MapIcon },
+        { label: "Standards", to: "/libraries/standards", icon: Book },
+      ],
+    },
+    {
+      heading: "Library · Knowledge",
+      items: [
+        {
+          label: "Knowledge Bank portal",
+          to: "/libraries/knowledge-bank-portal",
+          icon: AutoStoriesIcon,
+        },
       ],
     },
     {

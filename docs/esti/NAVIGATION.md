@@ -1,213 +1,165 @@
 # AORMS — Navigation Architecture (Canonical V3)
 
 **Status:** Canonical navigation IA · **Owner:** Holagundi Consulting Works ·
-**Adopted:** 2026-06-29 · **Shell sync:** 2026-08-06 (no-rail soft neu)
+**Adopted:** 2026-06-29 · **Shell sync:** 2026-08-09 (suite-wide groups)
 
 > This document is the **single source of truth for navigation** — where modules
 > live in the shipped chrome, and naming. Where any other doc disagrees, **this
 > wins**. For *what code exists today* the authority remains
-> [UNIFIED-ARCHITECTURE-V4.md](UNIFIED-ARCHITECTURE-V4.md) § "System state"; the two
-> are reconciled here via the **Status** column.
+> [UNIFIED-ARCHITECTURE-V4.md](UNIFIED-ARCHITECTURE-V4.md) § "System state".
 >
-> **AORMS apps:** AStudio · AConsulting · **AProc** (PMC preview · Waves 0–4 ✅).
-> The retired contractor-ERP modules (old PMC hub, Construction, Programme Gantt,
-> Tenders) stay removed — AProc is a **greenfield** PMC consultancy workspace; see
-> [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md).
+> **AORMS apps:** AStudio · AConsulting · **AProc**.
 >
-> **Spatial model (HCW-UI-Kit):** soft **ribbon** (top) · **stage** (full width) ·
-> **ActionDock** (bottom-centre CTAs) · soft **taskbar footer** · **AnalogueClock**.
-> **Left rail retired.** Canon: [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) ·
-> [HCW-UI-KIT.md](HCW-UI-KIT.md) · [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md).
+> **Spatial model (HCW-UI-Kit):** soft **ribbon** (top — brand · search · status) ·
+> **stage** (full width) · **ActionDock** · soft **taskbar footer** (module nav) ·
+> **AnalogueClock**. **Left rail retired.** Canon: [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md).
 
 ## Status legend
 | Tag | Meaning |
 |---|---|
 | ✅ | **Built** — code exists, reachable in its V3 home |
-| 🚧 | **Partial / rebuilding** — exists in a different shape or under active rebuild |
-| 🔲 | **Planned** — not built yet (no primary nav slot until live) |
+| 🚧 | **Partial / rebuilding** |
+| 🔲 | **Planned** |
 
 ## Shipped chrome (source of truth: `frontend/src/App.tsx`)
 
-### Ribbon (top) — `nav` tree
+Module nav lives in the **footer taskbar** (`RibbonNavCluster`). Top bar is brand ·
+search · health/dues · greeting · alerts.
 
-**Studio host** (`studio.aorms.in`) — four sections (capability-gated):
+### AStudio (`studio.aorms.in`)
 
 | Item | Kind | Destinations |
 |---|---|---|
 | **Projects** | link | `/projects` |
-| **Clients** | link | `/clients` (write capability) |
-| **Teams** | menu | Teams · Performance · HR |
-| **Office** | menu (2 labelled groups — Hick/Miller) | **Office:** Leads · Proposals · Documents · Contracts · Letters · **Finance:** Invoices · Reconcile · Cashbook · Expenses · Payroll · Financial Reports |
+| **Clients** | link | `/clients` (`write`) |
+| **People** | menu | Teams · Performance · HR |
+| **Office** | menu | **Capture:** Leads · Tenders · Proposals · **Papers:** Documents · Contracts · Letters |
+| **Finance** | menu | Invoices · Reconcile · Cashbook · Expenses · Payroll · Financial Reports |
 
-**Consultancy host** (`consultancy.aorms.in`) — engineering workspace chrome:
+### AConsulting (`consultancy.aorms.in`)
 
 | Item | Kind | Destinations |
 |---|---|---|
 | **Enquiries** | link | `/consultancy/enquiries` |
 | **Engagements** | link | `/consultancy/engagements` |
-| **Clients** | link | `/clients` (write) |
-| **Teams** | menu | same as Studio |
-| **Office** | menu | **Finance:** Invoices · Reconcile · Cashbook · Reports · **Studio link:** Projects · Proposals · Standards |
+| **Clients** | link | `/clients` (`write`) |
+| **Projects** | link | `/projects` |
+| **People** | menu | Teams · Performance · HR |
+| **Office** | menu | **Capture:** Proposals · **References:** Standards |
+| **Finance** | menu | same Finance menu as Studio |
 
-Footer home launcher on consultancy host opens Enquiries (not Studio Intelligence).
+Footer home on consultancy opens Enquiries.
 
-**PMC host** (`proc.aorms.in` / path `/pmc`) — AProc chrome (`pmcNav`):
+### AProc (`proc.aorms.in` / `/pmc`)
 
 | Item | Kind | Destinations |
 |---|---|---|
 | **Home** | link | `/pmc` — portfolio KPIs · digest · pillars |
-| **Projects** | link | `/projects` (write) — Delivery: Site · Comms · Minutes · Snags · Progress · Programme (CSV/XER) · Packages · RA · Steel · BBS · Steel recon · Phase stages |
-| **Clients** | link | `/clients` (write) |
+| **Projects** | link | `/projects` — Site · Coordination · Technical bands |
+| **Clients** | link | `/clients` (`write`) |
 | **Delivery** | menu | Contractors · Consultants |
-| **Office** | menu | Proposals · Invoices · Financial Reports |
+| **People** | menu | Teams · Performance |
+| **Finance** | menu | Invoices · Reconcile · Cashbook · Expenses · Payroll · Reports |
 
-Footer home launcher on PMC host opens `/pmc`.
+Footer home on PMC opens `/pmc`.
 
-**Capability gates (ribbon pruning — source: `App.tsx`):**
+### Capability gates
 
 | Item | Gate |
 |---|---|
-| **Clients** | `write` capability |
-| **Teams** menu | `hrEnabled` firm setting — when off, the whole menu is pruned |
-| Teams › Performance | `hrEnabled` + rank ≥ 60 |
-| Teams › HR | `hrEnabled` + `hr:manage` |
-| Office › Leads, Documents, Contracts, Letters | `write` |
+| **Clients** | `write` |
+| **People** menu | `hrEnabled` — pruned when empty |
+| People › Performance | `hrEnabled` + rank ≥ 60 |
+| People › HR | `hrEnabled` + `hr:manage` |
+| Office › Leads, Tenders, Documents, Contracts, Letters | `write` |
 | Office › Proposals | `fees:manage` |
 | Finance › Invoices, Reconcile, Cashbook, Expenses | `invoice:manage` |
 | Finance › Payroll | `hrEnabled` + `hr:manage` |
 | Finance › Financial Reports | `reports:view` |
 
-### Admin hamburger (ribbon) — `adminGroups`
+### Admin menu (footer) — `adminGroups`
+
 | Group | Destinations |
 |---|---|
-| **Third Parties** | Consultants · Contractors · Vendors (Clients promoted to ribbon) |
-| **Library** | Spec catalogue · Standard items · Rate Books · Compliance · Master Plans · Standards · Knowledge Bank portal |
-| **Admin** | Archived projects · System (system admin) |
+| **Third Parties** | Consultants · Contractors · Vendors |
+| **Library · Design** | Specification · Standard items · Rate Books |
+| **Library · Codes** | Compliance · Master Plans · Standards |
+| **Library · Knowledge** | Knowledge Bank portal |
+| **Admin** | Archived projects · System |
 
-### Taskbar footer (centre launchers)
-Studio Intelligence (`/`) · Tasks (`/tasks`) · **Search** (`/search`, Ctrl/Cmd+K) · Ask ESTI · Wellness · Pomodoro. Tray: clock · sync · **Help** (`/help`, Ctrl+/) · alerts · ID card · sign out.
+### Taskbar footer (chrome)
+LEFT wellness · calculator · CENTER module nav + Admin · RIGHT sync (desktop) · sign out.
+Top bar: search · health/dues · greeting → `/account` · AlertsBell.
+Studio Intelligence `/` · Tasks `/tasks` · Help `/help` are stage destinations (search/help chords).
 
-### Not in ribbon (by design)
+### Not in taskbar (by design)
 | Destination | How to reach |
 |---|---|
-| Studio Intelligence | Footer launcher or `/` |
-| Tasks | Footer launcher or `/tasks` |
-| Search | Footer Search or Ctrl/Cmd+K |
-| LXOS | Direct `/lxos` (Lessons live; other layers Coming soon) |
-| AI Studio | `/office/ai-studio` (rank ≥ 60) |
-| Estimation workspace | **Removed from nav** — `/estimation*` redirects to `/projects`. Measurement lives under Project → Measurement |
+| Studio Intelligence | `/` on studio host |
+| Tasks | `/tasks` |
+| Search | Top-bar search or Ctrl/Cmd+K |
+| LXOS | `/lxos` |
+| Ask ESTI / AI Studio | Desktop managers only — not this SPA |
 
 ---
 
 ## 1. Studio Intelligence ✅
-Route `/` · File `StudioAbstract.tsx` · tRPC `dashboard.*`. Glass rail + stage.
-Tabs and KPI layout follow the live `StudioAbstract` implementation (rail telemetry +
-stage tabs). Alert glyphs: ● circle (stable) · ▲ triangle (watch) · ■ square (critical).
+Route `/` · `StudioAbstract.tsx` · `dashboard.*`.
+
+**Groups (2026-08-09)** via `ProjectSectionNav`:
+
+| Group | Tabs |
+|---|---|
+| **Focus** | Priorities |
+| **Portfolio** | Projects · Work |
+| **Practice** | Team (HR) · Zoning |
+
+Alert glyphs: ● circle (stable) · ▲ triangle (watch) · ■ square (critical).
 
 ## 2. Projects ✅
 Active Projects ✅ (`/projects`) → Project Details ✅ (`/projects/:id`).
 
-**Two-level tabs (Setup · Project workspace)** — section nav lives in the **glass rail** (2026-07-10); stage shows one panel at a time (no double horizontal tab bars):
+**Four horizontal groups** — `ProjectSectionNav`:
 
-| Group | Primary tabs | Nested (in-panel) |
+| Group | Primary tabs | Nested |
 |---|---|---|
-| Setup | Overview · Brief · Settings | Brief → Project Info \| Pipeline \| Program \| **R&O** \| CPI |
-| Project workspace | Measurement · Drawings & approvals · Documents · Invoices · Team · **BBS** · **Steel** · **RA bills** · Delivery · Lessons | Drawings → Drawings \| Transmittals \| Approvals; Documents → Documents \| Specs; Delivery → Site \| Comms \| Minutes |
+| **Setup** | Overview · Brief · Settings | Brief facets; Settings → Team when HR on |
+| **Design** | Measurement · Drawings & approvals · Documents · Moodboard · Lessons | Drawings · Documents · Brief use `ProjectFacetTabs` (MUI) |
+| **Commercial** (gated) | Estimation · Tenders · Finance | Finance → Invoices \| Purchase Orders |
+| **Site** | Site · Coordination · Technical | Site / Coordination / Technical MUI facets |
 
-Legacy `?tab=` deep links (`info`, `pipeline`, `site-visits`, `approvals`, `invoices`, …) redirect to the new parent slug while preserving `approvalId` / `invoiceId` when present.
-
-**Estimation / takeoff:** `/estimation` → `/projects`; `/estimation/:id` → `/projects/:id?tab=measurement`. Live surfaces are Project → **Estimation** (priced BOQ, `fees:manage`) and Project → **Measurement** / plan markup. The old CMS rebuild path is gone.
+Legacy `?tab=` aliases map onto parents; optional `?facet=`.
 
 ## 3. Tasks ✅
-Work hub (`/tasks`). Tabs (2026-07-11, Miller — max 7 for a full-permission user):
-Tasks · Board · Calendar · Workload (HR) · Activity · **Requests** (client +
-consultant queues stacked in one tab; legacy `?tab=client-requests` /
-`consultant-requests` alias to it) · Attendance (HR).
-Priority Engine 🚧 → ESTI Pulse — [ESTI-PULSE.md](ESTI-PULSE.md).
+Work hub (`/tasks`) — `ProjectSectionNav` groups:
+
+| Group | Tabs |
+|---|---|
+| **Execute** | Tasks · Board · Calendar |
+| **Coordinate** | Requests (`write`) · Activity |
+| **Capacity** | Workload · Attendance (`hrEnabled` + `hr:manage`) |
+
+Legacy `?tab=client-requests` / `consultant-requests` alias to Requests.
 
 ## 4. AI Studio 🚧
-Route `/office/ai-studio` — plan-gated, rank ≥ 60. Not a ribbon item.
+Not in this SPA (desktop managers).
 
-## 5. Library ✅ (admin menu)
-| Module | Status | Where |
-|---|---|---|
-| Specification catalogue | ✅ | `/libraries/spec-catalog` |
-| Standard items library | ✅ | `/libraries/items` — unpriced takeoff vocabulary (code/UOM/measure-kind) feeding Plan Markup + Measurement Sheet |
-| Rate Books | ✅ (2026-07-18) | `/libraries/rate-books`, `fees:manage` gated — firm item-code/unit/**rate** sets pricing the project **Estimation** tab (BOQ + contingency/GST); ported from Construction-Billing-System, estimation-only (no Contracts/Running-Bills). Distinct from the Standard items library above (no pricing there) — not yet cross-linked, see the note under Projects §2 |
-| Compliance Library | ✅ | `/libraries/compliance` |
-| Master Plan Library | ✅ | `/libraries/master-plans` |
-| Standards Library | ✅ | `/libraries/standards` |
-| Knowledge Bank portal | ✅ | `/libraries/knowledge-bank-portal` (staff L4+, EOMS intake) |
+## 5. Library ✅ (Admin menu)
+Clustered as Design · Codes · Knowledge (see Admin menu above).
 
-## 6. Studio (Teams menu)
+## 6. People (was Teams menu)
 | Module | Status | Where |
 |---|---|---|
 | Teams | ✅ | `/team` |
 | Performance | ✅ | `/performance` |
 | HR | ✅ | `/hr` |
 
-## 7. Third Parties (admin menu)
-| Module | Status | Where |
-|---|---|---|
-| Clients | ✅ | `/clients` |
-| Consultants | ✅ | `/consultants` |
-| Contractors | ✅ | `/contractors` |
-| Vendors | ✅ | `/vendors` (rank ≥ 60) |
+## 7. Office · Finance
+Office = Capture + Papers. Finance is a **top-level** taskbar menu (not nested under Office).
 
-## 8–9. Office + Finance (Office ribbon menu)
-One trigger, **two labelled ListSubheader groups** (2026-07-11, Hick/Miller — the
-flat list had reached 11 items): **Office** (Leads · Proposals · Documents ·
-Contracts · Letters) and **Finance** (Consultancy Invoices · Reconcile · Cashbook ·
-Office Expenses · Payroll · Financial Reports `/filing`) — capability-gated as in
-`App.tsx`; empty groups are pruned per role.
-
-## 10. LXOS 🚧
-Route `/lxos` (`/leos` redirects). Single-page (no tabs — Parkinson / Goal Gradient,
-avoid placeholder tab exploration): **Lessons Learned ✅** and the **Academy ✅**
-(`AcademyPanel` — `docs/holagundi/SOP.md`'s 27 SOPs as theory/mark-read + practical,
-auto-detected from real usage for 13, self-attested for 14; completion pushes a
-portable growth event `hlp_growth_event` for I-5-linked users) are both live primary
-sections. Community Exchange · Professional Identity remain 🔲 behind a single
-"Coming soon" notice, not shown as empty tabs.
-
-## 11. Admin & account portals
-| Module | Status | Where |
-|---|---|---|
-| Personal account | ✅ | `/account` |
-| Company account | ✅ | `/company-account` |
-| Legacy redirects | ✅ | `/company`, `/users`, `/audit`, `/settings`, `/profile` → portals |
-| System admin | ✅ | `/system-admin` |
+## 8. AProc ✅
+Home `/pmc` · project Site bands · Delivery stakeholders menu.
 
 ---
 
-## Header / footer utilities
-
-| Utility | Status | Today |
-|---|---|---|
-| Global Search | ✅ | Footer Search + Ctrl/Cmd+K → `/search` |
-| Keyboard Help | ✅ | Tray Help + Ctrl+/ → `/help` (shared `keymap`) |
-| Skip to main | ✅ | `.esti-skip-link` → `#esti-main` |
-| Notifications | ✅ | `AlertsBell` → `/alerts` |
-| User Profile | ✅ | Footer ID card → `/account#profile` |
-| Calculator | ✅ | Footer · Alt+C |
-| AI compute badge | ✅ | Local vs Hosted on Ask ESTI + AI Studio (LF5) |
-
----
-
-## Removed (consultancy-only)
-**Construction** (contractor ERP) — routes redirect to `/projects`. Top-level
-**Estimation** nav removed; `/estimation*` → `/projects`.
-
-**Moodboard** lives on the project workspace tab (`/projects/:id?tab=moodboard`) —
-Canva-like canvas (images, pen, sticky notes) with board/item discussion. Not a
-top-level sidebar entry.
-
-## Restored / live under Project workspace
-**Programme**, **Packages / tenders**, **RA certification**, **BBS**, **Steel
-reconciliation**, and **Moodboard** are project tabs (AProc / AStudio), not
-standalone nav pillars.
-
-## Closing philosophy
-AORMS is an **operating system for design studios**: work and learning coexist,
-knowledge becomes infrastructure (LXOS), growth becomes measurable. Navigation chrome
-stays **ribbon · rail · stage · ActionDock · footer** — improve within that model.
+**Related:** [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) · [COMPOSITION-PRINCIPLES.md](COMPOSITION-PRINCIPLES.md) · [UI-SITE-MAP.md](UI-SITE-MAP.md).

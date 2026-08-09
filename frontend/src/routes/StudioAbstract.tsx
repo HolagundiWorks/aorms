@@ -14,12 +14,10 @@ import {
   Skeleton,
   Stack,
   Switch,
-  Tab,
-  Tabs,
   Typography,
 } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { can, formatINRShort, PRIORITY_BAND_LABEL } from "@esti/contracts";
 import { OfficeHealthGlyph } from "../components/shell/OfficeHealthGlyph.js";
@@ -34,12 +32,15 @@ import BusinessOutlined from "@mui/icons-material/BusinessOutlined";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { confidenceTag, PRIORITY_BAND_TAG } from "../components/work/workHelpers.js";
 import { ZonalComplianceCalculator } from "../components/compliance/ZonalComplianceCalculator.js";
+import { ProjectSectionNav } from "../components/project/ProjectSectionNav.js";
 import { useAuth } from "../lib/auth.js";
 import { trpc } from "../lib/trpc.js";
 import { useNavigate } from "react-router-dom";
 import { RADIUS, Surface, TYPE_SCALE, useScreenActions } from "@hcw/ui-kit";
 import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import { AORMS_STUDIO } from "../lib/product-nomenclature.js";
+
+type StudioTab = "priorities" | "projects" | "work" | "team" | "zoning";
 
 // ── Zone state ────────────────────────────────────────────────────────────────
 
@@ -189,10 +190,12 @@ function taskHref(taskId?: string | null, projectId?: string | null): string {
 
 function projectIssueHref(p: any): string {
   if (p.focusTaskId) return taskHref(p.focusTaskId, p.id);
-  if (p.focusInvoiceId) return `/projects/${p.id}?tab=invoices&invoiceId=${p.focusInvoiceId}`;
-  if (p.focusApprovalId) return `/projects/${p.id}?tab=approvals&approvalId=${p.focusApprovalId}`;
-  if ((p.overdueInvoices ?? 0) > 0) return `/projects/${p.id}?tab=invoices`;
-  if ((p.staleApprovals ?? 0) > 0) return `/projects/${p.id}?tab=approvals`;
+  if (p.focusInvoiceId)
+    return `/projects/${p.id}?tab=finance&facet=invoices&invoiceId=${p.focusInvoiceId}`;
+  if (p.focusApprovalId)
+    return `/projects/${p.id}?tab=drawings&approvalId=${p.focusApprovalId}`;
+  if ((p.overdueInvoices ?? 0) > 0) return `/projects/${p.id}?tab=finance&facet=invoices`;
+  if ((p.staleApprovals ?? 0) > 0) return `/projects/${p.id}?tab=drawings`;
   return `/projects/${p.id}?tab=overview`;
 }
 
@@ -335,10 +338,37 @@ export function StudioAbstract() {
 
   const canInvoice = can(user?.role, "invoice:manage");
 
-  // Stage tabs under the soft brief strip (full width — no left rail).
-  const [tab, setTab] = useState<"priorities" | "projects" | "work" | "team" | "zoning">("priorities");
+  // Stage groups: Focus · Portfolio · Practice (same pattern as ProjectSectionNav).
+  const [tab, setTab] = useState<StudioTab>("priorities");
   /** Focus mode default — priorities first; Action items / risks behind “Show all”. */
   const [estiExpanded, setEstiExpanded] = useState(true);
+
+  const studioNavGroups = useMemo(() => {
+    const groups = [
+      {
+        slug: "focus",
+        label: "Focus",
+        tabs: [{ slug: "priorities" as const, label: "Priorities" }],
+      },
+      {
+        slug: "portfolio",
+        label: "Portfolio",
+        tabs: [
+          { slug: "projects" as const, label: "Projects" },
+          { slug: "work" as const, label: "Work" },
+        ],
+      },
+      {
+        slug: "practice",
+        label: "Practice",
+        tabs: [
+          ...(hrEnabled ? [{ slug: "team" as const, label: "Team" }] : []),
+          { slug: "zoning" as const, label: "Zoning" },
+        ],
+      },
+    ];
+    return groups;
+  }, [hrEnabled]);
 
   useScreenActions(
     tab === "priorities"
@@ -508,8 +538,8 @@ export function StudioAbstract() {
   }));
 
   const officeActionRows = [
-    ...overdueInvs.slice(0, 5).map((inv: any) => ({ id: `inv-${inv.id}`, item: `Invoice ${inv.ref}`, detail: formatINRShort(inv.netReceivablePaise), when: `${inv.daysOverdue}d overdue`, href: `/projects/${inv.projectId}?tab=invoices&invoiceId=${inv.id}`, state: (inv.daysOverdue > 30 ? "critical" : "friction") as ZoneState })),
-    ...pending.slice(0, 5).map((ap: any) => ({ id: `ap-${ap.id}`, item: `${ap.projectRef} — ${ap.title}`, detail: "Approval pending", when: `${ap.daysWaiting}d`, href: `/projects/${ap.projectId}?tab=approvals&approvalId=${ap.id}`, state: (ap.daysWaiting > 14 ? "critical" : "friction") as ZoneState })),
+    ...overdueInvs.slice(0, 5).map((inv: any) => ({ id: `inv-${inv.id}`, item: `Invoice ${inv.ref}`, detail: formatINRShort(inv.netReceivablePaise), when: `${inv.daysOverdue}d overdue`, href: `/projects/${inv.projectId}?tab=finance&facet=invoices&invoiceId=${inv.id}`, state: (inv.daysOverdue > 30 ? "critical" : "friction") as ZoneState })),
+    ...pending.slice(0, 5).map((ap: any) => ({ id: `ap-${ap.id}`, item: `${ap.projectRef} — ${ap.title}`, detail: "Approval pending", when: `${ap.daysWaiting}d`, href: `/projects/${ap.projectId}?tab=drawings&approvalId=${ap.id}`, state: (ap.daysWaiting > 14 ? "critical" : "friction") as ZoneState })),
     ...riskProjects.slice(0, 5).map((p: any) => ({ id: `proj-${p.id}`, item: `${p.ref} — ${p.title}`, detail: "Delivery risk", when: "—", href: projectIssueHref(p), state: "critical" as ZoneState })),
     ...(billingReady.length > 0 ? [{ id: "billing-ready", item: `${billingReady.length} phase${billingReady.length > 1 ? "s" : ""} ready to invoice`, detail: fh?.readyToBillPaise ? formatINRShort(fh.readyToBillPaise) : "—", when: "—", href: "/invoices", state: "watch" as ZoneState }] : []),
   ];
@@ -800,24 +830,14 @@ export function StudioAbstract() {
             gap: COMPOSITION_RHYTHM.mainGap,
           }}
         >
-          <Tabs
-            value={tab}
-            onChange={(_, v) => setTab(v)}
-            variant="scrollable"
-            scrollButtons="auto"
-            aria-label="Studio Intelligence sections"
-            sx={{
-              flexShrink: 0,
-              borderBottom: 1,
-              borderColor: "divider",
-            }}
-          >
-            <Tab value="priorities" label="Priorities" />
-            <Tab value="projects" label="Projects" />
-            <Tab value="work" label="Work" />
-            {hrEnabled && <Tab value="team" label="Team" />}
-            <Tab value="zoning" label="Zonal compliance" />
-          </Tabs>
+          <Box sx={{ flexShrink: 0 }}>
+            <ProjectSectionNav
+              ariaLabel="Studio Intelligence sections"
+              groups={studioNavGroups}
+              activeSlug={tab}
+              onSelect={(slug) => setTab(slug as StudioTab)}
+            />
+          </Box>
 
           {tab === "priorities" && (
             <Box
@@ -989,7 +1009,7 @@ export function StudioAbstract() {
                 action={<StatusDot color={pendingCount > 0 ? tagKind(cs) : "green"} label={`${pendingCount} pending`} />}
               >
                 {pending.length === 0 ? emptyText("No approvals pending.") : (
-                  <DataGrid rows={apRows} columns={apCols} onRowClick={(p) => navigate(`/projects/${p.row.projectId}?tab=approvals&approvalId=${p.row.id}`)} {...gridProps} />
+                  <DataGrid rows={apRows} columns={apCols} onRowClick={(p) => navigate(`/projects/${p.row.projectId}?tab=drawings&approvalId=${p.row.id}`)} {...gridProps} />
                 )}
               </TabSplit>
             </>

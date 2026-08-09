@@ -70,6 +70,7 @@ form body scrolls inside the fixed-height card.
 **Wave 5** — `COMPOSITION_RHYTHM` on all shells (`RailLayout` · Studio · portals · auth · ribbon · admin) · staff gutter 24px  
 
 **Wave 6** — `AormsMark` in AppRibbon · de-Carbon shared widgets · ProjectDetail odd groups  
+**2026-08-09** — Suite IA: taskbar People/Office/Finance · Studio Focus/Portfolio/Practice · Work Execute/Coordinate/Capacity · Project Setup/Design/Commercial/Site · Brief/Drawings/Documents on `ProjectFacetTabs`  
 
 **Wave 7** — Unified `/login` tabs (Workspace · Portals · Account + scopes) · account hub `PortalCard` soft panels · denser building entourage  
 

@@ -131,7 +131,7 @@ export function Invoices() {
       valueGetter: (_v, row) => row.projectRef,
       renderCell: (p) => (
         <Stack spacing={0} sx={{ justifyContent: "center", height: 1 }}>
-          <Link to={`/projects/${p.row.projectId}?tab=invoices`}>{p.row.projectRef}</Link>
+          <Link to={`/projects/${p.row.projectId}?tab=finance&facet=invoices`}>{p.row.projectRef}</Link>
           <Typography variant="caption" color="text.secondary">
             {p.row.projectTitle}
           </Typography>

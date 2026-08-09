@@ -123,6 +123,8 @@ Landing IA (five sections): **Overview · Outcomes · Platform · Rhythm · Star
 | Element | Role |
 | --- | --- |
 | `RailLayout` | **Stage page shell** (name kept) — soft header (title · description · tabs · filters · actions) + full-width scrolling main. **No left column.** |
+| `ProjectSectionNav` | Horizontal group chips + peer tabs — Project Detail · Studio Intelligence · Work hub |
+| `ProjectFacetTabs` | Nested MUI facets inside a peer panel (Brief · Drawings · Documents · Site bands · Finance) |
 | `PageBreadcrumb` | Wayfinding + `document.title` |
 | `ActionDock` / `useScreenActions` | Page-level CTAs only here (publish `[]` while dialogs open); clears floating footer via `--esti-dock-bottom` |
 | `AppRibbon` | Top chrome — brand · search · office health/dues · greeting → `/account` · AlertsBell |

@@ -1,44 +1,68 @@
-import { Tab, TabList, Tabs } from "@carbon/react";
-import { useState } from "react";
-import { CarbonScope } from "../../carbon/CarbonScope.js";
+import { useMemo, useState } from "react";
 import { ProjectCpi } from "../ProjectCpi.js";
 import { ProjectInfo } from "../ProjectInfo.js";
 import { ProjectPipeline } from "../ProjectPipeline.js";
 import { ProjectProgram } from "../ProjectProgram.js";
+import { ProjectFacetTabs } from "./ProjectFacetTabs.js";
 import { ProjectPreconPanel } from "./ProjectPreconPanel.js";
 
-/** Progressive disclosure for Setup: Info · Pipeline · Program · R&O · CPI. Wave 3 (Carbon). */
+/** Setup › Brief — Info · Pipeline · Program · R&O · CPI (residential). */
 export function ProjectBriefPanel({
   projectId,
   showCpi,
+  initialFacet,
 }: {
   projectId: string;
   showCpi: boolean;
+  initialFacet?: string;
 }) {
-  const [sub, setSub] = useState(0);
-  const tabs = [
-    { label: "Project Info", panel: <ProjectInfo projectId={projectId} /> },
-    { label: "Pipeline", panel: <ProjectPipeline projectId={projectId} /> },
-    { label: "Program", panel: <ProjectProgram projectId={projectId} /> },
-    { label: "R&O", panel: <ProjectPreconPanel projectId={projectId} /> },
-    ...(showCpi
-      ? [{ label: "CPI", panel: <ProjectCpi projectId={projectId} /> }]
-      : []),
-  ];
-  const safe = Math.min(sub, tabs.length - 1);
+  const facets = useMemo(
+    () => [
+      {
+        id: "info",
+        label: "Project Info",
+        panel: <ProjectInfo projectId={projectId} />,
+      },
+      {
+        id: "pipeline",
+        label: "Pipeline",
+        panel: <ProjectPipeline projectId={projectId} />,
+      },
+      {
+        id: "program",
+        label: "Program",
+        panel: <ProjectProgram projectId={projectId} />,
+      },
+      {
+        id: "ro",
+        label: "R&O",
+        panel: <ProjectPreconPanel projectId={projectId} />,
+      },
+      ...(showCpi
+        ? [
+            {
+              id: "cpi",
+              label: "CPI",
+              panel: <ProjectCpi projectId={projectId} />,
+            },
+          ]
+        : []),
+    ],
+    [projectId, showCpi],
+  );
+
+  const fallback = facets[0]?.id ?? "info";
+  const [value, setValue] = useState(
+    initialFacet && facets.some((f) => f.id === initialFacet) ? initialFacet : fallback,
+  );
+  const safe = facets.some((f) => f.id === value) ? value : fallback;
 
   return (
-    <div>
-      <CarbonScope>
-        <Tabs selectedIndex={safe} onChange={({ selectedIndex }) => setSub(selectedIndex)}>
-          <TabList aria-label="Project brief sections" contained scrollIntoView>
-            {tabs.map((t) => (
-              <Tab key={t.label}>{t.label}</Tab>
-            ))}
-          </TabList>
-        </Tabs>
-      </CarbonScope>
-      {tabs[safe]?.panel}
-    </div>
+    <ProjectFacetTabs
+      facets={facets}
+      value={safe}
+      onChange={setValue}
+      ariaLabel="Project brief sections"
+    />
   );
 }

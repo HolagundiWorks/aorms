@@ -7,6 +7,11 @@ portal MoM ESTI drafting removed earlier.
 licence bind, sync queue tray, sync status poll, and WinUI native bridge.
 Offline sync / bind dialogs stay desktop-only (LOCAL-FIRST).
 
+**2026-08-09 — Suite IA pass.** Taskbar: People · Office (Capture/Papers) ·
+Finance top-level; Library Admin clusters Design/Codes/Knowledge. Studio home
+Focus · Portfolio · Practice. AConsulting/AProc host nav aligned. Project Detail
+Option A (Setup · Design · Commercial · Site). Canon: [NAVIGATION.md](../../esti/NAVIGATION.md).
+
 **2026-08-09 — Staff chrome = portal chrome metrics.** Floating `AppFooterBar`
 **60px** · **35px** hits · module nav in footer; ribbon = brand/search/status/alerts.
 `--esti-dock-bottom` = footer stack **76** + gap **16** (kit fallback 72 overlaps).

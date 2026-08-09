@@ -8,21 +8,23 @@ import {
 } from "@esti/contracts";
 import { RailLayout } from "../components/RailLayout.js";
 import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
-import { type ReactNode, useEffect, useMemo } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ProjectPurchaseOrders } from "../components/ProjectPurchaseOrders.js";
 import { ProjectEstimates } from "../components/ProjectEstimates.js";
 import { ProjectMeasurementPanel } from "../components/measurement/ProjectMeasurementPanel.js";
 import { DrawingsApprovalsPanel } from "../components/project/DrawingsApprovalsPanel.js";
 import { DocumentsSpecsPanel } from "../components/project/DocumentsSpecsPanel.js";
 import { ProjectBriefPanel } from "../components/project/ProjectBriefPanel.js";
-import { ProjectDeliveryPanel } from "../components/project/ProjectDeliveryPanel.js";
+import { ProjectFinancePanel } from "../components/project/ProjectFinancePanel.js";
 import { ProjectTenders } from "../components/project/ProjectTenders.js";
-import { ProjectInvoicesPanel } from "../components/project/ProjectInvoicesPanel.js";
 import { ProjectMoodboard } from "../components/project/ProjectMoodboard.js";
-import { ProjectRailNav } from "../components/project/ProjectRailNav.js";
+import { ProjectSectionNav } from "../components/project/ProjectSectionNav.js";
+import {
+  ProjectCoordinationPanel,
+  ProjectSiteBandPanel,
+  ProjectTechnicalPanel,
+} from "../components/project/ProjectSitePanels.js";
 import { ProjectSettings } from "../components/ProjectSettings.js";
-import { ProjectTeam } from "../components/ProjectTeam.js";
 import { ProjectLessons } from "../components/ProjectLessons.js";
 import { ProjectOverview } from "../components/ProjectOverview.js";
 import { ProjectRailSignals } from "../components/ProjectRailSignals.js";
@@ -33,7 +35,7 @@ import { trpc } from "../lib/trpc.js";
 type ProjectTab = { slug: string; label: string; panel: ReactNode };
 type ProjectGroup = { slug: string; label: string; tabs: ProjectTab[] };
 
-/** Map legacy deep-link tab slugs onto the collapsed IA. */
+/** Map legacy deep-link tab slugs onto Setup · Design · Commercial · Site. */
 const LEGACY_TAB: Record<string, string> = {
   "running-bills": "measurement",
   costing: "measurement",
@@ -41,11 +43,53 @@ const LEGACY_TAB: Record<string, string> = {
   program: "brief",
   info: "brief",
   cpi: "brief",
+  ro: "brief",
   "spec-sheets": "documents",
-  "site-visits": "delivery",
-  communications: "delivery",
-  minutes: "delivery",
+  delivery: "site",
+  "site-visits": "site",
+  snags: "site",
+  "progress-reports": "site",
+  "phase-stages": "site",
+  communications: "coordination",
+  minutes: "coordination",
+  programme: "coordination",
+  packages: "coordination",
+  bbs: "technical",
+  "steel-recon": "technical",
+  steel: "technical",
+  "ra-certification": "technical",
+  "running-account": "technical",
+  "steel-certification": "technical",
   approvals: "drawings",
+  invoices: "finance",
+  "purchase-orders": "finance",
+  team: "settings",
+};
+
+/** Nested facet defaults when landing from a legacy slug. */
+const LEGACY_FACET: Record<string, string> = {
+  "site-visits": "site-progress",
+  snags: "snags",
+  "progress-reports": "progress-reports",
+  "phase-stages": "phase-stages",
+  communications: "communications",
+  minutes: "minutes",
+  programme: "programme",
+  packages: "packages",
+  bbs: "bbs",
+  "steel-recon": "steel-recon",
+  steel: "steel-recon",
+  "ra-certification": "ra-certification",
+  "running-account": "ra-certification",
+  "steel-certification": "steel-certification",
+  invoices: "invoices",
+  "purchase-orders": "purchase-orders",
+  team: "team",
+  pipeline: "pipeline",
+  program: "program",
+  info: "info",
+  cpi: "cpi",
+  ro: "ro",
 };
 
 export function ProjectDetail() {
@@ -62,6 +106,7 @@ export function ProjectDetail() {
   );
 
   const rawTab = searchParams.get("tab") ?? "overview";
+  const facetParam = searchParams.get("facet");
   const approvalId = searchParams.get("approvalId");
   const invoiceId = searchParams.get("invoiceId");
   const showTeam = hrEnabled && canHr;
@@ -69,16 +114,50 @@ export function ProjectDetail() {
   const drawingsInitialSub =
     rawTab === "approvals" || approvalId ? ("approvals" as const) : ("drawings" as const);
 
+  const siteInitialFacet = facetParam ?? LEGACY_FACET[rawTab];
+  const financeInitialFacet =
+    facetParam === "invoices" || facetParam === "purchase-orders"
+      ? facetParam
+      : LEGACY_FACET[rawTab] === "invoices" || LEGACY_FACET[rawTab] === "purchase-orders"
+        ? LEGACY_FACET[rawTab]
+        : invoiceId
+          ? "invoices"
+          : undefined;
+
+  const setFacet = useCallback(
+    (facet: string) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set("facet", facet);
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
   const projectGroups = useMemo((): ProjectGroup[] => {
-    // Odd peer groups (COMPOSITION-PRINCIPLES §3): Setup 3 · Design 5 · Delivery gated.
+    // Odd peer groups: Setup 3 · Design 5 · Commercial gated · Site 3.
     const setupTabs: ProjectTab[] = [
       { slug: "overview", label: "Overview", panel: <ProjectOverview projectId={id} /> },
       {
         slug: "brief",
         label: "Brief",
-        panel: <ProjectBriefPanel projectId={id} showCpi={isResidential} />,
+        panel: (
+          <ProjectBriefPanel
+            projectId={id}
+            showCpi={isResidential}
+            initialFacet={siteInitialFacet}
+          />
+        ),
       },
-      { slug: "settings", label: "Settings", panel: <ProjectSettings projectId={id} /> },
+      {
+        slug: "settings",
+        label: "Settings",
+        panel: <ProjectSettings projectId={id} showTeam={showTeam} />,
+      },
     ];
 
     const designTabs: ProjectTab[] = [
@@ -111,54 +190,71 @@ export function ProjectDetail() {
       { slug: "lessons", label: "Lessons", panel: <ProjectLessons projectId={id} /> },
     ];
 
-    const deliveryTabs: ProjectTab[] = [
-      {
-        slug: "delivery",
-        label: "Delivery",
-        panel: <ProjectDeliveryPanel projectId={id} />,
-      },
-    ];
-    if (canInvoice) {
-      deliveryTabs.push({
-        slug: "invoices",
-        label: "Invoices",
-        panel: (
-          <ProjectInvoicesPanel
-            projectId={id}
-            highlightInvoiceId={invoiceId}
-            canManage={canInvoice}
-          />
-        ),
-      });
-    }
+    const commercialTabs: ProjectTab[] = [];
     if (canFees) {
-      deliveryTabs.push({
+      commercialTabs.push({
         slug: "estimation",
         label: "Estimation",
         panel: <ProjectEstimates projectId={id} />,
       });
     }
     if (canWrite) {
-      deliveryTabs.push({
-        slug: "purchase-orders",
-        label: "Purchase Orders",
-        panel: <ProjectPurchaseOrders projectId={id} />,
-      });
-      deliveryTabs.push({
+      commercialTabs.push({
         slug: "tenders",
         label: "Tenders",
         panel: <ProjectTenders projectId={id} />,
       });
     }
-    if (showTeam) {
-      deliveryTabs.push({ slug: "team", label: "Team", panel: <ProjectTeam projectId={id} /> });
+    if (canInvoice || canWrite) {
+      commercialTabs.push({
+        slug: "finance",
+        label: "Finance",
+        panel: (
+          <ProjectFinancePanel
+            projectId={id}
+            canInvoice={canInvoice}
+            canWrite={canWrite}
+            highlightInvoiceId={invoiceId}
+            initialFacet={financeInitialFacet}
+            onFacetChange={setFacet}
+          />
+        ),
+      });
     }
 
-    return [
+    const siteTabs: ProjectTab[] = [
+      {
+        slug: "site",
+        label: "Site",
+        panel: (
+          <ProjectSiteBandPanel projectId={id} initialFacet={siteInitialFacet} />
+        ),
+      },
+      {
+        slug: "coordination",
+        label: "Coordination",
+        panel: (
+          <ProjectCoordinationPanel projectId={id} initialFacet={siteInitialFacet} />
+        ),
+      },
+      {
+        slug: "technical",
+        label: "Technical",
+        panel: (
+          <ProjectTechnicalPanel projectId={id} initialFacet={siteInitialFacet} />
+        ),
+      },
+    ];
+
+    const groups: ProjectGroup[] = [
       { slug: "setup", label: "Setup", tabs: setupTabs },
       { slug: "design", label: "Design", tabs: designTabs },
-      { slug: "delivery", label: "Delivery", tabs: deliveryTabs },
     ];
+    if (commercialTabs.length > 0) {
+      groups.push({ slug: "commercial", label: "Commercial", tabs: commercialTabs });
+    }
+    groups.push({ slug: "site", label: "Site", tabs: siteTabs });
+    return groups;
   }, [
     id,
     showTeam,
@@ -169,6 +265,9 @@ export function ProjectDetail() {
     approvalId,
     invoiceId,
     drawingsInitialSub,
+    siteInitialFacet,
+    financeInitialFacet,
+    setFacet,
   ]);
 
   const projectTabs = projectGroups.flatMap((g) => g.tabs);
@@ -189,6 +288,10 @@ export function ProjectDetail() {
       (prev) => {
         const next = new URLSearchParams(prev);
         next.set("tab", slug);
+        // Clear facet when switching peers unless staying on finance/site bands.
+        if (slug !== "finance" && slug !== "site" && slug !== "coordination" && slug !== "technical") {
+          next.delete("facet");
+        }
         return next;
       },
       { replace: true },
@@ -200,20 +303,37 @@ export function ProjectDetail() {
       navigate(`/tasks?projectId=${id}`, { replace: true });
       return;
     }
+    const preserveRaw =
+      rawTab === "approvals" ||
+      rawTab === "invoices" ||
+      rawTab === "purchase-orders" ||
+      rawTab === "team";
     const shouldNormalizeTab =
-      tabSlug !== activeTab ||
-      (rawTab !== activeTab && rawTab !== "approvals" && rawTab !== "invoices");
+      tabSlug !== activeTab || (rawTab !== activeTab && !preserveRaw);
     if (shouldNormalizeTab) {
       setSearchParams(
         (prev) => {
           const next = new URLSearchParams(prev);
           next.set("tab", activeTab);
+          const legacyFacet = LEGACY_FACET[rawTab];
+          if (legacyFacet && !next.get("facet")) {
+            next.set("facet", legacyFacet);
+          }
           return next;
         },
         { replace: true },
       );
     }
   }, [tabSlug, activeTab, rawTab, setSearchParams, id, navigate]);
+
+  useEffect(() => {
+    if (activeTab === "settings" && (facetParam === "team" || rawTab === "team") && showTeam) {
+      document.getElementById("project-settings-team")?.scrollIntoView({
+        block: "start",
+        behavior: "smooth",
+      });
+    }
+  }, [activeTab, facetParam, rawTab, showTeam]);
 
   if (project.isLoading) {
     return (
@@ -246,9 +366,22 @@ export function ProjectDetail() {
     .contractValuePaise;
 
   const Fact = ({ label, value }: { label: string; value: ReactNode }) => (
-    <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, py: 0.5, borderBottom: 1, borderColor: "divider" }}>
-      <Typography variant="caption" color="text.secondary">{label}</Typography>
-      <Typography variant="caption" sx={{ textAlign: "right", fontWeight: 600 }}>{value}</Typography>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        gap: 1,
+        py: 0.5,
+        borderBottom: 1,
+        borderColor: "divider",
+      }}
+    >
+      <Typography variant="caption" color="text.secondary">
+        {label}
+      </Typography>
+      <Typography variant="caption" sx={{ textAlign: "right", fontWeight: 600 }}>
+        {value}
+      </Typography>
     </Box>
   );
 
@@ -257,7 +390,8 @@ export function ProjectDetail() {
       title={`${p.ref} — ${p.title}`}
       description={`${workTypeLabel} · ${p.projectType} · ${p.jurisdiction}`}
       tabs={
-        <ProjectRailNav
+        <ProjectSectionNav
+          ariaLabel="Project sections"
           groups={projectGroups.map((g) => ({
             slug: g.slug,
             label: g.label,
@@ -268,7 +402,12 @@ export function ProjectDetail() {
         />
       }
       aside={
-        <Stack spacing={1.5}>
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={2}
+          useFlexGap
+          sx={{ alignItems: { md: "flex-start" }, flexWrap: "wrap" }}
+        >
           <StatusTag
             value={p.status as ProjectStatus}
             map={PROJECT_STATUS_TAG}
@@ -278,9 +417,9 @@ export function ProjectDetail() {
             }
           />
 
-          <Box>
+          <Box sx={{ minWidth: 200, flex: "1 1 220px" }}>
             <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: 1 }}>
-              Overview
+              Facts
             </Typography>
             <Box sx={{ mt: 0.5 }}>
               {currentPhase && (
@@ -309,7 +448,9 @@ export function ProjectDetail() {
             </Box>
           </Box>
 
-          <ProjectRailSignals projectId={id} />
+          <Box sx={{ flex: "1 1 240px", minWidth: 200 }}>
+            <ProjectRailSignals projectId={id} />
+          </Box>
         </Stack>
       }
     >

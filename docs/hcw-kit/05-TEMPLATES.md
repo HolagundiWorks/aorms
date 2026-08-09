@@ -34,13 +34,18 @@ Dock: CENTER "New <object>" · dialog publishes [] while open
 Create/edit = Dialog — never an always-visible form
 ```
 
+Work hub (`Work.tsx` / `/tasks`) uses `ProjectSectionNav` groups:
+**Execute** (Tasks · Board · Calendar) · **Coordinate** (Requests · Activity) ·
+**Capacity** (Workload · Attendance).
+
 ## T3 — Detail (reference: `ProjectDetail.tsx`)
 
 ```
-RailLayout · PageBreadcrumb (list → this record, 2–4 levels)
-├ header: record identity + StatusDot
-├ tab strip for facets (each facet = its own panel)
-└ facet panels own queries; mutations carry meta.errorTitle
+RailLayout · PageBreadcrumb (Projects → ref → group → tab)
+├ header: record identity + StatusDot / facts / signals
+├ ProjectSectionNav — group chips (Setup · Design · Commercial · Site)
+│                   + peer MUI tabs for the active group
+└ one stage panel; nested ProjectFacetTabs where needed (Site bands · Finance)
 Dock: RIGHT commit · LEFT destroy (ConfirmModal)
 ```
 

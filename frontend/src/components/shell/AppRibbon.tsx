@@ -380,7 +380,7 @@ function AdminMenu({
       anchorOrigin={{ vertical: above ? "top" : "bottom", horizontal: "right" }}
       transformOrigin={{ vertical: above ? "bottom" : "top", horizontal: "right" }}
       trigger={(
-        <Tooltip title="Admin · Library · Third Parties" disableHoverListener={isOpen}>
+        <Tooltip title="Library · Third Parties · Admin" disableHoverListener={isOpen}>
           <IconButton
             id={`ribbon-trigger-${menuId}`}
             ref={btnRef}
