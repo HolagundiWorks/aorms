@@ -16,13 +16,13 @@ import { isMarketingOnly } from "./marketing-gate.js";
 export const LANDING_SEO = {
   title: `AORMS | ${AORMS_PLATFORM.expansion}`,
   description:
-    "AORMS suite for AEC consultancies — practice managers, AQC Estimation/BBS/PM, AADT drafting, ShilpiDB drawings, and firm portals. Technical work stays local; aorms.in is marketing and blog. Open source; installers coming soon.",
+    "AORMS — the operating suite for architecture studios and engineering consultancies. Practice managers, AQC Estimation/BBS/PM, AADT drafting, ShilpiDB drawings, and firm portals. Technical work stays local; installers coming soon.",
   keywords:
-    "AORMS, AStudio, AConsulting, AQC Estimation, AQC BBS, AProc, AADT, ShilpiDB, EOMS, ESTI, AEC consulting suite, practice management, local-first desktop, architecture software, engineering software, PMC software, fragmented tools",
-  ogTitle: `AORMS — ${AORMS_PLATFORM.heroHeadline[0]} ${AORMS_PLATFORM.heroHeadline[1]}`,
+    "AORMS, AStudio, AConsulting, architecture studio software, engineering consultancy software, AQC Estimation, AQC BBS, AProc, AADT, ShilpiDB, EOMS, ESTI, AEC consulting suite, practice management, local-first desktop",
+  ogTitle: `AORMS — ${AORMS_PLATFORM.heroHeadline[0]}`,
   ogDescription:
-    "One suite for AEC consultancies: managers for communications; Estimation, BBS, PM, and AADT locally; ShilpiDB for drawings; firm portals for published updates. Open source. Installers coming soon.",
-  twitterTitle: "AORMS — the operating suite for AEC consultancies",
+    "Built for architecture studios and engineering consultancies: managers for the office; Estimation, BBS, PM, and AADT locally; ShilpiDB for drawings; firm portals for published updates. Open source. Installers coming soon.",
+  twitterTitle: "AORMS — for architecture studios and engineering firms",
   twitterDescription:
     `${AORMS_STUDIO.title} · ${AORMS_CONSULTANCY.title} · ${AQC_ESTIMATION.title} · ${AQC_BBS.title} · ${AORMS_PMC.title} · ${AADT.title} · ${SHILPIDB.name}. Technical work local; portals online.`,
   headline: `${AORMS_PLATFORM.heroHeadline[0]} ${AORMS_PLATFORM.heroHeadline[1]}`,
@@ -46,7 +46,7 @@ export const LANDING_FAQ = [
   {
     question: "Who is the suite for?",
     answer:
-      `AEC consulting and PMC firms — architecture, engineering, and project management practices that advise and govern projects. Not contractor labour ERP.`,
+      `Architecture studios and engineering consultancies first — then PMC practices that advise and govern projects. Not contractor labour ERP.`,
   },
   {
     question: `What are ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title}?`,
@@ -165,7 +165,7 @@ export function injectLandingJsonLd(): void {
         audience: {
           "@type": "Audience",
           audienceType:
-            "AEC consulting and PMC firms — architecture, engineering, and project management consultancies",
+            "Architecture studios and engineering consultancies — plus PMC practices that advise and govern projects",
         },
         offers: {
           "@type": "Offer",

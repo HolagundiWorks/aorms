@@ -1,10 +1,26 @@
 # Landing page redesign — agent context
 
-**Status:** Canonical brief · **Updated:** 2026-08-08 · **Owner:** HCW
+**Status:** Canonical brief · **Updated:** 2026-08-09 · **Owner:** HCW
 
 Another agent or designer may own visual/layout work on the public landing. This
 file captures **product and documentation context** so copy, IA, and SEO stay
 aligned with the suite rebrand. **Page chrome / tokens:** [PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md).
+
+## AEC hero pass (2026-08-09)
+
+Home `/` targets **architecture studios** and **engineering consultancies** first
+(PMC under Platform). Composition:
+
+| Region | Law |
+| --- | --- |
+| Hero | Brand · one headline · one support · Coming soon CTAs · **dominant visual = `LandingEcosystemMap`** (Connect → managers / technical → portals · AADT→ShilpiDB). Entourage stays faint atmosphere only — **no** workspace preview or KPI strip |
+| Outcomes | List bands (not card collage) |
+| Audience | Two peers only — AStudio · AConsulting |
+| Platform | Managers first · practice desk preview · technical apps |
+| Motion | Hero stagger · section reveal · entourage drift; `prefers-reduced-motion` off |
+| Soft launch | Downloads Coming soon; no demo sign-in CTAs while `VITE_MARKETING_ONLY` |
+
+Dock IA: **Overview · Outcomes · Audience · Platform · Start** (Rhythm folds into Start).
 
 ---
 
@@ -34,7 +50,7 @@ The home route (`/`) is the **AORMS suite landing** (`Landing.tsx` +
 - **EOMS** (knowledge bank) + **ESTI** (internal AI agent on desktop managers)
 - Managers: **AStudio** · **AConsulting** · Technical: **AQC Estimation / BBS / PM** · Drafting: **AADT** · Geometry: **ShilpiDB**
 - Target: AEC consulting and PMC firms
-- Five sections: **Overview · Outcomes · Platform · Rhythm · Start**
+- Dock sections: **Overview · Outcomes · Audience · Platform · Start** (Rhythm folds into Start)
 - Licensing: **open source for now**; SaaS deferred
 - Atmosphere: `LandingEntourage` (isometric buildings, marketing only)
 

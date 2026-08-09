@@ -116,7 +116,7 @@ Do not hard-code hex in product UI — use kit tokens / theme. Marketing CSS var
 | `LandingWellbeingWidget` | In-flow wellbeing + inline `WellnessPanel` |
 | `MarketingShell` | Blog / Downloads / etc. — wraps `MarketingNeuFrame` |
 
-Landing IA (five sections): **Overview · Outcomes · Platform · Rhythm · Start**.
+Landing IA (five dock sections): **Overview · Outcomes · Audience · Platform · Start** (Rhythm folds into Start; full-bleed Entourage hero).
 
 ### Staff page shell
 

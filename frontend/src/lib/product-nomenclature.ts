@@ -8,14 +8,17 @@ export const AORMS_PLATFORM = {
   name: "AORMS",
   expansion: "Accelerated Operational Resources Management System",
   /** Platform scope — AEC consulting suite (2026-08). */
-  tagline: "The operating suite for AEC consulting and project management firms",
+  tagline: "The operating suite for architecture studios and engineering consultancies",
   audience:
-    "AEC consulting firms and project management consultancies — architecture, engineering, and PMC practices that advise and govern projects",
-  /** Platform home hero — no third-party product names. */
+    "Architecture studios and engineering consultancies — plus PMC practices that advise and govern projects",
+  /** Platform home hero — brand + AEC peers; no third-party product names. */
   heroHeadline: [
-    "From disconnected tools to one operating suite:",
-    "Managers online for communications; technical work stays local.",
+    "One operating suite for architecture and engineering practices.",
+    "Managers for the office; technical work stays local.",
   ] as const,
+  /** One-line hero support under the headline. */
+  heroSupport:
+    "Connect launches AStudio and AConsulting for the office, AQC and AADT for technical work, and firm portals for what you publish — one suite, not five tools. Installers coming soon.",
   aecDisciplines: ["Architecture", "Engineering", "Project management"] as const,
   fragmentedTools: [
     "Messaging",

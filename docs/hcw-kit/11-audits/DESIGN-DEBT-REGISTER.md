@@ -1,4 +1,9 @@
-﻿**2026-08-09 — Cognitive load / capacity pass (AStudio · AConsulting).**
+﻿**2026-08-09 — AEC landing redesign.** Full-bleed Entourage hero (brand · AEC
+headline · Coming soon); Architecture / Engineering audience peers; Outcomes as
+list bands; managers-first Platform; hero stagger + reveal + entourage drift
+(`prefers-reduced-motion`). SEO + LANDING-REDESIGN-CONTEXT synced.
+
+**2026-08-09 — Cognitive load / capacity pass (AStudio · AConsulting).**
 Engagements dock ≤5 (TQ/fee/rate on stage facets); Studio brief = greeting +
 attention + health glyph (module toggles → Practice › Zoning); Portfolio Work
 and Work hub Requests use `ProjectFacetTabs` (one queue); AConsulting taskbar

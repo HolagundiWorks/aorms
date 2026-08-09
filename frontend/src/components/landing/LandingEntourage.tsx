@@ -160,6 +160,7 @@ export function LandingEntourage({
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let raf = 0;
     const apply = () => {
