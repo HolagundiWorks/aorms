@@ -38,13 +38,14 @@ search · health/dues · greeting · alerts.
 
 ### AConsulting (`consultancy.aorms.in`)
 
+**Capacity:** ≤5 primary peers. People and Library/References live under Admin (not concurrent taskbar chrome).
+
 | Item | Kind | Destinations |
 |---|---|---|
 | **Practice** | menu | Enquiries · Engagements |
 | **Clients** | link | `/clients` (`write`) |
 | **Projects** | link | `/projects` |
-| **People** | menu | Teams · Performance · HR |
-| **Office** | menu | **Capture:** Proposals · Tenders · **Papers:** Documents · Contracts · Letters · **References:** Standards · Specification |
+| **Office** | menu | **Capture:** Leads · Tenders · Proposals · **Papers:** Documents · Contracts · Letters |
 | **Finance** | menu | same Finance menu as Studio |
 
 Footer home on consultancy opens Enquiries. Sign in with `principal@demo.aorms.in` (same demo firm; Account Hub / host selects AConsulting).

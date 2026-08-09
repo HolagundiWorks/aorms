@@ -124,9 +124,11 @@ Landing IA (five sections): **Overview · Outcomes · Platform · Rhythm · Star
 | --- | --- |
 | `RailLayout` | **Stage page shell** (name kept) — soft header (title · description · tabs · filters · actions) + full-width scrolling main. **No left column.** |
 | `ProjectSectionNav` | Horizontal group chips + peer tabs — Project Detail · Studio Intelligence · Work hub |
-| `ProjectFacetTabs` | Nested MUI facets inside a peer panel (Brief · Drawings · Documents · Site bands · Finance) |
+| `ProjectFacetTabs` | Nested MUI facets inside a peer panel (Brief · Drawings · Documents · Site bands · Finance · Engagement detail · Work Requests) — **one panel at a time** |
 | `PageBreadcrumb` | Wayfinding + `document.title` |
-| `ActionDock` / `useScreenActions` | Page-level CTAs only here (publish `[]` while dialogs open); clears floating footer via `--esti-dock-bottom` |
+| `ActionDock` / `useScreenActions` | Page-level CTAs only here (publish `[]` while dialogs open); clears floating footer via `--esti-dock-bottom`. **Cap ≤5**; **one** `tone: "primary"` / Radiant Orange commit |
+
+**Capacity (AStudio / AConsulting, 2026-08-09):** brief = greeting + one attention line; Focus defaults to Priorities (Show all discloses Action items / risks); Work portfolio and Requests use facets not stacked lists; Engagement commercial/TQ/rate actions live on stage facets, not the dock; desktop WinUI stage is Tasks-only (hub/licence in tray).
 | `AppRibbon` | Top chrome — brand · search · office health/dues · greeting → `/account` · AlertsBell |
 | `AppFooterBar` | Floating taskbar (`PORTAL_CHROME`) — wellness · calculator · **module nav** (`RibbonNavCluster`) · sync · sign out |
 | `MarketingClockPomodoro` | Ambient clock + Pomodoro — `bottom: footerStack + dockGap` |

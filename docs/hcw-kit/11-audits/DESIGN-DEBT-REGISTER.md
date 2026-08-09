@@ -1,4 +1,11 @@
-﻿**2026-08-09 — UX audit wave (1B+2C).** Full pass: landing honesty + neu shell;
+﻿**2026-08-09 — Cognitive load / capacity pass (AStudio · AConsulting).**
+Engagements dock ≤5 (TQ/fee/rate on stage facets); Studio brief = greeting +
+attention + health glyph (module toggles → Practice › Zoning); Portfolio Work
+and Work hub Requests use `ProjectFacetTabs` (one queue); AConsulting taskbar
+≤5 peers (Practice nest; Library under Admin); WinUI Tasks-only stage, hub/
+licence in tray, one orange Publish. Canon: PAGE-STRUCTURE · NAVIGATION.
+
+**2026-08-09 — UX audit wave (1B+2C).** Full pass: landing honesty + neu shell;
 portal docks for all four roles; carbon adapters → kit; Work/Leads/Filing/
 Libraries + company/platform-admin priority de-Carbon; Chip→StatusDot;
 Performance capacity; CarbonSpike gone; AStudio/AConsulting HCW geography

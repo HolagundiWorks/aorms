@@ -76,6 +76,7 @@ import { EngagementCloseoutPanels } from "../components/consultancy/EngagementCl
 import { EngagementPreconPanels } from "../components/consultancy/EngagementPreconPanels.js";
 import { InvoicePdfCell } from "../components/InvoicePdfCell.js";
 import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
+import { ProjectFacetTabs } from "../components/project/ProjectFacetTabs.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
 import { StatusDot, StatusTag } from "../components/StatusTag.js";
@@ -108,10 +109,14 @@ export function ConsultancyEngagements() {
   const [searchParams] = useSearchParams();
   const listQ = trpc.consultancy.engagements.list.useQuery();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [detailFacet, setDetailFacet] = useState("register");
   useEffect(() => {
     const id = searchParams.get("id");
     if (id) setSelectedId(id);
   }, [searchParams]);
+  useEffect(() => {
+    setDetailFacet("register");
+  }, [selectedId]);
   const detailQ = trpc.consultancy.engagements.get.useQuery(
     { id: selectedId ?? "" },
     {
@@ -568,6 +573,7 @@ export function ConsultancyEngagements() {
     packOpen || riskOpen || relOpen || askOpen || phaseOpen || briefOpen || frOpen ||
     feeTermsOpen || !!feeConfirm ||
     !!crsFor || !!eomsFor || !!tqAnswerFor || !!tqCloseFor;
+  // Capacity: dock ≤5. TQ / fee / rate card live on stage facets (not concurrent chrome).
   useScreenActions(
     anyDialogOpen
       ? []
@@ -595,37 +601,10 @@ export function ConsultancyEngagements() {
                   label: "Add deliverable",
                   icon: <AddIcon />,
                   onClick: () => {
-                    // SOP: document numbers hang off the job number; type picks the MDR slot.
                     setDelDocType("CALCULATION");
                     setDelTitle("");
                     setDelRevision("P01");
                     setDelOpen(true);
-                  },
-                },
-                {
-                  id: "cons-raise-tq",
-                  zone: "center",
-                  label: "Raise TQ",
-                  icon: <AddIcon />,
-                  onClick: () => {
-                    setTqCode("");
-                    setTqQuestion("");
-                    // SLA default: contractual turnaround is typically 5–14 working days.
-                    setTqDueDate(new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10));
-                    setTqScopeImpact(false);
-                    setTqOpen(true);
-                  },
-                },
-                {
-                  id: "cons-add-fee-stage",
-                  zone: "center",
-                  label: "Add fee stage",
-                  icon: <AddIcon />,
-                  onClick: () => {
-                    setFeeLabel("");
-                    setFeeAmount("");
-                    setFeeDeliverableId("");
-                    setFeeOpen(true);
                   },
                 },
                 {
@@ -644,7 +623,6 @@ export function ConsultancyEngagements() {
                 {
                   id: "cons-ask-intelligence",
                   zone: "right",
-                  tone: "primary",
                   label: "Ask intelligence",
                   onClick: () => {
                     setAskQuestion("");
@@ -653,26 +631,10 @@ export function ConsultancyEngagements() {
                     setAskOpen(true);
                   },
                 },
-                {
-                  id: "cons-rate-card",
-                  zone: "right",
-                  label: "Rate card",
-                  onClick: () => {
-                    const draft: Record<string, string> = {};
-                    const caps: Record<string, string> = {};
-                    for (const r of rateCardQ.data ?? []) {
-                      draft[r.grade] = String((r.ratePaise ?? 0) / 100);
-                      caps[r.grade] = String(r.capacityHoursWeek ?? 0);
-                    }
-                    setRateDraft(draft);
-                    setCapDraft(caps);
-                    setRatesOpen(true);
-                  },
-                },
               ] satisfies DockAction[])
             : []),
         ] satisfies DockAction[]),
-    [anyDialogOpen, selectedId, rateCardQ.data],
+    [anyDialogOpen, selectedId],
   );
 
   const engagements = listQ.data ?? [];
@@ -925,6 +887,16 @@ export function ConsultancyEngagements() {
                 </Stack>
               </Box>
 
+              <ProjectFacetTabs
+                ariaLabel="Engagement detail sections"
+                value={detailFacet}
+                onChange={setDetailFacet}
+                facets={[
+                  {
+                    id: "register",
+                    label: "Register",
+                    panel: (
+                      <Stack spacing={2}>
               {/* Typed project brief — the design-basis parameter set, per consultancy type. */}
               {detail.consultancyType && (
                 <Box>
@@ -1419,13 +1391,39 @@ export function ConsultancyEngagements() {
                   </TableBody>
                 </Table>
               </TableContainer>
-
+                      </Stack>
+                    ),
+                  },
+                  {
+                    id: "commercial",
+                    label: "Commercial",
+                    panel: (
+                      <Stack spacing={2}>
               {/* Fee position — stage billing tied to deliverable issue (Phase 2). */}
               <Box sx={{ pt: 1 }}>
                 <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 0.5 }}>
                   <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600 }} className="esti-grow">
                     Fee position
                   </Typography>
+                  <Button
+                    size="small"
+                    variant="text"
+                    onClick={() => {
+                      setFeeLabel("");
+                      setFeeAmount("");
+                      setFeeDeliverableId("");
+                      setFeeOpen(true);
+                    }}
+                  >
+                    Add fee stage
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="text"
+                    onClick={() => setRatesOpen(true)}
+                  >
+                    Rate card
+                  </Button>
                   <Button
                     size="small"
                     variant="text"
@@ -1459,7 +1457,7 @@ export function ConsultancyEngagements() {
                 </span>
                 {detail.feeStages.length === 0 ? (
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    No fee stages yet. Use Add fee stage in the dock to schedule billing.
+                    No fee stages yet. Use Add fee stage to schedule billing.
                   </Typography>
                 ) : (
                   <TableContainer sx={{ mt: 1 }}>
@@ -1677,90 +1675,19 @@ export function ConsultancyEngagements() {
                 </Box>
               )}
 
-              {/* Site visits — field observation reports (observe, never inspect). */}
-              <Box sx={{ pt: 1 }}>
-                <Stack direction="row" spacing={1} sx={{ alignItems: "baseline" }}>
-                  <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600 }} className="esti-grow">
-                    Site visits
-                  </Typography>
-                  <Button
-                    size="small"
-                    variant="text"
-                    onClick={() => {
-                      setFrDate(new Date().toISOString().slice(0, 10));
-                      setFrWeather("");
-                      setFrPersonnel("");
-                      setFrWork("");
-                      setFrObservations("");
-                      setFrNcs("");
-                      setFrInstructions("");
-                      setFrNextVisit("");
-                      setFrOpen(true);
-                    }}
-                  >
-                    Record visit
-                  </Button>
-                </Stack>
-                {detail.fieldReports.length === 0 ? (
-                  <span className="esti-label esti-label--secondary">
-                    No site visits recorded — field reports document general conformance
-                    observations, issued within 2–3 working days of the visit.
-                  </span>
-                ) : (
-                  <Stack spacing={1} sx={{ mt: 0.5 }}>
-                    {detail.fieldReports.map((fr) => (
-                      <Box key={fr.id} sx={{ p: 1.25, border: 1, borderColor: "divider" }}>
-                        <Stack spacing={0.5}>
-                          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }} className="esti-grow">
-                              {`Report #${fr.reportNo} · ${fr.visitDate}`}
-                              {fr.weather ? ` · ${fr.weather}` : ""}
-                            </Typography>
-                            <span className="esti-label esti-label--secondary">{fr.authorName}</span>
-                            <RowActionsMenu
-                              actions={[
-                                {
-                                  label: "Delete",
-                                  danger: true,
-                                  disabled: removeFieldReport.isPending,
-                                  onClick: () => removeFieldReport.mutate({ id: fr.id }),
-                                },
-                              ]}
-                            />
-                          </Stack>
-                          {fr.personnel && (
-                            <span className="esti-label esti-label--secondary">On site: {fr.personnel}</span>
-                          )}
-                          {fr.workObserved && (
-                            <span className="esti-label esti-label--secondary">Work: {fr.workObserved}</span>
-                          )}
-                          {fr.observations && (
-                            <Typography variant="body2">{fr.observations}</Typography>
-                          )}
-                          {fr.nonconformances && (
-                            <span className="esti-label esti-label--secondary" style={{ color: "var(--cds-support-error, #da1e28)" }}>
-                              NC: {fr.nonconformances}
-                            </span>
-                          )}
-                          {fr.instructions && (
-                            <span className="esti-label esti-label--secondary">Instructions: {fr.instructions}</span>
-                          )}
-                          {fr.nextVisit && (
-                            <span className="esti-label esti-label--secondary">Next visit: {fr.nextVisit}</span>
-                          )}
-                        </Stack>
-                      </Box>
-                    ))}
-                  </Stack>
-                )}
-              </Box>
-
               {/* Time booked — substrate for WIP / utilisation / realisation. */}
               <Box sx={{ pt: 1 }}>
                 <Stack direction="row" spacing={1} sx={{ alignItems: "baseline" }}>
                   <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600, mb: 0.5 }} className="esti-grow">
                     Time
                   </Typography>
+                  <Button
+                    size="small"
+                    variant="text"
+                    onClick={() => setRatesOpen(true)}
+                  >
+                    Rate card
+                  </Button>
                   {detail.feePosition && detail.feePosition.pendingApproval > 0 && (
                     <Button
                       size="small"
@@ -1838,14 +1765,37 @@ export function ConsultancyEngagements() {
                 )}
               </Box>
 
+                      </Stack>
+                    ),
+                  },
+                  {
+                    id: "queries",
+                    label: "Queries",
+                    panel: (
+                      <Stack spacing={2}>
               {/* Technical query register — closure evidence required to close. */}
               <Box sx={{ pt: 1 }}>
-                <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600, mb: 1 }}>
-                  Technical queries
-                </Typography>
+                <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 1 }}>
+                  <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600 }} className="esti-grow">
+                    Technical queries
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant="text"
+                    onClick={() => {
+                      setTqCode("");
+                      setTqQuestion("");
+                      setTqDueDate("");
+                      setTqScopeImpact(false);
+                      setTqOpen(true);
+                    }}
+                  >
+                    Raise TQ
+                  </Button>
+                </Stack>
                 {detail.tqs.length === 0 ? (
                   <span className="esti-label esti-label--secondary">
-                    No technical queries — raise one from the dock when a question needs a
+                    No technical queries — raise one when a question needs a
                     dated, closable record.
                   </span>
                 ) : (
@@ -2116,6 +2066,92 @@ export function ConsultancyEngagements() {
                 )}
               </Box>
 
+                      </Stack>
+                    ),
+                  },
+                  {
+                    id: "closeout",
+                    label: "Closeout",
+                    panel: (
+                      <Stack spacing={2}>
+              {/* Site visits — field observation reports (observe, never inspect). */}
+              <Box sx={{ pt: 1 }}>
+                <Stack direction="row" spacing={1} sx={{ alignItems: "baseline" }}>
+                  <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600 }} className="esti-grow">
+                    Site visits
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant="text"
+                    onClick={() => {
+                      setFrDate(new Date().toISOString().slice(0, 10));
+                      setFrWeather("");
+                      setFrPersonnel("");
+                      setFrWork("");
+                      setFrObservations("");
+                      setFrNcs("");
+                      setFrInstructions("");
+                      setFrNextVisit("");
+                      setFrOpen(true);
+                    }}
+                  >
+                    Record visit
+                  </Button>
+                </Stack>
+                {detail.fieldReports.length === 0 ? (
+                  <span className="esti-label esti-label--secondary">
+                    No site visits recorded — field reports document general conformance
+                    observations, issued within 2–3 working days of the visit.
+                  </span>
+                ) : (
+                  <Stack spacing={1} sx={{ mt: 0.5 }}>
+                    {detail.fieldReports.map((fr) => (
+                      <Box key={fr.id} sx={{ p: 1.25, border: 1, borderColor: "divider" }}>
+                        <Stack spacing={0.5}>
+                          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }} className="esti-grow">
+                              {`Report #${fr.reportNo} · ${fr.visitDate}`}
+                              {fr.weather ? ` · ${fr.weather}` : ""}
+                            </Typography>
+                            <span className="esti-label esti-label--secondary">{fr.authorName}</span>
+                            <RowActionsMenu
+                              actions={[
+                                {
+                                  label: "Delete",
+                                  danger: true,
+                                  disabled: removeFieldReport.isPending,
+                                  onClick: () => removeFieldReport.mutate({ id: fr.id }),
+                                },
+                              ]}
+                            />
+                          </Stack>
+                          {fr.personnel && (
+                            <span className="esti-label esti-label--secondary">On site: {fr.personnel}</span>
+                          )}
+                          {fr.workObserved && (
+                            <span className="esti-label esti-label--secondary">Work: {fr.workObserved}</span>
+                          )}
+                          {fr.observations && (
+                            <Typography variant="body2">{fr.observations}</Typography>
+                          )}
+                          {fr.nonconformances && (
+                            <span className="esti-label esti-label--secondary" style={{ color: "var(--cds-support-error, #da1e28)" }}>
+                              NC: {fr.nonconformances}
+                            </span>
+                          )}
+                          {fr.instructions && (
+                            <span className="esti-label esti-label--secondary">Instructions: {fr.instructions}</span>
+                          )}
+                          {fr.nextVisit && (
+                            <span className="esti-label esti-label--secondary">Next visit: {fr.nextVisit}</span>
+                          )}
+                        </Stack>
+                      </Box>
+                    ))}
+                  </Stack>
+                )}
+              </Box>
+
               <EngagementPreconPanels
                 engagementId={detail.id}
                 opportunities={detail.opportunities ?? []}
@@ -2127,6 +2163,11 @@ export function ConsultancyEngagements() {
                 detail={detail}
                 canFees={detail.feePosition != null}
                 onInvalidate={invalidate}
+              />
+                      </Stack>
+                    ),
+                  },
+                ]}
               />
             </Stack>
           )}

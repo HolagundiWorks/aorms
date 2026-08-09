@@ -33,6 +33,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import { confidenceTag, PRIORITY_BAND_TAG } from "../components/work/workHelpers.js";
 import { ZonalComplianceCalculator } from "../components/compliance/ZonalComplianceCalculator.js";
 import { ProjectSectionNav } from "../components/project/ProjectSectionNav.js";
+import { ProjectFacetTabs } from "../components/project/ProjectFacetTabs.js";
 import { useAuth } from "../lib/auth.js";
 import { trpc } from "../lib/trpc.js";
 import { useNavigate } from "react-router-dom";
@@ -342,6 +343,8 @@ export function StudioAbstract() {
   const [tab, setTab] = useState<StudioTab>("priorities");
   /** Focus mode default — priorities first; Action items / risks behind “Show all”. */
   const [estiExpanded, setEstiExpanded] = useState(true);
+  /** Portfolio › Work — one queue visible at a time. */
+  const [workFacet, setWorkFacet] = useState("queue");
 
   const studioNavGroups = useMemo(() => {
     const groups = [
@@ -786,35 +789,21 @@ export function StudioAbstract() {
           borderRadius: `${RADIUS}px`,
         }}
       >
-          {/* Greeting */}
+          {/* Capacity: brief = greeting + one attention line only (mission ≤30s). */}
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 300, lineHeight: 1.15, mt: 0 }}>{greetingFor()},</Typography>
             <Typography variant="h5" sx={{ fontWeight: 600, lineHeight: 1.15 }}>{firstName}</Typography>
             {companyName && <Typography variant="caption" color="text.secondary">{companyName}</Typography>}
           </Box>
 
-          {/* Orchestration — visible only while ESTI is working. */}
           <EstiOrchestrationStatus />
 
-          {/* Attention update — below the greeting */}
-          <Typography variant="body2" color="text.secondary">
-            {attn.issue} — {attn.action}
-          </Typography>
-
-          {/* Office health — flat orb (pure neu) */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, py: 1, borderTop: 1, borderColor: "divider" }}>
-            <Typography variant="overline" color="text.secondary" sx={{ lineHeight: 1 }}>Office health</Typography>
-            <Box sx={{ flex: 1 }} />
-            <OfficeHealthGlyph state={officeState} title={STATE_WORD[officeState]} />
-            <Typography sx={{ fontWeight: 300, textTransform: "capitalize" }} noWrap>{STATE_WORD[officeState]}</Typography>
-          </Box>
-
-          {/* Admin module toggles only — wellness prefs live in Account / wellness panels. */}
-          {moduleToggles ? (
-            <Box sx={{ pt: 0.5, display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center" }}>
-              {moduleToggles}
-            </Box>
-          ) : null}
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+            <Typography variant="body2" color="text.secondary" sx={{ flex: 1, minWidth: 0 }}>
+              {attn.issue} — {attn.action}
+            </Typography>
+            <OfficeHealthGlyph state={officeState} title={`Office health: ${STATE_WORD[officeState]}`} size={14} />
+          </Stack>
       </Surface>
 
         {/* ── STAGE — tabs + tab content (full width) ─────────────────────────────── */}
@@ -994,25 +983,69 @@ export function StudioAbstract() {
 
           {tab === "work" && (
             <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
-            <>
-              <TabSplit
-                title="Work queue"
-                action={<StatusDot color={tasksOverdue > 0 ? "warm-gray" : "green"} label={`${tasks.length} open · ${tasksOverdue} overdue`} />}
-              >
-                {tasks.length === 0 ? emptyText("No active tasks.") : (
-                  <DataGrid rows={wqRows} columns={wqCols} onRowClick={(p) => navigate(taskHref(p.row.id))} {...gridProps} />
-                )}
-              </TabSplit>
-              <Sep />
-              <TabSplit
-                title="Approvals"
-                action={<StatusDot color={pendingCount > 0 ? tagKind(cs) : "green"} label={`${pendingCount} pending`} />}
-              >
-                {pending.length === 0 ? emptyText("No approvals pending.") : (
-                  <DataGrid rows={apRows} columns={apCols} onRowClick={(p) => navigate(`/projects/${p.row.projectId}?tab=drawings&approvalId=${p.row.id}`)} {...gridProps} />
-                )}
-              </TabSplit>
-            </>
+              <ProjectFacetTabs
+                ariaLabel="Work portfolio queues"
+                value={workFacet}
+                onChange={setWorkFacet}
+                facets={[
+                  {
+                    id: "queue",
+                    label: `Tasks (${tasks.length})`,
+                    panel: (
+                      <TabSplit
+                        title="Work queue"
+                        action={
+                          <StatusDot
+                            color={tasksOverdue > 0 ? "warm-gray" : "green"}
+                            label={`${tasks.length} open · ${tasksOverdue} overdue`}
+                          />
+                        }
+                      >
+                        {tasks.length === 0
+                          ? emptyText("No active tasks.")
+                          : (
+                            <DataGrid
+                              rows={wqRows}
+                              columns={wqCols}
+                              onRowClick={(p) => navigate(taskHref(p.row.id))}
+                              {...gridProps}
+                            />
+                          )}
+                      </TabSplit>
+                    ),
+                  },
+                  {
+                    id: "approvals",
+                    label: `Approvals (${pendingCount})`,
+                    panel: (
+                      <TabSplit
+                        title="Approvals"
+                        action={
+                          <StatusDot
+                            color={pendingCount > 0 ? tagKind(cs) : "green"}
+                            label={`${pendingCount} pending`}
+                          />
+                        }
+                      >
+                        {pending.length === 0
+                          ? emptyText("No approvals pending.")
+                          : (
+                            <DataGrid
+                              rows={apRows}
+                              columns={apCols}
+                              onRowClick={(p) =>
+                                navigate(
+                                  `/projects/${p.row.projectId}?tab=drawings&approvalId=${p.row.id}`,
+                                )
+                              }
+                              {...gridProps}
+                            />
+                          )}
+                      </TabSplit>
+                    ),
+                  },
+                ]}
+              />
             </Box>
           )}
 
@@ -1036,7 +1069,20 @@ export function StudioAbstract() {
 
           {tab === "zoning" && (
             <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
-            <ZonalComplianceCalculator />
+              <Stack spacing={COMPOSITION_RHYTHM.mainGap}>
+                {moduleToggles ? (
+                  <Surface layer="soft" sx={{ p: COMPOSITION_RHYTHM.headerPad, borderRadius: `${RADIUS}px` }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                      Practice modules
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1.5 }}>
+                      Admin only — hide Finance or Project signals when the practice does not use them.
+                    </Typography>
+                    <Stack spacing={1}>{moduleToggles}</Stack>
+                  </Surface>
+                ) : null}
+                <ZonalComplianceCalculator />
+              </Stack>
             </Box>
           )}
         </Box>

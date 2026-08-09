@@ -580,7 +580,7 @@ function AppWorkspace() {
     financeMenu,
   ];
 
-  // AConsulting — Practice peers + same Office/Finance grouping as AStudio.
+  // AConsulting — ≤5 primary peers. Practice nests Enquiries/Engagements; Library under Admin.
   const consultancyNav: NavNode[] = [
     {
       kind: "menu",
@@ -595,47 +595,7 @@ function AppWorkspace() {
       ? [{ label: "Clients", to: "/clients", icon: User }]
       : []),
     { label: "Projects", to: "/projects", icon: Building },
-    peopleMenu,
-    {
-      kind: "menu",
-      label: "Office",
-      icon: Enterprise,
-      items: [
-        {
-          kind: "menu",
-          label: "Capture",
-          items: [
-            ...(can(user.role, "fees:manage")
-              ? [{ label: "Proposals", to: "/office/proposals", icon: Document }]
-              : []),
-            ...(can(user.role, "write")
-              ? [{ label: "Tenders", to: "/office/tenders", icon: Gavel }]
-              : []),
-          ],
-        },
-        {
-          kind: "menu",
-          label: "Papers",
-          items: [
-            ...(can(user.role, "write")
-              ? [
-                  { label: "Documents", to: "/office/documents", icon: Document },
-                  { label: "Contracts", to: "/office/contracts", icon: License },
-                  { label: "Letters", to: "/office/letters", icon: Email },
-                ]
-              : []),
-          ],
-        },
-        {
-          kind: "menu",
-          label: "References",
-          items: [
-            { label: "Standards", to: "/libraries/standards", icon: Book },
-            { label: "Specification", to: "/libraries/spec-catalog", icon: ListChecked },
-          ],
-        },
-      ],
-    },
+    officeCapturePapers,
     financeMenu,
   ];
 

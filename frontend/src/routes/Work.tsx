@@ -1,11 +1,12 @@
-import { Box, Stack, Typography } from "@mui/material";
-import { useMemo, useRef } from "react";
+import { Box } from "@mui/material";
+import { useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { useScreenActions } from "@hcw/ui-kit";
 import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { ProjectSectionNav } from "../components/project/ProjectSectionNav.js";
+import { ProjectFacetTabs } from "../components/project/ProjectFacetTabs.js";
 import { ActivityTab } from "../components/work/ActivityTab.js";
 import { AttendanceTab } from "../components/work/AttendanceTab.js";
 import { TaskBoardTab } from "../components/work/TaskBoardTab.js";
@@ -20,6 +21,21 @@ import { useAuth } from "../lib/auth.js";
 import { trpc } from "../lib/trpc.js";
 
 type TabDef = { slug: WorkTabSlug; label: string; panel: React.ReactNode };
+
+function RequestsPanel() {
+  const [facet, setFacet] = useState("client");
+  return (
+    <ProjectFacetTabs
+      ariaLabel="Request queues"
+      value={facet}
+      onChange={setFacet}
+      facets={[
+        { id: "client", label: "Client", panel: <ClientRequests embedded /> },
+        { id: "consultant", label: "Consultant", panel: <ConsultantRequests embedded /> },
+      ]}
+    />
+  );
+}
 
 export function Work() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -37,41 +53,14 @@ export function Work() {
       { slug: "tasks", label: "Tasks", panel: <TasksTab ref={tasksRef} /> },
       { slug: "board", label: "Board", panel: <TaskBoardTab /> },
       { slug: "calendar", label: "Calendar", panel: <TaskCalendarTab /> },
-      ...(hrEnabled && canHr
-        ? [{ slug: "workload" as WorkTabSlug, label: "Workload", panel: <WorkloadTab /> }]
+      ...(canWrite
+        ? [{ slug: "requests" as WorkTabSlug, label: "Requests", panel: <RequestsPanel /> }]
         : []),
       { slug: "activity", label: "Activity", panel: <ActivityTab /> },
-      ...(canWrite
-        ? [
-            {
-              slug: "requests" as WorkTabSlug,
-              label: "Requests",
-              panel: (
-                <Stack spacing={4}>
-                  <Stack spacing={1}>
-                    <Typography variant="h6" component="h2">
-                      Client requests
-                    </Typography>
-                    <ClientRequests embedded />
-                  </Stack>
-                  <Stack spacing={1}>
-                    <Typography variant="h6" component="h2">
-                      Consultant requests
-                    </Typography>
-                    <ConsultantRequests embedded />
-                  </Stack>
-                </Stack>
-              ),
-            },
-          ]
-        : []),
       ...(hrEnabled && canHr
         ? [
-            {
-              slug: "attendance" as WorkTabSlug,
-              label: "Attendance",
-              panel: <AttendanceTab />,
-            },
+            { slug: "workload" as WorkTabSlug, label: "Workload", panel: <WorkloadTab /> },
+            { slug: "attendance" as WorkTabSlug, label: "Attendance", panel: <AttendanceTab /> },
           ]
         : []),
     ],
@@ -93,6 +82,7 @@ export function Work() {
         .filter((s) => bySlug.has(s))
         .map((s) => ({ slug: s, label: bySlug.get(s)!.label }));
 
+    // Execute first (≤3 peers); Coordinate + Capacity disclose secondary jobs.
     const groups = [
       { slug: "execute", label: "Execute", tabs: pick("tasks", "board", "calendar") },
       {
@@ -128,11 +118,7 @@ export function Work() {
   return (
     <RailLayout
       title="Work"
-      description={
-        hrEnabled && canHr
-          ? "Tasks, portal triage, workload, attendance, and office activity."
-          : "Tasks, client and consultant requests, and activity — enable Team & HR for workload and attendance."
-      }
+      description="Execute work first. Coordinate portal requests and capacity when you need them."
       tabs={
         <ProjectSectionNav
           ariaLabel="Work sections"
