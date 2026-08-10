@@ -108,6 +108,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | W8 | AConsulting **Practice** live (capacity counts · `local_practice` notes · Flush) | ✅ |
 | W9 | AStudio **S2d** in-process `bbs_engine` P/Invoke (Focus engine smoke · `build-engine.cmd`) | ✅ |
 | W10 | AStudio **S3** Focus Fees · Drawings · Delivery (`invoiceStatus` · `drawingRegister` · `phaseProgress`) | ✅ |
+| W11 | AStudio **S4** Practice Ask ESTI → local Ollama (probe/chat · no transcript sync) | ✅ |
 
 ### Ops-blocked (need human)
 
