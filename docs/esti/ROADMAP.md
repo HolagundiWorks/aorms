@@ -107,6 +107,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | W7 | AConsulting **Clients** (`local_clients` · `clientStatus`) + AStudio S2e AQC handoff | ✅ |
 | W8 | AConsulting **Practice** live (capacity counts · `local_practice` notes · Flush) | ✅ |
 | W9 | AStudio **S2d** in-process `bbs_engine` P/Invoke (Focus engine smoke · `build-engine.cmd`) | ✅ |
+| W10 | AStudio **S3** Focus Fees · Drawings · Delivery (`invoiceStatus` · `drawingRegister` · `phaseProgress`) | ✅ |
 
 ### Ops-blocked (need human)
 
