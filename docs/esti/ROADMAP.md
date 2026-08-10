@@ -111,6 +111,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | W11 | AStudio **S4** Practice Ask ESTI → local Ollama (probe/chat · no transcript sync) | ✅ |
 | W12 | AConsulting Ask ESTI mirror (Practice Ollama · capacity context) | ✅ |
 | W13 | AStudio **S3e** drawing artifact ingest (`drawing` · sha256 · Bridge flush) | ✅ |
+| W14 | AStudio **S5a** web chrome parity (taskbar studioNav · floating dock · clock · Ask ESTI slot) | ✅ |
 
 ### Ops-blocked (need human)
 
