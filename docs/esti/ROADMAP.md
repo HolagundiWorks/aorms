@@ -105,6 +105,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | W5+ | Pin Connect · AStudio · AConsulting `vendor/AQC` → `5f553cb` (JM + OutboxCounts) | ✅ |
 | W6 | AConsulting **Office** enquiry go/no-go (`local_office_enquiries` · `officeEnquiry` meta) | ✅ |
 | W7 | AConsulting **Clients** (`local_clients` · `clientStatus`) + AStudio S2e AQC handoff | ✅ |
+| W8 | AConsulting **Practice** live (capacity counts · `local_practice` notes · Flush) | ✅ |
 
 ### Ops-blocked (need human)
 
