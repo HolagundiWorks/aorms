@@ -17,6 +17,9 @@ Gate: `frontend/src/lib/marketing-gate.ts`.
 see [`docs/hcw-kit/README.md`](docs/hcw-kit/README.md) and [`docs/HCW-UX.md`](docs/HCW-UX.md).
 Before UI work: [`DESIGN-DEBT-REGISTER.md`](docs/hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md) ·
 [`HCW-KIT-AI-KNOWLEDGE-BASE.md`](docs/esti/HCW-KIT-AI-KNOWLEDGE-BASE.md) (R1–R9).
+**Desktop WinUI (all AORMS apps):** [`DESKTOP-WINUI-UX.md`](docs/esti/DESKTOP-WINUI-UX.md) ·
+[`HCW-UI-UX-PRINCIPLES.md`](docs/esti/HCW-UI-UX-PRINCIPLES.md) §2b — density 1× · floating chrome ·
+clock 0.8× · `HcwTheme.xaml` from AStudio.
 Re-vendor: [`docs/KITS.md`](docs/KITS.md). `@carbon/react` was removed (2026-07).
 
 **AORMS AI:** desktop-only (local Ollama) — not on the VPS. `@hcw/aorms-ai-kit`

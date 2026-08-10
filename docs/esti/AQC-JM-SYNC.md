@@ -55,7 +55,7 @@ the target book. JM id is the idempotency key for MB import (`source` note in au
 1. On hub event `jointMeasurement` APPROVED → sync record + optional catalog row for the project.
 2. Desktop: `GET /api/ops/joint-measurements?projectId=` (Bearer `syncToken`) returns APPROVED bundles + lines.
 3. AQC BBSApp **Outputs › Pull JM** (and `AQC.Estimation pull-jm`) → rate-book seed (rate 0) + earthwork MB rows; idempotent on `JM:{lineId}` mark / itemCode.
-4. Rate edits in AQC may push back as metadata `estimateTotals` later (out of scope here).
+4. AQC Core publishes metadata `estimateTotals` / `projectStatus` after Bind (File › Publish · Outputs › Publish); Flush drains the outbox.
 
 ## Esti surfaces (live)
 
@@ -68,5 +68,7 @@ the target book. JM id is the idempotency key for MB import (`source` note in au
 
 ## Out of scope
 
-- AQC WinUI implementation (sibling repos)
+- Full `.bbsproj` → work SQLite migration (Bridge wave)
 - Replacing AProc RA certification with JM
+
+**AQC Core consume:** Bind (Connect catalog) required before Pull JM — no silent first-catalog auto-bind.

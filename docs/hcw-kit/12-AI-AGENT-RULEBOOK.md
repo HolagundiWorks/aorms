@@ -33,6 +33,9 @@ silently obeyed.
 10. Never edit files another session is actively writing (check mtimes); never
     commit an unverified tree.
 
+**Desktop WinUI (AORMS apps)**
+- Follow [DESKTOP-WINUI-UX.md](../esti/DESKTOP-WINUI-UX.md): density **1×**, floating ribbon 56 / taskbar 60, dock hits 44, module nav in taskbar, wellness in-window (not system Flyout), clock Viewbox **0.8×**. Copy `Themes/HcwTheme.xaml` from AStudio — do not invent a second token file. Thin shells (Connect · AQC) may omit dock/wellness/clock but must ship Fog + floating ribbon + theme.
+
 **Always**
 11. Always reference tokens and kit components; kit-first for anything shared.
 12. Always cover the full state set (hover, active, focus-visible, disabled,

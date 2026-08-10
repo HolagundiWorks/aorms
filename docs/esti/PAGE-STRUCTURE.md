@@ -84,13 +84,15 @@ Executable: [`frontend/src/lib/portal-chrome.ts`](../../frontend/src/lib/portal-
 | `dockGapPx` | **16** | Air between ActionDock and footer stack |
 | — | **stack + gap** | `--esti-dock-bottom` — kit ActionDock `bottom` (staff + portals). Kit fallback `72px` **overlaps** a 76px stack — always set the var. |
 | `footerHitPx` | **35** | `--esti-portal-hit` — portal chips; staff footer hits override `chromeIconSx` to 35 |
-| `clockSizePx` | **100** | `AMBIENT_ANALOGUE_CLOCK_SIZE_PX` — staff · portal · auth · marketing |
+| `clockSizePx` | **100** | `AMBIENT_ANALOGUE_CLOCK_SIZE_PX` — staff · portal · auth · marketing (**web**) |
 | `clockMarkRatio` | **0.2** | AORMS mark in dial centre |
 | `clockRightPx` | **16 / 24** | Fixed bottom-right |
 
+**Desktop WinUI clock:** design dial stays 100/127; **shown at 0.8×** (face **80**, Viewbox **102**) — see [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md). Do not change web `clockSizePx` to match; density of the shell stays **1×**.
+
 Staff stage pad when dock visible: `--esti-dock-stack: 68px` (gap + tray) on `.esti-app-shell2--dock-visible` — content `padding-bottom` = footer-stack + dock-stack + shell gutter.
 
-Do **not** hard-code footer / dock / clock px in SCSS or components — change `PORTAL_CHROME` (and keep `glass.scss` staff vars in sync).
+Do **not** hard-code footer / dock / clock px in SCSS or components — change `PORTAL_CHROME` (and keep `glass.scss` staff vars in sync). WinUI mirrors the same numbers in `Themes/HcwTheme.xaml`.
 
 **Layers (opaque pure neumorphism — no glass chrome):**
 

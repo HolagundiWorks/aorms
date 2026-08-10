@@ -3,54 +3,62 @@
 > **Law:** one design language, two hosts — only **platform behaviour** diverges.  
 > **Design system:** [`@hcw/ui-kit`](HCW-UI-KIT.md) (Urbanist · Radiant Orange · opaque soft neu · Top ribbon · Stage · Taskbar · ActionDock · AnalogueClock).  
 > **Chrome SoT:** [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) · [UI-SITE-MAP.md](UI-SITE-MAP.md).  
+> **WinUI contract (all apps):** [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) — density **1×**, floating chrome, wellness in-window, clock **0.8×**.  
 > **Runtime:** [LOCAL-FIRST.md](LOCAL-FIRST.md). Do **not** introduce a second typeface, palette, or ERP chrome for desktop.
 
 ## Shell mapping (same IA both hosts)
 
 ```text
 ┌─ Optional thin OS menu (desktop only: Project · Edit · View · AI · Help) ─┐
-├─ Soft neu top ribbon (modules) ── Stage ── Inspector / Ask ESTI ──────────┤
-├─ ActionDock (destroy · create · commit) ──────────────────────────────────┤
-├─ TaskbarFooter (calc · launchers · tray: sync · alerts · ID — no clock) ──┤
-└─ AnalogueClock (fixed bottom-right — single clock; no watermark) ─────────┘
+├─ Soft neu floating ribbon 56 (brand/status — not module nav) ─────────────┤
+├─ Stage (Fog) ── optional Inspector / Ask ESTI right slot ─────────────────┤
+├─ ActionDock (destroy · create · commit) · bottom clears taskbar ──────────┤
+├─ TaskbarFooter 60 (wellness · calc | modules | sync — no clock) ──────────┤
+└─ AnalogueClock BR — web 100px · desktop WinUI shown at 0.8× (face 80) ────┘
 ```
 
 | Role | Primitive | Rule |
 | --- | --- | --- |
-| Modules | Soft neu `AppRibbon` / stage brief (staff); `PortalNeuFrame` on portals | Same IA on desktop + web — do not invent a second module tree |
+| Modules | Soft neu ribbon + **taskbar** module nav (staff); `PortalNeuFrame` on portals | Same IA — module nav is **not** in the top ribbon |
 | Marketing | `MarketingNeuFrame` (top ribbon · stage · AnalogueClock) | Public Home/Blog/Downloads — no left SoftRail |
-| Workspace | Stage + `RailLayout` page shell | Same routes + [05-TEMPLATES](../hcw-kit/05-TEMPLATES.md) |
-| Inspector / AI | One right slot (properties ↔ Ask ESTI) | AI never menu-only |
-| Native chrome | Thin **WinUI 3** Fluent 2 menu → SPA commands | AI never menu-only |
-| Status | Taskbar + `SyncQueueChip` + AnalogueClock | Same tray order; analogue clock is decorative/ambient |
+| Workspace | Stage + `RailLayout` page shell (web) · Fog stage (WinUI) | Same templates + [05-TEMPLATES](../hcw-kit/05-TEMPLATES.md) |
+| Inspector / AI | One right slot (properties ↔ Ask ESTI) | AI never menu-only · desktop-only Ollama |
+| Native chrome | WinUI 3 + `Themes/HcwTheme.xaml` (kit mirror) | No Fluent card brand chrome; see [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) |
+| Status | Taskbar + sync chip + AnalogueClock | Same tray order; clock ambient |
 
-Desktop may add a **thin native menu** that invokes the **same command IDs** as the web Command Palette — it does not replace the SPA module chrome.
+Desktop may add a **thin native menu** that invokes the **same command IDs** as the web Command Palette — it does not replace the SPA / WinUI module chrome.
 
 ## Shared (must not fork)
 
-- Tokens, typography (Urbanist), icons (one MUI/kit set), 8pt spacing, layers, dialogs, forms (visible labels), tables (one DataGrid adapter), toasts, loading skeletons
+- Tokens, typography (Urbanist / Segoe UI Variable peer), icons, 8pt spacing, layers, dialogs, forms (visible labels), tables, toasts, loading skeletons
 - Keyboard map (Ctrl+K / Alt+A / Alt+C / Alt+T / Ctrl+/) — one
-  [`frontend/src/lib/keymap.ts`](../../frontend/src/lib/keymap.ts) for both hosts;
-  Help at `/help`
+  [`frontend/src/lib/keymap.ts`](../../frontend/src/lib/keymap.ts) for web;
+  desktop mirrors the same IDs where shipped
 - Module screens assembled from kit + templates — no per-module button skins or brand colours
+- WinUI: copy `Themes/HcwTheme.xaml` from AStudio — do not invent a second token file
 
 ## Platform-only deltas
 
-| Concern | Desktop | Web |
+| Concern | Desktop (WinUI) | Web |
 | --- | --- | --- |
 | Windows | Multi-window (AI / inspector / drawing) | Tabs + docked panels |
 | Files | Native dialogs + FS | Browser picker + drag-drop |
 | Print | Native / system PDF | Browser print |
-| AI compute | **Desktop only** — local Ollama / Foundry Local — badge **Local AI** | **No hub Hosted AI** — web/portals do not run staff LLM; optional future portal chat on published context only |
-| Sync | Offline queue in tray | Same chip; usually idle when fully online · tray “Web” hint |
+| AI compute | **Desktop only** — local Ollama / Foundry Local — badge **Local AI** | **No hub Hosted AI** |
+| Sync | Offline queue in tray | Same chip; usually idle when fully online |
+| Density | **1×** chrome px (= `PORTAL_CHROME`) — never window-scale | Browser zoom is user-controlled |
+| Clock | Design 100 · **shown 0.8×** (face 80) | `clockSizePx` **100** |
+| Wellness / calc | In-window soft panels (same tree as shell) | MUI Popover / float widgets |
+| Popovers | Avoid system `Flyout` for primary chrome peers | Kit / MUI popovers |
 
 ## PR checklist
 
-- [ ] Screenshot same route on loopback desktop flags and web  
-- [ ] No new hex / font / icon pack  
-- [ ] Template cited from `05-TEMPLATES.md`  
+- [ ] Screenshot same route on desktop WinUI and web (or thin-shell exception documented)  
+- [ ] No new hex / font / icon pack — WinUI uses `HcwTheme.xaml`  
+- [ ] No `UiDensity` / window scale host  
+- [ ] Template cited from `05-TEMPLATES.md` (managers)  
 - [ ] Shortcuts unchanged in Help  
-- [ ] Kit-first if shared chrome changed  
+- [ ] Kit-first if shared chrome changed · [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) followed  
 
 ## Figma ↔ kit tokens (LF6)
 
@@ -68,6 +76,7 @@ surface.
 
 ## Related
 
+- [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md)  
 - [HCW-UI-KIT.md](HCW-UI-KIT.md) · [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md)  
 - [LOCAL-FIRST.md](LOCAL-FIRST.md) · [ROADMAP.md](ROADMAP.md) § Local-first  
 - [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) · [WEB-PORTAL.md](WEB-PORTAL.md)  

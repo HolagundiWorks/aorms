@@ -64,13 +64,15 @@
 
 | Check | Done when | Status |
 | --- | --- | --- |
-| AStudio shell | Ribbon · stage · ActionDock · tray (bridge Tasks in stage) | ✅ |
-| AConsulting shell | Practice nav labels · same geography | ✅ |
-| Docs | `WINUI-SHELL.md` in each repo · parity [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) | ✅ |
+| AStudio shell | Floating ribbon 56 · stage · ActionDock · taskbar 60 · clock 0.8× · wellness 320 | ✅ |
+| AConsulting shell | Same geography + `HcwTheme` (practice nav labels) | ✅ / in sync |
+| Canon docs | [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) · parity [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) | ✅ |
+| Per-repo `WINUI-SHELL.md` | Managers + Connect + AQC thin shells documented | ✅ |
 | Domain UI | Office · HR · engagements beyond bridge smoke | 🔲 |
-| AQC chrome | Estimation / BBS / PM native HCW geography | 🔲 S12 follow-on |
+| AQC / Connect chrome | Thin HCW ribbon + Fog stage + theme (full dock/clock optional) | ✅ thin |
 
 ## Related
 
+- [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) · [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md)  
 - [AORMS-SUITE.md](AORMS-SUITE.md) · [AORMS-CONNECT.md](AORMS-CONNECT.md) · [SHILPI-WIRE.md](SHILPI-WIRE.md) · [MONGO-OPS.md](MONGO-OPS.md)  
 - [ROADMAP.md](ROADMAP.md) · [WEB-PORTAL.md](WEB-PORTAL.md) · [2026-08-09-UX-AUDIT-WAVE.md](../hcw-kit/11-audits/2026-08-09-UX-AUDIT-WAVE.md)  

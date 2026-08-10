@@ -26,6 +26,7 @@
     "seed:demo": "tsx src/scripts/seedDemo.ts",
     "migrate:workspace-profile": "tsx src/scripts/migrateWorkspaceProfileGate.ts",
     "seed:demo-licenses": "tsx src/scripts/seedDemoLicenses.ts",
+    "seed:desktop-local-hub": "tsx src/scripts/seedDesktopLocalHub.ts",
     "seed:prod": "node dist/scripts/seed.js",
     "backfill:activity": "tsx src/scripts/backfillActivity.ts"
   },

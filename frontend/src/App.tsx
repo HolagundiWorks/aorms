@@ -889,8 +889,10 @@ function AppWorkspace() {
                   <Route path="/audit" element={<Navigate to="/company-account#administration" replace />} />
                 )}
                 {can(user.role, "firm:admin") && (
-                  <Route path="/ops-db" element={<OpsDbManager />} />
-                  <Route path="/connection-manager" element={<OpsDbManager />} />
+                  <>
+                    <Route path="/ops-db" element={<OpsDbManager />} />
+                    <Route path="/connection-manager" element={<OpsDbManager />} />
+                  </>
                 )}
                 <Route path="/account" element={<AccountPortal />} />
                 <Route path="/company-account" element={<CompanyAccountPortal />} />

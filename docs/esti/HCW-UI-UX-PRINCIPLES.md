@@ -8,7 +8,12 @@ interfaces the way we do. For *how* (tokens, layers, components, SCSS), see
 **[AORMS-BRANDING-KIT.md](AORMS-BRANDING-KIT.md)**.
 
 **Adopted:** 2026-07-10 · **Applies to:** workspace app, portals, licensing
-console, marketing site, and every future `@hcw/ui-kit` consumer.
+console, marketing site, **every WinUI desktop app** (AStudio · AConsulting ·
+AORMS Connect · AQC Estimation/BBS/PM), and every future `@hcw/ui-kit` consumer.
+
+**Desktop WinUI contract:** [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) —
+floating ribbon 56 · stage · ActionDock · taskbar 60 · density **1×** · clock
+**0.8×** · wellness in-window 320.
 
 ---
 
@@ -52,6 +57,26 @@ documented product exception (marketing atmosphere in `landing.scss` is one).
 | Where does this module live in nav? | [NAVIGATION.md](NAVIGATION.md) |
 | Why Radiant Orange / Urbanist? | [AORMS-BRANDING-KIT.md](AORMS-BRANDING-KIT.md) |
 | Shell rollout status | [AORMS-UI-AUTOPILOT-ROADMAP.md](AORMS-UI-AUTOPILOT-ROADMAP.md) |
+| Desktop WinUI chrome (all apps) | [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) · [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) |
+
+---
+
+## 2b. Desktop WinUI — same principles, native host
+
+WinUI shells **do not** get a second UX language. Map kit law → XAML:
+
+| Principle | WinUI application |
+|-----------|-------------------|
+| One geography | Floating ribbon · Fog stage · ActionDock · taskbar · clock — see [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) |
+| Fitts / hits | Dock **44** · taskbar/ribbon **35** · radius **8** (`HcwTheme.xaml`) |
+| Cowan capacity | KPI ≤4 · dock ≤5 (managers) |
+| Consistency | `Themes/HcwTheme.xaml` copied from AStudio SoT — no per-app hex |
+| Density | **1×** — never scale the whole window; clock alone may be Viewbox **0.8×** |
+| Wellness | In-window soft panel (320×340) — not system Flyout |
+| Module nav | Taskbar CENTER — not top ribbon |
+| Thin shells | Connect + AQC may omit dock/wellness/clock until needed; still Fog + floating ribbon + theme |
+
+Checklist for desktop PRs: §12 below + [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) agent checklist.
 
 ---
 
@@ -247,16 +272,18 @@ Editorial CSS lives in `landing.scss` — not in `@hcw/ui-kit` tokens.
 
 Before shipping UI:
 
-- [ ] Uses `RailLayout` (staff) or `PortalNeuFrame` (portals) — no bespoke left rail
+- [ ] Uses `RailLayout` (staff web) or `PortalNeuFrame` (portals) — no bespoke left rail
+- [ ] **WinUI:** `HcwTheme.xaml` + geography per [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) (managers full · Connect/AQC thin OK)
 - [ ] Stage header: identity / tabs / filters only — **no** DataGrid in the soft header
 - [ ] Stage: primary work content; scrolls independently (desktop)
-- [ ] Page CTAs via `useScreenActions`; dock cleared while dialog open (staff)
+- [ ] Page CTAs via `useScreenActions` (web) / ActionDock zones (WinUI); dock cleared while dialog open (staff)
 - [ ] Breadcrumb if screen is deeper than top-level module
 - [ ] Layer chosen by role ([decision tree](HCW-UI-KIT.md#layer-decision-tree))
-- [ ] Soft-square **8px** radius on chrome (`RADIUS`) — no ad-hoc 4/12px
-- [ ] No new raw hex — `@hcw/ui-kit` tokens only (marketing: `landing.scss` exceptions documented)
+- [ ] Soft-square **8px** radius on chrome (`RADIUS` / `HcwCorner8`) — no ad-hoc 4/12px
+- [ ] No new raw hex — `@hcw/ui-kit` / `HcwTheme.xaml` only (marketing: `landing.scss` exceptions documented)
+- [ ] No window-level `UiDensity` / scale host on WinUI
 - [ ] Keyboard path verified for primary action
-- [ ] `[NAVIGATION.md](NAVIGATION.md)` / `[UI-SITE-MAP.md](UI-SITE-MAP.md)` updated if chrome or IA changed
+- [ ] `[NAVIGATION.md](NAVIGATION.md)` / `[UI-SITE-MAP.md](UI-SITE-MAP.md)` / per-repo `WINUI-SHELL.md` updated if chrome or IA changed
 - [ ] Helper text meets contrast; destroy actions in dock LEFT
 - [ ] No floating watermark beside AnalogueClock
 
@@ -278,6 +305,9 @@ Before shipping UI:
 | Top-level Estimation nav | Redirects to projects — [NAVIGATION.md](NAVIGATION.md) |
 | Accent orange for body links | Orange = fill/CTA only — [AORMS-BRANDING-KIT.md](AORMS-BRANDING-KIT.md) |
 | More than one primary CTA above the fold (marketing) | Splits attention; use dock |
+| WinUI system Flyout as wellness/calc primary chrome | Scale diverges from shell — use in-window panel |
+| WinUI window-scale / UiDensity | Breaks px parity with web `PORTAL_CHROME` |
+| Module nav in WinUI top ribbon | Nav belongs in taskbar (web law) |
 
 ---
 
