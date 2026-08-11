@@ -74,7 +74,7 @@ Copy the theme from AStudio; do not invent a parallel token file per app.
 
 - Full geography above.
 - Taskbar CENTER = practice module nav (AStudio `studioNav` · AConsulting Practice…Tasks).
-- Wellness · Calc · Ask ESTI · Sync · Activate as on web `AppFooterBar` peers.
+- Wellness · Calc · Ask ESTI · Sync · Licence (status from Connect session) as on web `AppFooterBar` peers. Activate HLP only in **AORMS Connect**.
 - Home ≤4 KPIs; ActionDock ≤5.
 
 ### Thin (Connect · AQC-*)
@@ -83,8 +83,8 @@ Must still ship:
 
 1. `HcwTheme.xaml` merged in `App.xaml`
 2. Fog canvas + floating soft ribbon **56** (brand + product name + Local AI / hub chip)
-3. Stage content in Fog with **24** gutters (existing Activate/Flush cards stay Layer-1 flat cards)
-4. Optional floating taskbar **60** for Sync · Activate · downloads — hits **35**
+3. Stage content in Fog with **24** gutters (existing Flush / status cards stay Layer-1 flat cards)
+4. Optional floating taskbar **60** for Sync · Licence status · downloads — hits **35** (Activate stays in Connect)
 5. Short `docs/WINUI-SHELL.md` pointing here + listing exceptions
 
 May defer until domain UI needs them: full ActionDock, wellness panel, Pomodoro clock.

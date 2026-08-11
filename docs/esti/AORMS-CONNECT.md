@@ -1,12 +1,15 @@
 # AORMS Connect
 
-**Status:** Canonical product law · **Updated:** 2026-08-08  
+**Status:** Canonical product law · **Updated:** 2026-08-11  
 **Package id:** `in.aorms.connect` · **Repo:** [AORMS-Connect](https://github.com/HolagundiWorks/AORMS-Connect)  
-**Suite:** [AORMS-SUITE.md](AORMS-SUITE.md) · **Runtime:** [LOCAL-FIRST.md](LOCAL-FIRST.md) · **Roadmap:** [ROADMAP.md](ROADMAP.md) C0–C3
+**Suite:** [AORMS-SUITE.md](AORMS-SUITE.md) · **Runtime:** [LOCAL-FIRST.md](LOCAL-FIRST.md) · **Roadmap:** [ROADMAP.md](ROADMAP.md) C0–C3  
+**Desktop chrome:** [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) · Connect [`WINUI-SHELL.md`](https://github.com/HolagundiWorks/AORMS-Connect/blob/main/docs/WINUI-SHELL.md)
 
-**AORMS Connect** is the **suite core desktop app** — single login, launcher,
-shared firm/project catalog, DB connector, and installer links for every suite
-app. It is **not** a practice manager and **not** a rename of AStudio.
+**AORMS Connect** is the **suite core desktop app** and **Manager Hub** — single
+login, launcher (Managers · Technical · Drafting), shared firm/project catalog,
+DB connector, and installer links for every suite app. It is **not** a practice
+manager and **not** a rename of AStudio. Hub chrome ships MenuBar · ribbon ·
+ActionDock · taskbar; practice UI stays in AStudio / AConsulting.
 
 | Owns | Does **not** own |
 | --- | --- |
@@ -29,6 +32,7 @@ flowchart TB
   subgraph apps [Suite_apps]
     AS[AStudio]
     AC[AConsulting]
+    CORE[AQC_Core]
     EST[AQC_Estimation]
     BBS[AQC_BBS]
     PM[AQC_PM]
@@ -70,11 +74,14 @@ flowchart TB
 
 **Rules for C2:**
 
-- Connect is the **only** desktop surface that runs full user login against the hub.  
+- Connect is the **only** desktop surface that **Activates** a licence / writes `session.json`.  
 - On successful Activate, write `session.json` with `{ syncToken, hubUrl, licenseApiUrl, licenseToken, deviceId, writtenAt }` (`expiresAt` / `userId` optional).  
-- Sibling apps import the default `session.json` at bridge create (`overwrite: true`); Connect Open also passes `--connect-session`. Do **not** prompt for HLP key when a valid session exists.  
+- Sibling apps (**AStudio · AConsulting · AQC Core · AQC-Estimation / AQC-BBS / AQC-PM**) **read** licence via `TryImportConnectSession` into their own `firm.db` — never ship per-app HLP Activate UI.  
+- Import the default `session.json` at bridge create (`overwrite: true`); Connect Open also passes `--connect-session`. Do **not** prompt for HLP key in managers or technical apps.  
+- Connect startup rewrites `session.json` when `firm.db` already has a `syncToken` but the file is missing.  
 - `catalog.json` entries use stable UUID `id` + firm `ref` + `title` + `status`; apps must not invent parallel project ids for the same engagement.  
-- Soft-launch marketing gate (`VITE_MARKETING_ONLY`) is **unrelated** — do not flip apex login as part of Connect work.
+- Soft-launch marketing gate (`VITE_MARKETING_ONLY`) is **unrelated** — do not flip apex login as part of Connect work.  
+- **AADT** (drafting) consumes Connect via vendored `Aorms.Bridge` → `%LocalAppData%\AADT\firm.db` (`aadt_bridge.dll` NativeAOT ABI + WinUI `AormsBridgeHost`). Activate stays in Connect. Open resolves `AAD.exe` / `AadWinui.exe` and passes `--connect-session` (`app …` for egui).
 
 ## Project catalog (consistency)
 
@@ -102,15 +109,18 @@ Connect itself is listed on `/downloads` (`aorms-connect` offer) — Coming soon
 
 ## Licence Manager (C3)
 
-Connect shows **local seat status** (licence state, install id, hub / license API
-URLs, `firm.db` + `session.json` paths) and links to the operator console at
-`admin.aorms.in` (**HCW License Manager**). Actions: copy install id, rewrite
-`session.json` from `firm.db`, clear local tokens (does not revoke on hub).
+Connect is the **suite licence hub**: Activate (HLP key → hub) → local seat status
+(licence state, install id, hub / license API URLs, `firm.db` + `session.json`) and
+links to the operator console at `admin.aorms.in` (**HCW License Manager**).
+Actions: copy install id, rewrite `session.json` from `firm.db`, clear local tokens
+(does not revoke on hub).
 
+Managers and technical apps **consume** that session — they do not Activate.
 Full issue / revoke / device admin stays on `admin.aorms.in` — not duplicated in
 Connect. Do not invent Stripe / Standard licence metering in Connect copy.
 
-Bridge: `AormsBridge.LicenceSnapshot()` · `ClearLocalLicence()`.
+Bridge: `AormsBridge.LicenceSnapshot()` · `ClearLocalLicence()` ·
+`TryImportConnectSession` (readers).
 
 ---
 
