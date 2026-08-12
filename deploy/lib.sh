@@ -211,6 +211,53 @@ wait_for_backend_health() {
   echo "Backend /health returned HTTP ${code} after ${attempts} attempts." >&2; return 1
 }
 
+# Rebuild the Vite SPA image and atomically swap host nginx's frontend/dist.
+# Reads VITE_* build args from the already-loaded .env (compose.prod.yaml).
+# Sets BUILD_REVISION from the current git HEAD when unset.
+rebuild_frontend_dist() {
+  local rev="${BUILD_REVISION:-}"
+  if [[ -z "$rev" ]] && command -v git >/dev/null 2>&1 && [[ -d "$DEPLOY_DIR/.git" ]]; then
+    rev="$(git -C "$DEPLOY_DIR" rev-parse --short HEAD 2>/dev/null || true)"
+  fi
+  export BUILD_REVISION="${rev:-dev}"
+  info "Frontend build revision: ${BUILD_REVISION} (VITE_PUBLIC_SITE=${VITE_PUBLIC_SITE:-?} VITE_MARKETING_ONLY=${VITE_MARKETING_ONLY:-?})"
+  docker compose -f compose.prod.yaml --profile build-only build frontend
+  docker create --name esti-fe-tmp esti-frontend:prod
+  rm -rf "$DEPLOY_DIR/frontend/dist.new"
+  mkdir -p "$DEPLOY_DIR/frontend/dist.new"
+  docker cp esti-fe-tmp:/usr/share/nginx/html/. "$DEPLOY_DIR/frontend/dist.new/"
+  docker rm esti-fe-tmp
+  chown -R www-data:www-data "$DEPLOY_DIR/frontend/dist.new" 2>/dev/null || true
+  rm -rf "$DEPLOY_DIR/frontend/dist.old"
+  [[ -d "$DEPLOY_DIR/frontend/dist" ]] && mv "$DEPLOY_DIR/frontend/dist" "$DEPLOY_DIR/frontend/dist.old"
+  mv "$DEPLOY_DIR/frontend/dist.new" "$DEPLOY_DIR/frontend/dist"
+  info "Frontend swapped → ${DEPLOY_DIR}/frontend/dist"
+  if [[ -f "$DEPLOY_DIR/frontend/dist/landing/hero/aorms-aec-poster.jpg" ]]; then
+    info "OK  hero poster present (landing/hero/aorms-aec-poster.jpg)"
+  else
+    warn "Hero poster missing in dist — check frontend/public/landing/hero/"
+  fi
+  if command -v nginx >/dev/null 2>&1 && nginx -t >/dev/null 2>&1; then
+    systemctl reload nginx 2>/dev/null || true
+  fi
+}
+
+# Soft-launch marketing guardrails for landing updates (warn only; never flip S8).
+assert_landing_soft_launch_env() {
+  local profile="${DEPLOY_PROFILE:-${PROFILE:-}}"
+  if [[ "$profile" != "landing" && "${FORCE_LANDING_UPDATE:-false}" != "true" ]]; then
+    warn "DEPLOY_PROFILE='${profile:-unset}' — update-landing.sh is meant for PROFILE=landing boxes"
+  fi
+  if [[ "${VITE_PUBLIC_SITE:-}" != "true" ]]; then
+    warn "VITE_PUBLIC_SITE=${VITE_PUBLIC_SITE:-unset} — marketing landing needs true; edit .env then re-run"
+  fi
+  if [[ "${VITE_MARKETING_ONLY:-true}" != "true" ]]; then
+    warn "VITE_MARKETING_ONLY=${VITE_MARKETING_ONLY} — apex auth is open; use deploy/s8-reopen-demos.sh only when intentional"
+  else
+    info "Soft launch gate on (VITE_MARKETING_ONLY=true)"
+  fi
+}
+
 # ── .env writer — one file, profile-driven ───────────────────────────────────
 # Expects the caller (install.sh) to have exported: DOMAIN, PUBLIC_SITE, SEED_DEMO,
 # FIRM_PLAN, OWNER_EMAIL, OWNER_PASSWORD, DEMO_PASSWORD, SESSION_SECRET,

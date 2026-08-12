@@ -42,7 +42,8 @@ Monorepo (pnpm): `packages/contracts`, `backend` (Fastify + tRPC + Drizzle),
 
 VPS: [`docs/esti/VPS-INSTALL.md`](docs/esti/VPS-INSTALL.md) ·
 [`docs/esti/PRODUCTION-OPS.md`](docs/esti/PRODUCTION-OPS.md) § Soft launch ·
-`deploy/bootstrap-vps.sh` · `deploy/install-landing.sh` · `deploy/verify-vps.sh`.
+`deploy/bootstrap-vps.sh` · `deploy/install-landing.sh` · `deploy/update-landing.sh` ·
+`deploy/verify-vps.sh`.
 
 ## Product naming (agent memory — 2026-08)
 

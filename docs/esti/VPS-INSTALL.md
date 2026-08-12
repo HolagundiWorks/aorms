@@ -267,6 +267,13 @@ GIT_BRANCH=feat/x bash deploy/update.sh   # a specific branch
 REFRESH_NGINX=true bash deploy/update.sh  # also re-apply the nginx vhost
 ```
 
+**Marketing landing only** (`PROFILE=landing` soft launch — preferred day-2 path):
+```bash
+cd /opt/esti
+bash deploy/update-landing.sh             # pull + SPA rebuild + dist swap + verify
+FULL=true bash deploy/update-landing.sh   # also rebuild backend/worker
+```
+
 **Backups & restore:**
 ```bash
 bash deploy/backup.sh /opt/esti/backups   # Postgres dump + MinIO volume tarball

@@ -11,6 +11,7 @@
 #     sudo -E bash deploy/install-landing.sh
 #
 # Re-enable login later: set VITE_MARKETING_ONLY=false in .env → bash deploy/update.sh
+# Day-2 marketing refresh (SPA only): bash deploy/update-landing.sh
 # ============================================================
 set -euo pipefail
 

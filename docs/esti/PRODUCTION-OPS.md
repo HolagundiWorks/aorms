@@ -18,10 +18,11 @@ Goal: **landing + blog only**. Apex login and installers stay Coming soon.
 | --- | --- |
 | DNS A/AAAA → VPS | `dig +short YOUR_DOMAIN` |
 | Install | `PROFILE=landing` via `deploy/bootstrap-vps.sh` or `deploy/install-landing.sh` |
+| Day-2 update | `bash deploy/update-landing.sh` (SPA) · `FULL=true` for backend too · or `deploy/update.sh` |
 | Env | `VITE_PUBLIC_SITE=true` · `VITE_MARKETING_ONLY=true` (default) · Mongo URL set by installer |
 | Build | Frontend image bakes `VITE_MARKETING_ONLY` ([Dockerfile.prod](../../frontend/Dockerfile.prod)) |
 | Smoke | `bash deploy/verify-vps.sh https://YOUR_DOMAIN` |
-| Expect 200 | `/` · `/blog` · `/downloads` · `/wiki`→home · `/login`→Coming soon |
+| Expect 200 | `/` · `/blog` · `/downloads` · `/wiki`→home · `/login`→Coming soon · `/landing/hero/aorms-aec-poster.jpg` |
 | Blog explainers | `/blog/why-aorms-suite-matters` · `how-aorms-suite-solves-fragmented-practice` · `aorms-suite-map` |
 | Do **not** | Seed demo for marketing-only · Flip installers without signed URL+sha256 |
 

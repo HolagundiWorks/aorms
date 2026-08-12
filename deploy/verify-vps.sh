@@ -14,12 +14,12 @@ source "$SCRIPT_DIR/lib.sh"
 
 cd "$DEPLOY_DIR"
 BASE_URL="${1:-}"
+if [[ -f "$DEPLOY_DIR/.env" ]]; then
+  set -a; load_dotenv "$DEPLOY_DIR/.env"; set +a
+fi
 if [[ -z "$BASE_URL" ]]; then
-  if [[ -f "$DEPLOY_DIR/.env" ]]; then
-    set -a; load_dotenv "$DEPLOY_DIR/.env"; set +a
-    if [[ -n "${DOMAIN:-}" ]]; then
-      BASE_URL="https://${DOMAIN}"
-    fi
+  if [[ -n "${DOMAIN:-}" ]]; then
+    BASE_URL="https://${DOMAIN}"
   fi
 fi
 BASE_URL="${BASE_URL:-http://127.0.0.1:4000}"
@@ -74,8 +74,21 @@ section "Static assets"
 if [[ -f "$DEPLOY_DIR/frontend/dist/index.html" ]]; then
   info "OK  frontend/dist/index.html present"
 else
-  warn "FAIL frontend/dist missing — run deploy/update.sh"
+  warn "FAIL frontend/dist missing — run deploy/update-landing.sh (or update.sh)"
   fail=1
+fi
+if [[ -f "$DEPLOY_DIR/frontend/dist/landing/hero/aorms-aec-poster.jpg" ]]; then
+  info "OK  hero poster present"
+  check "hero-poster" "${BASE_URL}/landing/hero/aorms-aec-poster.jpg"
+else
+  warn "Hero poster missing in dist — pull latest and run deploy/update-landing.sh"
+fi
+
+_mkt="${VITE_MARKETING_ONLY:-true}"
+if [[ "$_mkt" == "true" ]]; then
+  info "Soft launch: VITE_MARKETING_ONLY=true (apex login Coming soon)"
+else
+  warn "VITE_MARKETING_ONLY=${_mkt} — demos/auth may be open (S8)"
 fi
 
 if [[ "$fail" -eq 0 ]]; then

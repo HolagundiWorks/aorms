@@ -5,6 +5,9 @@
 #   bash deploy/update.sh
 #   GIT_BRANCH=feat/x bash deploy/update.sh    # deploy a branch
 #   REFRESH_NGINX=true bash deploy/update.sh    # also re-apply nginx vhost
+#
+# Marketing / soft-launch landing boxes can use the faster frontend path:
+#   bash deploy/update-landing.sh
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -14,6 +17,13 @@ source "$SCRIPT_DIR/lib.sh"
 cd "$DEPLOY_DIR"
 GIT_BRANCH="${GIT_BRANCH:-main}"
 set -a; load_dotenv "$DEPLOY_DIR/.env"; set +a
+
+_profile="${DEPLOY_PROFILE:-}"
+if [[ "$_profile" == "landing" ]]; then
+  section "Profile=landing (soft launch marketing)"
+  assert_landing_soft_launch_env
+  info "Tip: for a faster SPA-only refresh use bash deploy/update-landing.sh"
+fi
 
 section "Pulling ${GIT_BRANCH}"
 git fetch origin && git checkout "$GIT_BRANCH" && git pull origin "$GIT_BRANCH"
@@ -42,19 +52,12 @@ section "Seeds (idempotent)"
 docker compose -f compose.prod.yaml exec -T backend node backend/dist/scripts/seed.js || warn "base seed failed"
 if [[ "${SEED_DEMO:-false}" == "true" ]]; then
   docker compose -f compose.prod.yaml exec -T backend node backend/dist/scripts/seedDemo.js || warn "demo seed failed"
+elif [[ "$_profile" == "landing" ]]; then
+  info "Demo seed skipped (landing profile)."
 fi
 
 section "Frontend (atomic dist swap)"
-docker compose -f compose.prod.yaml --profile build-only build frontend
-docker create --name esti-fe-tmp esti-frontend:prod
-rm -rf "$DEPLOY_DIR/frontend/dist.new"; mkdir -p "$DEPLOY_DIR/frontend/dist.new"
-docker cp esti-fe-tmp:/usr/share/nginx/html/. "$DEPLOY_DIR/frontend/dist.new/"
-docker rm esti-fe-tmp
-chown -R www-data:www-data "$DEPLOY_DIR/frontend/dist.new"
-rm -rf "$DEPLOY_DIR/frontend/dist.old"
-[[ -d "$DEPLOY_DIR/frontend/dist" ]] && mv "$DEPLOY_DIR/frontend/dist" "$DEPLOY_DIR/frontend/dist.old"
-mv "$DEPLOY_DIR/frontend/dist.new" "$DEPLOY_DIR/frontend/dist"
-info "Frontend swapped."
+rebuild_frontend_dist
 
 if [[ "${REFRESH_NGINX:-false}" == "true" ]]; then
   section "Refreshing nginx vhost"
@@ -74,3 +77,6 @@ if [[ "${REFRESH_NGINX:-false}" == "true" ]]; then
   fi
 fi
 info "Update complete."
+if [[ "$_profile" == "landing" ]]; then
+  echo "  Landing : https://${DOMAIN:-}/  (soft launch VITE_MARKETING_ONLY=${VITE_MARKETING_ONLY:-true})"
+fi

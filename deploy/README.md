@@ -30,6 +30,7 @@ sudo bash deploy/install.sh
 ```bash
 sudo bash deploy/install-landing.sh
 # or: PROFILE=landing sudo -E bash deploy/bootstrap-vps.sh
+# Day-2 refresh (SPA): bash deploy/update-landing.sh
 # Reopen demos later (S8): CONFIRM=yes bash deploy/s8-reopen-demos.sh
 ```
 
@@ -78,6 +79,7 @@ bash deploy/verify-vps.sh https://aorms.in
 | `deploy/bootstrap-vps.sh` | **Blank VPS one-shot** — clone `/opt/esti` + run the right installer |
 | `deploy/install.sh` | **AORMS-site installer (default: aorms profile)** → sets profile env → runs `install_core` |
 | `deploy/install-landing.sh` | **Marketing landing** — `PROFILE=landing` front door |
+| `deploy/update-landing.sh` | **Day-2 landing refresh** — pull + SPA rebuild + dist swap (soft launch) |
 | `deploy/install-enterprise.sh` | **Customer Core/Enterprise self-host** — firm-only front door + licence-key activation; reuses `install_core` |
 | `deploy/install-demo.sh` | **Landing + demo showcase** — public marketing landing + seeded demo workspace only |
 | `deploy/install-admin-console.sh` | **Licensing console at `admin.DOMAIN`** — vhost + TLS for `dist/admin.html` |
@@ -204,6 +206,14 @@ cd /opt/esti
 sudo bash deploy/backup.sh                 # 1. always back up first
 sudo bash deploy/preflight-migrations.sh   # 2. dry-run migrations on a clone (do this on a release that adds migrations)
 sudo bash deploy/update.sh                 # 3. pull main, rebuild, migrate on boot, swap dist
+```
+
+**Marketing / soft-launch landing only** (faster — SPA rebuild, soft-launch gate stays on):
+
+```bash
+cd /opt/esti
+bash deploy/update-landing.sh              # pull + frontend dist swap + verify
+FULL=true bash deploy/update-landing.sh    # also rebuild backend/worker
 ```
 
 `preflight-migrations.sh` clones the live DB, applies the pending migrations to

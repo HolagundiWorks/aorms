@@ -19,7 +19,8 @@
 # Temporary self-signed TLS (no Let's Encrypt yet):
 #   SELF_SIGNED_CERT=true DOMAIN=… … sudo -E bash deploy/bootstrap-vps.sh
 #
-# Then day-2:  bash /opt/esti/deploy/update.sh
+# Then day-2 landing refresh:  bash /opt/esti/deploy/update-landing.sh
+# Full stack update:          bash /opt/esti/deploy/update.sh
 # Docs: docs/esti/VPS-INSTALL.md · deploy/README.md
 # ============================================================
 set -euo pipefail
