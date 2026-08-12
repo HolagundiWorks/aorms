@@ -46,7 +46,7 @@ The esti monorepo staff SPA is a **reference archive** — not the shipping staf
 | --- | --- | --- |
 | **Work / localOnly** | Desktop SQLite | Drafts, BOQ lines, AI chats |
 | **Calculations** | C++ engine on desktop | BBS, quantities — never recomputed in cloud |
-| **Geometry** | ShilpiDB local / hosted | Entities, spatial queries, `.vdb` |
+| **Geometry** | ShilpiDB local / hosted | Entities, spatial queries, `.vdb`. AADT: realtime tip sync **OFF**; local `COMMIT` / `SAVE` writes `%LocalAppData%\AADT\work\active.vdb`; upload only via `COMMIT PUSH` ([work-DB bridge](https://github.com/HolagundiWorks/AADT/blob/main/docs/architecture/aadt-shilpidb-architecture.md#interim-work-db-bridge-shipping-now)) |
 | **Ops metadata** | MongoDB via hub | Tasks, status, progress %, portal threads |
 | **Artifacts** | Object store + Mongo pointers | Issued PDFs, READY drawing packages |
 
