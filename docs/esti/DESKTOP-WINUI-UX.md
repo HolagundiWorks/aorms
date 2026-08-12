@@ -14,6 +14,7 @@
 | **Suite core** | AORMS Connect | Thin HCW chrome (ribbon · Fog stage · floating tray) |
 | **Technical** | AQC Estimation · BBS · PM | Thin HCW chrome (same); domain UI grows inside stage |
 | **Technical core** | **AQC-Core** (`AQC/BBSDesktop/BBSApp`) | Full takeoff UI · HCW soft neu shell + Fluent→HCW bridge |
+| **Drafting** | **AADT** (`AADT/native/aad-winui`) | HCW shell + clock/Pomodoro · CAD stage exceptions (tool strip · rails · CLI) — [WINUI-SHELL.md](https://github.com/HolagundiWorks/aadt/blob/main/docs/WINUI-SHELL.md) |
 | **Reference** | esti SPA | Archive for IA/tokens — not the shipping staff host |
 
 Per-repo mirror: `docs/WINUI-SHELL.md` + `Themes/HcwTheme.xaml` (copy of AStudio SoT until a shared package exists).
@@ -23,6 +24,7 @@ Per-repo mirror: `docs/WINUI-SHELL.md` + `Themes/HcwTheme.xaml` (copy of AStudio
 ## Spatial model (same as web staff)
 
 ```text
+┌─ App title bar 32 — OS drag · document/context (system min/max/close) ┐
 ┌─ Floating ribbon 56 — brand · search/status · Local AI ──────────────┐
 ├─ Stage (Fog) · gutters 24 · full width (managers) ───────────────────┤
 │              ╭─ floating ActionDock (hug · ≤5) ─╮                    │
@@ -32,6 +34,7 @@ Per-repo mirror: `docs/WINUI-SHELL.md` + `Themes/HcwTheme.xaml` (copy of AStudio
 
 | Region | Height / size | Hits | Rule |
 | --- | --- | --- | --- |
+| App title bar | **32** · `ExtendsContentIntoTitleBar` + `SetTitleBar` | drag | Top strip **is** the Windows app bar — not a second OS caption |
 | Ribbon | **56** face · inset **16** | **35** | Brand + status only — **module nav is not in the ribbon** |
 | Stage | Fog `#F2F4F7` · pad **24** · bottom pad clears dock/taskbar | — | Full width on managers (not portal 1200 column) |
 | ActionDock | Hug-content soft tray · bottom **92** (76 stack + 16 gap) | **44** | LEFT destroy · CENTER create/save · RIGHT reload/publish · grooves |

@@ -70,5 +70,7 @@ the target book. JM id is the idempotency key for MB import (`source` note in au
 
 - Full `.bbsproj` → work SQLite migration (Bridge wave)
 - Replacing AProc RA certification with JM
+- AADT CAD geometry → AQC takeoff import (field map lives in AADT
+  [`docs/AQC-META-TAGS.md`](../../../AADT/docs/AQC-META-TAGS.md); import is a later D-wave)
 
 **AQC Core consume:** Bind (Connect catalog) required before Pull JM — no silent first-catalog auto-bind.
