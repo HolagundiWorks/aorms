@@ -25,7 +25,7 @@ Allow: /sitemap.xml
 
 # Live soft launch: / · /blog · /downloads (coming soon).
 # Sign-in deactivated on apex. Keyword landings / wiki redirect to /.
-# Suite: AStudio · AConsulting · AQC Estimation/BBS/PM · AADT · ShilpiDB.
+# Suite: AStudio · AConsulting · AQC Estimation/BBS/PM · ADraft · ShilpiDB.
 
 # Block authenticated app routes — these require login and must not be indexed
 Disallow: /dashboard

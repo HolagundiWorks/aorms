@@ -29,7 +29,7 @@ export function Blog() {
           <h1 className="lp2-section-head__title">Blog</h1>
           <p className="lp2-section-head__body">
             Suite notes for {AORMS_PLATFORM.name} — why the suite matters, how it solves
-            fragmented tools, and the product map for managers, AQC apps, AADT, and{" "}
+            fragmented tools, and the product map for managers, AQC apps, ADraft, and{" "}
             {AORMS_STUDIO.title} operations.
           </p>
           <p className="lp2-blog-links">

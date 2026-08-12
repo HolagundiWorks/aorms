@@ -1,6 +1,6 @@
 # AORMS platform nomenclature
 
-**Status:** Canonical · **Owner:** Human Centric Works (HCW) · **Updated:** 2026-08-07
+**Status:** Canonical · **Owner:** Human Centric Works (HCW) · **Updated:** 2026-08-12
 
 This document is the **single source of truth for product naming**. Where an older doc still says
 *Architecture Office Resource Management System*, **AORMS-Architecture**, **HiveD**,
@@ -9,7 +9,7 @@ This document is the **single source of truth for product naming**. Where an old
 
 **Runtime (2026-08):** **AORMS is a suite** — [AORMS-SUITE.md](AORMS-SUITE.md).
 **AStudio** / **AConsulting** = practice managers. **AQC** splits into Estimation ·
-BBS · Project Management (shared `bbs_engine`). **AADT** drafts; **ShilpiDB** holds
+BBS · Project Management (shared `bbs_engine`). **ADraft** drafts; **ShilpiDB** holds
 geometry; **MongoDB** holds non-drawing ops. `aorms.in` = marketing + demos.
 Open source for now — [LOCAL-FIRST.md](LOCAL-FIRST.md).
 
@@ -27,7 +27,7 @@ Executable constants: `frontend/src/lib/product-nomenclature.ts`.
 | **AQC Estimation** | Quantity / costing technical app (shared `bbs_engine`) | QS / estimators |
 | **AQC BBS** | Bar bending / steel recon technical app | Site / structural detailing |
 | **AQC Project Management** | Programme / packages / RA (absorbs **AProc**) | PMC / delivery |
-| **AADT** | **Accelerated Architectural Drafting** — 2D CAD | Drafters / architects |
+| **ADraft** | **Accelerating Drafting** — 2D CAD (slug/repo `aadt`) | Drafters / architects |
 | **ShilpiDB** | Geometry / drawing store across the suite | All technical apps + portals (published) |
 | **EOMS** | **Knowledge bank** (standalone API) | Codebooks & compliance |
 | **ESTI** | **Internal AI agent** in managers / desktop | Ask ESTI, local assist |
@@ -45,7 +45,7 @@ AORMS is a **suite**, not three identical ERP forks:
 | --- | --- |
 | Practice managers | **AStudio** · **AConsulting** — Tasks, Office, HR, Payroll, communications |
 | Technical (AQC lineage) | **Estimation** · **BBS** · **Project Management** — separate installers, shared engine |
-| Drafting | **AADT** |
+| Drafting | **ADraft** |
 | Geometry | **ShilpiDB** |
 | Online | Portals · ops DB manager · marketing · Licence Manager |
 
@@ -56,7 +56,7 @@ AORMS is a **suite**, not three identical ERP forks:
 | Estimation | **AQC Estimation** | `aqc-estimation` | Desktop technical |
 | BBS | **AQC BBS** | `aqc-bbs` | Desktop technical |
 | Project management | **AQC PM** (*AProc*) | `aproc` / `aqc-pm` | Desktop technical |
-| Drafting | **AADT** | `aadt` | Desktop CAD |
+| Drafting | **ADraft** | `aadt` | Desktop CAD |
 
 Legacy marketing names / slugs redirect:
 
@@ -65,6 +65,7 @@ Legacy marketing names / slugs redirect:
 | AORMS-Studio · `aorms-studio` · `hived` · `aorms-architecture` | **AStudio** · `astudio` |
 | AORMS-Consultancy · `aorms-consultancy` · `/aorms-consultancy` | **AConsulting** · `aconsulting` · `/aconsulting` |
 | AORMS-PMC · `aorms-pmc` · `/aorms-pmc` · `pmc.aorms.in` | **AProc** · `aproc` · `/aproc` · `proc.aorms.in` |
+| **AADT** (Accelerated Architectural Drafting) | **ADraft** (Accelerating Drafting) · slug `aadt` · repo HolagundiWorks/AADT |
 
 ---
 

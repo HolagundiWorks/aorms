@@ -1,11 +1,11 @@
 # ShilpiDB wire across the AORMS suite
 
 **Status:** ACTIVE · **Updated:** 2026-08-07  
-**Canon:** [AORMS-SUITE.md](AORMS-SUITE.md) · Upstream: [shilpidb](https://github.com/HolagundiWorks/shilpidb) · [AADT](https://github.com/HolagundiWorks/AADT)
+**Canon:** [AORMS-SUITE.md](AORMS-SUITE.md) · Upstream: [shilpidb](https://github.com/HolagundiWorks/shilpidb) · [ADraft](https://github.com/HolagundiWorks/AADT)
 
 ## Role
 
-**ShilpiDB** is the geometry spine. AADT authors entities; Estimation / BBS / PM
+**ShilpiDB** is the geometry spine. ADraft authors entities; Estimation / BBS / PM
 query sheets; portals show **published packages** only (Mongo pointers + object
 store), never live edit sessions.
 
@@ -24,7 +24,7 @@ store), never live edit sessions.
 
 ## Publish flow
 
-1. AADT / technical app finalizes a sheet → Shilpi local or project `shilpid`
+1. ADraft / technical app finalizes a sheet → Shilpi local or project `shilpid`
 2. Desktop posts `POST /api/ops/artifacts` with `entity: "drawingPackage"`, `drawingPackageId`, optional `vdbUri` / `storageKey`
 3. Portal reads packages via `mongoOps.portalDrawingPackages`
 

@@ -8,7 +8,7 @@
 | Suite core | **AORMS Connect** (desktop — login · launcher · catalog · DB connector) |
 | Practice managers | **AStudio** · **AConsulting** (desktop; launched from Connect) |
 | Technical | **AQC Estimation** · **AQC BBS** · **AQC Project Management** / **AProc** (desktop, shared `bbs_engine`) |
-| Drafting / geometry | **AADT** · **ShilpiDB** |
+| Drafting / geometry | **ADraft** · **ShilpiDB** |
 | Online | Firm portals · hub · Mongo ops · **aorms.in** marketing |
 
 **ESTI** = internal AI on desktop managers. **EOMS** = external knowledge bank.
@@ -49,7 +49,7 @@ VPS: [`docs/esti/VPS-INSTALL.md`](docs/esti/VPS-INSTALL.md) ·
 **Executable constants:** `frontend/src/lib/product-nomenclature.ts` — import
 `AORMS_PLATFORM`, `AORMS_APPS`, `AORMS_CONNECT`, `AORMS_STUDIO` / `ASTUDIO`,
 `AORMS_CONSULTANCY` / `ACONSULTING`, `AORMS_PMC` / `APROC`, `AQC_ESTIMATION`,
-`AQC_BBS`, `AADT`, `SHILPIDB`, `SUITE_CORE_APPS`, `SUITE_MANAGER_APPS`,
+`AQC_BBS`, `ADRAFT` / `AADT` (alias), `SHILPIDB`, `SUITE_CORE_APPS`, `SUITE_MANAGER_APPS`,
 `SUITE_TECHNICAL_APPS`, `AORMS_PORTALS`, `EOMS`, `ESTI`. Do not hard-code product
 strings in UI/SEO.
 
@@ -61,7 +61,7 @@ strings in UI/SEO.
 | **AConsulting** | Engineering practice manager — desktop; slug `aconsulting` |
 | **AProc** / **AQC PM** | Project management technical app — desktop; slug `aproc` |
 | **AQC Estimation / BBS** | Technical installers — separate repos |
-| **AADT** · **ShilpiDB** | Drafting · geometry store |
+| **ADraft** · **ShilpiDB** | Drafting (Accelerating Drafting) · geometry store |
 | **EOMS** | Knowledge bank API |
 | **ESTI** | Internal AI agent (desktop managers) |
 | **`esti` / `aorms`** | Hub monorepo — never use `esti` in marketing copy |

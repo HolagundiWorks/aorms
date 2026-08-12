@@ -36,7 +36,7 @@ flowchart TB
     EST[AQC_Estimation]
     BBS[AQC_BBS]
     PM[AQC_PM]
-    AAD[AADT]
+    AAD[ADraft]
   end
   Hub[aorms_hub_APIs]
   Login --> Hub
@@ -81,7 +81,7 @@ flowchart TB
 - Connect startup rewrites `session.json` when `firm.db` already has a `syncToken` but the file is missing.  
 - `catalog.json` entries use stable UUID `id` + firm `ref` + `title` + `status`; apps must not invent parallel project ids for the same engagement.  
 - Soft-launch marketing gate (`VITE_MARKETING_ONLY`) is **unrelated** — do not flip apex login as part of Connect work.  
-- **AADT** (drafting) consumes Connect via vendored `Aorms.Bridge` → `%LocalAppData%\AADT\firm.db` (`aadt_bridge.dll` NativeAOT ABI + WinUI `AormsBridgeHost`). Activate stays in Connect. Open resolves `AAD.exe` / `AadWinui.exe` and passes `--connect-session` (`app …` for egui).
+- **ADraft** (drafting; repo/slug `aadt`) consumes Connect via vendored `Aorms.Bridge` → `%LocalAppData%\AADT\firm.db` (`aadt_bridge.dll` NativeAOT ABI + WinUI `AormsBridgeHost`). Activate stays in Connect. Open resolves `AAD.exe` / `AadWinui.exe` and passes `--connect-session` (`app …` for egui).
 
 ## Project catalog (consistency)
 

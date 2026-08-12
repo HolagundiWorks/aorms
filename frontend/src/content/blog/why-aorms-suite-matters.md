@@ -25,7 +25,7 @@ So AORMS splits the work the way firms already split people:
 | --- | --- | --- |
 | **Practice managers** | Tasks, office, HR, payroll views, portal publish | Communications and commercial rhythm |
 | **Technical apps** | Estimation, BBS, programme / RA | Heavy calc stays local on a shared engine |
-| **Drafting / geometry** | AADT + ShilpiDB | Drawings are not “files in chat” |
+| **Drafting / geometry** | ADraft + ShilpiDB | Drawings are not “files in chat” |
 | **Online** | Firm portals + hub | Clients see **published** updates only |
 
 That split is the product. It is why the suite matters more than any single screen.

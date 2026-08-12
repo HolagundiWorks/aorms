@@ -36,7 +36,7 @@ resolver `frontend/src/lib/desktop-installers.ts`.
 | AQC Estimation | `aqc-estimation.json` |
 | AQC BBS | `aqc-bbs.json` |
 | AQC Project Management | `aqc-pm.json` |
-| AADT | `aadt.json` |
+| ADraft | `aadt.json` |
 
 ## Honesty rule (do not break)
 

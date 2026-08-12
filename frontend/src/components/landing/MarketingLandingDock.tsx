@@ -23,19 +23,25 @@ function sectionIdFromHref(href: string): string | null {
 /**
  * Landing bottom chrome: section text links (left) + action buttons (right 60%).
  * Active section uses primary highlight colour — not chip buttons.
+ *
+ * `revealAfterId`: stay concealed while that section (hero) is on screen;
+ * slide in after it scrolls past — same contract as MarketingTopBar.
  */
 export function MarketingLandingDock({
   sections,
   signInHref = "/",
   signInLabel = "Home",
+  revealAfterId,
 }: {
   sections: readonly MarketingDockSection[];
   signInHref?: string;
   signInLabel?: string;
+  revealAfterId?: string;
 }) {
   const { pathname, hash } = useLocation();
   const [spyId, setSpyId] = useState<string | null>(null);
   const [showCalc, setShowCalc] = useState(false);
+  const [chromeVisible, setChromeVisible] = useState(!revealAfterId);
   const calcTriggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -45,6 +51,23 @@ export function MarketingLandingDock({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  useEffect(() => {
+    if (!revealAfterId) return;
+    const el = document.getElementById(revealAfterId);
+    if (!el) return;
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      setChromeVisible(rect.bottom <= 12);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [revealAfterId]);
 
   useEffect(() => {
     const ids = sections.map((s) => sectionIdFromHref(s.href)).filter((id): id is string => Boolean(id));
@@ -94,10 +117,21 @@ export function MarketingLandingDock({
     px: 1.5,
   };
 
+  const revealMode = Boolean(revealAfterId);
+  const wrapClass = [
+    "esti-mkt-landing-dock-wrap",
+    revealMode ? "esti-mkt-landing-dock-wrap--reveal" : "",
+    revealMode && chromeVisible ? "esti-mkt-landing-dock-wrap--shown" : "",
+    revealMode && !chromeVisible ? "esti-mkt-landing-dock-wrap--concealed" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <>
       <Box
-        className="esti-mkt-landing-dock-wrap"
+        className={wrapClass}
+        aria-hidden={revealMode && !chromeVisible ? true : undefined}
         sx={{
           position: "fixed",
           left: 0,
@@ -105,7 +139,7 @@ export function MarketingLandingDock({
           bottom: 24,
           zIndex: 1240,
           px: { xs: MARKETING_CONTENT_GUTTER.xs, md: MARKETING_CONTENT_GUTTER.md },
-          pointerEvents: "none",
+          pointerEvents: revealMode && !chromeVisible ? "none" : "none",
         }}
       >
         <Surface
@@ -213,7 +247,7 @@ export function MarketingLandingDock({
         </Surface>
       </Box>
       <FloatingCalculator
-        open={showCalc}
+        open={showCalc && chromeVisible}
         onClose={() => setShowCalc(false)}
         triggerRef={calcTriggerRef}
         placement="above"

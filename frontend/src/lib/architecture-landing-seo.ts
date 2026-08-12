@@ -7,7 +7,7 @@ const LEGACY_SLUGS = AORMS_STUDIO.legacySlugs.join(", ");
 export const ARCHITECTURE_LANDING_SEO = {
   title: `${AORMS_STUDIO.title} | Architecture practice manager on AORMS`,
   description:
-    `${AORMS_STUDIO.title} is the architecture practice manager in the AORMS suite — tasks, office, portal communications. Technical calc stays in AQC apps; drafting in AADT. Soft launch: sign-in coming soon.`,
+    `${AORMS_STUDIO.title} is the architecture practice manager in the AORMS suite — tasks, office, portal communications. Technical calc stays in AQC apps; drafting in ADraft. Soft launch: sign-in coming soon.`,
   keywords:
     `architecture practice manager, AStudio, Accelerated Studio, AORMS suite, ${LEGACY_SLUGS}, ESTI, EOMS, AEC consulting`,
   ogTitle: `${AORMS_STUDIO.title} — architecture practice manager on AORMS`,

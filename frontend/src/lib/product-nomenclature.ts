@@ -1,7 +1,7 @@
 /**
  * Product naming — keep in sync with docs/esti/AORMS-PLATFORM-NOMENCLATURE.md
  * and docs/esti/AORMS-SUITE.md.
- * Suite: Connect (core) + managers (AStudio · AConsulting) + AQC Estimation/BBS/PM + AADT + ShilpiDB.
+ * Suite: Connect (core) + managers (AStudio · AConsulting) + AQC Estimation/BBS/PM + ADraft + ShilpiDB.
  */
 import { platformPageUrl } from "./aorms-surface-urls.js";
 export const AORMS_PLATFORM = {
@@ -13,13 +13,14 @@ export const AORMS_PLATFORM = {
     "Architecture studios and engineering consultancies — plus PMC practices that advise and govern projects",
   /** Platform home hero — brand + AEC peers; no third-party product names. */
   heroHeadline: [
-    "One operating suite for architecture and engineering practices.",
-    "Managers for the office; technical work stays local.",
+    "One operating suite for practices that design with precision.",
+    "Architecture and engineering — office on managers, technical work local.",
   ] as const,
   /** One-line hero support under the headline. */
   heroSupport:
-    "Connect launches AStudio and AConsulting for the office, AQC and AADT for technical work, and firm portals for what you publish — one suite, not five tools. Installers coming soon.",
-  aecDisciplines: ["Architecture", "Engineering", "Project management"] as const,
+    "For architects and engineers who notice lineweight, kerning, and fee leakage alike. Connect launches AStudio, AConsulting, AQC, and ADraft — installers coming soon.",
+  /** Landing AEC strip — Architecture · Engineering · Construction. */
+  aecDisciplines: ["Architecture", "Engineering", "Construction"] as const,
   fragmentedTools: [
     "Messaging",
     "Team communication",
@@ -47,7 +48,7 @@ export const PLATFORM_FRAMEWORKS = {
 
 /**
  * The AORMS suite apps.
- * Core: AORMS Connect. Managers: AStudio · AConsulting. Technical: AProc/AQC-PM · Estimation · BBS. Drafting: AADT.
+ * Core: AORMS Connect. Managers: AStudio · AConsulting. Technical: AProc/AQC-PM · Estimation · BBS. Drafting: ADraft.
  * Legacy marketing names AORMS-Studio / AORMS-Consultancy / AORMS-PMC redirect.
  */
 export const AORMS_APPS = {
@@ -163,15 +164,16 @@ export const AORMS_APPS = {
   aadt: {
     slug: "aadt",
     legacySlugs: [] as const,
-    title: "AADT",
-    expansion: "Accelerated Architectural Drafting",
+    title: "ADraft",
+    expansion: "Accelerating Drafting",
     discipline: "Drafting",
     role: "drafting" as const,
-    tagline: "2D CAD drafting — geometry in ShilpiDB",
+    tagline:
+      "Accelerating Drafting — 2D CAD with Urbanist type, local work .vdb, object snaps; geometry in ShilpiDB",
     audience: "Architects and drafters",
     appUrl: "https://github.com/HolagundiWorks/AADT",
     marketingPath: "/downloads",
-    landingHref: "/#aadt",
+    landingHref: "/#adraft",
     wikiPath: "/wiki",
     status: "preview" as const,
   },
@@ -194,6 +196,9 @@ export const AORMS_PMC = AORMS_APPS.pmc;
 export const APROC = AORMS_APPS.pmc;
 export const AQC_ESTIMATION = AORMS_APPS.estimation;
 export const AQC_BBS = AORMS_APPS.bbs;
+/** Drafting CAD — display name ADraft; slug/repo stay `aadt` / HolagundiWorks/AADT. */
+export const ADRAFT = AORMS_APPS.aadt;
+/** @deprecated Prefer {@link ADRAFT} — same object. */
 export const AADT = AORMS_APPS.aadt;
 
 /** Legacy single slug — prefer {@link AORMS_STUDIO.legacySlugs}. */
@@ -246,7 +251,7 @@ export const PLATFORM_APPS = [
     expansion: AORMS_STUDIO.expansion,
     subtitle: "Practice manager · architecture",
     body:
-      "Tasks, office, HR, payroll, and client portals for architecture practices. Technical calc stays in AQC apps; drafting in AADT. Launch from Connect.",
+      "Tasks, office, HR, payroll, and client portals for architecture practices. Technical calc stays in AQC apps; drafting in ADraft. Launch from Connect.",
     bullets: [
       "Tasks · Office · HR · Payroll",
       "Client & third-party communications",
@@ -332,13 +337,13 @@ export const SUITE_TECHNICAL_APPS = [
     cta: "Open AProc",
   },
   {
-    id: "aadt",
-    status: AADT.status,
-    workspace: AADT.title,
-    expansion: AADT.expansion,
+    id: "adraft",
+    status: ADRAFT.status,
+    workspace: ADRAFT.title,
+    expansion: ADRAFT.expansion,
     subtitle: "Drafting · 2D CAD",
-    body: AADT.tagline,
-    href: AADT.appUrl,
+    body: ADRAFT.tagline,
+    href: ADRAFT.appUrl,
     repo: "https://github.com/HolagundiWorks/AADT",
     cta: "GitHub",
   },
@@ -358,6 +363,152 @@ export const SHILPIDB = {
     "Shared drawing database across the suite — .vdb codec, spatial index, shilpid server, and shilpi-http for portals.",
   url: "https://github.com/HolagundiWorks/shilpidb",
 } as const;
+
+/**
+ * Dedicated landing product sections (`/#connect`, `/#studio`, …).
+ * Keep copy soft-launch honest: installers Coming soon; staff work on desktop.
+ */
+export const LANDING_PRODUCTS = [
+  {
+    id: "connect",
+    family: "Suite core",
+    title: AORMS_CONNECT.title,
+    expansion: AORMS_CONNECT.expansion,
+    lead: "Sign in once. Launch every AORMS app. Shared projects and installer links from one Manager Hub.",
+    updates: [
+      "Custom app title bar and HCW Manager Hub chrome for the desktop entry point",
+      "Firm licence Activate and session hand-off into desktop managers",
+      "Catalog launcher for AStudio, AConsulting, AQC apps, and ADraft",
+    ] as const,
+    cta: "Downloads — coming soon",
+    href: "/downloads",
+    external: false,
+  },
+  {
+    id: "studio",
+    family: "Practice manager · architecture",
+    title: AORMS_STUDIO.title,
+    expansion: AORMS_STUDIO.expansion,
+    lead: "Tasks, office, HR, payroll, and client portals for architecture practices — launched from Connect.",
+    updates: [
+      "OS drag title bar and HCW theme tokens on the desktop shell",
+      "Local firm.db with hub Activate / Flush bind helpers",
+      "Office ledger, wellness prefs, and practice desk helpers for studio rhythm",
+    ] as const,
+    cta: "Downloads — coming soon",
+    href: "/downloads",
+    external: false,
+  },
+  {
+    id: "consultancy",
+    family: "Practice manager · engineering",
+    title: AORMS_CONSULTANCY.title,
+    expansion: AORMS_CONSULTANCY.expansion,
+    lead: "Engagements, deliverables, and governed communications for engineering consultancies — same suite spine as AStudio.",
+    updates: [
+      "Custom app title bar aligned with suite desktop chrome",
+      "Practice Ask ESTI surface on the engineering manager (desktop)",
+      "Engagement and portal communications without owning BOQ or CAD math",
+    ] as const,
+    cta: "Downloads — coming soon",
+    href: "/downloads",
+    external: false,
+  },
+  {
+    id: "estimation",
+    family: "Technical · quantities",
+    title: AQC_ESTIMATION.title,
+    expansion: AQC_ESTIMATION.expansion,
+    lead: "Rate books, BOQ, and measurement on the desktop — published totals only reach firm portals.",
+    updates: [
+      "Separate desktop installer; shared bbs_engine with BBS and PM",
+      "Local calculation — never recomputed in the cloud hub",
+      "Issued abstracts and PDFs for portal publish, not draft lines",
+    ] as const,
+    cta: "Downloads — coming soon",
+    href: "/downloads",
+    repo: "https://github.com/HolagundiWorks/AQC-Estimation",
+    external: false,
+  },
+  {
+    id: "bbs",
+    family: "Technical · steel",
+    title: AQC_BBS.title,
+    expansion: AQC_BBS.expansion,
+    lead: "Bar bending schedules and steel reconciliation — IS-aware engine on the desktop.",
+    updates: [
+      "Local BBS and steel recon against the shared AQC engine",
+      "Site-ready schedules without pulling CAD into the browser",
+      "Publishes certified outputs; geometry stays in ADraft / ShilpiDB",
+    ] as const,
+    cta: "Downloads — coming soon",
+    href: "/downloads",
+    repo: "https://github.com/HolagundiWorks/AQC-BBS",
+    external: false,
+  },
+  {
+    id: "pmc",
+    family: "Technical · programme & site",
+    title: AORMS_PMC.suiteTitle ?? AORMS_PMC.title,
+    expansion: AORMS_PMC.expansion,
+    lead: "Programme, packages, RA, and site certification for PMC practices that advise and govern delivery.",
+    updates: [
+      "AQC Project Management (AProc) as a dedicated desktop technical app",
+      "Owner-side programme and package governance — not contractor labour ERP",
+      "Published milestones and progress for firm portals only",
+    ] as const,
+    cta: "Downloads — coming soon",
+    href: "/downloads",
+    repo: "https://github.com/HolagundiWorks/AQC-PM",
+    external: false,
+  },
+  {
+    id: "adraft",
+    family: "Drafting · 2D CAD",
+    title: ADRAFT.title,
+    expansion: ADRAFT.expansion,
+    lead: "Accelerating Drafting — local WinUI CAD with Urbanist type and geometry on disk, not a cloud mega-app.",
+    updates: [
+      "Urbanist only for chrome and drawing text — one brand typeface end to end",
+      "Dimension pick, hot-grip highlight, and per-kind object-snap settings",
+      "Local work .vdb tip — realtime sync off; COMMIT / SAVE write disk; COMMIT PUSH uploads",
+    ] as const,
+    cta: "ADraft on GitHub",
+    href: ADRAFT.appUrl,
+    repo: "https://github.com/HolagundiWorks/AADT",
+    external: true,
+  },
+  {
+    id: "shilpidb",
+    family: "Geometry spine",
+    title: SHILPIDB.name,
+    expansion: SHILPIDB.expansion,
+    lead: SHILPIDB.summary,
+    updates: [
+      ".vdb codec and spatial index shared across drafting and suite tools",
+      "Local-first geometry; portals receive published drawing packages only",
+      "Standalone shilpid / shilpi-http path for hosted read models when needed",
+    ] as const,
+    cta: "ShilpiDB on GitHub",
+    href: SHILPIDB.url,
+    external: true,
+  },
+  {
+    id: "portals",
+    family: "Online · firm communications",
+    title: "Firm portals",
+    expansion: "Client · consultant · contractor · site",
+    lead: "Published updates only — clients and collaborators never edit the office draft.",
+    updates: [
+      "Client, consultant, contractor, and site portal surfaces",
+      "Managers publish; technical apps contribute issued artefacts",
+      "aorms.in stays marketing and blog under soft launch",
+    ] as const,
+    cta: "Coming soon",
+    href: "/downloads",
+    external: false,
+  },
+] as const;
 
 /**
  * Portal and surface labels — staff workspace, external portals, account hub.

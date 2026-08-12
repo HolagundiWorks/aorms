@@ -13,7 +13,7 @@ supersedes: aorms-is-web-only
 
 AORMS is a **product suite**:
 
-1. **Desktop (preferred for staff work)** — practice managers (AStudio / AConsulting) and technical apps (AQC Estimation, BBS, Project Management) plus AADT drafting into ShilpiDB. Drafts and calc stay on the machine.
+1. **Desktop (preferred for staff work)** — practice managers (AStudio / AConsulting) and technical apps (AQC Estimation, BBS, Project Management) plus ADraft drafting into ShilpiDB. Drafts and calc stay on the machine.
 2. **Online** — firm-branded portals and the hub for **published** ops, PDFs, and drawing packages.
 3. **Marketing** — `aorms.in` suite home and blog (soft launch: sign-in and Windows installers **coming soon**).
 

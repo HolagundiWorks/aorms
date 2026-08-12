@@ -14,7 +14,7 @@
 | **Suite core** | AORMS Connect | Thin HCW chrome (ribbon · Fog stage · floating tray) |
 | **Technical** | AQC Estimation · BBS · PM | Thin HCW chrome (same); domain UI grows inside stage |
 | **Technical core** | **AQC-Core** (`AQC/BBSDesktop/BBSApp`) | Full takeoff UI · HCW soft neu shell + Fluent→HCW bridge |
-| **Drafting** | **AADT** (`AADT/native/aad-winui`) | HCW shell + clock/Pomodoro · CAD stage exceptions (tool strip · rails · CLI) — [WINUI-SHELL.md](https://github.com/HolagundiWorks/aadt/blob/main/docs/WINUI-SHELL.md) |
+| **Drafting** | **ADraft** (`AADT/native/aad-winui`) | HCW shell + clock/Pomodoro · CAD stage exceptions (tool strip · rails · CLI) — [WINUI-SHELL.md](https://github.com/HolagundiWorks/aadt/blob/main/docs/WINUI-SHELL.md) |
 | **Reference** | esti SPA | Archive for IA/tokens — not the shipping staff host |
 
 Per-repo mirror: `docs/WINUI-SHELL.md` + `Themes/HcwTheme.xaml` (copy of AStudio SoT until a shared package exists).
@@ -63,7 +63,7 @@ Per-repo mirror: `docs/WINUI-SHELL.md` + `Themes/HcwTheme.xaml` (copy of AStudio
 | Ink / Accent / Danger | `#141517` / `#FF4F18` / `#C8442E` |
 | Radius | **8px** soft-square everywhere |
 | Elevation | Dual-offset neu (dark SE + light NW) — **no** blur/glass |
-| Type | Segoe UI Variable (Urbanist peer until OFL pack) |
+| Type | **ADraft:** Urbanist only (bundled OFL). Other apps: Segoe UI Variable (Urbanist peer until OFL pack) |
 | Active nav | Transparent + **2px accent underline** — orange fill only on scarce CTAs |
 | Icons | Segoe Fluent Icons |
 

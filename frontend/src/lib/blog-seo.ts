@@ -40,7 +40,7 @@ function setLinkRel(rel: string, href: string, extra?: { type?: string; title?: 
 export function applyBlogListSeo(): void {
   const title = `Blog — ${SITE_NAME}`;
   const description =
-    "Why the AORMS suite matters for AEC consultancies — how practice managers, AQC technical apps, AADT, and ShilpiDB solve fragmented tools. Soft launch: suite home and blog live; installers coming soon.";
+    "Why the AORMS suite matters for AEC consultancies — how practice managers, AQC technical apps, ADraft, and ShilpiDB solve fragmented tools. Soft launch: suite home and blog live; installers coming soon.";
   document.title = title;
   setMeta('meta[name="description"]', "content", description);
   setMeta('meta[property="og:title"]', "content", title);

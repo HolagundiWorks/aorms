@@ -1,7 +1,7 @@
 ---
 title: AORMS suite map — managers, technical apps, drafting
 date: 2026-08-08
-excerpt: A clear map of the AORMS product suite: AStudio and AConsulting practice managers; AQC Estimation, BBS, and Project Management; AADT and ShilpiDB; firm portals online. What each product owns — and what it deliberately does not.
+excerpt: A clear map of the AORMS product suite: AStudio and AConsulting practice managers; AQC Estimation, BBS, and Project Management; ADraft and ShilpiDB; firm portals online. What each product owns — and what it deliberately does not.
 tags: Suite, Product, Map
 author: Human Centric Works
 ---
@@ -33,7 +33,7 @@ Calculations never re-run in the cloud. Draft lines never leave the machine.
 
 | Product | Role |
 | --- | --- |
-| **AADT** | Local 2D CAD drafting |
+| **ADraft** | Local 2D CAD drafting (Accelerating Drafting) |
 | **ShilpiDB** | Spatial vector store (`.vdb`, spatial index, `shilpi-http` for published packages) |
 
 Mongo never stores CAD entities. ShilpiDB never stores payroll.
@@ -50,7 +50,7 @@ Mongo never stores CAD entities. ShilpiDB never stores payroll.
 ## How the pieces talk
 
 ```text
-Desktop managers + AQC apps + AADT
+Desktop managers + AQC apps + ADraft
         │ publish ops / PDFs / drawing packages
         ▼
    AORMS hub (Mongo ops + object store + Shilpi publish)

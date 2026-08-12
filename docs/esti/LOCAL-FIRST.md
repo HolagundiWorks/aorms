@@ -9,7 +9,7 @@
 (login · launcher · shared project catalog · DB connector). Practice managers
 (**AStudio** / **AConsulting**) and technical apps (**AQC Estimation** · **AQC BBS** ·
 **AQC Project Management**) ship as native Windows apps launched from Connect.
-**AADT** drafts locally; **ShilpiDB** holds geometry; **MongoDB** holds all
+**ADraft** drafts locally; **ShilpiDB** holds geometry; **MongoDB** holds all
 non-drawing cloud ops/comms. Technical work and **ESTI AI stay on the machine**
 (local Ollama / Foundry Local / opt-in keys inside desktop apps).
 **Ollama does not run on the cloud hub or aorms.in VPS.** Firm-branded
@@ -29,7 +29,7 @@ The esti monorepo staff SPA is a **reference archive** — not the shipping staf
 
 | # | Choice |
 | --- | --- |
-| Suite shape | **Connect** + managers + three AQC installers + AADT + ShilpiDB ([AORMS-SUITE.md](AORMS-SUITE.md)) |
+| Suite shape | **Connect** + managers + three AQC installers + ADraft + ShilpiDB ([AORMS-SUITE.md](AORMS-SUITE.md)) |
 | Desktop login | **AORMS Connect only** — suite apps launch with Connect session (C2 broker) |
 | Staff runtime | **Native desktop** — no browser staff ERP |
 | Engine SoT | **C++** `bbs_engine` — shared by Estimation / BBS / PM |
@@ -46,7 +46,7 @@ The esti monorepo staff SPA is a **reference archive** — not the shipping staf
 | --- | --- | --- |
 | **Work / localOnly** | Desktop SQLite | Drafts, BOQ lines, AI chats |
 | **Calculations** | C++ engine on desktop | BBS, quantities — never recomputed in cloud |
-| **Geometry** | ShilpiDB local / hosted | Entities, spatial queries, `.vdb`. AADT: realtime tip sync **OFF**; local `COMMIT` / `SAVE` writes `%LocalAppData%\AADT\work\active.vdb`; upload only via `COMMIT PUSH` ([work-DB bridge](https://github.com/HolagundiWorks/AADT/blob/main/docs/architecture/aadt-shilpidb-architecture.md#interim-work-db-bridge-shipping-now)) |
+| **Geometry** | ShilpiDB local / hosted | Entities, spatial queries, `.vdb`. ADraft: realtime tip sync **OFF**; local `COMMIT` / `SAVE` writes `%LocalAppData%\AADT\work\active.vdb`; upload only via `COMMIT PUSH` ([work-DB bridge](https://github.com/HolagundiWorks/AADT/blob/main/docs/architecture/aadt-shilpidb-architecture.md#interim-work-db-bridge-shipping-now)) |
 | **Ops metadata** | MongoDB via hub | Tasks, status, progress %, portal threads |
 | **Artifacts** | Object store + Mongo pointers | Issued PDFs, READY drawing packages |
 
@@ -77,7 +77,7 @@ flowchart LR
 | --- | --- |
 | **AStudio / AConsulting** | Practice managers — Tasks · Office · HR · Payroll · comms |
 | **AQC Estimation / BBS / PM** | Technical apps — shared `bbs_engine` |
-| **AADT** | 2D drafting |
+| **ADraft** | 2D drafting |
 | **ShilpiDB** | Geometry spine (+ desktop manager) |
 | **Cloud hub** | Licence · Mongo ops · artifacts · portals · ops DB manager — **no LLM / Ollama** |
 | **`aorms.in`** | Marketing · demos · downloads — **no Ask ESTI cloud runtime** |
@@ -98,7 +98,7 @@ flowchart LR
 | [AQC](https://github.com/HolagundiWorks/AQC) | Engine + three technical app packaging |
 | [AStudio](https://github.com/HolagundiWorks/AStudio) | Architecture practice manager |
 | [AConsulting](https://github.com/HolagundiWorks/AConsulting) | Engineering practice manager |
-| [AADT](https://github.com/HolagundiWorks/AADT) | 2D drafting |
+| [ADraft](https://github.com/HolagundiWorks/AADT) | 2D drafting |
 | [shilpidb](https://github.com/HolagundiWorks/shilpidb) | Geometry store |
 | esti / aorms | Hub · portals · marketing · contracts |
 

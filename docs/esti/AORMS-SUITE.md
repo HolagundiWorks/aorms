@@ -1,7 +1,7 @@
 # AORMS Suite Architecture
 
 **Status:** Canonical product law · **Updated:** 2026-08-09  
-**Locked:** **AORMS Connect** = suite core (login · launcher · catalog) · AQC → **three separate installers** sharing `bbs_engine` · **MongoDB** for non-drawing cloud ops · **ShilpiDB** for drawings · **AADT** for drafting  
+**Locked:** **AORMS Connect** = suite core (login · launcher · catalog) · AQC → **three separate installers** sharing `bbs_engine` · **MongoDB** for non-drawing cloud ops · **ShilpiDB** for drawings · **ADraft** for drafting  
 **Runtime:** [LOCAL-FIRST.md](LOCAL-FIRST.md) · Connect: [AORMS-CONNECT.md](AORMS-CONNECT.md) · Bridge: [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · Repos: [DESKTOP-REPOS.md](DESKTOP-REPOS.md)
 
 **AORMS** is the **suite brand and cloud spine**, not a single mega-app.
@@ -26,7 +26,7 @@ flowchart TB
     EST[AQC_Estimation]
     BBS[AQC_BBS]
     PM[AQC_ProjectMgmt]
-    AAD[AADT_drafting]
+    AAD[ADraft_drafting]
     Engine[bbs_engine_shared]
     ShilpiLocal[shilpid_or_embedded_vdb]
   end
@@ -101,7 +101,7 @@ Monolithic [AQC](https://github.com/HolagundiWorks/AQC) = **engine + reference**
 
 | Component | Role |
 | --- | --- |
-| **AADT** | Local 2D CAD — [AADT](https://github.com/HolagundiWorks/AADT) |
+| **ADraft** | Local 2D CAD (Accelerating Drafting) — [repo](https://github.com/HolagundiWorks/AADT) |
 | **ShilpiDB** | Geometry store — [shilpidb](https://github.com/HolagundiWorks/shilpidb); `shilpi-http` for non-Rust hosts |
 
 ## Online surfaces
@@ -130,7 +130,7 @@ Monolithic [AQC](https://github.com/HolagundiWorks/AQC) = **engine + reference**
 | HR / payroll worksheets | Yes | Payslip meta + PDF keys | PDF bytes |
 | Portal approvals | Optional mirror | **Authoritative** | — |
 | BOQ / BBS / programme scratch | Technical apps | Issued totals only | PDFs |
-| CAD entities | AADT + Shilpi | Refs only (`drawingPackageId`) | `.vdb` / packages |
+| CAD entities | ADraft + Shilpi | Refs only (`drawingPackageId`) | `.vdb` / packages |
 | AI transcripts | Local only | Never | Never |
 
 **Mongo collections (firm-scoped):** `firms`, `projects`, `tasks`, `office_docs`, `hr_events`, `payroll_runs`, `portal_threads`, `meta_events`, `sync_cursors`, `published_artifacts`.
@@ -147,7 +147,7 @@ hub and marketing VPS do **not** host Ollama or a staff “Hosted AI” plane.
 | Layer | Runtime |
 | --- | --- |
 | Desktop managers (AStudio / AConsulting) | Local instruct (Ollama / Foundry Local / opt-in keys) via Connect-launched apps |
-| Desktop technical (AQC · AADT) | Local instruct / VL on the machine |
+| Desktop technical (AQC · ADraft) | Local instruct / VL on the machine |
 | Cloud hub / aorms.in | **No Ollama** — licence, Mongo ops, portals, marketing only |
 | Portal chat (optional, future) | Cloud API on **published** context only — never firm draft AI |
 | Embeddings | Local, beside Shilpi `SpatialGrid` |

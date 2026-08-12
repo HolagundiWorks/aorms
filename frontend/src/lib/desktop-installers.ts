@@ -8,7 +8,7 @@
  * (docs/esti/WEB-PORTAL.md · ROADMAP D6).
  */
 import {
-  AADT,
+  ADRAFT,
   AORMS_CONNECT,
   AORMS_CONSULTANCY,
   AORMS_PMC,
@@ -110,9 +110,9 @@ const APP_META: Record<
     manifest: "/update-manifests/aqc-pm.json",
   },
   aadt: {
-    title: AADT.title,
-    expansion: AADT.expansion,
-    webUrl: AADT.appUrl,
+    title: ADRAFT.title,
+    expansion: ADRAFT.expansion,
+    webUrl: ADRAFT.appUrl,
     repoUrl: "https://github.com/HolagundiWorks/AADT",
     manifest: "/update-manifests/aadt.json",
   },

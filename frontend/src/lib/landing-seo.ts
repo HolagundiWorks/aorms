@@ -1,6 +1,6 @@
 /** Landing-page SEO — platform home `/`. Keep in sync with index.html meta tags. */
 import {
-  AADT,
+  ADRAFT,
   AORMS_CONSULTANCY,
   AORMS_PMC,
   AORMS_PLATFORM,
@@ -16,15 +16,15 @@ import { isMarketingOnly } from "./marketing-gate.js";
 export const LANDING_SEO = {
   title: `AORMS | ${AORMS_PLATFORM.expansion}`,
   description:
-    "AORMS — the operating suite for architecture studios and engineering consultancies. Practice managers, AQC Estimation/BBS/PM, AADT drafting, ShilpiDB drawings, and firm portals. Technical work stays local; installers coming soon.",
+    "AORMS — the operating suite for architecture studios and engineering consultancies. Practice managers, AQC Estimation/BBS/PM, ADraft drafting, ShilpiDB drawings, and firm portals. Technical work stays local; installers coming soon.",
   keywords:
-    "AORMS, AStudio, AConsulting, architecture studio software, engineering consultancy software, AQC Estimation, AQC BBS, AProc, AADT, ShilpiDB, EOMS, ESTI, AEC consulting suite, practice management, local-first desktop",
+    "AORMS, AStudio, AConsulting, architecture studio software, engineering consultancy software, AQC Estimation, AQC BBS, AProc, ADraft, ShilpiDB, EOMS, ESTI, AEC consulting suite, practice management, local-first desktop",
   ogTitle: `AORMS — ${AORMS_PLATFORM.heroHeadline[0]}`,
   ogDescription:
-    "Built for architecture studios and engineering consultancies: managers for the office; Estimation, BBS, PM, and AADT locally; ShilpiDB for drawings; firm portals for published updates. Open source. Installers coming soon.",
+    "Built for architecture studios and engineering consultancies: managers for the office; Estimation, BBS, PM, and ADraft locally; ShilpiDB for drawings; firm portals for published updates. Open source. Installers coming soon.",
   twitterTitle: "AORMS — for architecture studios and engineering firms",
   twitterDescription:
-    `${AORMS_STUDIO.title} · ${AORMS_CONSULTANCY.title} · ${AQC_ESTIMATION.title} · ${AQC_BBS.title} · ${AORMS_PMC.title} · ${AADT.title} · ${SHILPIDB.name}. Technical work local; portals online.`,
+    `${AORMS_STUDIO.title} · ${AORMS_CONSULTANCY.title} · ${AQC_ESTIMATION.title} · ${AQC_BBS.title} · ${AORMS_PMC.title} · ${ADRAFT.title} · ${SHILPIDB.name}. Technical work local; portals online.`,
   headline: `${AORMS_PLATFORM.heroHeadline[0]} ${AORMS_PLATFORM.heroHeadline[1]}`,
   footerBlurb: `${AORMS_PLATFORM.name} (${AORMS_PLATFORM.expansion}) — suite home and blog.`,
   canonical: "https://aorms.in/",
@@ -36,7 +36,7 @@ export const LANDING_FAQ = [
   {
     question: "What is AORMS?",
     answer:
-      `AORMS (${AORMS_PLATFORM.expansion}) is a product suite for AEC consulting and PMC firms — practice managers, technical desktop apps, AADT drafting, and ShilpiDB for drawings. ${EOMS.name} is the knowledge bank; ${ESTI.name} is the internal AI agent on desktop managers.`,
+      `AORMS (${AORMS_PLATFORM.expansion}) is a product suite for AEC consulting and PMC firms — practice managers, technical desktop apps, ADraft drafting, and ShilpiDB for drawings. ${EOMS.name} is the knowledge bank; ${ESTI.name} is the internal AI agent on desktop managers.`,
   },
   {
     question: "Why a suite instead of one mega-app?",
@@ -59,9 +59,14 @@ export const LANDING_FAQ = [
       `${AQC_ESTIMATION.title}, ${AQC_BBS.title}, and ${AORMS_PMC.suiteTitle ?? AORMS_PMC.title} (${AORMS_PMC.title}) are separate desktop installers sharing bbs_engine. They publish totals and issued PDFs — never draft lines — to firm portals.`,
   },
   {
-    question: `What are ${AADT.title} and ${SHILPIDB.name}?`,
+    question: `What are ${ADRAFT.title} and ${SHILPIDB.name}?`,
     answer:
-      `${AADT.title} is local 2D CAD. ${SHILPIDB.name} is the geometry spine; portals see published drawing packages only.`,
+      `${ADRAFT.title} (${ADRAFT.expansion}) is local WinUI 2D CAD — Urbanist typeface for chrome and drawing text, dimension pick, object snaps, and a local work .vdb tip (realtime sync off; COMMIT PUSH uploads when you ask). ${SHILPIDB.name} is the geometry spine; portals see published drawing packages only.`,
+  },
+  {
+    question: "Where is each product described on aorms.in?",
+    answer:
+      "The suite home has dedicated Products bands for AORMS Connect, AStudio, AConsulting, AQC Estimation, AQC BBS, AQC Project Management (AProc), ADraft, ShilpiDB, and firm portals — plus ESTI and EOMS under Intelligence. Jump via aorms.in/#adraft for drafting.",
   },
   {
     question: "How is AORMS licensed right now?",
@@ -151,7 +156,7 @@ export function injectLandingJsonLd(): void {
           AQC_ESTIMATION.title,
           AQC_BBS.title,
           AORMS_PMC.title,
-          AADT.title,
+          ADRAFT.title,
           SHILPIDB.name,
           EOMS.name,
           ESTI.name,
@@ -161,7 +166,7 @@ export function injectLandingJsonLd(): void {
         url: "https://aorms.in/",
         description: LANDING_SEO.description,
         featureList:
-          "practice managers, AQC Estimation, AQC BBS, AQC Project Management, AADT drafting, ShilpiDB geometry, firm portals, local-first desktop, EOMS, ESTI, open source",
+          "practice managers, AQC Estimation, AQC BBS, AQC Project Management, ADraft drafting, ShilpiDB geometry, firm portals, local-first desktop, EOMS, ESTI, open source",
         audience: {
           "@type": "Audience",
           audienceType:

@@ -68,7 +68,7 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | **AORMS Connect** | Suite core — SSO · launcher · catalog | [AORMS-Connect](https://github.com/HolagundiWorks/AORMS-Connect) |
 | **AStudio** / **AConsulting** | Practice managers | [AStudio](https://github.com/HolagundiWorks/AStudio) · [AConsulting](https://github.com/HolagundiWorks/AConsulting) |
 | **AQC Estimation / BBS / PM** | Three technical installers · shared engine | [AQC](https://github.com/HolagundiWorks/AQC) SoT · [AQC-Estimation](https://github.com/HolagundiWorks/AQC-Estimation) · [AQC-BBS](https://github.com/HolagundiWorks/AQC-BBS) · [AQC-PM](https://github.com/HolagundiWorks/AQC-PM) |
-| **AADT** · **ShilpiDB** | Drafting · geometry | [AADT](https://github.com/HolagundiWorks/AADT) · [shilpidb](https://github.com/HolagundiWorks/shilpidb) |
+| **ADraft** · **ShilpiDB** | Drafting · geometry | [repo](https://github.com/HolagundiWorks/AADT) · [shilpidb](https://github.com/HolagundiWorks/shilpidb) |
 | **aorms** (esti) | Hub · marketing · portals · Mongo ops | [aorms](https://github.com/HolagundiWorks/aorms) |
 
 ## Next up (execute in order)

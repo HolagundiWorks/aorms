@@ -8,10 +8,14 @@ Suite map:
 - **AORMS Connect** — suite core (single login · launcher · shared projects · installer links)
 - **AStudio** / **AConsulting** — practice managers (architecture / engineering)
 - **AQC Estimation** · **AQC BBS** · **AQC Project Management (AProc)** — technical desktop installers sharing bbs_engine
-- **AADT** — 2D drafting · **ShilpiDB** — geometry store
+- **ADraft** (Accelerating Drafting) — 2D CAD · Urbanist type · **ShilpiDB** — geometry store
 - **EOMS** — external knowledge bank · **ESTI** — internal AI on desktop managers
 
 Suite home: https://aorms.in/
+Products (dedicated sections): https://aorms.in/#products
+- Connect https://aorms.in/#connect · AStudio https://aorms.in/#studio · AConsulting https://aorms.in/#consultancy
+- Estimation https://aorms.in/#estimation · BBS https://aorms.in/#bbs · AProc https://aorms.in/#pmc
+- ADraft https://aorms.in/#adraft · ShilpiDB https://aorms.in/#shilpidb · Portals https://aorms.in/#portals
 Blog: https://aorms.in/blog
 Downloads (coming soon): https://aorms.in/downloads
 

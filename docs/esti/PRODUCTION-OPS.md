@@ -212,7 +212,7 @@ See [DEMO-AND-HR-MODE.md](DEMO-AND-HR-MODE.md).
 ## ESTI AI — desktop only (no cloud Ollama)
 
 **Product law (2026-08):** ESTI / staff AI runs inside **desktop apps**
-(AStudio · AConsulting · AQC / AADT via Connect) with **local** instruct
+(AStudio · AConsulting · AQC / ADraft via Connect) with **local** instruct
 (Ollama / Foundry Local / opt-in keys). See [LOCAL-FIRST.md](LOCAL-FIRST.md) ·
 [AORMS-SUITE.md](AORMS-SUITE.md) § AI.
 

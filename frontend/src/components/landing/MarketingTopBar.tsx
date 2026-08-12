@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { Surface, colors, RADIUS } from "@hcw/ui-kit";
-import { type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AormsLogo } from "../AormsLogo.js";
 import { MarketingClockPomodoro } from "./MarketingClockPomodoro.js";
 import { MarketingHomeLink } from "./MarketingHomeLink.js";
@@ -16,18 +16,39 @@ export { MarketingHomeLink } from "./MarketingHomeLink.js";
 /**
  * Brand-only marketing top ribbon — logo + expansion.
  * Page actions (Blog, Downloads, Home, Calculator) live in MarketingLandingDock.
+ *
+ * `revealMode`: fixed chrome that stays concealed until the parent shows it
+ * (landing hero — black full-bleed first; bar after scroll past hero).
  */
-export function MarketingTopBar() {
+export function MarketingTopBar({
+  revealMode = false,
+  visible = true,
+}: {
+  revealMode?: boolean;
+  visible?: boolean;
+}) {
+  const wrapClass = [
+    "esti-mkt-topbar-wrap",
+    revealMode ? "esti-mkt-topbar-wrap--reveal" : "",
+    revealMode && visible ? "esti-mkt-topbar-wrap--shown" : "",
+    revealMode && !visible ? "esti-mkt-topbar-wrap--concealed" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <Box
-      className="esti-mkt-topbar-wrap"
+      className={wrapClass}
+      aria-hidden={revealMode && !visible ? true : undefined}
       sx={{
-        position: "sticky",
+        position: revealMode ? "fixed" : "sticky",
         top: COMPOSITION_RHYTHM.chromeInsetMd * 8,
+        left: 0,
+        right: 0,
         zIndex: 50,
         width: "100%",
         px: { xs: MARKETING_CONTENT_GUTTER.xs, md: MARKETING_CONTENT_GUTTER.md },
-        mt: COMPOSITION_RHYTHM.sm,
+        mt: revealMode ? 0 : COMPOSITION_RHYTHM.sm,
         boxSizing: "border-box",
         flexShrink: 0,
       }}
@@ -71,16 +92,53 @@ export function MarketingTopBar() {
 export function MarketingNeuFrame({
   children,
   mainId = "lp-main",
+  /** When set, header stays hidden while `#id` (hero) intersects; shows after scroll past. */
+  revealHeaderAfterId,
+  /** Landing: no soft top ribbon — hero owns the brand. */
+  hideTopBar = false,
 }: {
   children: ReactNode;
   mainId?: string;
   /** @deprecated Actions moved to MarketingLandingDock — kept for call-site compat. */
   ctaHref?: string;
   ctaLabel?: string;
+  revealHeaderAfterId?: string;
+  hideTopBar?: boolean;
 }) {
+  const revealMode = Boolean(revealHeaderAfterId) && !hideTopBar;
+  const [headerVisible, setHeaderVisible] = useState(!revealMode);
+
+  useEffect(() => {
+    if (!revealHeaderAfterId || hideTopBar) return;
+    const el = document.getElementById(revealHeaderAfterId);
+    if (!el) return;
+
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      // Show soft header once the hero has scrolled off (bottom above inset).
+      setHeaderVisible(rect.bottom <= 12);
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [revealHeaderAfterId, hideTopBar]);
+
+  const frameClass = [
+    "esti-lp-neu",
+    revealMode ? "esti-lp-neu--reveal-header" : "",
+    hideTopBar ? "esti-lp-neu--no-topbar" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <Box
-      className="esti-lp-neu"
+      className={frameClass}
       sx={{
         minHeight: "100vh",
         backgroundColor: colors.background,
@@ -91,7 +149,9 @@ export function MarketingNeuFrame({
       <a href={`#${mainId}`} className="esti-skip-link">
         Skip to content
       </a>
-      <MarketingTopBar />
+      {!hideTopBar ? (
+        <MarketingTopBar revealMode={revealMode} visible={headerVisible} />
+      ) : null}
       <Box component="main" id={mainId} tabIndex={-1} sx={{ flex: 1, minWidth: 0, width: "100%" }}>
         {children}
       </Box>

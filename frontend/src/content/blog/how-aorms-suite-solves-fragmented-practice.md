@@ -1,7 +1,7 @@
 ---
 title: How the AORMS suite solves fragmented practice tools
 date: 2026-08-08
-excerpt: Messaging, sheets, email, and CAD each own a slice of the project. Here is how AORMS maps those pain points to practice managers, AQC technical apps, AADT, ShilpiDB, and firm portals — without pretending one login fixes everything.
+excerpt: Messaging, sheets, email, and CAD each own a slice of the project. Here is how AORMS maps those pain points to practice managers, AQC technical apps, ADraft, ShilpiDB, and firm portals — without pretending one login fixes everything.
 tags: Suite, Operations, Product
 author: Human Centric Works
 ---
@@ -26,7 +26,7 @@ This post maps **common consulting-office failures** to **how the AORMS suite so
 
 **Problem.** Principals will not put unfinished geometry on a shared SaaS CAD just to “unify” the stack. WAN latency and IP fear win.
 
-**Suite answer.** **Technical work stays local.** **AQC Estimation**, **AQC BBS**, and **AQC Project Management** (AProc) share `bbs_engine` on the desktop. **AADT** drafts into **ShilpiDB**. Portals see READY drawing packages and issued PDFs only.
+**Suite answer.** **Technical work stays local.** **AQC Estimation**, **AQC BBS**, and **AQC Project Management** (AProc) share `bbs_engine` on the desktop. **ADraft** drafts into **ShilpiDB**. Portals see READY drawing packages and issued PDFs only.
 
 ## 4. “Latest drawing” is a social problem
 

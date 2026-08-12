@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { useLocation, Link as RouterLink } from "react-router-dom";
 import {
   Accordion,
@@ -23,26 +23,22 @@ import ArchitectureOutlined from "@mui/icons-material/ArchitectureOutlined";
 import EngineeringOutlined from "@mui/icons-material/EngineeringOutlined";
 import {
   KpiStrip,
-  Surface,
   RADIUS,
 } from "@hcw/ui-kit";
 import { MarketingNeuFrame } from "../components/landing/MarketingTopBar.js";
 import { MarketingLandingDock } from "../components/landing/MarketingLandingDock.js";
 import { LandingWellbeingWidget } from "../components/landing/LandingWellbeingWidget.js";
 import { LandingEntourage } from "../components/landing/LandingEntourage.js";
-import { LandingEcosystemMap } from "../components/landing/LandingEcosystemMap.js";
+import { LandingHeroVideo } from "../components/landing/LandingHeroVideo.js";
 import { SoftSurface } from "../components/landing/SoftSurface.js";
 import { AormsLogo } from "../components/AormsLogo.js";
 import {
   AORMS_PLATFORM,
-  PLATFORM_FRAMEWORKS,
-  SUITE_CORE_APPS,
-  SUITE_MANAGER_APPS,
-  SUITE_TECHNICAL_APPS,
+  LANDING_PRODUCTS,
   SHILPIDB,
   AORMS_STUDIO,
   AORMS_CONSULTANCY,
-  AADT,
+  ADRAFT,
   EOMS,
   ESTI,
   HUMAN_CENTRIC_WORKS,
@@ -52,19 +48,27 @@ import { useLandingVisitCounter } from "../lib/landing-visit.js";
 import { isMarketingOnly } from "../lib/marketing-gate.js";
 import { installersComingSoonForced } from "../lib/desktop-installers.js";
 import { MARKETING_CONTENT_GUTTER, MARKETING_RHYTHM, marketingContentColumnSx } from "../lib/marketing-layout.js";
+import { LandingAecStrip, LandingProductFigure } from "../components/landing/LandingAecStrip.js";
 
 /**
  * AEC landing IA (odd dock peers):
- * Overview → Outcomes → Audience → Platform → Start
- * Rhythm wellbeing folds into Start. Composition: COMPOSITION-PRINCIPLES.md
+ * Overview → Outcomes → Audience → Products → Start
+ * Hero: brand + copy + poster/video (no AEC building collage). Products: suite catalog.
  */
 const SECTIONS = [
   { href: "#top", label: "Overview" },
   { href: "#outcomes", label: "Outcomes" },
   { href: "#audience", label: "Audience" },
-  { href: "#platform", label: "Platform" },
+  { href: "#products", label: "Products" },
   { href: "#start", label: "Start" },
 ] as const;
+
+type LandingProduct = (typeof LANDING_PRODUCTS)[number];
+
+const AUDIENCE_FIGURE: Record<string, string> = {
+  architecture: "/landing/entourage/building-03.png",
+  engineering: "/landing/entourage/building-07.png",
+};
 
 /** Market outcomes — five peers (list bands, not card collage). */
 const OUTCOMES = [
@@ -76,7 +80,7 @@ const OUTCOMES = [
   {
     icon: <HubOutlined fontSize="small" />,
     title: "One suite — not five disconnected tools",
-    body: "Managers for the office, AQC for quantities and programme, AADT for drafting, ShilpiDB for drawings. Firm portals publish updates — no spreadsheet archaeology.",
+    body: "Managers for the office, AQC for quantities and programme, ADraft for drafting, ShilpiDB for drawings. Firm portals publish updates — no spreadsheet archaeology.",
   },
   {
     icon: <DnsOutlined fontSize="small" />,
@@ -123,29 +127,43 @@ function SectionHead({
   eyebrow,
   title,
   lead,
+  display,
 }: {
   eyebrow: string;
   title: string;
   lead?: string;
+  /** Larger display face for product / audience bands. */
+  display?: boolean;
 }) {
   return (
     <Stack
-      className="esti-lp-reveal"
+      className="esti-lp-reveal esti-lp-section-head"
       spacing={MARKETING_RHYTHM.sm}
-      sx={{ mb: MARKETING_RHYTHM.headMb, maxWidth: 720 }}
+      sx={{ mb: MARKETING_RHYTHM.headMb, maxWidth: display ? 820 : 720 }}
     >
       <Typography
+        className="esti-lp-eyebrow"
         variant="overline"
         color="text.secondary"
-        sx={{ letterSpacing: "0.14em", fontFamily: "inherit" }}
+        sx={{ letterSpacing: "0.16em", fontFamily: "inherit", fontWeight: 600 }}
       >
         {eyebrow}
       </Typography>
-      <Typography variant="h3" component="h2" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+      <Typography
+        className={display ? "esti-lp-display" : "esti-lp-section-title"}
+        variant="h3"
+        component="h2"
+        sx={{ fontWeight: display ? 650 : 700, lineHeight: 1.12, letterSpacing: "-0.02em" }}
+      >
         {title}
       </Typography>
       {lead ? (
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 620, lineHeight: 1.55 }}>
+        <Typography
+          className="esti-lp-lead"
+          variant="body1"
+          color="text.secondary"
+          sx={{ maxWidth: 640, lineHeight: 1.6, fontWeight: 450 }}
+        >
           {lead}
         </Typography>
       ) : null}
@@ -153,65 +171,247 @@ function SectionHead({
   );
 }
 
-function Bar({ w = "100%" }: { w?: number | string }) {
+function ProductCtas({ product }: { product: LandingProduct }) {
+  const ctaSx = { textTransform: "none", fontWeight: 700, px: 0, minHeight: 44 } as const;
   return (
-    <Box
-      sx={{
-        height: 8,
-        width: w,
-        borderRadius: 1,
-        bgcolor: (t) => t.palette.action.hover,
-      }}
-    />
+    <Stack
+      className="esti-lp-reveal"
+      direction="row"
+      spacing={MARKETING_RHYTHM.md}
+      sx={{ flexWrap: "wrap", alignItems: "center" }}
+    >
+      {product.external ? (
+        <Button
+          component="a"
+          href={product.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="text"
+          color="inherit"
+          size="medium"
+          endIcon={<ArrowForward />}
+          className="esti-lp-cta-link"
+          sx={ctaSx}
+        >
+          {product.cta}
+        </Button>
+      ) : (
+        <Button
+          component={RouterLink}
+          to={product.href}
+          variant="text"
+          color="inherit"
+          size="medium"
+          endIcon={<ArrowForward />}
+          className="esti-lp-cta-link"
+          sx={ctaSx}
+        >
+          {product.cta}
+        </Button>
+      )}
+      {"repo" in product && product.repo ? (
+        <Button
+          component="a"
+          href={product.repo}
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="text"
+          size="medium"
+          className="esti-lp-cta-link"
+          sx={{ textTransform: "none", fontWeight: 600, minHeight: 44 }}
+        >
+          Repo
+        </Button>
+      ) : null}
+    </Stack>
   );
 }
 
-/** Practice desk proof — Platform only; never in the hero. */
-function WorkspacePreview() {
+function ProductBody({ product }: { product: LandingProduct }) {
   return (
-    <SoftSurface
-      aria-hidden
-      className="esti-lp-reveal"
-      sx={{
-        p: { xs: MARKETING_RHYTHM.md, md: MARKETING_RHYTHM.lg },
-        height: { xs: 240, md: "min(40vh, 320px)" },
-        minHeight: { md: 280 },
-      }}
-    >
-      <Stack spacing={MARKETING_RHYTHM.md} sx={{ height: "100%" }}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <Bar w={72} />
-          <Box sx={{ flex: 1 }} />
-          <Bar w={40} />
-          <Bar w={40} />
-        </Stack>
-        <KpiStrip
-          items={[
-            { id: "a", label: "Fee at risk", value: "₹2.4L" },
-            { id: "b", label: "Open loops", value: "3" },
-            { id: "c", label: "Health", value: "Steady" },
-          ]}
-        />
-        <Surface
-          layer="flat"
-          sx={{
-            flex: 1,
-            minHeight: 0,
-            p: MARKETING_RHYTHM.md,
-            border: (t) => `1px solid ${t.palette.divider}`,
-            display: "flex",
-            flexDirection: "column",
-            gap: MARKETING_RHYTHM.sm,
-          }}
-        >
-          <Bar w="40%" />
-          <Bar w="92%" />
-          <Bar w="78%" />
-          <Bar w="60%" />
-        </Surface>
+    <Box sx={{ minWidth: 0 }}>
+      <Typography
+        variant="overline"
+        color="text.secondary"
+        className="esti-lp-eyebrow"
+        sx={{ letterSpacing: "0.1em", fontWeight: 600 }}
+      >
+        {product.family}
+      </Typography>
+      <Typography
+        variant="h4"
+        component="h3"
+        sx={{ mt: MARKETING_RHYTHM.sm, fontWeight: 650, letterSpacing: "-0.025em", lineHeight: 1.15 }}
+      >
+        {product.title}
+      </Typography>
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        sx={{ mt: MARKETING_RHYTHM.sm, mb: MARKETING_RHYTHM.md, lineHeight: 1.65, fontWeight: 450 }}
+      >
+        {product.lead}
+      </Typography>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        className="esti-lp-product__meta"
+        sx={{ display: "block", mb: MARKETING_RHYTHM.md, letterSpacing: "0.06em" }}
+      >
+        {product.expansion}
+        {product.id !== "portals" ? " · Desktop preferred · Soft launch" : " · Soft launch"}
+      </Typography>
+      <Stack className="esti-lp-product__updates" spacing={0} sx={{ mb: MARKETING_RHYTHM.lg }}>
+        {product.updates.map((line, i) => (
+          <Box key={line} className="esti-lp-product__update" sx={{ py: MARKETING_RHYTHM.md }}>
+            <Typography className="esti-lp-product__update-n" variant="caption" aria-hidden>
+              {String(i + 1).padStart(2, "0")}
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.65, fontWeight: 450 }}>
+              {line}
+            </Typography>
+          </Box>
+        ))}
       </Stack>
-    </SoftSurface>
+      <ProductCtas product={product} />
+    </Box>
   );
+}
+
+/** One Products surface — all suite apps in a single rail + panel catalog. */
+function SuiteProductsCatalog({ activeProduct }: { activeProduct: string | null }) {
+  const { hash } = useLocation();
+  const hashId = hash.replace(/^#/, "");
+  const initial = LANDING_PRODUCTS.some((p) => p.id === hashId) ? hashId : LANDING_PRODUCTS[0]!.id;
+  const [active, setActive] = useState(initial);
+  const userChoseRef = useRef(false);
+
+  useEffect(() => {
+    const id = hash.replace(/^#/, "");
+    if (!LANDING_PRODUCTS.some((p) => p.id === id)) return;
+    userChoseRef.current = false;
+    setActive(id);
+  }, [hash]);
+
+  useEffect(() => {
+    if (userChoseRef.current) return;
+    if (activeProduct && LANDING_PRODUCTS.some((p) => p.id === activeProduct)) {
+      setActive(activeProduct);
+    }
+  }, [activeProduct]);
+
+  const selected = LANDING_PRODUCTS.find((p) => p.id === active) ?? LANDING_PRODUCTS[0]!;
+  const panelId = `suite-panel-${selected.id}`;
+
+  return (
+    <Box className="esti-lp-reveal esti-lp-vacc esti-lp-vacc--suite" sx={{ maxWidth: 1080 }}>
+      <nav className="esti-lp-vacc__rail" aria-label="AORMS suite products">
+        {LANDING_PRODUCTS.map((product) => {
+          const open = product.id === selected.id;
+          return (
+            <button
+              key={product.id}
+              type="button"
+              id={product.id}
+              data-product={product.id}
+              className={open ? "esti-lp-vacc__tab esti-lp-vacc__tab--active" : "esti-lp-vacc__tab"}
+              aria-current={open ? "true" : undefined}
+              aria-controls={panelId}
+              aria-expanded={open}
+              onClick={() => {
+                userChoseRef.current = true;
+                setActive(product.id);
+                if (typeof window !== "undefined" && window.history?.replaceState) {
+                  window.history.replaceState(null, "", `#${product.id}`);
+                }
+              }}
+            >
+              <span className="esti-lp-vacc__tab-family">{product.family}</span>
+              <span className="esti-lp-vacc__tab-title">{product.title}</span>
+            </button>
+          );
+        })}
+      </nav>
+      <Box
+        id={panelId}
+        role="region"
+        aria-labelledby={selected.id}
+        className="esti-lp-vacc__panel esti-lp-vacc__panel--suite"
+        data-product={selected.id}
+      >
+        <div className="esti-lp-vacc__panel-grid">
+          <LandingProductFigure productId={selected.id} title={selected.title} />
+          <ProductBody product={selected} />
+        </div>
+      </Box>
+    </Box>
+  );
+}
+
+function useScrollProgress() {
+  const [p, setP] = useState(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const el = document.documentElement;
+      const max = el.scrollHeight - el.clientHeight;
+      setP(max > 0 ? Math.min(1, el.scrollTop / max) : 0);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return p;
+}
+
+function useHeroPointer(homeRef: RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const root = homeRef.current;
+    if (!root) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const onMove = (e: PointerEvent) => {
+      const r = root.getBoundingClientRect();
+      const x = ((e.clientX - r.left) / r.width) * 100;
+      const y = ((e.clientY - r.top) / r.height) * 100;
+      root.style.setProperty("--lp-px", `${x.toFixed(2)}%`);
+      root.style.setProperty("--lp-py", `${y.toFixed(2)}%`);
+    };
+    root.addEventListener("pointermove", onMove, { passive: true });
+    return () => root.removeEventListener("pointermove", onMove);
+  }, [homeRef]);
+}
+
+function useActiveProduct() {
+  const [active, setActive] = useState<string | null>(null);
+  useEffect(() => {
+    const ids = LANDING_PRODUCTS.map((p) => p.id);
+    const visible = new Map<string, number>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const id = entry.target.id;
+          if (!id) continue;
+          if (entry.isIntersecting) visible.set(id, entry.intersectionRatio);
+          else visible.delete(id);
+        }
+        let best = "";
+        let bestR = 0;
+        for (const [id, ratio] of visible) {
+          if (ratio >= bestR) {
+            bestR = ratio;
+            best = id;
+          }
+        }
+        if (best) setActive(best);
+      },
+      { rootMargin: "-35% 0px -45% 0px", threshold: [0, 0.2, 0.45, 0.7] },
+    );
+    for (const id of ids) {
+      const n = document.getElementById(id);
+      if (n) io.observe(n);
+    }
+    return () => io.disconnect();
+  }, []);
+  return active;
 }
 
 function useLandingReveal() {
@@ -237,11 +437,16 @@ function useLandingReveal() {
   }, []);
 }
 
-/** Single-page AORMS suite landing — AEC architecture + engineering focus. */
+/** Single-page AORMS suite landing — typography-led for architects & engineers. */
 export function Landing() {
   const visitCount = useLandingVisitCounter();
   const { hash } = useLocation();
+  const homeRef = useRef<HTMLDivElement>(null);
+  const [audienceFocus, setAudienceFocus] = useState<"architecture" | "engineering" | null>(null);
+  const progress = useScrollProgress();
+  const activeProduct = useActiveProduct();
   useLandingReveal();
+  useHeroPointer(homeRef);
 
   useEffect(() => {
     applyLandingSeo();
@@ -249,8 +454,13 @@ export function Landing() {
   }, []);
 
   useEffect(() => {
-    const section = hash.replace(/^#/, "");
+    // Legacy #aadt → #adraft (ADraft rebrand).
+    const raw = hash.replace(/^#/, "");
+    const section = raw === "aadt" ? "adraft" : raw;
     if (!section) return;
+    if (raw === "aadt" && typeof window !== "undefined") {
+      window.history.replaceState(null, "", "#adraft");
+    }
     const raf = window.requestAnimationFrame(() => {
       document.getElementById(section)?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
@@ -258,13 +468,29 @@ export function Landing() {
   }, [hash]);
 
   return (
-    <MarketingNeuFrame>
-      <Box className="esti-lp-aec-home" sx={{ position: "relative", width: "100%" }}>
-        <LandingEntourage count={15} seed={77} />
+    <MarketingNeuFrame hideTopBar>
+      <Box
+        ref={homeRef}
+        className="esti-lp-aec-home esti-lp-atelier"
+        sx={{ position: "relative", width: "100%" }}
+      >
+        <div
+          className="esti-lp-scroll-progress"
+          style={{ transform: `scaleX(${progress})` }}
+          aria-hidden
+        />
+        <div className="esti-lp-atelier-grid" aria-hidden />
+        <LandingEntourage count={12} seed={77} />
 
-        {/* 1 — Overview: brand + one big-picture ecosystem view */}
-        <Box id="top" component="section" className="esti-lp-hero-bleed esti-lp-hero-bleed--eco">
+        {/* 1 — Overview: brand + poster/video */}
+        <Box
+          id="top"
+          component="section"
+          className="esti-lp-hero-bleed esti-lp-hero-bleed--dark esti-lp-hero-bleed--video"
+        >
+          <LandingHeroVideo />
           <div className="esti-lp-hero-bleed__grade" aria-hidden />
+          <div className="esti-lp-hero-bleed__spot" aria-hidden />
           <Container
             maxWidth={false}
             disableGutters
@@ -281,26 +507,30 @@ export function Landing() {
                 <AormsLogo variant="hero" />
               </Box>
               <Typography
-                className="esti-lp-hero-in esti-lp-hero-in--2"
+                className="esti-lp-hero-in esti-lp-hero-in--2 esti-lp-eyebrow"
                 variant="overline"
-                color="text.secondary"
-                sx={{ mt: MARKETING_RHYTHM.sm, letterSpacing: "0.1em", display: "block" }}
+                sx={{ mt: MARKETING_RHYTHM.sm, letterSpacing: "0.14em", display: "block", fontWeight: 600 }}
               >
                 {AORMS_PLATFORM.expansion}
               </Typography>
               <Typography
-                className="esti-lp-hero-in esti-lp-hero-in--3"
+                className="esti-lp-hero-in esti-lp-hero-in--3 esti-lp-hero-display"
                 variant="h3"
                 component="h1"
-                sx={{ mt: MARKETING_RHYTHM.sm, fontWeight: 700, lineHeight: 1.15, maxWidth: 720 }}
+                sx={{
+                  mt: MARKETING_RHYTHM.md,
+                  fontWeight: 650,
+                  lineHeight: 1.08,
+                  letterSpacing: "-0.03em",
+                  maxWidth: 760,
+                }}
               >
                 {AORMS_PLATFORM.heroHeadline[0]}
               </Typography>
               <Typography
-                className="esti-lp-hero-in esti-lp-hero-in--4"
+                className="esti-lp-hero-in esti-lp-hero-in--4 esti-lp-lead"
                 variant="body1"
-                color="text.secondary"
-                sx={{ mt: MARKETING_RHYTHM.sm, mb: MARKETING_RHYTHM.md, maxWidth: 560, lineHeight: 1.55 }}
+                sx={{ mt: MARKETING_RHYTHM.md, mb: MARKETING_RHYTHM.lg, maxWidth: 540, lineHeight: 1.65, fontWeight: 450 }}
               >
                 {AORMS_PLATFORM.heroSupport}
               </Typography>
@@ -308,7 +538,7 @@ export function Landing() {
                 className="esti-lp-hero-in esti-lp-hero-in--5"
                 direction="row"
                 spacing={MARKETING_RHYTHM.sm}
-                sx={{ flexWrap: "wrap", gap: MARKETING_RHYTHM.sm, mb: MARKETING_RHYTHM.lg }}
+                sx={{ flexWrap: "wrap", gap: MARKETING_RHYTHM.sm }}
               >
                 {isMarketingOnly() ? (
                   <Button
@@ -317,6 +547,7 @@ export function Landing() {
                     variant="contained"
                     color="primary"
                     endIcon={<ArrowForward />}
+                    className="esti-lp-cta-primary"
                     sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 48, px: 3 }}
                   >
                     Downloads — coming soon
@@ -328,6 +559,7 @@ export function Landing() {
                     variant="contained"
                     color="primary"
                     endIcon={<ArrowForward />}
+                    className="esti-lp-cta-primary"
                     sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 48, px: 3 }}
                   >
                     Firm portal demos
@@ -335,18 +567,20 @@ export function Landing() {
                 )}
                 <Button
                   component="a"
-                  href="#platform"
+                  href="#products"
                   variant="outlined"
                   color="inherit"
+                  className="esti-lp-cta-ghost"
                   sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
                 >
-                  Suite detail
+                  Explore products
                 </Button>
                 <Button
                   component={RouterLink}
                   to="/blog"
-                  variant="outlined"
+                  variant="text"
                   color="inherit"
+                  className="esti-lp-cta-link"
                   sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
                 >
                   Blog
@@ -364,10 +598,6 @@ export function Landing() {
                 )}
               </Stack>
             </Box>
-
-            <Box className="esti-lp-hero-in esti-lp-hero-in--6 esti-lp-hero-bleed__eco">
-              <LandingEcosystemMap />
-            </Box>
           </Container>
         </Box>
 
@@ -382,30 +612,43 @@ export function Landing() {
             pb: 14,
           }}
         >
-          {/* 2 — Outcomes: list bands */}
+          {/* 2 — Outcomes: numbered interactive bands */}
           <Box id="outcomes" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
             <SectionHead
               eyebrow="Outcomes"
               title="What changes when the practice runs on one record"
               lead="Not another dashboard — fee recovery, delivery quality, and trusted answers stop competing with tool chaos."
+              display
             />
-            <Stack className="esti-lp-outcome-list" spacing={0} divider={<Divider />}>
-              {OUTCOMES.map((o) => (
+            <Stack className="esti-lp-outcome-list" spacing={0}>
+              {OUTCOMES.map((o, i) => (
                 <Stack
                   key={o.title}
                   className="esti-lp-reveal esti-lp-outcome-row"
                   direction="row"
                   spacing={MARKETING_RHYTHM.md}
-                  sx={{ alignItems: "flex-start", py: MARKETING_RHYTHM.md }}
+                  sx={{ alignItems: "flex-start", py: MARKETING_RHYTHM.lg }}
+                  tabIndex={0}
                 >
-                  <Box sx={{ color: "text.secondary", display: "flex", mt: 0.35 }} aria-hidden>
+                  <Typography className="esti-lp-outcome-n" aria-hidden>
+                    {String(i + 1).padStart(2, "0")}
+                  </Typography>
+                  <Box sx={{ color: "text.secondary", display: "flex", mt: 0.5 }} aria-hidden>
                     {o.icon}
                   </Box>
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Typography
+                      variant="h6"
+                      component="h3"
+                      sx={{ fontWeight: 700, letterSpacing: "-0.015em", lineHeight: 1.25 }}
+                    >
                       {o.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm, maxWidth: 640 }}>
+                    <Typography
+                      variant="body1"
+                      color="text.secondary"
+                      sx={{ mt: MARKETING_RHYTHM.sm, maxWidth: 640, lineHeight: 1.65, fontWeight: 450 }}
+                    >
                       {o.body}
                     </Typography>
                   </Box>
@@ -414,282 +657,138 @@ export function Landing() {
             </Stack>
           </Box>
 
-          {/* 3 — Audience: architecture + engineering peers */}
+          {/* 3 — Audience: architecture / engineering with AEC figures */}
           <Box id="audience" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
             <SectionHead
               eyebrow="Audience"
-              title="Built for the practices that design and advise"
-              lead="Two practice managers. Same suite spine. PMC governance lives with AProc under Platform."
+              title="Drawn for architects and engineers"
+              lead="AEC consulting firms — not generic SaaS personas. Two practice managers on one suite spine."
+              display
             />
-            <Grid container spacing={MARKETING_RHYTHM.lg}>
-              {AUDIENCE.map((a) => (
-                <Grid key={a.id} size={{ xs: 12, md: 6 }}>
-                  <Stack className="esti-lp-reveal esti-lp-audience-peer" spacing={MARKETING_RHYTHM.sm}>
-                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                      <Box sx={{ color: "primary.main", display: "flex" }} aria-hidden>
-                        {a.icon}
-                      </Box>
-                      <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em" }}>
-                        {a.product}
-                      </Typography>
-                    </Stack>
-                    <Typography variant="h5" component="h3" sx={{ fontWeight: 700 }}>
-                      {a.title}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.55, maxWidth: 420 }}>
-                      {a.body}
-                    </Typography>
-                  </Stack>
-                </Grid>
-              ))}
+            <Grid container spacing={0} className="esti-lp-audience-split">
+              {AUDIENCE.map((a) => {
+                const focused = audienceFocus === a.id || audienceFocus === null;
+                return (
+                  <Grid key={a.id} size={{ xs: 12, md: 6 }}>
+                    <Box
+                      className={[
+                        "esti-lp-reveal",
+                        "esti-lp-audience-peer",
+                        audienceFocus === a.id ? "esti-lp-audience-peer--on" : "",
+                        audienceFocus && audienceFocus !== a.id ? "esti-lp-audience-peer--dim" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      onMouseEnter={() => setAudienceFocus(a.id as "architecture" | "engineering")}
+                      onMouseLeave={() => setAudienceFocus(null)}
+                      onFocus={() => setAudienceFocus(a.id as "architecture" | "engineering")}
+                      onBlur={() => setAudienceFocus(null)}
+                      tabIndex={0}
+                      sx={{ opacity: focused ? 1 : undefined }}
+                    >
+                      <Stack spacing={MARKETING_RHYTHM.md}>
+                        <figure className="esti-lp-audience-fig" aria-hidden>
+                          <img
+                            src={AUDIENCE_FIGURE[a.id]}
+                            alt=""
+                            width={200}
+                            height={200}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </figure>
+                        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                          <Box sx={{ color: "primary.main", display: "flex" }} aria-hidden>
+                            {a.icon}
+                          </Box>
+                          <Typography className="esti-lp-eyebrow" variant="overline" color="text.secondary">
+                            {a.product}
+                          </Typography>
+                        </Stack>
+                        <Typography
+                          className="esti-lp-audience-title"
+                          variant="h4"
+                          component="h3"
+                          sx={{ fontWeight: 650, letterSpacing: "-0.025em", lineHeight: 1.15 }}
+                        >
+                          {a.title}
+                        </Typography>
+                        <Typography
+                          variant="body1"
+                          color="text.secondary"
+                          sx={{ lineHeight: 1.65, maxWidth: 420, fontWeight: 450 }}
+                        >
+                          {a.body}
+                        </Typography>
+                        <Button
+                          component="a"
+                          href={a.id === "architecture" ? "#studio" : "#consultancy"}
+                          variant="text"
+                          color="inherit"
+                          endIcon={<ArrowForward />}
+                          className="esti-lp-cta-link"
+                          sx={{ textTransform: "none", fontWeight: 700, px: 0, alignSelf: "flex-start", minHeight: 44 }}
+                        >
+                          See {a.product}
+                        </Button>
+                      </Stack>
+                    </Box>
+                  </Grid>
+                );
+              })}
             </Grid>
           </Box>
 
-          {/* 4 — Platform: managers first, then technical */}
-          <Box id="platform" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
-            <SoftSurface className="esti-lp-reveal" sx={{ p: { xs: MARKETING_RHYTHM.md, md: MARKETING_RHYTHM.lg }, mb: MARKETING_RHYTHM.blockGap }}>
-              <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em" }}>
-                Replaces the sprawl
-              </Typography>
-              <Stack direction="row" sx={{ flexWrap: "wrap", gap: MARKETING_RHYTHM.sm, mt: MARKETING_RHYTHM.sm }}>
-                {AORMS_PLATFORM.fragmentedTools.map((tool) => (
-                  <Typography
-                    key={tool}
-                    variant="body2"
-                    sx={{
-                      px: 1.5,
-                      py: 0.5,
-                      color: "text.secondary",
-                      border: (t) => `1px solid ${t.palette.divider}`,
-                      borderRadius: `${RADIUS}px`,
-                    }}
-                  >
-                    {tool}
-                  </Typography>
-                ))}
-                <Typography
-                  variant="body2"
-                  sx={{ px: 1.5, py: 0.5, fontWeight: 700, color: "primary.main" }}
-                >
-                  → {AORMS_PLATFORM.name}
-                </Typography>
-              </Stack>
-            </SoftSurface>
+          {/* 4 — Products: one AEC suite catalog */}
+          <Box id="products" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
+            <LandingAecStrip variant="section" />
 
             <SectionHead
-              eyebrow="Suite"
-              title="Managers first. Technical apps local. Drafting shared."
-              lead="AORMS Connect is the suite core — sign in once and launch every app. Practice managers sync communications to firm portals. Estimation, BBS, and project management run locally on a shared engine."
+              eyebrow="Products"
+              title="One AEC suite. Dedicated apps."
+              lead={`Architecture, engineering, and construction consulting — Connect launches managers and local technical tools. ${AORMS_PLATFORM.aecDisciplines.join(" · ")}. Installers remain Coming soon.`}
+              display
             />
 
-            <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em", display: "block", mb: MARKETING_RHYTHM.sm }}>
-              Practice managers
-            </Typography>
-            <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
-              {SUITE_MANAGER_APPS.map((app) => (
-                <Grid key={app.id} size={{ xs: 12, md: 6 }}>
-                  <Stack
-                    className="esti-lp-reveal"
-                    id={app.id}
-                    spacing={MARKETING_RHYTHM.sm}
-                    sx={{ py: MARKETING_RHYTHM.sm, borderTop: (t) => `1px solid ${t.palette.divider}` }}
-                  >
-                    <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
-                      {app.workspace}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {app.subtitle} · Coming soon
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {app.body}
-                    </Typography>
-                    <Box>
-                      <Button
-                        component={RouterLink}
-                        to="/downloads"
-                        variant="text"
-                        color="inherit"
-                        size="small"
-                        endIcon={<ArrowForward />}
-                        sx={{ textTransform: "none", fontWeight: 700, px: 0, minHeight: 44 }}
-                      >
-                        {app.cta}
-                      </Button>
-                    </Box>
-                  </Stack>
-                </Grid>
-              ))}
-            </Grid>
+            <SuiteProductsCatalog activeProduct={activeProduct} />
 
-            <Grid container spacing={MARKETING_RHYTHM.lg} sx={{ mb: MARKETING_RHYTHM.blockGap, alignItems: "center" }}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em" }}>
-                  Practice desk
-                </Typography>
-                <Typography variant="h6" component="h3" sx={{ fontWeight: 700, mt: MARKETING_RHYTHM.sm }}>
-                  Priorities the principal can act on
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm, maxWidth: 420 }}>
-                  Fee risk, open loops, and office health — the manager view for architecture and engineering firms.
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <WorkspacePreview />
-              </Grid>
-            </Grid>
-
-            <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
-              {Object.values(PLATFORM_FRAMEWORKS).map((fw) => (
-                <Grid key={fw.title} size={{ xs: 12, md: 6 }}>
-                  <Stack className="esti-lp-reveal" spacing={MARKETING_RHYTHM.sm} sx={{ py: MARKETING_RHYTHM.sm }}>
-                    <Typography variant="h6" component="h3" sx={{ fontWeight: 700 }}>
-                      {fw.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {fw.summary}
-                    </Typography>
-                  </Stack>
-                </Grid>
-              ))}
-            </Grid>
-
-            <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em", display: "block", mb: MARKETING_RHYTHM.sm }}>
-              Suite core
-            </Typography>
-            <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
-              {SUITE_CORE_APPS.map((app) => (
-                <Grid key={app.id} size={{ xs: 12, md: 6 }}>
-                  <Stack
-                    className="esti-lp-reveal"
-                    id={app.id}
-                    spacing={MARKETING_RHYTHM.sm}
-                    sx={{ py: MARKETING_RHYTHM.sm, borderTop: (t) => `1px solid ${t.palette.divider}` }}
-                  >
-                    <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
-                      {app.workspace}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {app.subtitle}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {app.body}
-                    </Typography>
-                    <Box>
-                      <Button
-                        component={RouterLink}
-                        to="/downloads"
-                        variant="text"
-                        color="inherit"
-                        size="small"
-                        endIcon={<ArrowForward />}
-                        sx={{ textTransform: "none", fontWeight: 700, px: 0, minHeight: 44 }}
-                      >
-                        {app.cta}
-                      </Button>
-                    </Box>
-                  </Stack>
-                </Grid>
-              ))}
-            </Grid>
-
-            <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.1em", display: "block", mb: MARKETING_RHYTHM.sm }}>
-              Technical &amp; drafting
-            </Typography>
-            <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
-              {SUITE_TECHNICAL_APPS.map((app) => (
-                <Grid key={app.id} size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Stack
-                    className="esti-lp-reveal"
-                    id={app.id}
-                    spacing={MARKETING_RHYTHM.sm}
-                    sx={{ py: MARKETING_RHYTHM.sm, height: "100%" }}
-                  >
-                    <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
-                      {app.workspace}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {app.subtitle}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {app.body}
-                    </Typography>
-                    <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-                      <Button
-                        component="a"
-                        href={app.href}
-                        target={app.href.startsWith("http") ? "_blank" : undefined}
-                        rel={app.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                        variant="text"
-                        color="inherit"
-                        size="small"
-                        sx={{ textTransform: "none", fontWeight: 700, px: 0, minHeight: 44 }}
-                      >
-                        {app.cta}
-                      </Button>
-                      <Button
-                        component="a"
-                        href={app.repo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        variant="text"
-                        size="small"
-                        sx={{ textTransform: "none", fontWeight: 600, minHeight: 44 }}
-                      >
-                        Repo
-                      </Button>
-                    </Stack>
-                  </Stack>
-                </Grid>
-              ))}
-            </Grid>
-
-            <Stack className="esti-lp-reveal" spacing={MARKETING_RHYTHM.sm} sx={{ mb: MARKETING_RHYTHM.blockGap, py: MARKETING_RHYTHM.md, borderTop: (t) => `1px solid ${t.palette.divider}` }}>
-              <Typography variant="h6" component="h3" sx={{ fontWeight: 700 }}>
-                {SHILPIDB.name}
-              </Typography>
-              <Typography variant="overline" color="text.secondary">
-                {SHILPIDB.role}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 640 }}>
-                {SHILPIDB.summary}
-              </Typography>
-              <Box>
-                <Button
-                  component="a"
-                  href={SHILPIDB.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  size="small"
-                  sx={{ textTransform: "none", fontWeight: 700, px: 0, minHeight: 44 }}
-                >
-                  ShilpiDB on GitHub
-                </Button>
-              </Box>
-            </Stack>
-
-            <Grid container spacing={MARKETING_RHYTHM.md} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
-              {[EOMS, ESTI].map((tier) => (
-                <Grid key={tier.name} size={{ xs: 12, md: 6 }}>
-                  <Stack className="esti-lp-reveal" spacing={MARKETING_RHYTHM.sm} sx={{ py: MARKETING_RHYTHM.sm }}>
-                    <Stack direction="row" spacing={MARKETING_RHYTHM.sm} sx={{ alignItems: "baseline" }}>
-                      <Typography variant="h6" component="h3" sx={{ fontWeight: 800 }}>
-                        {tier.name}
-                      </Typography>
-                      <Typography variant="overline" color="text.secondary">
-                        {tier.role}
+            <Box
+              id="intelligence"
+              component="section"
+              sx={{
+                py: MARKETING_RHYTHM.sectionY,
+                borderTop: (t) => `1px solid ${t.palette.divider}`,
+              }}
+            >
+              <SectionHead
+                eyebrow="Intelligence"
+                title={`${ESTI.name} on the desk. ${EOMS.name} in the bank.`}
+                lead="AI stays local on practice managers. The knowledge bank stays a separate API — never a third-party training sink."
+              />
+              <Grid container spacing={MARKETING_RHYTHM.md}>
+                {[ESTI, EOMS].map((tier) => (
+                  <Grid key={tier.name} size={{ xs: 12, md: 6 }}>
+                    <Stack className="esti-lp-reveal" spacing={MARKETING_RHYTHM.sm} sx={{ py: MARKETING_RHYTHM.sm }}>
+                      <Stack direction="row" spacing={MARKETING_RHYTHM.sm} sx={{ alignItems: "baseline" }}>
+                        <Typography variant="h6" component="h3" sx={{ fontWeight: 800 }}>
+                          {tier.name}
+                        </Typography>
+                        <Typography variant="overline" color="text.secondary">
+                          {tier.role}
+                        </Typography>
+                      </Stack>
+                      <Typography variant="body2" color="text.secondary">
+                        {tier.summary}
                       </Typography>
                     </Stack>
-                    <Typography variant="body2" color="text.secondary">
-                      {tier.summary}
-                    </Typography>
-                  </Stack>
-                </Grid>
-              ))}
-            </Grid>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
 
-            <SoftSurface className="esti-lp-reveal" sx={{ p: { xs: MARKETING_RHYTHM.cardPad, md: MARKETING_RHYTHM.lg } }}>
+            <SoftSurface className="esti-lp-reveal" sx={{ p: { xs: MARKETING_RHYTHM.cardPad, md: MARKETING_RHYTHM.lg }, mt: MARKETING_RHYTHM.lg }}>
               <KpiStrip
-                aria-label="AORMS platform at a glance"
+                aria-label="AORMS suite at a glance"
                 items={STATS.map((s) => ({
                   id: s.id,
                   label: s.label,
@@ -770,10 +869,10 @@ export function Landing() {
                     Technical
                   </Typography>
                   <Typography variant="h6" component="h3" sx={{ fontWeight: 700 }}>
-                    AQC · {AADT.title}
+                    AQC · {ADRAFT.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Estimation, BBS, and project management on a shared engine; drafting in AADT with geometry in{" "}
+                    Estimation, BBS, and project management on a shared engine; drafting in ADraft (Urbanist type, local .vdb) with geometry in{" "}
                     {SHILPIDB.name}.
                   </Typography>
                 </Stack>
@@ -943,6 +1042,7 @@ export function Landing() {
 
         <MarketingLandingDock
           sections={SECTIONS}
+          revealAfterId="top"
           signInHref={isMarketingOnly() ? "/" : "/login?tab=portals"}
           signInLabel={isMarketingOnly() ? "Home" : "Sign in"}
         />

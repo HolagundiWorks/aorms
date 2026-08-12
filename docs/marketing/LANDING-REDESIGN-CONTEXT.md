@@ -6,21 +6,28 @@ Another agent or designer may own visual/layout work on the public landing. This
 file captures **product and documentation context** so copy, IA, and SEO stay
 aligned with the suite rebrand. **Page chrome / tokens:** [PAGE-STRUCTURE.md](../esti/PAGE-STRUCTURE.md).
 
-## AEC hero pass (2026-08-09)
+## ADraft rebrand (2026-08-12)
 
-Home `/` targets **architecture studios** and **engineering consultancies** first
-(PMC under Platform). Composition:
+Drafting product display name is **ADraft** (*Accelerating Drafting*). Landing
+anchor `/#adraft` (legacy `/#aadt` redirects). Product band + FAQ call out
+**Urbanist-only** drafting type. Repo/slug remain `aadt` / HolagundiWorks/AADT.
+
+---
+
+Home `/` targets **architects and engineers** (designers with a keen eye for
+detail and typography). PMC under Products. Composition:
 
 | Region | Law |
 | --- | --- |
-| Hero | Brand · one headline · one support · Coming soon CTAs · **dominant visual = `LandingEcosystemMap`** (Connect → managers / technical → portals · AADT→ShilpiDB). Entourage stays faint atmosphere only — **no** workspace preview or KPI strip |
-| Outcomes | List bands (not card collage) |
-| Audience | Two peers only — AStudio · AConsulting |
-| Platform | Managers first · practice desk preview · technical apps |
-| Motion | Hero stagger · section reveal · entourage drift; `prefers-reduced-motion` off |
+| Hero | **Dark band** · poster/video · brand + headline + CTAs only. **No AEC building collage / product flowchart** in hero. **No MarketingTopBar**. Dock reveals after `#top`. Video brief: [NANO-BANANA-HERO-VIDEO.md](NANO-BANANA-HERO-VIDEO.md). |
+| Outcomes | Numbered interactive bands (hover accent rule) |
+| Audience | Two peers — hover focus dim/raise; jump to AStudio / AConsulting |
+| Products | **One suite catalog** (rail + panel for all apps) · **LandingAecStrip** Architecture / Engineering / Construction visuals · Intelligence + KPI strip |
+| Motion | Hero stagger · section reveal · rail/node hover; `prefers-reduced-motion` off |
 | Soft launch | Downloads Coming soon; no demo sign-in CTAs while `VITE_MARKETING_ONLY` |
 
-Dock IA: **Overview · Outcomes · Audience · Platform · Start** (Rhythm folds into Start).
+Dock IA: **Overview · Outcomes · Audience · Products · Start** (Rhythm folds into Start).
+Product anchors: `/#connect` · `/#studio` · `/#consultancy` · `/#estimation` · `/#bbs` · `/#pmc` · `/#adraft` · `/#shilpidb` · `/#portals`.
 
 ---
 
@@ -29,7 +36,7 @@ Dock IA: **Overview · Outcomes · Audience · Platform · Start** (Rhythm folds
 | Before | After |
 | --- | --- |
 | AORMS = *Architecture Office Resource Management System* | AORMS = **Accelerated Operational Resources Management System** (suite) |
-| Landing = architecture-practice-only marketing | Landing = **suite home** — managers · AQC technical · AADT · ShilpiDB |
+| Landing = architecture-practice-only marketing | Landing = **suite home** — managers · AQC technical · ADraft · ShilpiDB |
 | Clear-glass left rail + SectionDock | **No left rail** — soft top bar · stage · `MarketingLandingDock` · clock |
 | Staff ActionDock on marketing | Marketing uses **MarketingLandingDock** only |
 | Web-parity staff ERP on apex | Apex = **marketing** (soft launch); staff on desktop; portals online |
@@ -48,11 +55,12 @@ The home route (`/`) is the **AORMS suite landing** (`Landing.tsx` +
 
 - Mission: AEC consulting suite — managers for communications; technical work local
 - **EOMS** (knowledge bank) + **ESTI** (internal AI agent on desktop managers)
-- Managers: **AStudio** · **AConsulting** · Technical: **AQC Estimation / BBS / PM** · Drafting: **AADT** · Geometry: **ShilpiDB**
+- Managers: **AStudio** · **AConsulting** · Technical: **AQC Estimation / BBS / PM** · Drafting: **ADraft** · Geometry: **ShilpiDB**
 - Target: AEC consulting and PMC firms
-- Dock sections: **Overview · Outcomes · Audience · Platform · Start** (Rhythm folds into Start)
+- Dock sections: **Overview · Outcomes · Audience · Products · Start** (Rhythm folds into Start)
 - Licensing: **open source for now**; SaaS deferred
-- Atmosphere: `LandingEntourage` (isometric buildings, marketing only)
+- Atmosphere: `LandingEntourage` + **`LandingAecStrip`** (Architecture · Engineering ·
+  Construction building sketches) — marketing only
 
 **SEO:** `frontend/src/lib/landing-seo.ts` · static fallback in `frontend/index.html`.  
 **LLM crawl summary:** `frontend/public/llms.txt`.  
