@@ -68,7 +68,7 @@ strings in UI/SEO.
 | **`esti` / `aorms`** | Hub monorepo — never use `esti` in marketing copy |
 
 **Retired in new copy:** web-parity staff ERP on apex · Standard licence metering
-claims · wiki as primary docs · AORMS-Studio / EmOI / HiveD · “one mega platform app” ·
+claims · wiki as primary docs · AORMS-Studio / EmOI / HiveD · "one mega platform app" ·
 per-app login as the primary suite UX (use Connect).
 
 **Public marketing surfaces (soft launch):**
@@ -85,10 +85,10 @@ per-app login as the primary suite UX (use Connect).
 
 Frozen hosts: [`docs/esti/AORMS-SURFACE-URLS.md`](docs/esti/AORMS-SURFACE-URLS.md).
 
-**Operator:** **Human Centric Works (HCW)** — `@hcw/ui-kit` + AORMS.
-- [`docs/marketing/LANDING-REDESIGN-CONTEXT.md`](docs/marketing/LANDING-REDESIGN-CONTEXT.md)
+**Web-first platform:** AORMS hub + portals now **web-only** with **IBM Carbon Design System**.
 - [`docs/esti/ROADMAP.md`](docs/esti/ROADMAP.md) — S0–S7 ✅; **C0–C3** Connect · next S8–S10 · D6
 - [`docs/esti/MARKET-FIT.md`](docs/esti/MARKET-FIT.md)
+- Carbon migration active: [`docs/esti/CARBON-MIGRATION.md`](docs/esti/CARBON-MIGRATION.md)
 
 When editing wiki markdown under `frontend/src/content/wiki/`, rebuild the AI wiki
 index only if Ask ESTI should see it (wiki is not a public marketing surface).
@@ -103,188 +103,104 @@ index only if Ask ESTI should see it (wiki is not a public marketing surface).
 | Pin AQC engine from HolagundiWorks/AQC | Fork divergent `bbs_engine` in product repos |
 | Edit `Projects.tsx` / `Clients.tsx` only when asked | Parallel WIP collisions |
 
-## UI / design system — HCW-UI-KIT
+## UI / design system — IBM Carbon Design System (active 2026-09-03)
 
-> **⚠️ CANONICAL (2026-08): `@hcw/ui-kit` v1.5.0** (*HCW-UI-Kit — Human Centric Works*,
-> vendored at `vendor/hcw-ui-kit` from [hcwux](https://github.com/HolagundiWorks/hcwux))
-> — **pure neumorphism** (no glassmorphism).
-> **`@carbon/react` was removed (2026-07).** Carbon *Sass* colours/type scale survive
-> only as a frozen `--cds-*` compat block in `frontend/src/styles.scss` — no Carbon
-> React components anywhere.
+> **🎯 CANONICAL (2026-09):** **IBM Carbon Design System v11** — web-only, pure Carbon.
+> Whole frontend — app screens, portals, and public landing / marketing pages.
+> **No custom UI/UX elements; no MUI, no `@hcw/ui-kit`.** Stock `@carbon/react`
+> components only, arranged with Carbon grid and tokens.
 >
-> **➜ Planned reversal:** a migration back to the **IBM Carbon Design System**
-> (whole app + landing) is scoped in [`docs/esti/CARBON-MIGRATION.md`](docs/esti/CARBON-MIGRATION.md).
-> Until that migration reaches its decommission wave, **`@hcw/ui-kit` stays
-> canonical** and the rules below apply — build on the kit, not Carbon React.
+> **Migration roadmap:** [`docs/esti/CARBON-MIGRATION.md`](docs/esti/CARBON-MIGRATION.md)
+> — Waves 0–6 sequenced plan, ~10–14 sprints. Wave 0–2 foundation in place (2026-08).
+> Wave 3 (app MUI→Carbon, 4–6 sprints) active. **Entry point for new screens:**
+> build on stock `@carbon/react` + `CarbonScope` adapter in `frontend/src/carbon/`.
 >
-> **Documentation map (read in order):** [`docs/hcw-kit/README.md`](docs/hcw-kit/README.md)
-> (sections 00–13). Agent contract + detection recipes:
-> [`docs/esti/HCW-KIT-AI-KNOWLEDGE-BASE.md`](docs/esti/HCW-KIT-AI-KNOWLEDGE-BASE.md).
-> Living debt queue: [`DESIGN-DEBT-REGISTER.md`](docs/hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md).
-> Audit index: [`11-audits/README.md`](docs/hcw-kit/11-audits/README.md).
+> **Governing rule (§0):** **Pure Carbon, no custom UI/UX.** Every screen is
+> composed **only** from stock `@carbon/react` components and Carbon patterns
+> (UI Shell, DataTable, Modal, Tile, etc.). **No bespoke components where Carbon
+> provides one.** If Carbon omits a component, use the nearest Carbon pattern
+> (`HeaderGlobalBar`, `Tag`, `OverflowMenu`). **No neumorphism, glass, soft surfaces,
+> or Urbanist.** Elevation via Carbon `Layer`/`Tile` only (flat). Brand expression
+> limited to theme tokens + logo lockups — no restyling.
 >
-> **Thesis: depth encodes importance.** Opaque **pure neumorphism** — pick a layer by
-> ROLE, never by taste. **No glass / blur / translucent chrome.** Global **8px** radius.
+> **Typography:** IBM Plex Sans (Carbon default) — `@carbon/styles` type tokens.
+> **Colour:** Carbon theme tokens (`white`/`g10`/`g90`/`g100`) + `@carbon/colors`
+> data-viz palette. **Spatial model:** Carbon UI Shell (`Header`, `SideNav`,
+> `HeaderGlobalBar`) + bespoke dock (if needed). **Density / a11y:** Carbon
+> `useTheme` + component `size` props; WCAG-tested stock components.
 >
-> 1. **Layer 1 — FLAT:** information at rest — tables, text, headings. Fog Gray
->    `#F2F4F7`, Pure White cards, Coal Black `#141517`, **Radiant Orange `#FF4F18`**.
-> 2. **Layer 2 — SOFT RAISED:** objects / chrome — dialogs, ribbon, ActionDock,
->    page headers. `<Surface layer="soft">`.
-> 3. **Layer 3 — SOFT ATTENTION:** wells, focus, alerts — inset neu + solid accent.
->    Legacy `layer="glass"` aliases soft raised (deprecation cycle).
+> **Tech stack:**
+> - `@carbon/react@11` · `@carbon/icons-react@11` · `@carbon/styles@1` (tree-shaken)
+> - `frontend/src/carbon/carbon-tree.scss` (selective Sass @use per wave)
+> - `frontend/src/carbon/CarbonScope.tsx` (per-subtree theming during migration)
+> - Carbon adapters for high-use kit primitives: `StatusDot`→`Tag`, `DataState`
+>   →`Skeleton*`/empty, `ConfirmModal`→`Modal`, `PageBreadcrumb`→`Breadcrumb`,
+>   `DataGrid`→stock `Table` (§ Wave 2/3, CARBON-MIGRATION.md).
 >
-> **Spatial model — Top ribbon · Stage · Taskbar footer · ActionDock · AnalogueClock:**
-> soft sticky ribbon (primary nav) + full-width stage; **left rail retired**;
-> soft-square **8px** radius; footer taskbar (`AppFooterBar`); global ActionDock;
-> fixed bottom-right kit `AnalogueClock` (no floating watermark). Auth uses a
-> centered soft-neu card (`AuthRailLayout` — legacy name). Portals use
-> `PortalNeuFrame`. Canon: [`PAGE-STRUCTURE.md`](docs/esti/PAGE-STRUCTURE.md) ·
-> [`UI-SITE-MAP.md`](docs/esti/UI-SITE-MAP.md).
-> Screen CTAs via `useScreenActions` (publish `[]` while dialogs open).
->
-> **Brand font: Urbanist** (OFL) — `@fontsource/urbanist` in `main.tsx`, mirrored
-> in the kit theme. Calculator result uses **VT323** pixel face.
->
-> **Colour / density / COGA:** `createHcwTheme({ scheme, density, coga })` —
-> schemes `light` (default) · `dark` · `highContrast`; density `comfortable` |
-> `compact`; COGA `default` | `calm`. `KitRoot` (app shim `MuiRoot`) wires the
-> provider; Settings → Appearance persists choices. Prefer HCW names over legacy
-> `createAormsTheme` / `MuiRoot` aliases. Materials stay opaque neu in every scheme.
+> **Coexistence (Waves 1–5):** both `@carbon/react` and `@mui/material` installed;
+> migrate screens incrementally. Wave 6 removes MUI + the kit. **Exit criteria per
+> wave:** typecheck + lint green; visual baselines re-captured (Playwright).
 
-**Governance chain:** [`HCW-DESIGN-PLAYBOOK.md`](docs/HCW-DESIGN-PLAYBOOK.md) (why) →
-[`HCW-UX.md`](docs/HCW-UX.md) (framework + process) →
-[`00-CONSTITUTION.md`](docs/hcw-kit/00-CONSTITUTION.md) (law) →
-[`12-AI-AGENT-RULEBOOK.md`](docs/hcw-kit/12-AI-AGENT-RULEBOOK.md) (permanent AI behaviour) →
-[`HCW-KIT-AI-KNOWLEDGE-BASE.md`](docs/esti/HCW-KIT-AI-KNOWLEDGE-BASE.md) (R1–R9 recipes).
+**Starter template:** new Carbon screens follow the recipe in CARBON-MIGRATION.md
+§ 3 Wave 3 (tranche 1):
+1. Swap kit → `../carbon/adapters` (StatusDot/DataState/ConfirmModal/PageBreadcrumb).
+2. MUI → stock Carbon (see § 4.2 component map in CARBON-MIGRATION.md).
+3. Wrap root in `<CarbonScope>` while host still on kit.
+4. Remove all `@mui/*` and `@hcw/ui-kit` imports; `tsc` + `eslint` green.
+5. Add newly-used Carbon components to `carbon-tree.scss`.
 
-| # | Topic | Canonical doc |
-| --- | --- | --- |
-| 01 | Layers · spatial model | [`PAGE-STRUCTURE.md`](docs/esti/PAGE-STRUCTURE.md) · [`UI-SITE-MAP.md`](docs/esti/UI-SITE-MAP.md) · [`COMPOSITION-PRINCIPLES.md`](docs/esti/COMPOSITION-PRINCIPLES.md) · [`HCW-UI-KIT.md`](docs/esti/HCW-UI-KIT.md) |
-| 02 | Tokens | `vendor/hcw-ui-kit/dist/tokens.js` · [`02-TOKEN-GOVERNANCE.md`](docs/hcw-kit/02-TOKEN-GOVERNANCE.md) · [`02-TOKEN-EXPORT.md`](docs/hcw-kit/02-TOKEN-EXPORT.md) |
-| 03 | Components | [`CHANGELOG`](vendor/hcw-ui-kit/CHANGELOG.md) · [`03-COMPONENT-QUALITY-CHECKLIST.md`](docs/hcw-kit/03-COMPONENT-QUALITY-CHECKLIST.md) · [`14-HCW-CATALOG.md`](docs/hcw-kit/14-HCW-CATALOG.md) |
-| 05 | Page templates | [`05-TEMPLATES.md`](docs/hcw-kit/05-TEMPLATES.md) — incl. T10 orchestration |
-| 07 | UX checklists | [`HCW-UI-UX-PRINCIPLES.md`](docs/esti/HCW-UI-UX-PRINCIPLES.md) · [`07-UX-REVIEW-CHECKLISTS.md`](docs/hcw-kit/07-UX-REVIEW-CHECKLISTS.md) |
-| 10 | Elements | [`10-ELEMENTS.md`](docs/hcw-kit/10-ELEMENTS.md) · [`10-MUI-MAPPING.md`](docs/hcw-kit/10-MUI-MAPPING.md) |
-| 11 | Audits + debt | [`11-audits/README.md`](docs/hcw-kit/11-audits/README.md) · [`DESIGN-DEBT-REGISTER.md`](docs/hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md) |
-| 13 | Kit vs product roadmaps | [`13-ROADMAPS.md`](docs/hcw-kit/13-ROADMAPS.md) |
-| 09 | Kit semver / contribution | Upstream [hcwux GOVERNANCE](https://github.com/HolagundiWorks/hcwux/blob/main/GOVERNANCE.md) · re-vendor via [`KITS.md`](docs/KITS.md) |
+**Transitional CSS** (`styles.scss`, `landing.scss`):
+- `styles.scss`'s frozen `--cds-*` `:root` block remains for unmigrated screens.
+- `landing.scss` editorial system migrates separately (Wave 5).
+- Permitted structural helpers (colourless layout/sizing): `esti-fill`, `esti-grow`,
+  `esti-row`, `esti-form-panel`, `esti-app-shell`, etc. (see CLAUDE.md historical
+  list — these are **structural only**, no visual styling).
+- Permitted functional animations: `esti-pom-pulse`, `esti-zone-pulse`,
+  `esti-calm-breathe`, `esti-qpulse` (state-indicator keyframes; Carbon has no
+  equivalents).
+- **Data-driven colour maps** (e.g., `ZCOLOR` in `StudioAbstract.tsx` applying
+  `var(--cds-*)` token strings dynamically) are permitted during migration only.
 
-**Kit primitives** (`@hcw/ui-kit` — use these, never fork):
+**Removed (retired, not reimplemented):**
+- `@hcw/ui-kit` kit primitives: `ActionDock`, `GlassRail`, `SectionDock`,
+  `TaskbarFooter`, `KpiStrip`, `HealthGlassOrb`, `Avatar`, `BrandMark`, `Surface`
+  (soft/glass). Rewritten on Carbon patterns (UI Shell, `Tile`, `Tag`) per wave.
+- `@mui/material`, `@mui/icons-material`, `vendor/hcw-ui-kit`, `@fontsource/urbanist`.
 
-| Primitive | Role |
-| --- | --- |
-| `KitRoot` (`MuiRoot` alias) | Theme provider (`scheme` · `density` · `coga` · `locale`) |
-| `Surface` | Layer 1/2/3 material (opaque neu) |
-| `ActionDock` + `useScreenActions` | Global dock contract (staff) |
-| `ActionOutcomeBanner` | Dock / publishOutcome feedback |
-| `KpiStrip` | Capacity-capped KPI row |
-| `MissionHeader` · `DecisionQueue` | Orchestration (T10) |
-| `AwarenessStrip` | Open-loop awareness |
-| `TaskbarFooter` | App footer launchers |
-| `AnalogueClock` | Fixed bottom-right clock |
-| `StatusDot` | Status indicator (never filled Chip; optional `shape`) |
-| `DataState` | Loading skeleton + empty state |
-| `ConfirmModal` | Destroy confirmation (`kind` / `reason`) |
-| `PageBreadcrumb` | Wayfinding + `document.title` |
-| `ToastHost` + `pushToast` | Transient feedback (mount inside KitRoot) |
-| `Avatar` + `getInitials` | Identity mark (colour injected by caller) |
-| `chromeIconSx` | Persistent chrome hit targets (COGA-aware) |
-
-`SoftRail` / `GlassRail` are **not** primary chrome (left rail retired 2026-08).
-Portals use `PortalNeuFrame` · `PortalShell` · `ExternalPortalShell`.
-`BrandMark` / `HealthGlassOrb` / `SectionDock` remain available where a template
-still references them.
-
-App compat shims re-export kit primitives where noted (`StatusTag` delegates to
-`StatusDot`). Domain colour logic (`StaffAvatar`, `resolveColor`) stays app-side.
-
-Brand heritage: [`AORMS-BRANDING-KIT.md`](docs/esti/AORMS-BRANDING-KIT.md).
-Historical Carbon→MUI migration: [`HCW-UI-KIT.md`](docs/esti/HCW-UI-KIT.md).
-
-**Open design debt:** see [`DESIGN-DEBT-REGISTER.md`](docs/hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md).
-Skill: `.claude/skills/hcw-design-audit`.
-
-### UI task order
-
-1. Read [`DESIGN-DEBT-REGISTER.md`](docs/hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md) — current state.
-2. Read [`HCW-UI-KIT.md`](docs/esti/HCW-UI-KIT.md) + [`05-TEMPLATES.md`](docs/hcw-kit/05-TEMPLATES.md) — pick the shipped reference anatomy.
-3. Read [`HCW-UI-UX-PRINCIPLES.md`](docs/esti/HCW-UI-UX-PRINCIPLES.md) + [`07-UX-REVIEW-CHECKLISTS.md`](docs/hcw-kit/07-UX-REVIEW-CHECKLISTS.md) before review.
-4. Build from `@mui/material` (themed/neutral per [`10-ELEMENTS.md`](docs/hcw-kit/10-ELEMENTS.md)) + `@hcw/ui-kit` — never hard-coded hex;
-   raw colour lives ONLY in the kit tokens (+ sanctioned `DATA_VIZ` for canvas/SVG).
-   `frontend/src/theme/` is a thin re-export shim. Prefer kit tokens over `--cds-*`
-   compat; never add new `--cds-*` usage. Marketing atmosphere in `landing.scss`;
-   app-screen CSS in `styles.scss` (structural only).
-5. Kit-first: shared visual changes land in **hcwux**, then re-vendor into
-   `vendor/hcw-ui-kit/` (see [`KITS.md`](docs/KITS.md)). Do not edit `dist/` by hand.
-6. Visual regression: `e2e/tests/visual-regression.spec.ts` (Playwright `visual`
-   project; baselines under `e2e/tests/visual-regression.spec.ts-snapshots/`).
+**Documentation (after Wave 6, decommission wave):**
+Rewrite CLAUDE.md § UI, `HCW-UI-KIT.md` (mark superseded), all `docs/hcw-kit/*`,
+`HCW-KIT-AI-KNOWLEDGE-BASE.md`, the design-debt register.
 
 **AORMS AI:** ESTI runs on **desktop apps only** (local Ollama / Foundry Local) —
 not on the cloud hub or aorms.in. `@hcw/aorms-ai-kit` is prompts + Ollama SDK for
 local/desktop use; canon: `docs/esti/LOCAL-FIRST.md` · `AORMS-SUITE.md` § AI ·
 `PRODUCTION-OPS.md` § ESTI AI.
 
-### Structural CSS helpers (`styles.scss`, `landing.scss`)
+### Carbon Sass & tokens (`styles.scss`, `landing.scss`)
 
-`@carbon/react` was removed (2026-07) — there is no Carbon component library in
-this codebase anymore. `styles.scss`'s `--cds-*` `:root` block is a static,
-hand-owned compatibility layer of colour/spacing tokens carried forward from
-Carbon's old values (see the "UI / design system" section above); prefer
-`@hcw/ui-kit` tokens for new code.
+See UI section above. During migration (Waves 1–5), both legacy and Carbon styles coexist:
 
-- **`landing.scss`** is the separate editorial design system for unauthenticated
-  marketing surfaces (Landing, Blog, Investors). It lives alongside `styles.scss`
-  and is imported in `main.tsx`. Do not add app-screen CSS to `landing.scss`, and
-  do not add `esti-lp-*` classes to `styles.scss`.
-- Prefer semantic HTML (`h1`–`h4`, `p`) over styled `div`s where markup allows.
-- Custom CSS classes should stay **structural and colourless** where possible —
-  visual styling (colour, shape, surfaces) belongs in the `@hcw/ui-kit` theme,
-  not hand-rolled CSS.
+- **`frontend/src/carbon/carbon-tree.scss`** — tree-shaken Carbon Sass (`@use`),
+  imported in `carbon.css` wrapped in `@layer carbon`. Per-wave component adds:
+  e.g., `@use '@carbon/react/components/breadcrumb'` as new screens use `Breadcrumb`.
+- **`styles.scss`'s frozen `--cds-*` `:root` block** — static compat layer for
+  unmigrated HCW-kit screens. Replaced entirely in Wave 6.
+- **`landing.scss`** — editorial system for unauthenticated surfaces (Landing, Blog).
+  Migrates to Carbon tokens in Wave 5. Do not mix `esti-lp-*` classes into `styles.scss`.
+
+Permitted structural helpers in `styles.scss` (colourless, layout/sizing only):
+`esti-fill`, `esti-grow`, `esti-row`, `esti-form-panel`, `esti-app-shell`,
+`esti-landing-shell`, `esti-page-header`, `esti-login-shell`, `esti-login-brand`,
+`esti-toast-host`, `esti-pomodoro-float`, `esti-header-clock`, `esti-footer`,
+`esti-ai-explain__*`, `esti-ai-studio__*`, `esti-float-widget`, `esti-geo--*`,
+`esti-staff-tile__*`, `esti-id-card__*` (all sizing constraints, no colour).
 
 **Hidden file inputs** (`<input type="file" style={{ display: "none" }}` triggered via
-`ref.current.click()`) are a permitted structural pattern — they are not visible UI;
-the MUI `Button` that triggers them is the visible element.
+`ref.current.click()`) are a permitted pattern — the triggering Carbon `Button` is
+the visible element.
 
-**StudioAbstract semantic color layer** — `ZCOLOR`, `TILE_COLOR`, `LOAD_COLOR` in
-`StudioAbstract.tsx` are JS maps of `var(--cds-*)` token strings (with optional hex
-fallback inside `var()`). `style={{ color: ZCOLOR[state] }}` / `style={{ background: ... }}`
-applied inline from these maps is a permitted data-driven pattern — the value IS a Carbon
-token string, just applied dynamically. Do not replace with static classes.
-
-Permitted structural helpers in `styles.scss` (colourless layout/sizing only):
-`esti-fill`, `esti-grow`, `esti-dash`, `esti-cal`, `esti-cal-hdr`, `esti-cal-cell`,
-`esti-label` / `esti-label--secondary` / `esti-label--helper` (Carbon `label-01`
-type-style for hint text — use instead of `fontSize: "0.75rem"` inline),
-`esti-kpi-track` / `esti-kpi-fill` (ASPRF bar track/fill — only `width` and
-`background` stay dynamic inline), `esti-heat-swatch` (heatmap legend swatch —
-`backgroundColor` stays dynamic), `esti-bar-palette`, `esti-personal-panel` (and
-sub-classes), `esti-chart-sm/md/lg`, `esti-login-shell/panel`, `esti-toast-host`,
-`esti-pomodoro-float`, `esti-header-clock`, `esti-footer`,
-`esti-app-shell`, `esti-app-content`, `esti-app-mark` (app shell + brand mark sizing),
-`esti-landing-shell` (landing page shell), `esti-page-header` (page header bar),
-`esti-portal-logo`, `esti-login-brand/mark` (portal/login identity sizing),
-`esti-row` / `esti-row-between` (horizontal flex layout rows),
-`esti-form-panel` / `esti-form-panel--wide` (constrained form containers),
-`esti-firm-logo`, `esti-input-md` / `esti-input-sm` (sizing constraints),
-`esti-zone-head` (dashboard zone header flex row),
-`esti-ai-explain__*` / `esti-ai-studio__*` / `esti-ai-settings-tile` / `esti-ai-panel`
-(AI assistant layout/type-style helpers),
-`esti-float-widget` / `esti-float-panel-shell` / `esti-float-settings` /
-`esti-float-calc` / `esti-float-pom-header` / `esti-scroll-affordance` (floating panel),
-`esti-av-strip` (audio-video header strip),
-`esti-geo--sm/circle/triangle/square/act` (geo-marker glyph sizing),
-`esti-staff-tile__photo` / `esti-staff-tile__accent` / `esti-staff-tile__dot` /
-`esti-staff-tile__level-badge` (staff tile colour elements — `background` stays dynamic
-inline from `resolveColor()`; same pattern as `esti-kpi-fill`),
-`esti-id-card__initials-bg` / `esti-id-card__overlay` / `esti-id-card__role-dot` /
-`esti-id-card__level-badge` (ID card colour elements — same dynamic `background` pattern),
-`esti-staff-avatar` (circular avatar — `width/height/minWidth/background/fontSize` all
-computed from props; no fixed visual values).
-
-Permitted functional animations in `styles.scss` (state-indicator keyframes — not decorative;
-Carbon provides no equivalent pulse/breathe keyframes):
-`esti-pom-pulse` (Pomodoro ring), `esti-zone-pulse` (dashboard zone attention indicator),
-`esti-calm-breathe` (wellbeing breathing exercise), `esti-qpulse` (quick status pulse).
+Permitted functional animations (state-indicator keyframes):
+`esti-pom-pulse`, `esti-zone-pulse`, `esti-calm-breathe`, `esti-qpulse`.
 
 ## Python worker (`worker/`)
 
@@ -343,7 +259,7 @@ Tests: `worker/tests/test_jobs.py` (handler unit tests) and
 - Portable identity handles: `AORMS-U-` (person) / `AORMS-C-` (company) on the
   licensing platform via `newPublicId` — see `docs/esti/AORMS-IDENTITY.md`.
 - Commit messages end with:
-  `Co-Authored-By: Codex Opus 4.8 <noreply@anthropic.com>`
+  `Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>`
 - Two files have ongoing parallel WIP — avoid editing `frontend/src/routes/
   Projects.tsx` and `frontend/src/routes/Clients.tsx` unless asked.
 
