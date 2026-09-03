@@ -1,18 +1,17 @@
 # HCW-UI-Kit → IBM Carbon Design System — migration & roadmap
 
-**Status:** Proposed (not active) · **Created:** 2026-08-02 · **Owner:** HCW / frontend  
-**Updated:** 2026-08-09 — product direction remains **`@hcw/ui-kit` pure neu**; S12 UX
-audit **removed** CarbonSpike and de-Carboned priority staff/portal surfaces. Remaining
-`@carbon/react` (~38 files) is strangler debt to clear toward the kit, **not** a
-restart of this Carbon migration.
+**Status:** ✅ **ACTIVE** (2026-09-03) · **Created:** 2026-08-02 · **Owner:** web-first platform  
+**Updated:** 2026-09-03 — product direction **shifted to Carbon only**. Web-first hub + portals.
+Waves 0–2 foundation delivered (2026-08). **Wave 3 in progress** (app MUI→Carbon conversion).
+`@hcw/ui-kit` and MUI retire in Wave 6.
 
-**Scope (historical plan):** Whole frontend — app screens, portals, licensing console,
-**and** the public landing / marketing pages.
+**Scope (now active 2026-09):** Whole frontend — app screens, portals, licensing console,
+**and** the public landing / marketing pages. **Web-only platform.** No desktop ERP.
 
-> This document once planned a move **off** `@hcw/ui-kit` (+ MUI) **onto** IBM
-> Carbon (`@carbon/react` v11). That programme is **not** the shipping direction.
-> Canon: [`HCW-UI-KIT.md`](HCW-UI-KIT.md) · [`CLAUDE.md`](../../CLAUDE.md) § UI ·
-> S12 note [2026-08-09-UX-AUDIT-WAVE.md](../hcw-kit/11-audits/2026-08-09-UX-AUDIT-WAVE.md).
+> This document was proposed 2026-08-02 as a planned reversal from `@hcw/ui-kit`.
+> **Now active (2026-09-03):** product direction shifted to Carbon only. Waves 0–2
+> foundation complete. Wave 3 underway. Canon: [`CLAUDE.md`](../../CLAUDE.md) § UI ·
+> [`CARBON-MIGRATION.md`](CARBON-MIGRATION.md) (this file) · Wave-specific PRs.
 
 ---
 
@@ -378,7 +377,7 @@ no MUI/kit imports.
 Remove `@mui/material`, `@mui/icons-material`, `@hcw/ui-kit`, `vendor/hcw-ui-kit`,
 `@fontsource/urbanist` (if dropped), the theme shims (`MuiRoot.tsx`,
 `muiTheme.ts`), and any dead `--cds-*` compat. Rewrite the governance chain:
-`CLAUDE.md` § UI, `HCW-UI-KIT.md` (mark superseded), `docs/hcw-kit/*`,
+`CLAUDE.md` (§ UI), `HCW-UI-KIT.md` (mark superseded), `docs/hcw-kit/*`,
 `HCW-KIT-AI-KNOWLEDGE-BASE.md`, the design-debt register, and the AI wiki index.
 **Exit:** zero MUI/kit imports repo-wide; docs describe Carbon as canonical;
 CI green; visual baselines final.
