@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  Box,
-  Chip,
-  LinearProgress,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { ProgressBar, Stack, Tag, Tile } from "@carbon/react";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { DataGrid, StatusDot, type GridColDef } from "../../carbon/adapters/index.js";
 import { trpc } from "../lib/trpc";
 
@@ -39,22 +33,23 @@ const STATUS_COLOR: Record<string, string> = {
 const fmtDate = (d: Date | string | null) => (d ? new Date(d).toLocaleDateString() : "—");
 const fmtDateTime = (d: Date | string) => new Date(d).toLocaleString();
 
+const SUBTLE: React.CSSProperties = { margin: 0, color: "var(--cds-text-secondary)" };
+
 function Kpi({ label, value, tone, onClick }: { label: string; value: number | string; tone?: "warn" | "default"; onClick?: () => void }) {
   const warn = tone === "warn" && Number(value) > 0;
   return (
-    <Paper
-      variant="outlined"
-      sx={{ p: 2, height: "100%", cursor: onClick ? "pointer" : undefined }}
+    <Tile
+      style={{ height: "100%", cursor: onClick ? "pointer" : undefined }}
       onClick={onClick}
     >
-      <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>{label}</Typography>
-      <Typography
-        variant="h5"
-        sx={{ mt: 0.5, mb: 0, color: warn ? "warning.main" : undefined }}
+      <p className="cds--type-body-01" style={SUBTLE}>{label}</p>
+      <p
+        className="cds--type-productive-heading-05"
+        style={{ margin: "0.25rem 0 0", color: warn ? "var(--cds-support-warning)" : undefined }}
       >
         {value}
-      </Typography>
-    </Paper>
+      </p>
+    </Tile>
   );
 }
 
@@ -106,21 +101,22 @@ export default function DashboardTab({ onGoTo }: { onGoTo: (section: "licenses" 
   ];
 
   return (
-    <Stack spacing={2.5}>
-      <div style={KPI_GRID}>
-        <Kpi label="Total licenses" value={data.totalLicenses} />
-        <Kpi label="Organizations" value={data.totalOrgs} />
-        <Kpi label="Active devices" value={data.activeDevices} />
-        <Kpi label="New this month" value={data.newThisMonth} />
-        <Kpi label="Pending requests" value={data.pendingRequests} tone="warn" onClick={() => onGoTo("requests")} />
-        <Kpi label="Unlicensed orgs" value={data.unlicensedOrgs} tone="warn" onClick={() => onGoTo("orgs")} />
-        <Kpi label="Expiring in 30 days" value={data.expiringSoon.length} tone="warn" onClick={() => onGoTo("licenses")} />
-        <Kpi
-          label="Suspended / revoked"
-          value={(data.byStatus.SUSPENDED ?? 0) + (data.byStatus.REVOKED ?? 0)}
-          tone="warn"
-        />
-      </div>
+    <CarbonScope>
+      <Stack gap={6}>
+        <div style={KPI_GRID}>
+          <Kpi label="Total licenses" value={data.totalLicenses} />
+          <Kpi label="Organizations" value={data.totalOrgs} />
+          <Kpi label="Active devices" value={data.activeDevices} />
+          <Kpi label="New this month" value={data.newThisMonth} />
+          <Kpi label="Pending requests" value={data.pendingRequests} tone="warn" onClick={() => onGoTo("requests")} />
+          <Kpi label="Unlicensed orgs" value={data.unlicensedOrgs} tone="warn" onClick={() => onGoTo("orgs")} />
+          <Kpi label="Expiring in 30 days" value={data.expiringSoon.length} tone="warn" onClick={() => onGoTo("licenses")} />
+          <Kpi
+            label="Suspended / revoked"
+            value={(data.byStatus.SUSPENDED ?? 0) + (data.byStatus.REVOKED ?? 0)}
+            tone="warn"
+          />
+        </div>
 
         {usage && (
           <div>
@@ -177,56 +173,36 @@ export default function DashboardTab({ onGoTo }: { onGoTo: (section: "licenses" 
               {data.byProduct.map((p) => (
                 <Tag key={p.code} type="outline">{`${p.name}: ${p.n}`}</Tag>
               ))}
-            </Stack>
-          )}
-        </Box>
-      )}
+            </div>
+          </div>
+        )}
 
-      <Box>
-        <Typography variant="h6" component="h3" sx={{ m: 0, mb: 1 }}>Licenses by status</Typography>
-        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-          {Object.entries(data.byStatus).map(([status, n]) => (
-            <StatusDot key={status} color={STATUS_COLOR[status] ?? "gray"} label={`${STATUS_LABEL[status] ?? status}: ${n}`} />
-          ))}
-        </Box>
-      </Box>
+        <div>
+          <h3 className="cds--type-heading-03" style={{ margin: "0 0 0.5rem" }}>Expiring in the next 30 days</h3>
+          <DataGrid
+            rows={data.expiringSoon}
+            columns={expiringColumns}
+            getRowId={(r) => r.id}
+            density="compact"
+            disableRowSelectionOnClick
+            hideFooter
+            autoHeight
+          />
+        </div>
 
-      {data.byProduct.length > 0 && (
-        <Box>
-          <Typography variant="h6" component="h3" sx={{ m: 0, mb: 1 }}>Licenses by product</Typography>
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            {data.byProduct.map((p) => (
-              <Chip key={p.code} variant="outlined" size="small" label={`${p.name}: ${p.n}`} />
-            ))}
-          </Box>
-        </Box>
-      )}
-
-      <Box>
-        <Typography variant="h6" component="h3" sx={{ m: 0, mb: 1 }}>Expiring in the next 30 days</Typography>
-        <DataGrid
-          rows={data.expiringSoon}
-          columns={expiringColumns}
-          getRowId={(r) => r.id}
-          density="compact"
-          disableRowSelectionOnClick
-          hideFooter
-          autoHeight
-        />
-      </Box>
-
-      <Box>
-        <Typography variant="h6" component="h3" sx={{ m: 0, mb: 1 }}>Recent license activity</Typography>
-        <DataGrid
-          rows={data.recentEvents}
-          columns={eventColumns}
-          getRowId={(r) => r.id}
-          density="compact"
-          disableRowSelectionOnClick
-          hideFooter
-          autoHeight
-        />
-      </Box>
-    </Stack>
+        <div>
+          <h3 className="cds--type-heading-03" style={{ margin: "0 0 0.5rem" }}>Recent license activity</h3>
+          <DataGrid
+            rows={data.recentEvents}
+            columns={eventColumns}
+            getRowId={(r) => r.id}
+            density="compact"
+            disableRowSelectionOnClick
+            hideFooter
+            autoHeight
+          />
+        </div>
+      </Stack>
+    </CarbonScope>
   );
 }

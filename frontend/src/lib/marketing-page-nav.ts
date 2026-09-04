@@ -4,7 +4,6 @@ export type MarketingRailIcon =
   | "architecture"
   | "consultancy"
   | "wiki"
-  | "blog"
   | "downloads"
   | "about"
   | "legal"
@@ -16,11 +15,10 @@ export type MarketingPageLink = {
   icon: MarketingRailIcon;
 };
 
-// Platform landing + blog + downloads are the live public marketing surfaces.
+// Platform landing + downloads are the live public marketing surfaces.
 // Wiki / about / legal / per-app marketing pages remain consolidated to `/`.
 export const MARKETING_RAIL_PAGES: readonly MarketingPageLink[] = [
   { href: "/", label: "Home", icon: "platform" },
-  { href: "/blog", label: "Blog", icon: "blog" },
   { href: "/downloads", label: "Downloads", icon: "downloads" },
 ] as const;
 
@@ -31,7 +29,6 @@ export function railPageLinkIsActive(href: string, pathname: string, hash = ""):
   const path = url.pathname || "/";
   const linkHash = url.hash.replace(/^#/, "");
 
-  if (path === "/blog") return pathname === "/blog" || pathname.startsWith("/blog/");
   if (path === "/downloads") return pathname === "/downloads" || pathname === "/download";
   if (path === "/wiki") return pathname === "/wiki" || pathname.startsWith("/wiki/");
   if (path === "/" && linkHash) {

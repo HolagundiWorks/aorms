@@ -29,11 +29,13 @@
 @use '@carbon/styles/scss/zone';
 
 // ── Components in use (Wave 1 spike set + near-term Wave 2 adapters) ───────────
+@use '@carbon/styles/scss/components/accordion';
 @use '@carbon/styles/scss/components/breadcrumb';
 @use '@carbon/styles/scss/components/button';
 @use '@carbon/styles/scss/components/checkbox';
 @use '@carbon/styles/scss/components/data-table';
 @use '@carbon/styles/scss/components/dropdown';
+@use '@carbon/styles/scss/components/form';
 @use '@carbon/styles/scss/components/link';
 @use '@carbon/styles/scss/components/list-box';
 @use '@carbon/styles/scss/components/modal';
