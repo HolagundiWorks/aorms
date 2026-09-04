@@ -397,13 +397,9 @@ export function Landing() {
   }, []);
 
   useEffect(() => {
-    // Legacy #aadt → #adraft (ADraft rebrand).
-    const raw = hash.replace(/^#/, "");
-    const section = raw === "aadt" ? "adraft" : raw;
+    // Smooth scroll to hash section
+    const section = hash.replace(/^#/, "");
     if (!section) return;
-    if (raw === "aadt" && typeof window !== "undefined") {
-      window.history.replaceState(null, "", "#adraft");
-    }
     const raf = window.requestAnimationFrame(() => {
       document.getElementById(section)?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
@@ -486,7 +482,7 @@ export function Landing() {
                 {isMarketingOnly() ? (
                   <Button
                     component={RouterLink}
-                    to="/downloads"
+                    to="/login"
                     variant="contained"
                     color="primary"
                     endIcon={<ArrowForward />}
@@ -564,7 +560,7 @@ export function Landing() {
                 {!isMarketingOnly() && (
                   <Button
                     component={RouterLink}
-                    to="/downloads"
+                    to="/login"
                     variant="text"
                     color="inherit"
                     sx={{ textTransform: "none", fontWeight: 600, borderRadius: `${RADIUS}px`, minHeight: 48 }}
@@ -972,14 +968,13 @@ export function Landing() {
               <Grid size={{ xs: 12, md: 4 }}>
                 <Stack className="esti-lp-reveal" spacing={MARKETING_RHYTHM.sm}>
                   <Typography variant="overline" color="text.secondary">
-                    Technical
+                    Intelligence
                   </Typography>
                   <Typography variant="h6" component="h3" sx={{ fontWeight: 700 }}>
-                    AQC · {ADRAFT.title}
+                    {ESTI.name} · {EOMS.name}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Estimation, BBS, and project management on a shared engine; drafting in ADraft (Urbanist type, local .vdb) with geometry in{" "}
-                    {SHILPIDB.name}.
+                    {ESTI.name} is built-in office automation for task recommendations and insights; {EOMS.name} is the continuously-learning knowledge bank of building codes and standards.
                   </Typography>
                 </Stack>
               </Grid>
@@ -1121,7 +1116,7 @@ export function Landing() {
                   </Box>
                   <Box
                     component={RouterLink}
-                    to="/downloads"
+                    to="/login"
                     sx={{ color: "text.secondary", textDecoration: "none" }}
                   >
                     <Typography variant="body2">Downloads (coming soon)</Typography>
