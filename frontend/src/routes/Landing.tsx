@@ -9,7 +9,6 @@ import { AormsLogo } from "../components/AormsLogo.js";
 import {
   AORMS_PLATFORM,
   AORMS_OFFICE_HUB,
-  EOMS,
   ESTI,
   HUMAN_CENTRIC_WORKS,
 } from "../lib/product-nomenclature.js";
@@ -46,10 +45,6 @@ const AUDIENCE = [
     title: "Architecture studios",
     body: "Fee recovery, client portals, office management, and practice coordination — one unified web hub for your entire practice.",
   },
-  {
-    title: "Engineering consultancies",
-    body: "Engagements, deliverables, team management, and delivery coordination — the engineering office runs on one web hub.",
-  },
 ] as const;
 
 const FEATURES = [
@@ -63,7 +58,7 @@ const FEATURES = [
 
 const STATS = [
   { label: "Office management modules", value: "10+" },
-  { label: "AI agents · EOMS + ESTI", value: "Built-in" },
+  { label: "AI agent · ESTI", value: "Built-in" },
   { label: "Deployment model", value: "Cloud" },
 ] as const;
 
@@ -93,8 +88,8 @@ const START = [
   },
   {
     eyebrow: "Intelligence",
-    title: `${ESTI.name} · ${EOMS.name}`,
-    body: `${ESTI.name} is the built-in AI agent for office automation and insights. ${EOMS.name} connects the hub to your firm's external knowledge bank.`,
+    title: ESTI.name,
+    body: `${ESTI.name} is the built-in AI agent for office automation and insights, answering only from your firm's own validated repositories.`,
   },
   {
     eyebrow: "Online",
@@ -234,11 +229,11 @@ export function Landing() {
           <Grid>
             <SectionHead
               eyebrow="Audience"
-              title="Drawn for architects and engineers"
-              lead="AEC consulting firms — not generic SaaS personas. Two practice types on one office hub."
+              title="Built for architecture practices"
+              lead="An architectural consultancy's office hub — not a generic SaaS persona."
             />
             {AUDIENCE.map((a) => (
-              <Column key={a.title} sm={4} md={4} lg={8} style={{ marginBottom: "1rem" }}>
+              <Column key={a.title} sm={4} md={8} lg={16} style={{ marginBottom: "1rem" }}>
                 <Tile style={{ height: "100%" }}>
                   <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-text-secondary)" }}>
                     {AORMS_OFFICE_HUB.title}
@@ -273,7 +268,7 @@ export function Landing() {
             <SectionHead
               eyebrow="Features"
               title="Unified office management"
-              lead="One web hub for Architecture, Engineering, and Construction practices — clients, projects, proposals, invoicing, team, knowledge, and delivery."
+              lead="One web hub for architecture practices — clients, projects, proposals, invoicing, team, knowledge, and delivery."
             />
             {FEATURES.map((f) => (
               <Column key={f.title} sm={4} md={4} lg={5} style={{ marginBottom: "1rem" }}>
@@ -293,10 +288,10 @@ export function Landing() {
           <Grid>
             <SectionHead
               eyebrow="Intelligence"
-              title={`${ESTI.name} on the desk. ${EOMS.name} in the bank.`}
+              title={`${ESTI.name} on the desk.`}
               lead="AI answers only from your firm's validated repositories — never a third-party training sink."
             />
-            <Column sm={4} md={4} lg={8} style={{ marginBottom: "1rem" }}>
+            <Column sm={4} md={8} lg={16} style={{ marginBottom: "1rem" }}>
               <Tile style={{ height: "100%" }}>
                 <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-text-secondary)" }}>
                   Internal AI agent
@@ -306,19 +301,6 @@ export function Landing() {
                 </h3>
                 <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
                   Built-in office automation — answers only from validated firm repositories; recommendations, insights, task automation, document generation.
-                </p>
-              </Tile>
-            </Column>
-            <Column sm={4} md={4} lg={8} style={{ marginBottom: "1rem" }}>
-              <Tile style={{ height: "100%" }}>
-                <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-text-secondary)" }}>
-                  Knowledge bank (standalone API)
-                </p>
-                <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.5rem" }}>
-                  {EOMS.name}
-                </h3>
-                <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
-                  The continuously-learning knowledge bank — a standalone API that ingests, catalogs, and serves standard codebooks and building/compliance codes on demand.
                 </p>
               </Tile>
             </Column>
@@ -385,7 +367,7 @@ export function Landing() {
             <Column sm={4} md={8} lg={12}>
               <h2 className="cds--type-heading-05">Bring the practice onto one hub.</h2>
               <p className="cds--type-body-02" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
-                Architecture studios and engineering consultancies — sign in and start managing the office on one hub.
+                Architecture studios — sign in and start managing the office on one hub.
               </p>
               <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
                 <Button href="#sign-in" renderIcon={ArrowRight}>

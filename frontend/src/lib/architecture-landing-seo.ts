@@ -1,25 +1,24 @@
 /** SEO metadata for office hub landing page. */
-import { AORMS_OFFICE_HUB, AORMS_PLATFORM, EOMS, ESTI } from "./product-nomenclature.js";
+import { AORMS_OFFICE_HUB, AORMS_PLATFORM, ESTI } from "./product-nomenclature.js";
 
 const BASE = "https://aorms.in/";
 
 export const ARCHITECTURE_LANDING_SEO = {
   title: `${AORMS_OFFICE_HUB.title} | Office Management System`,
   description:
-    `${AORMS_OFFICE_HUB.title} — unified office management for AEC firms. Clients, projects, proposals, invoicing, team, knowledge, and delivery — all in one web hub.`,
+    `${AORMS_OFFICE_HUB.title} — unified office management for architecture practices. Clients, projects, proposals, invoicing, team, knowledge, and delivery — all in one web hub.`,
   keywords:
-    `office management, AEC consulting, practice manager, ESTI, EOMS, architecture, engineering, project management`,
+    `office management, architecture practice management, practice manager, ESTI, architecture consultancy, project management`,
   ogTitle: `${AORMS_OFFICE_HUB.title} — Office Management System`,
   ogDescription:
     `${AORMS_OFFICE_HUB.title} — unified office hub for ${AORMS_PLATFORM.aecDisciplines.join(", ")} practices.`,
   twitterTitle: `${AORMS_OFFICE_HUB.title} — Office Hub`,
   twitterDescription:
-    `Unified office management for AEC firms. Cloud-based, no desktop apps required.`,
+    `Unified office management for architecture practices. Cloud-based, no desktop apps required.`,
   headline: "One office hub for practices that design with precision.",
   footerBlurb: `${AORMS_OFFICE_HUB.title} on ${AORMS_PLATFORM.name}.`,
   canonical: `${BASE}`,
   siteName: AORMS_PLATFORM.name,
-  wikiUrl: "https://aorms.in/blog",
 } as const;
 
 export const ARCHITECTURE_LANDING_FAQ = [
@@ -44,14 +43,9 @@ export const ARCHITECTURE_LANDING_FAQ = [
       "No. AORMS is now a web-only office management system. Access it from any browser on any device. No installers, no desktop apps, no local-first setup required.",
   },
   {
-    question: "Where is the documentation?",
+    question: `What is ${ESTI.name}?`,
     answer:
-      "Start with the AORMS blog at aorms.in/blog — why the office hub matters and how it solves fragmented tools. Full docs at docs.aorms.in.",
-  },
-  {
-    question: `What are ${EOMS.name} and ${ESTI.name}?`,
-    answer:
-      `${EOMS.name} is the external knowledge bank for standard codes and compliance rules. ${ESTI.name} is the built-in AI agent that answers from your firm's own validated repositories.`,
+      `${ESTI.name} is the built-in AI agent that answers only from your firm's own validated repositories — recommendations, insights, task automation, and document generation.`,
   },
 ] as const;
 

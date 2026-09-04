@@ -1,12 +1,11 @@
 # AORMS — Office Management System (agent instructions)
 
 **AORMS** (**Accelerated Operational Resources Management System**) is a
-**cloud-based office management system** for **AEC firms & consultancies** — web-only, single unified app.
+**cloud-based office management system** for **architecture practices & consultancies** — web-only, single unified app, pure architectural consultancy (not engineering, not multi-discipline AEC).
 
 **Core products (web-based):**
 - **AORMS** — Office management hub (clients, projects, proposals, invoices, team, finances, knowledge bank)
 - **ESTI** — Built-in AI agent (office automation, insights, recommendations)
-- **EOMS** — External knowledge bank API (connected to hub)
 
 **Removed (legacy):**
 - ❌ AORMS Connect (desktop launcher) — not needed in web-only model
@@ -16,6 +15,18 @@
 - ❌ AQC Estimation / BBS (technical installers) — removed, separate repos
 - ❌ ADraft / ShilpiDB (drafting / geometry) — removed, allied apps
 - ❌ Desktop installers, Windows setup, Tauri shell — web-only now
+- ❌ **EOMS** (external knowledge bank API) — deprecated 2026-09; do not
+  reference in marketing/UI copy. A backend EOMS client/router
+  (`backend/src/lib/eoms/`, `backend/src/modules/eoms/`) and frontend
+  panels (`EomsCompliancePanel.tsx`, `KnowledgeBankPortal.tsx`) still exist
+  in code — not yet physically removed, scope pending.
+- ❌ **Engineering consultancy** angle — AORMS is now **pure architectural
+  consultancy** only, not multi-discipline AEC. The `consultancy` backend
+  module (`backend/src/modules/consultancy/`, docs/esti/AORMS-CONSULTANCY-
+  OPERATING-MODEL-AND-ARCHITECTURE.md) is explicitly engineering-consultancy
+  domain logic — still exists in code, not yet physically removed, scope
+  pending. Don't build new features on it or reference it as current
+  product surface.
 
 **Architecture:**
 - Web-first SPA only (no desktop apps)
@@ -68,17 +79,19 @@ VPS: [`docs/esti/VPS-INSTALL.md`](docs/esti/VPS-INSTALL.md) ·
 ## Product naming (2026-09)
 
 **Executable constants:** `frontend/src/lib/product-nomenclature.ts` — import
-`AORMS`, `AORMS_OFFICE_HUB`, `EOMS`, `ESTI`. Do not hard-code product strings in UI/SEO.
+`AORMS`, `AORMS_OFFICE_HUB`, `ESTI`. Do not hard-code product strings in UI/SEO.
 
 | Name | Role |
 | --- | --- |
 | **AORMS** | Office management system brand + cloud spine |
 | **AORMS Office Hub** | Web-only SPA; clients, projects, proposals, invoices, team, finances, KB |
 | **ESTI** | Built-in AI agent for office automation + insights |
-| **EOMS** | External knowledge bank API (connected to hub) |
 | **`esti` / `aorms`** | Hub monorepo codename — never use `esti` in marketing copy |
 
 **Removed (legacy, no longer referenced):**
+- ❌ `EOMS` constant — deprecated 2026-09, marked `@deprecated` in
+  `product-nomenclature.ts`, kept only for the still-unremoved backend
+  client/frontend panels. Do not import/reference in new work.
 - ❌ `AORMS_CONNECT` — desktop launcher removed
 - ❌ `AORMS_STUDIO` / `ASTUDIO` — allied app removed
 - ❌ `AORMS_CONSULTANCY` / `ACONSULTING` — allied app removed
@@ -445,7 +458,7 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
 - `system` — release metadata (owner-only)
 - `marketing` — landing visit counter
 - `specCatalog` — specification material catalogue (Knowledge Bank)
-- `consultancy` — AORMS-Consultancy engineering OS (engagements, deliverables, RACI, HLP, timesheets, WIP, contract review, lessons, NC/CAPA, MoM, opportunities, phase gates)
+- `consultancy` — ❌ **deprecated 2026-09** — AORMS-Consultancy engineering OS (engagements, deliverables, RACI, HLP, timesheets, WIP, contract review, lessons, NC/CAPA, MoM, opportunities, phase gates). AORMS is pure architectural consultancy now; this engineering-specific namespace is not current product surface. Not yet physically removed — see § Removed above.
 - `office` — includes enquiry register + go/no-go (`office.enquiries`)
 - `admin.usageReports` — HLP usage billing export + suspend-for-non-payment (P7.2 / P7.3)
 

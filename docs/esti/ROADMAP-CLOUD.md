@@ -203,12 +203,6 @@ Status reflects what a signed-in user reaches on `aorms.in` once S8 reopens
 - Email draft automation
 - Reminder creation
 
-### EOMS Knowledge API 🔲
-- External knowledge store integration
-- Search + filtering
-- Trending + recommendations
-- Connected to office hub
-
 ---
 
 ## Q4 2026 milestones (cloud)
@@ -231,7 +225,6 @@ this file tracks only what's actually live for users.
 
 ### Q1 2027
 - ESTI AI agent fully live on the office hub
-- EOMS knowledge bank live
 - SSO + federated identity
 - Office hub fully responsive on mobile
 

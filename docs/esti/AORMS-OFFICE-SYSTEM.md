@@ -8,7 +8,7 @@
 
 ## Overview
 
-**AORMS** is a cloud-based **office management system** for **AEC firms and consultancies**.  
+**AORMS** is a cloud-based **office management system** for **architecture firms and consultancies**.  
 A single unified web application (SPA) for managing:
 - **Clients** — CRM, interactions, contacts
 - **Projects** — tracking, phases, milestones, status
@@ -21,7 +21,11 @@ A single unified web application (SPA) for managing:
 
 **Built-in AI:**
 - **ESTI** — Office automation agent; recommendations, insights, task automation
-- **EOMS** — External knowledge bank API (connected to hub)
+
+> **EOMS deprecated (2026-09):** the external knowledge-bank API is no
+> longer part of the offering — AORMS is a pure architectural consultancy
+> product now. See CLAUDE.md § Removed for backend code that still exists
+> pending removal.
 
 ---
 
@@ -161,12 +165,13 @@ standards
 
 ---
 
-## Knowledge Bank API (EOMS)
+## Knowledge Bank
 
-**External knowledge store:**
-- Specifications, standards, compliance rules, lessons learned
-- Accessed from office hub via REST API
-- Supports search, filter, trending, recommendations
+**Firm-owned reference library** (specifications, standards, compliance
+rules, lessons learned) — governed within the office hub itself. The
+external EOMS knowledge-bank API is deprecated (2026-09); the Knowledge Bank
+portal (PDF intake → validated firm library → ESTI RAG) does not depend on
+it.
 
 ---
 
@@ -246,7 +251,6 @@ docker compose up
 **Q1 2027:**
 - Office hub v2.0 (Carbon Design System live)
 - ESTI AI agent (local inference integration)
-- EOMS knowledge bank (live)
 - SSO + federated identity setup
 
 **Q2+ 2027:**

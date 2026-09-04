@@ -5,20 +5,19 @@
  */
 import { platformPageUrl } from "./aorms-surface-urls.js";
 
-/** AORMS Platform — unified office management system for AEC firms. */
+/** AORMS Platform — unified office management system for architecture practices. */
 export const AORMS_PLATFORM = {
   name: "AORMS",
   expansion: "Accelerated Operational Resources Management System",
-  tagline: "The office management system for AEC practices",
-  audience:
-    "Architecture studios, engineering consultancies, and PMC practices managing clients, projects, and delivery",
+  tagline: "The office management system for architecture practices",
+  audience: "Architecture studios managing clients, projects, and delivery",
   heroHeadline: [
-    "One unified office hub for AEC practices.",
+    "One unified office hub for architecture practices.",
     "Clients, projects, proposals, invoicing, team, and knowledge — all in one place.",
   ] as const,
   heroSupport:
-    "For architects and engineers who manage projects, invoices, and teams with precision. Web-based, cloud-only.",
-  aecDisciplines: ["Architecture", "Engineering", "Construction"] as const,
+    "For architects who manage projects, invoices, and teams with precision. Web-based, cloud-only.",
+  aecDisciplines: ["Architecture"] as const,
   fragmentedTools: [
     "Email",
     "Spreadsheets",
@@ -161,23 +160,24 @@ export const ESTI = {
   workspace: "office",
 } as const;
 
-/** Knowledge Bank portal — EOMS textbook intake → validated firm library → ESTI RAG. */
+/** Knowledge Bank portal — PDF intake → validated firm library → ESTI RAG. */
 export const KNOWLEDGE_BANK_PORTAL = {
   title: "Knowledge Bank portal",
   route: "/libraries/knowledge-bank-portal",
   url: platformPageUrl("knowledgeBank"),
   summary:
-    "Governed reference library: HCW Markdown Tool converts PDFs to markdown; EOMS rephrases and summarises; published sections are available to ESTI (Ask ESTI).",
+    "Governed reference library: HCW Markdown Tool converts PDFs to markdown; published sections are available to ESTI (Ask ESTI).",
 } as const;
 
 /** @deprecated Use KNOWLEDGE_BANK_PORTAL — kept for transitional imports. */
 export const REPO_PORTAL = KNOWLEDGE_BANK_PORTAL;
 
 /**
- * EOMS — the continuously-learning knowledge bank. A standalone API in its own
- * repository (not the `esti` monorepo) that catalogs standard codebooks and
- * building/compliance codes; AORMS office hub queries it to retrieve
- * authoritative code and data.
+ * @deprecated EOMS is retired (2026-09) — AORMS is a pure architectural
+ * consultancy product now; the external knowledge-bank API is no longer part
+ * of the offering. Do not reference in marketing/UI copy. Kept only because
+ * a backend EOMS client/router still exists pending a decision on removing
+ * that code — see CLAUDE.md § Product naming.
  */
 export const EOMS = {
   name: "EOMS",
