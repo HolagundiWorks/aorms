@@ -27,8 +27,8 @@ import {
 import { StatusDot } from "../components/StatusTag.js";
 import { GoogleIconCircle } from "../components/GoogleIconCircle.js";
 import {
+  AORMS_PLATFORM,
   AORMS_PORTALS,
-  AORMS_STUDIO,
   HCW_LICENSE_MANAGER,
 } from "../lib/product-nomenclature.js";
 import { AccountSignupFields, EMPTY_PROFILE, type ProfileDraft } from "./AccountSignupFields.js";
@@ -209,7 +209,7 @@ export default function Login({
       ? `Create your account to activate ${product}.`
       : mode === "register"
         ? portal
-          ? `Create your ${AORMS_PORTALS.account.name} and request ${AORMS_STUDIO.title}.`
+          ? `Create your ${AORMS_PORTALS.account.name} and request ${AORMS_PLATFORM.name} office hub access.`
           : "Create the platform admin account."
         : portal
           ? showCompanyStep

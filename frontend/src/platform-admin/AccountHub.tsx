@@ -7,8 +7,6 @@ import type { Me } from "./lib/auth.js";
 import { PortalCard } from "../components/portal/PortalChrome.js";
 import { COMPOSITION_RHYTHM } from "../lib/composition.js";
 import {
-  AORMS_CONSULTANCY,
-  AORMS_PMC,
   AORMS_PORTALS,
 } from "../lib/product-nomenclature.js";
 
@@ -99,24 +97,9 @@ export function AccountHub({ me }: { me: Me }) {
         </Stack>
 
         <Stack direction="row" spacing={COMPOSITION_RHYTHM.xs} sx={{ flexWrap: "wrap", gap: 1 }}>
-          {wsType === "CONSULTANCY" ? (
-            <Button
-              component="a"
-              href={AORMS_CONSULTANCY.appUrl}
-              variant="contained"
-              size="small"
-            >
-              Open {wsLabel}
-            </Button>
-          ) : wsType === "PMC" ? (
-            <Button component="a" href={AORMS_PMC.appUrl} variant="contained" size="small">
-              Open {wsLabel}
-            </Button>
-          ) : (
-            <Button component={RouterLink} to="/login" variant="contained" size="small">
-              Open {wsLabel}
-            </Button>
-          )}
+          <Button component={RouterLink} to="/login" variant="contained" size="small">
+            Open office hub
+          </Button>
           {ownsCompany && (
             <Button component={RouterLink} to="/company-account" variant="outlined" size="small">
               Company account
