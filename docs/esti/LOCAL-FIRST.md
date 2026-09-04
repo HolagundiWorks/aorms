@@ -91,7 +91,23 @@ Packaging stub: [`desktop/`](../../desktop/) · env: `desktop/env.desktop.exampl
 
 ## Sibling repos
 
-| Repo | Product |
+## Implementation waves
+
+| Wave | Focus | Status |
+| --- | --- | --- |
+| **LF0** | Contracts: planes, `MetaEntity`, field maps, capability presets, tests | ✅ |
+| **LF1** | Hub `esti_meta_event` + catch-up REST + WS; node meta outbox/cursor; drain tick | ✅ |
+| **LF2** | Artifact content-hash; publish DTOs (tender/RA/siteReference/progressReport); portal-from-hub reads | ✅ |
+| **LF3** | Domain enqueue of metadata (tasks, estimate totals, phase progress) + apply hooks on pull | ✅ Gagan 2026-08 |
+| **LF4** | Signed desktop installer (**WinUI 3** Fluent 2 shell + WebView2 SPA; profile STUDIO\|CONSULTANCY); first-run licence bind | 🚧 Bhoomi — `desktop/AStudio.Shell` · `build-winui.ps1` · sign + physical bind ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); the legacy Tauri scaffold was **removed — WinUI 3 is the only shell** |
+| **LF5** | Web parity polish: capability badges, degraded AI UX, shared keymap / Help | ✅ Aakash — `CapabilityBadge` · `frontend/src/lib/keymap.ts` · `/help` · `resolveRuntimeCapabilities` web-parity fix |
+| **LF6** | UX parity checklist + inspector/AI right-slot; Figma token sync to kit | ✅ Aakash — [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) stub ✅ · right-slot ✅ (`RightSlot`) |
+
+**Migrations:** `0226_local_first_sync.sql` · `0227_hlp_org_sync_firm.sql` (panel sync firm UUID).
+
+## Key APIs & modules
+
+| Surface | Path |
 | --- | --- |
 | [AQC](https://github.com/HolagundiWorks/AQC) | Engine + three technical app packaging |
 | [AStudio](https://github.com/HolagundiWorks/AStudio) | Architecture practice manager |

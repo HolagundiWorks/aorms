@@ -7,13 +7,9 @@
 
 | Choice | Detail |
 | --- | --- |
-| **Suite core** | [AORMS-Connect](https://github.com/HolagundiWorks/AORMS-Connect) — login · launcher · catalog · DB connector |
-| **Practice managers** | [AStudio](https://github.com/HolagundiWorks/AStudio) · [AConsulting](https://github.com/HolagundiWorks/AConsulting) |
-| **Technical apps** | [AQC-Estimation](https://github.com/HolagundiWorks/AQC-Estimation) · [AQC-BBS](https://github.com/HolagundiWorks/AQC-BBS) · [AQC-PM](https://github.com/HolagundiWorks/AQC-PM) — three installers; engine SoT in [AQC](https://github.com/HolagundiWorks/AQC) (`bbs_engine`) |
-| **Drafting / geometry** | [ADraft](https://github.com/HolagundiWorks/AADT) · [shilpidb](https://github.com/HolagundiWorks/shilpidb) |
-| **Ops cloud** | MongoDB via esti hub |
-| **Stack (WinUI)** | C# WinUI 3 + C++ `bbs_engine` where calc applies |
-| **Open source** | Keep OSS for now |
+| **Single contracts package** | `@esti/contracts` in this monorepo — **do not** invent a second contracts repo |
+| **Desktop shell in-tree** | `desktop/AStudio.Shell` (**WinUI 3** + WebView2) — the legacy Tauri scaffold was **removed; WinUI 3 is the only shell** |
+| **Same SPA** | Desktop loads `frontend/` against loopback backend |
 
 ## Repos
 

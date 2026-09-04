@@ -132,7 +132,7 @@ roadmap status accuracy.
 
 ### Key paths
 
-- `desktop/AStudio.Shell` · `desktop/scripts/build-winui.ps1` · `build-installer.ps1`
+- `desktop/` · `desktop/scripts/build-installer.ps1` · `desktop/AStudio.Shell/`
 - `MORNING-TEST-LF4.md` · [LOCAL-FIRST.md](LOCAL-FIRST.md) LF4
 
 ### Done when
