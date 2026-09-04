@@ -1,5 +1,5 @@
 /**
- * ToastHost — promoted into the design system (2026-07). Compatibility
- * re-export; new code should import from `@hcw/ui-kit` directly.
+ * ToastHost — migrated to Carbon (2026-09).
+ * Re-export from adapters so existing call sites keep their import path.
  */
-export { ToastHost } from "@hcw/ui-kit";
+export { ToastHost } from '../carbon/adapters/index.js';
