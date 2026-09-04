@@ -1,4 +1,4 @@
-import { AORMS_PORTALS, AORMS_STUDIO } from "../lib/product-nomenclature.js";
+import { AORMS_PORTALS, AORMS_OFFICE_HUB } from "../lib/product-nomenclature.js";
 import { AormsLogo } from "./AormsLogo.js";
 import { LandingContours } from "./landing/LandingContours.js";
 
@@ -6,8 +6,8 @@ export type AuthStageVariant = "workspace" | "portal" | "external" | "admin";
 
 const COPY: Record<AuthStageVariant, { headline: string; subline: string }> = {
   workspace: {
-    headline: AORMS_STUDIO.title,
-    subline: `${AORMS_STUDIO.tagline} — projects, fees, drawings, and team on one record.`,
+    headline: AORMS_OFFICE_HUB.title,
+    subline: `${AORMS_OFFICE_HUB.tagline} — clients, projects, proposals, invoicing, team, and knowledge on one web hub.`,
   },
   portal: {
     headline: AORMS_PORTALS.account.stageHeadline,

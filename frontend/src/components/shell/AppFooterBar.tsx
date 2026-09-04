@@ -23,7 +23,6 @@ import type { WellnessSection } from "../wellness/wellnessExercises.js";
 import { WELLNESS_OPEN_EVENT } from "../wellness/wellnessExercises.js";
 import { detectSurface } from "../../lib/aorms-surface-urls.js";
 import { matchShellKey, tooltipWithChord } from "../../lib/keymap.js";
-import { AORMS_CONSULTANCY, AORMS_PMC } from "../../lib/product-nomenclature.js";
 import { OfficeHealthGlyph } from "./OfficeHealthGlyph.js";
 import { useOfficeHealth } from "./useOfficeHealth.js";
 import { SyncQueueChip } from "../SyncQueueChip.js";

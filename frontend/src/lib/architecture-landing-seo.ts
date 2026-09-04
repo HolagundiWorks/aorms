@@ -1,23 +1,22 @@
-/** SEO for /login — AStudio entry (soft launch: Coming soon on apex). */
-import { AORMS_STUDIO, AORMS_PLATFORM, EOMS, ESTI } from "./product-nomenclature.js";
+/** SEO metadata (legacy: was AStudio-specific, now office-hub focused). */
+import { AORMS_OFFICE_HUB, AORMS_PLATFORM, EOMS, ESTI } from "./product-nomenclature.js";
 
 const BASE = "https://aorms.in/";
-const LEGACY_SLUGS = AORMS_STUDIO.legacySlugs.join(", ");
 
 export const ARCHITECTURE_LANDING_SEO = {
-  title: `${AORMS_STUDIO.title} | Architecture practice manager on AORMS`,
+  title: `${AORMS_OFFICE_HUB.title} | Office Management System`,
   description:
-    `${AORMS_STUDIO.title} is the architecture practice manager in the AORMS suite — tasks, office, portal communications. Technical calc stays in AQC apps; drafting in ADraft. Soft launch: sign-in coming soon.`,
+    `${AORMS_OFFICE_HUB.title} — unified office management for AEC firms. Clients, projects, proposals, invoicing, team, knowledge, and delivery — all in one web hub.`,
   keywords:
-    `architecture practice manager, AStudio, Accelerated Studio, AORMS suite, ${LEGACY_SLUGS}, ESTI, EOMS, AEC consulting`,
-  ogTitle: `${AORMS_STUDIO.title} — architecture practice manager on AORMS`,
+    `office management, AEC consulting, practice manager, ESTI, EOMS, architecture, engineering, project management`,
+  ogTitle: `${AORMS_OFFICE_HUB.title} — Office Management System`,
   ogDescription:
-    `Part of the AORMS suite: managers for communications; technical work local. ${AORMS_STUDIO.title} does not own BOQ or CAD entities.`,
-  twitterTitle: `${AORMS_STUDIO.title} — AORMS practice manager`,
+    `${AORMS_OFFICE_HUB.title} — unified office hub for ${AORMS_PLATFORM.aecDisciplines.join(", ")} practices.`,
+  twitterTitle: `${AORMS_OFFICE_HUB.title} — Office Hub`,
   twitterDescription:
-    "Architecture practice manager in the AORMS suite. Soft launch: suite home and blog live; sign-in coming soon.",
-  headline: "From chaos to clarity. One living record for the practice.",
-  footerBlurb: `${AORMS_STUDIO.title} on ${AORMS_PLATFORM.name}.`,
+    `Unified office management for AEC firms. Cloud-based, no desktop apps required.`,
+  headline: "One office hub for practices that design with precision.",
+  footerBlurb: `${AORMS_OFFICE_HUB.title} on ${AORMS_PLATFORM.name}.`,
   canonical: `${BASE}`,
   siteName: AORMS_PLATFORM.name,
   wikiUrl: "https://aorms.in/blog",
@@ -25,34 +24,34 @@ export const ARCHITECTURE_LANDING_SEO = {
 
 export const ARCHITECTURE_LANDING_FAQ = [
   {
-    question: `Who is ${AORMS_STUDIO.title} for?`,
+    question: `What is ${AORMS_OFFICE_HUB.title}?`,
     answer:
-      "Architecture and design consultancies — practice managers for tasks, office, and portal communications within the AORMS suite.",
+      `A unified web-based office management system for ${AORMS_PLATFORM.aecDisciplines.join(", ")} practices — clients, projects, proposals, invoicing, team roster, knowledge bank, and delivery tracking all in one place.`,
   },
   {
     question: "How does fee recovery work?",
     answer:
-      "The practice manager keeps proposals, invoices, and project records together so revisions and stages stay billable — technical totals publish from AQC Estimation when issued.",
+      "Track clients, projects, proposals, and invoices on one unified record. Proposals link to projects; invoices follow proposals. No spreadsheet archaeology.",
   },
   {
     question: "How is AORMS licensed?",
     answer:
-      "Every account includes 5 GB storage and the full workspace. Pay only for additional storage per GB-month — AI is unmetered (local Ollama on desktop, the hub on web), with no per-token billing or bring-your-own key.",
+      "One Standard licence — unlimited users, full office hub, and cloud storage included. Pay only for storage above your allocation. AI is built-in and unmetered (no per-token billing).",
   },
   {
     question: "Is there a desktop app?",
     answer:
-      "Yes — desktop preferred with web parity. The same workspace runs as a local-first desktop node or in the browser; drafts and AI can stay on the machine, and finalized documents publish to the hub. Signed installers appear on aorms.in/downloads when packaging ships; until then, use the web workspace.",
+      "No. AORMS is now a web-only office management system. Access it from any browser on any device. No installers, no desktop apps, no local-first setup required.",
   },
   {
     question: "Where is the documentation?",
     answer:
-      "Start with the AORMS blog — why the suite matters, how it solves fragmented tools, and the suite map at aorms.in/blog.",
+      "Start with the AORMS blog at aorms.in/blog — why the office hub matters and how it solves fragmented tools. Full docs at docs.aorms.in.",
   },
   {
     question: `What are ${EOMS.name} and ${ESTI.name}?`,
     answer:
-      `${EOMS.name} is the external knowledge bank for codes. ${ESTI.name} is the internal AI agent on desktop managers — answers from validated firm repositories.`,
+      `${EOMS.name} is the external knowledge bank for standard codes and compliance rules. ${ESTI.name} is the built-in AI agent that answers from your firm's own validated repositories.`,
   },
 ] as const;
 
@@ -89,20 +88,15 @@ export function injectArchitectureLandingJsonLd(): void {
       {
         "@type": "SoftwareApplication",
         "@id": `${ARCHITECTURE_LANDING_SEO.canonical}#software`,
-        name: AORMS_STUDIO.title,
-        alternateName: [
-          AORMS_PLATFORM.expansion,
-          ESTI.name,
-          ESTI.expansion,
-          ...AORMS_STUDIO.legacySlugs,
-        ],
+        name: AORMS_OFFICE_HUB.title,
+        alternateName: [AORMS_PLATFORM.expansion, ESTI.name, ESTI.expansion],
         applicationCategory: "BusinessApplication",
-        operatingSystem: "Windows, Web",
-        url: AORMS_STUDIO.appUrl,
+        operatingSystem: "Web",
+        url: AORMS_OFFICE_HUB.appUrl,
         description: ARCHITECTURE_LANDING_SEO.description,
         audience: {
           "@type": "Audience",
-          audienceType: AORMS_STUDIO.audience,
+          audienceType: AORMS_PLATFORM.audience,
         },
         publisher: { "@id": "https://aorms.in/#organization" },
       },
