@@ -39,13 +39,6 @@ const Env = z.object({
   /** NODE — base URL of the hub (e.g. https://aorms.in) for activation/refresh/sync. Empty = offline-only. */
   ESTI_HUB_URL: z.string().default(""),
   /**
-   * Base URL of the EOMS compliance Knowledge Bank (a separate local service —
-   * the desktop companion, default port 8756). From a container reach the host
-   * via `http://host.docker.internal:8756`. Empty = EOMS integration disabled
-   * (reads degrade gracefully). See docs/esti/EOMS-INTEGRATION.md.
-   */
-  EOMS_API_URL: z.string().default(""),
-  /**
    * NODE — base URL of the HCW License Manager Product License API
    * (e.g. https://aorms.in/platform). When set with ESTI_PRODUCT_API_KEY,
    * activate/refresh call `/v1` instead of the legacy hub. Empty = use the hub

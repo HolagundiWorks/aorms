@@ -171,20 +171,3 @@ export const KNOWLEDGE_BANK_PORTAL = {
 
 /** @deprecated Use KNOWLEDGE_BANK_PORTAL — kept for transitional imports. */
 export const REPO_PORTAL = KNOWLEDGE_BANK_PORTAL;
-
-/**
- * @deprecated EOMS is retired (2026-09) — AORMS is a pure architectural
- * consultancy product now; the external knowledge-bank API is no longer part
- * of the offering. Do not reference in marketing/UI copy. Kept only because
- * a backend EOMS client/router still exists pending a decision on removing
- * that code — see CLAUDE.md § Product naming.
- */
-export const EOMS = {
-  name: "EOMS",
-  expansion: "Emergent Object Management System",
-  role: "Knowledge bank (standalone API)",
-  external: true,
-  hosts: ["Standard codebooks", "Building compliance", "Other compliance codes"] as const,
-  summary:
-    "The continuously-learning knowledge bank — a standalone API that ingests, catalogs, and serves standard codebooks and building/compliance codes so a specific code or dataset can be retrieved on demand. AORMS office hub queries EOMS; ESTI answers only from the firm's own validated repositories.",
-} as const;

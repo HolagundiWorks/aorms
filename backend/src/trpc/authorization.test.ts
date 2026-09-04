@@ -121,11 +121,11 @@ describe("tRPC authorization boundaries", () => {
     await expect(caller(user("SENIOR")).fees()).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 
-  // The consultancy module gates fee stages / rate cards / variation approvals
-  // behind fees:manage & cost:approve (money = L2+), while the engineering
-  // sign-off chain and timesheet logging stay on `write`. These assertions lock
-  // the exact capability split that separation relies on — in particular that
-  // HR_MANAGER, which holds `write` via its allow-list, does NOT reach money.
+  // fees:manage & cost:approve gate money-moving actions (estimate/proposal/
+  // rate-book/running-bill approvals — money = L2+), separate from general
+  // `write`. These assertions lock the exact capability split that separation
+  // relies on — in particular that HR_MANAGER, which holds `write` via its
+  // allow-list, does NOT reach money.
   it.each([
     ["OWNER", true],
     ["PARTNER", true],
@@ -134,7 +134,7 @@ describe("tRPC authorization boundaries", () => {
     ["SENIOR", false],
     ["ASSOCIATE", false],
     ["VIEWER", false],
-  ] as const)("scopes consultancy money capabilities for %s", (role, money) => {
+  ] as const)("scopes money capabilities for %s", (role, money) => {
     expect(can(role, "fees:manage")).toBe(money);
     expect(can(role, "cost:approve")).toBe(money);
     // Operational `write` (sign-off chain, timesheet logging) is broader.

@@ -75,7 +75,6 @@ import {
   sweepDanglingReferences,
   upsertDemoFirm,
 } from "./demoStudioSeed.js";
-import { clearDemoConsultancyRows, seedDemoConsultancy } from "./demoConsultancySeed.js";
 import { seedDemoClientPortalExtras } from "./demoClientPortalSeed.js";
 import { seedDemoContractorPortalExtras } from "./demoContractorPortalSeed.js";
 import { seedDemoJointMeasurement } from "./demoJointMeasurementSeed.js";
@@ -108,7 +107,6 @@ async function clearDemoWorkspace(principalId: string) {
   let repaired = { total: 0, tables: 0 };
   await db.execute(rawSql`SET session_replication_role = 'replica'`);
   try {
-    await clearDemoConsultancyRows(db);
     await clearStudioDemoRows(db, principalId);
     await db.delete(projectOffices).where(eq(projectOffices.createdById, principalId));
     await db.delete(contractors).where(eq(contractors.createdById, principalId));
@@ -158,7 +156,6 @@ async function backfillStudioDemo(principalId: string, pwHash: string): Promise<
   await patchDemoApprovalSignals(db, projectIds, principalId);
   await rebalanceDemoTaskAssignees(db);
   if (projectIds[0]) await seedDemoTakeoff(db, projectIds[0]);
-  await seedDemoConsultancy(db, principalId);
   await seedDemoClientPortalExtras(db, principalId);
   await seedDemoContractorPortalExtras(db, principalId);
   await seedDemoJointMeasurement(db, principalId);
@@ -705,7 +702,6 @@ async function main() {
   await seedStudioGlanceAndLeads(db, principal.id, allProjectIds, memberIds);
   await rebalanceDemoTaskAssignees(db);
   if (allProjectIds[0]) await seedDemoTakeoff(db, allProjectIds[0]);
-  await seedDemoConsultancy(db, principal.id);
 
   // Showcase OPEN tender on Sharma Villa with two invitations.
   if (allProjectIds[0] && contractorRows[0] && contractorRows[1]) {
@@ -866,9 +862,6 @@ async function main() {
   console.log(`    client portal: Kapoor Residence — approvals · drawings · progress · RA · MoM · activity`);
   console.log(`    contractor portal: Sharma Villa — tickets · visits · drawings · RA · joint measure`);
   console.log(`    joint measurement: site recorder → AProc approve · rate-book import (Sharma Villa)`);
-  console.log(
-    `    consultancy: EQ-DEMO-001→C-DEMO-001 · EQ-DEMO-002 open · EQ-DEMO-003 lost · C-DEMO-002 MEP`,
-  );
 }
 
 main()

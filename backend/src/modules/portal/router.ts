@@ -14,8 +14,6 @@ import {
   activities,
   approvals,
   assignments,
-  consDeliverables,
-  consEngagements,
   drawings,
   moms,
   phases,
@@ -234,36 +232,6 @@ export const portalRouter = router({
         .where(and(eq(assignments.projectId, input.projectId), sql`${users.id} IS NOT NULL`))
         .orderBy(asc(users.fullName));
     }),
-
-  /**
-   * AORMS-Consultancy Phase 0 — issued deliverable packages for this client's
-   * engineering engagements. Scoped hard: the client sees **ISSUED packages
-   * only** (drafts, superseded, and withdrawn deliverables never leave the
-   * office), and only for engagements linked to their own clientId.
-   */
-  issuedConsDeliverables: clientProcedure.query(async ({ ctx }) => {
-    return ctx.db
-      .select({
-        id: consDeliverables.id,
-        engagementId: consEngagements.id,
-        engagementTitle: consEngagements.title,
-        code: consDeliverables.code,
-        title: consDeliverables.title,
-        discipline: consDeliverables.discipline,
-        revision: consDeliverables.revision,
-        issueClass: consDeliverables.issueClass,
-        issuedAt: consDeliverables.issuedAt,
-      })
-      .from(consDeliverables)
-      .innerJoin(consEngagements, eq(consDeliverables.engagementId, consEngagements.id))
-      .where(
-        and(
-          eq(consEngagements.clientId, ctx.user.clientId),
-          eq(consDeliverables.status, "ISSUED"),
-        ),
-      )
-      .orderBy(desc(consDeliverables.issuedAt));
-  }),
 
   /** Issued progress reports for the client's projects (hub published store when ESTI_ROLE=hub). */
   issuedProgressReports: clientProcedure

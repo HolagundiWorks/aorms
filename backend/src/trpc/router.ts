@@ -11,7 +11,6 @@ import { engagementRouter } from "../modules/consultant/engagement.js";
 import { consultantRequestsRouter } from "../modules/consultant/inbox.js";
 import { collaboratorRouter } from "../modules/consultant/portal.js";
 import { consultantRouter } from "../modules/consultant/router.js";
-import { consultancyRouter } from "../modules/consultancy/router.js";
 import { contractorRouter } from "../modules/contractor/router.js";
 import { vendorRouter } from "../modules/vendor/router.js";
 import { complianceRouter } from "../modules/compliance/router.js";
@@ -106,7 +105,6 @@ import { estimateRouter } from "../modules/estimate/router.js";
 import { bbsRouter } from "../modules/bbs/router.js";
 import { steelReconciliationRouter } from "../modules/steel/router.js";
 import { moodboardRouter } from "../modules/moodboard/router.js";
-import { eomsRouter } from "../modules/eoms/router.js";
 import { mongoOpsRouter } from "../modules/mongoOps/router.js";
 import { publicProcedure, router } from "./trpc.js";
 
@@ -149,9 +147,6 @@ export const appRouter = router({
   approvals: approvalRouter,
   transmittals: transmittalRouter,
   consultants: consultantRouter,
-  // AORMS-Consultancy (engineering) — Phase 0 living record; distinct from the
-  // Studio architect↔consultant `engagements` namespace below.
-  consultancy: consultancyRouter,
   contractors: contractorRouter,
   vendors: vendorRouter,
   compliance: complianceRouter,
@@ -244,7 +239,6 @@ export const appRouter = router({
   tenders: tendersRouter,
   runningBills: runningBillsRouter,
   moodboard: moodboardRouter,
-  eoms: eomsRouter,
 });
 
 /** Exported type only — the SPA imports this for end-to-end type safety. */

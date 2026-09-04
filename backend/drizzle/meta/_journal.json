@@ -1611,6 +1611,13 @@
       "when": 1785979000000,
       "tag": "0227_hlp_org_sync_firm",
       "breakpoints": true
+    },
+    {
+      "idx": 234,
+      "version": "7",
+      "when": 1788514121338,
+      "tag": "0234_remove_consultancy_tables",
+      "breakpoints": true
     }
   ]
 }

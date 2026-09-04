@@ -43,4 +43,3 @@ export * from "./running-bill.js";
 export type { ProjectOfficeRow } from "./project.js";
 export * from "./usage.js";
 export * from "./cpi.js";
-export * from "./consultancy.js";

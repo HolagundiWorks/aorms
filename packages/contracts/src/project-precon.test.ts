@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  CONSULTANCY_PHASE_GATE_CHECKLIST,
   ProjectOpportunityCreate,
   ProjectPhaseGateUpsert,
   ProjectRiskCreate,
   canDecidePhaseGate,
 } from "./project-precon.js";
-import { CONSULTANCY_PHASE_GATE_CHECKLIST } from "./consultancy.js";
 
 describe("Studio project precon schemas", () => {
   it("accepts a risk create payload", () => {

@@ -27,9 +27,8 @@ import {
   type RepoSourceCategory,
   type RepoSourceStatus,
 } from "@esti/contracts";
-import { EOMS, KNOWLEDGE_BANK_PORTAL } from "../lib/product-nomenclature.js";
+import { KNOWLEDGE_BANK_PORTAL } from "../lib/product-nomenclature.js";
 import { DataState } from "../components/DataState.js";
-import { EomsCompliancePanel } from "../components/EomsCompliancePanel.js";
 import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { RowActionsMenu } from "../components/RowActionsMenu.js";
@@ -67,7 +66,7 @@ export function KnowledgeBankPortal() {
 
   const create = trpc.knowledgeBankPortal.create.useMutation({ meta: { errorTitle: "Couldn't create the document" }, onSuccess: inv });
   const remove = trpc.knowledgeBankPortal.remove.useMutation({ meta: { errorTitle: "Couldn't delete the document" }, onSuccess: inv });
-  const processEoms = trpc.knowledgeBankPortal.processWithEoms.useMutation({ meta: { errorTitle: "Couldn't process the document with EOMS" }, onSuccess: inv });
+  const processEoms = trpc.knowledgeBankPortal.processWithEoms.useMutation({ meta: { errorTitle: "Couldn't process the document" }, onSuccess: inv });
   const publish = trpc.knowledgeBankPortal.publish.useMutation({ meta: { errorTitle: "Couldn't publish the document" }, onSuccess: inv });
   const unpublish = trpc.knowledgeBankPortal.unpublish.useMutation({ meta: { errorTitle: "Couldn't unpublish the document" }, onSuccess: inv });
   const update = trpc.knowledgeBankPortal.update.useMutation({ meta: { errorTitle: "Couldn't update the document" }, onSuccess: inv });
@@ -95,7 +94,7 @@ export function KnowledgeBankPortal() {
   const [editDirty, setEditDirty] = useState(false);
 
   useEffect(() => {
-    document.title = `${KNOWLEDGE_BANK_PORTAL.title} — ${EOMS.name}`;
+    document.title = KNOWLEDGE_BANK_PORTAL.title;
   }, []);
 
   useEffect(() => {
@@ -189,7 +188,7 @@ export function KnowledgeBankPortal() {
                 id: "kb-eoms",
                 zone: "right" as const,
                 tone: "primary" as const,
-                label: `Run ${EOMS.name}`,
+                label: "Run AI rephrase",
                 icon: <AutoStoriesOutlinedIcon />,
                 onClick: runEoms,
                 disabled:
@@ -274,15 +273,13 @@ export function KnowledgeBankPortal() {
           <Link href={HCW_MARKDOWN_TOOL.repoUrl} target="_blank" rel="noreferrer">
             {HCW_MARKDOWN_TOOL.name}
           </Link>
-          ; {EOMS.name} ingests the markdown before publish to <strong>ESTI</strong>.
+          ; AI rephrasing ingests the markdown before publish to <strong>ESTI</strong>.
         </Typography>
       }
     >
       <PageBreadcrumb items={[{ label: "Library" }, { label: KNOWLEDGE_BANK_PORTAL.title }]} />
       <Stack spacing={2} sx={{ height: "100%", minHeight: 0 }}>
         {error && <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>}
-
-        <EomsCompliancePanel />
 
         <Box sx={{ flex: "0 0 auto", minHeight: 240 }}>
           <DataState
@@ -291,7 +288,7 @@ export function KnowledgeBankPortal() {
             columnCount={1}
             empty={{
               title: "No reference sources",
-              description: `Add a textbook. PDFs become Markdown, then ${EOMS.name} rephrases and summarises before you publish to ESTI.`,
+              description: "Add a textbook. PDFs become Markdown, then AI rephrases and summarises before you publish to ESTI.",
             }}
           >
             <DataGrid
@@ -395,7 +392,7 @@ export function KnowledgeBankPortal() {
                       </Button>
                     )}
                   </Stack>
-                  {/* “Run EOMS” lives in the ActionDock (RIGHT — commit); no inline duplicate. */}
+                  {/* “Run AI rephrase” lives in the ActionDock (RIGHT — commit); no inline duplicate. */}
                 </Stack>
               )}
 
@@ -461,7 +458,7 @@ export function KnowledgeBankPortal() {
               fullWidth
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
-              helperText="Paste textbook content — stored as markdown for EOMS (minimum 200 characters)."
+              helperText="Paste textbook content — stored as markdown for AI rephrasing (minimum 200 characters)."
             />
           </Stack>
         </DialogContent>
