@@ -43,5 +43,16 @@ export function CapabilityBadge({
  * is gated via {@link isDesktopClient}). Kept for any stray imports.
  */
 export function RuntimeHostTrayHint() {
-  return null;
+  const host = buildTimeHost();
+  if (host === "desktop") return null;
+  return (
+    <Typography
+      variant="caption"
+      color="text.secondary"
+      sx={{ px: 0.5, display: { xs: "none", md: "inline" } }}
+      title="Web parity — AI and heavy jobs run on the hub"
+    >
+      Web
+    </Typography>
+  );
 }
