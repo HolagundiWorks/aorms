@@ -8,26 +8,21 @@
 
 .NOTES
   Requires: .NET 8 SDK, Windows App SDK workloads, WebView2 runtime.
-  WinUI 3 is the only desktop shell (the legacy Tauri scaffold was removed).
+  Tauri under desktop/src-tauri is non-canonical (legacy scaffold).
 #>
 [CmdletBinding()]
 param(
   [ValidateSet("STUDIO", "CONSULTANCY")]
   [string] $Profile = "STUDIO",
   [switch] $SkipFrontendBuild,
-  [switch] $Run,
-  # After publish, run sign-winui.ps1 (ACO-dev or AORMS_CODESIGN_PFX).
-  [switch] $Sign,
-  [string] $Version = "0.0.0-dev",
-  [switch] $RequireTrustedChain
+  [switch] $Run
 )
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $ShellDir = Join-Path $RepoRoot "desktop\AStudio.Shell"
 $Frontend = Join-Path $RepoRoot "frontend"
-$profileDir = if ($Profile -eq "CONSULTANCY") { "consultancy" } else { "studio" }
-$OutDir = Join-Path $RepoRoot "desktop\artifacts\winui\$profileDir"
+$OutDir = Join-Path $RepoRoot "desktop\artifacts\winui"
 
 Write-Host "=== AORMS WinUI 3 shell ($Profile) ===" -ForegroundColor Cyan
 Write-Host "Repo: $RepoRoot"
@@ -91,20 +86,8 @@ if (Test-Path $exe) {
   Get-ChildItem $OutDir -Filter *.exe -Recurse | Select-Object -First 5 FullName
 }
 
-Write-Host "Sign: powershell -File desktop/scripts/sign-winui.ps1 -Profile $Profile"
+Write-Host "Sign the published exe/MSIX, then set VITE_ASTUDIO_INSTALLER_URL (Aakash handoff)."
 Write-Host "Dev run: set AORMS_SPA_URL=http://127.0.0.1:5173 and launch the exe (stack via start-node.ps1)."
-
-if ($Sign -and (Test-Path $exe)) {
-  $signScript = Join-Path $PSScriptRoot "sign-winui.ps1"
-  $signParams = @{
-    Profile = $Profile
-    ExePath = $exe
-    Version = $Version
-  }
-  if ($RequireTrustedChain) { $signParams.RequireTrustedChain = $true }
-  & $signScript @signParams
-  if ($LASTEXITCODE -ne 0) { throw "sign-winui.ps1 failed ($LASTEXITCODE)" }
-}
 
 if ($Run -and (Test-Path $exe)) {
   $env:AORMS_SPA_URL = "http://127.0.0.1:5173"

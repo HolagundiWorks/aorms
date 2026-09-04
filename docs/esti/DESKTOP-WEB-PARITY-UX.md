@@ -19,12 +19,11 @@
 
 | Role | Primitive | Rule |
 | --- | --- | --- |
-| Modules | Soft neu ribbon + **taskbar** module nav (staff); `PortalNeuFrame` on portals | Same IA — module nav is **not** in the top ribbon |
-| Marketing | `MarketingNeuFrame` (top ribbon · stage · AnalogueClock) | Public Home/Blog/Downloads — no left SoftRail |
-| Workspace | Stage + `RailLayout` page shell (web) · Fog stage (WinUI) | Same templates + [05-TEMPLATES](../hcw-kit/05-TEMPLATES.md) |
-| Inspector / AI | One right slot (properties ↔ Ask ESTI) | AI never menu-only · desktop-only Ollama |
-| Native chrome | WinUI 3 + `Themes/HcwTheme.xaml` (kit mirror) | No Fluent card brand chrome; see [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) |
-| Status | Taskbar + sync chip + AnalogueClock | Same tray order; clock ambient |
+| Modules | `GlassRail` — expanded ~280px / collapsed ~72px | Never move module nav to a web-only top bar |
+| Workspace | Stage | Same routes + [05-TEMPLATES](../hcw-kit/05-TEMPLATES.md) |
+| Inspector / AI | One right slot (properties ↔ Ask ESTI) | AI never menu-only |
+| Native chrome | Thin **WinUI 3** Fluent 2 menu → SPA commands | AI never menu-only |
+| Status | Taskbar + `SyncQueueChip` | Same tray order |
 
 Desktop may add a **thin native menu** that invokes the **same command IDs** as the web Command Palette — it does not replace the SPA / WinUI module chrome.
 

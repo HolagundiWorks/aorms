@@ -34,15 +34,9 @@ else
 fi
 
 if grep -q 'LegacyTauri' "$ROOT/desktop/scripts/build-installer.ps1"; then
-  bad "LegacyTauri escape hatch still present — WinUI 3 is the only shell"
+  ok "LegacyTauri escape hatch present"
 else
-  ok "build-installer.ps1 has no LegacyTauri hatch (WinUI-only)"
-fi
-
-if [[ -e "$ROOT/desktop/src-tauri" ]]; then
-  bad "legacy desktop/src-tauri scaffold still present"
-else
-  ok "legacy Tauri scaffold removed (no desktop/src-tauri)"
+  bad "LegacyTauri switch missing from build-installer.ps1"
 fi
 
 if grep -q 'TargetFramework>net8.0-windows' "$SHELL_DIR/AStudio.Shell.csproj"; then

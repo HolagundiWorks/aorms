@@ -30,16 +30,16 @@ Stripe/W4, or edit `frontend/src/routes/Projects.tsx` / `Clients.tsx`.
 
 | Surface | Owner | PR / branch | Notes |
 | --- | --- | --- | --- |
-| Hub `syncToken` mint · `firmFromSyncToken` · `0227` · LF3 `domainMeta` · `@esti/contracts` | **Gagan** | **#45** `cursor/hub-sync-contracts-9937` | Merge to `main` **first** |
-| Tauri / installer / signing · first-run bind UX (`DesktopLicenceBind`) | **Bhoomi** | `orch/lf4-sync-bind-installer` | Rebase after #45; **drop duplicate hub/sync/docs** |
-| Portal Downloads / GTM / LF5–LF6 | **Aakash** | LF5 **#51** · LF6 **#54** · CI lint **#55** · WinUI wording **#50** | Live URL waits on Bhoomi signed Setup.exe |
+| Hub `syncToken` · `0227` · LF3 · bind readiness | **Gagan** | **#45/#48/#53** ✅ | On `main` |
+| CI lint · worker ruff | **Vishwakarma** | **#55/#56** ✅ | On `main` |
+| LF5 badges/keymap/Help | **Aakash** | **#51** ✅ | On `main` |
+| LF6 right-slot | **Aakash** | **#54** ✅ | On `main` |
+| **WinUI 3** shell · sign · bind | **Bhoomi** | **#49** 🚧 | Code ready · Windows sign/bind open |
+| Portal WinUI wording | **Aakash** | **#50** | Independent · `web_fallback` |
 
-**Merge order (Vishwakarma):** land **#45** (Gagan hub/sync/contracts) before the LF4
-desktop branch. LF4 will rebase onto `main` and drop overlapping hub files
-(`licenseApi/service.ts`, `license/consumer.ts`, `sync/*`, contracts
-`licensing-platform.ts`, HUB-API / LOCAL-FIRST / ROADMAP / AGENT-WORKSTREAMS /
-DESKTOP-REPOS). Gagan does **not** own `desktop/` packaging or
-`DesktopLicenceBind`.
+**Merge wave (2026-08-06):** **#55 → #56 → #51 → #53 → #54** ✅ on `main`. Remaining:
+land **#49** (WinUI), then Bhoomi Windows sign + hub **0227** prod confirm → Aakash
+live download URL. Gagan does **not** own `desktop/` packaging.
 
 ---
 
