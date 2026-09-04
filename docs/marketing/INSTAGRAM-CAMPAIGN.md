@@ -1,6 +1,6 @@
 # AORMS — Instagram Marketing Campaign Strategy
 
-**Product:** AORMS (**Accelerated Operational Resources Management System**, platform; **AORMS-Studio** workspace) — aorms.in
+**Product:** AORMS (**Architecture Operations & Resource Management System**, platform; **AORMS-Studio** workspace) — aorms.in
 **By:** Holagundi Consulting Works
 **Audience geography:** India (primary: Bengaluru, then metro + tier-2 practice hubs)
 **Prepared:** July 2026

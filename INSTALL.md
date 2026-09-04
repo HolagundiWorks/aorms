@@ -1,6 +1,6 @@
 # AORMS — Installation
 
-AORMS (**Accelerated Operational Resources Management System**) — **AORMS-Studio**
+AORMS (**Architecture Operations & Resource Management System**) — **AORMS-Studio**
 workspace — is a containerised monorepo. Every
 component (PostgreSQL, Redis, MinIO, the TypeScript backend, the Python worker
 and the React SPA) runs in a container — nothing is installed on the host

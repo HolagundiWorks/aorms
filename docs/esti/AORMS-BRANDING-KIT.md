@@ -10,7 +10,7 @@
 > brand font is now **Urbanist** (not Open Sans, §2 below), and corners are
 > **0 on surfaces** with **`BUTTON_RADIUS` (4px) on buttons only** (§3 below).
 >
-> **Product:** **AORMS** (**Accelerated Operational Resources Management System**) —
+> **Product:** **AORMS** (**Architecture Operations & Resource Management System**) —
 > the platform for AEC consulting firms. **AORMS-Studio** — architecture app (`aorms-studio`).
 > **EmOI** — external AI agent; **ESTI** — internal AI agent (live in **AORMS-Studio**).
 > Code identifiers keep the `esti` codename; the platform mark is **AORMS**.

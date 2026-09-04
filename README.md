@@ -1,4 +1,4 @@
-# AORMS — Accelerated Operational Resources Management System
+# AORMS — Architecture Operations & Resource Management System
 
 **AORMS** is a **cloud-based, web-only office management system** for
 **architecture practices & consultancies** — clients, projects, proposals,
