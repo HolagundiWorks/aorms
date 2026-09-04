@@ -80,8 +80,22 @@ job now fails on its own merits instead of on a shared install failure:**
 | --- | --- | --- |
 | `TypeScript` | `pnpm typecheck` | 16 pre-existing JSX errors in `Landing.tsx` / `DashboardTab.tsx` (unrelated to this pivot — see ROADMAP-LOCAL.md Phase 1) |
 | `Visual regression` | `Build · serve · assert` | Downstream of the same `tsc` failure — `vite build` runs `tsc` first |
-| `Dependency audit` | `pnpm audit --audit-level=high` | High-severity finding(s) present even with the existing `pnpm.overrides` — under investigation |
+| `Dependency audit` | `pnpm audit --audit-level=high` | **12 high-severity findings** (0 critical, 6 moderate below the gate) across 629 resolved deps — see below |
 | `Python worker` | — | ✅ Green (ruff + pytest both pass) |
+
+**`pnpm audit --audit-level=high` findings (2026-09-04):**
+
+| Package | Path | Issue |
+| --- | --- | --- |
+| `pdfjs-dist` | direct dep, pinned `6.1.200` (`frontend/package.json`) | Arbitrary JS execution on opening a malicious PDF — worth prioritizing: this app is PDF-heavy (invoices, proposals, drawings) and the version is exact-pinned, so bumping is a deliberate choice, not automatic |
+| `fast-uri` | transitive, via `fastify` / `fast-json-stringify` in `backend` | 4 distinct advisories (host confusion via IDN/percent-encoding, SSRF via IPv6/hostname decoding) — the root `pnpm.overrides` already pins `fast-uri` (`^3.1.5`) and `fast-json-stringify>fast-uri` (`^4.1.2`) for an *earlier* round of the same package; these are newer advisories the current pin doesn't cover — the override version needs bumping, not re-adding |
+| `browserslist` | transitive, via `eslint-plugin-react-hooks` → `@babel/core` (dev-only path) | Unbounded memory growth + a crash/prototype-write vector via untrusted stats — build-tooling only, not shipped to users, lower urgency |
+| `nanoid` | transitive, via `vite` → `postcss` | Custom generators can loop indefinitely at size 0 — build-tooling only |
+
+Not fixed in this pass — flagging with specifics so the next session doesn't
+have to re-run `pnpm audit --audit-level=high --json` to find out what's
+actually failing. `pdfjs-dist` and the `fast-uri` override bump are the two
+worth doing first; `browserslist`/`nanoid` are dev-only exposure.
 
 **Action:** merge `cloud-agent` into `main` to at least restore CI's ability
 to *run* — right now every push is fighting an install failure that has
