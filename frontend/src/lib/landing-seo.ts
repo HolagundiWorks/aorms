@@ -1,32 +1,20 @@
 /** Landing-page SEO — platform home `/`. Keep in sync with index.html meta tags. */
-import {
-  ADRAFT,
-  AORMS_CONSULTANCY,
-  AORMS_PMC,
-  AORMS_PLATFORM,
-  AORMS_STUDIO,
-  AQC_BBS,
-  AQC_ESTIMATION,
-  EOMS,
-  ESTI,
-  SHILPIDB,
-} from "./product-nomenclature.js";
+import { AORMS_PLATFORM, EOMS, ESTI } from "./product-nomenclature.js";
 import { isMarketingOnly } from "./marketing-gate.js";
 
 export const LANDING_SEO = {
   title: `AORMS | ${AORMS_PLATFORM.expansion}`,
   description:
-    "AORMS — the operating suite for architecture studios and engineering consultancies. Practice managers, AQC Estimation/BBS/PM, ADraft drafting, ShilpiDB drawings, and firm portals. Technical work stays local; installers coming soon.",
+    "AORMS — the office management system for AEC firms. Manage clients, projects, proposals, invoicing, team, and knowledge. Web-based, cloud-only. For architecture studios, engineering consultancies, and PMC practices.",
   keywords:
-    "AORMS, AStudio, AConsulting, architecture studio software, engineering consultancy software, AQC Estimation, AQC BBS, AProc, ADraft, ShilpiDB, EOMS, ESTI, AEC consulting suite, practice management, local-first desktop",
+    "AORMS, office management, architecture software, engineering software, project management, invoicing, team management, AEC consulting, practice management",
   ogTitle: `AORMS — ${AORMS_PLATFORM.heroHeadline[0]}`,
-  ogDescription:
-    "Built for architecture studios and engineering consultancies: managers for the office; Estimation, BBS, PM, and ADraft locally; ShilpiDB for drawings; firm portals for published updates. Open source. Installers coming soon.",
-  twitterTitle: "AORMS — for architecture studios and engineering firms",
+  ogDescription: AORMS_PLATFORM.heroHeadline[1],
+  twitterTitle: "AORMS — Office management for AEC firms",
   twitterDescription:
-    `${AORMS_STUDIO.title} · ${AORMS_CONSULTANCY.title} · ${AQC_ESTIMATION.title} · ${AQC_BBS.title} · ${AORMS_PMC.title} · ${ADRAFT.title} · ${SHILPIDB.name}. Technical work local; portals online.`,
+    "Clients · Projects · Proposals · Invoicing · Team · Knowledge. Web-based, cloud-only office hub.",
   headline: `${AORMS_PLATFORM.heroHeadline[0]} ${AORMS_PLATFORM.heroHeadline[1]}`,
-  footerBlurb: `${AORMS_PLATFORM.name} (${AORMS_PLATFORM.expansion}) — suite home and blog.`,
+  footerBlurb: `${AORMS_PLATFORM.name} (${AORMS_PLATFORM.expansion}) — office hub home and blog.`,
   canonical: "https://aorms.in/",
   siteName: AORMS_PLATFORM.name,
   wikiUrl: "https://aorms.in/blog",
@@ -34,54 +22,34 @@ export const LANDING_SEO = {
 
 export const LANDING_FAQ = [
   {
-    question: "What is AORMS?",
+    question: “What is AORMS?”,
     answer:
-      `AORMS (${AORMS_PLATFORM.expansion}) is a product suite for AEC consulting and PMC firms — practice managers, technical desktop apps, ADraft drafting, and ShilpiDB for drawings. ${EOMS.name} is the knowledge bank; ${ESTI.name} is the internal AI agent on desktop managers.`,
+      `AORMS (${AORMS_PLATFORM.expansion}) is a web-based office management system for AEC firms. ${AORMS_PLATFORM.tagline}. ${EOMS.name} provides the knowledge bank; ${ESTI.name} is the built-in office automation AI agent.`,
   },
   {
-    question: "Why a suite instead of one mega-app?",
+    question: “Who is AORMS for?”,
     answer:
-      "Practice communications and commercial rhythm belong in managers. Heavy calc (BOQ, BBS, programme) and drafting stay on the desktop. Firm portals show published updates only. One cloud ERP that tries to own CAD drafts and payroll always fails trust or correctness.",
+      “Architecture studios, engineering consultancies, and PMC practices that manage clients, projects, proposals, invoicing, teams, and knowledge.”,
   },
   {
-    question: "Who is the suite for?",
+    question: “What can I do with AORMS?”,
     answer:
-      `Architecture studios and engineering consultancies first — then PMC practices that advise and govern projects. Not contractor labour ERP.`,
+      “Manage clients and projects, create proposals and contracts, handle invoicing and finance, coordinate teams, track deliverables, maintain a knowledge base, and get AI-powered insights and recommendations.”,
   },
   {
-    question: `What are ${AORMS_STUDIO.title} and ${AORMS_CONSULTANCY.title}?`,
+    question: “Is AORMS cloud-based or desktop?”,
     answer:
-      `Practice managers — Tasks, Office, HR, Payroll views, and portal communications. ${AORMS_STUDIO.title} for architecture; ${AORMS_CONSULTANCY.title} for engineering. They do not own BOQ math or CAD entities.`,
+      “AORMS is a web-based, cloud-only application. Access it from any browser. No installers or local software required.”,
   },
   {
-    question: "What are the AQC technical apps?",
+    question: “Can I sign in on aorms.in today?”,
     answer:
-      `${AQC_ESTIMATION.title}, ${AQC_BBS.title}, and ${AORMS_PMC.suiteTitle ?? AORMS_PMC.title} (${AORMS_PMC.title}) are separate desktop installers sharing bbs_engine. They publish totals and issued PDFs — never draft lines — to firm portals.`,
+      “Yes, sign in at aorms.in/login to access your office hub workspace.”,
   },
   {
-    question: `What are ${ADRAFT.title} and ${SHILPIDB.name}?`,
+    question: “How is AORMS licensed?”,
     answer:
-      `${ADRAFT.title} (${ADRAFT.expansion}) is local WinUI 2D CAD — Urbanist typeface for chrome and drawing text, dimension pick, object snaps, and a local work .vdb tip (realtime sync off; COMMIT PUSH uploads when you ask). ${SHILPIDB.name} is the geometry spine; portals see published drawing packages only.`,
-  },
-  {
-    question: "Where is each product described on aorms.in?",
-    answer:
-      "The suite home has dedicated Products bands for AORMS Connect, AStudio, AConsulting, AQC Estimation, AQC BBS, AQC Project Management (AProc), ADraft, ShilpiDB, and firm portals — plus ESTI and EOMS under Intelligence. Jump via aorms.in/#adraft for drafting.",
-  },
-  {
-    question: "How is AORMS licensed right now?",
-    answer:
-      "Open source for now. SaaS commercial licensing is deferred. Windows installers are listed as coming soon on aorms.in/downloads.",
-  },
-  {
-    question: "Can I sign in on aorms.in today?",
-    answer:
-      "Soft launch: the suite home and blog are live. Workspace sign-in and firm-portal demos are coming soon. Follow the blog for release notes.",
-  },
-  {
-    question: "Where do I learn how the suite solves fragmented tools?",
-    answer:
-      "Read the blog posts “Why the AORMS suite matters”, “How the AORMS suite solves fragmented practice tools”, and “AORMS suite map” at aorms.in/blog.",
+      “AORMS is available under Standard licence with usage-based billing. See aorms.in/pricing for details.”,
   },
 ] as const;
 
@@ -151,33 +119,26 @@ export function injectLandingJsonLd(): void {
         name: AORMS_PLATFORM.name,
         alternateName: [
           AORMS_PLATFORM.expansion,
-          AORMS_STUDIO.title,
-          AORMS_CONSULTANCY.title,
-          AQC_ESTIMATION.title,
-          AQC_BBS.title,
-          AORMS_PMC.title,
-          ADRAFT.title,
-          SHILPIDB.name,
           EOMS.name,
           ESTI.name,
         ],
         applicationCategory: "BusinessApplication",
-        operatingSystem: "Windows, Web",
+        operatingSystem: "Web",
         url: "https://aorms.in/",
         description: LANDING_SEO.description,
         featureList:
-          "practice managers, AQC Estimation, AQC BBS, AQC Project Management, ADraft drafting, ShilpiDB geometry, firm portals, local-first desktop, EOMS, ESTI, open source",
+          "client management, project tracking, proposals, invoicing, team coordination, knowledge base, firm portals, EOMS knowledge bank, ESTI AI agent",
         audience: {
           "@type": "Audience",
           audienceType:
-            "Architecture studios and engineering consultancies — plus PMC practices that advise and govern projects",
+            "Architecture studios, engineering consultancies, and PMC practices",
         },
         offers: {
           "@type": "Offer",
-          name: `${AORMS_PLATFORM.name} suite`,
+          name: `${AORMS_PLATFORM.name} office hub`,
           description:
-            "Open-source suite. Soft launch: marketing home and blog live; Windows installers coming soon.",
-          url: "https://aorms.in/blog",
+            "Web-based office management system for AEC firms.",
+          url: "https://aorms.in/",
         },
         publisher: { "@id": "https://aorms.in/#organization" },
       },
