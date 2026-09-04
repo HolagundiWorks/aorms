@@ -23,16 +23,17 @@ export type AiComputeLocation = "local" | "hosted";
 
 export function buildTimeHost(): RuntimeHost {
   const h = import.meta.env.VITE_RUNTIME_HOST;
-  if (h === "desktop" || h === "hub") return h;
+  if (h === "hub") return h;
   return "web";
 }
 
 /**
- * True when this SPA is the desktop node (Vite desktop host or WinUI WebView2).
- * Use before mounting licence bind, offline sync tray, or native menu bridge.
+ * True when this SPA is running inside a native desktop shell (WinUI WebView2).
+ * Web-only builds never set `VITE_RUNTIME_HOST=desktop` — this is legacy
+ * shell detection only, kept for a native wrapper still pointing at the web build.
  */
 export function isDesktopClient(): boolean {
-  return buildTimeHost() === "desktop" || isNativeDesktopShell();
+  return isNativeDesktopShell();
 }
 
 /** Static fallback before the capabilities query resolves. */

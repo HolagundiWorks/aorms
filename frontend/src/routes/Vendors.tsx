@@ -451,7 +451,7 @@ export function Vendors() {
                   label="Rate (₹)"
                   type="number"
                   size="small"
-                  inputProps={{ min: 0, step: 0.5 }}
+                  slotProps={{ htmlInput: { min: 0, step: 0.5 } }}
                   value={priceForm.rateRupees}
                   onChange={(e) => setPriceForm({ ...priceForm, rateRupees: Number(e.target.value) || 0 })}
                 />

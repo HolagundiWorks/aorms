@@ -13,13 +13,13 @@ export function isMarketingOnly(): boolean {
   return import.meta.env.VITE_PUBLIC_SITE !== "false";
 }
 
-/** Paths that must not expose auth while marketing-only is on (apex). */
+/**
+ * Paths that must not expose auth while marketing-only is on (apex).
+ * Sign-in/signup/password-reset live on the landing page itself (`/#sign-in`)
+ * now and are not gated here — this list covers the remaining surfaces still
+ * held back during soft launch.
+ */
 export const MARKETING_AUTH_PATHS = [
-  "/login",
-  "/access",
-  "/signup",
-  "/forgot-password",
-  "/reset-password",
   "/demo",
   "/account",
   "/company-account",

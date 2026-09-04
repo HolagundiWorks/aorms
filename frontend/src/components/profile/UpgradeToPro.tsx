@@ -1,6 +1,7 @@
-import CheckIcon from "@mui/icons-material/Check";
-import { Alert, AlertTitle, Stack, Typography } from "@mui/material";
+import { InlineNotification, Stack } from "@carbon/react";
+import { Checkmark } from "@carbon/icons-react";
 import { STANDARD_LICENCE_LABEL, type LicenseStatus } from "@esti/contracts";
+import { CarbonScope } from "../../carbon/CarbonScope.js";
 import { StatusDot } from "../../carbon/adapters/index.js";
 import { trpc } from "../../lib/trpc.js";
 

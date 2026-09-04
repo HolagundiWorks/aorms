@@ -103,7 +103,7 @@ export function ProjectPhaseProgress({ projectId }: { projectId: string }) {
                     sx={{ minWidth: 160 }}
                     value={s.status}
                     disabled={update.isPending}
-                    InputLabelProps={{ shrink: true }}
+                    slotProps={{ inputLabel: { shrink: true } }}
                     onChange={(e) =>
                       update.mutate({
                         id: s.id,

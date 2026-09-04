@@ -15,7 +15,6 @@ import {
   Apartment as Enterprise,
   Engineering,
   Event as Events,
-  Home,
   Badge as Identification,
   CardMembership as License,
   Checklist as ListChecked,
@@ -63,19 +62,15 @@ import { UsageIdentity } from "./components/identity/UsageIdentity.js";
 import { DesktopLicenceBind } from "./components/DesktopLicenceBind.js";
 import { PomodoroProvider } from "./contexts/PomodoroContext.js";
 import { UploadAuthProvider } from "./lib/uploadAuth.js";
-// Landing + Login stay eager so the first paint (marketing / sign-in) needs no extra
-// chunk fetch. Every other route is code-split below so a landing visitor never
-// downloads the authenticated workspace (and its charts/xlsx) bundle.
+// Landing + AuthPage stay eager so the first paint (marketing / sign-in) needs no
+// extra chunk fetch. Every other route is code-split below so a landing visitor
+// never downloads the authenticated workspace (and its charts/xlsx) bundle.
 import { Landing } from "./routes/Landing.js";
 import { NotFound } from "./routes/NotFound.js";
-import { Signup } from "./routes/Signup.js";
-import { Login } from "./routes/Login.js";
+import { AuthPage } from "./routes/AuthPage.js";
 import { ComingSoonAuth } from "./routes/ComingSoonAuth.js";
-import { ExternalLogin } from "./routes/ExternalLogin.js";
 import { ForcePasswordChange } from "./routes/ForcePasswordChange.js";
 import { ForceWorkspaceProfile } from "./routes/ForceWorkspaceProfile.js";
-import { ForgotPassword } from "./routes/ForgotPassword.js";
-import { ResetPassword } from "./routes/ResetPassword.js";
 import { isMarketingAuthPath, isMarketingOnly } from "./lib/marketing-gate.js";
 import { portalChromeCssVars } from "./lib/portal-chrome.js";
 
@@ -147,7 +142,6 @@ const Projects = lazyRoute(() => import("./routes/Projects.js"), "Projects");
 const Reconcile = lazyRoute(() => import("./routes/Reconcile.js"), "Reconcile");
 const SearchPage = lazyRoute(() => import("./routes/Search.js"), "SearchPage");
 const HelpPage = lazyRoute(() => import("./routes/Help.js"), "HelpPage");
-const AiStudioPage = lazyRoute(() => import("./components/AiStudio.js"), "AiStudioPage");
 const Work = lazyRoute(() => import("./routes/Work.js"), "Work");
 const Team = lazyRoute(() => import("./routes/Team.js"), "Team");
 const Hr = lazyRoute(() => import("./routes/Hr.js"), "Hr");
@@ -282,9 +276,24 @@ function AppWorkspace() {
   if (publicMarketing && pathname === "/demo")
     return MARKETING_ONLY ? <Navigate to="/" replace /> : <Navigate to="/login" replace />;
 
-  // Soft launch: landing + blog (+ downloads coming-soon) only — no apex login.
+  // Soft launch: demo / account / company-account / platform-admin still gated.
+  // Sign-in itself is live — see the /login redirect below.
   if (publicMarketing && MARKETING_ONLY && isMarketingAuthPath(pathname))
     return <ComingSoonAuth />;
+
+  // Sign in / create workspace / reset password now live on the landing page
+  // itself (`LandingAuth`, `/#sign-in`) — no dedicated auth pages on the
+  // public marketing site. Preserve query params (e.g. a reset `?token=`).
+  if (
+    publicMarketing &&
+    (pathname === "/login" ||
+      pathname === "/access" ||
+      pathname === "/signup" ||
+      pathname === "/forgot-password" ||
+      pathname === "/reset-password")
+  ) {
+    return <Navigate to={`/${window.location.search}#sign-in`} replace />;
+  }
 
   if (publicMarketing) {
     // Legacy marketing paths and removed app URLs all redirect to home
@@ -325,28 +334,17 @@ function AppWorkspace() {
 
   if (isLoading) return <Box sx={{ position: "fixed", inset: 0, display: "grid", placeItems: "center", zIndex: 9999 }}><CircularProgress aria-label={`Loading ${AORMS_OFFICE_HUB.title}`} /></Box>;
   if (!user) {
+    // publicMarketing already redirected /login, /access, /signup,
+    // /forgot-password, /reset-password to `/#sign-in` above — these routes
+    // only serve the non-marketing (firm product) build, where there is no
+    // landing page to embed sign-in into.
     return (
       <Routes>
-        <Route
-          path="/login"
-          element={publicMarketing && MARKETING_ONLY ? <ComingSoonAuth /> : <Login />}
-        />
-        <Route
-          path="/access"
-          element={publicMarketing && MARKETING_ONLY ? <ComingSoonAuth /> : <ExternalLogin />}
-        />
-        <Route
-          path="/signup"
-          element={publicMarketing && MARKETING_ONLY ? <ComingSoonAuth /> : <Signup />}
-        />
-        <Route
-          path="/forgot-password"
-          element={publicMarketing && MARKETING_ONLY ? <ComingSoonAuth /> : <ForgotPassword />}
-        />
-        <Route
-          path="/reset-password"
-          element={publicMarketing && MARKETING_ONLY ? <ComingSoonAuth /> : <ResetPassword />}
-        />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/access" element={<AuthPage />} />
+        <Route path="/signup" element={<AuthPage />} />
+        <Route path="/forgot-password" element={<AuthPage />} />
+        <Route path="/reset-password" element={<AuthPage />} />
         {publicMarketing ? (
           <>
             <Route path="/" element={<Landing />} />

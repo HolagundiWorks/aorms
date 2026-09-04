@@ -22,7 +22,7 @@ import { RailLayout } from "../components/RailLayout.js";
 import { trpc } from "../lib/trpc.js";
 import { useAuth } from "../lib/auth.js";
 import { Navigate } from "react-router-dom";
-import { AORMS_OFFICE_HUB, AORMS_PORTALS, externalPortalsPhrase } from "../lib/product-nomenclature.js";
+import { AORMS_OFFICE_HUB, externalPortalsPhrase } from "../lib/product-nomenclature.js";
 
 type ModuleTileProps = {
   icon: SvgIconComponent;

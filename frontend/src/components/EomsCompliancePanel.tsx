@@ -119,7 +119,7 @@ export function EomsCompliancePanel() {
               size="small"
               value={asOf}
               onChange={(e) => setAsOf(e.target.value)}
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
             <TextField
               id="eoms-param"

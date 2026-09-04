@@ -602,7 +602,7 @@ export function ProjectBbs({ projectId }: { projectId: string }) {
                 {detail.checks.length > 0 && (
                   <>
                     <p className="cds--type-label-01" style={OVERLINE}>Checks</p>
-                    {detail.checks.map((c, i) => (
+                    {detail.checks.map((c, _i) => (
                       <Alert severity={c.ok ? "success" : "warning"}><AlertTitle>{`${c.mark}: ${c.label}`}</AlertTitle>{`${c.value} vs min ${c.limit} — ${c.message}`}</Alert>
                     ))}
                   </>

@@ -111,7 +111,7 @@ export function PeriodFilter({ value, onChange, layout = "inline" }: Props) {
             fullWidth={rail}
             value={value.month ?? ""}
             onChange={(e) => onChange({ ...value, month: e.target.value })}
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
           />
         </div>
       )}
@@ -150,7 +150,7 @@ export function PeriodFilter({ value, onChange, layout = "inline" }: Props) {
               fullWidth={rail}
               value={value.fromDate ?? ""}
               onChange={(e) => onChange({ ...value, fromDate: e.target.value })}
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </div>
           <div style={rail ? { width: "100%" } : undefined}>
@@ -162,7 +162,7 @@ export function PeriodFilter({ value, onChange, layout = "inline" }: Props) {
               fullWidth={rail}
               value={value.toDate ?? ""}
               onChange={(e) => onChange({ ...value, toDate: e.target.value })}
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </div>
         </>

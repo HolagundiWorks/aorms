@@ -7,7 +7,7 @@ import {
   PortalFeedbackInput,
 } from "@esti/contracts";
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "../../db/index.js";
 import {

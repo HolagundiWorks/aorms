@@ -368,7 +368,7 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
 
           <Stack spacing={2.5}>
             <p className="cds--type-body-01" style={{ margin: 0 }}>Creates an office staff login at the chosen seniority tier.</p>
-            <TextField id="u-name" label="Full name" autoComplete="name" value={form.fullName} onChange={(e) => setForm((f) => ({ ...f, fullName: e.target.value }))} helperText="Shown on ID cards and assignments." invalid={form.fullName.length > 0 && form.fullName.trim().length < 2} invalidText="At least 2 characters." size="small" />
+            <TextField id="u-name" label="Full name" autoComplete="name" value={form.fullName} onChange={(e) => setForm((f) => ({ ...f, fullName: e.target.value }))} error={form.fullName.length > 0 && form.fullName.trim().length < 2} helperText={form.fullName.length > 0 && form.fullName.trim().length < 2 ? "At least 2 characters." : "Shown on ID cards and assignments."} size="small" />
             <TextField id="u-email" label="Login email" type="email" autoComplete="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} helperText={!form.email.trim() ? "Required for sign-in." : undefined} size="small" />
             <TextField id="u-role" label="Role (seniority tier)" value={form.role} onChange={(e) =>
                 setForm((f) => ({
@@ -380,7 +380,7 @@ export function Users({ embedded = false }: { embedded?: boolean }) {
                 <MenuItem key={r} value={r}>{STAFF_ROLE_LABEL[r]}</MenuItem>
               ))}
             </TextField>
-            <TextField id="u-pw" label="Temporary password (min 8 chars)" autoComplete="new-password" value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} helperText="They can change this after first login." invalid={form.password.length > 0 && form.password.length < 8} invalidText="Use at least 8 characters." type="password" />
+            <TextField id="u-pw" label="Temporary password (min 8 chars)" autoComplete="new-password" value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} error={form.password.length > 0 && form.password.length < 8} helperText={form.password.length > 0 && form.password.length < 8 ? "Use at least 8 characters." : "They can change this after first login."} type="password" />
             {createBlockedReason && !createStaff.isPending && (
               <p className="cds--type-label-01" style={LABEL_STYLE}>{createBlockedReason}</p>
             )}

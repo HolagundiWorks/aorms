@@ -531,9 +531,9 @@ export function ContractorPortal() {
                   return;
                 }
                 if (!openId) return;
-                submit.mutate({
+                submitBid.mutate({
                   invitationId: openId,
-                  amountPaise: paise,
+                  amountPaise: Math.round(rupees * 100),
                   completionWeeks: w,
                   notes: notes || undefined,
                 });

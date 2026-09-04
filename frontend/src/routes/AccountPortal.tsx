@@ -166,7 +166,7 @@ export function AccountPortal() {
               ? `${AORMS_PORTALS.account.personal} — ${AORMS_PORTALS.account.name}`
               : `${TAB_LABELS[tab]} — ${AORMS_PORTALS.account.personal} — ${AORMS_PORTALS.account.name}`
           }
-          subtitle={`Your portable identity, companies, and security — separate from ${AORMS_PORTALS.studio.title}.`}
+          subtitle={`Your portable identity, companies, and security — separate from ${AORMS_PORTALS.office.title}.`}
           meta={
             <Stack
               direction="row"
@@ -257,8 +257,8 @@ export function AccountPortal() {
             {!user ? (
               <Alert severity="warning">
                 <AlertTitle>Workspace sign-in required</AlertTitle>
-                Work profile and workspace settings need an active {AORMS_PORTALS.studio.sessionLabel}.{" "}
-                <RouterLink to="/login">{AORMS_PORTALS.studio.signInLink}</RouterLink> first, then
+                Work profile and workspace settings need an active {AORMS_PORTALS.office.sessionLabel}.{" "}
+                <RouterLink to="/login">{AORMS_PORTALS.office.signInLink}</RouterLink> first, then
                 return here.
               </Alert>
             ) : (

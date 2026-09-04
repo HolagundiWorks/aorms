@@ -12,7 +12,7 @@ import {
 import { can } from "@esti/contracts";
 import { useState } from "react";
 import { useAuth } from "../lib/auth.js";
-import { buildTimeHost, useRuntimeCapabilities } from "../lib/runtimeCapabilities.js";
+import { useRuntimeCapabilities } from "../lib/runtimeCapabilities.js";
 import { trpc } from "../lib/trpc.js";
 
 /**
@@ -49,8 +49,9 @@ export function DesktopLicenceBind() {
     },
   });
 
-  const isDesktop =
-    buildTimeHost() === "desktop" || caps.host === "desktop" || Boolean(import.meta.env.VITE_RUNTIME_HOST === "desktop");
+  // Web-only builds never set VITE_RUNTIME_HOST=desktop; caps.host can still
+  // report "desktop" from a native shell wrapper reachable through trpc.sync.status.
+  const isDesktop = caps.host === "desktop";
 
   if (!user || !can(user.role, "firm:admin") || !isDesktop || dismissed) return null;
 

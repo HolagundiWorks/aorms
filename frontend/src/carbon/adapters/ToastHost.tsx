@@ -122,7 +122,7 @@ export function useToasts(): Toast[] {
 }
 
 // Ref to context so pushToast/dismissToast can call it without being inside React
-let toastContextRef: { current: ReturnType<typeof useToastStore> | null } = { current: null };
+const toastContextRef: { current: ReturnType<typeof useToastStore> | null } = { current: null };
 
 /**
  * ToastProvider — mounts the toast context at app root.
@@ -198,8 +198,5 @@ export function ToastHost() {
     </ToastProvider>
   );
 }
-
-export type { ToastKind as ToastKind };
-export type { Toast as Toast };
 
 export default ToastHost;

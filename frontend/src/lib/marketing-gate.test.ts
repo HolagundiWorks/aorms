@@ -56,12 +56,12 @@ describe("isMarketingAuthPath", () => {
   });
 
   it("matches nested paths under a gated prefix", () => {
-    expect(isMarketingAuthPath("/login/foo")).toBe(true);
     expect(isMarketingAuthPath("/account/settings")).toBe(true);
+    expect(isMarketingAuthPath("/company-account/members")).toBe(true);
   });
 
   it("tolerates a trailing slash", () => {
-    expect(isMarketingAuthPath("/login/")).toBe(true);
+    expect(isMarketingAuthPath("/account/")).toBe(true);
   });
 
   it("does not match public marketing paths", () => {
@@ -71,8 +71,16 @@ describe("isMarketingAuthPath", () => {
     expect(isMarketingAuthPath("/downloads")).toBe(false);
   });
 
+  it("sign-in/signup/password-reset are not gated — they're live on the landing page", () => {
+    expect(isMarketingAuthPath("/login")).toBe(false);
+    expect(isMarketingAuthPath("/access")).toBe(false);
+    expect(isMarketingAuthPath("/signup")).toBe(false);
+    expect(isMarketingAuthPath("/forgot-password")).toBe(false);
+    expect(isMarketingAuthPath("/reset-password")).toBe(false);
+  });
+
   it("does not false-positive on a path that merely starts with a gated segment's letters", () => {
-    // "/loginx" is a different route than "/login" and must not be gated.
-    expect(isMarketingAuthPath("/loginx")).toBe(false);
+    // "/accountx" is a different route than "/account" and must not be gated.
+    expect(isMarketingAuthPath("/accountx")).toBe(false);
   });
 });

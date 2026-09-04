@@ -15,8 +15,8 @@ const NAV: { key: PortalNavKey; label: string; href: string; external?: boolean 
   { key: "licensing", label: AORMS_PORTALS.account.licensing, href: "/platform-admin" },
   {
     key: "workspace",
-    label: AORMS_PORTALS.studio.navLabel,
-    href: `${AORMS_PORTALS.studio.url}/login`,
+    label: AORMS_PORTALS.office.navLabel,
+    href: `${AORMS_PORTALS.office.url}/login`,
     external: true,
   },
 ];

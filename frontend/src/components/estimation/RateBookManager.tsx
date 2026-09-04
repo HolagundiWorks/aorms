@@ -171,7 +171,7 @@ export function RateBookManager() {
               });
             }}
             sx={{ width: 120 }}
-            inputProps={{ step: "0.01", min: 0 }}
+            slotProps={{ htmlInput: { step: "0.01", min: 0 } }}
           />
         ),
     },

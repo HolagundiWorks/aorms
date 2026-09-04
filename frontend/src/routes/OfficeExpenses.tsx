@@ -66,7 +66,7 @@ type ExpenseRow = {
 function LoadingRows() {
   return (
     <Stack spacing={1}>
-      {Array.from({ length: 3 }).map((_, i) => (
+      {Array.from({ length: 3 }).map((_, _i) => (
         <Skeleton variant="rounded" style={{ height: 32, width: "100%" }} />
       ))}
     </Stack>

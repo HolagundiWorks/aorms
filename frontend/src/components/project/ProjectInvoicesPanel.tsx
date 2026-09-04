@@ -81,7 +81,7 @@ export function ProjectInvoicesPanel({
               sx={{ minWidth: 110 }}
               value={iv.row.status}
               disabled={!canManage || iv.row.status === "PAID" || iv.row.status === "CANCELLED"}
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
               onChange={(e) =>
                 updateStatus.mutate({
                   id: iv.row.id,

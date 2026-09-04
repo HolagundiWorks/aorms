@@ -1,45 +1,39 @@
+import AutoAwesome from "@mui/icons-material/AutoAwesome";
 import CalculateOutlined from "@mui/icons-material/CalculateOutlined";
-import Engineering from "@mui/icons-material/Engineering";
 import HelpOutlined from "@mui/icons-material/HelpOutlined";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
+import SearchOutlined from "@mui/icons-material/SearchOutlined";
 import SelfImprovement from "@mui/icons-material/SelfImprovement";
+import TaskAltOutlined from "@mui/icons-material/TaskAltOutlined";
 import {
   Box,
   IconButton,
   Stack,
   Tooltip,
+  Typography,
 } from "@mui/material";
-import { Surface, chromeIconSx } from "@hcw/ui-kit";
+import { chromeIconSx } from "@hcw/ui-kit";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ASK_ESTI_EVENT } from "../AiAgentCommand.js";
 import { AlertsBell } from "../AlertsBell.js";
+import { AormsAnalogueClock } from "../AormsAnalogueClock.js";
 import { RuntimeHostTrayHint } from "../CapabilityBadge.js";
+import { DemoAdminUnlock } from "../DemoAdminUnlock.js";
 import { FloatingCalculator } from "../FloatingCalculator.js";
+import { HeaderPomodoro } from "../HeaderPomodoro.js";
+import { UserIdCard } from "../UserIdCard.js";
 import { WellnessPanel } from "../wellness/WellnessPanel.js";
 import { WellnessReminderBanner } from "../wellness/WellnessReminderBanner.js";
 import { useWellnessReminders } from "../wellness/useWellnessReminders.js";
 import type { WellnessSection } from "../wellness/wellnessExercises.js";
 import { WELLNESS_OPEN_EVENT } from "../wellness/wellnessExercises.js";
-import { detectSurface } from "../../lib/aorms-surface-urls.js";
 import { matchShellKey, tooltipWithChord } from "../../lib/keymap.js";
 import { PORTAL_CHROME } from "../../lib/portal-chrome.js";
+import type { AdminGroup, RibbonNode } from "./AppRibbon.js";
 import { OfficeHealthGlyph } from "./OfficeHealthGlyph.js";
 import { useOfficeHealth } from "./useOfficeHealth.js";
 import { SyncQueueChip } from "../SyncQueueChip.js";
-
-const R8 = "8px";
-const HIT = PORTAL_CHROME.footerHitPx;
-
-const staffChromeIconSx = {
-  ...chromeIconSx,
-  width: HIT,
-  height: HIT,
-  "[data-hcw-coga=\"calm\"] &": {
-    width: HIT,
-    height: HIT,
-  },
-} as const;
 
 /**
  * Staff taskbar — portal metrics (60px · floating · 35px hits).
@@ -51,8 +45,10 @@ const staffChromeIconSx = {
 export function AppFooterBar({
   planClass,
   onSignOut,
-  nav = [],
-  adminGroups = [],
+  // Accepted for API compatibility with callers (App.tsx) — this footer bar's
+  // CENTER section currently hardcodes its icons rather than rendering `nav`.
+  nav: _nav = [],
+  adminGroups: _adminGroups = [],
 }: {
   planClass?: string;
   onSignOut: () => void;
@@ -60,7 +56,10 @@ export function AppFooterBar({
   adminGroups?: AdminGroup[];
 }) {
   const navigate = useNavigate();
-  const desktop = isDesktopClient();
+  const { pathname } = useLocation();
+  const homePath = "/";
+  const homeLabel = "Home";
+  const homeActive = pathname === homePath;
   const [showCalc, setShowCalc] = useState(false);
   const [showWellness, setShowWellness] = useState(false);
   const [wellnessSection, setWellnessSection] = useState<WellnessSection>("breathe");
@@ -79,13 +78,7 @@ export function AppFooterBar({
 
   useWellnessReminders();
 
-  const { state } = useOfficeHealth();
-  const healthToken =
-    state === "critical"
-      ? "var(--cds-support-error)"
-      : state === "watch"
-        ? "var(--cds-support-warning)"
-        : "var(--cds-support-success)";
+  const { state, pendingTasks } = useOfficeHealth();
 
   // Shared LF5 keymap — calculator · search · help (Ask ESTI / Pomodoro own their IDs).
   useEffect(() => {
@@ -99,8 +92,6 @@ export function AppFooterBar({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [navigate]);
-
-  const trayWidth = "min(200px, 28%)";
 
   return (
     <Box
@@ -145,7 +136,7 @@ export function AppFooterBar({
             }}
             aria-label={`Office health: ${state}. Go to ${homeLabel}`}
           >
-            <OfficeHealthGlyph state={state} variant="glass" title={state} />
+            <OfficeHealthGlyph state={state} title={state} />
             <Typography variant="caption" sx={{ textTransform: "capitalize" }} noWrap>{state}</Typography>
           </Stack>
         </Tooltip>
@@ -186,7 +177,7 @@ export function AppFooterBar({
             color={homeActive ? "primary" : "default"}
             sx={chromeIconSx}
           >
-            {isPmc || isConsultancy ? <Engineering /> : <AutoAwesome />}
+            <AutoAwesome />
           </IconButton>
         </Tooltip>
         <Tooltip title="Tasks">
@@ -237,7 +228,7 @@ export function AppFooterBar({
 
       {/* RIGHT — system tray */}
       <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flex: 1, justifyContent: "flex-end", minWidth: 0 }}>
-        <TrayClock />
+        <AormsAnalogueClock size={28} />
         <RuntimeHostTrayHint />
         <SyncQueueChip />
         <Tooltip title={tooltipWithChord("Keyboard shortcuts", "help")}>

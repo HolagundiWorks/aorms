@@ -37,7 +37,7 @@ export function ProjectAppointment({ projectId }: { projectId: string }) {
         type="date"
         size="small"
         defaultValue={row?.siteVisitDate ?? ""}
-        InputLabelProps={{ shrink: true }}
+        slotProps={{ inputLabel: { shrink: true } }}
         onBlur={(e) =>
           upsert.mutate({
             projectId,
