@@ -1,66 +1,79 @@
 # AORMS Local Development Roadmap
 
-**Status:** ACTIVE — local test/verify loop  
+**Status:** ACTIVE — local stack verified working end-to-end; Next.js/Supabase
+migration Phase 1 built here  
 **Updated:** 2026-09-04  
-**Scope:** Work done in the **local dev environment** (Podman/Docker compose
-stack, this machine, `main` branch) — primarily **testing and verification**
-of what the cloud branch (`cloud-agent`) builds: running the stack, typecheck/
-lint/unit/e2e tests, manual verification, bug fixes found while testing. See
-[`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split for the full
-policy, and [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) for where **primary feature
-development** (including the [Next.js/Supabase migration](./NEXTJS-SUPABASE-MIGRATION.md))
-now happens. The phase history below (Sept 2026 web-only pivot cleanup, Carbon
-migration) predates this split and stays as a record of local-dev work already
-done; new net-new feature work should start on `cloud-agent`, not here.
+**Scope:** Work done in the **local dev environment** (Podman compose stack,
+this machine, `main` branch). The cloud/local branch split described in
+[`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split is
+**currently paused** — `cloud-agent` was merged into `main` and both feature
+work and testing happen from this single local session for now. The phase
+history below (Sept 2026 web-only pivot cleanup, Carbon migration) predates
+the (now-paused) split.
 
 **Platform (current, live):** React + Carbon Design System + Fastify backend +
-PostgreSQL. (Target platform for new development is Next.js + Supabase — see
+PostgreSQL, run locally via Podman. **Target platform** (in progress, built
+here): Next.js + Carbon + Supabase — see the `web/` package and
 [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md); this local
-environment keeps testing the current stack until that migration lands.)
+environment now tests both stacks side by side.
 
 ---
 
 ## Local dev environment
 
-Podman/Docker compose stack (`compose.yaml`) — see
-[`../../DEVELOPMENT.md`](../../DEVELOPMENT.md) for setup and
-[`../../CLAUDE.md`](../../CLAUDE.md) § Dev / verify loop for the day-to-day
+Podman compose stack (`compose.yaml`) — see
+[`../../CLAUDE.md`](../../CLAUDE.md) § Dev / verify loop for day-to-day
 commands (container restarts, typecheck/lint, migrations).
 
 ```bash
-cp .env.example .env
 podman compose up -d --build
+# Do NOT `cp .env.example .env` for local dev — that file is a PRODUCTION
+# template (NODE_ENV=production, a strict SESSION_SECRET check that crashes
+# the backend on boot). compose.yaml bakes in safe dev defaults for every
+# variable; a local dev pod needs no .env file at all. .env.example matters
+# only when preparing an actual deployment.
+#
 # SPA      → http://localhost:5173
 # Backend  → http://localhost:4000/health  ·  tRPC at /trpc
 # MinIO    → http://localhost:9001 (console)
 ```
 
-**`pnpm install --frozen-lockfile` (2026-09-04):** was failing on `main` HEAD
-(`frontend/package.json` had drifted from `pnpm-lock.yaml` — missing
-`@carbon/react`, a stale `react-router-dom` specifier not matching the root
-`pnpm.overrides` security pin). This broke CI's first step on every job that
-installs — fixed on `cloud-agent`, zero lockfile changes needed. See
-[ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) § CI / build health for the full
-picture (what's still red once install succeeds).
+**Verified working end-to-end (2026-09-04):** full stack up via
+`podman compose up -d --build` (Postgres, Redis, MongoDB, MinIO, Ollama,
+backend, worker, frontend all healthy), migrations apply cleanly, demo seed
+(`pnpm --filter @esti/backend seed:demo`) completes, and sign-in
+(`principal@demo.aorms.in` / `demo1234`) round-trips through the real UI
+(landing page → `LandingAuth` → Studio Intelligence dashboard → Clients →
+Projects all render real seeded data).
+
+**Known gotchas hit getting there (2026-09-04), now fixed:**
+- The bind mount `./desktop/artifacts/keys:/keys:ro` (licensing signing key,
+  unrelated to the deprecated desktop *app*) needs that directory to exist on
+  the host before `up` — Podman/Docker refuses to create it. `mkdir -p
+  desktop/artifacts/keys` once; already gitignored.
+- **Drizzle migration journal drift:** three migration files
+  (`0225_moodboard.sql`, `0228_contractor_submission_attention.sql`,
+  `0229_joint_measurement.sql`) existed on disk but were missing from
+  `backend/drizzle/meta/_journal.json` — silently never applied. Fixed in
+  commit `9e06f99b`. **If you add a migration file by hand instead of via
+  `drizzle-kit generate`, you must add its journal entry too** — drizzle's
+  postgres-js migrator only compares a single `MAX(created_at)` cutoff against
+  each journal entry's `when` timestamp, not per-file hashes, so a missing or
+  out-of-order entry is silently skipped forever, not just delayed.
 
 ---
 
 ## Local test/verify loop (2026-09)
 
-The day-to-day job here is now **testing**, not authoring new features:
-
-1. `git fetch --all && git pull` on `main`; pull `cloud-agent` too when asked
-   to verify unmerged cloud work.
+1. `git fetch --all && git pull` on `main`.
 2. Bring up the stack (above), run the app, click through the area under test.
 3. `tsc --noEmit`, `eslint`, unit tests (`vitest`, `pytest` in `worker/`), and
    Playwright/e2e where they exist — see [`../../CLAUDE.md`](../../CLAUDE.md)
    § Dev / verify loop for exact commands.
-4. Fix bugs found while testing directly; for larger feature gaps, note them
-   for the `cloud-agent` branch rather than building them out here.
-5. Once the Next.js/Supabase migration ([spec](./NEXTJS-SUPABASE-MIGRATION.md))
-   starts landing on `cloud-agent`, this loop extends to testing that stack
-   too (Next.js dev server, Supabase local/staging project) alongside the
-   current one — updated here once that phase actually starts.
+4. Fix bugs found while testing directly.
+5. For the Next.js/Supabase migration, `cd web && pnpm dev` runs the new
+   stack (port 3000 by default) alongside the current one — see
+   [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) § Stack migration for Phase status.
 
 ---
 
@@ -81,13 +94,16 @@ The day-to-day job here is now **testing**, not authoring new features:
 - [x] Remove installer/setup logic (`frontend/src/lib/desktop-installers.ts` deleted)
 - [ ] Remove desktop native bridge (`frontend/src/lib/desktopNativeBridge.ts` still present)
 - [x] Fix UTF-8 smart-quote corruption in `landing-seo.ts` (was breaking `tsc`)
-- [~] tsc + eslint + vite build — down to 16 pre-existing JSX errors in `Landing.tsx` / `DashboardTab.tsx` (unrelated to this cleanup, not yet fixed)
+- [x] `tsc` + `eslint` + `vite build` — all green (0 errors, 0 warnings) as of 2026-09-04; the 72 TypeScript errors and assorted lint issues these tools surfaced after the `cloud-agent` merge are fixed (see ROADMAP-CLOUD.md § CI / build health)
+- [x] EOMS (external knowledge-bank API) removed — backend client/router, contracts, frontend panel, env var all deleted
+- [x] Engineering-consultancy angle removed — `consultancy` tRPC namespace + DB schema deleted; AORMS is pure architectural consultancy
 
 ### Phase 2: Landing Pages & Marketing ✅
-- [x] Update `Landing.tsx` — office hub benefits (clients, projects, proposals, invoicing, team, KB, delivery)
+- [x] Update `Landing.tsx` — office hub benefits (clients, projects, proposals, invoicing, team, KB, delivery); pure Carbon rewrite
 - [x] Remove allied app CTAs + feature cards
-- [x] `/downloads` redirects to `/login` (web-only, no installers)
-- [x] Update blog, footer, nav, meta tags, auth pages (Login, ComingSoonAuth, AccountHub, RequestPlan)
+- [x] `/downloads` — web-only, no installers
+- [x] Blog removed entirely (content, routes, nav, sitemap, RSS feed)
+- [x] Sign-in/create-workspace/password-reset folded into the landing page (`LandingAuth`, `/#sign-in`) — no dedicated auth pages; `/login` etc. redirect there
 
 ### Phase 3: Documentation ✅
 - [x] Create `AORMS-OFFICE-SYSTEM.md`
@@ -165,7 +181,11 @@ re-captured (Playwright).
    # Find remaining allied-app references
    grep -r "AStudio\|AConsulting\|AProc\|ADraft\|ShilpiDB" frontend/src --include="*.ts" --include="*.tsx" -l
 
-   # Remove the legacy desktop/ directory (still pending)
+   # Remove the legacy desktop/ directory (still pending) — NOTE: compose.yaml
+   # bind-mounts ./desktop/artifacts/keys:/keys:ro for the licensing signing
+   # key, unrelated to the deprecated desktop app. If desktop/ is removed
+   # wholesale, recreate that one directory (mkdir -p desktop/artifacts/keys)
+   # or update compose.yaml to drop the mount first.
    rm -rf desktop/
 
    # See OFFICE-SYSTEM-CLEANUP-PLAN.md Phase 1 for the full checklist
@@ -173,7 +193,7 @@ re-captured (Playwright).
 
 2. **Landing pages** (Phase 2 — done, verify locally)
    ```bash
-   npm run dev   # or: podman compose up -d --build
+   podman compose up -d --build   # do NOT cp .env.example .env — see § Local dev environment above
    ```
 
 3. **Documentation** (Phase 3 — done)
@@ -181,9 +201,9 @@ re-captured (Playwright).
    - `docs/esti/archived/` holds superseded specs
 
 4. **CI verification** (local, before pushing)
-   - `tsc --noEmit` — currently 16 pre-existing JSX errors in `Landing.tsx` / `DashboardTab.tsx`, unrelated to the pivot cleanup
-   - `eslint` ✅ green
-   - `vite build` — blocked on the same 16 `tsc` errors above
+   - `tsc --noEmit` — ✅ green (frontend, backend, contracts all 0 errors)
+   - `eslint` ✅ green (0 errors, 0 warnings)
+   - `vite build` ✅ succeeds
 
 ---
 
@@ -199,7 +219,7 @@ re-captured (Playwright).
 - [OFFICE-SYSTEM-CLEANUP-PLAN.md](./OFFICE-SYSTEM-CLEANUP-PLAN.md) — 6-phase cleanup
 - [NAVIGATION.md](./NAVIGATION.md) — canonical sidebar IA
 
-**Cloud / production (primary feature development, `cloud-agent` branch):**
+**Cloud / production:**
 see [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) ·
 [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) ·
 [PRODUCTION-OPS.md](./PRODUCTION-OPS.md) · [VPS-INSTALL.md](./VPS-INSTALL.md)

@@ -1,18 +1,14 @@
 # AORMS Cloud Roadmap (aorms.in / production)
 
-**Status:** ACTIVE — soft launch (landing + blog live); Next.js/Supabase stack
-migration planned  
+**Status:** ACTIVE — soft launch, sign-in now live on the landing page;
+Next.js/Supabase stack migration **in progress** (Phase 1 done)  
 **Updated:** 2026-09-04  
 **Scope:** What ships to the **production VPS** (`aorms.in`) and when — deployment
-status, feature rollout to the live office hub, and cloud infrastructure. This
-is also where **primary feature development happens** — on the `cloud-agent`
-branch, in cloud (hosted agent) sessions, merging up to `main`. For the local
-test/verify loop that checks this work, see [ROADMAP-LOCAL.md](./ROADMAP-LOCAL.md)
-and [`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split.
+status, feature rollout to the live office hub, and cloud infrastructure.
 
 ---
 
-## Stack migration — Next.js + Supabase (planned)
+## Stack migration — Next.js + Supabase (in progress)
 
 Full spec: [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md).
 
@@ -20,12 +16,15 @@ Full spec: [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md).
 the current React SPA + tRPC + Fastify + raw PostgreSQL + Python worker stack.
 Deployment target moves from the VPS (`compose.prod.yaml`) to Hostinger
 Managed App Hosting; Supabase replaces self-hosted PostgreSQL/auth/storage.
+**The current production stack stays live and unchanged** until a phase below
+is merged and verified — the `web/` package is new, additive code; nothing in
+`frontend`/`backend` has been touched by this migration yet.
 
 | Item | Status |
 | --- | --- |
 | Target-architecture spec written | ✅ [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) |
 | Repo audit (map current tRPC procedures / Fastify routes / components to Next.js equivalents — see spec § 36–37) | 🔲 |
-| Phase 1 — Foundation (Next.js + TS + Carbon + Supabase + auth + app shell) | 🔲 |
+| **Phase 1 — Foundation** (Next.js + TS + Carbon + Supabase + auth + app shell) | ✅ `web/` package — Next.js 16 + Carbon + `@supabase/ssr` wired end-to-end (client/server/proxy), Server Action sign-in/sign-out, Carbon `AppShell` (Header+SideNav), `(auth)/login` + `(app)/dashboard` route groups. `next build --webpack` clean, `eslint web` 0/0. **Not yet connected to a live Supabase project** — env vars in `web/.env.example` are placeholders. |
 | Phase 2 — Core ERP (orgs, users, roles, clients, projects, tasks) | 🔲 |
 | Phase 3 — Commercial (proposals, quotations, contracts, invoices, payments) | 🔲 |
 | Phase 4 — Technical (estimation, BOQ, measurements, documents, drawings) | 🔲 |
@@ -33,50 +32,37 @@ Managed App Hosting; Supabase replaces self-hosted PostgreSQL/auth/storage.
 | Phase 6 — Advanced processing (PDF/DWG, Python worker) | 🔲 |
 | Phase 7 — Optional AI | 🔲 |
 
-**Where this happens:** `cloud-agent` branch, cloud sessions. **Do not** start
-this migration from a local session — pull `cloud-agent` to see current
-progress, and use local sessions to test/verify what lands, per
-[`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split. The current
-production stack (tRPC/Fastify/VPS) stays live and unchanged until a phase
-above is actually merged and verified — nothing on this list is implemented yet.
+**Known gotcha (documented in `web/next.config.ts`):** Next 16's default
+Turbopack can't resolve `@carbon/styles`' internal Sass `@use` imports
+through pnpm's symlinked `node_modules` — `web/package.json`'s dev/build
+scripts force `--webpack` until that's fixed upstream.
+
+**Next up:** get real Supabase project credentials into `web/.env`, verify
+sign-in against a live project, then start Phase 2 (map `clients`/`projects`
+tRPC procedures onto Server Actions + Supabase tables with RLS).
 
 ---
 
 ## Current phase — soft launch
 
-Per [`../../CLAUDE.md`](../../CLAUDE.md) § Launch status and
-[PRODUCTION-OPS.md](./PRODUCTION-OPS.md) § Soft launch:
+Per [`../../CLAUDE.md`](../../CLAUDE.md) § Launch status:
 
 | Surface | Status |
 | --- | --- |
-| `/` · `/blog` (landing pages) | ✅ **Live** |
-| `/login`, `/access`, `/signup`, `/account` (office hub SPA) | 🔲 Coming soon (`VITE_MARKETING_ONLY` gate) |
-| `/downloads` | ✅ Redirects to `/login` (web-only, no installers) |
+| `/` (landing page) | ✅ **Live** — pure architecture-practice messaging, no blog (removed 2026-09) |
+| `/#sign-in` (sign in / create workspace / reset password) | ✅ **Live** — embedded on the landing page (`LandingAuth`), not gated behind `VITE_MARKETING_ONLY` |
+| `/login`, `/access`, `/signup`, `/forgot-password`, `/reset-password` | ✅ Redirect to `/#sign-in` |
+| `/downloads` | Web-only, no installers |
 | `/wiki*` | ✅ Redirects home (no wiki surfaces) |
+| `/account`, `/company-account`, `/platform-admin`, `/demo` | 🔲 Still behind `VITE_MARKETING_ONLY` |
 
-**Gate:** `VITE_MARKETING_ONLY` (default **true** on public builds) —
-`frontend/src/lib/marketing-gate.ts`.
+**S8 (reopen apex sign-in) is done** — superseded by folding sign-in directly
+into the landing page rather than reopening the old dedicated `/login` page.
+`VITE_MARKETING_ONLY` still gates the smaller remaining surface above.
 
-**Next milestone — S8:** reopen apex `/login` for real sign-in and firm-portal
-demos, once firm-portal tabs are honest (see PRODUCTION-OPS.md § S8).
-
-**Codebase-side prerequisite: verified met (2026-09-04).** The "honest tabs"
-requirement is fully implemented — `visibleFirmPortalSections()`
-(`frontend/src/components/portal/FirmPortalSections.ts`) hides any firm-portal
-chrome tab whose `panels` key isn't wired, and all four portals (Client,
-Contractor, Collaborator, Site) pass a `panels` object matching their
-documented capability list (no Alert stubs, no unwired tabs). This was already
-covered by `visibleFirmPortalSections.test.ts`; the marketing-gate switch
-itself (`isMarketingOnly()` / `isMarketingAuthPath()`, the exact toggle S8
-flips) previously had **no** test coverage — added in
-`frontend/src/lib/marketing-gate.test.ts` (20 cases: default-on behavior,
-every truthy/falsy env value, and the gated-path matcher). Both suites pass;
-`tsc` is unchanged at its 16 pre-existing, unrelated JSX errors.
-
-What remains for S8 is **ops only**, not code: flip `VITE_MARKETING_ONLY=false`
-on the VPS per PRODUCTION-OPS.md § S8 (`s8-reopen-demos.sh` / the
-`s8-reopen-demos.yml` GitHub Action) — this session has no VPS/deploy
-credentials, so that step is left to an operator.
+**Ops step still needed:** deploy the current `main` to the VPS — the
+landing-page sign-in, blog removal, and EOMS/consultancy removal are all
+committed but this session has no VPS/deploy credentials to push them live.
 
 ---
 
@@ -148,7 +134,7 @@ adopts newer majors of these, or if someone can verify against a live stack.
 | MinIO/S3 (published artifacts) | ✅ Live |
 | SSL/TLS + nginx reverse proxy | ✅ Live |
 | No cloud Ollama by default — ESTI AI runs through the backend gateway, not a sized-for-inference box | ✅ (see PRODUCTION-OPS.md § ESTI AI) |
-| CI (`esti-ci` — TypeScript, lint, test, build, audit, visual regression, Python worker) | 🚧 Install step fixed (on `cloud-agent`, not yet `main`); typecheck + audit still red — see § CI / build health |
+| CI (`esti-ci` — TypeScript, lint, test, build, audit, visual regression, Python worker) | ✅ On `main` — install, typecheck, lint, tests, build, audit all green; Python worker `pytest` unverified (no Python on the machine that checked) — see § CI / build health |
 
 Deploy references: [VPS-INSTALL.md](./VPS-INSTALL.md) ·
 [PRODUCTION-OPS.md](./PRODUCTION-OPS.md) · [`../../deploy/README.md`](../../deploy/README.md).
@@ -157,8 +143,9 @@ Deploy references: [VPS-INSTALL.md](./VPS-INSTALL.md) ·
 
 ## Office hub feature rollout (cloud-facing)
 
-Status reflects what a signed-in user reaches on `aorms.in` once S8 reopens
-`/login` — not local-dev code completeness (see ROADMAP-LOCAL.md for that).
+Status reflects what a signed-in user reaches once the current `main` is
+deployed to `aorms.in` — not local-dev code completeness (see
+ROADMAP-LOCAL.md for that).
 
 ### Clients & Projects
 - Client CRM (interactions, leads, tenders)
@@ -209,10 +196,13 @@ Status reflects what a signed-in user reaches on `aorms.in` once S8 reopens
 
 | Week | Milestone | Status |
 |------|-----------|--------|
-| **This week** | Landing + blog soft launch stays green; legacy docs archived | ✅ |
-| **This week** | Restore CI's ability to run (`pnpm install` fix merged to `main`) | 🚧 fixed on `cloud-agent`, not yet on `main` |
-| **This week** | Clear `pnpm typecheck` red (16 JSX errors) and `pnpm audit --audit-level=high` findings | 🔲 |
-| **S8** | Reopen apex `/login` — real sign-in + firm-portal demos | 🔲 (codebase prerequisite met — ops-only step remains) |
+| **This week** | Landing soft launch stays green; legacy docs archived; blog removed entirely | ✅ |
+| **This week** | Restore CI's ability to run (`pnpm install` fix on `main`) | ✅ |
+| **This week** | Clear `pnpm typecheck` and `pnpm audit --audit-level=high` findings | ✅ |
+| **This week** | EOMS + engineering-consultancy angle removed (pure architectural consultancy) | ✅ |
+| **S8** | Sign-in live — folded into the landing page instead of reopening `/login` | ✅ |
+| **This week** | Next.js/Supabase migration Phase 1 (foundation) scaffolded and building clean | ✅ |
+| **This week** | Local Podman stack verified working end-to-end (build → migrate → seed demo → sign in through the real UI) | ✅ |
 | **EOQ** | Office hub v2.0 live on Carbon Design System · SSO + ESTI AI ready | 🔲 |
 
 Engineering work that gates these milestones (codebase cleanup, Carbon

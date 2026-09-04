@@ -1,20 +1,23 @@
 # AORMS Roadmap — index
 
-**Status:** ACTIVE | Web-only office hub (no allied apps) | Stack migration to Next.js + Supabase planned  
+**Status:** ACTIVE | Pure architectural consultancy (EOMS + engineering angle
+removed 2026-09) | Next.js + Supabase stack migration **in progress**
+(Phase 1 done)  
 **Updated:** 2026-09-04
 
-This roadmap is split in two, by **branch and role**, not just environment —
-see [`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split for the
-full policy:
+The two docs below split by **scope**, not currently by branch — the
+cloud-agent/main branch split described in
+[`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split is
+**paused**; all work (including the Next.js migration) currently happens on
+`main` from a single session:
 
-| Roadmap | Branch | Covers | Role |
-| --- | --- | --- | --- |
-| **[ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)** | `cloud-agent` → `main` | What's live on `aorms.in`; **primary feature development**, including the Next.js/Supabase stack migration ([spec](./NEXTJS-SUPABASE-MIGRATION.md)) | Where new work happens |
-| **[ROADMAP-LOCAL.md](./ROADMAP-LOCAL.md)** | local checkout of `main` | Local dev/test loop — running the stack, typecheck/lint/test, verifying what cloud built | Where it gets tested |
+| Roadmap | Covers |
+| --- | --- |
+| **[ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)** | What's live/deployable on `aorms.in` — soft-launch status, feature rollout, cloud infra, the Next.js/Supabase stack migration ([spec](./NEXTJS-SUPABASE-MIGRATION.md)) |
+| **[ROADMAP-LOCAL.md](./ROADMAP-LOCAL.md)** | The local Podman dev/test loop — running the stack, typecheck/lint/test, migration gotchas, verified-working status |
 
-They stay in sync at milestone boundaries: cloud-branch feature work (the
-stack migration, new modules) is verified locally before/while it merges to
-`main`.
+They'll split back apart by branch once the cloud-agent/main pause lifts —
+see CLAUDE.md for that policy.
 
 ---
 
