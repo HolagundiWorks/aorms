@@ -88,7 +88,7 @@ Executable: [`frontend/src/lib/portal-chrome.ts`](../../frontend/src/lib/portal-
 | `clockMarkRatio` | **0.2** | AORMS mark in dial centre |
 | `clockRightPx` | **16 / 24** | Fixed bottom-right |
 
-**Desktop WinUI clock:** design dial stays 100/127; **shown at 0.8×** (face **80**, Viewbox **102**) — see [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md). Do not change web `clockSizePx` to match; density of the shell stays **1×**.
+**Desktop WinUI clock:** design dial stays 100/127; **shown at 0.8×** (face **80**, Viewbox **102**) — see DESKTOP-WINUI-UX.md. Do not change web `clockSizePx` to match; density of the shell stays **1×**.
 
 Staff stage pad when dock visible: `--esti-dock-stack: 68px` (gap + tray) on `.esti-app-shell2--dock-visible` — content `padding-bottom` = footer-stack + dock-stack + shell gutter.
 

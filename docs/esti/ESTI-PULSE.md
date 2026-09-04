@@ -16,7 +16,7 @@ for architecture offices.
 > holds the tasks, drawings, approvals and records Pulse reads. **ESTI**
 > (Embedded Studio Intelligence) is the intelligence layer;
 > Pulse is one of its capabilities, beside ESTI AI / Ask ESTI and the
-> [Cognition Engine](COGNITION-ENGINE.md). The cognition engine watches the
+> Cognition Engine. The cognition engine watches the
 > **office** (health scores, owner attention); ESTI Pulse watches **projects
 > and tasks** (dependencies, blockers, standups). Both obey the same law:
 > *deterministic systems create business truth; LLMs explain business truth.*
@@ -310,7 +310,7 @@ esti_task_priority_log        id · task_id · old/new_priority_score · old/new
   hygiene, same tier as the existing `priorityScore`.
 - **Standup agent + question drafting + RAG** (anything touching the LLM):
   **Pro** (`ai` plan feature), consistent with
-  [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md).
+  PLANS-AND-TIERS.md.
 
 ## 18. Delivery phases
 

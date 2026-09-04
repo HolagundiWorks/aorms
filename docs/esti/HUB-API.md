@@ -15,7 +15,7 @@
 
 Breaking changes to paths, auth, or required response fields **must** bump this
 version tag, `@esti/contracts`, and the agent checklist in
-[AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) § Gagan in the same PR.
+AGENT-WORKSTREAMS.md § Gagan in the same PR.
 
 ## Auth planes
 

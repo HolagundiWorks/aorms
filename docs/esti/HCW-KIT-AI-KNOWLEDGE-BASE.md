@@ -45,7 +45,7 @@ staff, marketing, and portals — see [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) and
 Staff brand = firm name in `AppRibbon`; no floating watermark (clock owns BR).
 `:focus-visible` receives the same lift as `:hover` — keyboard parity is brand behaviour.
 
-**Desktop WinUI:** same geography via [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) —
+**Desktop WinUI:** same geography via DESKTOP-WINUI-UX.md —
 `HcwTheme.xaml` · density **1×** · clock shown **0.8×** · wellness in-window 320.
 Managers (AStudio · AConsulting) = full shell; Connect · AQC = thin ribbon + Fog + taskbar.
 

@@ -11,7 +11,7 @@ interfaces the way we do. For *how* (tokens, layers, components, SCSS), see
 console, marketing site, **every WinUI desktop app** (AStudio · AConsulting ·
 AORMS Connect · AQC Estimation/BBS/PM), and every future `@hcw/ui-kit` consumer.
 
-**Desktop WinUI contract:** [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) —
+**Desktop WinUI contract:** DESKTOP-WINUI-UX.md —
 floating ribbon 56 · stage · ActionDock · taskbar 60 · density **1×** · clock
 **0.8×** · wellness in-window 320.
 
@@ -48,16 +48,16 @@ documented product exception (marketing atmosphere in `landing.scss` is one).
 | What colour mass / rhythm / grouping? | [COMPOSITION-PRINCIPLES.md](COMPOSITION-PRINCIPLES.md) |
 | What colour / layer / component? | [HCW-UI-KIT.md](HCW-UI-KIT.md) · [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) |
 | What heuristic or law applies? | **This document** |
-| How should an AI surface report, ask, and defer? | [HCW-AI-ORCHESTRATION-UX.md](HCW-AI-ORCHESTRATION-UX.md) |
-| Construction stakeholders / lifecycle / field? | [HCW-CONSTRUCTION-UX-OVERLAY.md](HCW-CONSTRUCTION-UX-OVERLAY.md) |
+| How should an AI surface report, ask, and defer? | HCW-AI-ORCHESTRATION-UX.md |
+| Construction stakeholders / lifecycle / field? | HCW-CONSTRUCTION-UX-OVERLAY.md |
 | How do we measure UX? | [HCW-UX-KPI-INSTRUMENT.md](HCW-UX-KPI-INSTRUMENT.md) |
 | What tone should copy use? | [HCW-UX-VOICE.md](../HCW-UX-VOICE.md) |
 | How does a product adopt the kit? | [HCW-UX-ADOPTION-PLAYBOOK.md](HCW-UX-ADOPTION-PLAYBOOK.md) |
-| Construction job patterns? | [HCW-CONSTRUCTION-PATTERNS.md](HCW-CONSTRUCTION-PATTERNS.md) |
+| Construction job patterns? | HCW-CONSTRUCTION-PATTERNS.md |
 | Where does this module live in nav? | [NAVIGATION.md](NAVIGATION.md) |
 | Why Radiant Orange / Urbanist? | [AORMS-BRANDING-KIT.md](AORMS-BRANDING-KIT.md) |
-| Shell rollout status | [AORMS-UI-AUTOPILOT-ROADMAP.md](AORMS-UI-AUTOPILOT-ROADMAP.md) |
-| Desktop WinUI chrome (all apps) | [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) · [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) |
+| Shell rollout status | AORMS-UI-AUTOPILOT-ROADMAP.md |
+| Desktop WinUI chrome (all apps) | DESKTOP-WINUI-UX.md · DESKTOP-WEB-PARITY-UX.md |
 
 ---
 
@@ -67,7 +67,7 @@ WinUI shells **do not** get a second UX language. Map kit law → XAML:
 
 | Principle | WinUI application |
 |-----------|-------------------|
-| One geography | Floating ribbon · Fog stage · ActionDock · taskbar · clock — see [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) |
+| One geography | Floating ribbon · Fog stage · ActionDock · taskbar · clock — see DESKTOP-WINUI-UX.md |
 | Fitts / hits | Dock **44** · taskbar/ribbon **35** · radius **8** (`HcwTheme.xaml`) |
 | Cowan capacity | KPI ≤4 · dock ≤5 (managers) |
 | Consistency | `Themes/HcwTheme.xaml` copied from AStudio SoT — no per-app hex |
@@ -76,7 +76,7 @@ WinUI shells **do not** get a second UX language. Map kit law → XAML:
 | Module nav | Taskbar CENTER — not top ribbon |
 | Thin shells | Connect + AQC may omit dock/wellness/clock until needed; still Fog + floating ribbon + theme |
 
-Checklist for desktop PRs: §12 below + [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) agent checklist.
+Checklist for desktop PRs: §12 below + DESKTOP-WINUI-UX.md agent checklist.
 
 ---
 
@@ -273,7 +273,7 @@ Editorial CSS lives in `landing.scss` — not in `@hcw/ui-kit` tokens.
 Before shipping UI:
 
 - [ ] Uses `RailLayout` (staff web) or `PortalNeuFrame` (portals) — no bespoke left rail
-- [ ] **WinUI:** `HcwTheme.xaml` + geography per [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) (managers full · Connect/AQC thin OK)
+- [ ] **WinUI:** `HcwTheme.xaml` + geography per DESKTOP-WINUI-UX.md (managers full · Connect/AQC thin OK)
 - [ ] Stage header: identity / tabs / filters only — **no** DataGrid in the soft header
 - [ ] Stage: primary work content; scrolls independently (desktop)
 - [ ] Page CTAs via `useScreenActions` (web) / ActionDock zones (WinUI); dock cleared while dialog open (staff)

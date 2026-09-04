@@ -88,7 +88,7 @@ The fee-proposal and invoice line picks the SAC per the work type; default
   and deposits it.
 - AORMS tracks **expected TDS per invoice** and a pending-certificate state, and
   reconciles against **Form 26AS / AIS** at year-end (see the **reconcile
-  module** in [ARCHITECT-PROFILE](ARCHITECT-PROFILE.md)).
+  module** in ARCHITECT-PROFILE).
 - TDS receivables are exportable for the CA.
 
 ## Place of Supply

@@ -37,7 +37,7 @@ PROFILE=landing DOMAIN=aorms.in ADMIN_EMAIL=ops@aorms.in \
 
 ### S8 — Reopen apex auth / portal demos
 
-**When:** Firm portal tabs are honest (see [FIRM-PORTAL-SECTIONS.md](FIRM-PORTAL-SECTIONS.md)).  
+**When:** Firm portal tabs are honest (see FIRM-PORTAL-SECTIONS.md).  
 **Staff:** Sign in via the web-only office hub at `/login` — no desktop app.
 
 **Local first (docker compose):**
@@ -204,7 +204,7 @@ docker compose -f compose.prod.yaml exec backend pnpm --filter @esti/backend see
 | Contractor portal | `contractor@demo.aorms.in` | same |
 | Collaborator portal | `collab@demo.aorms.in` | same |
 
-See [DEMO-AND-HR-MODE.md](DEMO-AND-HR-MODE.md).
+See DEMO-AND-HR-MODE.md.
 
 ---
 
@@ -353,7 +353,7 @@ Owner UI: **Company → Release & readiness** mirrors `system.release` tRPC.
 - GitHub Actions (`.github/workflows/ci.yml`, `esti-ci`) runs on every push and PR: the **node** job does typecheck · lint · tests · backend + frontend production builds; the **python** job runs `ruff check` + `pytest` on the worker. Green CI is the pre-release gate.
 - Dependency licenses: `node scripts/licenses.mjs`
 - Backend API smoke: `pnpm --filter @esti/backend test:api-smoke`
-- Worker limits / idempotency: [WORKER-LIMITS.md](WORKER-LIMITS.md)
+- Worker limits / idempotency: WORKER-LIMITS.md
 
 ---
 

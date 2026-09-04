@@ -4,7 +4,7 @@
 **Type:** UX **framework** — principles, scope, diagram, KPIs, precedence  
 **Run it with:** [HCW-UX-PROCESS.md](HCW-UX-PROCESS.md) (the **process**) · **Index:** [HCW-UX.md](HCW-UX.md)  
 **Published score:** [HCW-UX-EVALUATION.md](HCW-UX-EVALUATION.md) (**88/100** industry-reference bar, 2026-07-22)  
-**Executable layer:** `@hcw/ui-kit` · **Laws:** [HCW-UI-UX-PRINCIPLES.md](esti/HCW-UI-UX-PRINCIPLES.md) · **AI module:** [HCW-AI-ORCHESTRATION-UX.md](esti/HCW-AI-ORCHESTRATION-UX.md) · **Construction overlay:** [HCW-CONSTRUCTION-UX-OVERLAY.md](esti/HCW-CONSTRUCTION-UX-OVERLAY.md) (construction-**aware**, not a CPM UX framework)
+**Executable layer:** `@hcw/ui-kit` · **Laws:** [HCW-UI-UX-PRINCIPLES.md](esti/HCW-UI-UX-PRINCIPLES.md) · **AI module:** HCW-AI-ORCHESTRATION-UX.md · **Construction overlay:** HCW-CONSTRUCTION-UX-OVERLAY.md (construction-**aware**, not a CPM UX framework)
 
 | Framework (this doc) | Process |
 | --- | --- |
@@ -242,8 +242,8 @@ Canonical scored reaudit: **[HCW-UX-EVALUATION.md](HCW-UX-EVALUATION.md)** (weig
 | This charter (framework) | **You are here** |
 | **How to run (process)** | [HCW-UX-PROCESS.md](HCW-UX-PROCESS.md) |
 | Heuristic → pattern | [esti/HCW-UI-UX-PRINCIPLES.md](esti/HCW-UI-UX-PRINCIPLES.md) |
-| AI module | [esti/HCW-AI-ORCHESTRATION-UX.md](esti/HCW-AI-ORCHESTRATION-UX.md) · [ai-orchestration-ux-framework.md](ai-orchestration-ux-framework.md) |
-| Construction (aware overlay) | [esti/HCW-CONSTRUCTION-UX-OVERLAY.md](esti/HCW-CONSTRUCTION-UX-OVERLAY.md) |
+| AI module | esti/HCW-AI-ORCHESTRATION-UX.md · ai-orchestration-ux-framework.md |
+| Construction (aware overlay) | esti/HCW-CONSTRUCTION-UX-OVERLAY.md |
 | KPIs | [esti/HCW-UX-KPI-INSTRUMENT.md](esti/HCW-UX-KPI-INSTRUMENT.md) |
 | Kit catalog | [hcw-kit/14-HCW-CATALOG.md](hcw-kit/14-HCW-CATALOG.md) |
 
@@ -260,7 +260,7 @@ Canonical scored reaudit: **[HCW-UX-EVALUATION.md](HCW-UX-EVALUATION.md)** (weig
 | **V1** | External multi-org / multi-project validation | Validation → 8+ | [VALIDATION-PROTOCOL.md](hcw-kit/11-audits/VALIDATION-PROTOCOL.md) |
 | **V2** | Live KPI dashboards with before/after deltas | Measurable impact | [HCW-UX-ADOPTION-PLAYBOOK.md](esti/HCW-UX-ADOPTION-PLAYBOOK.md) |
 | **V3** | Calibrated predictive models | Predictive → 8+ | [HCW-UX-CALIBRATION.md](esti/HCW-UX-CALIBRATION.md) |
-| **V4** | Construction domain pattern library in product (RFI, NCR, claims…) | Domain completeness | [HCW-CONSTRUCTION-PATTERNS.md](esti/HCW-CONSTRUCTION-PATTERNS.md) |
+| **V4** | Construction domain pattern library in product (RFI, NCR, claims…) | Domain completeness | HCW-CONSTRUCTION-PATTERNS.md |
 | **V5** | Long-lived decision/freeze audit persistence | Explainability → 9+ | `setDecisionAuditSink` · adoption §4 |
 
 New kit defects: file on the debt register — do not leave this section stale.

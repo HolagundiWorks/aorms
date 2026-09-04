@@ -100,7 +100,7 @@ live) and [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) (engineering in progress).
 
 ### M5 — GTM packaging
 1. Consistent public story (no BBS / PMC / tenders / “launch gated” leftovers) ✅  
-2. Landing **#pricing** from [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) ✅  
+2. Landing **#pricing** from PLANS-AND-TIERS.md ✅  
 3. ICP one-pager + Holagundi SOP as proof ✅  
 4. Ask ESTI / wiki-knowledge scrub for removed modules ✅  
 

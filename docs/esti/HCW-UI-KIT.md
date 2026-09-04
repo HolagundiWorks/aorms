@@ -301,7 +301,7 @@ Package README: [`README.md`](../../README.md).
 - **Glass Rail reference complete** on Studio Intelligence (`/`): full-viewport-height
   frosted rail, independent stage scroll, stage-head zone health, glass taskbar footer.
   Canonical spec: [§ Glass Rail](#glass-rail--canonical-reference-studio-intelligence).
-  Rollout: [AORMS-UI-AUTOPILOT-ROADMAP.md](AORMS-UI-AUTOPILOT-ROADMAP.md) **U0–U6 ✅**.
+  Rollout: AORMS-UI-AUTOPILOT-ROADMAP.md **U0–U6 ✅**.
 - **Marketing shell complete** on public site: clear-glass rail · full-width heading
   glass · flat sub-cards · hero logo · contour z-depth 3× · full-page scroll depth ·
   dock-only CTAs · FAQ 3-up. Spec:
@@ -313,7 +313,7 @@ Package README: [`README.md`](../../README.md).
 - Layer 3 via theme: button hover glass; error/warning alerts tinted glass.
 
 **Remaining (incremental):**
-1. Estimate app E1 UI pivot — **N/A** (no `estimate/` tree); active cost UI follows [COST-MANAGEMENT-SYSTEM.md](COST-MANAGEMENT-SYSTEM.md) rebuild.
+1. Estimate app E1 UI pivot — **N/A** (no `estimate/` tree); active cost UI follows COST-MANAGEMENT-SYSTEM.md rebuild.
 2. Optional: marketing SCSS rail/heads import kit clear-glass tokens instead of
    duplicated rgba recipes.
 3. Optional further shrink of `glass.scss` once orb class aliases fully migrate

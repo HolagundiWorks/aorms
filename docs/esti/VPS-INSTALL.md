@@ -308,7 +308,7 @@ redirects to `/login`. Legacy `/download` redirects to `/downloads` → `/login`
 
 Operators on pre-2026-07 VPS layouts may still have leftover Manager binaries under
 `frontend/dist/downloads/` — safe to delete via `deploy/cleanup-vps.sh`.
-See [ADMIN-GUIDE](ADMIN-GUIDE.md) §6b.
+See ADMIN-GUIDE §6b.
 
 ---
 

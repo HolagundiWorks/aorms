@@ -28,7 +28,7 @@ authoritative business state.
 The same authority boundary applies to the AORMS cognition engine:
 deterministic TypeScript read models calculate office health and interventions,
 Python may later recognise anomalies or predictions, and LLMs only explain
-structured machine output. See [COGNITION-ENGINE](COGNITION-ENGINE.md) (if present).
+structured machine output. See COGNITION-ENGINE (if present).
 
 ## Repository
 

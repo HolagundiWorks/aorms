@@ -23,7 +23,7 @@ Neither replaces the other.
 | **[HCW-UX-EVALUATION.md](HCW-UX-EVALUATION.md)** | Published scorecard | Industry-reference bar — weighted **88/100**, validation & prediction honesty |
 | **[HCW-UX-VOICE.md](HCW-UX-VOICE.md)** | Voice & tone | Empathic partner grammar · `VOICE` / `TRUST` · fatigue offers |
 | [esti/HCW-UX-ADOPTION-PLAYBOOK.md](esti/HCW-UX-ADOPTION-PLAYBOOK.md) | Product adoption | KPI sink · voice · fatigue UI · audit · DoD |
-| [esti/HCW-CONSTRUCTION-PATTERNS.md](esti/HCW-CONSTRUCTION-PATTERNS.md) | Domain patterns | CP-01…11 job specs (product implements) |
+| esti/HCW-CONSTRUCTION-PATTERNS.md | Domain patterns | CP-01…11 job specs (product implements) |
 | [HCW-DESIGN-PLAYBOOK.md](HCW-DESIGN-PLAYBOOK.md) | Philosophy | Why the rules exist |
 | [hcw-kit/00-CONSTITUTION.md](hcw-kit/00-CONSTITUTION.md) | Law | Non-negotiable articles |
 | [esti/COMPOSITION-PRINCIPLES.md](esti/COMPOSITION-PRINCIPLES.md) | **Composition grammar** | 60·30·10 · odd groups · 8px rhythm · von Restorff |
@@ -31,8 +31,8 @@ Neither replaces the other.
 | [esti/UI-SITE-MAP.md](esti/UI-SITE-MAP.md) | Surface inventory | Marketing · auth · staff · portals · AProc |
 | [esti/HCW-UI-KIT.md](esti/HCW-UI-KIT.md) | Product kit how-to | Layers · spatial model · dock zones |
 | [esti/HCW-UI-UX-PRINCIPLES.md](esti/HCW-UI-UX-PRINCIPLES.md) | Evidence map | Law → pattern table |
-| [esti/HCW-AI-ORCHESTRATION-UX.md](esti/HCW-AI-ORCHESTRATION-UX.md) | AI module | Mission-first AI surfaces |
-| [esti/HCW-CONSTRUCTION-UX-OVERLAY.md](esti/HCW-CONSTRUCTION-UX-OVERLAY.md) | Domain overlay | Construction-**aware** lifecycle & stakeholders (not a CPM UX framework) |
+| esti/HCW-AI-ORCHESTRATION-UX.md | AI module | Mission-first AI surfaces |
+| esti/HCW-CONSTRUCTION-UX-OVERLAY.md | Domain overlay | Construction-**aware** lifecycle & stakeholders (not a CPM UX framework) |
 | [esti/HCW-UX-KPI-INSTRUMENT.md](esti/HCW-UX-KPI-INSTRUMENT.md) | Measurement | Events & healthy bands |
 | [hcw-kit/07-UX-REVIEW-CHECKLISTS.md](hcw-kit/07-UX-REVIEW-CHECKLISTS.md) | Process tool | Pass/fail Evaluate gate |
 | [hcw-kit/14-HCW-CATALOG.md](hcw-kit/14-HCW-CATALOG.md) | Implementation | Attributes for every element |

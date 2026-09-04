@@ -89,7 +89,7 @@ Before/after write-ups: [case-studies/](../hcw-kit/11-audits/case-studies/).
 | Rework tagged “UX ambiguity” | count / month (product taxonomy) |
 | Freeze compliance | commercial decisions frozen before execute |
 
-See [HCW-CONSTRUCTION-UX-OVERLAY.md](HCW-CONSTRUCTION-UX-OVERLAY.md).
+See HCW-CONSTRUCTION-UX-OVERLAY.md.
 
 ---
 

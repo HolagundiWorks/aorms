@@ -174,7 +174,7 @@ domain-agnostic kit. Overlay score for domain completeness: **~68 / 100**.
 | Independent multi-project / multi-org validation | Research | [VALIDATION-PROTOCOL.md](hcw-kit/11-audits/VALIDATION-PROTOCOL.md) | Validation 5.5 → 8+ |
 | Live KPI dashboards with before/after deltas | Product | [HCW-UX-ADOPTION-PLAYBOOK.md](esti/HCW-UX-ADOPTION-PLAYBOOK.md) | Measurable impact |
 | Quantified predictive models | Research | [HCW-UX-CALIBRATION.md](esti/HCW-UX-CALIBRATION.md) | Predictive 6.5 → 8+ |
-| Construction domain UIs (CP-01…11) | Product | [HCW-CONSTRUCTION-PATTERNS.md](esti/HCW-CONSTRUCTION-PATTERNS.md) | Domain-strong |
+| Construction domain UIs (CP-01…11) | Product | HCW-CONSTRUCTION-PATTERNS.md | Domain-strong |
 | Persist decision/freeze audit ≥6 months | Product | `setDecisionAuditSink` | Explainability → 9+ |
 | Voice + fatigue UI in shells | Product | `VOICE` · `FatigueOfferBanner` | Partner tone under load |
 

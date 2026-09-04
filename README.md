@@ -50,8 +50,8 @@ commerce, warehouse, labour, subcontractor-accounting, and contractor execution
 systems are out of scope.
 
 **User guide:** [aorms.in/wiki](https://aorms.in/wiki) · **Licence:** one standard
-licence ([PLANS-AND-TIERS](docs/esti/PLANS-AND-TIERS.md)) — **desktop preferred**
-+ web parity ([LOCAL-FIRST](docs/esti/LOCAL-FIRST.md)); legacy Manager / separate
+licence (PLANS-AND-TIERS) — **desktop preferred**
++ web parity (LOCAL-FIRST); legacy Manager / separate
 Estimate installers stay retired.
 
 ## Fixed India profile

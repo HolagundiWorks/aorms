@@ -42,7 +42,7 @@ Auto-categorize remaining files:
 5. **Landing/marketing** — ~30 files; separate Wave 5 path
 6. **Deferred (overlays, popovers)** — ~27 files; defer post-browser-QA
 
-**Deliverable:** categorized audit in [CARBON-WAVE3-AUDIT.md](./CARBON-WAVE3-AUDIT.md)  
+**Deliverable:** categorized audit in CARBON-WAVE3-AUDIT.md  
 **Effort:** 4-6 hours (scripted + manual review)
 
 ### 1.3 Lock in design decisions from CARBON-MIGRATION.md § 0
@@ -393,7 +393,7 @@ done | sort
 ## Related docs
 
 - [`CARBON-MIGRATION.md`](./CARBON-MIGRATION.md) — Full roadmap & decisions
-- [`CARBON-WAVE3-AUDIT.md`](./CARBON-WAVE3-AUDIT.md) — Detailed file categorization (to be generated)
+- `CARBON-WAVE3-AUDIT.md` — Detailed file categorization (to be generated)
 - [`07-UX-REVIEW-CHECKLISTS.md`](../hcw-kit/07-UX-REVIEW-CHECKLISTS.md) — Accessibility validation
 - [`e2e/tests/visual-regression.spec.ts`](../../e2e/tests/visual-regression.spec.ts) — Visual baselines
 

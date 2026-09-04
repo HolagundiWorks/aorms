@@ -80,7 +80,7 @@ Session ring (`listSessionDecisionAudits`) is for the current tab only.
 
 ## 5. Construction patterns (V4)
 
-Implement job UIs from [HCW-CONSTRUCTION-PATTERNS.md](HCW-CONSTRUCTION-PATTERNS.md)
+Implement job UIs from HCW-CONSTRUCTION-PATTERNS.md
 on the kit geography — do not fork chrome into the kit.
 
 ---

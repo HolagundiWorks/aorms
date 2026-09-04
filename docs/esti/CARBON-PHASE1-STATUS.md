@@ -195,7 +195,7 @@ Create `docs/esti/CARBON-MIGRATION-DECISIONS.md` (documentation of choices above
 
 - [`CARBON-MIGRATION-WAVE3-PLAN.md`](./CARBON-MIGRATION-WAVE3-PLAN.md) — Detailed execution (8 tranches, 7 weeks)
 - [`CARBON-MIGRATION-QUICK-START.md`](./CARBON-MIGRATION-QUICK-START.md) — Developer recipe (per-file)
-- [`CARBON-MIGRATION-CHECKLIST.md`](../CARBON-MIGRATION-CHECKLIST.md) — Tranche checklist (track progress)
+- `CARBON-MIGRATION-CHECKLIST.md` — Tranche checklist (track progress)
 - [`CARBON-WAVE2-COMPLETE.md`](./CARBON-WAVE2-COMPLETE.md) — Wave 2 report (ToastHost delivery)
 - [`CARBON-MIGRATION.md`](./CARBON-MIGRATION.md) — Full roadmap + decisions (reference)
 

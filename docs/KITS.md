@@ -75,4 +75,4 @@ CI uses a **single checkout** — no sibling kit repos are cloned.
   removed with `@carbon/react`, 2026-07).
 
 **Cloud / aorms.in:** no Ollama. ESTI AI is desktop-only — see
-[PRODUCTION-OPS.md](esti/PRODUCTION-OPS.md) § ESTI AI · [LOCAL-FIRST.md](esti/LOCAL-FIRST.md).
+[PRODUCTION-OPS.md](esti/PRODUCTION-OPS.md) § ESTI AI · LOCAL-FIRST.md.
