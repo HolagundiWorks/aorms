@@ -1,16 +1,16 @@
 import { useEffect, type CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AORMS_STUDIO, AORMS_PLATFORM } from "../lib/product-nomenclature.js";
+import { AORMS_OFFICE_HUB, AORMS_PLATFORM } from "../lib/product-nomenclature.js";
 import { MarketingShell } from "../components/landing/MarketingShell.js";
 import { formatPostDate, listPosts } from "../lib/blog.js";
 import { applyBlogListSeo } from "../lib/blog-seo.js";
 
 // Roadmap of articles in the pipeline — shown as titles, not thin placeholder pages.
 const COMING_NEXT = [
-  "Signed installer release notes — when /downloads flips off Coming soon",
   "Firm portal soft launch — what clients see first",
-  "COA stage-wise fee structures — a billing guide for Indian architects",
-  "ASPRF in the wild — reading a studio score without gaming it",
+  "COA stage-wise fee structures — a billing guide for AEC practices",
+  "ASPRF in the wild — reading a performance score without gaming it",
+  "Building an office knowledge bank — connecting ESTI with your firm's standards",
 ];
 
 export function Blog() {
@@ -28,12 +28,12 @@ export function Blog() {
           <p className="lp2-section-head__tag">{AORMS_PLATFORM.name} blog</p>
           <h1 className="lp2-section-head__title">Blog</h1>
           <p className="lp2-section-head__body">
-            Platform notes (frameworks, EOMS, ESTI) and <strong>{AORMS_STUDIO.title}</strong>{" "}
-            advisory operations for Indian architecture consultancies — revisions, approvals,
-            billing, and workflows. Desktop preferred with web parity.
+            Platform notes on {AORMS_PLATFORM.name} office management — client tracking, project proposals,
+            invoicing, team coordination, and delivery management for AEC firms.
+            Built on ESTI (AI agent) and EOMS (knowledge bank).
           </p>
           <p className="lp2-blog-links">
-            <Link to="/">Suite home</Link>
+            <Link to="/">{AORMS_PLATFORM.name} home</Link>
             <span aria-hidden> · </span>
             <Link to="/downloads">Downloads</Link>
           </p>

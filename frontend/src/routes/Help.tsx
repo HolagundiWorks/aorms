@@ -12,17 +12,17 @@ import {
 import { PageBreadcrumb } from "../components/PageBreadcrumb.js";
 import { RailLayout } from "../components/RailLayout.js";
 import { SHELL_KEYMAP } from "../lib/keymap.js";
-import { AORMS_STUDIO, ESTI } from "../lib/product-nomenclature.js";
+import { AORMS_OFFICE_HUB, ESTI } from "../lib/product-nomenclature.js";
 
 /**
- * Keyboard shortcuts Help — LF5 shared keymap surface for desktop + web.
+ * Keyboard shortcuts Help — LF5 shared keymap surface for the office hub.
  * Chords come from `lib/keymap.ts` so tooltips and this page stay aligned.
  */
 export function HelpPage() {
   return (
     <RailLayout
       title="Keyboard shortcuts"
-      description={`Shared shell map for ${AORMS_STUDIO.title} on desktop and web. Canvas-local keys stay on their screens.`}
+      description={`Keyboard shortcuts for ${AORMS_OFFICE_HUB.title} — streamline your workflow.`}
     >
       <PageBreadcrumb items={[{ label: "Help" }, { label: "Shortcuts" }]} />
       <Stack spacing={2}>

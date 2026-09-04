@@ -22,7 +22,7 @@ import { RailLayout } from "../components/RailLayout.js";
 import { trpc } from "../lib/trpc.js";
 import { useAuth } from "../lib/auth.js";
 import { Navigate } from "react-router-dom";
-import { AORMS_PORTALS, AORMS_STUDIO, externalPortalsPhrase } from "../lib/product-nomenclature.js";
+import { AORMS_OFFICE_HUB, AORMS_PORTALS, externalPortalsPhrase } from "../lib/product-nomenclature.js";
 
 type ModuleTileProps = {
   icon: SvgIconComponent;
@@ -148,8 +148,8 @@ export function SystemAdmin() {
     },
     {
       icon: ManageAccounts,
-      title: `${AORMS_STUDIO.title} · external portals`,
-      description: `${externalPortalsPhrase()}: client change requests and approvals, ${AORMS_PORTALS.consultant.label.toLowerCase()} scoped access, contractor and site surfaces. Enabled when portal logins are provisioned.`,
+      title: `${AORMS_OFFICE_HUB.title} · external portals`,
+      description: `${externalPortalsPhrase()}: client, consultant, contractor, and site access to projects and updates. Enabled when portal logins are provisioned.`,
       enabled: true,
       loading: false,
       onToggle: () => undefined,
