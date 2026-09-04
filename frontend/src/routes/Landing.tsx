@@ -900,9 +900,9 @@ export function Landing() {
                     Full workspace
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
-                    ACTIVE licence from signup — projects, fees, GST invoices, drawings,
-                    portals, Studio Intelligence, and {AORMS_CONSULTANCY.title} on the same spine.
-                    Unlimited staff logins.
+                    ACTIVE licence from signup — clients, projects, proposals, invoices,
+                    team management, knowledge bank, delivery tracking, and portals
+                    all on one unified office hub. Unlimited staff logins.
                   </Typography>
                 </Surface>
               </Grid>
@@ -959,13 +959,13 @@ export function Landing() {
               <Grid size={{ xs: 12, md: 4 }}>
                 <Stack className="esti-lp-reveal" spacing={MARKETING_RHYTHM.sm}>
                   <Typography variant="overline" color="text.secondary">
-                    Managers
+                    Office Hub
                   </Typography>
                   <Typography variant="h6" component="h3" sx={{ fontWeight: 700 }}>
-                    {AORMS_STUDIO.title} · {AORMS_CONSULTANCY.title}
+                    {AORMS_OFFICE_HUB.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Tasks, office, HR, and portal communications for architecture studios and engineering consultancies.
+                    One unified web application for office management — clients, projects, proposals, invoicing, team, knowledge, and delivery.
                   </Typography>
                 </Stack>
               </Grid>
