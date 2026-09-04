@@ -1,7 +1,7 @@
-"""PDF → Markdown for Repo portal (HCW Markdown Tool pipeline).
+"""PDF → Markdown for Repo/Knowledge Bank portal (HCW Markdown Tool pipeline).
 
 Uses pymupdf4llm — the same library as HolagundiWorks/hcw-markdown-tool — to
-convert uploaded textbooks into markdown before EOMS ingest.
+convert uploaded textbooks into markdown for the Knowledge Bank portal.
 """
 from __future__ import annotations
 
