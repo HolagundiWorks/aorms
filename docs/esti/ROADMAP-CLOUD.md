@@ -27,6 +27,24 @@ Per [`../../CLAUDE.md`](../../CLAUDE.md) § Launch status and
 **Next milestone — S8:** reopen apex `/login` for real sign-in and firm-portal
 demos, once firm-portal tabs are honest (see PRODUCTION-OPS.md § S8).
 
+**Codebase-side prerequisite: verified met (2026-09-04).** The "honest tabs"
+requirement is fully implemented — `visibleFirmPortalSections()`
+(`frontend/src/components/portal/FirmPortalSections.ts`) hides any firm-portal
+chrome tab whose `panels` key isn't wired, and all four portals (Client,
+Contractor, Collaborator, Site) pass a `panels` object matching their
+documented capability list (no Alert stubs, no unwired tabs). This was already
+covered by `visibleFirmPortalSections.test.ts`; the marketing-gate switch
+itself (`isMarketingOnly()` / `isMarketingAuthPath()`, the exact toggle S8
+flips) previously had **no** test coverage — added in
+`frontend/src/lib/marketing-gate.test.ts` (20 cases: default-on behavior,
+every truthy/falsy env value, and the gated-path matcher). Both suites pass;
+`tsc` is unchanged at its 16 pre-existing, unrelated JSX errors.
+
+What remains for S8 is **ops only**, not code: flip `VITE_MARKETING_ONLY=false`
+on the VPS per PRODUCTION-OPS.md § S8 (`s8-reopen-demos.sh` / the
+`s8-reopen-demos.yml` GitHub Action) — this session has no VPS/deploy
+credentials, so that step is left to an operator.
+
 ---
 
 ## Cloud infrastructure ✅
