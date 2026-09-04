@@ -103,17 +103,21 @@ index only if Ask ESTI should see it (wiki is not a public marketing surface).
 | Pin AQC engine from HolagundiWorks/AQC | Fork divergent `bbs_engine` in product repos |
 | Edit `Projects.tsx` / `Clients.tsx` only when asked | Parallel WIP collisions |
 
-## UI / design system — IBM Carbon Design System (active 2026-09-03)
+## UI / design system — IBM Carbon Design System (active 2026-09-04)
 
 > **🎯 CANONICAL (2026-09):** **IBM Carbon Design System v11** — web-only, pure Carbon.
 > Whole frontend — app screens, portals, and public landing / marketing pages.
 > **No custom UI/UX elements; no MUI, no `@hcw/ui-kit`.** Stock `@carbon/react`
 > components only, arranged with Carbon grid and tokens.
 >
-> **Migration roadmap:** [`docs/esti/CARBON-MIGRATION.md`](docs/esti/CARBON-MIGRATION.md)
-> — Waves 0–6 sequenced plan, ~10–14 sprints. Wave 0–2 foundation in place (2026-08).
-> Wave 3 (app MUI→Carbon, 4–6 sprints) active. **Entry point for new screens:**
-> build on stock `@carbon/react` + `CarbonScope` adapter in `frontend/src/carbon/`.
+> **Migration status:** [`docs/esti/CARBON-MIGRATION.md`](docs/esti/CARBON-MIGRATION.md)
+> (roadmap) · [`docs/esti/CARBON-PHASE1-STATUS.md`](docs/esti/CARBON-PHASE1-STATUS.md) (current)
+> · [`docs/esti/CARBON-WAVE3-PLAN.md`](docs/esti/CARBON-MIGRATION-WAVE3-PLAN.md) (execution).
+> **Waves 0–2 complete (2026-08/09).** Wave 3 (app MUI→Carbon) launches Week 2, 
+> 8 tranches over 7 weeks (3–4 developers, parallel). All 5 Wave 2 adapters ready
+> (StatusDot, DataState, ConfirmModal, PageBreadcrumb, ToastHost). 
+> **Entry point for new screens:** build on stock `@carbon/react` + `CarbonScope` 
+> adapter in `frontend/src/carbon/`.
 >
 > **Governing rule (§0):** **Pure Carbon, no custom UI/UX.** Every screen is
 > composed **only** from stock `@carbon/react` components and Carbon patterns
