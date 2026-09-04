@@ -4,12 +4,13 @@
 migration Phase 1 built here  
 **Updated:** 2026-09-04  
 **Scope:** Work done in the **local dev environment** (Podman compose stack,
-this machine, `main` branch). The cloud/local branch split described in
-[`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split is
-**currently paused** — `cloud-agent` was merged into `main` and both feature
-work and testing happen from this single local session for now. The phase
-history below (Sept 2026 web-only pivot cleanup, Carbon migration) predates
-the (now-paused) split.
+this machine, `main` branch) — plus, per the resumed split
+([`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split,
+[CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md)), **verifying and
+merging** the short-lived `cloud-agent/<task-slug>` branches cloud sessions
+push. Net-new feature work still happens here too when it isn't explicitly
+assigned to a cloud-agent branch. The phase history below (Sept 2026
+web-only pivot cleanup, Carbon migration) predates any of this split.
 
 **Platform (current, live):** React + Carbon Design System + Fastify backend +
 PostgreSQL, run locally via Podman. **Target platform** (in progress, built
@@ -65,13 +66,20 @@ Projects all render real seeded data).
 
 ## Local test/verify loop (2026-09)
 
-1. `git fetch --all && git pull` on `main`.
-2. Bring up the stack (above), run the app, click through the area under test.
-3. `tsc --noEmit`, `eslint`, unit tests (`vitest`, `pytest` in `worker/`), and
+1. `git fetch --all && git pull` on `main`; check `git branch -r` for any
+   pushed `cloud-agent/<task-slug>` branch waiting on verification.
+2. **If a `cloud-agent/*` branch is waiting:** follow
+   [CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md) § Handoff — pull it,
+   re-run its self-verification checklist yourself (don't assume it was run),
+   do the functional verification a cloud session couldn't (live stack, live
+   Supabase, browser click-through), then merge to `main` and push, or send
+   it back with specific fixes needed.
+3. Bring up the stack (above), run the app, click through the area under test.
+4. `tsc --noEmit`, `eslint`, unit tests (`vitest`, `pytest` in `worker/`), and
    Playwright/e2e where they exist — see [`../../CLAUDE.md`](../../CLAUDE.md)
    § Dev / verify loop for exact commands.
-4. Fix bugs found while testing directly.
-5. For the Next.js/Supabase migration, `cd web && pnpm dev` runs the new
+5. Fix bugs found while testing directly.
+6. For the Next.js/Supabase migration, `cd web && pnpm dev` runs the new
    stack (port 3000 by default) alongside the current one — see
    [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) § Stack migration for Phase status.
 
@@ -222,6 +230,7 @@ re-captured (Playwright).
 **Cloud / production:**
 see [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) ·
 [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) ·
+[CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md) ·
 [PRODUCTION-OPS.md](./PRODUCTION-OPS.md) · [VPS-INSTALL.md](./VPS-INSTALL.md)
 
 **Archived (legacy):**
@@ -236,7 +245,7 @@ see [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) ·
 - **Architecture questions?** See [ARCHITECTURE.md](./ARCHITECTURE.md)
 - **Stack migration spec?** See [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md)
 - **Deployment / what's live? Where does new feature work happen?** See [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)
-- **Branch policy (cloud vs local)?** See [`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split
+- **Branch policy (cloud vs local)?** See [`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split · [CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md) for the full rules
 
 ---
 

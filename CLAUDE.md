@@ -266,27 +266,34 @@ Tests: `worker/tests/test_jobs.py` (handler unit tests) and
 
 ## Branch & environment split — cloud vs local (2026-09)
 
-**Currently paused (2026-09-04):** by explicit direction, `cloud-agent` was
-merged into `main` and both branches are consolidated — work happens on
-`main` from a single agent/session until outstanding issues are resolved.
-The split below is the target model to resume once that's done; don't act on
-"work happens on `cloud-agent`" language until told to resume the split.
-
-Development normally runs in two places at once, split by **branch and by
-role**, not by feature area:
+**Resumed (2026-09-04), refined.** The original model ran one long-lived
+`cloud-agent` branch, which caused real problems at merge time (duplicate
+work, a large unnoticed error pile-up) — full postmortem and the actual
+rules cloud-agent sessions must follow are in
+[CLOUD-AGENT-WORKFLOW.md](docs/esti/CLOUD-AGENT-WORKFLOW.md). The short
+version:
 
 | Branch | Environment | Role |
 | --- | --- | --- |
-| `cloud-agent` | Cloud (hosted agent sessions) | **Primary feature development** — the Next.js/Supabase stack migration, new modules, most day-to-day coding happens here and merges up to `main`. |
-| `main` | — | Integration branch. Cloud work lands here; this is what a local session pulls. |
-| (local checkout, this machine) | Local (Podman/Docker compose, this repo) | **Testing and verification** — run the stack, exercise the app, write/run tests, file bugs, verify what the cloud branch produced before/after it merges. Not the primary place for new feature work. |
+| `cloud-agent/<task-slug>` — one short-lived branch **per task**, not one long-lived branch | Cloud (hosted agent sessions) | **Primary feature development** — branches off a freshly-pulled `main`, stays scoped to one task, gets pushed (never merged by the cloud session itself) and handed off. |
+| `main` | — | Integration branch. Cloud work lands here only after local verifies it. |
+| (local checkout, this machine) | Local (Podman/Docker compose, this repo) | **Verification + merge gate** for cloud-agent branches, plus the general testing/verification role below. Also where net-new feature work happens when not explicitly assigned to a cloud-agent branch (e.g. this session built the Next.js/Supabase migration's Phase 1 and the start of Phase 2 directly on `main`). |
 
 **What that means day to day, in this local environment:**
-- Pull `main` (and `cloud-agent` when asked to verify unmerged cloud work) before starting.
-- Prefer: running the app, `tsc`/`eslint`/`vitest`/`pytest`, Playwright/e2e, manual click-through verification, filing/fixing bugs found while testing.
-- Avoid starting large net-new feature work here that duplicates what the cloud branch is already building — check `git log origin/cloud-agent` / `origin/main` first so local and cloud don't diverge on the same feature.
-- Small, testing-adjacent fixes (a broken test, a local-only config issue, a bug found while verifying) are fine to fix directly here.
-- Roadmap docs reflect this split: [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) tracks what cloud development is building (including the Next.js/Supabase migration — see § Stack migration above); [ROADMAP-LOCAL.md](docs/esti/ROADMAP-LOCAL.md) tracks the local test/verify loop, not net-new feature development.
+- Pull `main` before starting; pull any pushed `cloud-agent/<task-slug>`
+  branch when one is waiting for verification.
+- When a `cloud-agent/*` branch is pushed: re-run its self-verification
+  checklist yourself (don't trust it was actually run), do whatever
+  functional verification the cloud session couldn't (live Podman stack,
+  live Supabase, browser click-through), then merge to `main` and push —
+  per [CLOUD-AGENT-WORKFLOW.md](docs/esti/CLOUD-AGENT-WORKFLOW.md) § Handoff.
+- Otherwise: run the app, `tsc`/`eslint`/`vitest`/`pytest`, Playwright/e2e,
+  manual click-through verification, filing/fixing bugs found while testing
+  — or net-new feature work not currently assigned to a cloud-agent branch.
+- Roadmap docs: [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) tracks what's
+  live/in-progress (including the Next.js/Supabase migration — see § Stack
+  migration above); [ROADMAP-LOCAL.md](docs/esti/ROADMAP-LOCAL.md) tracks
+  the local dev/test loop specifically.
 
 ## Dev / verify loop
 
