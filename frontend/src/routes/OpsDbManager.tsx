@@ -2,7 +2,6 @@ import { Alert, Box, Stack, Typography } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { Surface } from "@hcw/ui-kit";
 import { DataState } from "../components/DataState.js";
-import { AORMS_CONNECT } from "../lib/product-nomenclature.js";
 import { trpc } from "../lib/trpc.js";
 
 /** Local row shapes — browse payload may lose inference when mongodb types are absent in the FE tsc graph. */
@@ -84,9 +83,7 @@ export function OpsDbManager() {
           Connection manager
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Hub bind status, published Mongo ops (tasks · artifacts), and sync/meta from desktop Flush.
-          Geometry stays in ShilpiDB. Local SQLite lives in {AORMS_CONNECT.title} — this page does not
-          edit firm.db.
+          Hub bind status and published Mongo ops (tasks · artifacts) for the office hub.
         </Typography>
       </Stack>
 
@@ -124,7 +121,7 @@ export function OpsDbManager() {
               {connector?.desktopConnectorHint}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Flush path: {AORMS_CONNECT.title} → firm.db outbox → POST /api/sync/meta · /api/ops/* → this page.
+              Sync path: office hub → POST /api/sync/meta · /api/ops/* → this page.
             </Typography>
           </Stack>
         )}
@@ -140,7 +137,7 @@ export function OpsDbManager() {
           columnCount={4}
           empty={{
             title: "No published tasks",
-            description: `Publish from AStudio Tasks, or Flush ops from ${AORMS_CONNECT.title} after enqueue. POST /api/ops/tasks also works.`,
+            description: `Publish from office hub tasks. POST /api/ops/tasks also works.`,
           }}
         >
           <Box sx={{ width: "100%" }}>
@@ -159,7 +156,7 @@ export function OpsDbManager() {
           columnCount={4}
           empty={{
             title: "No published packages",
-            description: `Publish drawingPackage artifacts from desktop Flush / AStudio, or mongoOps.publishDrawingPackage.`,
+            description: `Publish drawingPackage artifacts via mongoOps.publishDrawingPackage.`,
           }}
         >
           <Box sx={{ width: "100%" }}>
@@ -183,7 +180,7 @@ export function OpsDbManager() {
               columnCount={4}
               empty={{
                 title: "No sync records yet",
-                description: `Flush artifacts from ${AORMS_CONNECT.title} or suite apps (POST /api/sync/ingest).`,
+                description: `Sync records from office hub (POST /api/sync/ingest).`,
               }}
             >
               <Box sx={{ width: "100%" }}>
@@ -205,7 +202,7 @@ export function OpsDbManager() {
               columnCount={5}
               empty={{
                 title: "No meta events yet",
-                description: `In ${AORMS_CONNECT.title}: Enqueue test meta → Flush to hub.`,
+                description: `Enqueue test meta from office hub.`,
               }}
             >
               <Box sx={{ width: "100%" }}>
