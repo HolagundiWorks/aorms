@@ -144,7 +144,7 @@ reinstall.
 
 ```bash
 apt-get update && apt-get install -y git
-git clone --branch main https://github.com/HolagundiWorks/esti.git /opt/esti
+git clone --branch main https://github.com/HolagundiWorks/aorms.git /opt/esti
 cd /opt/esti
 sudo bash deploy/install.sh
 ```

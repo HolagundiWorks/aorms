@@ -79,8 +79,9 @@ Canonical product and engineering docs: **[docs/esti/README.md](docs/esti/README
 ## License
 
 AORMS is original software owned by Holagundi Consulting Works. HCW chooses the
-license — see [docs/esti/LICENSE-NOTICE.md](docs/esti/LICENSE-NOTICE.md).
+license.
 
 ## Repository
 
-Source, issues, releases, and docs: `https://github.com/HolagundiWorks/esti`.
+Standalone repo — source, issues, releases, and docs all live here:
+`https://github.com/HolagundiWorks/aorms`.

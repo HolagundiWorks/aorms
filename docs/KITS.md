@@ -51,7 +51,6 @@ Canonical source: **github.com/HolagundiWorks/hcwux**. Do not edit
 6. `pnpm install` at the repo root to re-link.
 7. Typecheck frontend; smoke Studio Intelligence + Appearance (scheme / density / COGA).
 
-Adoption notes (esti-specific vendor path): [ADOPTING-THE-KIT.md](ADOPTING-THE-KIT.md).
 UX index: [HCW-UX.md](HCW-UX.md).
 
 ## Updating `@hcw/aorms-ai-kit`
