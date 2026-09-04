@@ -1,13 +1,22 @@
 ﻿# AORMS Implementation Roadmap
 
-**Status:** ACTIVE (suite soft launch + Connect) · **Updated:** 2026-08-09  
-**Canon:** [AORMS-SUITE.md](AORMS-SUITE.md) · [AORMS-CONNECT.md](AORMS-CONNECT.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md) ·  
-[DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [WEB-PORTAL.md](WEB-PORTAL.md) · [VPS-INSTALL.md](VPS-INSTALL.md)
+**Status:** ACTIVE · **Updated:** 2026-08-06  
+**Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
+**Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
+**AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)  
+**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 (WinUI #49 · env `bhoomi`) · LF5 🚧 (#51) · LF6 🔲 — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
+**Crew:** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) (Vishwakarma · Bhoomi · Gagan · Aakash)
 
 Open source for now; SaaS licensing deferred.
 
-**AI law:** ESTI / Ollama run on **desktop apps only** — not on the cloud hub or
-aorms.in VPS ([PRODUCTION-OPS.md](PRODUCTION-OPS.md) § ESTI AI).
+**Active delivery (2026-08-06):** hub `0227` + panel `syncToken` ✅ (Gagan #45) ·
+portal `/downloads` placeholders ✅ (Aakash #46) · LF5 web parity polish 🚧
+(#51) · LF4 **WinUI 3** shell 🚧 (#49 · Bhoomi on env **`bhoomi`**) · LF6
+right-slot 🔲 (Aakash). Crew restarted — see [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)
+live roster. Live installer URLs stay gated. The 2026-07-19 **web-only** product
+law is **superseded** for runtime shape ([PLANS-AND-TIERS.md](PLANS-AND-TIERS.md),
+[LOCAL-FIRST.md](LOCAL-FIRST.md)). Legacy Community / Manager installers and a
+separate Estimate desktop app stay **retired**.
 
 ---
 
