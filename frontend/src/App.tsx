@@ -153,6 +153,7 @@ const Projects = lazyRoute(() => import("./routes/Projects.js"), "Projects");
 const Reconcile = lazyRoute(() => import("./routes/Reconcile.js"), "Reconcile");
 const SearchPage = lazyRoute(() => import("./routes/Search.js"), "SearchPage");
 const HelpPage = lazyRoute(() => import("./routes/Help.js"), "HelpPage");
+const AiStudioPage = lazyRoute(() => import("./components/AiStudio.js"), "AiStudioPage");
 const Work = lazyRoute(() => import("./routes/Work.js"), "Work");
 const Team = lazyRoute(() => import("./routes/Team.js"), "Team");
 const Hr = lazyRoute(() => import("./routes/Hr.js"), "Hr");

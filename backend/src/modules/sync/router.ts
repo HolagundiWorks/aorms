@@ -13,13 +13,7 @@ import { drainOutbox, outboxStatus } from "../../lib/sync/outbox.js";
 import { resolveRuntimeCapabilities } from "../../lib/sync/runtimeCapabilities.js";
 import { ownerProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
 
-export { resolveRuntimeCapabilities };
-
-type FlushSkip =
-  | "sync_disabled"
-  | "not_node"
-  | "hub_unconfigured"
-  | "missing_sync_token";
+export { resolveRuntimeCapabilities } from "../../lib/sync/runtimeCapabilities.js";
 
 /** Node-side sync controls — outbox status, flush, metadata enqueue/pull, capabilities. */
 export const syncRouter = router({

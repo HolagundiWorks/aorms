@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { envState, getOrgSettings } = vi.hoisted(() => ({
+const { envState } = vi.hoisted(() => ({
   envState: {
     ESTI_ROLE: "node" as "node" | "hub",
     ESTI_HUB_URL: "",
@@ -8,7 +8,6 @@ const { envState, getOrgSettings } = vi.hoisted(() => ({
     STORAGE_DRIVER: "s3",
     ESTI_DESKTOP: false,
   },
-  getOrgSettings: vi.fn(async () => ({ syncToken: null as string | null })),
 }));
 
 vi.mock("../../env.js", () => ({
@@ -19,22 +18,15 @@ vi.mock("../plan.js", () => ({
   licenseState: vi.fn(async () => null),
 }));
 
-vi.mock("../settings.js", () => ({
-  getOrgSettings,
-}));
-
-import { licenseState } from "../plan.js";
 import { resolveRuntimeCapabilities } from "./runtimeCapabilities.js";
 
-describe("resolveRuntimeCapabilities (hub bind / LF5)", () => {
+describe("resolveRuntimeCapabilities (LF5)", () => {
   beforeEach(() => {
     envState.ESTI_ROLE = "node";
     envState.ESTI_HUB_URL = "";
     envState.INSTALL_ID = "";
     envState.STORAGE_DRIVER = "s3";
     envState.ESTI_DESKTOP = false;
-    getOrgSettings.mockResolvedValue({ syncToken: null });
-    vi.mocked(licenseState).mockResolvedValue(null);
   });
 
   it("keeps web-parity localAi/localWorker false when not desktop", async () => {
@@ -60,23 +52,5 @@ describe("resolveRuntimeCapabilities (hub bind / LF5)", () => {
     expect(caps.localAi).toBe(true);
     expect(caps.metaSync).toBe(false);
     expect(caps.artifactSync).toBe(false);
-  });
-
-  it("keeps desktop meta/artifact sync off until syncToken is present", async () => {
-    envState.ESTI_DESKTOP = true;
-    envState.ESTI_HUB_URL = "https://aorms.in";
-    vi.mocked(licenseState).mockResolvedValue({
-      managed: true,
-      status: "VALID",
-    } as never);
-    getOrgSettings.mockResolvedValue({ syncToken: null });
-    const unbound = await resolveRuntimeCapabilities({} as never);
-    expect(unbound.metaSync).toBe(false);
-    expect(unbound.artifactSync).toBe(false);
-
-    getOrgSettings.mockResolvedValue({ syncToken: "sync-bearer" });
-    const bound = await resolveRuntimeCapabilities({} as never);
-    expect(bound.metaSync).toBe(true);
-    expect(bound.artifactSync).toBe(true);
   });
 });

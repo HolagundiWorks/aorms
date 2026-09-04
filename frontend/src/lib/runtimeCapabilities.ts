@@ -17,9 +17,6 @@ import { trpc } from "./trpc.js";
  *
  * AI Local vs Hosted badges key off the **client** host (`buildTimeHost`), not
  * the hub process — a browser SPA against `ESTI_ROLE=hub` still shows Hosted AI.
- *
- * Desktop-only chrome (licence bind · sync queue · native bridge) must gate on
- * {@link isDesktopClient} — staff SPA on web is a reference archive (LOCAL-FIRST).
  */
 
 export type AiComputeLocation = "local" | "hosted";
@@ -48,7 +45,7 @@ export function defaultCapabilities(): RuntimeCapabilities {
 
 /**
  * Where AI compute runs for this SPA host (LF5 badge).
- * Desktop + server `localAi` → Local; otherwise Hosted (hub).
+ * Desktop + server `localAi` → Local; otherwise Hosted (hub / BYO).
  */
 export function resolveAiCompute(
   clientHost: RuntimeHost,

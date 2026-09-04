@@ -87,10 +87,8 @@ Footer home on PMC opens `/pmc`.
 | **Library · Knowledge** | Knowledge Bank portal |
 | **Admin** | Archived projects · Connection manager (`/ops-db`) · System |
 
-### Taskbar footer (chrome)
-LEFT wellness · calculator · CENTER module nav + Admin · RIGHT sync (desktop) · sign out.
-Top bar: search · health/dues · greeting → `/account` · AlertsBell.
-Studio Intelligence `/` · Tasks `/tasks` · Help `/help` are stage destinations (search/help chords).
+### Taskbar footer (centre launchers)
+Studio Intelligence (`/`) · Tasks (`/tasks`) · **Search** (`/search`, Ctrl/Cmd+K) · Ask ESTI · Wellness · Pomodoro. Tray: clock · sync · **Help** (`/help`, Ctrl+/) · alerts · ID card · sign out.
 
 ### Not in taskbar (by design)
 | Destination | How to reach |
@@ -162,4 +160,34 @@ Home `/pmc` · project Site bands · Delivery stakeholders menu.
 
 ---
 
-**Related:** [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) · [COMPOSITION-PRINCIPLES.md](COMPOSITION-PRINCIPLES.md) · [UI-SITE-MAP.md](UI-SITE-MAP.md).
+## Header / footer utilities
+
+| Utility | Status | Today |
+|---|---|---|
+| Global Search | ✅ | Footer Search + Ctrl/Cmd+K → `/search` |
+| Keyboard Help | ✅ | Tray Help + Ctrl+/ → `/help` (shared `keymap`) |
+| Skip to main | ✅ | `.esti-skip-link` → `#esti-main` |
+| Notifications | ✅ | `AlertsBell` → `/alerts` |
+| User Profile | ✅ | Footer ID card → `/account#profile` |
+| Calculator | ✅ | Footer · Alt+C |
+| AI compute badge | ✅ | Local vs Hosted on Ask ESTI + AI Studio (LF5) |
+
+---
+
+## Removed (consultancy-only)
+**Construction** (contractor ERP) — routes redirect to `/projects`. Top-level
+**Estimation** nav removed; `/estimation*` → `/projects`.
+
+**Moodboard** lives on the project workspace tab (`/projects/:id?tab=moodboard`) —
+Canva-like canvas (images, pen, sticky notes) with board/item discussion. Not a
+top-level sidebar entry.
+
+## Restored / live under Project workspace
+**Programme**, **Packages / tenders**, **RA certification**, **BBS**, **Steel
+reconciliation**, and **Moodboard** are project tabs (AProc / AStudio), not
+standalone nav pillars.
+
+## Closing philosophy
+AORMS is an **operating system for design studios**: work and learning coexist,
+knowledge becomes infrastructure (LXOS), growth becomes measurable. Navigation chrome
+stays **ribbon · rail · stage · ActionDock · footer** — improve within that model.

@@ -1,14 +1,14 @@
 import { Stack, Typography } from "@mui/material";
 import { StatusDot } from "./StatusTag.js";
 import {
+  buildTimeHost,
   useRuntimeCapabilities,
   type AiComputeLocation,
 } from "../lib/runtimeCapabilities.js";
 
 /**
  * Local vs Hosted AI badge (LF5 / DESKTOP-WEB-PARITY-UX).
- * Local vs Hosted AI label for desktop Ask ESTI / AI Studio. Web staff shells
- * do not mount ESTI chrome.
+ * Same Ask ESTI / AI Studio panel on both hosts — only the compute label changes.
  */
 export function CapabilityBadge({
   size = "sm",
@@ -38,10 +38,7 @@ export function CapabilityBadge({
   );
 }
 
-/**
- * @deprecated Web tray no longer shows a host tip (desktop-only sync chrome
- * is gated via {@link isDesktopClient}). Kept for any stray imports.
- */
+/** Compact tray hint — web hosts only (desktop already has SyncQueueChip). */
 export function RuntimeHostTrayHint() {
   const host = buildTimeHost();
   if (host === "desktop") return null;
@@ -50,7 +47,7 @@ export function RuntimeHostTrayHint() {
       variant="caption"
       color="text.secondary"
       sx={{ px: 0.5, display: { xs: "none", md: "inline" } }}
-      title="Web parity — AI and heavy jobs run on the hub"
+      title="Web parity — AI and heavy jobs run on the hub or BYO"
     >
       Web
     </Typography>

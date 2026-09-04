@@ -46,7 +46,7 @@ export const SHELL_KEYMAP: readonly KeyBinding[] = [
     id: "askEsti",
     label: "Ask ESTI",
     chord: "Alt+A",
-    description: "Open or close Ask ESTI in the right slot",
+    description: "Open or close the Ask ESTI command bar",
     match: (e) => e.altKey && (e.key === "a" || e.key === "A"),
   },
   {

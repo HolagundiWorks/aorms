@@ -293,7 +293,7 @@ export function AiStudioPage() {
       {caps.aiDegraded && (
         <Alert severity="info">
           <AlertTitle>Hosted AI</AlertTitle>
-          Drafts run on the hub. Desktop uses local Ollama — same panel.
+          Drafts run on the hub or your BYO key. Desktop uses local Ollama — same panel.
         </Alert>
       )}
       {!settingsQ.data?.enabled ? (
@@ -302,7 +302,7 @@ export function AiStudioPage() {
           Enable under Company settings.
           {caps.aiCompute === "local"
             ? " Uses local Ollama — no API keys."
-            : " Uses hub AI."}
+            : " Uses hub AI or a BYO key."}
         </Alert>
       ) : null}
     </Stack>
