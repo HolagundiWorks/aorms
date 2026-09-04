@@ -1,14 +1,12 @@
 import { ARCHITECTURE_LANDING_SEO } from "../../lib/architecture-landing-seo.js";
-import { LANDING_SEO } from "../../lib/landing-seo.js";
 import { formatVisitCount } from "../../lib/landing-visit.js";
 import { HcwAttribution } from "../brand/HcwAttribution.js";
 
-// Soft launch: landing + blog (+ downloads coming soon). Login deactivated.
+// Soft launch: landing (+ downloads coming soon). Login lives on the landing page.
 const PLATFORM_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/blog", label: "Blog" },
   { href: "/downloads", label: "Downloads" },
-  { href: "/login", label: "Sign in" },
+  { href: "/#sign-in", label: "Sign in" },
   { href: "mailto:hi@aorms.in", label: "hi@aorms.in" },
 ] as const;
 
@@ -23,8 +21,7 @@ export function MarketingFooter({
   variant?: "platform" | "architecture";
 }) {
   const links = variant === "architecture" ? ARCHITECTURE_LINKS : PLATFORM_LINKS;
-  const footerBlurb =
-    variant === "architecture" ? ARCHITECTURE_LANDING_SEO.footerBlurb : LANDING_SEO.footerBlurb;
+  const footerBlurb = ARCHITECTURE_LANDING_SEO.footerBlurb;
 
   return (
     <footer className="lp2-footer" aria-label="AORMS footer">

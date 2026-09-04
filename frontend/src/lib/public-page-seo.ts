@@ -1,5 +1,5 @@
 /** SEO helpers for unauthenticated public pages (auth, 404 slugs). */
-import { AORMS_PLATFORM } from "./product-nomenclature.js";
+import { AORMS_OFFICE_HUB } from "./product-nomenclature.js";
 
 function setMeta(selector: string, attr: "content" | "href", value: string) {
   document.querySelector(selector)?.setAttribute(attr, value);
@@ -39,7 +39,7 @@ export function applyPublicPageSeo(opts: {
 export function applyPublicNotFoundSeo(label: string): void {
   applyPublicPageSeo({
     title: `${label} not found — AORMS`,
-    description: `This ${label.toLowerCase()} does not exist on aorms.in. Browse the blog or sign in to ${AORMS_PLATFORM.name} office hub.`,
+    description: `This ${label.toLowerCase()} does not exist on aorms.in. Sign in to ${AORMS_OFFICE_HUB.title}.`,
     path: window.location.pathname,
     noindex: true,
   });
@@ -47,9 +47,9 @@ export function applyPublicNotFoundSeo(label: string): void {
 
 export const AUTH_PAGE_SEO = {
   login: {
-    title: `Sign in — ${AORMS_PLATFORM.name}`,
+    title: `Sign in — ${AORMS_OFFICE_HUB.title}`,
     description:
-      `Sign in to your AORMS office hub workspace. Google or email login available. Access projects, clients, proposals, invoicing, and team coordination.`,
+      `Sign in to your ${AORMS_OFFICE_HUB.title} workspace. Google or email login available. Access projects, clients, proposals, invoicing, and team coordination.`,
     path: "/login",
   },
   signup: {
@@ -60,18 +60,18 @@ export const AUTH_PAGE_SEO = {
   },
   forgotPassword: {
     title: "Reset password — AORMS",
-    description: `Request a password reset link for your AORMS office hub workspace account.`,
+    description: `Request a password reset link for your ${AORMS_OFFICE_HUB.title} workspace account.`,
     path: "/forgot-password",
   },
   resetPassword: {
     title: "Choose a new password — AORMS",
-    description: `Set a new password for your AORMS office hub workspace from your reset email link.`,
+    description: `Set a new password for your ${AORMS_OFFICE_HUB.title} workspace from your reset email link.`,
     path: "/reset-password",
   },
   externalAccess: {
     title: "External portal sign-in — AORMS",
     description:
-      `Sign in to your client, consultant, contractor, or site portal. AORMS office staff sign in at /login.`,
+      `Sign in to your client, consultant, contractor, or site portal. Office staff use ${AORMS_OFFICE_HUB.title} at /login.`,
     path: "/login?tab=portals",
   },
 } as const;

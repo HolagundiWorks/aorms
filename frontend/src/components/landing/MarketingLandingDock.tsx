@@ -234,9 +234,6 @@ export function MarketingLandingDock({
                 <CalculateOutlined fontSize="small" />
               </IconButton>
             </Tooltip>
-            <Button component={RouterLink} to="/blog" variant="outlined" size="small" sx={btnSx}>
-              Blog
-            </Button>
             <Button component={RouterLink} to="/downloads" variant="outlined" size="small" sx={btnSx}>
               Downloads
             </Button>

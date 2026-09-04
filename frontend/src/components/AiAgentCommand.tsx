@@ -5,15 +5,13 @@ import {
   toggleAskEstiSlot,
 } from "../lib/right-slot.js";
 
-/** Re-export for taskbar footer + any legacy imports. */
-export { ASK_ESTI_EVENT };
-
 /**
  * Ask ESTI shell glue — opens the LF6 right slot Ask tab.
  * Panel UI lives in {@link AskEstiPanel} inside {@link RightSlot}.
  * Alt+A (shared keymap) / `esti:ask` toggle the same slot (no floating second chrome).
+ * Re-exported for the taskbar footer + any legacy imports.
  */
-export { ASK_ESTI_EVENT } from "../lib/right-slot.js";
+export { ASK_ESTI_EVENT };
 
 export function AiAgentCommand() {
   useEffect(() => {

@@ -158,8 +158,6 @@ const Contractors = lazyRoute(() => import("./routes/Contractors.js"), "Contract
 const Lxos = lazyRoute(() => import("./routes/Lxos.js"), "Lxos");
 const SystemAdmin = lazyRoute(() => import("./routes/SystemAdmin.js"), "SystemAdmin");
 const OpsDbManager = lazyRoute(() => import("./routes/OpsDbManager.js"), "OpsDbManager");
-const Blog = lazyRoute(() => import("./routes/Blog.js"), "Blog");
-const BlogPost = lazyRoute(() => import("./routes/BlogPost.js"), "BlogPost");
 const Downloads = lazyRoute(() => import("./routes/Downloads.js"), "Downloads");
 
 
@@ -266,17 +264,10 @@ function AppWorkspace() {
   if (!ADMIN_CONSOLE_URL && (isAdminHost() || pathname.startsWith("/platform-admin")))
     return <PlatformAdmin />;
 
-  // Blog + /downloads are live public surfaces. Other former marketing
-  // sub-pages — wiki, SEO keyword landings, design-system, investors, legal,
-  // about/contact, and per-app marketing slugs — still redirect home.
+  // /downloads is a live public surface. Blog is retired — falls through to
+  // the removed-marketing redirect below, same as wiki, SEO keyword landings,
+  // design-system, investors, legal, about/contact, and per-app marketing slugs.
   // Legacy `/download` (Manager portal) redirects to `/downloads` (local-first).
-  if (publicMarketing && (pathname === "/blog" || pathname.startsWith("/blog/")))
-    return (
-      <Routes>
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:slug" element={<BlogPost />} />
-      </Routes>
-    );
 
   if (publicMarketing && pathname === "/download")
     return <Navigate to="/downloads" replace />;
@@ -300,6 +291,7 @@ function AppWorkspace() {
     const slug = pathname.replace(/^\/+/, "").replace(/\/+$/, "");
     const isRemovedMarketing =
       pathname === WIKI_PATH || pathname.startsWith(`${WIKI_PATH}/`) ||
+      pathname === "/blog" || pathname.startsWith("/blog/") ||
       pathname === "/design-system" ||
       pathname === "/development" ||
       pathname === "/investors" ||

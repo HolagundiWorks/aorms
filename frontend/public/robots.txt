@@ -17,15 +17,12 @@ User-agent: Google-Extended
 User-agent: Applebot-Extended
 User-agent: CCBot
 
-# Allow public landing page, blog, and assets
+# Allow public landing page and assets
 Allow: /
-Allow: /blog
-Allow: /blog/
 Allow: /sitemap.xml
 
-# Live soft launch: / · /blog · /downloads (coming soon).
-# Sign-in deactivated on apex. Keyword landings / wiki redirect to /.
-# Suite: AStudio · AConsulting · AQC Estimation/BBS/PM · ADraft · ShilpiDB.
+# Live: / (sign-in now on the landing page). /downloads coming soon.
+# Keyword landings / wiki redirect to /.
 
 # Block authenticated app routes — these require login and must not be indexed
 Disallow: /dashboard
