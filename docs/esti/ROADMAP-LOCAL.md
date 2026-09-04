@@ -115,7 +115,9 @@ re-captured (Playwright).
 
 ### Testing 🔲
 - E2E test coverage (Playwright)
-- Unit test coverage (backend, frontend)
+- Unit test coverage (backend, frontend) — small addition: `marketing-gate.test.ts`
+  now covers the S8 cutover switch (`isMarketingOnly`, `isMarketingAuthPath`);
+  the portal-honesty mechanism (`visibleFirmPortalSections`) already had coverage
 - Visual regression baseline (after Carbon migration)
 
 ---
