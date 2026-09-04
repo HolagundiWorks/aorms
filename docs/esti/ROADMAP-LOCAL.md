@@ -35,6 +35,14 @@ podman compose up -d --build
 # MinIO    → http://localhost:9001 (console)
 ```
 
+**`pnpm install --frozen-lockfile` (2026-09-04):** was failing on `main` HEAD
+(`frontend/package.json` had drifted from `pnpm-lock.yaml` — missing
+`@carbon/react`, a stale `react-router-dom` specifier not matching the root
+`pnpm.overrides` security pin). This broke CI's first step on every job that
+installs — fixed on `cloud-agent`, zero lockfile changes needed. See
+[ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) § CI / build health for the full
+picture (what's still red once install succeeds).
+
 ---
 
 ## Local test/verify loop (2026-09)
@@ -143,7 +151,9 @@ re-captured (Playwright).
 
 ### Testing 🔲
 - E2E test coverage (Playwright)
-- Unit test coverage (backend, frontend)
+- Unit test coverage (backend, frontend) — small addition: `marketing-gate.test.ts`
+  now covers the S8 cutover switch (`isMarketingOnly`, `isMarketingAuthPath`);
+  the portal-honesty mechanism (`visibleFirmPortalSections`) already had coverage
 - Visual regression baseline (after Carbon migration)
 
 ---
