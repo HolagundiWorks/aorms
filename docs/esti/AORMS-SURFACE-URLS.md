@@ -16,7 +16,7 @@ License control plane stays on **admin.aorms.in**.
 
 | Surface | Host | Audience | Role |
 | --- | --- | --- | --- |
-| **platform** | [aorms.in](https://aorms.in) (+ `www.aorms.in`) | Public + staff | Landing, blog, and the **office hub SPA** (`/login` sign-in) |
+| **platform** | [aorms.in](https://aorms.in) (+ `www.aorms.in`) | Public + staff | Landing page (sign-in embedded at `/#sign-in`) and the **office hub SPA** |
 | **admin** | [admin.aorms.in](https://admin.aorms.in) | HCW operators | Licensing console (platform administration) |
 
 Any hostname that doesn't match a known surface (or an `admin.*` prefix)
@@ -29,14 +29,12 @@ resolves to `unknown`, which `isPlatformHost()` treats as the platform surface
 
 | Path | Notes |
 | --- | --- |
-| `/` | Office hub landing — marketing + login CTA |
-| `/blog`, `/blog/*` | Blog |
-| `/downloads` | **Redirects to `/login`** — web-only, no installers |
-| `/access` | External portals — client, consultant, contractor, site sign-in |
+| `/` | Office hub landing — marketing + `LandingAuth` sign-in panel at `#sign-in` |
+| `/downloads` | Web-only, no installers |
+| `/login`, `/access`, `/signup`, `/forgot-password`, `/reset-password` | **Redirect to `/#sign-in`** on the public marketing site — sign-in/create-workspace/password-reset live on the landing page itself, no dedicated auth pages |
 | `/account` | Personal account — identity + licence hub |
 | `/company-account` | Company account (firm owners) |
-| `/libraries/knowledge-bank-portal` | Knowledge Bank portal (staff L4+, EOMS intake) |
-| `/login` | **AORMS office hub sign-in** — the one staff entry point |
+| `/libraries/knowledge-bank-portal` | Knowledge Bank portal (staff L4+) |
 | `/wiki`, `/wiki/*` | **Redirects home** — no public wiki surface |
 | `/platform-admin` | Licensing console; prefer `admin.aorms.in` |
 

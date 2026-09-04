@@ -22,10 +22,10 @@ A single unified web application (SPA) for managing:
 **Built-in AI:**
 - **ESTI** — Office automation agent; recommendations, insights, task automation
 
-> **EOMS deprecated (2026-09):** the external knowledge-bank API is no
-> longer part of the offering — AORMS is a pure architectural consultancy
-> product now. See CLAUDE.md § Removed for backend code that still exists
-> pending removal.
+> **EOMS removed (2026-09):** the external knowledge-bank API is no longer
+> part of the offering — AORMS is a pure architectural consultancy product
+> now. The backend client/router and frontend panel were physically removed;
+> see CLAUDE.md § Removed.
 
 ---
 
@@ -237,6 +237,14 @@ docker compose up
 - Suite of separate apps
 - Per-app login
 - Desktop + web parity
+
+❌ **Product scope (2026-09):**
+- EOMS — external knowledge-bank API (backend client/router + frontend
+  panel physically removed)
+- Engineering consultancy — the `consultancy` tRPC namespace and its DB
+  schema (engagements, deliverables, RACI, reliance engine, TQ register,
+  contract review, closeout) physically removed; AORMS is pure
+  architectural consultancy now, not multi-discipline AEC
 
 ---
 

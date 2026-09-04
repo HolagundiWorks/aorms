@@ -1,12 +1,11 @@
 # AORMS — Accelerated Operational Resources Management System
 
-**AORMS** is a **cloud-based, web-only office management system** for **AEC
-firms & consultancies** (architecture and engineering practices — clients,
-projects, proposals, invoices, team, finances, knowledge bank). It ships as a
-**single unified web app**, the **AORMS Office Hub**, accessed via SSO —
-no desktop apps, no installers, no per-app logins. **ESTI** is the built-in
-AI agent for office automation and insights; **EOMS** is the external
-knowledge-bank API the hub queries. Developed by **Human Centric Works (HCW)**.
+**AORMS** is a **cloud-based, web-only office management system** for
+**architecture practices & consultancies** — clients, projects, proposals,
+invoices, team, finances, knowledge bank. It ships as a **single unified web
+app**, the **AORMS Office Hub**, accessed via SSO — no desktop apps, no
+installers, no per-app logins. **ESTI** is the built-in AI agent for office
+automation and insights. Developed by **Human Centric Works (HCW)**.
 *(The repo, `@esti/*` packages and `esti_*` tables keep the `esti` codename.)*
 
 Nomenclature: [CLAUDE.md](CLAUDE.md) § Product naming.

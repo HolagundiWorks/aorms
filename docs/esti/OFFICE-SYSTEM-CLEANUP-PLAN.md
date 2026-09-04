@@ -16,8 +16,11 @@ AORMS is **now a pure office management system** (web-only SPA). Removed:
 
 **What stays:**
 - ESTI AI agent (built into office hub)
-- EOMS knowledge bank API
 - Office management features (clients, projects, proposals, invoices, team, finances, KB)
+
+**Later removed (2026-09, after this plan):** EOMS (external knowledge-bank
+API) and the engineering-consultancy angle/`consultancy` module — AORMS is
+pure architectural consultancy now. See CLAUDE.md § Removed.
 
 ---
 

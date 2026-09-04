@@ -1,7 +1,8 @@
 # AORMS — Market fit brief
 
 **Status:** Canonical GTM + product priority · **Updated:** 2026-09-04
-(web-only office hub pivot)  
+(web-only office hub pivot; **pure architectural consultancy pivot**, EOMS
+retired)  
 **Owner:** Human Centric Works (HCW)
 
 Companion to [ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) (office hub soft launch · next **S8**) and
@@ -9,7 +10,12 @@ Companion to [ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) (office hub soft launch · nex
 
 **Delivery status:** Market-fit Waves **W1–W3 shipped**; **W4 integrations deferred**;
 **web-only pivot** superseded the desktop/local-first GTM (M8, below) — the product
-is now a single cloud office hub, no installers.
+is now a single cloud office hub, no installers. **2026-09 pivot:** AORMS narrowed
+to **pure architectural consultancy** — the engineering-consultancy angle (dual
+architecture+engineering positioning below, the `consultancy` module) and **EOMS**
+(external knowledge-bank API) are retired; §§1–4 below are updated to reflect this,
+§§5–6 (backlog/waves) are kept as historical record with pivot notes inline where
+an item references what's now removed.
 
 ---
 
@@ -17,13 +23,13 @@ is now a single cloud office hub, no installers.
 
 | | |
 |---|---|
-| **Buyer** | Indian AEC **advisory** firms — architecture studios and engineering consultancies (structural / MEP / civil), roughly **5–50 people** |
-| **Not for** | Contractors, PMC portfolios, construction execution ERP, warehouses / RA bills / **contractor** tenders |
-| **Category** | A/E practice ops / light PSA — not CAD, not construction PM, not generic ERP |
+| **Buyer** | Indian **architecture** consultancy firms, roughly **5–50 people** |
+| **Not for** | Engineering consultancies, contractors, PMC portfolios, construction execution ERP, warehouses / RA bills / **contractor** tenders |
+| **Category** | Architecture practice ops / light PSA — not CAD, not construction PM, not generic ERP |
 | **JTBD** | Replace WhatsApp + email + Excel + generic PM + ad-hoc GST with one **office operating record**: fees → delivery → revisions → site supervision → invoices → portals |
 
-**Wedge line:** *Operating system for AEC consultancies in India* — fee recovery,
-revision control, site supervision, and GST on one spine.
+**Wedge line:** *Operating system for architecture consultancies in India* — fee
+recovery, revision control, site supervision, and GST on one spine.
 
 ---
 
@@ -32,9 +38,8 @@ revision control, site supervision, and GST on one spine.
 | Market gap | AORMS answer |
 |---|---|
 | Generic PM ignores COA fees, GST/TDS, FY April | India-first money (paise), proposals, invoices, reconcile |
-| Global A/E PSA ignores Indian site supervision | Drawings, transmittals, snags, instructions, progress (architect-side) |
-| “AI for architects” = chat wrappers | Dual-tier: **ESTI** (validated firm data) + **EOMS** (codes / knowledge bank) |
-| Architecture tools ignore engineering (and vice versa) | Same spine: one office hub serves both architecture and engineering consultancies |
+| Global architecture PSA ignores Indian site supervision | Drawings, transmittals, snags, instructions, progress |
+| “AI for architects” = chat wrappers | **ESTI** — built-in AI agent answering only from the firm's own validated repositories |
 | Scope creep into construction ERP | Explicit teardown — **advise, don’t deliver** |
 | Fragmented external access | Client / consultant / contractor / site portals |
 | Install / per-app login friction | Web-only, one login, no installers · one Standard licence · storage + AI usage |
@@ -45,10 +50,10 @@ revision control, site supervision, and GST on one spine.
 
 | Type | Examples | They win | We win |
 |---|---|---|---|
-| Indian AEC ERP | ArchiO | Breadth, SMB familiarity | Advisory-only focus, Studio Intelligence, dual AI |
+| Indian architecture ERP | ArchiO | Breadth, SMB familiarity | Advisory-only focus, Studio Intelligence, ESTI |
 | Finance-only | UpLabs | Clean money UX | Full delivery + portals + R&O + revisions |
-| AI toolkits | Studio Matrx ArchitectAI | Bylaw AI, free tools, brand | System of record + firm memory + eng app |
-| Global PSA | Monograph, Ajera, Projectworks | Time → profitability polish | India GST/COA, site supervision, EOMS/ESTI |
+| AI toolkits | Studio Matrx ArchitectAI | Bylaw AI, free tools, brand | System of record + firm memory |
+| Global PSA | Monograph, Ajera, Projectworks | Time → profitability polish | India GST/COA, site supervision, ESTI |
 | Inertia | Excel / WhatsApp / Notion | Zero switching cost | Traceability, invoices, portals, audit |
 
 Biggest competitor: **inertia**, not any single SaaS.
@@ -57,11 +62,13 @@ Biggest competitor: **inertia**, not any single SaaS.
 
 ## 4. Viability
 
-**Viable as** a focused vertical SaaS for Indian AEC consultancies.  
-**Not viable as** a horizontal AI/PM platform.
+**Viable as** a focused vertical SaaS for Indian architecture consultancies.  
+**Not viable as** a horizontal AI/PM platform, and not as a multi-discipline
+AEC platform — engineering consultancies are explicitly out of scope (2026-09
+pivot).
 
-Path: land architecture firms → expand to engineering consultancies (same
-office hub) → upsell cloud storage + multi-company licensing. (AI is
+Path: land architecture firms → deepen within architecture (more modules,
+larger firms) → upsell cloud storage + multi-company licensing. (AI is
 unmetered and built into the hub — a capability, not a usage upsell.)
 
 Risks to manage: GTM consistency, time→WIP UX depth vs global PSA, reference
@@ -80,7 +87,7 @@ live) and [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) (engineering in progress).
 3. Onboarding: first invoice in ~30 minutes (demo seed + guided empty states) ✅  
 
 ### M2 — Time & capacity
-1. Staff time → WIP → fee stages (Consultancy already stronger; Studio light)  
+1. Staff time → WIP → fee stages  
 2. Capacity / overload on Studio Intelligence ✅  
 
 ### M3 — Client-facing proof
@@ -90,7 +97,6 @@ live) and [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) (engineering in progress).
 ### M4 — India differentiation
 1. COA fee + GST as default excellence  
 2. Pre-con R&O + revision intelligence as the “why not Excel” story  
-3. Dense EOMS packs later — do not lead with bylaw-AI until catalog depth exists
 
 ### M5 — GTM packaging
 1. Consistent public story (no BBS / PMC / tenders / “launch gated” leftovers) ✅  
@@ -98,9 +104,11 @@ live) and [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) (engineering in progress).
 3. ICP one-pager + Holagundi SOP as proof ✅  
 4. Ask ESTI / wiki-knowledge scrub for removed modules ✅  
 
-### M6 — Consultancy go-to-market
-1. Reference eng firms + 15-minute engagement→invoice demo ✅  
-2. Workspace chrome that does not feel like “Studio with extra URLs” ✅  
+### M6 — Consultancy go-to-market — ❌ retired (2026-09 pivot)
+Historical: engineering-firm GTM (reference eng firms, engagement→invoice demo,
+workspace chrome parity) was executed under the dual architecture+engineering
+positioning. Retired along with the `consultancy` module — AORMS is pure
+architectural consultancy now; no engineering-firm GTM track.
 
 ### M7 — Integrations (phase 2) — deferred
 Tally / Zoho Books deepen · Drive for drawings · WhatsApp capture — not day-one.

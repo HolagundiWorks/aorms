@@ -2,10 +2,11 @@
 
 **Status:** Canonical index · **Owner:** Human Centric Works (HCW) · **Reviewed:** 2026-09-04
 
-> **Nomenclature:** **AORMS** = the platform. **AORMS Office Hub** = the single
-> unified web app (no allied apps, no desktop apps, no per-app logins). **EOMS**
-> = external knowledge bank API; **ESTI** = built-in AI agent. Full rules:
-> [`../../CLAUDE.md`](../../CLAUDE.md) § Product naming.
+> **Nomenclature:** **AORMS** = the platform, pure architectural consultancy
+> (not engineering, not multi-discipline AEC). **AORMS Office Hub** = the
+> single unified web app (no allied apps, no desktop apps, no per-app logins).
+> **ESTI** = built-in AI agent. **EOMS** (external knowledge bank API) is
+> retired (2026-09). Full rules: [`../../CLAUDE.md`](../../CLAUDE.md) § Product naming.
 
 This directory is the **single source of truth**. Superseded specs are moved to
 [`archived/`](archived/) with a historical-notice banner — do not follow naming

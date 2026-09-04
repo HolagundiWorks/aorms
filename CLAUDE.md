@@ -15,18 +15,22 @@
 - ❌ AQC Estimation / BBS (technical installers) — removed, separate repos
 - ❌ ADraft / ShilpiDB (drafting / geometry) — removed, allied apps
 - ❌ Desktop installers, Windows setup, Tauri shell — web-only now
-- ❌ **EOMS** (external knowledge bank API) — deprecated 2026-09; do not
-  reference in marketing/UI copy. A backend EOMS client/router
-  (`backend/src/lib/eoms/`, `backend/src/modules/eoms/`) and frontend
-  panels (`EomsCompliancePanel.tsx`, `KnowledgeBankPortal.tsx`) still exist
-  in code — not yet physically removed, scope pending.
+- ❌ **EOMS** (external knowledge bank API) — retired 2026-09, physically
+  removed: `backend/src/lib/eoms/`, `backend/src/modules/eoms/`,
+  `packages/contracts/src/eoms.ts`, `EomsCompliancePanel.tsx`, the
+  `EOMS_API_URL` env var. `KnowledgeBankPortal.tsx` stays (Knowledge Bank
+  portal is a kept feature) — only the EOMS panel/branding was removed from
+  it; its AI rephrase action (`knowledgeBankPortal.processWithEoms`) is
+  unrelated internal processing, kept, UI-relabelled off the EOMS name.
 - ❌ **Engineering consultancy** angle — AORMS is now **pure architectural
   consultancy** only, not multi-discipline AEC. The `consultancy` backend
-  module (`backend/src/modules/consultancy/`, docs/esti/AORMS-CONSULTANCY-
-  OPERATING-MODEL-AND-ARCHITECTURE.md) is explicitly engineering-consultancy
-  domain logic — still exists in code, not yet physically removed, scope
-  pending. Don't build new features on it or reference it as current
-  product surface.
+  module (tRPC namespace, `backend/src/db/schema/consultancy.ts`,
+  `packages/contracts/src/consultancy.ts`) is physically removed (2026-09).
+  Shared risk/opportunity/phase-gate enums it held that the kept
+  `projectPrecon` (Studio pre-construction R&O) feature depends on were
+  extracted into `packages/contracts/src/project-precon.ts` first. Historical
+  design doc: docs/esti/AORMS-CONSULTANCY-OPERATING-MODEL-AND-ARCHITECTURE.md
+  (superseded, kept for history only).
 
 **Architecture:**
 - Web-first SPA only (no desktop apps)
@@ -89,9 +93,8 @@ VPS: [`docs/esti/VPS-INSTALL.md`](docs/esti/VPS-INSTALL.md) ·
 | **`esti` / `aorms`** | Hub monorepo codename — never use `esti` in marketing copy |
 
 **Removed (legacy, no longer referenced):**
-- ❌ `EOMS` constant — deprecated 2026-09, marked `@deprecated` in
-  `product-nomenclature.ts`, kept only for the still-unremoved backend
-  client/frontend panels. Do not import/reference in new work.
+- ❌ `EOMS` constant — removed 2026-09 from `product-nomenclature.ts` along
+  with the backend integration it named.
 - ❌ `AORMS_CONNECT` — desktop launcher removed
 - ❌ `AORMS_STUDIO` / `ASTUDIO` — allied app removed
 - ❌ `AORMS_CONSULTANCY` / `ACONSULTING` — allied app removed
@@ -458,7 +461,6 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
 - `system` — release metadata (owner-only)
 - `marketing` — landing visit counter
 - `specCatalog` — specification material catalogue (Knowledge Bank)
-- `consultancy` — ❌ **deprecated 2026-09** — AORMS-Consultancy engineering OS (engagements, deliverables, RACI, HLP, timesheets, WIP, contract review, lessons, NC/CAPA, MoM, opportunities, phase gates). AORMS is pure architectural consultancy now; this engineering-specific namespace is not current product surface. Not yet physically removed — see § Removed above.
 - `office` — includes enquiry register + go/no-go (`office.enquiries`)
 - `admin.usageReports` — HLP usage billing export + suspend-for-non-payment (P7.2 / P7.3)
 
