@@ -4,8 +4,7 @@
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
 **Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
 **AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)  
-**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 (WinUI #49 · env `bhoomi`) · LF5 🚧 (#51) · LF6 🔲 — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
-**Crew:** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) (Vishwakarma · Bhoomi · Gagan · Aakash)
+**Local-first waves:** LF0–LF3 ✅ · LF4–LF6 open — see [LOCAL-FIRST.md](LOCAL-FIRST.md) · crew [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)
 
 Open source for now; SaaS licensing deferred.
 
@@ -24,12 +23,24 @@ separate Estimate desktop app stay **retired**.
 
 | Surface | State |
 | --- | --- |
-| `/` suite landing | ✅ Live |
-| `/blog` (+ suite explainers) | ✅ Live |
-| `/downloads` | ✅ Live — installers **Coming soon** (incl. Connect stub) |
-| Apex `/login` · accounts | ⏸ Soft launch — **Coming soon** (`VITE_MARKETING_ONLY`) |
-| Signed Windows installers | 🔲 D6 |
-| Firm portal demos on apex | ⏸ After soft launch |
+| [UNIFIED-ARCHITECTURE-V4.md](UNIFIED-ARCHITECTURE-V4.md) | **System state** — modules live vs removed |
+| [NAVIGATION.md](NAVIGATION.md) | Canonical sidebar IA |
+| [LOCAL-FIRST.md](LOCAL-FIRST.md) | **Local-first + hub sync** — planes, APIs, LF waves |
+| [HUB-API.md](HUB-API.md) | Hub wire contract (`2026-08`) — activate→`syncToken`, sync REST/WS, node `sync.*` |
+| [DESKTOP-REPOS.md](DESKTOP-REPOS.md) | Desktop contracts gate · installer ownership |
+| [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) | Crew split — Vishwakarma · Bhoomi · Gagan · Aakash |
+| [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) | Desktop ↔ web UX consistency |
+| [MARKET-FIT.md](MARKET-FIT.md) | **GTM + market-fit backlog** (ICP, competitors, waves) |
+| [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) | Standard licence law (desktop + web) |
+| [AORMS-PLATFORM-NOMENCLATURE.md](AORMS-PLATFORM-NOMENCLATURE.md) | Naming (platform · apps · EOMS · ESTI) |
+| [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md) | Host / path map |
+| [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md) | **AProc** product law + delivery waves |
+| [P9V-CONSULTANCY-WALKTHROUGH.md](P9V-CONSULTANCY-WALKTHROUGH.md) | P9.V acceptance checklist (signed) |
+| [AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md](AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md) | Pre-con R&O law |
+| [AORMS-CONSULTANCY-SOP-CASE-STUDY.md](AORMS-CONSULTANCY-SOP-CASE-STUDY.md) | Consultancy SOP ↔ product |
+| [HCW-LICENSE-MANAGER.md](HCW-LICENSE-MANAGER.md) | In-tree licensing authority |
+| [DESIGN-DEBT-REGISTER.md](../hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md) | Living design debt |
+| [PRD.md](PRD.md) | Requirements |
 
 Gate: `VITE_MARKETING_ONLY` (default on for public builds) · `frontend/src/lib/marketing-gate.ts`.  
 Desktop firm login target: **AORMS Connect** (not apex).
@@ -64,13 +75,19 @@ Desktop firm login target: **AORMS Connect** (not apex).
 
 | Wave | Outcome | Status |
 | --- | --- | --- |
-| **D0–D5** | Bridge · siblings · WinUI shells · portal panels | ✅ |
-| **D5b** | AStudio / AConsulting HCW geography scaffold (ribbon · stage · dock · tray) | ✅ shells + Engagements/Portfolio domain slices |
-| **D6** | Signed installers · portal tenants | 🟡 tooling ✅ · blocked on SmartScreen-trusted cert + HTTPS |
+| **LF0** | Contracts: sync planes, meta schemas, capability presets | ✅ 2026-08 |
+| **LF1** | Hub meta event log + catch-up + WS; node meta outbox/cursor | ✅ 2026-08 |
+| **LF2** | Artifact content-hash; publish DTOs; portal-from-hub reads; desktop stub; product-law docs | ✅ 2026-08 |
+| **LF3** | Domain metadata enqueue/apply (tasks, estimate totals, phase progress) + panel `syncToken` | ✅ Gagan 2026-08 |
+| **LF4** | Signed Tauri installer + first-run licence / hub bind | 🔲 Bhoomi |
+| **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | 🔲 Aakash |
+| **LF6** | UX parity checklist + inspector/AI right-slot; Figma ↔ kit tokens | 🔲 Aakash |
 
----
+**Namespaces / seams:** `sync` (tRPC + REST) · `esti_meta_*` · `esti_sync_*` ·
+`packages/contracts` sync · `desktop/` · `trpc.sync.capabilities` ·
+`/platform/v1/activate` → `syncToken` ([HUB-API.md](HUB-API.md)).
 
-## Product map
+**Migrations:** `0226_local_first_sync` · `0227_hlp_org_sync_firm`.
 
 | App / surface | Role | Repo |
 | --- | --- | --- |
@@ -98,7 +115,6 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | **Market fit W1–W3** | GTM scrub · portal · fee recovery · onboarding · capacity · digests · consultancy chrome · demo seed · packaging |
 | **AProc W0–W5** | Chrome · Delivery · tenders · RA/steel cert · BBS + steel recon · CSV/XER · digest · ESTI (`0220`–`0224`) |
 | **Local-first LF0–LF3** | Sync planes · meta log/WS · artifact hash · portal hub reads · desktop stub · panel `syncToken` · domain meta (`0226`–`0227`) |
-| **Local-first LF5** | Capability badges · Hosted AI empty states · shared `keymap` + `/help` · web-parity capabilities fix |
 
 ### S8 — Reopen apex auth (when demos are honest)
 

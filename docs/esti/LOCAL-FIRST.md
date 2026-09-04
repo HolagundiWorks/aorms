@@ -1,9 +1,13 @@
 # AORMS local-first suite + cloud hub
 
-> **Canonical runtime law** · **Updated:** 2026-08-09 (desktop-only AI)  
-> Suite: [AORMS-SUITE.md](AORMS-SUITE.md) · Wire: [HUB-API.md](HUB-API.md) ·  
-> Bridge: [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · Repos: [DESKTOP-REPOS.md](DESKTOP-REPOS.md) ·  
-> Roadmap: [ROADMAP.md](ROADMAP.md)
+> **Canonical implementation doc** for the dual-runtime product.  
+> **Status (2026-08):** LF0–LF2 ✅ · **LF3** domain meta enqueue/apply ✅ (Gagan) ·
+> LF4 packaging/bind open (Bhoomi) · LF5–LF6 open (Aakash).  
+> Wire contract: [HUB-API.md](HUB-API.md) (`2026-08`) · contracts gate:
+> [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · crew: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md).  
+> **Product law:** [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) · **UX parity:**
+> [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) · **Identity:**
+> [AORMS-IDENTITY.md](AORMS-IDENTITY.md) §10.
 
 **AORMS is a product suite.** **AORMS Connect** is the desktop suite core
 (login · launcher · shared project catalog · DB connector). Practice managers
@@ -102,9 +106,9 @@ Runtime resolution: `trpc.sync.capabilities` ·
 | **LF1** | Hub `esti_meta_event` + catch-up REST + WS; node meta outbox/cursor; drain tick | ✅ |
 | **LF2** | Artifact content-hash; publish DTOs (tender/RA/siteReference/progressReport); portal-from-hub reads | ✅ |
 | **LF3** | Domain enqueue of metadata (tasks, estimate totals, phase progress) + apply hooks on pull | ✅ Gagan 2026-08 |
-| **LF4** | Signed desktop installer (**WinUI 3** Fluent 2 shell + WebView2 SPA; profile STUDIO\|CONSULTANCY); first-run licence bind | 🚧 Bhoomi — `desktop/AStudio.Shell` · `build-winui.ps1` · sign + physical bind ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); the legacy Tauri scaffold was **removed — WinUI 3 is the only shell** |
-| **LF5** | Web parity polish: capability badges, degraded AI UX, shared keymap / Help | ✅ Aakash — `CapabilityBadge` · `frontend/src/lib/keymap.ts` · `/help` · `resolveRuntimeCapabilities` web-parity fix |
-| **LF6** | UX parity checklist + inspector/AI right-slot; Figma token sync to kit | ✅ Aakash — [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) stub ✅ · right-slot ✅ (`RightSlot`) |
+| **LF4** | Signed desktop installer (Tauri + bundled/sidecar Postgres·worker·Ollama); first-run licence bind | 🔲 Bhoomi |
+| **LF5** | Web parity polish: capability badges, degraded AI UX, shared keymap / Help | 🔲 Aakash |
+| **LF6** | UX parity checklist + inspector/AI right-slot; Figma token sync to kit | 🔲 Aakash |
 
 **Migrations:** `0226_local_first_sync.sql` · `0227_hlp_org_sync_firm.sql` (panel sync firm UUID).
 
@@ -117,7 +121,6 @@ Runtime resolution: `trpc.sync.capabilities` ·
 | Meta append / catch-up / WS | `/api/sync/meta*` — same |
 | Node tRPC | `sync.status` · `flush` · `enqueueMeta` · `pullMeta` · `capabilities` · `hubConfigured` |
 | Panel activate → sync bearer | `/platform/v1/activate` · `license.activate` ([HUB-API.md](HUB-API.md)) |
-| Capability resolution | [`backend/src/lib/sync/runtimeCapabilities.ts`](../../backend/src/lib/sync/runtimeCapabilities.ts) |
 | Meta lib | [`backend/src/lib/sync/metadata.ts`](../../backend/src/lib/sync/metadata.ts) |
 | LF3 domain enqueue/apply | [`backend/src/lib/sync/domainMeta.ts`](../../backend/src/lib/sync/domainMeta.ts) |
 | Artifact outbox | [`backend/src/lib/sync/outbox.ts`](../../backend/src/lib/sync/outbox.ts) |
@@ -144,5 +147,9 @@ Runtime resolution: `trpc.sync.capabilities` ·
 
 ## Related
 
-- [AORMS-SUITE.md](AORMS-SUITE.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · [HUB-API.md](HUB-API.md)  
-- [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [ROADMAP.md](ROADMAP.md) · [MONGO-OPS.md](MONGO-OPS.md)  
+- [HUB-API.md](HUB-API.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)  
+- [ROADMAP.md](ROADMAP.md) § Local-first  
+- [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md)  
+- [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md)  
+- [AORMS-IDENTITY.md](AORMS-IDENTITY.md) §10  
+- [ARCHITECTURE.md](ARCHITECTURE.md)  

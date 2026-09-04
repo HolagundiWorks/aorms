@@ -46,14 +46,12 @@ Hub side:
 
 1. Bind/refresh `hlp_device` for `(licenseId, deviceId)`.
 2. Mint `syncToken`, store `sha256(syncToken)` on `hlp_device.sync_token_hash`.
-3. Firm sync scope = `hlp_organization.sync_firm_id` (UUID) — requires migration
-   **`0227_hlp_org_sync_firm.sql`** on the hub DB before bind.
+3. Firm sync scope = `hlp_organization.sync_firm_id` (UUID).
 
 Node side (`license.activate` → `activateViaPanel`):
 
 - Persist `licenseToken` **and** `syncToken` on `esti_org_settings`.
 - Without `syncToken`, meta/artifact flush cannot authenticate.
-- Node rejects an activate response that omits `syncToken` (hub API 2026-08).
 
 ### `POST /platform/v1/refresh`
 
@@ -64,7 +62,6 @@ Response: `{ licenseToken, entitlement, syncToken? }`
 - Does **not** rotate an existing sync bearer (node keeps its copy).
 - If the device has no `sync_token_hash` (pre-2026-08 activation), mints once and
   returns `syncToken` so the node can catch up without re-entering the key.
-- Node persists `syncToken` when present (`refreshNow`).
 
 ### Legacy hub path (still supported)
 
@@ -80,9 +77,6 @@ Hub sync routes resolve the bearer to a UUID firm id:
 
 Used by `/api/sync/ingest`, `/api/sync/meta`, `/api/sync/meta/catch-up`, WS.
 
-**Deploy:** panel path (2) needs `hlp_organization.sync_firm_id` from migration `0227`.
-Without it, activate may still mint a bearer but hub ingest/meta resolve fails.
-
 ## Sync REST / WS (hub only, `ESTI_ROLE=hub`)
 
 | Method | Path | Body / query |
@@ -97,32 +91,23 @@ Without it, activate may still mint a bearer but hub ingest/meta resolve fails.
 | Procedure | Behaviour |
 | --- | --- |
 | `status` | Artifact + meta outbox counts |
-| `capabilities` | Desktop free vs licensed matrix; hub role returns web-parity+. Desktop `metaSync`/`artifactSync` require licence VALID/GRACE **and** hub URL **and** persisted `syncToken`. Non-desktop keeps `WEB_PARITY` `localAi`/`localWorker`=false ([`runtimeCapabilities.ts`](../../backend/src/lib/sync/runtimeCapabilities.ts)). |
-| `flush` | Drains artifact + meta outboxes; returns `{ skipped }` when `not_node` / `hub_unconfigured` / `missing_sync_token` / `sync_disabled` |
+| `capabilities` | Desktop free vs licensed matrix; hub role returns web-parity+ |
+| `flush` | Drains artifact + meta outboxes; skips when sync capabilities off |
 | `enqueueMeta` | Queues one meta event (no-op if `metaSync` false) |
-| `pullMeta` | Catch-up → **LF3 domain apply** (task / estimateTotals / phaseProgress) → advance cursor; empty with `skippedReason` when preconditions fail; `error: hub_unreachable` on hub down |
-| `hubConfigured` | `{ hubUrl, licenseApiUrl, wsUrl, hasSyncToken, role, syncReady }` — `syncReady` = hub URL + syncToken + `ESTI_ROLE=node` |
-
-Drain helpers (`drainOutbox` / `drainMetaOutbox` / `pullMetaCatchUp`) also no-op without
-`ESTI_ROLE=node`, `ESTI_HUB_URL`, and `syncToken` — caps and flush skip reasons stay aligned.
+| `pullMeta` | Catch-up → **LF3 domain apply** (task / estimateTotals / phaseProgress) → advance cursor; empty on hub down |
+| `hubConfigured` | `{ hubUrl, licenseApiUrl, wsUrl, hasSyncToken, role, syncReady }` |
 
 ## Morning bind checklist (Bhoomi)
 
-0. **Hub deploy:** apply `backend/drizzle/0227_hlp_org_sync_firm.sql` (idempotent) before testing panel activate → sync. Verify: `\d hlp_organization` shows `sync_firm_id uuid`.
-1. Node: `ESTI_ROLE=node` + `ESTI_HUB_URL` + `ESTI_LICENSE_API_URL` + `ESTI_PRODUCT_API_KEY` + `INSTALL_ID`
-2. Owner runs `license.activate` with a live key → panel returns **`syncToken`** (persisted on `esti_org_settings`)
-3. `sync.hubConfigured`: `hasSyncToken === true` **and** `syncReady === true` (`role=node`)
-4. `sync.capabilities.metaSync` / `artifactSync` === true
-5. `sync.flush` / `sync.pullMeta` succeed against hub (no `skipped` / `skippedReason`)
-
-Expanded table + fail cues: [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) § Operator bind sequence.
+1. Node: `ESTI_HUB_URL` + `ESTI_LICENSE_API_URL` + `ESTI_PRODUCT_API_KEY` + `INSTALL_ID`
+2. Owner runs `license.activate` with a live key
+3. `sync.hubConfigured.syncReady === true`
+4. `sync.flush` / `sync.pullMeta` succeed against hub
 
 **Owner:** Gagan lands the hub wire; Bhoomi runs the bind test after Vishwakarma merges.
-**Human (prod):** confirm **0227** applied on the live hub DB before Bhoomi’s physical bind.
 
 ## Related
 
 - [LOCAL-FIRST.md](LOCAL-FIRST.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [HCW-LICENSE-MANAGER.md](HCW-LICENSE-MANAGER.md)  
-- [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) — operator checklist including `0227`  
 - Contracts: `packages/contracts` · consumer notes: `packages/contracts/README.md`  
 - Crew: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)
