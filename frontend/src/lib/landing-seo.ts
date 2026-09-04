@@ -22,34 +22,34 @@ export const LANDING_SEO = {
 
 export const LANDING_FAQ = [
   {
-    question: “What is AORMS?”,
+    question: "What is AORMS?",
     answer:
       `AORMS (${AORMS_PLATFORM.expansion}) is a web-based office management system for AEC firms. ${AORMS_PLATFORM.tagline}. ${EOMS.name} provides the knowledge bank; ${ESTI.name} is the built-in office automation AI agent.`,
   },
   {
-    question: “Who is AORMS for?”,
+    question: "Who is AORMS for?",
     answer:
-      “Architecture studios, engineering consultancies, and PMC practices that manage clients, projects, proposals, invoicing, teams, and knowledge.”,
+      "Architecture studios, engineering consultancies, and PMC practices that manage clients, projects, proposals, invoicing, teams, and knowledge.",
   },
   {
-    question: “What can I do with AORMS?”,
+    question: "What can I do with AORMS?",
     answer:
-      “Manage clients and projects, create proposals and contracts, handle invoicing and finance, coordinate teams, track deliverables, maintain a knowledge base, and get AI-powered insights and recommendations.”,
+      "Manage clients and projects, create proposals and contracts, handle invoicing and finance, coordinate teams, track deliverables, maintain a knowledge base, and get AI-powered insights and recommendations.",
   },
   {
-    question: “Is AORMS cloud-based or desktop?”,
+    question: "Is AORMS cloud-based or desktop?",
     answer:
-      “AORMS is a web-based, cloud-only application. Access it from any browser. No installers or local software required.”,
+      "AORMS is a web-based, cloud-only application. Access it from any browser. No installers or local software required.",
   },
   {
-    question: “Can I sign in on aorms.in today?”,
+    question: "Can I sign in on aorms.in today?",
     answer:
-      “Yes, sign in at aorms.in/login to access your office hub workspace.”,
+      "Yes, sign in at aorms.in/login to access your office hub workspace.",
   },
   {
-    question: “How is AORMS licensed?”,
+    question: "How is AORMS licensed?",
     answer:
-      “AORMS is available under Standard licence with usage-based billing. See aorms.in/pricing for details.”,
+      "AORMS is available under Standard licence with usage-based billing. See aorms.in/pricing for details.",
   },
 ] as const;
 
