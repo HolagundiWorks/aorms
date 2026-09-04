@@ -25,8 +25,8 @@ is merged and verified — the `web/` package is new, additive code; nothing in
 | Target-architecture spec written | ✅ [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) |
 | Repo audit — Phase 2 domains (map current tRPC procedures / Fastify routes / components to Next.js equivalents — see spec § 36–37) | ✅ [NEXTJS-MIGRATION-PHASE2-AUDIT.md](./NEXTJS-MIGRATION-PHASE2-AUDIT.md) — surfaced and resolved a blocking decision (single-tenant per deployment, no `org_id`, decided 2026-09-04). Later phases (3–7) get their own audit pass when their turn comes. |
 | **Phase 1 — Foundation** (Next.js + TS + Carbon + Supabase + auth + app shell) | ✅ **Complete, connected to a live Supabase project.** `web/` package — Next.js 16 + Carbon + `@supabase/ssr` wired end-to-end (client/server/proxy), Server Action sign-in/sign-out, Carbon `AppShell` (Header+SideNav), `(auth)/login` + `(app)/dashboard` route groups. `next build --webpack` clean, `eslint web` 0/0. Sign-in verified live through the browser against the real project (landing → Supabase Auth session → Server Component → Carbon shell), including confirming Carbon's classes/CSS vars/IBM Plex font all apply correctly (an initial "looks unstyled" impression was just Carbon's flat `white` theme, not a bug). |
-| Phase 2 — Core ERP (orgs, users, roles, clients, projects, tasks) | 🚧 Migration `0001_phase2_core.sql` **applied to the live project** (user ran it via the SQL Editor — direct DB access still isn't available from a session: Supabase's direct connection is IPv6-only and this network has no IPv6 route, confirmed while trying). `profiles`/`audit_log`/`firm`/`clients`/`project_offices`/`phases`/`tasks` all exist with RLS live. **`/clients` slice verified end-to-end against real data**: signed in, created "Sharma Residences LLP" through the actual UI, confirmed it persisted or reloaded, and confirmed `write_audit()` logged the CREATE with full before/after — the whole read+write+audit+RLS pattern is proven, not just built. **`/projects` slice also verified end-to-end (2026-09-04)**: created "Sharma Residence Extension" against that same client through the real UI, confirmed the row renders with the joined client name and an `ENQUIRY` status tag, and confirmed the `audit_log` row via REST API. Remaining: `phases` and `tasks` UI + actions — see current assignment below. |
-| Phase 3 — Commercial (proposals, quotations, contracts, invoices, payments) | 🔲 |
+| Phase 2 — Core ERP (orgs, users, roles, clients, projects, tasks) | ✅ **Landing order complete, all four slices verified end-to-end against the live project.** Migration `0001_phase2_core.sql` applied via the SQL Editor (direct DB access still unavailable from a session — Supabase's direct connection is IPv6-only, this network has no IPv6 route). `profiles`/`audit_log`/`firm`/`clients`/`project_offices`/`phases`/`tasks` all exist with RLS live. `/clients`, `/projects`, `/projects/[id]` (phases), and `/tasks` were each built, then verified through the real browser UI (sign in → create a record → confirm it renders correctly, including FK joins and status tags → confirm the `audit_log` row via REST API with correct actor/action/payload) — see the git history on `main` (2026-09-04) for each slice's commit. Deliberately deferred, not forgotten: gap-free `esti_sequence`-style ref numbering (a placeholder count-based `ref` is used); `computeScores`/`flagInterventions`/`todayQueue` task business logic (own `services/tasks/` layer, separate follow-up); the `teamMembers` vs `profiles` FK question for `tasks.assignee_id`/`reviewer_id` (points straight at `profiles` for now, per the Phase 2 audit's suggested fallback). |
+| Phase 3 — Commercial (proposals, quotations, contracts, invoices, payments) | 🔲 Repo audit done — [NEXTJS-MIGRATION-PHASE3-AUDIT.md](./NEXTJS-MIGRATION-PHASE3-AUDIT.md). Corrects scope: no separate "quotations"/"payments" models exist — `esti_proposal` already covers quotations, payments are `invoices.paidPaise` + a separately-scoped reconciliation feature (deferred to Phase 6, depends on the Python worker). Flags two open decisions before implementation starts: purchase orders in/out of this phase, and whether PDF-render enqueueing lands now or waits for Phase 6's Redis Streams/worker pass. Suggested landing order: numbering (`sequences`/`next_ref()`) → shared pure business-logic functions (already portable as-is from `packages/contracts`) → proposals → letters/contracts → invoices. |
 | Phase 4 — Technical (estimation, BOQ, measurements, documents, drawings) | 🔲 |
 | Phase 5 — Reporting (dashboards, reports, exports, analytics) | 🔲 |
 | Phase 6 — Advanced processing (PDF/DWG, Python worker) | 🔲 |
@@ -40,17 +40,26 @@ scripts force `--webpack` until that's fixed upstream.
 **Tenancy decided (2026-09-04): single-tenant per deployment** — no `org_id`
 anywhere, RLS scoped by `auth.uid()` + role only.
 
-**Cloud-agent assignment:** the remaining Phase 2 work (`phases` UI + Server
-Actions, then `tasks`) is the current cloud-agent task — branch as
-`cloud-agent/phase2-phases-tasks` off a freshly-pulled `main` and follow
-[CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md) exactly (branch naming,
-do/don't, self-verification, handoff — local verifies and merges, cloud-agent
-does not merge to `main`). Follow the same pattern as `/clients` and
-`/projects` (`web/app/(app)/<domain>/page.tsx` + `web/components/aorms/New*
-Form.tsx` + `web/lib/actions/<domain>.ts`) — `phases` nests under a project
-(likely a tab/section on a future project-detail page rather than its own
-top-level nav item; `tasks` needs a new "Tasks" `SideNavLink` added to
-`AppShell.tsx`, which doesn't have one yet).
+**Phase 2 finished twice in parallel (2026-09-04) — collision, resolved.**
+A cloud-agent session (`claude/cloud-agent-roadmap-xnvtml`) and this local
+session both built the same `phases`/`tasks` slices independently and pushed
+around the same time. Local's version was already merged to `main` (verified
+end-to-end against live Supabase — see the Phase 2 row above) by the time the
+cloud branch was checked, so its Phase 2 commit (`d55cd076`) was **not**
+merged — it would only reintroduce the same files unverified. Its second,
+non-overlapping commit (the Phase 3 audit doc, `7817ada6`) **was** pulled in.
+Lesson for next time: check `git branch -r` for a live cloud-agent branch
+*before* starting overlapping work locally, not just at hand-off.
+
+**Cloud-agent assignment:** Phase 3 implementation, following the landing
+order [NEXTJS-MIGRATION-PHASE3-AUDIT.md](./NEXTJS-MIGRATION-PHASE3-AUDIT.md)
+suggests (numbering → shared business logic → proposals → letters/contracts →
+invoices) — branch as `cloud-agent/phase3-<slug>` off a freshly-pulled `main`
+and follow [CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md) exactly
+(branch naming, do/don't, self-verification, handoff — local verifies and
+merges, cloud-agent does not merge to `main`). Resolve the two open decisions
+the audit flags (purchase orders in/out of scope, PDF-render enqueueing now
+vs. Phase 6) before starting, not during.
 
 ---
 
@@ -242,7 +251,7 @@ this file tracks only what's actually live for users.
 
 - **Deployment / VPS?** See [VPS-INSTALL.md](./VPS-INSTALL.md) · [PRODUCTION-OPS.md](./PRODUCTION-OPS.md)
 - **Product definition?** See [AORMS-OFFICE-SYSTEM.md](./AORMS-OFFICE-SYSTEM.md)
-- **Stack migration spec?** See [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) · [Phase 2 audit](./NEXTJS-MIGRATION-PHASE2-AUDIT.md)
+- **Stack migration spec?** See [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) · [Phase 2 audit](./NEXTJS-MIGRATION-PHASE2-AUDIT.md) · [Phase 3 audit](./NEXTJS-MIGRATION-PHASE3-AUDIT.md)
 - **Cloud-agent branch/workflow rules?** See [CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md)
 - **Engineering / local-dev status?** See [ROADMAP-LOCAL.md](./ROADMAP-LOCAL.md)
 - **Market fit / GTM?** See [MARKET-FIT.md](./MARKET-FIT.md)

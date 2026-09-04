@@ -157,11 +157,21 @@ A cloud-agent branch is **not considered live or done until this happens** —
 ## Current assignment
 
 See [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) § Stack migration for the active
-Next.js/Supabase migration phase table — Phase 1 (Foundation) and the start
-of Phase 2 (`profiles`/`clients`) are done on `main` already (built locally
-this session). The natural next `cloud-agent` task is continuing Phase 2's
-remaining domains per the landing order in
-[NEXTJS-MIGRATION-PHASE2-AUDIT.md](./NEXTJS-MIGRATION-PHASE2-AUDIT.md)
-(`project_offices`/`phases` UI + Server Actions, then `tasks`) — confirm
-against the roadmap's current state before starting, since it may have moved
-since this line was written.
+Next.js/Supabase migration phase table. Phase 1 (Foundation) and all of
+Phase 2 (`profiles`/`clients`/`project_offices`/`phases`/`tasks`) are done on
+`main`, each slice verified end-to-end against the live Supabase project.
+**2026-09-04 collision, for context:** a cloud-agent session and this local
+session built the same Phase 2 `phases`/`tasks` slice independently and
+pushed close together — local's (already verified) version landed on `main`;
+the cloud branch's matching commit was not merged, only its separate,
+non-overlapping Phase 3 audit commit was. See ROADMAP-CLOUD.md's "Phase 2
+finished twice in parallel" note for the full account. **Always check
+`git branch -r` for a live cloud-agent branch before starting a task that
+might overlap with one — not just at hand-off.**
+
+The natural next `cloud-agent` task is Phase 3 (Commercial — proposals,
+letters, contracts, invoices) per the landing order in
+[NEXTJS-MIGRATION-PHASE3-AUDIT.md](./NEXTJS-MIGRATION-PHASE3-AUDIT.md)
+(numbering → shared business logic → proposals → letters/contracts →
+invoices) — confirm against the roadmap's current state before starting,
+since it may have moved since this line was written.

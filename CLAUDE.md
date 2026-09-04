@@ -279,9 +279,21 @@ version:
 
 | Branch | Environment | Role |
 | --- | --- | --- |
-| `cloud-agent/<task-slug>` — one short-lived branch **per task**, not one long-lived branch | Cloud (hosted agent sessions) | **Primary feature development** — branches off a freshly-pulled `main`, stays scoped to one task, gets pushed (never merged by the cloud session itself) and handed off. |
+| `cloud-agent/<task-slug>` — one short-lived branch **per task**, not one long-lived branch | Cloud (hosted agent sessions) | **Primary feature development**, incl. the Next.js/Supabase migration's phase work — branches off a freshly-pulled `main`, stays scoped to one task, gets pushed (never merged by the cloud session itself) and handed off. |
 | `main` | — | Integration branch. Cloud work lands here only after local verifies it. |
-| (local checkout, this machine) | Local (Podman/Docker compose, this repo) | **Verification + merge gate** for cloud-agent branches, plus the general testing/verification role below. Also where net-new feature work happens when not explicitly assigned to a cloud-agent branch (e.g. this session built the Next.js/Supabase migration's Phase 1 and the start of Phase 2 directly on `main`). |
+| (local checkout, this machine) | Local (Podman/Docker compose, this repo) | **Verification + merge gate** for cloud-agent branches, plus the general testing/verification role below. **Not** net-new cloud-roadmap feature work while a cloud-agent session is actively assigned — see the note below. |
+
+**Local stays on ROADMAP-LOCAL.md's scope now that cloud-agent is actively
+working (decided 2026-09-04, after a same-day collision — see
+ROADMAP-CLOUD.md's "Phase 2 finished twice in parallel" note and
+CLOUD-AGENT-WORKFLOW.md § Current assignment for the full account):** local
+sessions build Phase 1 and the start of Phase 2 of the Next.js/Supabase
+migration directly on `main` were a one-time exception while no cloud-agent
+branch existed yet for that work — not the standing model. With a cloud-agent
+session now actively assigned to the migration's next phase, local's role on
+that work is verification and merge only, not building the next slice itself.
+Check `git branch -r` for a live `cloud-agent/*` (or session-named `claude/*`)
+branch before starting anything that could overlap — not just at hand-off.
 
 **What that means day to day, in this local environment:**
 - Pull `main` before starting; pull any pushed `cloud-agent/<task-slug>`
@@ -292,12 +304,13 @@ version:
   live Supabase, browser click-through), then merge to `main` and push —
   per [CLOUD-AGENT-WORKFLOW.md](docs/esti/CLOUD-AGENT-WORKFLOW.md) § Handoff.
 - Otherwise: run the app, `tsc`/`eslint`/`vitest`/`pytest`, Playwright/e2e,
-  manual click-through verification, filing/fixing bugs found while testing
-  — or net-new feature work not currently assigned to a cloud-agent branch.
+  manual click-through verification, filing/fixing bugs found while testing —
+  the local dev/test loop, not the next cloud-roadmap feature slice.
 - Roadmap docs: [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) tracks what's
-  live/in-progress (including the Next.js/Supabase migration — see § Stack
-  migration above); [ROADMAP-LOCAL.md](docs/esti/ROADMAP-LOCAL.md) tracks
-  the local dev/test loop specifically.
+  live/in-progress on the cloud roadmap (read-only from here now, incl. the
+  Next.js/Supabase migration — see § Stack migration above);
+  [ROADMAP-LOCAL.md](docs/esti/ROADMAP-LOCAL.md) is local's own scope — the
+  local dev/test loop, plus verifying and merging cloud-agent branches.
 
 ## Dev / verify loop
 
