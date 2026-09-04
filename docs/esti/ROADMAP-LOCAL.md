@@ -49,6 +49,24 @@ volume's data should still be there to reattach to it.
 directly and are unaffected; `web/`'s Supabase connection is completely
 separate and was never routed through local Postgres either.
 
+**Follow-through (2026-09-04, same day):** the `esti-backend`/`esti-worker`
+*containers* were still running post-removal (created before the
+compose.yaml edit, so still holding the old baked-in `DATABASE_URL`
+default). Restarting either now crash-loops — confirmed live: `tsx watch`
+reboots, re-runs `runMigrations()` at boot, and dies on
+`getaddrinfo ENOTFOUND db` before ever calling `app.listen()`, so the
+container shows "Up" while nothing actually answers on `:4000`. Both
+containers have now been **stopped and removed** rather than left in that
+half-alive state — `podman ps` today shows only `redis`/`mongo`/`minio`/
+`ollama`/`frontend`. `frontend` alone is still useful: it's a plain Vite
+dev server with no hard dependency on `backend` being reachable, so static
+content (the landing page, its redesign included) renders fine — only
+its background tRPC calls (`auth.me`, `health`, etc.) 502, harmlessly.
+`docker compose up backend worker` will recreate them correctly next time
+(compose.yaml's new required-`DATABASE_URL` guard fails fast instead of
+crash-looping) — but do so only with a real `DATABASE_URL` supplied, since
+neither can do anything useful without one.
+
 ---
 
 ## Local dev environment
