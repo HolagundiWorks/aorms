@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Column,
   Grid,
@@ -66,7 +67,9 @@ export default async function ProjectsPage() {
               {(projects ?? []).map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>{p.ref}</TableCell>
-                  <TableCell>{p.title}</TableCell>
+                  <TableCell>
+                    <Link href={`/projects/${p.id}`}>{p.title}</Link>
+                  </TableCell>
                   <TableCell>
                     {(Array.isArray(p.clients) ? p.clients[0]?.name : (p.clients as { name: string } | null)?.name) ?? "—"}
                   </TableCell>

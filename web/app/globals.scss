@@ -12,6 +12,7 @@
 @use "@carbon/react/scss/themes";
 @use "@carbon/react/scss/components/button";
 @use "@carbon/react/scss/components/text-input";
+@use "@carbon/react/scss/components/text-area";
 @use "@carbon/react/scss/components/form";
 @use "@carbon/react/scss/components/ui-shell";
 @use "@carbon/react/scss/components/data-table";
@@ -26,4 +27,10 @@
 
 body {
   margin: 0;
+}
+
+// Structural-only spacing helper (no visual styling) — Carbon's Table
+// doesn't forward a `style` prop.
+.aorms-table-spaced {
+  margin-top: 1.5rem;
 }
