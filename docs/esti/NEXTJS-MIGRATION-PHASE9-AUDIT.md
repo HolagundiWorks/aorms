@@ -13,7 +13,20 @@ alongside Phase 8, not an adopted one. **Date:** 2026-09-04
 
 ## The headline finding — the live `contractorPortal` isn't the one Phase 8 assumed, and half of AProc's contractor-facing bidding is dead code
 
-This is the most consequential finding in this pass, so it leads rather than
+**Update, since this was first written:** `backend/src/modules/pmc/
+contractorPortal.ts` — the dead, never-mounted file this finding centers on —
+**has since been deleted outright**, confirmed via the commit that closed out
+this audit's cleanup backlog: verified via grep it was never imported from
+source anywhere (only a stale `backend/dist/` build artifact referenced it).
+The file no longer exists to "resurrect under a new name" as this section
+originally proposed as one option — that option is effectively foreclosed by
+the deletion. If AProc package-level contractor bidding is still wanted as a
+live feature, it now needs building fresh rather than resurrecting deleted
+code (git history still has it, if needed as a reference). The rest of this
+finding — the dead-code diagnosis itself, and the correction it made to
+Phase 8's assumption about `contractorPortal` — stands as written below.
+
+This was the most consequential finding in this pass, so it leads rather than
 waits in a table cell:
 
 Two different files each export a router literally named

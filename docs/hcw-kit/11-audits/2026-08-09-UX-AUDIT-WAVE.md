@@ -25,4 +25,4 @@ sibling AStudio / AConsulting. AQC technical app chrome rewrite deferred.
 ## Canon
 
 [HCW-UX-FRAMEWORK.md](../../HCW-UX-FRAMEWORK.md) · [PAGE-STRUCTURE.md](../../esti/PAGE-STRUCTURE.md) ·
-[UI-SITE-MAP.md](../../esti/UI-SITE-MAP.md) · `.cursor/skills/ux-designer/SKILL.md`
+[UI-SITE-MAP.md](../../esti/UI-SITE-MAP.md)

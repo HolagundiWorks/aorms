@@ -1,7 +1,7 @@
 # UX validation case studies
 
 **Status:** Framework gap F5 closed · **Published:** 2026-07-21  
-**Instrument:** [HCW-UX-KPI-INSTRUMENT.md](../../esti/HCW-UX-KPI-INSTRUMENT.md)
+**Instrument:** [HCW-UX-KPI-INSTRUMENT.md](../../../esti/HCW-UX-KPI-INSTRUMENT.md)
 
 Three before/after notes using the KPI vocabulary. Metrics are **studio-observed**
 (timed tasks + event logs on adopted surfaces), not lab A/B. Replicate with

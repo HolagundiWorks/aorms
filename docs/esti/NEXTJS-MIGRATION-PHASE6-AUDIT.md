@@ -189,10 +189,11 @@ sequence — it has one gating decision and then four independent job ports:
   central open decision, not answered.
 - **The actual code path that sets `invoices.paid_paise`** — flagged as
   missing from this audit's read of `reconcile.py`, not traced further.
-- **Project OS feasibility** (`feasibility_report` target) as its own
-  domain — still has no assigned roadmap phase even after Phase 8 (HR/Payroll
-  and Delivery/AProc are now covered there); flagged as a gap, not
-  audited in depth here (each would need its own audit pass the way Phases
+- ~~Project OS feasibility~~ (`feasibility_report` target) — **resolved by the
+  [Phase 10 audit](./NEXTJS-MIGRATION-PHASE10-AUDIT.md)** (Slice D of the
+  "Project OS" lead-to-activation pipeline, `feasibility.generate` in
+  `backend/src/modules/projectos/feasibility.ts`), not audited in depth here
+  (each finding would need its own audit pass the way Phases
   2–5 did for their domains, if/when a phase number is assigned to them).
 - Phase 7 (AI/ESTI) — own audit pass when its turn comes. Note: this audit's
   reading confirms (per the Phase 5 audit's finding) that the dashboard's rule-

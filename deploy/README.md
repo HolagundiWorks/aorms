@@ -41,7 +41,7 @@ no licensing console; licence-key activation against aorms.in:
 sudo bash deploy/install-enterprise.sh
 ```
 
-See [`docs/esti/SELF-HOST-INSTALL.md`](../docs/esti/SELF-HOST-INSTALL.md).
+See [VPS-INSTALL.md](../docs/esti/VPS-INSTALL.md).
 
 **Public landing + demo showcase:** marketing landing page + a fully seeded demo
 workspace, nothing else — secrets auto-generated, only domain + TLS email needed
@@ -188,8 +188,15 @@ main install + an `admin.DOMAIN` DNS record): it serves the build's
 `dist/admin.html` entry on its own vhost with a same-box `/platform/` proxy and
 provisions TLS. Set `VITE_ADMIN_URL=""` (empty) in `.env` before
 installing/updating to keep the embedded console at `/platform-admin`
-(the default for installs without the platform). See
-[HCW-LICENSE-MANAGER.md](../docs/esti/HCW-LICENSE-MANAGER.md).
+(the default for installs without the platform).
+
+> **Note:** `CLAUDE.md`'s current Launch status table marks
+> `admin.aorms.in` (licence manager) as removed — "not applicable to the
+> web-only model." This section describing the admin console installer
+> may itself be stale infrastructure documentation rather than just a
+> broken link; flagged here rather than resolved, since deciding whether
+> to remove the console-install flow entirely is a bigger call than a
+> dead-link fix.
 
 Google sign-in needs an OAuth client — set in `.env` after install (no code change):
 
@@ -200,7 +207,7 @@ GOOGLE_REDIRECT_URI=https://<domain>/platform/auth/google/callback
 PLATFORM_ADMIN_EMAILS=you@firm.in
 ```
 
-then `bash deploy/update.sh`. Google OAuth: set `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` in `.env` (see [ADMIN-GUIDE.md](../docs/esti/ADMIN-GUIDE.md) §5).
+then `bash deploy/update.sh`.
 
 ## Updating an existing box
 
@@ -246,8 +253,8 @@ Add `backup.sh` to root's crontab for daily dumps. Health check:
 ### VPS cleanup (retired installers, ESE, build cruft)
 
 Retired **Manager** installer binaries under `frontend/dist/downloads/` and **ESE**
-(`esti-ese`) are cleaned up here. The public `/downloads` **page** is the
-local-first portal (web_fallback until signed URLs — [WEB-PORTAL.md](../docs/esti/WEB-PORTAL.md)).
+(`esti-ese`) are cleaned up here — `/downloads` itself is removed per
+`CLAUDE.md`'s current Launch status (web-only, no installers).
 On an existing box:
 
 ```bash

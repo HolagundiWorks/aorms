@@ -286,7 +286,7 @@ Product shells: `AppRibbon` · `RailLayout` · `PortalNeuFrame` · `MarketingNeu
 see [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md).
 
 Full attribute tables: [14-HCW-CATALOG.md](../hcw-kit/14-HCW-CATALOG.md).
-Versioned from **0.1.0** — [`CHANGELOG.md`](../../CHANGELOG.md).
+Versioned from **0.1.0**.
 AI audit contract: [HCW-KIT-AI-KNOWLEDGE-BASE.md](HCW-KIT-AI-KNOWLEDGE-BASE.md).
 
 Source-only (like `@esti/contracts`); the consuming portal's bundler compiles it.

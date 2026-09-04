@@ -11,8 +11,8 @@ and tells the office **what must be done first**.
 This is not a chatbot. It is a **task-risk and dependency-resolution engine**
 for architecture offices.
 
-> **Nomenclature:** **AORMS** (**Accelerated Operational Resources Management
-> System**, platform) — the **AORMS office hub** is the single workspace that
+> **Nomenclature:** **AORMS** (**Architecture Operations & Resource
+> Management System**, platform) — the **AORMS office hub** is the single workspace that
 > holds the tasks, drawings, approvals and records Pulse reads. **ESTI**
 > (Embedded Studio Intelligence) is the intelligence layer;
 > Pulse is one of its capabilities, beside ESTI AI / Ask ESTI and the

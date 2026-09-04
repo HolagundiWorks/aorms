@@ -8,7 +8,7 @@ import { platformPageUrl } from "./aorms-surface-urls.js";
 /** AORMS Platform — unified office management system for architecture practices. */
 export const AORMS_PLATFORM = {
   name: "AORMS",
-  expansion: "Accelerated Operational Resources Management System",
+  expansion: "Architecture Operations & Resource Management System",
   tagline: "The office management system for architecture practices",
   audience: "Architecture studios managing clients, projects, and delivery",
   heroHeadline: [

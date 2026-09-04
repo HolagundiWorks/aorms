@@ -1,6 +1,6 @@
 # AORMS
 
-AORMS (Accelerated Operational Resources Management System) is a **cloud-based
+AORMS (Architecture Operations & Resource Management System) is a **cloud-based
 office management system** for architecture practices and consultancies —
 web-only, single unified app, pure architectural consultancy (not
 engineering, not multi-discipline AEC).

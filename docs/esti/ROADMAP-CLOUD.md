@@ -30,9 +30,10 @@ is merged and verified — the `web/` package is new, additive code; nothing in
 | Phase 4 — Technical (estimation, BOQ, measurements, documents, drawings) | 🚧 **Schema live on Supabase (2026-09-04), all 6 domains, 14 tables.** `rate_books`/`rate_book_items`, `estimates`/`estimate_items`/`estimate_measurements` (`fees:manage` RLS, plus Postgres triggers porting `recomputeItemFromMeasurements()` and the DRAFT/FINALISED-editable lock — defense-in-depth per the audit's own flag that RLS alone can't stop a client writing a stale computed quantity; verified end-to-end including the lock rejecting a write to an APPROVED estimate), `spec_sheets`/`spec_items`, `transmittals`/`transmittal_items` (+ `acknowledge_transmittal()`, a `security definer` RPC for client-portal acknowledgment — Postgres RLS can't express the column-level restriction a blanket UPDATE policy would need), `drawings` (full revision-chain columns, re-read in full since the audit's own read was truncated), `document_issues`/`office_templates`/`moms`/`mom_actions`. No UI/Server Actions yet — schema + RLS only, same as Phase 3. Bug caught during verification: the measurement-recompute trigger didn't handle cascade deletes correctly, fixed before commit. |
 | Phase 5 — Reporting (dashboards, reports, exports, analytics) | 🚧 **Schema live on Supabase (2026-09-04).** Migration `0009_phase5_reporting.sql` applied and verified — mostly read models over tables Phases 2–4 already shipped, so the only new DDL is `profiles.dashboard_layout`/`wellbeing_opt_in`/`calendar_feed_token`(`_at`), confirmed present via the live schema. Deliberately not ported: an `attendance` table (blocked on the `teamMembers`-vs-`profiles` question Phase 8 reopens) and any RLS change for the two inconsistencies the audit flagged — both left as product decisions, not migration questions, per the migration's own header comment. No UI/Server Actions yet. |
 | Phase 6 — Advanced processing (PDF/DWG, Python worker) | 🔲 Repo audit done — [NEXTJS-MIGRATION-PHASE6-AUDIT.md](./NEXTJS-MIGRATION-PHASE6-AUDIT.md). Different in kind from Phases 2–5: the central open question is a **hosting-topology decision** (does Hostinger Managed App Hosting support a persistent Python worker + Redis, or does the worker/queue stay externalized?), not a table-mapping question — flagged for whoever has visited Hostinger's actual docs, not resolved here. Found dead code (`engagement_register` PDF target references physically-removed `esti_cons_*` consultancy tables) and a stale doc comment (references removed EOMS). Surfaced a roadmap gap: `payslip`/`progress_report`/`site_instruction`/`pmc_ra_bill`/`feasibility_report` render targets belong to HR/Payroll and Delivery/AProc domains that have no assigned phase number 2–7. |
-| Phase 7 — Optional AI | 🔲 Repo audit done — [NEXTJS-MIGRATION-PHASE7-AUDIT.md](./NEXTJS-MIGRATION-PHASE7-AUDIT.md). **Central finding**: `CLAUDE.md` (desktop-only Ollama, cites archived `LOCAL-FIRST.md`), `PRODUCTION-OPS.md`/`ARCHITECTURE.md` (2026-09 pivot to office-hub backend gateway, `LOCAL-FIRST.md` explicitly archived/superseded), and the actual code (`ai/gateway.ts` still hardcodes desktop-only Ollama, calling `127.0.0.1:11434` from the server — which cannot reach a user's desktop in a cloud deployment) all disagree with each other. Flagged as a product decision to resolve before implementing, not resolved here. What's real and portable regardless: the `esti_ai_run` provenance/audit table + draft-approval-lock workflow, PII redaction, permission-filtered retrieval from firm data, and the mock/template fallback provider. Drops the plan/licensing gate (consistent with Phase 2's tenancy decision). |
-| Phase 8 — Roadmap gaps (HR/Payroll, Delivery/AProc, CPI, Knowledge Bank) — **not in the migration spec; proposed here** | 🚧 **Schema live on Supabase (2026-09-04), adopted by building it** — all four domains: migration `0011` (CPI, Knowledge Bank Portal), `0012` (Delivery's `contractors`/`contractor_submissions`/`approvals`), `0013` (HR/Payroll — 11 tables), `0014` (AProc/PMC — 11 tables incl. `pmc_package_bids_sealed`, a redacting view for the package-level sealed-bid rule, and a `cost:approve` trigger on the steel-cert/RA-bill CERTIFIED transition, smoke-tested against the live project). The `teamMembers`-vs-`profiles` tension is real and **deliberately left open**, not resolved by building the schema: `team_members` now exists (unblocking Phase 5's `attendance` table, added in `0013`) but `tasks.assignee_id`/`reviewer_id` still FK straight to `profiles`, per Phase 2's live, UI-verified design — a future breaking migration is the actual resolution, not attempted here. CPI's `generateReport` still blocked on Phase 7's unresolved AI-provider question (unrelated to schema). |
+| Phase 7 — Optional AI | 🔲 Repo audit done — [NEXTJS-MIGRATION-PHASE7-AUDIT.md](./NEXTJS-MIGRATION-PHASE7-AUDIT.md). Its original "three sources disagree about where ESTI runs" finding was **corrected in place** once fuller evidence surfaced: `CLAUDE.md` has since been fixed to match `PRODUCTION-OPS.md`, and the code's `127.0.0.1:11434` is only a fallback default — the real deployment (`compose.yaml`/`compose.prod.yaml`) correctly points at a shared, self-hosted Ollama container over the compose network. Architecture is not broken; nothing here blocks implementation on an open provider question. What's real and portable: the `esti_ai_run` provenance/audit table (**schema live**, migration `0010`) + draft-approval-lock workflow, PII redaction, permission-filtered retrieval from firm data, and the mock/template fallback provider. Drops the plan/licensing gate (consistent with Phase 2's tenancy decision). |
+| Phase 8 — Roadmap gaps (HR/Payroll, Delivery/AProc, CPI, Knowledge Bank) — **not in the migration spec; proposed here** | 🚧 **Schema live on Supabase (2026-09-04), adopted by building it** — all four domains: migration `0011` (CPI, Knowledge Bank Portal), `0012` (Delivery's `contractors`/`contractor_submissions`/`approvals`), `0013` (HR/Payroll — 11 tables), `0014` (AProc/PMC — 11 tables incl. `pmc_package_bids_sealed`, a redacting view for the package-level sealed-bid rule, and a `cost:approve` trigger on the steel-cert/RA-bill CERTIFIED transition, smoke-tested against the live project). The `teamMembers`-vs-`profiles` tension is real and **deliberately left open**, not resolved by building the schema: `team_members` now exists (unblocking Phase 5's `attendance` table, added in `0013`) but `tasks.assignee_id`/`reviewer_id` still FK straight to `profiles`, per Phase 2's live, UI-verified design — a future breaking migration is the actual resolution, not attempted here. CPI's `generateReport` no longer blocked on an AI-provider question — Phase 7's finding above was corrected; the actual blocker (if any) is picking an AI Server Action pattern, not architecture. |
 | Phase 9 — Library, HR recruitment, firm-issued Tenders — **not in the migration spec; proposed here** | 🚧 **Schema live on Supabase (2026-09-04), adopted by building it.** Tenders: migration `0012` (`tenders`/`tender_invitations`/`tender_bids` + `tender_bids_sealed`, the firm-issued sealed-bid redaction view — smoke-tested end-to-end: inserted a real bid while OPEN, confirmed the view nulled the amount, flipped to AWARDED, confirmed it unsealed). Library: migrations `0011` (Master Plans, Standards) + `0015` (Compliance's 6 tables, Lessons Learned) — all four sub-domains done. HR recruitment: covered by `0013`'s `job_applications`/`hr_profiles`/`hr_documents`. The headline dead-code finding (`pmc/contractorPortal.ts`, the unreachable AProc package-bid-submission router) was **acted on**, not just flagged — deleted, see the cleanup-backlog entry below. |
+| Phase 10 — Project OS (lead-to-activation pipeline) — **not in the migration spec; proposed here** | 🔲 Repo audit done — [NEXTJS-MIGRATION-PHASE10-AUDIT.md](./NEXTJS-MIGRATION-PHASE10-AUDIT.md). Covers `leads`/`projectDna`/`assessment`/`feasibility`/`negotiation`/`onboarding`/`program`/`projectBrief`/`projectPrecon` — a real, already-designed system ("Project OS," per the schema's own header comment) whose design doc (`UNIFIED-ARCHITECTURE-V4.md`) no longer exists anywhere in the repo — a genuine 404, flagged for a doc-sync fix. **Unifying finding**: `evaluateActivationGate()` ties this phase to Phase 3 — it's the pure function gating whether a draft project can activate, checking DNA/assessment/onboarding (this phase) alongside fee-approval and advance-payment (Phase 3's Slices I/K), resolving what Phase 2's `activate`/`activationStatus` procedures actually do. **New finding**: feasibility reports mint an anonymous `shareToken` that's never consumed anywhere — a half-wired feature (write side works, no read route exists), flagged as a product decision. Resolves a Phase 6 open item (`feasibility_report` render target is this phase's Slice D). Flags `projectPrecon` as scoped-in by naming convention but structurally belonging with Phase 8's Delivery domain instead. Not yet adopted — schema not built. |
 
 **Cleanup backlog — closed out (2026-09-04):**
 - ✅ **Dead code removed** — `worker/esti_worker/jobs/pdf.py`'s
@@ -92,16 +93,16 @@ SQL). **Deliberately not attempted**, because no audit exists for them yet
 and porting untraced business logic blind is exactly the risk this session's
 own discipline (audit → read the real router → write RLS matching it →
 apply → verify) was built to avoid: `moodboard` (AStudio project canvas),
-`project_precon` (Studio pre-construction R&O — risks/opportunities/phase
-gates), `bbs`/`steel` (BBS + steel reconciliation, explicitly scoped out of
+`bbs`/`steel` (BBS + steel reconciliation, explicitly scoped out of
 Phase 4), `measurement-plan`/`joint-measurement`/`item-library` (the
 plan-markup takeoff complex, explicitly scoped out of Phase 4), `academy`,
-`pulse`, `collaboration`, `project-os` (leads/DNA/assessment pipeline),
-`project-brief`, `running-bill`, `licensing`/`licensing-platform` (a
-separate service per the Phase 2 tenancy decision, likely genuinely
+`pulse`, `collaboration`, `running-bill`, `licensing`/`licensing-platform`
+(a separate service per the Phase 2 tenancy decision, likely genuinely
 out-of-scope rather than deferred), `marketing`, `memory-activity`, `sync`,
 `usage`, `vendor`, plus `inspections`/`permits`/`siteVisits` still sitting
-in `project.ts`. Whoever picks this up next: run each domain through an
+in `project.ts`. (`project-os`/`project-brief`/`project_precon` are now
+**audited** — Phase 10 — but not yet built; see its row above and the
+assignment below.) Whoever picks this up next: run each domain through an
 audit doc first, same as every phase here did — this list is the honest
 remainder, not a secret backlog.
 
@@ -116,15 +117,54 @@ non-overlapping commit (the Phase 3 audit doc, `7817ada6`) **was** pulled in.
 Lesson for next time: check `git branch -r` for a live cloud-agent branch
 *before* starting overlapping work locally, not just at hand-off.
 
-**Cloud-agent assignment:** Phase 3 implementation, following the landing
-order [NEXTJS-MIGRATION-PHASE3-AUDIT.md](./NEXTJS-MIGRATION-PHASE3-AUDIT.md)
-suggests (numbering → shared business logic → proposals → letters/contracts →
-invoices) — branch as `cloud-agent/phase3-<slug>` off a freshly-pulled `main`
-and follow [CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md) exactly
-(branch naming, do/don't, self-verification, handoff — local verifies and
-merges, cloud-agent does not merge to `main`). Resolve the two open decisions
-the audit flags (purchase orders in/out of scope, PDF-render enqueueing now
-vs. Phase 6) before starting, not during.
+**Cloud-agent — currently active (2026-09-04):** landing-page redesign +
+SEO updates. Not tracked on `claude/cloud-agent-roadmap-xnvtml` (that
+branch is the audit/docs-cleanup/rebrand work reconciled above) — appears
+to be a separate in-progress session/branch
+(`cursor/ci-visual-landing-hero-445f` exists on the remote but had 0
+commits ahead of `main` as of this check, so likely mid-session, not yet
+pushed). Whoever verifies that work: it touches marketing-surface files
+(`frontend/index.html`, `llms.txt`, landing routes) that this session's
+merge just rewrote for the acronym-expansion rebrand — **check for a
+collision on those specific files before merging**, same lesson as the
+Phase 2 collision earlier this session (§ above).
+
+**Queued next (2026-09-04, once landing/SEO is done and merged) —
+supersedes the stale Phase 3 assignment below:** Phase 10 (Project OS)
+schema — the audit is already done
+([NEXTJS-MIGRATION-PHASE10-AUDIT.md](./NEXTJS-MIGRATION-PHASE10-AUDIT.md)),
+same discipline as every migration `0002`–`0015` used: read the actual
+Drizzle schema + router for each table before writing DDL, RLS matching the
+real capability gate (not assumed), apply via the Supabase Management API
+(`POST /v1/projects/{ref}/database/query`, personal access token from
+supabase.com/dashboard/account/tokens — ask the user for a fresh one, never
+reuse/store one from a prior session), verify against the live project
+(table + RLS existence at minimum; smoke-test any non-trivial logic like
+`evaluateActivationGate()` with real inserted rows, same as this session did
+for the estimate-recompute triggers and both sealed-bid views). Branch as
+`cloud-agent/phase10-project-os` off a freshly-pulled `main` and follow
+[CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md) exactly — **do not
+merge to `main` yourself**, push and hand off.
+
+Two things to resolve before starting, not during: the audit's own
+`shareToken`-never-consumed finding (decide whether to build the missing
+read route or leave the write-only half as-is, and say which in the
+handoff) and whether `projectPrecon` lands here or is deferred to a future
+Phase 8-adjacent Delivery pass (the audit flags it as naming-convention-in,
+structurally-out — pick one, don't silently split it across both).
+
+Once Phase 10's schema lands, the natural next assignment after that is
+building UI/Server Actions for the schema Phases 3–9 already have (starting
+with Phase 3's proposals/letters/contracts/invoices — the most-audited,
+most build-ready domain) rather than more schema-only work — flag that to
+whoever reads this next if Phase 10 is done and no new instruction has
+arrived.
+
+**Superseded assignment (kept for history, do not follow):** ~~Phase 3
+implementation, following the landing order
+[NEXTJS-MIGRATION-PHASE3-AUDIT.md](./NEXTJS-MIGRATION-PHASE3-AUDIT.md)
+suggests (numbering → shared business logic → proposals → letters/contracts
+→ invoices)~~ — done, see the Phase 3 row above.
 
 ---
 
@@ -316,7 +356,7 @@ this file tracks only what's actually live for users.
 
 - **Deployment / VPS?** See [VPS-INSTALL.md](./VPS-INSTALL.md) · [PRODUCTION-OPS.md](./PRODUCTION-OPS.md)
 - **Product definition?** See [AORMS-OFFICE-SYSTEM.md](./AORMS-OFFICE-SYSTEM.md)
-- **Stack migration spec?** See [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) · [Phase 2 audit](./NEXTJS-MIGRATION-PHASE2-AUDIT.md) · [Phase 3 audit](./NEXTJS-MIGRATION-PHASE3-AUDIT.md) · [Phase 4 audit](./NEXTJS-MIGRATION-PHASE4-AUDIT.md) · [Phase 5 audit](./NEXTJS-MIGRATION-PHASE5-AUDIT.md) · [Phase 6 audit](./NEXTJS-MIGRATION-PHASE6-AUDIT.md) · [Phase 7 audit](./NEXTJS-MIGRATION-PHASE7-AUDIT.md) · [Phase 8 audit (proposed, not adopted)](./NEXTJS-MIGRATION-PHASE8-AUDIT.md) · [Phase 9 audit (proposed, not adopted)](./NEXTJS-MIGRATION-PHASE9-AUDIT.md)
+- **Stack migration spec?** See [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) · [Phase 2 audit](./NEXTJS-MIGRATION-PHASE2-AUDIT.md) · [Phase 3 audit](./NEXTJS-MIGRATION-PHASE3-AUDIT.md) · [Phase 4 audit](./NEXTJS-MIGRATION-PHASE4-AUDIT.md) · [Phase 5 audit](./NEXTJS-MIGRATION-PHASE5-AUDIT.md) · [Phase 6 audit](./NEXTJS-MIGRATION-PHASE6-AUDIT.md) · [Phase 7 audit](./NEXTJS-MIGRATION-PHASE7-AUDIT.md) · [Phase 8 audit (proposed, not adopted)](./NEXTJS-MIGRATION-PHASE8-AUDIT.md) · [Phase 9 audit (proposed, not adopted)](./NEXTJS-MIGRATION-PHASE9-AUDIT.md) · [Phase 10 audit (proposed, not adopted)](./NEXTJS-MIGRATION-PHASE10-AUDIT.md)
 - **Cloud-agent branch/workflow rules?** See [CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md)
 - **Engineering / local-dev status?** See [ROADMAP-LOCAL.md](./ROADMAP-LOCAL.md)
 - **Market fit / GTM?** See [MARKET-FIT.md](./MARKET-FIT.md)

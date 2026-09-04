@@ -82,7 +82,7 @@ bundled. Other profiles are env overrides (`PROFILE=…`):
 
 **Customer/self-hosted enterprise installs use their own front door** —
 `sudo bash deploy/install-enterprise.sh` (firm workspace only, licence-key
-activation; see `docs/esti/SELF-HOST-INSTALL.md`).
+activation; see [`deploy/README.md`](../../deploy/README.md)).
 
 > **Legacy plan codes.** The installer still writes legacy `FIRM_PLAN` values
 > (`CORE` / `ENTERPRISE`) — `asPlan()` folds both to **PRO**, so every profile

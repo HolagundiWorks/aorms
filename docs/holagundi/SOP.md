@@ -11,8 +11,9 @@
 > [PROJECT-BRIEFING.md](PROJECT-BRIEFING.md) (Phase 0 detail) and the compliance
 > constants in [`docs/esti/INDIA-PROFILE.md`](../esti/INDIA-PROFILE.md). Module
 > references were verified against the shipped app on 2026-07-17; where AORMS
-> itself has since drifted from its own docs, see
-> [`docs/esti/UNIFIED-ARCHITECTURE-V4.md`](../esti/UNIFIED-ARCHITECTURE-V4.md).
+> itself has since drifted from its own docs, check `CLAUDE.md`'s current
+> module map (the doc this note used to point to,
+> `docs/esti/UNIFIED-ARCHITECTURE-V4.md`, does not exist anywhere in the repo).
 
 **Status legend:** ✅ supported end-to-end in AORMS today · 🚧 partially
 supported (manual step or workaround needed) · 🔲 not supported — track outside
@@ -385,8 +386,8 @@ now works. Remaining:
 | LXOS beyond Lessons Learned + Academy | No documentation exchange, internal blogs, community exchange, professional identity, or formal certification issuance yet | Keep those artefacts elsewhere for now |
 | Vendor pricing `materialId` schema mismatch | Recording a vendor price/quote line may error (2026-07-09 teardown fallout) | Track vendor pricing outside AORMS until fixed |
 
-See [`docs/esti/UNIFIED-ARCHITECTURE-V4.md`](../esti/UNIFIED-ARCHITECTURE-V4.md) for
-the engineering-side detail behind these gaps.
+The doc that used to carry engineering-side detail behind these gaps,
+`docs/esti/UNIFIED-ARCHITECTURE-V4.md`, no longer exists in the repo.
 
 ---
 

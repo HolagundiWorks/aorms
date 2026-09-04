@@ -2,10 +2,9 @@
 
 **Audience:** Architecture studio principal or engineering consultancy partner  
 **Goal:** Raise (or show) an invoice on the AORMS spine without construction ERP noise  
-**Seed:** `pnpm --filter @esti/backend seed:demo` — see [DEMO-SEED-ITEMS.md](../esti/DEMO-SEED-ITEMS.md)
+**Seed:** `pnpm --filter @esti/backend seed:demo`
 
-Companion: [ICP-ONE-PAGER.md](ICP-ONE-PAGER.md) · [SOP.md](SOP.md) ·
-[P9V-CONSULTANCY-WALKTHROUGH.md](../esti/P9V-CONSULTANCY-WALKTHROUGH.md)
+Companion: [ICP-ONE-PAGER.md](ICP-ONE-PAGER.md) · [SOP.md](SOP.md)
 
 ---
 
@@ -43,5 +42,5 @@ Clients → Projects → Proposals → Invoices.
 
 - Wedge: *Operating system for AEC consultancies in India*  
 - Not for: contractors, PMC portfolios, RA bills / tenders / BBS  
-- Pricing: landing `#pricing` · [PLANS-AND-TIERS.md](../esti/PLANS-AND-TIERS.md)  
+- Pricing: landing `#pricing`  
 - Proof pack: this script + SOP-mapped modules in [SOP.md](SOP.md)

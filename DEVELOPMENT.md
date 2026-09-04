@@ -1,7 +1,7 @@
 # AORMS — Development
 
 Monorepo for **AORMS** — a **cloud-based, web-only office management system**
-(**Accelerated Operational Resources Management System**) for AEC firms &
+(**Architecture Operations & Resource Management System**) for AEC firms &
 consultancies by Human Centric Works. A single unified **AORMS Office Hub**
 SPA (clients, projects, proposals, invoices, team, finances, knowledge bank)
 — no per-app logins, no desktop apps. Nomenclature: [CLAUDE.md](CLAUDE.md)

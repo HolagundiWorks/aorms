@@ -1,16 +1,19 @@
 # AORMS — Instagram Marketing Campaign Strategy
 
-**Product:** AORMS (**Accelerated Operational Resources Management System**, platform; **AORMS-Studio** workspace) — aorms.in
+**Product:** AORMS (**Architecture Operations & Resource Management System**, platform; **AORMS-Studio** workspace) — aorms.in
 **By:** Holagundi Consulting Works
 **Audience geography:** India (primary: Bengaluru, then metro + tier-2 practice hubs)
 **Prepared:** July 2026
 
-> ## Product law (canonical — 2026-08-08)
+> ## Product law (canonical — superseded, see below)
 >
-> - **Desktop preferred + web parity.** Same SPA on a local-first desktop node and in the browser (`studio.aorms.in`). See [LOCAL-FIRST.md](../esti/LOCAL-FIRST.md).
-> - **One AORMS Standard licence** — no Lite/Pro/Enterprise, no free tier, no trial. Unlimited users; **5 GB** cloud storage included; pay for storage overage + hosted AI (or BYO key). Local desktop AI is not metered.
-> - **CTA destination:** `aorms.in` / signup / demo — or `/downloads` for signed desktop when live; **never** legacy Lite/Pro Manager SKUs.
-> - Law: [PLANS-AND-TIERS.md](../esti/PLANS-AND-TIERS.md).
+> **This block is stale — written before the 2026-09 web-only pivot.**
+> Per `CLAUDE.md`'s current Launch status: AORMS is now **web-only**, no
+> desktop app, no installers, no `/downloads` page. ESTI AI runs via a
+> self-hosted backend gateway, not a local desktop model. The
+> `LOCAL-FIRST.md`/`PLANS-AND-TIERS.md` docs this block cited no longer
+> exist in the repo. Any campaign copy should be checked against
+> `CLAUDE.md` § Launch status directly before use rather than this block.
 
 ---
 

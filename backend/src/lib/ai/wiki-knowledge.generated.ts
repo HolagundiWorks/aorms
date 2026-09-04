@@ -166,7 +166,7 @@ Both apps run on the same AORMS platform spine:
 
 ## Platform context
 
-AORMS (**Accelerated Operational Resources Management System**) is the wider platform — operational and design frameworks for **AEC consulting firms**. Two apps share one spine:
+AORMS (**Architecture Operations & Resource Management System**) is the wider platform — operational and design frameworks for **AEC consulting firms**. Two apps share one spine:
 
 | Discipline | App |
 | --- | --- |
@@ -891,7 +891,7 @@ This wiki is organised in **four domains**:
 | **[AI core](ai-core)** | **EOMS** knowledge bank + **ESTI** internal AI agent — cognition engine, Ask ESTI |
 | **[Management](management)** | Finance, billing, HR, licensing, team performance, operational framework |
 
-**AORMS** (**Accelerated Operational Resources Management System**) is the platform for **AEC consulting firms**. Two apps share one spine: **AORMS-Studio** (architecture — shipping from this repository) and **AORMS-Consultancy** (engineering — live).
+**AORMS** (**Architecture Operations & Resource Management System**) is the platform for **AEC consulting firms**. Two apps share one spine: **AORMS-Studio** (architecture — shipping from this repository) and **AORMS-Consultancy** (engineering — live).
 
 Sign in at [aorms.in/login](https://aorms.in/login) or the desktop node. One standard licence — unlimited users, **5 GB** included cloud storage; desktop preferred + web parity.
 `;

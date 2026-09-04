@@ -230,7 +230,9 @@ re-captured (Playwright).
 
 3. **Documentation** (Phase 3 — done)
    - `AORMS-OFFICE-SYSTEM.md` is the canonical product doc
-   - `docs/esti/archived/` holds superseded specs
+   - Superseded specs are deleted outright, not archived (see § Legacy docs
+     deleted above and `README.md`'s no-archive policy) — there is no
+     `docs/esti/archived/` to check
 
 4. **CI verification** (local, before pushing)
    - `tsc --noEmit` — ✅ green (frontend, backend, contracts all 0 errors)

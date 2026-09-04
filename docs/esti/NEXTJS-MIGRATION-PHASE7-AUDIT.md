@@ -9,58 +9,51 @@ the draft-approval workflow. Last phase in the 2–7 audit sequence.
 
 ---
 
-## The central finding — the codebase, `PRODUCTION-OPS.md`, and `CLAUDE.md` disagree about where ESTI runs, and the code hasn't caught up to the documented decision
+## The central finding, corrected — this audit's original claim was based on an incomplete read; the architecture is not actually broken
 
-Three sources, three different answers, read directly rather than assumed:
+**This section originally claimed a three-way contradiction between `CLAUDE.md`,
+`PRODUCTION-OPS.md`, and the code. That claim doesn't hold up against fuller
+evidence and is corrected here rather than left standing** — in keeping with
+this series' own rule of fixing findings once shown wrong, not just adding new
+ones.
 
-1. **`CLAUDE.md`** (this repo's own top-level instructions) says: *"ESTI runs on
-   **desktop apps only** (local Ollama / Foundry Local) — not on the cloud hub
-   or aorms.in,"* and cites `docs/esti/LOCAL-FIRST.md` as canon.
-2. **`docs/esti/LOCAL-FIRST.md` no longer exists at that path** — it has been
-   moved to `docs/esti/archived/LOCAL-FIRST.md`. `PRODUCTION-OPS.md` § ESTI AI
-   explains why, explicitly: *"Product law (2026-09 pivot): AORMS is web-only.
-   ESTI... runs as part of the **office hub**, not a desktop app — the
-   pre-pivot 'desktop-only Ollama' model (`LOCAL-FIRST.md`, `AORMS-SUITE.md` §
-   AI, both now archived) is superseded. ESTI answers only from validated firm
-   repositories via the backend AI gateway."* `ARCHITECTURE.md`'s "AI Boundary"
-   section matches this: *"AI providers are accessed through a backend
-   gateway... provider TBD per deployment."*
-3. **The actual code disagrees with #2 and matches the archived #1.**
-   `backend/src/lib/ai/gateway.ts`'s own comment reads *"Desktop-first,
-   local-only: AI resolves to a local Ollama model or the deterministic mock
-   template. There is no external/cloud provider"* — and it means it literally:
-   `resolveRuntime()` only ever returns `"ollama"` or `"mock"`, and the
-   `"ollama"` path calls `callOllamaChat({ baseUrl, ... })` **from the backend
-   server process itself**, defaulting to `http://127.0.0.1:11434`. On a
-   cloud-hosted backend (aorms.in, or its Next.js/Supabase successor), that
-   loopback address resolves to **the server's own localhost**, not a user's
-   desktop — this call cannot reach a user's local Ollama instance no matter
-   how `ollamaBaseUrl` is configured, because there is no mechanism for the
-   browser to tell the server which desktop to call back to. The only way this
-   code path currently produces a real (non-mock) answer in a cloud deployment
-   is if a shared Ollama instance is reachable from the backend server itself —
-   which is a real, working design, but it is "one shared server-side model
-   for the whole firm," not "each user's private local Ollama," and nothing in
-   the code, `ai.router.ts`'s comments, or the settings UI acknowledges that
-   distinction. `ai.router.ts` repeats the same framing: *"Local-only AI: no
-   secret to redact,"* *"Local-first AI is unmetered."*
+At the time this audit was first written, `CLAUDE.md` said ESTI was
+desktop-only and cited an archived `LOCAL-FIRST.md`. **`CLAUDE.md` has since
+been corrected** (by a later session, independent of this audit) — it now
+reads: *"ESTI runs as part of the office hub (web-only, 2026-09 pivot) — not
+a desktop app. It calls a self-hosted Ollama container alongside the backend
+(`compose.yaml`/`compose.prod.yaml` `ollama` service), not a user's own
+machine,"* and explicitly notes the old desktop-only docs *"were deleted 2026-09
+with the rest of `docs/esti/archived/`; this was the stale claim they left
+behind."* `CLAUDE.md` now agrees with `PRODUCTION-OPS.md` and `ARCHITECTURE.md`.
 
-**This is not a migration question to resolve unilaterally** — it's a live
-product-architecture decision that `PRODUCTION-OPS.md` says was already made
-(office-hub, backend-gateway, provider TBD) but that the implementation never
-followed through on. Whoever picks up Phase 7 needs to either (a) treat this
-phase as "finish the pivot the docs already describe" — pick a real
-provider strategy for cloud deployment (a hosted LLM API behind the gateway,
-or a firm-configurable self-hosted endpoint the *backend* can reach, not a
-per-user desktop one) and update the code/comments to match, or (b) confirm
-with the product owner that desktop-only Ollama is still actually the
-intended model despite `PRODUCTION-OPS.md`'s "superseded" language, and that
-`PRODUCTION-OPS.md`/`ARCHITECTURE.md`/`CLAUDE.md` need correcting instead.
-**Flagging this rather than picking a side** — it's exactly the kind of
-"decide on purpose, don't silently port a stale assumption forward" case this
-audit series has surfaced in every prior phase (Phase 5's dashboard RLS gap,
-Phase 6's hosting-topology question), just with documentation actively
-disagreeing with itself this time rather than only with the code.
+The code was also read incompletely the first time: `backend/src/lib/ai/
+gateway.ts`'s **fallback default** for `ollamaBaseUrl` is `http://127.0.0.1:11434`
+(used only when the `OLLAMA_BASE_URL` env var is unset), and the comments
+around it ("Desktop-first, local-only") are genuinely stale wording — but the
+**actual deployed configuration is not that fallback**. `compose.yaml` sets
+`OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}` (dev) and
+`compose.prod.yaml` sets `http://esti-ollama:11434` (prod) — both the Docker-
+Compose service hostname for the shared `ollama` container `CLAUDE.md`
+describes, reachable from the backend container over the compose network.
+**The architecture works as `CLAUDE.md`/`PRODUCTION-OPS.md` now describe it**:
+one shared, self-hosted Ollama instance per deployment, called server-side —
+not a per-user desktop model, and not currently broken.
+
+**What's left, now narrower than originally claimed:**
+- `gateway.ts`'s comments (*"Desktop-first, local-only... There is no
+  external/cloud provider"*) and `ai.router.ts`'s (*"Local-only AI: no secret
+  to redact," "Local-first AI is unmetered"*) are stale wording — accurate
+  about there being no external API, misleading about "desktop"/"local" when
+  the real shape is "one shared server-side container per deployment." Worth
+  a comment fix when this code is next touched; not a functional bug.
+- `ARCHITECTURE.md`'s "provider TBD per deployment" is itself now slightly
+  behind `CLAUDE.md`'s more specific "self-hosted Ollama container" answer —
+  minor, not contradictory, not chased further here.
+- The provider-strategy question this section originally posed as urgent
+  (hosted LLM API vs. self-hosted) **is already answered**: self-hosted Ollama,
+  per-deployment, server-reachable. Nothing here blocks Phase 7 implementation
+  on an unresolved architecture question the way the original write-up implied.
 
 ---
 
@@ -142,15 +135,15 @@ note the decision rather than silently dropping it.
 ## Suggested Phase 7 approach
 
 Given the central finding above, this phase doesn't have a normal "landing
-order of tables" the way Phases 2–5 did — it has one product decision gating
-everything, similar in shape to (though smaller in scope than) Phase 6's
-hosting-topology question:
+order of tables" the way Phases 2–5 did — but unlike Phase 6, the provider
+question that used to gate everything here is already answered (self-hosted
+Ollama, per-deployment, server-reachable — see the corrected central finding
+above), so this is a normal small-phase sequence, not a blocked one:
 
-1. **Resolve the provider-architecture question first** — surfaced above, not
-   decided here. Get an explicit answer: hosted LLM API behind the gateway,
-   firm-configurable self-hosted endpoint the *server* can reach, or confirm
-   the desktop-only model is still correct and the newer docs need fixing
-   instead. Everything else in this phase is downstream of that answer.
+1. **Decide whether to port a self-hosted Ollama container into the target
+   Hostinger deployment**, or reuse Phase 6's hosting-topology decision if a
+   persistent-process answer already exists there — this is now the only real
+   open infra question, and it's Phase 6's question, not a new one.
 2. **Port `esti_ai_run` + the approval-gate workflow** — works under the mock
    provider alone, no dependency on #1's answer, and is the actual
    compliance/audit backbone `ARCHITECTURE.md` cares about.
