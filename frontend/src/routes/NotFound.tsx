@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { AORMS_STUDIO, AORMS_PLATFORM } from "../lib/product-nomenclature.js";
+import { AORMS_OFFICE_HUB, AORMS_PLATFORM } from "../lib/product-nomenclature.js";
 import { MarketingShell } from "../components/landing/MarketingShell.js";
 
 /** Public 404 — unknown marketing paths (not a soft redirect to the homepage). */
 export function NotFound() {
   useEffect(() => {
     const title = "Page not found — AORMS";
-    const description = "This page does not exist on aorms.in. Browse the platform home or sign in to AStudio.";
+    const description = "This page does not exist on aorms.in. Browse the platform home or sign in to your office hub.";
     document.title = title;
     document.querySelector('meta[name="description"]')?.setAttribute("content", description);
     let robots = document.querySelector('meta[name="robots"]');
@@ -32,7 +32,7 @@ export function NotFound() {
           <p className="lp2-blog-links">
             <Link to="/">{AORMS_PLATFORM.name} home</Link>
             <span aria-hidden> · </span>
-            <Link to="/login">{AORMS_STUDIO.title}</Link>
+            <Link to="/login">{AORMS_OFFICE_HUB.title}</Link>
           </p>
         </header>
       </div>
