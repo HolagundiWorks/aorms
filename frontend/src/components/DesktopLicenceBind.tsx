@@ -12,7 +12,6 @@ import {
 import { can } from "@esti/contracts";
 import { useState } from "react";
 import { useAuth } from "../lib/auth.js";
-import { isNativeDesktopShell } from "../lib/desktopNativeBridge.js";
 import { buildTimeHost, useRuntimeCapabilities } from "../lib/runtimeCapabilities.js";
 import { trpc } from "../lib/trpc.js";
 
@@ -20,19 +19,16 @@ import { trpc } from "../lib/trpc.js";
  * LF4 desktop first-run — bind an activation key to this install so hub
  * meta/artifact sync can start. Non-blocking dialog for firm admins when the
  * node is unlicensed or licensed without a sync bearer.
- *
- * Not used on web — App mounts this only when {@link isDesktopClient}.
  */
 export function DesktopLicenceBind() {
   const { user } = useAuth();
-  const desktop = isDesktopClient();
+  const caps = useRuntimeCapabilities();
   const utils = trpc.useUtils();
-  const admin = Boolean(user && can(user.role, "firm:admin") && desktop);
   const licQ = trpc.license.status.useQuery(undefined, {
-    enabled: admin,
+    enabled: !!user && can(user.role, "firm:admin"),
   });
   const hubQ = trpc.sync.hubConfigured.useQuery(undefined, {
-    enabled: admin,
+    enabled: !!user && can(user.role, "firm:admin"),
   });
 
   const [key, setKey] = useState("");
@@ -53,13 +49,8 @@ export function DesktopLicenceBind() {
     },
   });
 
-  // WinUI WebView2 injects `__AORMS_NATIVE_SHELL__.host=desktop` even when Vite
-  // was not built with VITE_RUNTIME_HOST (dev URL against loopback).
   const isDesktop =
-    buildTimeHost() === "desktop" ||
-    caps.host === "desktop" ||
-    Boolean(import.meta.env.VITE_RUNTIME_HOST === "desktop") ||
-    isNativeDesktopShell();
+    buildTimeHost() === "desktop" || caps.host === "desktop" || Boolean(import.meta.env.VITE_RUNTIME_HOST === "desktop");
 
   if (!user || !can(user.role, "firm:admin") || !isDesktop || dismissed) return null;
 

@@ -1,30 +1,59 @@
-# Agent workstreams (local-first overnight split)
+# AORMS active delivery — named agent crew
 
-> Parallel tracks for desktop + hub delivery. Prefer small PRs; update this
-> file's checkboxes when an item lands. Product law: [LOCAL-FIRST.md](LOCAL-FIRST.md) ·
-> roadmap: [ROADMAP.md](ROADMAP.md).
->
-> **Vishwakarma** (CTO / orchestrator) merges to `main`.
+**Status:** ACTIVE · **Date:** 2026-08-06  
+**Parent:** [ROADMAP.md](ROADMAP.md) · morning checklist [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)
 
-## Crew
+Four agents. Call them by name in handoffs and PRs.
 
-| Name | Role | Focus |
-| --- | --- | --- |
-| **Vishwakarma** | CTO / orchestrator | Merge PRs to `main`; unblock cross-lane deps |
-| **Bhoomi** | Local desktop | Tauri / installer / code signing / first-run bind (LF4) |
-| **Gagan** | Cloud hub / sync / contracts | Panel `syncToken`, `sync.*`, `@esti/contracts`, LF3 meta |
-| **Aakash** | Cloud portal / GTM | Download UI, marketing manifests, web parity (LF5–LF6) |
+| Name | Role | Runtime | Owns |
+| --- | --- | --- | --- |
+| **Vishwakarma** | CTO / orchestrator | Cloud or local | Coordination · merge to `main` · roadmap truth |
+| **Bhoomi** | Local desktop | This Windows machine | LF4 sign · install · licence bind |
+| **Gagan** | Cloud hub / sync | Cloud | `syncToken` · hub APIs · `@esti/contracts` |
+| **Aakash** | Cloud portal / GTM | Cloud | Downloads · M8 · LF6 · empty scaffolds |
 
-Hard out-of-scope per agent: do not take another lane's packaging/portal work,
-Stripe/W4, or edit `frontend/src/routes/Projects.tsx` / `Clients.tsx`.
+```mermaid
+flowchart TB
+  Vish[Vishwakarma_CTO]
+  subgraph local [Bhoomi_local]
+    LF4[LF4_sign_install_bind]
+    Tauri[Tauri_MSVC_rebuild]
+    Smoke[Physical_Setup.exe_gate]
+  end
+  subgraph gagan [Gagan_cloud_hub]
+    Hub[Hub_API_fidelity]
+    SyncTok[syncToken_activate_path]
+    Contracts[contracts_node_publish]
+  end
+  subgraph aakash [Aakash_cloud_portal]
+    Portal[Downloads_manifest_ready]
+    M8[M8_GTM_honesty]
+    LF6[LF6_Figma_kit_tokens]
+    Scaffolds[Empty_repo_scaffolds]
+  end
+  Vish --> local
+  Vish --> gagan
+  Vish --> aakash
+  LF4 -->|signed_URL| Portal
+  SyncTok --> LF4
+  Hub --> SyncTok
+  gagan -->|PR| Vish
+  aakash -->|PR| Vish
+  local -->|PR| Vish
+```
 
-## Split table (ROADMAP)
+## Hard boundaries
 
-| Agent | Docs |
+| Rule | Why |
 | --- | --- |
-| **Bhoomi** | [DESKTOP-REPOS.md](DESKTOP-REPOS.md) D5–D7 · LF4 |
-| **Gagan** | This § Gagan · [HUB-API.md](HUB-API.md) · DESKTOP-REPOS D1–D4 |
-| **Aakash** | LF5–LF6 · portal / GTM surfaces |
+| **Do not** extract AStudio / AConsulting app code | [DESKTOP-REPOS.md](DESKTOP-REPOS.md) gate still open |
+| **Do not** touch Stripe / W4 integrations | Deferred by choice |
+| **Do not** edit `Projects.tsx` / `Clients.tsx` | Parallel WIP |
+| **Bhoomi** owns signing + physical install | Windows cert + UAC / SmartScreen |
+| **Gagan** owns hub / sync / licence mint | Backend + contracts; no Tauri |
+| **Aakash** owns portal / docs / manifests / GTM | Frontend public surfaces |
+| **Vishwakarma** owns merge to `main` | Single integration owner |
+| Update [ROADMAP.md](ROADMAP.md) + this file when status flips | Change rule |
 
 ## Crew sync matrix
 
@@ -43,45 +72,60 @@ live download URL. Gagan does **not** own `desktop/` packaging.
 
 ---
 
-## Gagan — Hub / sync / contracts
+## Vishwakarma — CTO / orchestrator
+
+**Owns:** Crew briefs · handoffs · conflict resolution · **merge to `main`** ·
+roadmap status accuracy.
+
+### Responsibilities
+
+1. Keep Bhoomi / Gagan / Aakash on hard boundaries; reassign if a PR crosses streams.
+2. Prefer **separate PRs per workstream**; rebase when Gagan and Aakash both touch
+   `ROADMAP.md` / this file (append status lines, don’t rewrite tables).
+3. **Merge** green workstream PRs into `main`; do not land unsigned installer URL
+   flips or app-code extraction.
+4. Update [ROADMAP.md](ROADMAP.md), this file, [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)
+   when status flips.
+5. Gate Bhoomi → Aakash handoff: only after **signed** Setup.exe + sha256 exist.
+
+### Out of scope alone
+
+- Physical code-signing / UAC (operator with Bhoomi).  
+- Inventing Stripe / W4 / repo extraction work.
+
+---
+
+## Bhoomi — Local desktop
+
+**Owns:** LF4 physical gate · Tauri / installer · morning operator checklist.  
+**Chat:** this session.
 
 ### Goals
 
-1. **Panel → sync bearer** — `/platform/v1/activate` + refresh issue/persist
-   `syncToken`; hub `firmFromSyncToken` resolves **legacy** `esti_license_install`
-   **and** `hlp_device` → `hlp_organization.sync_firm_id`; node `license.activate`
-   writes `esti_org_settings.sync_token`.
-2. **Harden `sync.*` for `ESTI_ROLE=node`** — flush / pullMeta / capabilities /
-   hubConfigured; no breaking wire changes without bumping [HUB-API.md](HUB-API.md).
-3. **DESKTOP-REPOS contracts gate** — publish path for `@esti/contracts` (version
-   note + consumer README); never a second contracts repo.
-4. **LF3 spot-check** — domain meta enqueue/apply for task / estimateTotals /
-   phaseProgress (`domainMeta.ts`); fix regressions only / land missing hooks.
-5. **Docs sync** — HUB-API · LOCAL-FIRST · ROADMAP · DESKTOP-REPOS · this file.
+1. Prefer **MSVC** toolchain (VS Build Tools → Desktop C++) over WinLibs when UAC allows; rebuild Studio Setup.exe.
+2. **Code-sign** `desktop/artifacts/AORMS-Studio_0.1.0_x64-setup.exe` (or rebuilt artifact).
+3. Run [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) physical install: admin sign-in → panel activate → `hasSyncToken` → sync flush.
+4. Optional: rebuild **CONSULTANCY** profile installer once Studio path is green.
+5. Hand signed asset URL + sha256 to **Aakash** for portal wire-up (do not publish unsigned).
 
-### Status (2026-08-06) — Gagan
+### Out of scope
 
-| # | Item | Status |
-| --- | --- | --- |
-| G1 | Panel activate/refresh returns + hashes `syncToken` on `hlp_device` | ✅ |
-| G2 | Node `license.activate` / refresh persists `syncToken` | ✅ |
-| G3 | `firmFromSyncToken` legacy + `hlp_device` | ✅ |
-| G4 | Migration `0227_hlp_org_sync_firm` (`sync_firm_id`) | ✅ |
-| G5 | `sync.flush` / `pullMeta` / `hubConfigured` node hardening + docs | ✅ |
-| G6 | `@esti/contracts` `0.1.0` + README (DESKTOP-REPOS D1) | ✅ |
-| G7 | LF3 `domainMeta.ts` enqueue/apply (task · estimate · phaseProgress) | ✅ |
-| G8 | HUB-API.md `2026-08` + LOCAL-FIRST / ROADMAP checkboxes | ✅ |
+- Portal download URL flips until signing is done (prep only on Aakash).
+- Hub API redesign (Gagan).
+- Repo extraction.
+- Merging to `main` (Vishwakarma).
 
-### Handoff to Bhoomi (morning bind)
+### Key paths
 
-**Ready for bind test** once this PR is merged/deployed to the hub:
+- `desktop/` · `desktop/scripts/build-installer.ps1` · `desktop/src-tauri/`
+- `MORNING-TEST-LF4.md` · [LOCAL-FIRST.md](LOCAL-FIRST.md) LF4
 
-1. Hub has migration **0227** + `/platform/v1/activate` returns `syncToken`.
-2. Node env: `ESTI_HUB_URL` **and** `ESTI_LICENSE_API_URL` (+ `ESTI_PRODUCT_API_KEY` + `INSTALL_ID`).
-3. Owner `license.activate` → `sync.hubConfigured.syncReady === true`.
-4. Pre-2026-08 devices: one `license.refresh` (catch-up mint) or re-activate.
+### Done when
 
-### Out of scope (Gagan)
+- [ ] Signed Studio Setup.exe exists and installs on this Windows host  
+- [ ] First-run licence bind yields hub `syncToken` + meta sync works  
+- [ ] Artifact path + sha256 noted for Aakash  
+- [ ] Vishwakarma has merged the LF4 code PR (unsigned artifact ok in branch; URLs stay gated)
 
 ---
 
@@ -144,7 +188,6 @@ live download URL. Gagan does **not** own `desktop/` packaging.
    `docs/esti/repo-scaffolds/` READMEs only — **no app code move**.
 5. Align [WEB-PORTAL.md](WEB-PORTAL.md) / MARKET-FIT M8 item 4 status with Bhoomi’s
    publish signal (leave 🔲 until signed URL exists).
-6. **LF5** web parity polish: capability badges, degraded AI UX, shared keymap / Help.
 
 ### Out of scope
 
@@ -156,9 +199,9 @@ live download URL. Gagan does **not** own `desktop/` packaging.
 ### Key paths
 
 - `frontend/src/routes/Downloads.tsx` · `DocsHub.tsx` · `AccountPortal.tsx`  
-- `frontend/src/lib/desktop-installers.ts` · `frontend/public/update-manifests/`  
+- `frontend/src/lib/portal-downloads.ts` · `frontend/public/update-manifests/`  
 - `frontend/src/content/blog/` · landing SEO / nomenclature imports  
-- `docs/esti/repo-scaffolds/` · [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) LF5–LF6
+- `docs/esti/repo-scaffolds/` · [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) LF6
 
 ### Done when
 
@@ -167,14 +210,8 @@ live download URL. Gagan does **not** own `desktop/` packaging.
 - [x] LF6 Figma/token item advanced or explicitly scoped with next step  
 - [x] Optional empty GitHub scaffolds created without app code (`docs/esti/repo-scaffolds/`)  
 - [x] PR opened for Vishwakarma to merge — **#46 merged**  
-- [x] LF5 capability badges · Hosted AI UX · shared keymap + `/help`  
-- [x] LF6 Inspector / Ask ESTI **one right slot** — `RightSlot` + `AskEstiPanel` + `lib/right-slot.ts` (Properties ↔ Ask; `CapabilityBadge` in Ask tab; rebased on #51).  
 
-**Still 🔲:** live download URL flip (wait on Bhoomi signed WinUI URL + sha256).
-
-**Status (2026-08-06, Aakash):** `/downloads` one-line fill fields confirmed exact in [WEB-PORTAL.md](WEB-PORTAL.md) (Option A env / Option B manifest+flag); placeholders stay `web_fallback`. Visual regression job on `main` fails **before** landing-hero screenshot — contracts `ActivateResult.syncToken` duplicate TS1117 (#55/#51); **not** a hero baseline drift from portal lanes.
-
-**Status (2026-08-06, Aakash):** LF6 #54 rebased on LF5 tip; download URL flip still gated; CI lint green-up in #55.
+**Still 🔲:** live download URL flip (wait on Bhoomi signed Setup.exe + sha256).
 
 ---
 

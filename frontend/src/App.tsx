@@ -67,7 +67,6 @@ import { AppRibbon } from "./components/shell/AppRibbon.js";
 import { AppFooterBar } from "./components/shell/AppFooterBar.js";
 import { UsageIdentity } from "./components/identity/UsageIdentity.js";
 import { DesktopLicenceBind } from "./components/DesktopLicenceBind.js";
-import { isDesktopClient } from "./lib/runtimeCapabilities.js";
 import { PomodoroProvider } from "./contexts/PomodoroContext.js";
 import { UploadAuthProvider } from "./lib/uploadAuth.js";
 // Landing + Login stay eager so the first paint (marketing / sign-in) needs no extra

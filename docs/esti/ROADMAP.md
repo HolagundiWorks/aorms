@@ -4,16 +4,14 @@
 **Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
 **Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
 **AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)  
-**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 (WinUI #49 · sign/bind open) · LF5 ✅ (#51) · LF6 ✅ right-slot (#54) — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
+**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 (unsigned Setup.exe + bind UI) · LF5–LF6 open — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
+**Crew:** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) (Vishwakarma · Bhoomi · Gagan · Aakash)
 
 **Crew:** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) (Vishwakarma · Bhoomi · Gagan · Aakash)
 
-Open source for now; SaaS licensing deferred.
-
-**Active delivery (2026-08-06):** hub `0227` + panel `syncToken` ✅ · hub bind
-readiness ✅ (Gagan #53) · CI lint ✅ (#55) · worker ruff ✅ (#56) · LF5 ✅ (#51) ·
-LF6 right-slot ✅ (#54) · portal `/downloads` placeholders ✅ · LF4 **WinUI 3**
-shell 🚧 (Bhoomi #49 — Linux validate ✅ · Windows sign + physical bind per
+**Active delivery (2026-08-06):** hub `0227` + panel `syncToken` ✅ (Gagan #45) ·
+portal `/downloads` placeholders ✅ (Aakash #46) · LF4 Tauri scaffold +
+`DesktopLicenceBind` 🚧 (Bhoomi — sign + physical bind per
 [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)). Live installer URLs stay gated.
 The 2026-07-19 **web-only** product law is **superseded** for runtime shape
 ([PLANS-AND-TIERS.md](PLANS-AND-TIERS.md), [LOCAL-FIRST.md](LOCAL-FIRST.md)).
@@ -82,9 +80,9 @@ Desktop firm login target: **AORMS Connect** (not apex).
 | **LF1** | Hub meta event log + catch-up + WS; node meta outbox/cursor | ✅ 2026-08 |
 | **LF2** | Artifact content-hash; publish DTOs; portal-from-hub reads; desktop stub; product-law docs | ✅ 2026-08 |
 | **LF3** | Domain metadata enqueue/apply (tasks, estimate totals, phase progress) + panel `syncToken` | ✅ Gagan 2026-08 |
-| **LF4** | Signed **WinUI 3** installer + first-run licence / hub bind | 🚧 Bhoomi — `desktop/AStudio.Shell` + `DesktopLicenceBind` · sign/bind ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)); Tauri legacy |
-| **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | ✅ Aakash 2026-08 — `CapabilityBadge` · `keymap` · `/help` · web-parity `localAi` fix |
-| **LF6** | UX parity checklist + inspector/AI right-slot; Figma ↔ kit tokens | ✅ Aakash — token stub ✅ · right-slot ✅ (`RightSlot` Properties ↔ Ask ESTI) |
+| **LF4** | Signed Tauri installer + first-run licence / hub bind | 🚧 Bhoomi — unsigned Studio Setup.exe + `DesktopLicenceBind` · sign/bind morning ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)) |
+| **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | 🔲 Aakash |
+| **LF6** | UX parity checklist + inspector/AI right-slot; Figma ↔ kit tokens | ◐ Aakash — token stub ✅ · right-slot 🔲 |
 
 **Namespaces / seams:** `sync` (tRPC + REST) · `esti_meta_*` · `esti_sync_*` ·
 `packages/contracts` sync · `desktop/` · `trpc.sync.capabilities` ·
