@@ -1,18 +1,20 @@
 # AORMS Roadmap — index
 
-**Status:** ACTIVE | Web-only office hub (no allied apps)  
+**Status:** ACTIVE | Web-only office hub (no allied apps) | Stack migration to Next.js + Supabase planned  
 **Updated:** 2026-09-04
 
-This roadmap is split in two, by environment:
+This roadmap is split in two, by **branch and role**, not just environment —
+see [`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split for the
+full policy:
 
-| Roadmap | Covers | Audience |
-| --- | --- | --- |
-| **[ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)** | What's live on `aorms.in` — soft launch status, feature rollout, cloud infrastructure, deployment milestones | Product / ops |
-| **[ROADMAP-LOCAL.md](./ROADMAP-LOCAL.md)** | Engineering work in the local dev environment — codebase cleanup phases, Carbon Design System migration, technical debt, local dev/test loop | Engineering |
+| Roadmap | Branch | Covers | Role |
+| --- | --- | --- | --- |
+| **[ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)** | `cloud-agent` → `main` | What's live on `aorms.in`; **primary feature development**, including the Next.js/Supabase stack migration ([spec](./NEXTJS-SUPABASE-MIGRATION.md)) | Where new work happens |
+| **[ROADMAP-LOCAL.md](./ROADMAP-LOCAL.md)** | local checkout of `main` | Local dev/test loop — running the stack, typecheck/lint/test, verifying what cloud built | Where it gets tested |
 
-They stay in sync at milestone boundaries: local-dev work (Carbon migration
-waves, cleanup phases) gates what ships in the cloud roadmap's Q4 2026
-milestones.
+They stay in sync at milestone boundaries: cloud-branch feature work (the
+stack migration, new modules) is verified locally before/while it merges to
+`main`.
 
 ---
 

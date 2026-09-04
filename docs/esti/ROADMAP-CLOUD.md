@@ -1,11 +1,44 @@
 # AORMS Cloud Roadmap (aorms.in / production)
 
-**Status:** ACTIVE — soft launch (landing + blog live)  
+**Status:** ACTIVE — soft launch (landing + blog live); Next.js/Supabase stack
+migration planned  
 **Updated:** 2026-09-04  
 **Scope:** What ships to the **production VPS** (`aorms.in`) and when — deployment
-status, feature rollout to the live office hub, and cloud infrastructure. For
-codebase work happening in local dev before it ships here, see
-[ROADMAP-LOCAL.md](./ROADMAP-LOCAL.md).
+status, feature rollout to the live office hub, and cloud infrastructure. This
+is also where **primary feature development happens** — on the `cloud-agent`
+branch, in cloud (hosted agent) sessions, merging up to `main`. For the local
+test/verify loop that checks this work, see [ROADMAP-LOCAL.md](./ROADMAP-LOCAL.md)
+and [`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split.
+
+---
+
+## Stack migration — Next.js + Supabase (planned)
+
+Full spec: [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md).
+
+**Target:** Next.js + TypeScript + Carbon Design System + Supabase, replacing
+the current React SPA + tRPC + Fastify + raw PostgreSQL + Python worker stack.
+Deployment target moves from the VPS (`compose.prod.yaml`) to Hostinger
+Managed App Hosting; Supabase replaces self-hosted PostgreSQL/auth/storage.
+
+| Item | Status |
+| --- | --- |
+| Target-architecture spec written | ✅ [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) |
+| Repo audit (map current tRPC procedures / Fastify routes / components to Next.js equivalents — see spec § 36–37) | 🔲 |
+| Phase 1 — Foundation (Next.js + TS + Carbon + Supabase + auth + app shell) | 🔲 |
+| Phase 2 — Core ERP (orgs, users, roles, clients, projects, tasks) | 🔲 |
+| Phase 3 — Commercial (proposals, quotations, contracts, invoices, payments) | 🔲 |
+| Phase 4 — Technical (estimation, BOQ, measurements, documents, drawings) | 🔲 |
+| Phase 5 — Reporting (dashboards, reports, exports, analytics) | 🔲 |
+| Phase 6 — Advanced processing (PDF/DWG, Python worker) | 🔲 |
+| Phase 7 — Optional AI | 🔲 |
+
+**Where this happens:** `cloud-agent` branch, cloud sessions. **Do not** start
+this migration from a local session — pull `cloud-agent` to see current
+progress, and use local sessions to test/verify what lands, per
+[`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split. The current
+production stack (tRPC/Fastify/VPS) stays live and unchanged until a phase
+above is actually merged and verified — nothing on this list is implemented yet.
 
 ---
 
@@ -137,6 +170,7 @@ this file tracks only what's actually live for users.
 
 - **Deployment / VPS?** See [VPS-INSTALL.md](./VPS-INSTALL.md) · [PRODUCTION-OPS.md](./PRODUCTION-OPS.md)
 - **Product definition?** See [AORMS-OFFICE-SYSTEM.md](./AORMS-OFFICE-SYSTEM.md)
+- **Stack migration spec?** See [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md)
 - **Engineering / local-dev status?** See [ROADMAP-LOCAL.md](./ROADMAP-LOCAL.md)
 - **Market fit / GTM?** See [MARKET-FIT.md](./MARKET-FIT.md)
 

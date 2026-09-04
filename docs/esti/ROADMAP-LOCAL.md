@@ -1,13 +1,22 @@
 # AORMS Local Development Roadmap
 
-**Status:** ACTIVE — web-only pivot cleanup + Carbon migration in progress  
+**Status:** ACTIVE — local test/verify loop  
 **Updated:** 2026-09-04  
-**Scope:** Engineering work done in the **local dev environment** (Podman/Docker
-compose stack) before it ships to production — codebase cleanup, the Carbon
-Design System migration, technical debt, and the local dev/test loop. For what's
-actually live on `aorms.in`, see [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md).
+**Scope:** Work done in the **local dev environment** (Podman/Docker compose
+stack, this machine, `main` branch) — primarily **testing and verification**
+of what the cloud branch (`cloud-agent`) builds: running the stack, typecheck/
+lint/unit/e2e tests, manual verification, bug fixes found while testing. See
+[`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split for the full
+policy, and [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) for where **primary feature
+development** (including the [Next.js/Supabase migration](./NEXTJS-SUPABASE-MIGRATION.md))
+now happens. The phase history below (Sept 2026 web-only pivot cleanup, Carbon
+migration) predates this split and stays as a record of local-dev work already
+done; new net-new feature work should start on `cloud-agent`, not here.
 
-**Platform:** React + Carbon Design System + Fastify backend + PostgreSQL
+**Platform (current, live):** React + Carbon Design System + Fastify backend +
+PostgreSQL. (Target platform for new development is Next.js + Supabase — see
+[NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md); this local
+environment keeps testing the current stack until that migration lands.)
 
 ---
 
@@ -25,6 +34,25 @@ podman compose up -d --build
 # Backend  → http://localhost:4000/health  ·  tRPC at /trpc
 # MinIO    → http://localhost:9001 (console)
 ```
+
+---
+
+## Local test/verify loop (2026-09)
+
+The day-to-day job here is now **testing**, not authoring new features:
+
+1. `git fetch --all && git pull` on `main`; pull `cloud-agent` too when asked
+   to verify unmerged cloud work.
+2. Bring up the stack (above), run the app, click through the area under test.
+3. `tsc --noEmit`, `eslint`, unit tests (`vitest`, `pytest` in `worker/`), and
+   Playwright/e2e where they exist — see [`../../CLAUDE.md`](../../CLAUDE.md)
+   § Dev / verify loop for exact commands.
+4. Fix bugs found while testing directly; for larger feature gaps, note them
+   for the `cloud-agent` branch rather than building them out here.
+5. Once the Next.js/Supabase migration ([spec](./NEXTJS-SUPABASE-MIGRATION.md))
+   starts landing on `cloud-agent`, this loop extends to testing that stack
+   too (Next.js dev server, Supabase local/staging project) alongside the
+   current one — updated here once that phase actually starts.
 
 ---
 
@@ -161,7 +189,9 @@ re-captured (Playwright).
 - [OFFICE-SYSTEM-CLEANUP-PLAN.md](./OFFICE-SYSTEM-CLEANUP-PLAN.md) — 6-phase cleanup
 - [NAVIGATION.md](./NAVIGATION.md) — canonical sidebar IA
 
-**Cloud / production:** see [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) ·
+**Cloud / production (primary feature development, `cloud-agent` branch):**
+see [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) ·
+[NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) ·
 [PRODUCTION-OPS.md](./PRODUCTION-OPS.md) · [VPS-INSTALL.md](./VPS-INSTALL.md)
 
 **Archived (legacy):**
@@ -174,7 +204,9 @@ re-captured (Playwright).
 - **Cleanup questions?** See [OFFICE-SYSTEM-CLEANUP-PLAN.md](./OFFICE-SYSTEM-CLEANUP-PLAN.md)
 - **Carbon migration?** See [CARBON-MIGRATION-WAVE3-PLAN.md](./CARBON-MIGRATION-WAVE3-PLAN.md)
 - **Architecture questions?** See [ARCHITECTURE.md](./ARCHITECTURE.md)
-- **Deployment / what's live?** See [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)
+- **Stack migration spec?** See [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md)
+- **Deployment / what's live? Where does new feature work happen?** See [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)
+- **Branch policy (cloud vs local)?** See [`../../CLAUDE.md`](../../CLAUDE.md) § Branch & environment split
 
 ---
 

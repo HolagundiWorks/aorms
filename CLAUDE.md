@@ -31,6 +31,21 @@ Monorepo (pnpm): `packages/contracts`, `backend` (Fastify + tRPC + Drizzle),
 `frontend` (React + Vite), Python `worker`. Dev: `compose.yaml`. Prod VPS:
 `compose.prod.yaml` + `deploy/*`.
 
+## Stack migration — Next.js + Supabase (planned, not yet started)
+
+A target-architecture rewrite is specified in
+[`docs/esti/NEXTJS-SUPABASE-MIGRATION.md`](docs/esti/NEXTJS-SUPABASE-MIGRATION.md):
+**Next.js + TypeScript + Carbon Design System + Supabase**, replacing the
+current React SPA + tRPC + Fastify + raw PostgreSQL + Python worker stack,
+deploying to Hostinger Managed App Hosting instead of the VPS. It is a
+**development specification** — nothing in the current codebase changes until
+this migration is executed. Do not assume Next.js/Supabase exist in this repo
+until that doc's status line says otherwise; the tables below (Architecture,
+Module map, Frontend routes) describe the **current, live** stack.
+
+Migration sequencing lives in [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md);
+see also § Branch & environment split below for where this work happens.
+
 ## Launch status (2026-09-04)
 
 **aorms.in ships landing + blog.** Office hub login going live soon (web-only, no desktop).
@@ -232,6 +247,24 @@ on `esti_site_assessment` and invoice rows after PDF upload.
 Tests: `worker/tests/test_jobs.py` (handler unit tests) and
 `test_retry_dlq.py` (retry/dead-letter stream tests). Run with `pytest` from the
 `worker/` directory.
+
+## Branch & environment split — cloud vs local (2026-09)
+
+Development now runs in two places at once, split by **branch and by role**,
+not by feature area:
+
+| Branch | Environment | Role |
+| --- | --- | --- |
+| `cloud-agent` | Cloud (hosted agent sessions) | **Primary feature development** — the Next.js/Supabase stack migration, new modules, most day-to-day coding happens here and merges up to `main`. |
+| `main` | — | Integration branch. Cloud work lands here; this is what a local session pulls. |
+| (local checkout, this machine) | Local (Podman/Docker compose, this repo) | **Testing and verification** — run the stack, exercise the app, write/run tests, file bugs, verify what the cloud branch produced before/after it merges. Not the primary place for new feature work. |
+
+**What that means day to day, in this local environment:**
+- Pull `main` (and `cloud-agent` when asked to verify unmerged cloud work) before starting.
+- Prefer: running the app, `tsc`/`eslint`/`vitest`/`pytest`, Playwright/e2e, manual click-through verification, filing/fixing bugs found while testing.
+- Avoid starting large net-new feature work here that duplicates what the cloud branch is already building — check `git log origin/cloud-agent` / `origin/main` first so local and cloud don't diverge on the same feature.
+- Small, testing-adjacent fixes (a broken test, a local-only config issue, a bug found while verifying) are fine to fix directly here.
+- Roadmap docs reflect this split: [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) tracks what cloud development is building (including the Next.js/Supabase migration — see § Stack migration above); [ROADMAP-LOCAL.md](docs/esti/ROADMAP-LOCAL.md) tracks the local test/verify loop, not net-new feature development.
 
 ## Dev / verify loop
 
