@@ -11,6 +11,21 @@ this one only covers what Phase 2 needs.
 
 ---
 
+## ✅ Decided (2026-09-04): single-tenant per deployment, for now
+
+**Option 1 below, for the development/demo phase.** No `org_id`/tenant
+scoping anywhere in Phase 2 (or later phases) — RLS policies check
+`auth.uid()` + role only, matching what the product already is and keeping
+early implementation simple. **Explicitly not a permanent decision:** once
+real firm accounts start onboarding (i.e. AORMS moves from one Supabase
+project per demo/dev deployment toward actually serving multiple paying
+firms), revisit multi-tenancy then — either option 2 (bolt `org_id` onto
+every table) or the licensing-platform-as-central-identity-service shape
+mentioned below, whichever fits how accounts actually get provisioned at
+that point. Don't design Phase 2's tables to make that harder than it needs
+to be (e.g. avoid assumptions that would be awkward to add a scoping column
+to later), but don't build the scoping now either.
+
 ## ⚠️ Critical finding — the current schema is single-tenant per deployment
 
 Before any Phase 2 table design: **the current Postgres schema has no
@@ -46,11 +61,10 @@ separate "licensing platform" schema (`backend/src/db/schema/licensing-platform.
 firm install talks to for activation/licensing — not the office-hub database
 itself. If real multi-tenancy is ever wanted, that existing split (one
 central identity/licensing service + many single-tenant firm databases) may
-be closer to workable than bolting `org_id` onto every ERP table. **Nobody
-has decided this yet — flag it before writing Phase 2 Supabase migrations.**
-Everything below assumes option 1 (single-tenant) since that's what today's
-product actually is; if option 2 is chosen instead, every table mapping
-below needs an added `org_id` column and RLS policy.
+be closer to workable than bolting `org_id` onto every ERP table — worth
+revisiting if multi-tenancy is ever wanted later. **Decided 2026-09-04:
+option 1.** Everything below reflects that — no `org_id` column, RLS scoped
+by `auth.uid()` + role only.
 
 ---
 
