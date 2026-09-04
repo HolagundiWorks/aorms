@@ -525,11 +525,17 @@ export function ContractorPortal() {
                   pushToast({ kind: "error", title: "Enter a valid amount" });
                   return;
                 }
-                submitBid.mutate({
+                const w = weeks.trim() ? Number(weeks) : undefined;
+                if (weeks.trim() && (!Number.isFinite(w) || (w ?? 0) <= 0)) {
+                  pushToast({ kind: "error", title: "Weeks must be a positive number" });
+                  return;
+                }
+                if (!openId) return;
+                submit.mutate({
                   invitationId: openId,
-                  amountPaise: Math.round(rupees * 100),
-                  completionWeeks: weeks.trim() ? Number(weeks) : undefined,
-                  notes: notes.trim() || undefined,
+                  amountPaise: paise,
+                  completionWeeks: w,
+                  notes: notes || undefined,
                 });
               }}
             >

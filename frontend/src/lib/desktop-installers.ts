@@ -141,6 +141,7 @@ function envInstallerUrl(app: DesktopInstallerApp): string | undefined {
   return map[app]?.trim();
 }
 
+/** Env gate — not a React hook (name must not start with `use`). */
 function releaseInstallersEnabled(): boolean {
   return envFlagTrue(
     import.meta.env.VITE_PORTAL_USE_RELEASE_INSTALLERS as string | undefined,
