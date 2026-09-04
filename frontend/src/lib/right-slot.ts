@@ -1,8 +1,9 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * LF6 — Properties inspector right slot.
- * Ask ESTI is not exposed in the AStudio / AConsulting staff SPA.
+ * LF6 — one right slot for Inspector properties ↔ Ask ESTI (both hosts).
+ * See docs/esti/DESKTOP-WEB-PARITY-UX.md. AI never gets a second chrome path;
+ * the footer Ask ESTI control opens this slot on the Ask tab.
  */
 
 export type RightSlotTab = "properties" | "ask";
@@ -24,7 +25,7 @@ export type RightSlotState = {
   inspector: InspectorPayload | null;
 };
 
-/** @deprecated Ask ESTI removed from this SPA — event is a no-op. */
+/** Window event — open/toggle Ask ESTI in the right slot (taskbar + Alt+A). */
 export const ASK_ESTI_EVENT = "esti:ask";
 
 /** Window event — open the Properties tab (optional detail in `event.detail`). */
@@ -32,7 +33,7 @@ export const OPEN_INSPECTOR_EVENT = "esti:inspect";
 
 let state: RightSlotState = {
   open: false,
-  tab: "properties",
+  tab: "ask",
   inspector: null,
 };
 
@@ -49,7 +50,9 @@ function setState(next: RightSlotState): void {
 
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
 export function getRightSlotState(): RightSlotState {
@@ -60,14 +63,18 @@ export function useRightSlot(): RightSlotState {
   return useSyncExternalStore(subscribe, getRightSlotState, getRightSlotState);
 }
 
-/** Open the slot on Properties (Ask tab is ignored). */
-export function openRightSlot(_tab: RightSlotTab = "properties"): void {
-  setState({ ...state, open: true, tab: "properties" });
+/** Open the slot on a tab (idempotent). */
+export function openRightSlot(tab: RightSlotTab): void {
+  setState({ ...state, open: true, tab });
 }
 
-/** @deprecated Ask ESTI removed from this SPA. */
+/** Toggle Ask ESTI — open on Ask, or close if already open on Ask. */
 export function toggleAskEstiSlot(): void {
-  /* no-op */
+  if (state.open && state.tab === "ask") {
+    setState({ ...state, open: false });
+    return;
+  }
+  setState({ ...state, open: true, tab: "ask" });
 }
 
 export function closeRightSlot(): void {
@@ -75,13 +82,13 @@ export function closeRightSlot(): void {
   setState({ ...state, open: false });
 }
 
-export function setRightSlotTab(_tab: RightSlotTab): void {
+export function setRightSlotTab(tab: RightSlotTab): void {
   if (!state.open) {
-    setState({ ...state, open: true, tab: "properties" });
+    setState({ ...state, open: true, tab });
     return;
   }
-  if (state.tab === "properties") return;
-  setState({ ...state, tab: "properties" });
+  if (state.tab === tab) return;
+  setState({ ...state, tab });
 }
 
 /** Publish properties into the Inspector tab (opens the slot). */
@@ -107,9 +114,7 @@ export function wireRightSlotWindowEvents(): () => void {
   }
   wired = true;
 
-  const onAsk = () => {
-    /* Ask ESTI removed — ignore */
-  };
+  const onAsk = () => toggleAskEstiSlot();
   const onInspect = (e: Event) => {
     const detail = (e as CustomEvent<InspectorPayload | undefined>).detail;
     if (detail && typeof detail === "object" && "title" in detail) {

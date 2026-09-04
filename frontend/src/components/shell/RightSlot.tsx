@@ -3,23 +3,29 @@ import {
   Box,
   IconButton,
   Stack,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { Surface, RADIUS } from "@hcw/ui-kit";
+import { Surface } from "@hcw/ui-kit";
 import { useEffect, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import {
   closeRightSlot,
+  setRightSlotTab,
   useRightSlot,
   wireRightSlotWindowEvents,
+  type RightSlotTab,
 } from "../../lib/right-slot.js";
+import { AskEstiPanel } from "../AskEstiPanel.js";
 
 /**
- * LF6 — Properties inspector only.
- * Ask ESTI is not mounted in the AStudio / AConsulting staff SPA.
+ * LF6 — one docked right slot: Properties ↔ Ask ESTI.
+ * Mirrors GlassRail geometry on the opposite edge. Same component on web and
+ * desktop (DESKTOP-WEB-PARITY-UX). Do not add a second AI chrome elsewhere.
  */
 export function RightSlot() {
-  const { open, inspector } = useRightSlot();
+  const { open, tab, inspector } = useRightSlot();
   const { pathname } = useLocation();
 
   useEffect(() => wireRightSlotWindowEvents(), []);
@@ -49,6 +55,7 @@ export function RightSlot() {
 
   return (
     <>
+      {/* Mobile backdrop — desktop keeps stage visible beside the slot. */}
       <Box
         className="esti-right-slot__backdrop"
         onClick={() => closeRightSlot()}
@@ -57,19 +64,12 @@ export function RightSlot() {
       <aside
         className="esti-right-slot"
         role="complementary"
-        aria-label="Inspector"
+        aria-label={tab === "ask" ? "Ask ESTI" : "Inspector"}
       >
         <Surface
           layer="soft"
           className="hcw-surface esti-right-slot__surface"
-          sx={{
-            height: "100%",
-            p: 2,
-            display: "flex",
-            flexDirection: "column",
-            minHeight: 0,
-            borderRadius: `${RADIUS}px`,
-          }}
+          sx={{ height: "100%", p: 2, display: "flex", flexDirection: "column", minHeight: 0 }}
         >
           <Stack
             className="esti-right-slot__chrome"
@@ -81,9 +81,22 @@ export function RightSlot() {
               spacing={1}
               sx={{ alignItems: "center", justifyContent: "space-between" }}
             >
-              <Typography variant="subtitle2" component="h2" sx={{ m: 0 }}>
-                Inspector
-              </Typography>
+              <ToggleButtonGroup
+                exclusive
+                size="small"
+                value={tab}
+                onChange={(_, next: RightSlotTab | null) => {
+                  if (next) setRightSlotTab(next);
+                }}
+                aria-label="Right slot mode"
+              >
+                <ToggleButton value="properties" aria-label="Properties">
+                  Properties
+                </ToggleButton>
+                <ToggleButton value="ask" aria-label="Ask ESTI">
+                  Ask ESTI
+                </ToggleButton>
+              </ToggleButtonGroup>
               <IconButton
                 className="esti-neu-btn"
                 aria-label="Close right slot"
@@ -95,7 +108,11 @@ export function RightSlot() {
             </Stack>
 
             <Box className="esti-right-slot__body" sx={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto" }}>
-              <PropertiesPanel pathname={pathname} inspector={inspector} />
+              {tab === "ask" ? (
+                <AskEstiPanel />
+              ) : (
+                <PropertiesPanel pathname={pathname} inspector={inspector} />
+              )}
             </Box>
           </Stack>
         </Surface>
@@ -158,7 +175,8 @@ function PropertiesPanel({
           Workspace
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Select a row or open a record to inspect properties.
+          Select a row or open a record to inspect properties. Ask ESTI shares
+          this slot — switch tabs above (no second AI chrome).
         </Typography>
       </div>
       <FieldList fields={routeFields} />

@@ -58,6 +58,7 @@ import { WIKI_PATH } from "./lib/wiki-url.js";
 import { useAuth } from "./lib/auth.js";
 import { trpc } from "./lib/trpc.js";
 import { LegacyModuleRedirect } from "./components/LegacyModuleRedirect.js";
+import { AiAgentCommand } from "./components/AiAgentCommand.js";
 import { RightSlot } from "./components/shell/RightSlot.js";
 import { ActionDock, ActionDockProvider, ActionOutcomeBanner } from "@hcw/ui-kit";
 import { MarketingClockPomodoro } from "./components/landing/MarketingClockPomodoro.js";
@@ -916,10 +917,11 @@ function AppWorkspace() {
             </main>
           </div>
           <UsageIdentity />
-          {/* LF6 — Properties inspector (Ask ESTI not mounted in this SPA). */}
+          {/* LF6 — one right slot (Properties ↔ Ask ESTI); AiAgentCommand wires Alt+A. */}
           <RightSlot />
-          {/* LF4 desktop first-run — licence / hub syncToken bind (not mounted on web). */}
-          {isDesktopClient() && <DesktopLicenceBind />}
+          <AiAgentCommand />
+          {/* LF4 desktop first-run — licence / hub syncToken bind (no-op on web). */}
+          <DesktopLicenceBind />
           {/* HCW-UI-Kit global action dock — screens publish CTAs via useScreenActions;
               renders nothing until they do (zero regression until adopted). */}
           <ActionDock />

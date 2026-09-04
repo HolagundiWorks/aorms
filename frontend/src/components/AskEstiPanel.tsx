@@ -156,7 +156,7 @@ export function AskEstiPanel() {
       {caps.aiDegraded && (
         <Alert severity="info" sx={{ py: 0.5 }}>
           <AlertTitle>Hosted AI</AlertTitle>
-          Running on the hub — local Ollama is not on this
+          Running on the hub or your BYO key — local Ollama is not on this
           machine. Same Ask ESTI panel as desktop.
         </Alert>
       )}

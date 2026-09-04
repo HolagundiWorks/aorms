@@ -70,6 +70,11 @@ is a **reference archive**; shipping Ask ESTI is on desktop apps, not the hub.
 Properties ↔ Ask ESTI tabs — pattern to port into desktop shells, not a cloud AI
 surface.
 
+**Shipped (LF6, Aakash 2026-08):** `frontend/src/components/shell/RightSlot.tsx` —
+Properties ↔ Ask ESTI tabs; Ask ESTI opens via taskbar / `esti:ask` / Alt+A into
+this slot (`AskEstiPanel`); screens may `publishInspector()` / dispatch
+`esti:inspect`. No floating second AI chrome.
+
 ## Related
 
 - [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md)  
