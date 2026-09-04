@@ -308,9 +308,12 @@ export function ProjectMoodboard({ projectId }: { projectId: string }) {
   });
 
   useEffect(() => {
+    // onKeyDown is a useEffectEvent — its identity is always stable and it
+    // always reads the latest render's values, so it's intentionally not a
+    // dependency here (only the mount/unmount listener registration is).
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onKeyDown]);
+  }, []);
 
   function stagePoint(e: ReactPointerEvent): { x: number; y: number } {
     const stage = stageRef.current?.querySelector("[data-mood-canvas]") as HTMLElement | null;

@@ -20,7 +20,7 @@ import {
   type MeasurementUom as MeasurementUomT,
 } from "@esti/contracts";
 import { pushToast, RADIUS, Surface } from "@hcw/ui-kit";
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { ProjectFacetTabs } from "../project/ProjectFacetTabs.js";
 import { StatusDot } from "../StatusTag.js";
 import { trpc } from "../../lib/trpc.js";
@@ -99,6 +99,11 @@ export function JointMeasurementRecorder({
   const [reviewNote, setReviewNote] = useState<string | null>(null);
 
   const [drawingId, setDrawingId] = useState("");
+  // Read inside the detailQ.data effect below without depending on `drawings`
+  // (a prop) — keeps that effect scoped to "run when the loaded detail
+  // changes" rather than re-running whenever the drawing list changes.
+  const drawingsRef = useRef(drawings);
+  drawingsRef.current = drawings;
   const [tool, setTool] = useState<JointMeasurementAnnotationTool>("PIN");
   const [annLabel, setAnnLabel] = useState("");
   const [draftPoints, setDraftPoints] = useState<{ x: number; y: number }[]>([]);
@@ -167,11 +172,9 @@ export function JointMeasurementRecorder({
         };
       }),
     );
-    if (!drawingId && d.annotations[0]?.drawingId) {
-      setDrawingId(d.annotations[0].drawingId);
-    } else if (!drawingId && drawings[0]) {
-      setDrawingId(drawings[0].id);
-    }
+    setDrawingId(
+      (prev) => prev || d.annotations[0]?.drawingId || drawingsRef.current[0]?.id || prev,
+    );
   }, [detailQ.data]);
 
   const editable = status === "DRAFT" || status === "REJECTED";

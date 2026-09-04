@@ -1,7 +1,7 @@
 /**
  * P7.2 — manual India usage billing: list reports, export CSV, mark billed.
  */
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Box,
@@ -53,18 +53,18 @@ export default function UsageReportsTab() {
   const [suspendFor, setSuspendFor] = useState<string | null>(null);
   const [suspendNote, setSuspendNote] = useState("");
 
-  async function load() {
+  const load = useCallback(async () => {
     setError(null);
     try {
       setRows(await trpc.admin.usageReports.list.query({ periodStart, billed }));
     } catch (e) {
       setError((e as Error).message);
     }
-  }
+  }, [periodStart, billed]);
 
   useEffect(() => {
     void load();
-  }, [periodStart, billed]);
+  }, [load]);
 
   async function exportCsv() {
     setError(null);

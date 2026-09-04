@@ -157,7 +157,10 @@ export function ProjectMeasurementPanel({ projectId }: { projectId: string }) {
 
   const book = bookQ.data?.book;
   const rows = bookQ.data?.rows ?? [];
-  const levels = levelsQ.data ?? [];
+  // Memoized so the `[]` fallback is referentially stable across renders —
+  // levelLabel's useMemo below depends on `levels` and would otherwise
+  // recompute every render whenever levelsQ.data is still undefined/null.
+  const levels = useMemo(() => levelsQ.data ?? [], [levelsQ.data]);
 
   const heightFromLevel = (
     levelId: string,

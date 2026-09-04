@@ -99,9 +99,11 @@ export function KnowledgeBankPortal() {
   }, []);
 
   useEffect(() => {
-    const d = detailQ.data;
-    if (d?.markdownText != null || d?.rawText != null) {
-      setEditRawText(d.markdownText ?? d.rawText ?? "");
+    // Read the specific fields directly (rather than via an intermediate
+    // `detailQ.data` alias) so this effect's dependency list — deliberately
+    // narrower than the whole query object — is verifiably exhaustive.
+    if (detailQ.data?.markdownText != null || detailQ.data?.rawText != null) {
+      setEditRawText(detailQ.data.markdownText ?? detailQ.data.rawText ?? "");
       setEditDirty(false);
     }
   }, [detailQ.data?.id, detailQ.data?.markdownText, detailQ.data?.rawText]);
