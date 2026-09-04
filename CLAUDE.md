@@ -1,89 +1,91 @@
-# AORMS (`esti` / `aorms`) — agent instructions
+# AORMS — Office Management System (agent instructions)
 
 **AORMS** (**Accelerated Operational Resources Management System**) is a
-**product suite** for **AEC consulting and PMC firms** — not a single mega-app.
+**cloud-based office management system** for **AEC firms & consultancies** — web-only, single unified app.
 
-| Plane | Products |
-| --- | --- |
-| Suite core | **AORMS Connect** (desktop — login · launcher · catalog · DB connector) |
-| Practice managers | **AStudio** · **AConsulting** (desktop; launched from Connect) |
-| Technical | **AQC Estimation** · **AQC BBS** · **AQC Project Management** / **AProc** (desktop, shared `bbs_engine`) |
-| Drafting / geometry | **ADraft** · **ShilpiDB** |
-| Online | Firm portals · hub · Mongo ops · **aorms.in** marketing |
+**Core products (web-based):**
+- **AORMS** — Office management hub (clients, projects, proposals, invoices, team, finances, knowledge bank)
+- **ESTI** — Built-in AI agent (office automation, insights, recommendations)
+- **EOMS** — External knowledge bank API (connected to hub)
 
-**ESTI** = internal AI on desktop managers. **EOMS** = external knowledge bank.
-Code identifiers (`@esti/*`, `esti_*`, repo folder `esti`) keep the `esti` codename;
-GitHub remote may be `HolagundiWorks/aorms`.
+**Removed (legacy):**
+- ❌ AORMS Connect (desktop launcher) — not needed in web-only model
+- ❌ AStudio (architecture practice mgr) — removed, allied app
+- ❌ AConsulting (engineering practice mgr) — removed, allied app
+- ❌ AProc / AQC PM (project mgmt technical) — removed, allied app
+- ❌ AQC Estimation / BBS (technical installers) — removed, separate repos
+- ❌ ADraft / ShilpiDB (drafting / geometry) — removed, allied apps
+- ❌ Desktop installers, Windows setup, Tauri shell — web-only now
 
-Canon: [`docs/esti/AORMS-SUITE.md`](docs/esti/AORMS-SUITE.md) ·
-[`docs/esti/AORMS-CONNECT.md`](docs/esti/AORMS-CONNECT.md) ·
-[`docs/esti/LOCAL-FIRST.md`](docs/esti/LOCAL-FIRST.md) ·
+**Architecture:**
+- Web-first SPA only (no desktop apps)
+- Single sign-on (SSO) → office hub
+- Cloud VPS deployment (no local-first requirement)
+- tRPC + Fastify backend, React + Vite + Carbon Design frontend
+
+Canon: [`docs/esti/AORMS-OFFICE-SYSTEM.md`](docs/esti/AORMS-OFFICE-SYSTEM.md) ·
 [`docs/esti/ROADMAP.md`](docs/esti/ROADMAP.md) ·
-[`docs/esti/AORMS-PLATFORM-NOMENCLATURE.md`](docs/esti/AORMS-PLATFORM-NOMENCLATURE.md).
+[`docs/esti/ARCHITECTURE.md`](docs/esti/ARCHITECTURE.md).
 
 Monorepo (pnpm): `packages/contracts`, `backend` (Fastify + tRPC + Drizzle),
 `frontend` (React + Vite), Python `worker`. Dev: `compose.yaml`. Prod VPS:
 `compose.prod.yaml` + `deploy/*`.
 
-## Soft launch (agent memory — 2026-08-08)
+## Launch status (2026-09-04)
 
-**aorms.in ships landing + blog only.** Apex login and Windows installers are
-**Coming soon**.
+**aorms.in ships landing + blog.** Office hub login going live soon (web-only, no desktop).
 
 | Rule | Detail |
 | --- | --- |
 | Gate | `VITE_MARKETING_ONLY` (default **true** on public builds) — `frontend/src/lib/marketing-gate.ts` |
-| Live | `/` · `/blog` · `/downloads` (Coming soon CTAs) |
-| Blocked on apex | `/login`, `/access`, `/signup`, `/account`, … → `ComingSoonAuth` |
-| Installers | Force `coming_soon` while gate is on — never invent signed download URLs |
-| Reopen demos | S8: set `VITE_MARKETING_ONLY=false` + rebuild (`deploy/update.sh`) |
-| Wiki | `/wiki*` redirects home — do not add wiki CTAs |
-| Staff UI | Desktop siblings — esti SPA is **reference archive**, not shipping ERP |
+| Live | `/` · `/blog` (landing pages) |
+| Coming soon | `/login`, `/access`, `/signup`, `/account` → office hub SPA |
+| No installers | Web-only app — removed Windows setup, desktop shells, Tauri |
+| No allied apps | Removed AStudio, AConsulting, AProc, ADraft, ShilpiDB references from marketing |
+| SSO only | Office hub accessed via web login (federated identity if configured) |
+| Wiki | `/wiki*` redirects home — no wiki surfaces |
 
 VPS: [`docs/esti/VPS-INSTALL.md`](docs/esti/VPS-INSTALL.md) ·
 [`docs/esti/PRODUCTION-OPS.md`](docs/esti/PRODUCTION-OPS.md) § Soft launch ·
 `deploy/bootstrap-vps.sh` · `deploy/install-landing.sh` · `deploy/update-landing.sh` ·
 `deploy/verify-vps.sh`.
 
-## Product naming (agent memory — 2026-08)
+## Product naming (2026-09)
 
 **Executable constants:** `frontend/src/lib/product-nomenclature.ts` — import
-`AORMS_PLATFORM`, `AORMS_APPS`, `AORMS_CONNECT`, `AORMS_STUDIO` / `ASTUDIO`,
-`AORMS_CONSULTANCY` / `ACONSULTING`, `AORMS_PMC` / `APROC`, `AQC_ESTIMATION`,
-`AQC_BBS`, `ADRAFT` / `AADT` (alias), `SHILPIDB`, `SUITE_CORE_APPS`, `SUITE_MANAGER_APPS`,
-`SUITE_TECHNICAL_APPS`, `AORMS_PORTALS`, `EOMS`, `ESTI`. Do not hard-code product
-strings in UI/SEO.
+`AORMS`, `AORMS_OFFICE_HUB`, `EOMS`, `ESTI`. Do not hard-code product strings in UI/SEO.
 
 | Name | Role |
 | --- | --- |
-| **AORMS** | Suite brand + cloud spine |
-| **AORMS Connect** | Suite core desktop — SSO · launcher · catalog · DB connector; slug `aorms-connect` |
-| **AStudio** | Architecture practice manager — desktop; slug `astudio` |
-| **AConsulting** | Engineering practice manager — desktop; slug `aconsulting` |
-| **AProc** / **AQC PM** | Project management technical app — desktop; slug `aproc` |
-| **AQC Estimation / BBS** | Technical installers — separate repos |
-| **ADraft** · **ShilpiDB** | Drafting (Accelerating Drafting) · geometry store |
-| **EOMS** | Knowledge bank API |
-| **ESTI** | Internal AI agent (desktop managers) |
-| **`esti` / `aorms`** | Hub monorepo — never use `esti` in marketing copy |
+| **AORMS** | Office management system brand + cloud spine |
+| **AORMS Office Hub** | Web-only SPA; clients, projects, proposals, invoices, team, finances, KB |
+| **ESTI** | Built-in AI agent for office automation + insights |
+| **EOMS** | External knowledge bank API (connected to hub) |
+| **`esti` / `aorms`** | Hub monorepo codename — never use `esti` in marketing copy |
 
-**Retired in new copy:** web-parity staff ERP on apex · Standard licence metering
-claims · wiki as primary docs · AORMS-Studio / EmOI / HiveD · "one mega platform app" ·
-per-app login as the primary suite UX (use Connect).
+**Removed (legacy, no longer referenced):**
+- ❌ `AORMS_CONNECT` — desktop launcher removed
+- ❌ `AORMS_STUDIO` / `ASTUDIO` — allied app removed
+- ❌ `AORMS_CONSULTANCY` / `ACONSULTING` — allied app removed
+- ❌ `AORMS_PMC` / `APROC` — allied app removed
+- ❌ `AQC_ESTIMATION`, `AQC_BBS` — separate repos, removed
+- ❌ `ADRAFT` / `AADT`, `SHILPIDB` — allied apps removed
+- ❌ `SUITE_*` constants — no longer a suite, single web app
 
-**Public marketing surfaces (soft launch):**
+**Public surfaces:**
 
 | Path / host | Role |
 | --- | --- |
-| `/` · **aorms.in** | Suite landing (incl. Connect in suite map) |
-| `/blog` | Suite explainers + practice notes |
-| `/downloads` | Installer list — Coming soon (Connect first) |
-| `/login` | Coming soon (marketing-only gate); desktop login → Connect |
-| `/wiki*` | Redirect → `/` |
-| **studio.** / **consultancy.** / **proc.** | App hosts (desktop-era; not apex marketing) |
-| **admin.aorms.in** | Licence Manager (when enabled; Connect C3 surfaces status) |
+| `/` · **aorms.in** | Office hub landing page |
+| `/blog` | Office management + best practices articles |
+| `/login` | Office hub web login (SSO gate) |
+| `/wiki*` | Redirect → `/` (no wiki surfaces) |
+| **app.aorms.in** | Office hub SPA (authenticated users only) |
 
-Frozen hosts: [`docs/esti/AORMS-SURFACE-URLS.md`](docs/esti/AORMS-SURFACE-URLS.md).
+**Removed:**
+- ❌ `/downloads` — no installers (web-only)
+- ❌ `/aproc`, `/aconsulting`, `/astudio` — allied app hosts removed
+- ❌ `admin.aorms.in` — licence manager (not applicable to web-only model)
 
 **Web-first platform:** AORMS hub + portals now **web-only** with **IBM Carbon Design System**.
 - [`docs/esti/ROADMAP.md`](docs/esti/ROADMAP.md) — S0–S7 ✅; **C0–C3** Connect · next S8–S10 · D6
@@ -93,15 +95,15 @@ Frozen hosts: [`docs/esti/AORMS-SURFACE-URLS.md`](docs/esti/AORMS-SURFACE-URLS.m
 When editing wiki markdown under `frontend/src/content/wiki/`, rebuild the AI wiki
 index only if Ask ESTI should see it (wiki is not a public marketing surface).
 
-## Agent do / don't (suite)
+## Agent do / don't (office management system)
 
 | Do | Don't |
 | --- | --- |
-| Prefer suite nomenclature + `marketing-gate` · Connect for desktop login | Claim web staff ERP or live signed installers · invent per-app login as primary UX |
-| Keep `/downloads` honest (`coming_soon` / `web_fallback`) | Point CTAs at unsigned `Setup.exe` |
-| Update `landing-seo.ts` + `index.html` together | Leave Standard/InStock commercial JSON-LD |
-| Pin AQC engine from HolagundiWorks/AQC | Fork divergent `bbs_engine` in product repos |
-| Edit `Projects.tsx` / `Clients.tsx` only when asked | Parallel WIP collisions |
+| Focus on office hub features (clients, projects, proposals, invoices, team, finances, KB) | Reference allied apps (AStudio, AConsulting, AProc, ADraft, ShilpiDB) |
+| Web-only, SPA-focused, Carbon Design System | Desktop apps, Windows installers, Tauri shell, launcher |
+| ESTI AI agent for office automation + insights | Multiple per-app logins; legacy suite architecture |
+| SSO + federated identity for office hub | Custom installer setup, license manager, local-first |
+| Update landing.tsx for office benefits; remove allied app CTAs | Mention architects, consultants, PMC services as separate products |
 
 ## UI / design system — IBM Carbon Design System (active 2026-09-04)
 
