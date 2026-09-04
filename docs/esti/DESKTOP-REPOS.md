@@ -13,18 +13,15 @@
 
 ## Repos
 
-| Repo | Role |
-| --- | --- |
-| `HolagundiWorks/AORMS-Connect` | Suite core — SSO · launcher · catalog · installer links |
-| `HolagundiWorks/AQC` | Engine SoT (`bbs_engine`, `Aorms.Bridge`) + reference `BBSApp` |
-| `HolagundiWorks/AQC-Estimation` | Estimation installer shell (publishes to portals) |
-| `HolagundiWorks/AQC-BBS` | BBS installer shell |
-| `HolagundiWorks/AQC-PM` | Project Management / AProc installer shell |
-| `HolagundiWorks/AStudio` | Architecture practice manager |
-| `HolagundiWorks/AConsulting` | Engineering practice manager |
-| `HolagundiWorks/AADT` | ADraft — 2D drafting |
-| `HolagundiWorks/shilpidb` | Geometry store + `shilpi-http` |
-| `HolagundiWorks/aorms` (esti) | Hub · portals · marketing · Mongo ops · contracts |
+| # | Item | Owner | Status |
+| --- | --- | --- | --- |
+| D1 | `@esti/contracts` versioned + consumer README (`0.1.0` / hub **2026-08**) | Gagan | ✅ |
+| D2 | Hub sync bearer from panel activate/refresh (`syncToken` + `hlp_device`) | Gagan | ✅ |
+| D3 | `firmFromSyncToken` legacy + `hlp_device` → `sync_firm_id` | Gagan | ✅ |
+| D4 | Node `sync.*` documented for `ESTI_ROLE=node` ([HUB-API.md](HUB-API.md)); caps ↔ `syncToken` aligned | Gagan | ✅ |
+| D5 | Signed Tauri installer + first-run licence bind (LF4) | Bhoomi | 🚧 unsigned Setup.exe + `DesktopLicenceBind` · sign morning |
+| D6 | Portal / marketing download manifests | Aakash | ✅ prep · live URL 🔲 |
+| D7 | Code signing + update channel | Bhoomi | 🔲 |
 
 ## Packaging policy
 

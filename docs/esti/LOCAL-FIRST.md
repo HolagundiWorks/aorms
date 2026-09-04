@@ -89,7 +89,10 @@ Packaging stub: [`desktop/`](../../desktop/) · env: `desktop/env.desktop.exampl
 | Licensed desktop (`VALID`/`GRACE` + hub + syncToken) | Yes | Yes | Yes |
 | Web parity | Hub (Hosted AI) | Yes | Server-side |
 
-## Sibling repos
+Runtime resolution: `trpc.sync.capabilities` ·
+[`backend/src/lib/sync/runtimeCapabilities.ts`](../../backend/src/lib/sync/runtimeCapabilities.ts)
+(server) · [`frontend/src/lib/runtimeCapabilities.ts`](../../frontend/src/lib/runtimeCapabilities.ts)
+(SPA badges / host). Desktop sync caps require licence + hub URL + `syncToken`.
 
 ## Implementation waves
 
@@ -109,12 +112,35 @@ Packaging stub: [`desktop/`](../../desktop/) · env: `desktop/env.desktop.exampl
 
 | Surface | Path |
 | --- | --- |
-| [AQC](https://github.com/HolagundiWorks/AQC) | Engine + three technical app packaging |
-| [AStudio](https://github.com/HolagundiWorks/AStudio) | Architecture practice manager |
-| [AConsulting](https://github.com/HolagundiWorks/AConsulting) | Engineering practice manager |
-| [ADraft](https://github.com/HolagundiWorks/AADT) | 2D drafting |
-| [shilpidb](https://github.com/HolagundiWorks/shilpidb) | Geometry store |
-| esti / aorms | Hub · portals · marketing · contracts |
+| Wire contract | [HUB-API.md](HUB-API.md) (`2026-08`) |
+| Artifact ingest | `POST /api/sync/ingest` — [`routes.ts`](../../backend/src/modules/sync/routes.ts) |
+| Meta append / catch-up / WS | `/api/sync/meta*` — same |
+| Node tRPC | `sync.status` · `flush` · `enqueueMeta` · `pullMeta` · `capabilities` · `hubConfigured` |
+| Panel activate → sync bearer | `/platform/v1/activate` · `license.activate` ([HUB-API.md](HUB-API.md)) |
+| Capability resolution | [`backend/src/lib/sync/runtimeCapabilities.ts`](../../backend/src/lib/sync/runtimeCapabilities.ts) |
+| Meta lib | [`backend/src/lib/sync/metadata.ts`](../../backend/src/lib/sync/metadata.ts) |
+| LF3 domain enqueue/apply | [`backend/src/lib/sync/domainMeta.ts`](../../backend/src/lib/sync/domainMeta.ts) |
+| Artifact outbox | [`backend/src/lib/sync/outbox.ts`](../../backend/src/lib/sync/outbox.ts) |
+| Publish DTOs | [`backend/src/lib/sync/publish.ts`](../../backend/src/lib/sync/publish.ts) |
+| Hub portal reads | [`backend/src/lib/sync/hubPortal.ts`](../../backend/src/lib/sync/hubPortal.ts) |
+| Sync queue chrome | [`SyncQueueChip.tsx`](../../frontend/src/components/SyncQueueChip.tsx) |
+
+## Conflict policy
+
+- Task/status-like fields: **LWW per field** (`updatedAt` + actor)
+- Derived money / progress scalars: **server seq wins** (`conflict: "serverSeq"`)
+
+## What must not sync
+
+- AI transcripts / model weights
+- Measurement scratch / nested estimate lines (until finalize)
+- Draft drawings and unissued PDFs
+
+## Operator notes
+
+- Empty `ESTI_HUB_URL` = offline-only node (no meta/artifact push).
+- Hub portals prefer `esti_sync_record` when `ESTI_ROLE=hub`; nodes keep live-table reads.
+- File mirror on ingest is best-effort when node and hub share object keys; content-hash skips unchanged bytes.
 
 ## Related
 

@@ -83,11 +83,7 @@ Used by `/api/sync/ingest`, `/api/sync/meta`, `/api/sync/meta/catch-up`, WS.
 **Deploy:** panel path (2) needs `hlp_organization.sync_firm_id` from migration `0227`.
 Without it, activate may still mint a bearer but hub ingest/meta resolve fails.
 
-## Sync REST / WS (hub, or colocated node)
-
-Mounted when `ESTI_ROLE=hub`, **or** when `ESTI_COLOCATED_HUB=true` on a
-`node` (single-box LF4 smoke: `ESTI_HUB_URL` may point at the same process).
-Production firm nodes leave colocated off and call the cloud hub.
+## Sync REST / WS (hub only, `ESTI_ROLE=hub`)
 
 | Method | Path | Body / query |
 | --- | --- | --- |
@@ -126,7 +122,7 @@ Expanded table + fail cues: [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) § Operat
 
 ## Related
 
-- [LOCAL-FIRST.md](LOCAL-FIRST.md) · [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [HCW-LICENSE-MANAGER.md](HCW-LICENSE-MANAGER.md)  
+- [LOCAL-FIRST.md](LOCAL-FIRST.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [HCW-LICENSE-MANAGER.md](HCW-LICENSE-MANAGER.md)  
 - [MORNING-TEST-LF4.md](MORNING-TEST-LF4.md) — operator checklist including `0227`  
 - Contracts: `packages/contracts` · consumer notes: `packages/contracts/README.md`  
 - Crew: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)
