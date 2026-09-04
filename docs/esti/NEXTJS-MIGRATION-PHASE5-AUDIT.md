@@ -193,9 +193,9 @@ sheets/Drawings).
   implementing its Server Component — some may depend on tables no phase has
   audited yet (e.g. `esti_decision` for revision intelligence, not covered by
   any phase so far).
-- **Whether an `attendance` table exists/is planned anywhere** — ASPRF's
-  reliability KPI likely needs one; no phase to date (2–5) has scoped
-  `esti_attendance`. Flagged above as a landing-order risk, not resolved.
+- ~~Whether an `attendance` table exists/is planned anywhere~~ — **resolved
+  by the [Phase 8 audit](./NEXTJS-MIGRATION-PHASE8-AUDIT.md)**: `esti_attendance`
+  exists, owned by the `attendance` namespace, covered there under HR/Payroll.
 - **`periodFilter.ts`'s actual implementation** (`periodRangeFromInput`,
   `invoicePeriodDate`) — referenced, not opened.
 - **`cognition/engine.ts`'s functions confirmed pure** — asserted from their

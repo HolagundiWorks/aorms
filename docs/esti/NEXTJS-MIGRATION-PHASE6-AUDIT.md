@@ -130,7 +130,7 @@ per the roadmap's "current production stack stays live and unchanged."
 | --- | --- | --- |
 | Purpose | Converts an uploaded PDF (Knowledge Bank / Repo portal source document) to Markdown, batching 25 pages at a time, writing to `esti_repo_source.markdown_text`/`raw_text`/`convert_status` | Pure conversion logic, transport-independent |
 | **Stale comment found** | The module docstring says: *"Uses pymupdf4llm — the same library as HolagundiWorks/hcw-markdown-tool — to convert uploaded textbooks into markdown **before EOMS ingest**."* Per `CLAUDE.md`'s Removed section, **EOMS was retired 2026-09 and physically removed** (`backend/src/lib/eoms/`, `backend/src/modules/eoms/`, etc.) — this comment describes a pipeline stage that no longer exists. `CLAUDE.md` itself already notes the correct current framing: `KnowledgeBankPortal.tsx`'s AI rephrase action "is unrelated internal processing, kept, UI-relabelled off the EOMS name" | Not a migration blocker, but worth a one-line doc fix while this file is touched during Phase 6 implementation — update the docstring to describe the Knowledge Bank portal's actual current pipeline instead of the removed EOMS ingest step. Flagging rather than fixing here, since fixing is an implementation-time edit, not an audit |
-| Table | `esti_repo_source` — not audited by any prior phase (Knowledge Bank isn't in Phases 2–5's scope either) | Confirm this table's schema and its owning tRPC namespace (likely `specCatalog`-adjacent, per `CLAUDE.md`'s Knowledge section — "the old `knowledgeBank` namespace... was removed 2026-07-09; only the spec catalogue survives" — so `esti_repo_source` may itself be a leftover from that removal, similar to the `engagement_register` finding above; **check whether this table and job type are still live/used before porting**, don't assume it is just because the code exists) |
+| Table | `esti_repo_source` — **resolved by the [Phase 8 audit](./NEXTJS-MIGRATION-PHASE8-AUDIT.md)**: not dead code, owned by the live `knowledgeBankPortal` tRPC namespace (`CLAUDE.md` confirms `KnowledgeBankPortal.tsx` is a kept feature). This job type is live and should be ported alongside Phase 8's Knowledge Bank Portal domain | Port together with Phase 8's `knowledgeBankPortal` CRUD — this job is its processing half |
 
 ---
 
@@ -168,18 +168,16 @@ sequence — it has one gating decision and then four independent job ports:
    to target Supabase instead of raw `psycopg`/`boto3`-to-self-hosted-MinIO.
 3. **Drop the dead `engagement_register` renderer** rather than porting it
    (references physically-removed tables).
-4. **Confirm whether `pdf_to_markdown`/`esti_repo_source` is still a live
-   feature** before porting it — possible leftover from the 2026-07-09
-   Knowledge Bank cleanup, not confirmed either way here.
+4. ~~Confirm whether `pdf_to_markdown`/`esti_repo_source` is still a live
+   feature~~ — **resolved by the [Phase 8 audit](./NEXTJS-MIGRATION-PHASE8-AUDIT.md)**:
+   it's live, port alongside Phase 8's Knowledge Bank Portal domain.
 5. **Wire `reconcile_import`'s output to `invoices.paid_paise`** — trace and
    port whatever currently connects a matched reconciliation line to marking
    an invoice paid; not found in this audit's reading of the worker side
    alone.
-6. **Raise the HR/Payroll and Delivery/Site-supervision/AProc roadmap gap**
-   (surfaced by the `payslip`/`progress_report`/`site_instruction`/
-   `pmc_ra_bill`/`feasibility_report` renderer targets having no home in any
-   audited phase) to whoever owns `ROADMAP-CLOUD.md`'s phase numbering —
-   this audit surfaces it, doesn't resolve it.
+6. ~~Raise the HR/Payroll and Delivery/Site-supervision/AProc roadmap gap~~ —
+   **addressed**: [Phase 8](./NEXTJS-MIGRATION-PHASE8-AUDIT.md) now covers
+   both domains (proposed addition to the roadmap, not yet adopted).
 
 ---
 
@@ -189,14 +187,11 @@ sequence — it has one gating decision and then four independent job ports:
   process and/or managed Redis** — a hosting-platform capability question,
   not something to determine from the repository. Flagged as the phase's
   central open decision, not answered.
-- **`esti_repo_source`'s owning tRPC namespace and current live status** —
-  flagged as possibly-dead, not confirmed.
 - **The actual code path that sets `invoices.paid_paise`** — flagged as
   missing from this audit's read of `reconcile.py`, not traced further.
-- **HR/Payroll** (`payslip` render target) and **Delivery/Site-supervision/
-  AProc** (`progress_report`/`site_instruction`/`pmc_ra_bill` targets) and
-  **Project OS feasibility** (`feasibility_report` target) as their own
-  domains — none has an assigned roadmap phase; flagged as a gap, not
+- **Project OS feasibility** (`feasibility_report` target) as its own
+  domain — still has no assigned roadmap phase even after Phase 8 (HR/Payroll
+  and Delivery/AProc are now covered there); flagged as a gap, not
   audited in depth here (each would need its own audit pass the way Phases
   2–5 did for their domains, if/when a phase number is assigned to them).
 - Phase 7 (AI/ESTI) — own audit pass when its turn comes. Note: this audit's
