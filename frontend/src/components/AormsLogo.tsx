@@ -56,7 +56,7 @@ export function AuthBrandBlock({
   logoVariant = "stage",
 }: {
   tagline?: string;
-  /** Short product label above the wordmark (e.g. AStudio). */
+  /** Optional label above the wordmark. */
   product?: string;
   logoVariant?: "sm" | "md" | "rail" | "stage" | "hero" | "watermark";
 }) {

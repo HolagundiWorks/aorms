@@ -1,4 +1,4 @@
-/** SEO metadata (legacy: was AStudio-specific, now office-hub focused). */
+/** SEO metadata for office hub landing page. */
 import { AORMS_OFFICE_HUB, AORMS_PLATFORM, EOMS, ESTI } from "./product-nomenclature.js";
 
 const BASE = "https://aorms.in/";
