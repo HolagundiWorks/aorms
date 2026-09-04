@@ -95,7 +95,7 @@ assume during implementation.
 | AProc packages + sealed bidding | `pmcPackages`/`pmcPackageTenders` — package-level tendering with invited-contractor sealed bids (`pmcPackageInvites`/`pmcPackageBids`) | This is a **second, independent sealed-bidding system** alongside the top-level `tenders`/`contractorPortal` (firm-issued project tenders) `CLAUDE.md` describes separately — confirm whether these two are meant to converge or genuinely serve different scopes (package-level vs. whole-project) before assuming one design covers both; not resolved here, and the top-level `tenders` namespace isn't covered by this phase at all (see scope map above) |
 | AProc RA bills + steel certs | `pmcRaBills`/`pmcRaLines` (`cost:approve`-gated certification — same capability tier as BBS/steel-recon finalize, per Phase 4's note) + `pmcSteelCerts`. PDF rendering (`pmc_ra_bill` target) already audited in Phase 6 | RLS: needs an `is_partner_or_above()`-tier check specifically for `cost:approve` (same rank, 80, as `hr:manage`/`invoice:manage`/`fees:manage` — reuse the existing helper, don't introduce a fourth-named-but-identical-rank policy) |
 | AProc digest | `pmcDigest` — portfolio-wide summary, `reports:view`-gated (same capability as Phase 5's GST/TDS reports) | Reuses Phase 5's `is_partner_or_above()` RLS directly, no new pattern |
-| Contractor + site portals | `contractorPortal`, `sitePortal` — **not staff procedures at all**, gated by `contractorProcedure` (a distinct auth middleware from staff `protectedProcedure`, alongside the `clientProcedure`/`collaboratorProcedure` `CLAUDE.md` mentions for the client/consultant portals). `siteVisitRouter` mixes both: `list` on `protectedProcedure`, a custom `writeProcedure` wrapper, and presumably contractor-scoped writes via `contractorProcedure` | **This is a cross-cutting RLS pattern no prior phase has needed**: Phases 2–7 only ever needed `is_office_staff()`/`is_partner_or_above()` (both staff-role checks) plus one narrow client-portal read policy (Phase 2's `clients: own portal read`) and one flagged-but-unresolved client-write RPC idea (Phase 4's transmittal acknowledge). This phase is the first to need the full three-portal-role shape (`CLIENT`/`CONSULTANT`/`CONTRACTOR`) as a systematic RLS concern, not a one-off. Recommend introducing `is_contractor()`/`is_collaborator()` helpers parallel to `is_office_staff()`/`current_app_role() = 'CLIENT'`, each scoped by the matching `client_id`/`consultant_id`/`contractor_id` FK on `profiles` (already present as columns from Phase 2's migration, just unused by RLS until now) |
+| Contractor + site portals | `contractorPortal`, `sitePortal` — **not staff procedures at all**, gated by `contractorProcedure` (a distinct auth middleware from staff `protectedProcedure`, alongside the `clientProcedure`/`collaboratorProcedure` `CLAUDE.md` mentions for the client/consultant portals). `siteVisitRouter` mixes both: `list` on `protectedProcedure`, a custom `writeProcedure` wrapper, and presumably contractor-scoped writes via `contractorProcedure`. **Correction from the [Phase 9 audit](./NEXTJS-MIGRATION-PHASE9-AUDIT.md)**: the `contractorPortal` namespace actually mounted in `router.ts` is `contractor/portal.ts`, not `pmc/contractorPortal.ts` — the latter (this section's assumed source for AProc package-bid submission) is **dead code, never mounted, currently unreachable**. Contractors invited to bid on an AProc *package* have no working submission path today. See Phase 9 for the full finding and the resulting open decision (resurrect it under a new name, or drop it) | **This is a cross-cutting RLS pattern no prior phase has needed**: Phases 2–7 only ever needed `is_office_staff()`/`is_partner_or_above()` (both staff-role checks) plus one narrow client-portal read policy (Phase 2's `clients: own portal read`) and one flagged-but-unresolved client-write RPC idea (Phase 4's transmittal acknowledge). This phase is the first to need the full three-portal-role shape (`CLIENT`/`CONSULTANT`/`CONTRACTOR`) as a systematic RLS concern, not a one-off. Recommend introducing `is_contractor()`/`is_collaborator()` helpers parallel to `is_office_staff()`/`current_app_role() = 'CLIENT'`, each scoped by the matching `client_id`/`consultant_id`/`contractor_id` FK on `profiles` (already present as columns from Phase 2's migration, just unused by RLS until now) — `contractor/portal.ts`'s live `myTenders`/`getInvitation`/`submitBid`/`projectDetail` (Phase 9's tenders domain) plus its own AProc-adjacent reads (`myRunningBills`/`projectTeam`/`mySubmissions`) are this helper's first real consumers, not the dead package-bid file |
 
 **Frontend:** `ContractorPortal.tsx` (invited tenders + sealed bids,
 `CONTRACTOR` login), delivery tabs live inside `ProjectDetail.tsx` per
@@ -161,14 +161,14 @@ prior phase's internal sequencing — pick based on what unblocks other work:
 
 ## What this audit deliberately did not cover
 
-- **`compliance`/`masterPlans`/`standards`/`lessons`** — named, not read.
-- **`hrProfiles`/`hrDocuments`/`jobApplications`** (recruitment) — found late,
-  not read in depth; also missing from `CLAUDE.md`'s module map entirely,
-  worth a doc-sync follow-up independent of this migration.
-- **The top-level `tenders`/`contractorPortal` firm-issued-tender flow** —
-  explicitly named as still-uncovered in the scope map above; distinct from
-  AProc's package-level `pmcPackageTenders`, and its relationship to that
-  system isn't resolved here either.
+- ~~`compliance`/`masterPlans`/`standards`/`lessons`~~, ~~`hrProfiles`/
+  `hrDocuments`/`jobApplications`~~, and ~~the top-level `tenders`/
+  `contractorPortal` firm-issued-tender flow~~ — **all three now covered by
+  the [Phase 9 audit](./NEXTJS-MIGRATION-PHASE9-AUDIT.md)**, which also found
+  that `hrProfile.ts` (not a missing namespace, just three underlying tables
+  found late) is internal HR tracking, not a public careers intake, and that
+  `pmcPackageTenders`' contractor-facing bid submission is dead code — see
+  Phase 9's headline finding.
 - **`siteVisitRouter`'s exact `writeProcedure` custom-wrapper logic** — noted
   as mixing staff and contractor access, not traced line-by-line.
 - **Whether this phase should actually exist as written** — per the framing
