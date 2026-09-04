@@ -105,4 +105,5 @@ over `frontend/src` (reproducible; recipes in the skill +
 1. Read [DESIGN-DEBT-REGISTER.md](DESIGN-DEBT-REGISTER.md) before UI changes.
 2. Run checklist sweeps from [07-UX-REVIEW-CHECKLISTS.md](../07-UX-REVIEW-CHECKLISTS.md).
 3. Deposit new findings in the relevant surface audit **or** the debt register.
-4. Skill entry point: `.claude/skills/hcw-design-audit/SKILL.md`.
+4. Skill entry point: `.claude/skills/hcw-design-audit/SKILL.md` (not present
+   in this checkout — not written or removed, unconfirmed).

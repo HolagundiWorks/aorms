@@ -146,7 +146,7 @@ index only if Ask ESTI should see it (wiki is not a public marketing surface).
 >
 > **Migration status:** [`docs/esti/CARBON-MIGRATION.md`](docs/esti/CARBON-MIGRATION.md)
 > (roadmap) · [`docs/esti/CARBON-PHASE1-STATUS.md`](docs/esti/CARBON-PHASE1-STATUS.md) (current)
-> · [`docs/esti/CARBON-WAVE3-PLAN.md`](docs/esti/CARBON-MIGRATION-WAVE3-PLAN.md) (execution).
+> · [`docs/esti/CARBON-MIGRATION-WAVE3-PLAN.md`](docs/esti/CARBON-MIGRATION-WAVE3-PLAN.md) (execution).
 > **Waves 0–2 complete (2026-08/09).** Wave 3 (app MUI→Carbon) launches Week 2, 
 > 8 tranches over 7 weeks (3–4 developers, parallel). All 5 Wave 2 adapters ready
 > (StatusDot, DataState, ConfirmModal, PageBreadcrumb, ToastHost). 
@@ -411,8 +411,11 @@ GST rates, SAC codes)
 > contingency/GST rollup), both gated to `fees:manage`. No Contracts or tenders
 > in this BOQ model. Project **BBS** + **steel reconciliation** returned as
 > Delivery sub-tabs (migrations `0223`/`0224`); contractor RA stays on AProc
-> `pmcRaBills`. See `packages/contracts/src/estimation.ts` and
-> `docs/esti/UNIFIED-ARCHITECTURE-V4.md`.
+> `pmcRaBills`. See `packages/contracts/src/estimation.ts`. (The doc this
+> section used to also cite, `docs/esti/UNIFIED-ARCHITECTURE-V4.md`, does not
+> exist anywhere in the repo — see the
+> [Phase 10 migration audit](docs/esti/NEXTJS-MIGRATION-PHASE10-AUDIT.md) for
+> the same broken pointer found independently.)
 
 **Team / HR / Performance:**
 - `team` / `assignments` — roster and project-staff assignments
@@ -452,8 +455,11 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
 - `pmcMilestones` (CSV + P6 XER) / `pmcPackages` / `pmcPackageTenders` /
   `pmcRaBills` / `pmcSteelCerts` / `pmcDigest` / `contractorPortal` /
   `phaseProgress` — AProc programme, packages, sealed tender bids, RA + steel
-  certification, portfolio digest, CA/handover live stages (owner-side; see
-  `docs/esti/APROC-ARCHITECTURE.md`)
+  certification, portfolio digest, CA/handover live stages (owner-side; the
+  doc this used to cite, `docs/esti/APROC-ARCHITECTURE.md`, does not exist
+  in the repo — see the
+  [Phase 8 migration audit](docs/esti/NEXTJS-MIGRATION-PHASE8-AUDIT.md) §
+  Delivery / Site-supervision / AProc for the closest current mapping)
 
 > **Removed in the 2026-06-29 consultancy-only teardown** (migration 0117 dropped the
 > tables): `pmc` (hub/portfolio), `programme` (delivery Gantt / milestones),
