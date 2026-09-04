@@ -153,7 +153,7 @@ After removals:
 ### 3.2 Update other docs
 
 - [x] **`NAVIGATION.md`** — rewritten for the unified single `nav` tree (matches `App.tsx`); removed the 3-surface taskbar model
-- [x] **`ROADMAP.md`** — checklist reconciled against actual repo state (Phase 1/2/3 status corrected)
+- [x] **`ROADMAP.md`** — checklist reconciled against actual repo state (Phase 1/2/3 status corrected); later **split** into [`ROADMAP-CLOUD.md`](./ROADMAP-CLOUD.md) (what's live) and [`ROADMAP-LOCAL.md`](./ROADMAP-LOCAL.md) (engineering), with `ROADMAP.md` kept as a short index so the ~13 existing incoming links stay valid
 - [x] **`ARCHITECTURE.md`** — rewritten for web-only stack (Carbon, no desktop/Tauri/local-first)
 - [x] **`PRODUCTION-OPS.md`** — removed installer/D6 gating, AORMS Connect staff-ERP note, and the "ESTI is desktop-only" AI section; rewrote ESTI AI § for office hub
 - [x] **`MARKET-FIT.md`** — repositioned from suite/local-first GTM to web-only office hub GTM; M8 checklist retired

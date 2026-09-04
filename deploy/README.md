@@ -93,14 +93,18 @@ bash deploy/verify-vps.sh https://aorms.in
 | `deploy/backup.sh` / `restore.sh` | Postgres + MinIO backup / restore |
 | `deploy/nginx-proxy.conf` | nginx vhost template |
 
-## Desktop packaging
+## Desktop packaging — retired (web-only, 2026-09 pivot)
 
-**Local-first node (active):** see [`desktop/`](../desktop/) and
-[docs/esti/LOCAL-FIRST.md](../docs/esti/LOCAL-FIRST.md). Signed installer waves
-are on [ROADMAP.md](../docs/esti/ROADMAP.md) § Local-first.
+AORMS is now a **web-only** office hub — no desktop apps, no installers, no
+per-app downloads. `/downloads` redirects straight to `/login`. See
+[docs/esti/ROADMAP-LOCAL.md](../docs/esti/ROADMAP-LOCAL.md) § Phase 1 for the
+remaining cleanup: the `desktop/` directory (Tauri shell) and local-first
+docs (`docs/esti/archived/LOCAL-FIRST.md`) are legacy and scheduled for
+removal.
 
 **Permanently retired (do not restore):**
 
+- Local-first desktop node + signed installer distribution
 - Lite / Pro / Community **Manager** `/download` hosting, `desktop.yml`,
   `fetch-installers.sh` (removed 2026-07-19); `/download` redirects to the landing
 - Standalone **AORMS Estimate** desktop app — estimation stays in-product

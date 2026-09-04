@@ -147,8 +147,9 @@ ESTI (the built-in AI agent) answers only from validated firm repositories.
 
 ## Delivery status
 
-Engineering delivery through [Phase 20](ROADMAP.md) is complete; the 2026-09-04
-web-only pivot removed the allied-app suite architecture described in earlier
-revisions of this document. Open product gaps are tracked only in
-[ROADMAP](ROADMAP.md). This document describes the stack and ADRs — not the
-live backlog.
+Engineering delivery through the pre-pivot phase history is complete; the
+2026-09-04 web-only pivot removed the allied-app suite architecture described
+in earlier revisions of this document. Open product gaps are tracked in
+[ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) (engineering) and
+[ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) (what's live). This document describes
+the stack and ADRs — not the live backlog.

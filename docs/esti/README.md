@@ -20,7 +20,7 @@ or architecture guidance from anything under `archived/`.
 2. [AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md) — product definition, what's live vs. removed
 3. [NAVIGATION.md](NAVIGATION.md) — sidebar IA (unified office hub nav)
 4. [ACCESS-HIERARCHY.md](ACCESS-HIERARCHY.md) — roles + access ladder
-5. [ROADMAP.md](ROADMAP.md) — delivery status (web-only pivot in progress)
+5. [ROADMAP.md](ROADMAP.md) — index into [ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) (what's live) and [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) (engineering in progress)
 6. [ARCHITECTURE.md](ARCHITECTURE.md) — stack + ADRs
 7. [CARBON-MIGRATION.md](CARBON-MIGRATION.md) + [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md) — design system
 
@@ -34,7 +34,8 @@ Repo agent entry: [`../../CLAUDE.md`](../../CLAUDE.md).
 | Product definition | [AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md) |
 | Hosts / URLs | [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md) |
 | Navigation IA | [NAVIGATION.md](NAVIGATION.md) |
-| Roadmap | [ROADMAP.md](ROADMAP.md) |
+| Roadmap — what's live (cloud) | [ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) |
+| Roadmap — engineering (local dev) | [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) |
 | Market fit / GTM | [MARKET-FIT.md](MARKET-FIT.md) |
 | Design system (Carbon migration) | [CARBON-MIGRATION.md](CARBON-MIGRATION.md) · [CARBON-PHASE1-STATUS.md](CARBON-PHASE1-STATUS.md) |
 | Legacy design system (pre-Carbon) | [HCW-UI-KIT.md](HCW-UI-KIT.md) — being retired, see Carbon docs |
@@ -59,7 +60,7 @@ Kit docs: [docs/hcw-kit/](../hcw-kit/README.md).
 1. [AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md) — product definition, what exists
 2. [NAVIGATION.md](NAVIGATION.md) — sidebar
 3. [ARCHITECTURE.md](ARCHITECTURE.md) / [INDIA-PROFILE.md](INDIA-PROFILE.md) — constraints
-4. [ROADMAP.md](ROADMAP.md) — delivery status
+4. [ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) / [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) — delivery status
 
 ## Archived (`archived/`)
 
@@ -70,6 +71,6 @@ Git history for anything not preserved there.
 
 ## Change rule
 
-Material features update this index / NAVIGATION / ROADMAP in the same PR.
+Material features update this index / NAVIGATION / ROADMAP-CLOUD / ROADMAP-LOCAL in the same PR.
 **Archive** superseded specs (move to `archived/` with a historical banner) —
 do not leave competing instructions live in this directory.

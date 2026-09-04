@@ -4,7 +4,7 @@
 (web-only office hub pivot)  
 **Owner:** Human Centric Works (HCW)
 
-Companion to [ROADMAP.md](ROADMAP.md) (office hub soft launch · next **S8**) and
+Companion to [ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) (office hub soft launch · next **S8**) and
 [AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md) (product definition).
 
 **Delivery status:** Market-fit Waves **W1–W3 shipped**; **W4 integrations deferred**;
@@ -71,7 +71,8 @@ customers, “boring reliability” (invoice PDF / GST) before ESTI storytelling
 
 ## 5. Market-fit backlog (priority)
 
-Implementation status lives on [ROADMAP.md](ROADMAP.md) § Market fit.
+Implementation status lives on [ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) (what's
+live) and [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) (engineering in progress).
 
 ### M1 — Trust & money (must-have)
 1. Flawless invoice / GST / fee-stage path for first paying firms  
