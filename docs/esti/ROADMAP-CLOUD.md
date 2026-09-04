@@ -80,60 +80,43 @@ credentials, so that step is left to an operator.
 
 ---
 
-## CI / build health 🚧
+## CI / build health ✅ (2026-09-04)
 
-**Discovered 2026-09-04: `main` HEAD's CI has been fully broken at the first
-step.** `esti-ci`'s `TypeScript`, `Dependency audit`, and `Visual regression`
-jobs all run `pnpm install` before anything else, and on `main` (confirmed at
-commit `0dfb3ac`) that step **fails outright** — `ERR_PNPM_OUTDATED_LOCKFILE`
-— which skips every downstream step (typecheck, lint, test, build, audit) in
-those three jobs. Only the `Python worker` job (a separate install path) was
-green. This means **no PR or push to `main` has produced a real green check**
-since the drift was introduced — CI was reporting failure, but for a reason
-that had nothing to do with the actual change being pushed.
+**History:** `main` HEAD's CI was fully broken at the install step
+(`ERR_PNPM_OUTDATED_LOCKFILE` — `frontend/package.json` had drifted from
+`pnpm-lock.yaml`, missing `@carbon/react` and misdeclaring `react-router-dom`
+against the root `pnpm.overrides` security pin), then, once that was fixed
+and `cloud-agent` merged into `main`, the merge itself surfaced 72
+pre-existing TypeScript errors and 1 pre-existing ESLint error across ~20
+files that had never actually been typechecked green (root causes: half-
+finished Carbon migrations, MUI v9 API drift, renamed contract fields, dead
+code referencing removed desktop/allied-app concepts).
 
-**Root cause:** `frontend/package.json` had drifted from what
-`pnpm-lock.yaml` actually resolves — `@carbon/react` was missing from
-`package.json` entirely (despite being imported and already resolved in the
-lockfile), and `react-router-dom` was declared as plain `^7.18.1` while the
-root workspace's `pnpm.overrides` (a deliberate security fix, PR #61)
-force-aliases it to `npm:react-router@8.3.0`.
+**Current state, verified locally (2026-09-04):**
 
-**Fixed, not yet on `main`:** corrected on `claude/fix-lockfile-drift-7315`,
-merged into the `cloud-agent` branch. `pnpm install --frozen-lockfile` now
-succeeds cleanly across all 6 workspace projects with **zero** lockfile
-changes needed. Verified on CI itself, not just locally — re-running
-`esti-ci` on the fixed commit shows `pnpm install` succeeding in all three
-previously-blocked jobs.
+| Check | Result |
+| --- | --- |
+| `frontend` `tsc --noEmit` | ✅ 0 errors |
+| `backend` `tsc --noEmit` | ✅ 0 errors |
+| `packages/contracts` `tsc --noEmit` | ✅ 0 errors |
+| `eslint .` (repo-wide) | ✅ 0 errors (5 pre-existing `react-hooks/exhaustive-deps` warnings remain) |
+| `frontend` `vitest run` | ✅ 63/63 passing |
+| `backend` `vitest run` | ✅ 209/209 passing |
+| `vite build` | ✅ succeeds |
+| `worker` `pytest` | ⬜ not verified — no Python interpreter on the machine that ran this pass |
 
-**Still red on `cloud-agent`, now for real (pre-existing) reasons — each
-job now fails on its own merits instead of on a shared install failure:**
+**Still open:**
 
-| Job | Failing step | Cause |
-| --- | --- | --- |
-| `TypeScript` | `pnpm typecheck` | 16 pre-existing JSX errors in `Landing.tsx` / `DashboardTab.tsx` (unrelated to this pivot — see ROADMAP-LOCAL.md Phase 1) |
-| `Visual regression` | `Build · serve · assert` | Downstream of the same `tsc` failure — `vite build` runs `tsc` first |
-| `Dependency audit` | `pnpm audit --audit-level=high` | **12 high-severity findings** (0 critical, 6 moderate below the gate) across 629 resolved deps — see below |
-| `Python worker` | — | ✅ Green (ruff + pytest both pass) |
-
-**`pnpm audit --audit-level=high` findings (2026-09-04):**
-
-| Package | Path | Issue |
-| --- | --- | --- |
-| `pdfjs-dist` | direct dep, pinned `6.1.200` (`frontend/package.json`) | Arbitrary JS execution on opening a malicious PDF — worth prioritizing: this app is PDF-heavy (invoices, proposals, drawings) and the version is exact-pinned, so bumping is a deliberate choice, not automatic |
-| `fast-uri` | transitive, via `fastify` / `fast-json-stringify` in `backend` | 4 distinct advisories (host confusion via IDN/percent-encoding, SSRF via IPv6/hostname decoding) — the root `pnpm.overrides` already pins `fast-uri` (`^3.1.5`) and `fast-json-stringify>fast-uri` (`^4.1.2`) for an *earlier* round of the same package; these are newer advisories the current pin doesn't cover — the override version needs bumping, not re-adding |
-| `browserslist` | transitive, via `eslint-plugin-react-hooks` → `@babel/core` (dev-only path) | Unbounded memory growth + a crash/prototype-write vector via untrusted stats — build-tooling only, not shipped to users, lower urgency |
-| `nanoid` | transitive, via `vite` → `postcss` | Custom generators can loop indefinitely at size 0 — build-tooling only |
-
-Not fixed in this pass — flagging with specifics so the next session doesn't
-have to re-run `pnpm audit --audit-level=high --json` to find out what's
-actually failing. `pdfjs-dist` and the `fast-uri` override bump are the two
-worth doing first; `browserslist`/`nanoid` are dev-only exposure.
-
-**Action:** merge `cloud-agent` into `main` to at least restore CI's ability
-to *run* — right now every push is fighting an install failure that has
-nothing to do with the change being reviewed. The typecheck and audit
-findings are then real, addressable red — not blocked from even being seen.
+- `pnpm audit --audit-level=high` findings from the 2026-09-04 audit pass are
+  **not yet addressed**: `pdfjs-dist` (pinned `6.1.200`, arbitrary JS
+  execution on a malicious PDF — worth prioritizing given how PDF-heavy this
+  app is), a `fast-uri` transitive advisory needing the existing
+  `pnpm.overrides` pin bumped (not re-added), plus lower-urgency dev-tooling-only
+  findings in `browserslist`/`nanoid`.
+- 5 `react-hooks/exhaustive-deps` warnings (not errors) in
+  `ProjectMeasurementPanel.tsx`, `JointMeasurementRecorder.tsx`,
+  `ProjectMoodboard.tsx`, `UsageReportsTab.tsx`, `KnowledgeBankPortal.tsx`.
+- Worker `pytest` needs running on a machine with Python to confirm.
 
 ---
 

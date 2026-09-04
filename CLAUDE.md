@@ -250,8 +250,14 @@ Tests: `worker/tests/test_jobs.py` (handler unit tests) and
 
 ## Branch & environment split — cloud vs local (2026-09)
 
-Development now runs in two places at once, split by **branch and by role**,
-not by feature area:
+**Currently paused (2026-09-04):** by explicit direction, `cloud-agent` was
+merged into `main` and both branches are consolidated — work happens on
+`main` from a single agent/session until outstanding issues are resolved.
+The split below is the target model to resume once that's done; don't act on
+"work happens on `cloud-agent`" language until told to resume the split.
+
+Development normally runs in two places at once, split by **branch and by
+role**, not by feature area:
 
 | Branch | Environment | Role |
 | --- | --- | --- |
