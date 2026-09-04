@@ -23,8 +23,8 @@ is merged and verified — the `web/` package is new, additive code; nothing in
 | Item | Status |
 | --- | --- |
 | Target-architecture spec written | ✅ [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) |
-| Repo audit (map current tRPC procedures / Fastify routes / components to Next.js equivalents — see spec § 36–37) | 🔲 |
-| **Phase 1 — Foundation** (Next.js + TS + Carbon + Supabase + auth + app shell) | ✅ `web/` package — Next.js 16 + Carbon + `@supabase/ssr` wired end-to-end (client/server/proxy), Server Action sign-in/sign-out, Carbon `AppShell` (Header+SideNav), `(auth)/login` + `(app)/dashboard` route groups. `next build --webpack` clean, `eslint web` 0/0. **Not yet connected to a live Supabase project** — env vars in `web/.env.example` are placeholders. |
+| Repo audit — Phase 2 domains (map current tRPC procedures / Fastify routes / components to Next.js equivalents — see spec § 36–37) | ✅ [NEXTJS-MIGRATION-PHASE2-AUDIT.md](./NEXTJS-MIGRATION-PHASE2-AUDIT.md) — surfaced a blocking decision: current schema is single-tenant-per-deployment (no `org_id` anywhere), contradicting the migration spec's multi-tenant §16–18 examples. Needs a decision before Phase 2 schema work starts. Later phases (3–7) get their own audit pass when their turn comes. |
+| **Phase 1 — Foundation** (Next.js + TS + Carbon + Supabase + auth + app shell) | ✅ **Complete, connected to a live Supabase project.** `web/` package — Next.js 16 + Carbon + `@supabase/ssr` wired end-to-end (client/server/proxy), Server Action sign-in/sign-out, Carbon `AppShell` (Header+SideNav), `(auth)/login` + `(app)/dashboard` route groups. `next build --webpack` clean, `eslint web` 0/0. Sign-in verified live through the browser against the real project (landing → Supabase Auth session → Server Component → Carbon shell), including confirming Carbon's classes/CSS vars/IBM Plex font all apply correctly (an initial "looks unstyled" impression was just Carbon's flat `white` theme, not a bug). |
 | Phase 2 — Core ERP (orgs, users, roles, clients, projects, tasks) | 🔲 |
 | Phase 3 — Commercial (proposals, quotations, contracts, invoices, payments) | 🔲 |
 | Phase 4 — Technical (estimation, BOQ, measurements, documents, drawings) | 🔲 |
@@ -37,9 +37,10 @@ Turbopack can't resolve `@carbon/styles`' internal Sass `@use` imports
 through pnpm's symlinked `node_modules` — `web/package.json`'s dev/build
 scripts force `--webpack` until that's fixed upstream.
 
-**Next up:** get real Supabase project credentials into `web/.env`, verify
-sign-in against a live project, then start Phase 2 (map `clients`/`projects`
-tRPC procedures onto Server Actions + Supabase tables with RLS).
+**Next up:** decide single-tenant vs multi-tenant (the blocking question the
+Phase 2 audit surfaced — see above), then start landing Phase 2 in the
+audit's suggested order: `profiles` + audit log + `firm`/`orgSettings` →
+`clients` → `projectOffices`/`phases` → `tasks`.
 
 ---
 
