@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   Column,
@@ -83,6 +84,10 @@ export default async function ProjectDetailPage({
             {project.city ? ` · ${project.city}` : ""}
           </span>
         </div>
+
+        <p style={{ marginBottom: "2rem" }}>
+          <Link href={`/projects/${project.id}/cpi`}>Client–Project Intelligence (CPI) →</Link>
+        </p>
 
         <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
           Phases
