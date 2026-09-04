@@ -14,5 +14,9 @@ complement the product docs in [`docs/esti/`](../esti/README.md).
 **Lifecycle placement:** Phase 0 (Appointment) through Initiation & Brief — before Concept Design sign-off (CLIENT-ONBOARDING/PROJECT-BRIEFING); SOP.md covers the full lifecycle end to end.
 
 > The in-browser Estimation OS this section used to point to was retired
-> 2026-07-09 (see [`docs/esti/UNIFIED-ARCHITECTURE-V4.md`](../esti/UNIFIED-ARCHITECTURE-V4.md));
-> there is no design-stage estimate module live today.
+> 2026-07-09; there is no design-stage estimate module live today.
+> (The doc this note used to cite, `docs/esti/UNIFIED-ARCHITECTURE-V4.md`,
+> does not exist anywhere in the repo — see the
+> [Phase 10 migration audit](../esti/NEXTJS-MIGRATION-PHASE10-AUDIT.md) for
+> the same broken pointer found independently from the `esti_projectoffice`
+> schema's own header comment.)

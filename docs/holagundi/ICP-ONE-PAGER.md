@@ -45,7 +45,7 @@ portals.
 | Demo script (15 min) | [DEMO-SCRIPT.md](DEMO-SCRIPT.md) |
 | Practice SOP | [SOP.md](SOP.md) |
 | Client onboarding | [CLIENT-ONBOARDING.md](CLIENT-ONBOARDING.md) |
-| Pricing law | [PLANS-AND-TIERS.md](../esti/PLANS-AND-TIERS.md) |
+| Pricing law | PLANS-AND-TIERS.md (missing — not written or removed, unconfirmed) |
 
 ---
 

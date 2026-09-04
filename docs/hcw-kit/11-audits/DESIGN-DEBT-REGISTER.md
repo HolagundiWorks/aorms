@@ -57,7 +57,7 @@ right slot; `.esti-neu-dash` primary (`.esti-glass-dash` alias); TabSplit on
 **2026-08-07 — Desktop-native SaaS pivot (D0–D4).** Staff ERP → desktop apps
 forked from AQC (WinUI + C++ engine). `aorms.in` marketing/demos only. Firm
 portal shell: Updates · Project · Progress · Drawings · Documents.
-[PORTAL-SYNC-BRIDGE.md](../../esti/PORTAL-SYNC-BRIDGE.md). **Open source for now** —
+**Open source for now** —
 SaaS commercial licensing deferred. Repos: AStudio · AConsulting · AQC PR #4.
 
 **2026-08-07 — Wave 8 plain Studio Intelligence.** Removed `StudioBreath`
@@ -69,8 +69,7 @@ animated topographic contour field from `/` — stage is plain Fog Gray only
 (Workspace · Portals · Account; Account scopes Personal · Company · Licensing).
 `/access`, unauthenticated `/account` / `/company-account` / `/platform-admin` redirect
 into matching tabs. Account hubs use soft `PortalCard` panels. Canon:
-[UI-SITE-MAP.md](../../esti/UI-SITE-MAP.md) · [AORMS-SURFACE-URLS.md](../../esti/AORMS-SURFACE-URLS.md) ·
-[ADMIN-GUIDE.md](../../esti/ADMIN-GUIDE.md) §3.
+[UI-SITE-MAP.md](../../esti/UI-SITE-MAP.md) · [AORMS-SURFACE-URLS.md](../../esti/AORMS-SURFACE-URLS.md).
 
 **2026-08-07 — Wave 6 polish.** `AormsMark` + firm name in `AppRibbon`; de-Carbon
 shared widgets (`RowActionsMenu`, `SubmissionThread`, `ProjectSiteReference`,
@@ -144,7 +143,7 @@ Published reaudit: [HCW-UX-EVALUATION.md](../../HCW-UX-EVALUATION.md) (**88/100*
 | **V1** | External validation | [VALIDATION-PROTOCOL.md](VALIDATION-PROTOCOL.md) | â‰¥3 independent studies |
 | **V2** | Live KPI dashboards | [HCW-UX-ADOPTION-PLAYBOOK.md](../../esti/HCW-UX-ADOPTION-PLAYBOOK.md) sink recipe | Production sink + before/after tiles |
 | **V3** | Predictive models | [HCW-UX-CALIBRATION.md](../../esti/HCW-UX-CALIBRATION.md) Â· `estimateOrientMultiplier` | Holdout-calibrated coefficients |
-| **V4** | Construction patterns | [HCW-CONSTRUCTION-PATTERNS.md](../../esti/HCW-CONSTRUCTION-PATTERNS.md) CP-01â€¦11 | Product UI implementations |
+| **V4** | Construction patterns | HCW-CONSTRUCTION-PATTERNS.md CP-01…11 (doc missing) | Product UI implementations |
 | **V5** | Audit persistence | `setDecisionAuditSink` Â· `ux.audit` | Durable DB â‰¥6 months |
 
 Adoption checklist: [HCW-UX-ADOPTION-PLAYBOOK.md](../../esti/HCW-UX-ADOPTION-PLAYBOOK.md).

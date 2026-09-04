@@ -14,10 +14,10 @@ audits after major feature waves; update the debt register in the same PR as fix
 
 | Audit | Scope | Path |
 | --- | --- | --- |
-| **AORMS-Studio interface** | Authenticated workspace (`studio.aorms.in`) — shell, nav, dock, a11y, loading | [AORMS-STUDIO-INTERFACE-AUDIT-2026-07-11.md](../../esti/AORMS-STUDIO-INTERFACE-AUDIT-2026-07-11.md) |
-| **Public pages & URLs** | Marketing, wiki, blog, auth, SEO landings | [PUBLIC-PAGES-AUDIT-2026-07-11.md](../../marketing/PUBLIC-PAGES-AUDIT-2026-07-11.md) |
-| **Public pages UI/UX** | Same scope — checklist + T7 layer compliance | [PUBLIC-PAGES-UX-AUDIT-2026-07-11.md](../../marketing/PUBLIC-PAGES-UX-AUDIT-2026-07-11.md) |
-| **Security** | API, tRPC, storage, CSP, sessions, deploy | [SECURITY-AUDIT-2026-07-11.md](../../esti/SECURITY-AUDIT-2026-07-11.md) |
+| **AORMS-Studio interface** | Authenticated workspace (`studio.aorms.in`) — shell, nav, dock, a11y, loading | AORMS-STUDIO-INTERFACE-AUDIT-2026-07-11.md (missing — not written or removed, unconfirmed) |
+| **Public pages & URLs** | Marketing, wiki, blog, auth, SEO landings | PUBLIC-PAGES-AUDIT-2026-07-11.md (missing — not written or removed, unconfirmed) |
+| **Public pages UI/UX** | Same scope — checklist + T7 layer compliance | PUBLIC-PAGES-UX-AUDIT-2026-07-11.md (missing — not written or removed, unconfirmed) |
+| **Security** | API, tRPC, storage, CSP, sessions, deploy | SECURITY-AUDIT-2026-07-11.md (missing — not written or removed, unconfirmed) |
 | **UX audit wave 1B+2C** | Landing · portals · SPA de-Carbon · AStudio/AConsulting shell | [2026-08-09-UX-AUDIT-WAVE.md](2026-08-09-UX-AUDIT-WAVE.md) |
 
 **Checklists:** [07-UX-REVIEW-CHECKLISTS.md](../07-UX-REVIEW-CHECKLISTS.md) ·
@@ -56,8 +56,7 @@ governance docs (00–13) · 276 error-titled mutations · 37 dock screens.
 +0.5 from this actionable-gap sweep — low-weight dims, so the overall holds at 83, at
 the top of Managed). Advancing to "Optimizing" needs the remaining roadmap-class
 programmes (Figma bridge · RTL/i18n) — product/design deliverables, not design
-defects. **Studio interface detail:** see
-[AORMS-STUDIO-INTERFACE-AUDIT](../../esti/AORMS-STUDIO-INTERFACE-AUDIT-2026-07-11.md).
+defects.
 
 ---
 

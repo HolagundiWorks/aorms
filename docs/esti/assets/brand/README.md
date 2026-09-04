@@ -19,4 +19,4 @@ Expected filenames:
 **Runtime assets** ship from `frontend/public/` — this folder is for regeneration
 only and is not referenced by the app at build time.
 
-See also [AORMS-BRANDING-KIT.md](../AORMS-BRANDING-KIT.md).
+See also [AORMS-BRANDING-KIT.md](../../AORMS-BRANDING-KIT.md).
