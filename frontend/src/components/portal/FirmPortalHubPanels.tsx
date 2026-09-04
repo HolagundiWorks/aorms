@@ -411,7 +411,7 @@ const TX_COLS: GridColDef[] = [
   },
 ];
 
-/** Drawings tab — READY drawings + issued transmittals + Shilpi package refs. */
+/** Drawings tab — READY drawings + issued transmittals + published drawing packages. */
 export function FirmPortalDrawingsPanel({
   loading,
   drawings,
@@ -431,7 +431,7 @@ export function FirmPortalDrawingsPanel({
 }) {
   const pkgs = packages ?? [];
   return (
-    <PanelShell title="Drawings" hint="READY drawings, transmittals, and published Shilpi packages.">
+    <PanelShell title="Drawings" hint="READY drawings, transmittals, and published drawing packages.">
       <DataState
         loading={loading}
         isEmpty={!loading && drawings.length === 0 && transmittals.length === 0 && pkgs.length === 0}
@@ -445,7 +445,7 @@ export function FirmPortalDrawingsPanel({
           {pkgs.length > 0 && (
             <Box>
               <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
-                Published packages (Shilpi)
+                Published packages
               </Typography>
               <Stack spacing={1}>
                 {pkgs.map((p) => (

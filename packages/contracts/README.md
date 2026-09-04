@@ -2,9 +2,11 @@
 
 Shared Zod schemas, DTOs, and constants for **AORMS** (`esti` monorepo).
 
-Desktop node clients, the Fastify backend, and the React SPA all consume this
-package — **there is no second contracts repository**. Node/Tauri shells must
-depend on this workspace package (or a version published from it).
+The Fastify backend and the React SPA consume this package — **there is no
+second contracts repository**. (The `sync`/`license` DTOs below predate the
+2026-09 web-only pivot, which removed the desktop/Tauri shell; the underlying
+backend modules are still live, so these types remain in use, just with no
+desktop client on the other end today.)
 
 ## Version
 
@@ -17,7 +19,7 @@ depend on this workspace package (or a version published from it).
 Bump `package.json` version when shipping a breaking wire change; update
 [`docs/esti/HUB-API.md`](../../docs/esti/HUB-API.md) in the same PR.
 
-## Consume (monorepo / desktop)
+## Consume (monorepo)
 
 ```json
 {
@@ -44,10 +46,7 @@ pnpm --filter @esti/contracts build
 pnpm pack
 ```
 
-Prefer keeping the desktop shell inside this monorepo (`desktop/`) so the
-workspace link stays the source of truth ([DESKTOP-REPOS.md](../../docs/esti/DESKTOP-REPOS.md)).
-
-## Exports of interest for node clients
+## Exports of interest for sync/licence code
 
 | Module area | Symbols |
 | --- | --- |

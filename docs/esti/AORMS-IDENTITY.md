@@ -10,10 +10,10 @@
 > start (§8, open decision 4); a real merge is a live-data migration across every
 > customer's database and needs its own sign-off before any build starts. Remaining
 > runtime work: point the firm app at the live platform as the identity authority.
-> **Local-first (2026-08):** desktop node is first-class again — see
-> [`LOCAL-FIRST.md`](LOCAL-FIRST.md); hybrid offline password grace (§10) remains the
-> login fallback when the hub is unreachable; desktop session cache is back on the
-> roadmap with the Tauri shell (`desktop/`).
+> **Web-only (2026-09):** the desktop node / Tauri shell (`desktop/`) has been
+> removed along with its local-first roadmap. Hybrid offline password grace
+> (§10) remains the login fallback when the hub is unreachable; the desktop
+> session-cache item below is stale and no longer applicable.
 > Delivery: phased to `main`, each phase additive so existing logins keep working.
 > Supersedes the ad-hoc split between
 > the licensing-platform accounts (`hlp_*`) and the firm-app users (`esti_user`).
@@ -222,12 +222,11 @@ which needs a deployed platform + a couple of product decisions:
   turned on (`backend/src/modules/auth/router.ts`). *To enable: mint a product API key
   at `/platform-admin`, set the three env vars, pilot on one install before flipping it
   on widely.*
-- **Hybrid desktop offline cache** — ✅ *structured (2026-08).* Desktop node packaging
-  stub lives under `desktop/` (WinUI 3 shell → loopback SPA). Login still uses the
-  **hybrid offline password grace** above when `ESTI_IDENTITY_DELEGATE` is on. A native
-  session-token cache under the WinUI shell (`desktop/AStudio.Shell`) (last successful online login so the shell
-  opens offline after first sign-in) is the remaining packaging-wave item — chosen model
-  unchanged: online identity, locally-cached session. See [`LOCAL-FIRST.md`](LOCAL-FIRST.md).
+- **Hybrid desktop offline cache** — ❌ *retired (2026-09).* The desktop node
+  packaging stub (`desktop/`, WinUI 3 shell → loopback SPA) was removed with
+  the web-only pivot. Login still uses the **hybrid offline password grace**
+  above when `ESTI_IDENTITY_DELEGATE` is on — that mechanism is unchanged for
+  the web app; only the native session-token cache item is dropped.
 - **ASPRF → growth** — call `recordGrowth(accountPublicId, …)` from the firm ASPRF/LXOS
   pipelines so performance + learning accrue to the linked person. The seam exists
   (`modules/portable/service.ts`); wiring it touches ASPRF hot paths, deferred deliberately.

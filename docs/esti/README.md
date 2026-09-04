@@ -8,12 +8,11 @@
 > **ESTI** = built-in AI agent. **EOMS** (external knowledge bank API) is
 > retired (2026-09). Full rules: [`../../CLAUDE.md`](../../CLAUDE.md) § Product naming.
 
-This directory is the **single source of truth**. Superseded specs are moved to
-[`archived/`](archived/) with a historical-notice banner — do not follow naming
-or architecture guidance from anything under `archived/`.
+This directory is the **single source of truth**. Superseded specs are deleted
+outright, not archived (policy since 2026-09-04) — there is no `archived/`
+folder to check for older guidance; if a doc is here, it's current.
 
-**Platform north-star:** [AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md) ·
-**Cleanup plan (in progress):** [OFFICE-SYSTEM-CLEANUP-PLAN.md](OFFICE-SYSTEM-CLEANUP-PLAN.md).
+**Platform north-star:** [AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md).
 
 ## Read first
 
@@ -49,7 +48,6 @@ Repo agent entry: [`../../CLAUDE.md`](../../CLAUDE.md).
 | HR / staff registry | [HR-PROFILE-SYSTEM.md](HR-PROFILE-SYSTEM.md) |
 | Deploy | [VPS-INSTALL.md](VPS-INSTALL.md) · [PRODUCTION-OPS.md](PRODUCTION-OPS.md) |
 | Brand heritage | [AORMS-BRANDING-KIT.md](AORMS-BRANDING-KIT.md) |
-| Cleanup plan (pivot execution) | [OFFICE-SYSTEM-CLEANUP-PLAN.md](OFFICE-SYSTEM-CLEANUP-PLAN.md) |
 
 Build: [DEVELOPMENT.md](../../DEVELOPMENT.md) · [INSTALL.md](../../INSTALL.md).  
 Firm SOP: [docs/holagundi/](../holagundi/README.md).  

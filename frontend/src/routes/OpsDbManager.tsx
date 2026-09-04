@@ -22,9 +22,8 @@ type OpsBrowseArtifact = {
 };
 
 /**
- * Online ops DB manager — browse Mongo (or memory) firm ops + hub sync/meta from desktop Flush.
- * Canon: docs/esti/AORMS-SUITE.md · MONGO-OPS.md · PORTAL-SYNC-BRIDGE.md
- * Geometry admin remains ShilpiDB Desktop / hosted shilpid. Does not edit firm.db.
+ * Online ops DB manager — browse Mongo (or memory) firm ops + hub sync/meta.
+ * Does not edit firm.db.
  */
 export function OpsDbManager() {
   const statusQ = trpc.mongoOps.status.useQuery();
@@ -89,9 +88,6 @@ export function OpsDbManager() {
 
       <Alert severity="info" variant="outlined" sx={{ borderRadius: "8px" }}>
         Store mode: <strong>{statusQ.data?.mode ?? connector?.opsMode ?? "…"}</strong>
-        {statusQ.data?.shilpiConfigured || connector?.shilpiConfigured
-          ? ` · Shilpi HTTP ${(statusQ.data?.shilpi ?? connector?.shilpi)?.ok ? "up" : "down"} (${(statusQ.data?.shilpi ?? connector?.shilpi)?.url ?? "—"})`
-          : " · Shilpi HTTP not configured"}
       </Alert>
 
       <Surface layer="soft" sx={{ p: 2, borderRadius: "8px" }}>

@@ -213,7 +213,7 @@ See [DEMO-AND-HR-MODE.md](DEMO-AND-HR-MODE.md).
 **Product law (2026-09 pivot):** AORMS is web-only. ESTI (the built-in AI
 agent) runs as part of the **office hub**, not a desktop app — the pre-pivot
 "desktop-only Ollama" model (`LOCAL-FIRST.md`, `AORMS-SUITE.md` § AI, both
-now archived) is superseded. ESTI answers only from validated firm
+deleted) is superseded. ESTI answers only from validated firm
 repositories via the backend AI gateway (see [ARCHITECTURE.md](ARCHITECTURE.md)
 § AI Boundary).
 

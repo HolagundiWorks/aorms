@@ -14,7 +14,6 @@ import {
   upsertPublishedArtifact,
 } from "../../lib/mongo/ops.js";
 import { getOrgSettings } from "../../lib/settings.js";
-import { shilpiHealth, shilpiHttpConfigured } from "../../lib/shilpi/client.js";
 import { clientProcedure, ownerProcedure, protectedProcedure, router } from "../../trpc/trpc.js";
 
 async function assertOwnedProject(
@@ -36,8 +35,6 @@ async function assertOwnedProject(
 export const mongoOpsRouter = router({
   status: protectedProcedure.query(async () => ({
     mode: mongoOpsMode(),
-    shilpiConfigured: shilpiHttpConfigured(),
-    shilpi: await shilpiHealth(),
   })),
 
   publishTask: protectedProcedure
@@ -155,8 +152,6 @@ export const mongoOpsRouter = router({
     return {
       firmId: firm.id,
       opsMode: mongoOpsMode(),
-      shilpiConfigured: shilpiHttpConfigured(),
-      shilpi: await shilpiHealth(),
       role: env.ESTI_ROLE,
       hubUrl: hub || null,
       /** Redacted — presence only (never return the bearer). */

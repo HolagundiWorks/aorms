@@ -25,7 +25,6 @@ verifies and merges):
 - **Working on the codebase locally?** → [ROADMAP-LOCAL.md](./ROADMAP-LOCAL.md)
 - **A cloud-agent session — branch/workflow rules?** → [CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md)
 - **Product definition?** → [AORMS-OFFICE-SYSTEM.md](./AORMS-OFFICE-SYSTEM.md)
-- **Cleanup plan detail?** → [OFFICE-SYSTEM-CLEANUP-PLAN.md](./OFFICE-SYSTEM-CLEANUP-PLAN.md)
 
 ---
 

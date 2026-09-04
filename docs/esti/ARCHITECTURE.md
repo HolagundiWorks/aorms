@@ -44,9 +44,9 @@ One monorepo (pnpm workspaces).
 - `docs/esti`: canonical product and engineering documentation.
 
 > **Web-only (2026-09).** No desktop apps, no Tauri shell, no local-first
-> architecture, no per-app installers. A `desktop/` directory with legacy Tauri
-> packaging scaffolding remains on disk from the pre-pivot suite era and is
-> scheduled for removal — it is not part of the shipped product.
+> architecture, no per-app installers. The `desktop/` directory (legacy Tauri
+> and WinUI packaging scaffolding from the pre-pivot suite era) has been
+> deleted — it was never part of the shipped product.
 
 ### Access Topology
 

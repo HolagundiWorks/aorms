@@ -48,10 +48,12 @@ backend, worker, frontend all healthy), migrations apply cleanly, demo seed
 Projects all render real seeded data).
 
 **Known gotchas hit getting there (2026-09-04), now fixed:**
-- The bind mount `./desktop/artifacts/keys:/keys:ro` (licensing signing key,
-  unrelated to the deprecated desktop *app*) needs that directory to exist on
-  the host before `up` — Podman/Docker refuses to create it. `mkdir -p
-  desktop/artifacts/keys` once; already gitignored.
+- The bind mount `./desktop/artifacts/keys:/keys:ro` (licensing signing key —
+  the path predates the web-only pivot but is kept as-is since compose.yaml
+  already points there) needs that directory to exist on the host before
+  `up` — Podman/Docker refuses to create it. `mkdir -p desktop/artifacts/keys`
+  once; already gitignored. (The rest of `desktop/` — the Tauri/WinUI shell —
+  was deleted 2026-09-04; only this one leaf directory remains, empty.)
 - **Drizzle migration journal drift:** three migration files
   (`0225_moodboard.sql`, `0228_contractor_submission_attention.sql`,
   `0229_joint_measurement.sql`) existed on disk but were missing from
@@ -87,21 +89,18 @@ Projects all render real seeded data).
 
 ## Current phase — office system pivot cleanup
 
-**🚧 Codebase cleanup (Sept 2026)** — full plan:
-[OFFICE-SYSTEM-CLEANUP-PLAN.md](./OFFICE-SYSTEM-CLEANUP-PLAN.md)
+**✅ Codebase cleanup (Sept 2026)** — the `OFFICE-SYSTEM-CLEANUP-PLAN.md`
+checklist this section used to track is complete and was deleted
+2026-09-04 (all remaining items — `desktop/` deletion, archived-docs
+deletion, stale `ShilpiDB` client removal — landed in the same pass; see
+that commit for the full list). Summary:
 
 - ✅ **Strategy locked** — office management system only (no AStudio, AConsulting, AProc, ADraft, ShilpiDB)
 - ✅ **CLAUDE.md updated** — product definition changed to office hub
-- ✅ **Legacy docs archived** — `docs/esti/archived/`
-- 🚧 **Carbon Design System migration** — Wave 2 complete, Wave 3 launching
-- 🚧 **Codebase cleanup** — allied-app references removed from frontend; `desktop/` directory removal still pending
-
-### Phase 1: Codebase Cleanup
-- [x] Remove allied app constant references from frontend (`AStudio`, `AConsulting`, `AProc`, `ADraft`, `ShilpiDB`, `AORMS_CONNECT` — 0 remaining, verified by grep)
-- [ ] Delete `desktop/` directory (Tauri shell still present — `desktop/src-tauri/`, `desktop/AStudio.Shell/`)
-- [x] Remove installer/setup logic (`frontend/src/lib/desktop-installers.ts` deleted)
-- [ ] Remove desktop native bridge (`frontend/src/lib/desktopNativeBridge.ts` still present)
-- [x] Fix UTF-8 smart-quote corruption in `landing-seo.ts` (was breaking `tsc`)
+- ✅ **Legacy docs deleted** — `docs/esti/archived/` and `docs/marketing/archived/` removed outright (2026-09-04); nothing kept "for history"
+- 🚧 **Carbon Design System migration** — Wave 2 complete, Wave 3 launching (ongoing, unrelated to the pivot cleanup)
+- ✅ **Codebase cleanup** — allied-app references removed from frontend; `desktop/` directory deleted (2026-09-04, only the gitignored `desktop/artifacts/keys` leaf remains for the compose bind mount); dead `ShilpiDB` backend client (`backend/src/lib/shilpi/`) removed
+- ℹ️ **Deliberately not touched** — `frontend/src/lib/desktopNativeBridge.ts` and the broader sync/license/runtime-capabilities subsystem (`backend/src/modules/sync`, `license`, `licensing`, `mongoOps`; frontend `SyncQueueChip`, `DesktopLicenceBind`, `LicensePanel`, `OpsDbManager.tsx`) are still live, wired, and rendered in the app today — this is pre-pivot desktop-hub-sync architecture kept intentionally (see in-code comments), not oversight. Retiring it is a real architecture decision, not a docs/dead-file cleanup — flag for a deliberate follow-up if it should go.
 - [x] `tsc` + `eslint` + `vite build` — all green (0 errors, 0 warnings) as of 2026-09-04; the 72 TypeScript errors and assorted lint issues these tools surfaced after the `cloud-agent` merge are fixed (see ROADMAP-CLOUD.md § CI / build health)
 - [x] EOMS (external knowledge-bank API) removed — backend client/router, contracts, frontend panel, env var all deleted
 - [x] Engineering-consultancy angle removed — `consultancy` tRPC namespace + DB schema deleted; AORMS is pure architectural consultancy
@@ -184,20 +183,14 @@ re-captured (Playwright).
 
 ## Getting started (local)
 
-1. **Code cleanup** (Phase 1)
+1. **Code cleanup** (Phase 1 — done 2026-09-04; kept here as the verification command)
    ```bash
-   # Find remaining allied-app references
+   # Confirm zero allied-app references remain
    grep -r "AStudio\|AConsulting\|AProc\|ADraft\|ShilpiDB" frontend/src --include="*.ts" --include="*.tsx" -l
-
-   # Remove the legacy desktop/ directory (still pending) — NOTE: compose.yaml
-   # bind-mounts ./desktop/artifacts/keys:/keys:ro for the licensing signing
-   # key, unrelated to the deprecated desktop app. If desktop/ is removed
-   # wholesale, recreate that one directory (mkdir -p desktop/artifacts/keys)
-   # or update compose.yaml to drop the mount first.
-   rm -rf desktop/
-
-   # See OFFICE-SYSTEM-CLEANUP-PLAN.md Phase 1 for the full checklist
    ```
+   The `desktop/` directory is deleted; only the gitignored
+   `desktop/artifacts/keys` leaf remains on disk (compose.yaml still
+   bind-mounts it for the licensing signing key).
 
 2. **Landing pages** (Phase 2 — done, verify locally)
    ```bash
@@ -224,7 +217,6 @@ re-captured (Playwright).
 - [CARBON-MIGRATION.md](./CARBON-MIGRATION.md) — full Carbon design system roadmap
 - [CARBON-MIGRATION-WAVE3-PLAN.md](./CARBON-MIGRATION-WAVE3-PLAN.md) — Wave 3 execution (8 tranches)
 - [CARBON-PHASE1-STATUS.md](./CARBON-PHASE1-STATUS.md) — current readiness status
-- [OFFICE-SYSTEM-CLEANUP-PLAN.md](./OFFICE-SYSTEM-CLEANUP-PLAN.md) — 6-phase cleanup
 - [NAVIGATION.md](./NAVIGATION.md) — canonical sidebar IA
 
 **Cloud / production:**
@@ -233,14 +225,10 @@ see [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) ·
 [CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md) ·
 [PRODUCTION-OPS.md](./PRODUCTION-OPS.md) · [VPS-INSTALL.md](./VPS-INSTALL.md)
 
-**Archived (legacy):**
-- `docs/esti/archived/` — superseded suite/desktop-era documents
-
 ---
 
 ## Support & questions
 
-- **Cleanup questions?** See [OFFICE-SYSTEM-CLEANUP-PLAN.md](./OFFICE-SYSTEM-CLEANUP-PLAN.md)
 - **Carbon migration?** See [CARBON-MIGRATION-WAVE3-PLAN.md](./CARBON-MIGRATION-WAVE3-PLAN.md)
 - **Architecture questions?** See [ARCHITECTURE.md](./ARCHITECTURE.md)
 - **Stack migration spec?** See [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md)

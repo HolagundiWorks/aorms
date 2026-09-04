@@ -1,8 +1,15 @@
 # Hub API (sync + licence bind) — **2026-08**
 
-> **Canonical wire contract** for desktop `ESTI_ROLE=node` ↔ cloud hub.  
-> Implementation: `backend/src/modules/sync/*`, `backend/src/licensing-platform/routes/v1.ts`,  
-> `backend/src/modules/license/consumer.ts`. Product law: [LOCAL-FIRST.md](LOCAL-FIRST.md).
+> **Status (2026-09):** describes the desktop-node (`ESTI_ROLE=node`) ↔ cloud
+> hub wire contract from the pre-pivot suite era. The desktop node itself
+> (`desktop/`) has been removed under the web-only pivot; the underlying
+> `sync`/`license`/`licensing` backend modules and the runtime-capabilities
+> code this describes are still present and wired live (kept deliberately —
+> see the frontend's own `runtimeCapabilities.ts` comments), so this remains
+> an accurate technical reference for that code even though no desktop client
+> currently drives it. Implementation: `backend/src/modules/sync/*`,
+> `backend/src/licensing-platform/routes/v1.ts`,
+> `backend/src/modules/license/consumer.ts`.
 
 **Version tag:** `2026-08` (matches `@esti/contracts` `0.1.0`).
 
@@ -108,6 +115,4 @@ Used by `/api/sync/ingest`, `/api/sync/meta`, `/api/sync/meta/catch-up`, WS.
 
 ## Related
 
-- [LOCAL-FIRST.md](LOCAL-FIRST.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md) · [HCW-LICENSE-MANAGER.md](HCW-LICENSE-MANAGER.md)  
-- Contracts: `packages/contracts` · consumer notes: `packages/contracts/README.md`  
-- Crew: [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md)
+- Contracts: `packages/contracts` · consumer notes: `packages/contracts/README.md`

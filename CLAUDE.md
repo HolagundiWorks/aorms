@@ -209,10 +209,14 @@ index only if Ask ESTI should see it (wiki is not a public marketing surface).
 Rewrite CLAUDE.md § UI, `HCW-UI-KIT.md` (mark superseded), all `docs/hcw-kit/*`,
 `HCW-KIT-AI-KNOWLEDGE-BASE.md`, the design-debt register.
 
-**AORMS AI:** ESTI runs on **desktop apps only** (local Ollama / Foundry Local) —
-not on the cloud hub or aorms.in. `@hcw/aorms-ai-kit` is prompts + Ollama SDK for
-local/desktop use; canon: `docs/esti/LOCAL-FIRST.md` · `AORMS-SUITE.md` § AI ·
-`PRODUCTION-OPS.md` § ESTI AI.
+**AORMS AI:** ESTI runs as part of the **office hub** (web-only, 2026-09 pivot)
+— not a desktop app. It calls a self-hosted Ollama container alongside the
+backend (`compose.yaml`/`compose.prod.yaml` `ollama` service), not a user's
+own machine. `@hcw/aorms-ai-kit` (`vendor/hcw-aorms-ai-kit`) is prompts +
+Ollama SDK, still live, imported from `backend/src/lib/ai/*`. Canon:
+`docs/esti/PRODUCTION-OPS.md` § ESTI AI. (The old "desktop-only Ollama" docs
+— `LOCAL-FIRST.md`, `AORMS-SUITE.md` § AI — were deleted 2026-09 with the
+rest of `docs/esti/archived/`; this was the stale claim they left behind.)
 
 ### Carbon Sass & tokens (`styles.scss`, `landing.scss`)
 
