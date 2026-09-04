@@ -111,7 +111,7 @@ code in `web/app/(app)/`, not ports of the MUI-era route files; same approach he
 | tRPC | `letter.{list,byId,create,generatePdf,remove}` / `contract.{list,create,updateStatus,remove}` (`backend/src/modules/office/router.ts`) — both on bare `protectedProcedure` (**any authenticated staff member**, no capability gate — unlike proposals/invoices) | `list`/`byId` → Server Components; `create`/`generatePdf`/`updateStatus`/`remove` → Server Actions. RLS: use `is_office_staff()` (already exists from Phase 2), **not** a narrower financial-only policy — matches the current no-capability-gate behavior. A contract carries a money value (`valuePaise`) but read/write access today is not restricted to partners the way invoices/proposals are; don't tighten this silently as a side effect of the port, flag it as a product question if it looks wrong |
 | Contract status | `ContractStatus` enum + `updateStatus` mutation, no guarded transition function found (unlike proposals' `canTransitionFeeProposal`) — any status can move to any status today | Port the same permissiveness; don't invent a transition guard that doesn't exist in the current system as part of this migration |
 | Delete guard | `requireUnissuedDocument()` (letters — can't delete once a PDF exists/is rendering) / `requireDeletableStatus(status, ["DRAFT"])` (contracts — DRAFT only) | Same two shared functions noted above |
-| Letter `generatePdf` side effect | Also calls `recordDocumentIssue()` (`backend/src/lib/documentIssue.ts`, not audited in depth here — a small append-only "this document was issued, version N" log distinct from `audit_log`) | Check whether `recordDocumentIssue` is worth folding into `audit_log` (one append-only log instead of two parallel ones) or porting as its own table — a decision for whoever implements this phase, flagged here rather than resolved |
+| Letter `generatePdf` side effect | Also calls `recordDocumentIssue()` (`backend/src/lib/documentIssue.ts`) — writes to `esti_document_issue`, an immutable per-version issue record shared by every issuable document type, distinct from `audit_log` on purpose | **Resolved by the [Phase 4 audit](./NEXTJS-MIGRATION-PHASE4-AUDIT.md)**: this is Phase 4's "Documents" domain (`documentIssues`/`officeTemplates`/`moms`, the `documentRouter`'s cross-entity register), not a Phase 3 open question. Port the table+RPC alongside Phase 4's other Documents work, not here — Phase 3 only needs to keep calling it the same way letters/contracts do today |
 
 **Frontend:** `frontend/src/routes/Letters.tsx`, `Contracts.tsx` (Office
 documents). New Carbon-only pages, not ports.
@@ -195,8 +195,6 @@ Given the dependencies above:
 - **Reconciliation** (`esti_reconcile`, bank/26AS/AIS/GSTR import + `pandas`
   matching) — explicitly scoped out above; it depends on the Python worker
   (Phase 6) and is a large feature in its own right, not "Commercial" CRUD.
-- **`recordDocumentIssue()`** (`backend/src/lib/documentIssue.ts`) — noted as an
-  open question (fold into `audit_log` vs. port separately) but not resolved.
 - Estimation/BOQ, drawings, delivery/site-supervision, reporting, PDF/DWG worker
   internals, AI — per the roadmap, these are Phases 4–7 and get their own audit
   pass when their turn comes.
