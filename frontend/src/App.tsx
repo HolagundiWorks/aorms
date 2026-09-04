@@ -1,11 +1,5 @@
 import { Alert, AlertTitle, Box, CircularProgress } from "@mui/material";
-import {
-  AORMS_STUDIO,
-  AORMS_CONSULTANCY,
-  AORMS_PMC,
-  isAormsStudioLegacySlug,
-  isAormsPmcLegacySlug,
-} from "./lib/product-nomenclature.js";
+import { AORMS_OFFICE_HUB } from "./lib/product-nomenclature.js";
 import {
   Analytics,
   Archive,
@@ -214,7 +208,7 @@ export function App() {
       <UploadAuthProvider>
         {/* One boundary covers the lazy routes rendered in every AppShell branch
             (public paths, portals, and the authenticated workspace). */}
-        <Suspense fallback={<Box sx={{ position: "fixed", inset: 0, display: "grid", placeItems: "center", zIndex: 9999 }}><CircularProgress aria-label={`Loading ${AORMS_STUDIO.title}`} /></Box>}>
+        <Suspense fallback={<Box sx={{ position: "fixed", inset: 0, display: "grid", placeItems: "center", zIndex: 9999 }}><CircularProgress aria-label={`Loading ${AORMS_OFFICE_HUB.title}`} /></Box>}>
           <AppShell />
         </Suspense>
       </UploadAuthProvider>
@@ -272,24 +266,10 @@ function AppWorkspace() {
   if (!ADMIN_CONSOLE_URL && (isAdminHost() || pathname.startsWith("/platform-admin")))
     return <PlatformAdmin />;
 
-  // consultancy.aorms.in — AConsulting. Authenticated staff enter the
-  // engineering workspace (Enquiries home); everyone else sees the
-  // unified platform landing. One login window — the workspace type only
-  // routes where a company works.
-  if (surface === "consultancy") {
-    if (user && isStaffRole(user.role)) {
-      if (pathname === "/" || pathname === AORMS_CONSULTANCY.marketingPath)
-        return <Navigate to="/consultancy/enquiries" replace />;
-      // Fall through to the authenticated app router below.
-    } else {
-      if (pathname === "/" || pathname === AORMS_CONSULTANCY.marketingPath)
-        return <Landing />;
-      if (pathname === "/login") {
-        // Fall through — staff sign-in works on this host too (single login).
-      } else {
-        return <Navigate to="/" replace />;
-      }
-    }
+  // Legacy subdomain redirects (consultancy.aorms.in, etc.) → office hub
+  // Since all apps are now unified in the office hub, redirect legacy domains to /login
+  if (surface === "consultancy" || surface === "pmc" || surface === "studio") {
+    return <Navigate to="/login" replace />;
   }
 
   // Blog + /downloads are live public surfaces. Other former marketing
@@ -322,6 +302,7 @@ function AppWorkspace() {
     return <ComingSoonAuth />;
 
   if (publicMarketing) {
+    // Legacy marketing paths and removed app URLs all redirect to home
     const slug = pathname.replace(/^\/+/, "").replace(/\/+$/, "");
     const isRemovedMarketing =
       pathname === WIKI_PATH || pathname.startsWith(`${WIKI_PATH}/`) ||
@@ -332,22 +313,17 @@ function AppWorkspace() {
       pathname === "/contact" ||
       pathname === "/about" ||
       isLandingSlug(pathname) ||
-      slug === AORMS_STUDIO.slug ||
-      isAormsStudioLegacySlug(slug);
-    if (
-      pathname === AORMS_CONSULTANCY.marketingPath ||
-      slug === AORMS_CONSULTANCY.slug ||
-      slug === "acsulting"
-    )
-      return <Navigate to="/#consultancy" replace />;
-    if (
-      pathname === AORMS_PMC.marketingPath ||
-      pathname === AORMS_PMC.legacyMarketingPath ||
-      slug === AORMS_PMC.slug ||
-      isAormsPmcLegacySlug(slug) ||
-      pathname === "/pmc"
-    )
-      return <Navigate to="/#pmc" replace />;
+      pathname === "/astudio" ||
+      pathname === "/aconsulting" ||
+      pathname === "/aproc" ||
+      pathname === "/aadt" ||
+      pathname === "/aorms-consultancy" ||
+      pathname === "/aorms-pmc" ||
+      pathname === "/pmc" ||
+      slug === "astudio" ||
+      slug === "aconsulting" ||
+      slug === "aproc" ||
+      slug === "acsulting";
     if (isRemovedMarketing) return <Navigate to="/" replace />;
   }
 
@@ -364,7 +340,7 @@ function AppWorkspace() {
   if (surface === "studio" && pathname === "/" && !user && !isLoading)
     return <Navigate to="/login" replace />;
 
-  if (isLoading) return <Box sx={{ position: "fixed", inset: 0, display: "grid", placeItems: "center", zIndex: 9999 }}><CircularProgress aria-label={`Loading ${AORMS_STUDIO.title}`} /></Box>;
+  if (isLoading) return <Box sx={{ position: "fixed", inset: 0, display: "grid", placeItems: "center", zIndex: 9999 }}><CircularProgress aria-label={`Loading ${AORMS_OFFICE_HUB.title}`} /></Box>;
   if (!user) {
     return (
       <Routes>
@@ -627,9 +603,7 @@ function AppWorkspace() {
         ...(atLeast(60)
           ? [
               { label: "Consultants", to: "/consultants", icon: UserProfile },
-              ...(surface !== "pmc"
-                ? [{ label: "Contractors", to: "/contractors", icon: Tools }]
-                : []),
+              { label: "Contractors", to: "/contractors", icon: Tools },
             ]
           : []),
         ...(atLeast(60) ? [{ label: "Vendors", to: "/vendors", icon: Store }] : []),
@@ -679,12 +653,13 @@ function AppWorkspace() {
     },
   ].filter((g) => g.items.length > 0);
 
-  const isStudioHome = pathname === "/" && surface === "studio";
+  // Office hub home page (no longer surface-specific)
+  const isOfficeHome = pathname === "/";
 
   return (
     <ThemeContext.Provider value="white">
       <ActionDockProvider>
-        <div className={`esti-app-shell2${user.isDemo ? " esti-app-shell--demo" : ""}${isStudioHome ? " esti-app-shell2--studio-home" : ""}`}>
+        <div className={`esti-app-shell2${user.isDemo ? " esti-app-shell--demo" : ""}${isOfficeHome ? " esti-app-shell2--studio-home" : ""}`}>
           <a href="#esti-main" className="esti-skip-link">
             Skip to main content
           </a>
