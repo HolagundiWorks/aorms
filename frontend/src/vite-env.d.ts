@@ -6,9 +6,9 @@ interface ImportMetaEnv {
   /** `desktop` | `web` | `hub` — build-time host hint for local-first parity. */
   readonly VITE_RUNTIME_HOST?: "desktop" | "web" | "hub";
   /**
-   * Signed AStudio / AConsulting Windows installer URLs for `/downloads`.
-   * Leave empty until Bhoomi publishes a code-signed Setup.exe (LF4).
-   * See docs/esti/WEB-PORTAL.md.
+   * Signed AStudio / AConsulting **WinUI 3** installer URLs for `/downloads`.
+   * Leave empty until Bhoomi publishes a code-signed WinUI package (LF4).
+   * Do not point at legacy Tauri NSIS Setup.exe. See docs/esti/WEB-PORTAL.md.
    */
   readonly VITE_ASTUDIO_INSTALLER_URL?: string;
   readonly VITE_ACONSULTING_INSTALLER_URL?: string;

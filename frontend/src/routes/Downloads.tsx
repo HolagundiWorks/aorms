@@ -17,8 +17,10 @@ import {
 } from "../lib/product-nomenclature.js";
 
 /**
- * Public `/downloads` portal — suite desktop installers.
- * Coming soon until D6 (signed URL + release flag) — independent of auth soft launch.
+ * Public `/downloads` portal — local-first desktop installers for AStudio /
+ * AConsulting. CTAs stay on web_fallback until a signed **WinUI** URL + sha256
+ * is wired (docs/esti/WEB-PORTAL.md). Do not link Tauri NSIS artifacts.
+ * Legacy Lite/Pro Manager SKUs stay retired.
  */
 export function Downloads() {
   const [offers, setOffers] = useState<DesktopInstallerOffer[] | null>(null);
@@ -113,9 +115,14 @@ export function Downloads() {
           ))}
 
           <Typography variant="body2" color="text.secondary" className="lp2-reveal">
-            {softLaunch
-              ? "Release notes will land on the blog when signed installers are ready."
-              : "Legacy Lite / Pro / Community Manager installers stay retired."}
+            Legacy Lite / Pro / Community Manager installers and the separate Estimate desktop
+            app stay <strong>retired</strong>. Estimating is in-product (Rate Books + project
+            Estimation). Operators: wire signed URLs via{" "}
+            <code>VITE_ASTUDIO_INSTALLER_URL</code> / <code>VITE_ACONSULTING_INSTALLER_URL</code>{" "}
+            or fill <code>frontend/public/update-manifests/*.json</code> and set{" "}
+            <code>VITE_PORTAL_USE_RELEASE_INSTALLERS=true</code> — only for a
+            <strong>signed WinUI</strong> package (never Tauri NSIS / unsigned{" "}
+            <code>desktop/artifacts/</code>; wait on Bhoomi for URL + sha256 + version).
           </Typography>
         </Stack>
       </div>

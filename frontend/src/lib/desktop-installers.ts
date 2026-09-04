@@ -2,10 +2,9 @@
  * Desktop installer resolution for the public `/downloads` portal.
  *
  * Honesty rule: never offer a download button until a **signed** URL is wired.
- * Until D6, force **coming_soon** (independent of the apex auth marketing gate).
- * Opt out locally with `VITE_INSTALLERS_COMING_SOON=false` for web_fallback testing.
- * Placeholders never become Download CTAs without release flag + sha256
- * (docs/esti/WEB-PORTAL.md · ROADMAP D6).
+ * Placeholders stay in `web_fallback` until Bhoomi publishes a **signed WinUI**
+ * installer URL + sha256 (see docs/esti/WEB-PORTAL.md). Never wire Tauri NSIS
+ * Setup.exe or `desktop/artifacts/` unsigned overnight builds.
  */
 import {
   ADRAFT,

@@ -157,9 +157,6 @@ DESKTOP-REPOS). Gagan does **not** own `desktop/` packaging or
 
 - `frontend/src/routes/Downloads.tsx` · `DocsHub.tsx` · `AccountPortal.tsx`  
 - `frontend/src/lib/desktop-installers.ts` · `frontend/public/update-manifests/`  
-- `frontend/src/lib/keymap.ts` · `CapabilityBadge.tsx` · `routes/Help.tsx`  
-- `frontend/src/components/shell/RightSlot.tsx` · `AskEstiPanel.tsx` · `lib/right-slot.ts`  
-
 - `frontend/src/content/blog/` · landing SEO / nomenclature imports  
 - `docs/esti/repo-scaffolds/` · [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) LF5–LF6
 
@@ -173,7 +170,9 @@ DESKTOP-REPOS). Gagan does **not** own `desktop/` packaging or
 - [x] LF5 capability badges · Hosted AI UX · shared keymap + `/help`  
 - [x] LF6 Inspector / Ask ESTI **one right slot** — `RightSlot` + `AskEstiPanel` + `lib/right-slot.ts` (Properties ↔ Ask; `CapabilityBadge` in Ask tab; rebased on #51).  
 
-**Still 🔲:** live download URL flip (wait on Bhoomi signed Setup.exe + sha256).
+**Still 🔲:** live download URL flip (wait on Bhoomi signed WinUI URL + sha256).
+
+**Status (2026-08-06, Aakash):** `/downloads` one-line fill fields confirmed exact in [WEB-PORTAL.md](WEB-PORTAL.md) (Option A env / Option B manifest+flag); placeholders stay `web_fallback`. Visual regression job on `main` fails **before** landing-hero screenshot — contracts `ActivateResult.syncToken` duplicate TS1117 (#55/#51); **not** a hero baseline drift from portal lanes.
 
 **Status (2026-08-06, Aakash):** LF6 #54 rebased on LF5 tip; download URL flip still gated; CI lint green-up in #55.
 
