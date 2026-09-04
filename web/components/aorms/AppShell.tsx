@@ -48,6 +48,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <SideNavLink href="/transmittals">Transmittals</SideNavLink>
           <SideNavLink href="/drawings">Drawings</SideNavLink>
           <SideNavLink href="/moms">Meeting Minutes</SideNavLink>
+          <SideNavLink href="/reports">Financial Reports</SideNavLink>
+          <SideNavLink href="/workload">Workload</SideNavLink>
+          <SideNavLink href="/audit-log">Audit Log</SideNavLink>
         </SideNavItems>
       </SideNav>
       <Content>{children}</Content>
