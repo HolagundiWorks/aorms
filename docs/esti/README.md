@@ -61,15 +61,9 @@ Kit docs: [docs/hcw-kit/](../hcw-kit/README.md).
 3. [ARCHITECTURE.md](ARCHITECTURE.md) / [INDIA-PROFILE.md](INDIA-PROFILE.md) — constraints
 4. [ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) / [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) — delivery status
 
-## Archived (`archived/`)
-
-Historical documents from the pre-pivot multi-app suite era (AStudio,
-AConsulting, AProc, ADraft, ShilpiDB, AORMS Connect desktop launcher) and the
-local-first desktop-node model. Each carries a **⚠️ HISTORICAL** banner. Use
-Git history for anything not preserved there.
-
 ## Change rule
 
 Material features update this index / NAVIGATION / ROADMAP-CLOUD / ROADMAP-LOCAL in the same PR.
-**Archive** superseded specs (move to `archived/` with a historical banner) —
-do not leave competing instructions live in this directory.
+**Delete** superseded specs outright — per the no-archive policy above, do
+not leave competing instructions live in this directory. Use Git history for
+anything not preserved here.
