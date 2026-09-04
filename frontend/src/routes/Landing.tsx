@@ -34,11 +34,7 @@ import { SoftSurface } from "../components/landing/SoftSurface.js";
 import { AormsLogo } from "../components/AormsLogo.js";
 import {
   AORMS_PLATFORM,
-  LANDING_PRODUCTS,
-  SHILPIDB,
-  AORMS_STUDIO,
-  AORMS_CONSULTANCY,
-  ADRAFT,
+  AORMS_OFFICE_HUB,
   EOMS,
   ESTI,
   HUMAN_CENTRIC_WORKS,
@@ -46,46 +42,53 @@ import {
 import { applyLandingSeo, getLandingFaq, injectLandingJsonLd } from "../lib/landing-seo.js";
 import { useLandingVisitCounter } from "../lib/landing-visit.js";
 import { isMarketingOnly } from "../lib/marketing-gate.js";
-import { installersComingSoonForced } from "../lib/desktop-installers.js";
 import { MARKETING_CONTENT_GUTTER, MARKETING_RHYTHM, marketingContentColumnSx } from "../lib/marketing-layout.js";
 import { LandingAecStrip, LandingProductFigure } from "../components/landing/LandingAecStrip.js";
 
 /**
- * AEC landing IA (odd dock peers):
- * Overview → Outcomes → Audience → Products → Start
- * Hero: brand + copy + poster/video (no AEC building collage). Products: suite catalog.
+ * AEC landing IA (office hub focus):
+ * Overview → Outcomes → Audience → Features → Start
+ * Hero: brand + copy + poster/video. Features: office hub capabilities.
  */
 const SECTIONS = [
   { href: "#top", label: "Overview" },
   { href: "#outcomes", label: "Outcomes" },
   { href: "#audience", label: "Audience" },
-  { href: "#products", label: "Products" },
+  { href: "#office-features", label: "Features" },
   { href: "#start", label: "Start" },
 ] as const;
 
-type LandingProduct = (typeof LANDING_PRODUCTS)[number];
+/** Office hub features — core capabilities. */
+const OFFICE_HUB_FEATURES = [
+  { id: "clients", title: "Clients & Leads", description: "CRM with interaction log, tender tracking, portal access" },
+  { id: "projects", title: "Projects", description: "Phases, tasks, milestones, moodboards, delivery tracking" },
+  { id: "proposals", title: "Proposals & Contracts", description: "Unified proposals with client approval gates and versioning" },
+  { id: "invoicing", title: "Invoicing & Finance", description: "GST-compliant invoicing, reconciliation, cash book, reports" },
+  { id: "team", title: "Team & HR", description: "Roster, assignments, leaves, payroll, performance scoring" },
+  { id: "knowledge", title: "Knowledge Bank", description: "Specifications, standards, compliance rules, lessons learned" },
+] as const;
 
 const AUDIENCE_FIGURE: Record<string, string> = {
   architecture: "/landing/entourage/building-03.png",
   engineering: "/landing/entourage/building-07.png",
 };
 
-/** Market outcomes — five peers (list bands, not card collage). */
+/** Market outcomes — three peers (office hub focus). */
 const OUTCOMES = [
   {
     icon: <PaymentsOutlined fontSize="small" />,
-    title: "Recover fees you already earned",
-    body: "Revisions, proposals, and invoices stay on one project record. Scope changes bill correctly — margin stops leaking into uninvoiced nights.",
+    title: "Recover fees and manage projects precisely",
+    body: "Clients, projects, proposals, invoices, and deliverables on one unified record. Track deliverables → proposals → invoices. No spreadsheet archaeology.",
   },
   {
     icon: <HubOutlined fontSize="small" />,
-    title: "One suite — not five disconnected tools",
-    body: "Managers for the office, AQC for quantities and programme, ADraft for drafting, ShilpiDB for drawings. Firm portals publish updates — no spreadsheet archaeology.",
+    title: "One web hub for office management",
+    body: "Cloud-only office system: clients, projects, proposals, invoicing, team roster, payroll, knowledge bank, delivery tracking. All accessible from your browser.",
   },
   {
     icon: <DnsOutlined fontSize="small" />,
-    title: "Runs on your server",
-    body: "Firm data stays in your environment, and nothing is used to train third-party models. AI runs on your own infrastructure — local on desktop, the hub on web.",
+    title: "Your data stays yours",
+    body: "Firm data stays in your environment, and nothing is used to train third-party models. Built-in AI (ESTI) runs on your own infrastructure with access to your firm's knowledge only.",
   },
 ] as const;
 
@@ -94,23 +97,23 @@ const AUDIENCE = [
     id: "architecture",
     icon: <ArchitectureOutlined fontSize="small" />,
     title: "Architecture studios",
-    product: AORMS_STUDIO.title,
-    body: "Fee recovery, client portals, office papers, and studio rhythm — practice communications without owning CAD or BOQ math.",
+    product: AORMS_OFFICE_HUB.title,
+    body: "Fee recovery, client portals, office management, and practice coordination — one unified web hub for your entire practice.",
   },
   {
     id: "engineering",
     icon: <EngineeringOutlined fontSize="small" />,
     title: "Engineering consultancies",
-    product: AORMS_CONSULTANCY.title,
-    body: "Engagements, deliverables, technical queries, and coordination — the engineering office runs on one record while calc stays local.",
+    product: AORMS_OFFICE_HUB.title,
+    body: "Engagements, deliverables, team management, and delivery coordination — the engineering office runs on one web hub.",
   },
 ] as const;
 
-/** Proof stats — three peers (odd · Cowan-friendly). */
+/** Proof stats — three peers (office hub focus). */
 const STATS = [
-  { id: "apps", label: "Suite product families", value: "6+" },
-  { id: "ai", label: "AI tiers · EOMS + ESTI", value: "Dual" },
-  { id: "oss", label: "Licensing right now", value: "OSS" },
+  { id: "features", label: "Office management modules", value: "10+" },
+  { id: "ai", label: "AI agents · EOMS + ESTI", value: "Built-in" },
+  { id: "deployment", label: "Deployment model", value: "Cloud" },
 ] as const;
 
 const FAQ = [
@@ -124,19 +127,19 @@ const FAQ = [
   },
   {
     q: "What is the difference between EOMS and ESTI?",
-    a: `${EOMS.name} is the external knowledge bank — standard codebooks and compliance codes on tap via its API. ${ESTI.name} is the internal agent that answers only from your firm's validated repositories.`,
+    a: `${EOMS.name} is the external knowledge bank — standard codebooks and compliance codes on tap via its API. ${ESTI.name} is the built-in office automation agent that answers only from your firm's validated repositories.`,
   },
   {
-    q: "Which apps ship today?",
-    a: `${AORMS_STUDIO.title} (architecture) and ${AORMS_CONSULTANCY.title} (engineering) are both live on the same spine — ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")} and ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")}.`,
+    q: "Is this a desktop app or web-based?",
+    a: `Web-based only. AORMS is a cloud office management system accessible from your browser. No desktop installers, no local-first architecture — just log in and start managing your office.`,
   },
   {
     q: "How much does it cost?",
-    a: `One Standard licence — unlimited users, full workspace, 5 GB cloud storage included. You pay only for cloud storage above 5 GB. AI is unmetered — it runs locally on your desktop node, and on the hub for web parity (no per-token billing, no bring-your-own key). Desktop node (local-first) + web parity share the same licence; no Lite/Pro tiers. See Pricing below.`,
+    a: `One Standard licence — unlimited users, full office hub, and cloud storage included. You pay only for storage above your allocation. AI is unmetered and built-in (no per-token billing, no bring-your-own key). See Pricing for more details.`,
   },
   {
-    q: "Who should start with AORMS first?",
-    a: `Architecture studios of about 5–25 people in India who lose fee recovery to revisions and site chaos — COA proposals, GST invoices, drawings, and a client portal on one record. Engineering consultancies use ${AORMS_CONSULTANCY.title} on the same spine.`,
+    q: "What office features does AORMS include?",
+    a: `Clients, projects, proposals, invoicing, team roster, payroll, knowledge bank (specifications, standards, compliance), delivery tracking (BBS, steel recon, running bills), and site supervision (snags, inspections, progress reports).`,
   },
 ] as const;
 
@@ -296,72 +299,24 @@ function ProductBody({ product }: { product: LandingProduct }) {
   );
 }
 
-/** One Products surface — all suite apps in a single rail + panel catalog. */
-function SuiteProductsCatalog({ activeProduct }: { activeProduct: string | null }) {
-  const { hash } = useLocation();
-  const hashId = hash.replace(/^#/, "");
-  const initial = LANDING_PRODUCTS.some((p) => p.id === hashId) ? hashId : LANDING_PRODUCTS[0]!.id;
-  const [active, setActive] = useState(initial);
-  const userChoseRef = useRef(false);
-
-  useEffect(() => {
-    const id = hash.replace(/^#/, "");
-    if (!LANDING_PRODUCTS.some((p) => p.id === id)) return;
-    userChoseRef.current = false;
-    setActive(id);
-  }, [hash]);
-
-  useEffect(() => {
-    if (userChoseRef.current) return;
-    if (activeProduct && LANDING_PRODUCTS.some((p) => p.id === activeProduct)) {
-      setActive(activeProduct);
-    }
-  }, [activeProduct]);
-
-  const selected = LANDING_PRODUCTS.find((p) => p.id === active) ?? LANDING_PRODUCTS[0]!;
-  const panelId = `suite-panel-${selected.id}`;
-
+/** Office hub features — simplified overview of core capabilities. */
+function OfficeHubFeatures() {
   return (
-    <Box className="esti-lp-reveal esti-lp-vacc esti-lp-vacc--suite" sx={{ maxWidth: 1080 }}>
-      <nav className="esti-lp-vacc__rail" aria-label="AORMS suite products">
-        {LANDING_PRODUCTS.map((product) => {
-          const open = product.id === selected.id;
-          return (
-            <button
-              key={product.id}
-              type="button"
-              id={product.id}
-              data-product={product.id}
-              className={open ? "esti-lp-vacc__tab esti-lp-vacc__tab--active" : "esti-lp-vacc__tab"}
-              aria-current={open ? "true" : undefined}
-              aria-controls={panelId}
-              aria-expanded={open}
-              onClick={() => {
-                userChoseRef.current = true;
-                setActive(product.id);
-                if (typeof window !== "undefined" && window.history?.replaceState) {
-                  window.history.replaceState(null, "", `#${product.id}`);
-                }
-              }}
-            >
-              <span className="esti-lp-vacc__tab-family">{product.family}</span>
-              <span className="esti-lp-vacc__tab-title">{product.title}</span>
-            </button>
-          );
-        })}
-      </nav>
-      <Box
-        id={panelId}
-        role="region"
-        aria-labelledby={selected.id}
-        className="esti-lp-vacc__panel esti-lp-vacc__panel--suite"
-        data-product={selected.id}
-      >
-        <div className="esti-lp-vacc__panel-grid">
-          <LandingProductFigure productId={selected.id} title={selected.title} />
-          <ProductBody product={selected} />
-        </div>
-      </Box>
+    <Box className="esti-lp-reveal esti-lp-vacc esti-lp-vacc--features" sx={{ maxWidth: 1080 }}>
+      <Grid container spacing={3}>
+        {OFFICE_HUB_FEATURES.map((feature) => (
+          <Grid item xs={12} sm={6} key={feature.id}>
+            <SoftSurface sx={{ p: 3, height: "100%" }}>
+              <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                {feature.title}
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                {feature.description}
+              </Typography>
+            </SoftSurface>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 }
@@ -398,38 +353,9 @@ function useHeroPointer(homeRef: RefObject<HTMLElement | null>) {
   }, [homeRef]);
 }
 
-function useActiveProduct() {
-  const [active, setActive] = useState<string | null>(null);
-  useEffect(() => {
-    const ids = LANDING_PRODUCTS.map((p) => p.id);
-    const visible = new Map<string, number>();
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const id = entry.target.id;
-          if (!id) continue;
-          if (entry.isIntersecting) visible.set(id, entry.intersectionRatio);
-          else visible.delete(id);
-        }
-        let best = "";
-        let bestR = 0;
-        for (const [id, ratio] of visible) {
-          if (ratio >= bestR) {
-            bestR = ratio;
-            best = id;
-          }
-        }
-        if (best) setActive(best);
-      },
-      { rootMargin: "-35% 0px -45% 0px", threshold: [0, 0.2, 0.45, 0.7] },
-    );
-    for (const id of ids) {
-      const n = document.getElementById(id);
-      if (n) io.observe(n);
-    }
-    return () => io.disconnect();
-  }, []);
-  return active;
+// Simplified for office hub (no product selection needed)
+function useActiveProduct(): null {
+  return null;
 }
 
 function useLandingReveal() {
@@ -462,7 +388,6 @@ export function Landing() {
   const homeRef = useRef<HTMLDivElement>(null);
   const [audienceFocus, setAudienceFocus] = useState<"architecture" | "engineering" | null>(null);
   const progress = useScrollProgress();
-  const activeProduct = useActiveProduct();
   useLandingReveal();
   useHeroPointer(homeRef);
 
@@ -790,18 +715,18 @@ export function Landing() {
             </Grid>
           </Box>
 
-          {/* 4 — Products: one AEC suite catalog */}
-          <Box id="products" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
+          {/* 4 — Features: office hub capabilities */}
+          <Box id="office-features" component="section" sx={{ py: MARKETING_RHYTHM.sectionY }}>
             <LandingAecStrip variant="section" />
 
             <SectionHead
-              eyebrow="Products"
-              title="One AEC suite. Dedicated apps."
-              lead={`Architecture, engineering, and construction consulting — Connect launches managers and local technical tools. ${AORMS_PLATFORM.aecDisciplines.join(" · ")}. Installers remain Coming soon.`}
+              eyebrow="Features"
+              title="Unified office management."
+              lead={`One web hub for ${AORMS_PLATFORM.aecDisciplines.join(", ")} practices — clients, projects, proposals, invoicing, team, knowledge, and delivery.`}
               display
             />
 
-            <SuiteProductsCatalog activeProduct={activeProduct} />
+            <OfficeHubFeatures />
 
             <Box
               id="intelligence"
