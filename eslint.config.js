@@ -7,6 +7,7 @@ export default tseslint.config(
     ignores: [
       "**/dist/**",
       "**/node_modules/**",
+      "**/.next/**",
       "htdocs/**",
       "worker/**",
       "**/*.config.{js,ts}",
@@ -33,9 +34,9 @@ export default tseslint.config(
     },
   },
   {
-    // React lives in the frontend app and in the shared UI kit (packages/hcw-ui-kit),
-    // so the Rules of Hooks apply to both — lint the kit like a first-class surface.
-    files: ["frontend/**/*.{ts,tsx}", "packages/**/*.{ts,tsx}"],
+    // React lives in the frontend app, the Next.js migration target (web/), and
+    // in the shared UI kit (packages/hcw-ui-kit) — Rules of Hooks applies to all three.
+    files: ["frontend/**/*.{ts,tsx}", "web/**/*.{ts,tsx}", "packages/**/*.{ts,tsx}"],
     plugins: { "react-hooks": reactHooks },
     // Keep the two classic rules the codebase is written against. react-hooks 7's
     // recommended preset adds several stricter rules (set-state-in-effect, etc.)
