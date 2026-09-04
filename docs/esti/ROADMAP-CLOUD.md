@@ -103,16 +103,33 @@ code referencing removed desktop/allied-app concepts).
 | `frontend` `vitest run` | ✅ 63/63 passing |
 | `backend` `vitest run` | ✅ 209/209 passing |
 | `vite build` | ✅ succeeds |
+| `pnpm audit --audit-level=high` | ✅ 0 high/critical (was 12) — 2 moderate remain, deliberately unfixed, see below |
 | `worker` `pytest` | ⬜ not verified — no Python interpreter on the machine that ran this pass |
+
+**Dependency audit — fixed (2026-09-04):** all 12 high-severity findings
+resolved via direct version bumps (`pdfjs-dist` `6.1.200`→`6.3.289`,
+`fastify` `^5.10.0`→`^5.12.3`, `dompurify` `^3.4.11`→`^3.4.14`) and root
+`pnpm.overrides` (`fast-uri` → `>=3.1.6 <4.0.0 || >=4.1.3` — a compound range
+because a bare `>=3.1.6` wouldn't force-bump an already-resolved `4.1.2`,
+which itself satisfies `>=3.1.6`; `nanoid` → `>=3.3.18`; `browserslist` →
+`>=4.28.7`; `postcss` → `>=8.5.23`). Verified: `tsc`/`eslint`/`vitest`/
+`vite build` all still green after the bumps.
+
+**Deliberately left unfixed — 2 moderate findings**, both nested under
+`backend > minio@8.0.7`, minio's *latest* release: `stream-json@1.9.1`
+(needs `>=3.5.0`, a **major** bump) and `query-string@7.1.3 >
+decode-uri-component@0.2.2` (needs `>=0.5.0`, which is pure-ESM-only —
+`query-string@7.1.3` has no `"type": "module"` of its own, so a `require()`
+of it would break). minio 8.0.7 itself still declares
+`"stream-json": "^1.8.0"` — forcing a major-version override risks breaking
+minio's internal JSON parsing (S3 client) silently, with no way to
+integration-test the fix on this machine (no live MinIO/Podman stack). Both
+are moderate DoS findings on a narrow attack surface (malformed S3 responses
+/ crafted percent-encoded input) — revisit once minio ships a release that
+adopts newer majors of these, or if someone can verify against a live stack.
 
 **Still open:**
 
-- `pnpm audit --audit-level=high` findings from the 2026-09-04 audit pass are
-  **not yet addressed**: `pdfjs-dist` (pinned `6.1.200`, arbitrary JS
-  execution on a malicious PDF — worth prioritizing given how PDF-heavy this
-  app is), a `fast-uri` transitive advisory needing the existing
-  `pnpm.overrides` pin bumped (not re-added), plus lower-urgency dev-tooling-only
-  findings in `browserslist`/`nanoid`.
 - 5 `react-hooks/exhaustive-deps` warnings (not errors) in
   `ProjectMeasurementPanel.tsx`, `JointMeasurementRecorder.tsx`,
   `ProjectMoodboard.tsx`, `UsageReportsTab.tsx`, `KnowledgeBankPortal.tsx`.
