@@ -22,14 +22,18 @@ Open source for now; SaaS commercial metering is deferred.
 ## What stayed retired
 
 - Lite / Pro / Community **Manager** installers (SKU matrix)
-- Treating `aorms.in` as staff ERP login
+- A separate **Estimate** desktop app (estimating stays in-product: Rate Books + project Estimation)
 
-## Why local-first for technical work
+Signed local-first installers (when packaging ships) are listed at
+[`/downloads`](/downloads) — until then the page keeps honest web-workspace CTAs.
+Legacy `/download` redirects there.
+
+## Why local-first
 
 Indian practices need low latency and control over unfinished geometry and money math.
 Keeping BOQ, BBS, and drafts on the desktop — while sharing tasks, progress, and issued
 PDFs through the hub — matches how firms already operate.
 
-Read [why the suite matters](/blog/why-aorms-suite-matters) and
-[how it solves fragmented tools](/blog/how-aorms-suite-solves-fragmented-practice).
-Watch [`/downloads`](/downloads) for signed installers when packaging ships.
+Sign in at [studio.aorms.in](https://studio.aorms.in), check
+[downloads](/downloads) for the signed desktop node when it ships, or follow
+Local-first notes in the repo roadmap.

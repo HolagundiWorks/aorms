@@ -1,7 +1,7 @@
 ---
 title: One Standard licence — storage and AI, not product tiers
 date: 2026-07-22
-excerpt: AORMS licences the company on a Standard plan — the only usage that scales is cloud storage, not Lite vs Pro desktop SKUs. Desktop + web share the same licence; AI is unmetered (local on desktop, hub Hosted AI on web).
+excerpt: AORMS licences the company on a Standard plan — usage is storage and AI, not Lite vs Pro desktop SKUs. Desktop + web share the same licence; BYO AI keys remain supported.
 tags: Product, Platform, Practice
 author: Human Centric Works
 ---

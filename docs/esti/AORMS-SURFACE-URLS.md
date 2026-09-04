@@ -31,7 +31,15 @@ License control plane stays on **admin.aorms.in**.
 | `/` | Platform landing | Marketing + demos; CTAs → downloads / product hosts |
 | `/wiki`, `/wiki/*` | AORMS Wiki | Public documentation |
 | `/blog`, `/blog/*` | Blog | Editorial |
-| `/downloads` | Desktop installers | AStudio · AConsulting · AQC (web_fallback until signed) — [WEB-PORTAL.md](WEB-PORTAL.md) |
+| `/downloads` | Desktop installers | Local-first signed Setup.exe (web_fallback until signed); legacy `/download` redirects here — [WEB-PORTAL.md](WEB-PORTAL.md) |
+| `/access` | External portals | Client, consultant, contractor, site sign-in |
+| `/account` | Personal account | Identity + licence hub |
+| `/company-account` | Company account | Firm owners |
+| `/libraries/knowledge-bank-portal` | Knowledge Bank portal | Staff L4+, EOMS intake |
+| `/aconsulting` | AConsulting marketing | Path alias; canonical host `consultancy.aorms.in` |
+| `/aorms-consultancy` | Legacy | Redirects to `/#consultancy` |
+| `/aproc` | AProc marketing | Path alias; canonical host `proc.aorms.in` |
+| `/aorms-pmc` | Legacy | Redirects to `/#pmc` |
 | `/about`, `/legal`, `/investors`, SEO landings | Marketing | Public pages |
 | `/aconsulting` · `/aproc` | Marketing aliases | Canonical hosts above |
 | `/login` | **Demo / legacy only** | Not the firm ERP entry. Firm portal login lives on the **firm portal host**. Operator licensing → `admin.aorms.in` |

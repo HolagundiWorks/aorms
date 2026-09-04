@@ -28,9 +28,9 @@ export function Blog() {
           <p className="lp2-section-head__tag">{AORMS_PLATFORM.name} blog</p>
           <h1 className="lp2-section-head__title">Blog</h1>
           <p className="lp2-section-head__body">
-            Suite notes for {AORMS_PLATFORM.name} — why the suite matters, how it solves
-            fragmented tools, and the product map for managers, AQC apps, ADraft, and{" "}
-            {AORMS_STUDIO.title} operations.
+            Platform notes (frameworks, EOMS, ESTI) and <strong>{AORMS_STUDIO.title}</strong>{" "}
+            advisory operations for Indian architecture consultancies — revisions, approvals,
+            billing, and workflows. Desktop preferred with web parity.
           </p>
           <p className="lp2-blog-links">
             <Link to="/">Suite home</Link>

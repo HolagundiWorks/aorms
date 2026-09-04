@@ -41,9 +41,7 @@ Never hand-edit `dist/`. Re-vendor per [KITS.md](../KITS.md) after upstream toke
 | --- | --- |
 | UX parity checklist (doc) | ✅ [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) |
 | Figma ↔ kit token sync notes + check script | ✅ this file + `scripts/figma-token-sync-check.mjs` |
-| Inspector / Ask ESTI **right-slot** (one slot both hosts) | ✅ Aakash 2026-08 — `RightSlot` + `AskEstiPanel` + `lib/right-slot.ts` (Properties ↔ Ask; `publishInspector` for screens; no floating second AI chrome) |
-
-**Status (2026-08-06, Aakash):** right-slot shell shipped; richer per-screen inspector payloads can adopt `publishInspector` / `esti:inspect` incrementally.
+| Inspector / Ask ESTI **right-slot** (one slot both hosts) | 🔲 product polish — follow parity checklist; no second AI chrome |
 
 ## Related
 

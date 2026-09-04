@@ -1,16 +1,14 @@
-# Sibling desktop repo scaffolds
+# Empty sibling-repo scaffolds
 
-Agent-ready documentation trees for **AStudio** and **AConsulting**. Copy into
-new GitHub repos (or push with `gh`) so coding agents have product law without
-the esti monorepo SPA.
+README-only templates for optional GitHub shells **AStudio** and **AConsulting**.
 
-| Folder | Target GitHub repo |
+| Path | Intended GitHub name |
 | --- | --- |
-| [AStudio/](AStudio/) | `HolagundiWorks/AStudio` |
-| [AConsulting/](AConsulting/) | `HolagundiWorks/AConsulting` |
+| [AStudio/README.md](AStudio/README.md) | `HolagundiWorks/AStudio` |
+| [AConsulting/README.md](AConsulting/README.md) | `HolagundiWorks/AConsulting` |
 
-**Engine / AProc:** [HolagundiWorks/AQC](https://github.com/HolagundiWorks/AQC)  
-**Bridge spike:** [../AQC-BRIDGE-SPIKE.md](../AQC-BRIDGE-SPIKE.md)  
-**Canon:** [../LOCAL-FIRST.md](../LOCAL-FIRST.md) · [../PORTAL-SYNC-BRIDGE.md](../PORTAL-SYNC-BRIDGE.md)
+**Rules:** no SPA/backend code here; no second contracts repo; create empty GitHub
+repos only when a human with write access chooses (agent `gh` is read-only).
 
-Open source for now; SaaS commercial licensing deferred.
+Sibling-repo gate / contracts publish: Vish/Gagan (DESKTOP-REPOS after their merge).
+Portal installer fill: [WEB-PORTAL.md](../WEB-PORTAL.md).

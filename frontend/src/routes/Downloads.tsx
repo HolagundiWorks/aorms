@@ -1,30 +1,27 @@
+import DownloadOutlined from "@mui/icons-material/DownloadOutlined";
+import OpenInNewOutlined from "@mui/icons-material/OpenInNewOutlined";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { StatusDot } from "@hcw/ui-kit";
-import { SoftSurface } from "../components/landing/SoftSurface.js";
+import { StatusDot, Surface } from "@hcw/ui-kit";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MarketingShell } from "../components/landing/MarketingShell.js";
 import {
-  installersComingSoonForced,
   loadDesktopInstallerOffers,
-  resolveInstallerOffer,
-  type DesktopInstallerApp,
   type DesktopInstallerOffer,
 } from "../lib/desktop-installers.js";
 import {
+  AORMS_CONSULTANCY,
   AORMS_PLATFORM,
-  SHILPIDB,
+  AORMS_STUDIO,
 } from "../lib/product-nomenclature.js";
 
 /**
  * Public `/downloads` portal — local-first desktop installers for AStudio /
- * AConsulting. CTAs stay on web_fallback until a signed **WinUI** URL + sha256
- * is wired (docs/esti/WEB-PORTAL.md). Do not link Tauri NSIS artifacts.
- * Legacy Lite/Pro Manager SKUs stay retired.
+ * AConsulting. CTAs stay on web_fallback until a signed URL + sha256 is wired
+ * (docs/esti/WEB-PORTAL.md). Legacy Lite/Pro Manager SKUs stay retired.
  */
 export function Downloads() {
   const [offers, setOffers] = useState<DesktopInstallerOffer[] | null>(null);
-  const softLaunch = installersComingSoonForced();
 
   useEffect(() => {
     document.title = `Downloads · ${AORMS_PLATFORM.name}`;
@@ -41,35 +38,25 @@ export function Downloads() {
     <MarketingShell contours>
       <div className="lp2-ds">
         <header className="lp2-section-head lp2-reveal" id="top">
-          <p className="lp2-section-head__tag">Desktop · suite installers</p>
+          <p className="lp2-section-head__tag">Desktop · preferred path</p>
           <h1 className="lp2-section-head__title">Downloads</h1>
           <p className="lp2-section-head__body">
-            {softLaunch ? (
-              <>
-                Windows installers for the {AORMS_PLATFORM.name} suite are{" "}
-                <strong>coming soon</strong>. This site is live for the suite home and
-                blog; signed builds will appear here when packaging ships. Drawings stay
-                in {SHILPIDB.name}.
-              </>
-            ) : (
-              <>
-                {AORMS_PLATFORM.name} is a <strong>product suite</strong> — practice managers
-                for communications; Estimation, BBS, project management, and drafting on the
-                desktop. Until a signed Windows build is published, open the product page or
-                GitHub repo. Drawings stay in {SHILPIDB.name}.
-              </>
-            )}
+            {AORMS_PLATFORM.name} is <strong>desktop preferred with web parity</strong> — the
+            same SPA on a local-first node or in the browser. Signed Windows installers
+            appear here when packaging ships; until then, open the web workspace.
           </p>
           <p className="lp2-blog-links">
-            <Link to="/">Suite home</Link>
+            <Link to="/">Platform home</Link>
             <span aria-hidden> · </span>
-            <Link to="/blog">Blog</Link>
+            <Link to="/login">{AORMS_STUDIO.title} web</Link>
+            <span aria-hidden> · </span>
+            <Link to="/blog/aorms-local-first">Local-first notes</Link>
           </p>
         </header>
 
         <Stack spacing={3} className="lp2-reveal" sx={{ mt: 4, maxWidth: 720 }}>
           {(offers ?? placeholderOffers()).map((offer) => (
-            <SoftSurface key={offer.app} sx={{ p: 3 }}>
+            <Surface key={offer.app} layer="soft" sx={{ p: 3 }}>
               <Stack spacing={2}>
                 <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
                   <Typography variant="h5" component="h2">
@@ -82,36 +69,51 @@ export function Downloads() {
                         ? offer.version
                           ? `Windows · v${offer.version}`
                           : "Windows · signed"
-                        : offer.status === "coming_soon"
-                          ? "Coming soon"
-                          : "Installer pending"
+                        : "Web workspace · installer pending"
                     }
                   />
                 </Stack>
                 <Typography variant="body2" color="text.secondary">
-                  {offer.expansion}
+                  {offer.expansion} — local-first desktop node (Postgres · worker · Ollama on
+                  device) with hub sync when licensed. Same Standard licence as web.
                 </Typography>
 
                 {offer.status === "available" && offer.downloadUrl ? (
-                  <Box>
-                    <Button variant="contained" size="large" href={offer.downloadUrl} download>
-                      Download {offer.title} for Windows
-                    </Button>
-                  </Box>
-                ) : offer.status === "coming_soon" ? (
-                  <Stack spacing={1}>
+                  <Stack spacing={1.5}>
+                    <Box>
+                      <Button
+                        variant="contained"
+                        size="large"
+                        endIcon={<DownloadOutlined />}
+                        href={offer.downloadUrl}
+                        download
+                      >
+                        Download {offer.title} for Windows
+                      </Button>
+                    </Box>
+                    {offer.sha256 ? (
+                      <Typography variant="caption" color="text.secondary" component="p">
+                        SHA-256: <code>{offer.sha256}</code>
+                      </Typography>
+                    ) : null}
+                  </Stack>
+                ) : (
+                  <Stack spacing={1.5}>
                     <Typography variant="body2">{offer.fallbackReason}</Typography>
                     <Box>
-                      <Button variant="outlined" size="large" disabled>
-                        Coming soon
+                      <Button
+                        variant="contained"
+                        size="large"
+                        endIcon={<OpenInNewOutlined />}
+                        href={offer.webUrl}
+                      >
+                        Open {offer.title} in browser
                       </Button>
                     </Box>
                   </Stack>
-                ) : (
-                  <Typography variant="body2">{offer.fallbackReason}</Typography>
                 )}
               </Stack>
-            </SoftSurface>
+            </Surface>
           ))}
 
           <Typography variant="body2" color="text.secondary" className="lp2-reveal">
@@ -120,9 +122,8 @@ export function Downloads() {
             Estimation). Operators: wire signed URLs via{" "}
             <code>VITE_ASTUDIO_INSTALLER_URL</code> / <code>VITE_ACONSULTING_INSTALLER_URL</code>{" "}
             or fill <code>frontend/public/update-manifests/*.json</code> and set{" "}
-            <code>VITE_PORTAL_USE_RELEASE_INSTALLERS=true</code> — only for a
-            <strong>signed WinUI</strong> package (never Tauri NSIS / unsigned{" "}
-            <code>desktop/artifacts/</code>; wait on Bhoomi for URL + sha256 + version).
+            <code>VITE_PORTAL_USE_RELEASE_INSTALLERS=true</code> — never point live CTAs at
+            unsigned overnight builds (wait on Bhoomi for signed URL + sha256).
           </Typography>
         </Stack>
       </div>
@@ -131,14 +132,33 @@ export function Downloads() {
 }
 
 function placeholderOffers(): DesktopInstallerOffer[] {
-  const apps: DesktopInstallerApp[] = [
-    "aorms-connect",
-    "astudio",
-    "aconsulting",
-    "aqc-estimation",
-    "aqc-bbs",
-    "aqc-pm",
-    "aadt",
+  // Synchronous first paint while manifests fetch — always web_fallback.
+  return [
+    {
+      app: "astudio",
+      title: AORMS_STUDIO.title,
+      expansion: AORMS_STUDIO.expansion,
+      webUrl: AORMS_STUDIO.appUrl,
+      downloadUrl: null,
+      version: null,
+      sha256: null,
+      status: "web_fallback",
+      fallbackReason:
+        "Signed Windows installer not published yet — use the web workspace (same SPA, same Standard licence).",
+      manifestPath: "/update-manifests/astudio.json",
+    },
+    {
+      app: "aconsulting",
+      title: AORMS_CONSULTANCY.title,
+      expansion: AORMS_CONSULTANCY.expansion,
+      webUrl: AORMS_CONSULTANCY.appUrl,
+      downloadUrl: null,
+      version: null,
+      sha256: null,
+      status: "web_fallback",
+      fallbackReason:
+        "Signed Windows installer not published yet — use the web workspace (same SPA, same Standard licence).",
+      manifestPath: "/update-manifests/aconsulting.json",
+    },
   ];
-  return apps.map((app) => resolveInstallerOffer(app, null));
 }

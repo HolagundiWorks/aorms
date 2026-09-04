@@ -7,14 +7,10 @@
 
 > ## Product law (canonical — 2026-08-08)
 >
-> - **Suite · local-first.** Managers + AQC technical apps + ADraft on desktop;
->   portals online; `aorms.in` = marketing ([AORMS-SUITE.md](../esti/AORMS-SUITE.md)).
-> - **Soft launch:** landing + blog; apex login / installers **Coming soon** until S8 / D6.
-> - **Licensing:** open source for now; do **not** claim Standard licence / web-parity staff ERP.
-> - **CTA:** `/` · `/blog` · `/downloads` (Coming soon) — never legacy Manager SKUs.
-> - Law: [LOCAL-FIRST.md](../esti/LOCAL-FIRST.md) · [ROADMAP.md](../esti/ROADMAP.md) · [PLANS-AND-TIERS.md](../esti/PLANS-AND-TIERS.md).
->
-> Older “web parity / Standard licence” bullets in this draft are **superseded**.
+> - **Desktop preferred + web parity.** Same SPA on a local-first desktop node and in the browser (`studio.aorms.in`). See [LOCAL-FIRST.md](../esti/LOCAL-FIRST.md).
+> - **One AORMS Standard licence** — no Lite/Pro/Enterprise, no free tier, no trial. Unlimited users; **5 GB** cloud storage included; pay for storage overage + hosted AI (or BYO key). Local desktop AI is not metered.
+> - **CTA destination:** `aorms.in` / signup / demo — or `/downloads` for signed desktop when live; **never** legacy Lite/Pro Manager SKUs.
+> - Law: [PLANS-AND-TIERS.md](../esti/PLANS-AND-TIERS.md).
 
 ---
 

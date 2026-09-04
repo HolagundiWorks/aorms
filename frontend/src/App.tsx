@@ -293,22 +293,6 @@ function AppWorkspace() {
     }
   }
 
-  // proc.aorms.in — AProc. Authenticated staff enter PMC home; others see landing.
-  if (surface === "pmc") {
-    if (user && isStaffRole(user.role)) {
-      if (pathname === "/" || pathname === AORMS_PMC.marketingPath)
-        return <Navigate to="/pmc" replace />;
-    } else {
-      if (pathname === "/" || pathname === AORMS_PMC.marketingPath)
-        return <Landing />;
-      if (pathname === "/login") {
-        // Fall through — staff sign-in on this host.
-      } else {
-        return <Navigate to="/" replace />;
-      }
-    }
-  }
-
   // Blog + /downloads are live public surfaces. Other former marketing
   // sub-pages — wiki, SEO keyword landings, design-system, investors, legal,
   // about/contact, and per-app marketing slugs — still redirect home.

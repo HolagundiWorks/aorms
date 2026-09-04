@@ -322,14 +322,11 @@ BETA_REQUEST_NOTIFY_TO=${BETA_REQUEST_NOTIFY_TO:-hi@${DOMAIN}}
 # SEED_DEMO gates the demo workspace seed, FIRM_PLAN sets the plan tier.
 DEPLOY_PROFILE=${PROFILE}
 VITE_PUBLIC_SITE=${PUBLIC_SITE}
-# Soft launch: landing + blog; deactivate apex login; installers Coming soon.
-# Set VITE_MARKETING_ONLY=false and rebuild to reopen demos / signed downloads.
-VITE_MARKETING_ONLY=${VITE_MARKETING_ONLY:-true}
 # Standalone licensing console origin (its own repo, deployed at admin.DOMAIN).
 # Set → aorms.in/platform-admin redirects there; empty → embedded console.
 VITE_ADMIN_URL=${VITE_ADMIN_URL:-}
-# Local-first signed WinUI installers for /downloads (LF4). Empty = web_fallback CTAs.
-# See docs/esti/WEB-PORTAL.md — do not wire Tauri NSIS or unsigned desktop/artifacts/.
+# Local-first signed installers for /downloads (LF4). Empty = web_fallback CTAs.
+# See docs/esti/WEB-PORTAL.md — do not wire unsigned overnight Setup.exe.
 VITE_ASTUDIO_INSTALLER_URL=${VITE_ASTUDIO_INSTALLER_URL:-}
 VITE_ACONSULTING_INSTALLER_URL=${VITE_ACONSULTING_INSTALLER_URL:-}
 VITE_PORTAL_USE_RELEASE_INSTALLERS=${VITE_PORTAL_USE_RELEASE_INSTALLERS:-}

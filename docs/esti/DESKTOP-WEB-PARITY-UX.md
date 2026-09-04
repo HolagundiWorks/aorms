@@ -74,6 +74,15 @@ Properties ↔ Ask ESTI tabs; Ask ESTI opens via taskbar / `esti:ask` / Alt+A in
 this slot (`AskEstiPanel`); screens may `publishInspector()` / dispatch
 `esti:inspect`. No floating second AI chrome.
 
+## Figma ↔ kit tokens (LF6)
+
+Code → Figma Variables bridge: [FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md) ·
+kit export [02-TOKEN-EXPORT.md](../hcw-kit/02-TOKEN-EXPORT.md).  
+Automation stub: `node scripts/figma-token-sync-check.mjs`.
+
+Inspector / Ask ESTI share **one right slot** on both hosts (properties ↔ AI) —
+do not add a menu-only AI path on desktop.
+
 ## Related
 
 - [DESKTOP-WINUI-UX.md](DESKTOP-WINUI-UX.md) · [DESKTOP-REPOS.md](DESKTOP-REPOS.md)  

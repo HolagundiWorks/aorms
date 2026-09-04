@@ -6,9 +6,9 @@ interface ImportMetaEnv {
   /** `desktop` | `web` | `hub` — build-time host hint for local-first parity. */
   readonly VITE_RUNTIME_HOST?: "desktop" | "web" | "hub";
   /**
-   * Signed AStudio / AConsulting **WinUI 3** installer URLs for `/downloads`.
-   * Leave empty until Bhoomi publishes a code-signed WinUI package (LF4).
-   * Do not point at legacy Tauri NSIS Setup.exe. See docs/esti/WEB-PORTAL.md.
+   * Signed AStudio / AConsulting Windows installer URLs for `/downloads`.
+   * Leave empty until Bhoomi publishes a code-signed Setup.exe (LF4).
+   * See docs/esti/WEB-PORTAL.md.
    */
   readonly VITE_ASTUDIO_INSTALLER_URL?: string;
   readonly VITE_ACONSULTING_INSTALLER_URL?: string;
@@ -18,17 +18,6 @@ interface ImportMetaEnv {
    * placeholder manifests never become live CTAs.
    */
   readonly VITE_PORTAL_USE_RELEASE_INSTALLERS?: string;
-  /**
-   * Soft launch: landing + blog only; apex login deactivated.
-   * Default on when `VITE_PUBLIC_SITE` is not false. Set `"false"` to re-enable demos (S8).
-   */
-  readonly VITE_MARKETING_ONLY?: string;
-  /**
-   * Force `/downloads` Coming soon until D6. Default on. Independent of marketing auth gate.
-   * Set `"false"` to exercise web_fallback Open/GitHub locally. Signed Download still needs
-   * env URL or `VITE_PORTAL_USE_RELEASE_INSTALLERS` + sha256.
-   */
-  readonly VITE_INSTALLERS_COMING_SOON?: string;
 }
 
 interface ImportMeta {
