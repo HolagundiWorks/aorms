@@ -153,6 +153,8 @@ const Lxos = lazyRoute(() => import("./routes/Lxos.js"), "Lxos");
 const SystemAdmin = lazyRoute(() => import("./routes/SystemAdmin.js"), "SystemAdmin");
 const OpsDbManager = lazyRoute(() => import("./routes/OpsDbManager.js"), "OpsDbManager");
 const Downloads = lazyRoute(() => import("./routes/Downloads.js"), "Downloads");
+const Blog = lazyRoute(() => import("./routes/Blog.js"), "Blog");
+const BlogPost = lazyRoute(() => import("./routes/BlogPost.js"), "BlogPost");
 
 
 // ─── App ──────────────────────────────────────────────────────────────────────
@@ -258,9 +260,9 @@ function AppWorkspace() {
   if (!ADMIN_CONSOLE_URL && (isAdminHost() || pathname.startsWith("/platform-admin")))
     return <PlatformAdmin />;
 
-  // /downloads is a live public surface. Blog is retired — falls through to
-  // the removed-marketing redirect below, same as wiki, SEO keyword landings,
-  // design-system, investors, legal, about/contact, and per-app marketing slugs.
+  // /downloads and /blog are live public surfaces. Wiki, SEO keyword
+  // landings, design-system, investors, legal, about/contact, and per-app
+  // marketing slugs fall through to the removed-marketing redirect below.
   // Legacy `/download` (Manager portal) redirects to `/downloads` (local-first).
 
   if (publicMarketing && pathname === "/download")
@@ -270,6 +272,20 @@ function AppWorkspace() {
     return (
       <Suspense fallback={<Box sx={{ position: "fixed", inset: 0, display: "grid", placeItems: "center" }}><CircularProgress aria-label="Loading downloads" /></Box>}>
         <Downloads />
+      </Suspense>
+    );
+
+  if (publicMarketing && pathname === "/blog")
+    return (
+      <Suspense fallback={<Box sx={{ position: "fixed", inset: 0, display: "grid", placeItems: "center" }}><CircularProgress aria-label="Loading blog" /></Box>}>
+        <Blog />
+      </Suspense>
+    );
+
+  if (publicMarketing && pathname.startsWith("/blog/"))
+    return (
+      <Suspense fallback={<Box sx={{ position: "fixed", inset: 0, display: "grid", placeItems: "center" }}><CircularProgress aria-label="Loading post" /></Box>}>
+        <BlogPost />
       </Suspense>
     );
 
@@ -300,7 +316,6 @@ function AppWorkspace() {
     const slug = pathname.replace(/^\/+/, "").replace(/\/+$/, "");
     const isRemovedMarketing =
       pathname === WIKI_PATH || pathname.startsWith(`${WIKI_PATH}/`) ||
-      pathname === "/blog" || pathname.startsWith("/blog/") ||
       pathname === "/design-system" ||
       pathname === "/development" ||
       pathname === "/investors" ||
