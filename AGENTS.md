@@ -3,28 +3,22 @@
 **Canonical agent guide:** [CLAUDE.md](CLAUDE.md) — edit that file only; do not
 duplicate product law here.
 
-**Suite law:** [docs/esti/AORMS-SUITE.md](docs/esti/AORMS-SUITE.md) ·
-[docs/esti/AORMS-CONNECT.md](docs/esti/AORMS-CONNECT.md) ·
-[docs/esti/ROADMAP.md](docs/esti/ROADMAP.md) (S0–S7 ✅ · C0 ✅ · next C1/S8) ·
-[docs/esti/LOCAL-FIRST.md](docs/esti/LOCAL-FIRST.md).
+**Roadmap:** [docs/esti/ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) (what's
+live) · [docs/esti/ROADMAP-LOCAL.md](docs/esti/ROADMAP-LOCAL.md) (engineering).
 
 **Soft launch (aorms.in):** landing + blog only. Keep
-`VITE_MARKETING_ONLY=true` on public builds until S8. Installers stay Coming
-soon until signed URL + sha256 (D6). Desktop firm login → **AORMS Connect**.
-Gate: `frontend/src/lib/marketing-gate.ts`.
+`VITE_MARKETING_ONLY=true` on public builds until S8 (reopen `/login`).
+AORMS is web-only — no desktop apps, no installers. Gate:
+`frontend/src/lib/marketing-gate.ts`.
 
-**UI:** `@hcw/ui-kit` v1.5.0 (HCW-UI-Kit, vendored from hcwux) on every surface —
-see [`docs/hcw-kit/README.md`](docs/hcw-kit/README.md) and [`docs/HCW-UX.md`](docs/HCW-UX.md).
-Before UI work: [`DESIGN-DEBT-REGISTER.md`](docs/hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md) ·
-[`HCW-KIT-AI-KNOWLEDGE-BASE.md`](docs/esti/HCW-KIT-AI-KNOWLEDGE-BASE.md) (R1–R9).
-**Desktop WinUI (all AORMS apps):** [`DESKTOP-WINUI-UX.md`](docs/esti/DESKTOP-WINUI-UX.md) ·
-[`HCW-UI-UX-PRINCIPLES.md`](docs/esti/HCW-UI-UX-PRINCIPLES.md) §2b — density 1× · floating chrome ·
-clock 0.8× · `HcwTheme.xaml` from AStudio.
-Re-vendor: [`docs/KITS.md`](docs/KITS.md). `@carbon/react` was removed (2026-07).
+**UI:** IBM Carbon Design System (`@carbon/react`) — see CLAUDE.md § UI / design
+system for the full migration status. Before UI work:
+[`DESIGN-DEBT-REGISTER.md`](docs/hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md).
+Legacy `@hcw/ui-kit` (MUI-based) coexists only until the Carbon migration's
+Wave 6 decommission.
 
-**AORMS AI:** desktop-only (local Ollama) — not on the VPS. `@hcw/aorms-ai-kit`
-for local/desktop; see `docs/esti/LOCAL-FIRST.md` · `PRODUCTION-OPS.md` § ESTI AI.
+**AORMS AI:** ESTI runs through the backend AI gateway as part of the office
+hub — see `docs/esti/PRODUCTION-OPS.md` § ESTI AI.
 
-**Cursor rule (local):** `.cursor/` is gitignored — create
-`.cursor/rules/aorms-suite-soft-launch.mdc` locally if you want always-on Cursor
-context; **repo law stays in CLAUDE.md**.
+**Cursor rule (local):** `.cursor/` is gitignored — create rules locally if you
+want always-on Cursor context; **repo law stays in CLAUDE.md**.

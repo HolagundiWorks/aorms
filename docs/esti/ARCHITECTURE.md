@@ -1,32 +1,25 @@
 # AORMS System Architecture
 
-**Status:** Canonical · **Owner:** Holagundi Consulting Works (HCW) · **Reviewed:** 2026-08-09
+**Status:** Canonical · **Owner:** Human Centric Works (HCW) · **Reviewed:** 2026-09-04
 
-> **Scope:** Historical monorepo shape + hub. **Shipping staff UI + ESTI AI** are
-> **desktop apps** ([LOCAL-FIRST.md](LOCAL-FIRST.md) · [AORMS-SUITE.md](AORMS-SUITE.md)).
-> This SPA is a **reference archive**. Platform north-star:
-> [AORMS-DEVELOPMENT-SPEC.md](AORMS-DEVELOPMENT-SPEC.md). Naming:
-> [AORMS-PLATFORM-NOMENCLATURE.md](AORMS-PLATFORM-NOMENCLATURE.md).
+> **Scope:** AORMS is a **web-only, cloud-based office management system** — a
+> single unified SPA (the **AORMS Office Hub**), no desktop apps, no per-app
+> installers. Platform north-star: [AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md).
+> Naming: [`../../CLAUDE.md`](../../CLAUDE.md) § Product naming.
 
 ## System Shape
 
-**Hub / reference stack** (esti monorepo) — marketing, portals, transitional Postgres:
-
 ```text
-Marketing + firm portals (@hcw/ui-kit)     Desktop suite (Connect → managers / AQC)
-       |                                              |
-       | tRPC / hub APIs                              | local DB + local ESTI (Ollama)
-       v                                              v
-Fastify/TypeScript hub ---- PostgreSQL (transitional) / Mongo ops
+Marketing + office hub SPA + firm portals (Carbon Design System)
+       |
+       | tRPC / hub APIs
+       v
+Fastify/TypeScript backend ---- PostgreSQL (system of record)
        |        |
        |        +---- MinIO/S3 (published artifacts)
        |
        +---- Redis Streams ---- Python worker (DXF, PDF, imports)
-       +---- NO cloud Ollama  (AI is desktop-only)
 ```
-
-ESTICAD / companion CAD is retired (2026-07-19). Sync planes:
-[LOCAL-FIRST.md](LOCAL-FIRST.md).
 
 The TypeScript backend owns domain rules, authorization, state transitions,
 money/tax, numbering, audit, and activity. The Python worker owns no
@@ -35,37 +28,32 @@ authoritative business state.
 The same authority boundary applies to the AORMS cognition engine:
 deterministic TypeScript read models calculate office health and interventions,
 Python may later recognise anomalies or predictions, and LLMs only explain
-structured machine output. See [COGNITION-ENGINE](COGNITION-ENGINE.md).
+structured machine output. See [COGNITION-ENGINE](COGNITION-ENGINE.md) (if present).
 
 ## Repository
 
-One monorepo (pnpm workspaces); surfaces are build targets, not repos.
+One monorepo (pnpm workspaces).
 
 - `packages/contracts`: shared Zod schemas, permissions, money, tax, labels, and
   the PURE estimation engine (`.aormsest` `EstimateFile` + `recostEstimate`, BBS).
   Browser-safe — the seam every surface imports.
 - `backend`: Fastify, tRPC, Drizzle, PostgreSQL domain modules and REST routes.
-- `frontend`: React/Vite SPA on HCW-UI-Kit (MUI), including the landing page.
+- `frontend`: React/Vite SPA on IBM Carbon Design System — the office hub, and
+  the public marketing/landing pages.
 - `worker`: Redis consumer for DXF, PDF, and reconciliation processing.
-- `desktop`: Tauri packaging stub for the local-first node (same SPA + local stack).
 - `docs/esti`: canonical product and engineering documentation.
 
-> **Local-first (2026-08).** Desktop node + cloud hub is first-class —
-> [LOCAL-FIRST.md](LOCAL-FIRST.md), [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md).
-> The 2026-07-19 **web-only** law is superseded for runtime shape. Legacy
-> Community / Manager installers and a standalone Estimate desktop app remain
-> **retired** — estimating runs in-product (Rate Books + project Estimation tab).
+> **Web-only (2026-09).** No desktop apps, no Tauri shell, no local-first
+> architecture, no per-app installers. A `desktop/` directory with legacy Tauri
+> packaging scaffolding remains on disk from the pre-pivot suite era and is
+> scheduled for removal — it is not part of the shipped product.
 
-### Surfaces And Access Topology
+### Access Topology
 
-Estimation is accessed **inside a project** of the workspace — same session,
-nav, permissions, and HCW-UI-Kit shell — not a subdomain.
-**ESE** is the one true subdomain (`ese.aorms.in`): different users (`kbteam`),
-different cadence (yearly SR), publishing into the system across a versioned,
-checksummed seam. **Estimating itself** runs in the SPA (desktop or web) as
-part of Cost / Estimation — there is no separate Estimate installer.
-Host / surface map: [AORMS-SURFACE-URLS](AORMS-SURFACE-URLS.md).
-Desktop ↔ web chrome: [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md).
+Estimation is accessed **inside a project** of the office hub — same session,
+nav, permissions, and Carbon shell — not a subdomain. Legacy per-surface
+subdomains (`studio.aorms.in`, `consultancy.aorms.in`, `proc.aorms.in`) redirect
+to the office hub login. Host / surface map: [AORMS-SURFACE-URLS](AORMS-SURFACE-URLS.md).
 
 ## Architecture Decisions
 
@@ -98,7 +86,7 @@ treated as wildcards). This keeps a hand-created login from being un-loginnable
 or silently duplicated by case, and still matches legacy rows stored mixed-case.
 
 The same policy applies to tRPC, REST upload/download routes, worker artifact
-access, exports, and search. “Authenticated” alone is never sufficient for an
+access, exports, and search. "Authenticated" alone is never sufficient for an
 operational write.
 
 ### Audit And Activity
@@ -124,12 +112,12 @@ Money is integer paise. Shared code owns Indian formatting and GST/TDS
 calculation. Numbering is concurrency-safe and per financial year. Rules are in
 [INDIA-PROFILE](INDIA-PROFILE.md).
 
-### One Design System — HCW-UI-Kit
+### One Design System — IBM Carbon
 
-The frontend has no competing second design system. It uses `@hcw/ui-kit`
-(HCW-UI-Kit — MUI-based, layered: flat/neumorphic/glassmorphism) everywhere,
-including the landing page. `@carbon/react` was removed (2026-07). See
-[HCW-UI-KIT](HCW-UI-KIT.md).
+The frontend is migrating to `@carbon/react` (IBM Carbon Design System) as the
+only design system — no competing second system, no bespoke UI/UX. MUI and the
+legacy `@hcw/ui-kit` coexist only during the migration (Waves 1–5) and are
+removed entirely in Wave 6. See [CARBON-MIGRATION](CARBON-MIGRATION.md).
 
 ### Contextual Collaboration
 
@@ -143,17 +131,7 @@ notification rules as internal writes.
 AI providers are accessed through a backend gateway. Retrieval is permission
 filtered; prompts and outputs are auditable; secrets stay server-side; sensitive
 data transmission is explicit; output remains a draft until a human issues it.
-
-### Companion Clients (ESTICAD) — retired
-
-ESTICAD, the native desktop CAD companion, was **dropped on 2026-07-19** with the
-rest of the desktop apps. Removed from the codebase: the `companion` tRPC
-namespace, device-token bearer auth (`esti_device_session`), the CAD AI draft
-kinds and `ai.generateCad`, drawing scale calibration (`drawings.setScale`), and
-the `esticad://` deep links.
-
-Cleanup completed: the legacy `esti_measurement` table and the
-`esti_device_session` table were dropped in migration `0211`.
+ESTI (the built-in AI agent) answers only from validated firm repositories.
 
 ## Operational Requirements
 
@@ -169,6 +147,9 @@ Cleanup completed: the legacy `esti_measurement` table and the
 
 ## Delivery status
 
-Engineering delivery through [Phase 20](ROADMAP.md) is complete. Open product gaps,
-if any, are tracked only in [ROADMAP](ROADMAP.md). This document describes the
-stack and ADRs — not the live backlog.
+Engineering delivery through the pre-pivot phase history is complete; the
+2026-09-04 web-only pivot removed the allied-app suite architecture described
+in earlier revisions of this document. Open product gaps are tracked in
+[ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) (engineering) and
+[ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) (what's live). This document describes
+the stack and ADRs — not the live backlog.

@@ -1,4 +1,11 @@
-# Landing page redesign — agent context
+> **⚠️ HISTORICAL.** Archived 2026-09-04 — this brief describes the pre-pivot
+> **suite rebrand** landing (AStudio, AConsulting, AProc, ADraft, ShilpiDB
+> product cards, desktop download CTAs). `Landing.tsx` has since been rewritten
+> for the web-only office hub pivot; this document no longer matches the
+> shipped page and its guidance should not be followed. Kept for historical
+> reference only.
+
+# Landing page redesign — agent context (archived)
 
 **Status:** Canonical brief · **Updated:** 2026-08-09 · **Owner:** HCW
 

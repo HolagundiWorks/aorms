@@ -39,7 +39,7 @@ Regular OWNER accounts **cannot** seed or purge. Only `is_system_admin = true` u
 
 ### External portal roles (not in the staff ladder)
 
-Canonical UI labels: `AORMS_PORTALS` in `frontend/src/lib/product-nomenclature.ts`. See [AORMS-PLATFORM-NOMENCLATURE](AORMS-PLATFORM-NOMENCLATURE.md) § Portals and surfaces.
+Canonical UI labels: `AORMS_PORTALS` in `frontend/src/lib/product-nomenclature.ts`. See [`../../CLAUDE.md`](../../CLAUDE.md) § Product naming and [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md).
 
 | Role | Portal | Rank |
 |---|---|---|

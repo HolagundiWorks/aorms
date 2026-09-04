@@ -88,7 +88,8 @@ VPS: [`docs/esti/VPS-INSTALL.md`](docs/esti/VPS-INSTALL.md) ·
 - ❌ `admin.aorms.in` — licence manager (not applicable to web-only model)
 
 **Web-first platform:** AORMS hub + portals now **web-only** with **IBM Carbon Design System**.
-- [`docs/esti/ROADMAP.md`](docs/esti/ROADMAP.md) — S0–S7 ✅; **C0–C3** Connect · next S8–S10 · D6
+- [`docs/esti/ROADMAP-CLOUD.md`](docs/esti/ROADMAP-CLOUD.md) — what's live on `aorms.in`; next milestone **S8** (reopen `/login`)
+- [`docs/esti/ROADMAP-LOCAL.md`](docs/esti/ROADMAP-LOCAL.md) — codebase cleanup + Carbon migration (local dev)
 - [`docs/esti/MARKET-FIT.md`](docs/esti/MARKET-FIT.md)
 - Carbon migration active: [`docs/esti/CARBON-MIGRATION.md`](docs/esti/CARBON-MIGRATION.md)
 

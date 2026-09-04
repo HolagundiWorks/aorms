@@ -266,12 +266,6 @@ function AppWorkspace() {
   if (!ADMIN_CONSOLE_URL && (isAdminHost() || pathname.startsWith("/platform-admin")))
     return <PlatformAdmin />;
 
-  // Legacy subdomain redirects (consultancy.aorms.in, etc.) → office hub
-  // Since all apps are now unified in the office hub, redirect legacy domains to /login
-  if (surface === "consultancy" || surface === "pmc" || surface === "studio") {
-    return <Navigate to="/login" replace />;
-  }
-
   // Blog + /downloads are live public surfaces. Other former marketing
   // sub-pages — wiki, SEO keyword landings, design-system, investors, legal,
   // about/contact, and per-app marketing slugs — still redirect home.
@@ -336,9 +330,6 @@ function AppWorkspace() {
   if (pathname === "/company-account")
     return <CompanyAccountPortal />;
 
-  // studio.aorms.in — staff sign-in lives at /login (no platform landing).
-  if (surface === "studio" && pathname === "/" && !user && !isLoading)
-    return <Navigate to="/login" replace />;
 
   if (isLoading) return <Box sx={{ position: "fixed", inset: 0, display: "grid", placeItems: "center", zIndex: 9999 }}><CircularProgress aria-label={`Loading ${AORMS_OFFICE_HUB.title}`} /></Box>;
   if (!user) {
@@ -531,19 +522,12 @@ function AppWorkspace() {
     ],
   };
 
-  // AStudio — Projects · Clients · People · Office · Finance
-  const studioNav: NavNode[] = [
+  // AORMS Office Hub — unified navigation for all users
+  const nav: NavNode[] = prune([
     { label: "Projects", to: "/projects", icon: Building },
     ...(can(user.role, "write")
       ? [{ label: "Clients", to: "/clients", icon: User }]
       : []),
-    peopleMenu,
-    officeCapturePapers,
-    financeMenu,
-  ];
-
-  // AConsulting — ≤5 primary peers. Practice nests Enquiries/Engagements; Library under Admin.
-  const consultancyNav: NavNode[] = [
     {
       kind: "menu",
       label: "Practice",
@@ -553,21 +537,6 @@ function AppWorkspace() {
         { label: "Engagements", to: "/consultancy/engagements", icon: Engineering },
       ],
     },
-    ...(can(user.role, "write")
-      ? [{ label: "Clients", to: "/clients", icon: User }]
-      : []),
-    { label: "Projects", to: "/projects", icon: Building },
-    officeCapturePapers,
-    financeMenu,
-  ];
-
-  // AProc — Home · Projects · Clients · Delivery · People · Finance
-  const pmcNav: NavNode[] = [
-    { label: "Home", to: "/pmc", icon: Home },
-    { label: "Projects", to: "/projects", icon: Building },
-    ...(can(user.role, "write")
-      ? [{ label: "Clients", to: "/clients", icon: User }]
-      : []),
     {
       kind: "menu",
       label: "Delivery",
@@ -584,16 +553,9 @@ function AppWorkspace() {
       ],
     },
     peopleMenu,
+    officeCapturePapers,
     financeMenu,
-  ];
-
-  const nav: NavNode[] = prune(
-    surface === "consultancy"
-      ? consultancyNav
-      : surface === "pmc"
-        ? pmcNav
-        : studioNav,
-  );
+  ]);
 
   // Admin menu — Third Parties · Library (Design / Codes / Knowledge) · Admin
   const adminGroups: { heading: string; items: NavLink[] }[] = [
@@ -760,7 +722,7 @@ function AppWorkspace() {
                 <Route path="/office/ai-studio" element={<Navigate to="/" replace />} />
                 <Route path="/tasks" element={<Work />} />
                 <Route path="/work" element={<Navigate to="/tasks" replace />} />
-                {/* AProc portfolio home — also served on proc.aorms.in */}
+                {/* Office hub — PMC/project portfolio home */}
                 <Route path="/pmc" element={<PmcHome />} />
                 <Route path="/aproc" element={<Navigate to="/pmc" replace />} />
                 <Route

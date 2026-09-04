@@ -1,4 +1,10 @@
-# AORMS development specification (platform)
+> **⚠️ HISTORICAL.** Archived 2026-09-04 — superseded by
+> [`AORMS-OFFICE-SYSTEM.md`](../AORMS-OFFICE-SYSTEM.md), the current platform
+> north-star. This document describes the pre-pivot **multi-app suite** model
+> (AStudio, AConsulting on one spine) and links to nomenclature/architecture
+> docs that are themselves archived. Kept for historical reference only.
+
+# AORMS development specification (platform) — archived
 
 **Status:** North-star · Pre-release · **Version 1.0** · **Updated:** 2026-07-10
 

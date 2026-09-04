@@ -172,4 +172,4 @@ spends in `esti_expense` with lightweight accounts (`MAIN`, `OFFICE_EXPENSE`,
 | Project | **Non-billable** or **billable** | Site travel, food, stay, misc; billable = client-recoverable (manual recovery link in v1) |
 
 Workflow: `DRAFT` → `SUBMITTED` → `AUDITED` → `CLOSED`. Cash vouchers debit the
-**Cash** account; client revenue never mixes with expense rows. See [ROADMAP Phase 18](ROADMAP.md).
+**Cash** account; client revenue never mixes with expense rows. See [ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) § Office hub feature rollout.

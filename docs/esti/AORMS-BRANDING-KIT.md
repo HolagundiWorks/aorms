@@ -123,7 +123,7 @@ Intelligence, now everywhere):
 
 Every screen splits into two regions. **Always refer to them by these names.**
 Canonical glass-rail spec: [HCW-UI-KIT.md § Glass Rail](HCW-UI-KIT.md#glass-rail--canonical-reference-studio-intelligence).
-Autopilot rollout: [ROADMAP.md](ROADMAP.md).
+Autopilot rollout: [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md).
 
 | Term | Width | Class | Holds |
 |---|---|---|---|

@@ -114,7 +114,8 @@ Summary before exposing a live firm instance:
 
 VPS deploy: clone the repo to `/opt/esti`, then `sudo bash deploy/install.sh` and pick a profile (1 landing · 2 demo · 3 Core · 4 Enterprise · 5 Licensing). It sources `deploy/lib.sh` relative to its location, so clone first — it cannot be piped via `curl | bash`. Update later with `bash deploy/update.sh` (profile is remembered in `.env`).
 
-See [ROADMAP](docs/esti/ROADMAP.md#status-at-a-glance) for delivered engineering scope (Phases 0–20).
+See [ROADMAP-LOCAL](docs/esti/ROADMAP-LOCAL.md) for engineering scope and
+[ROADMAP-CLOUD](docs/esti/ROADMAP-CLOUD.md) for what's live in production.
 
 ---
 

@@ -1,14 +1,12 @@
 /**
- * Frozen AORMS surface URLs — revised 2026-08-07 (desktop-native pivot).
- * `aorms.in` = marketing + demos. Staff ERP = desktop apps. Firm portals =
- * client/partner web. Docs: docs/esti/AORMS-SURFACE-URLS.md
+ * Frozen AORMS surface URLs — office hub only (2026-09-04).
+ * `aorms.in` = office hub + marketing. Firm portals = client/partner web.
+ * Docs: docs/esti/AORMS-SURFACE-URLS.md
  */
 export const AORMS_DOMAIN = "aorms.in" as const;
 
 /** Path-only surfaces on the platform apex (aorms.in). */
 export const AORMS_PLATFORM_PAGES = {
-  wiki: { path: "/wiki", label: "AORMS Wiki" },
-  downloads: { path: "/downloads", label: "Downloads" },
   externalAccess: { path: "/access", label: "External portals" },
   account: { path: "/account", label: "AORMS account" },
   companyAccount: { path: "/company-account", label: "Company account" },
@@ -16,56 +14,28 @@ export const AORMS_PLATFORM_PAGES = {
     path: "/libraries/knowledge-bank-portal",
     label: "Knowledge Bank portal",
   },
-  studioLogin: { path: "/login", label: "Demo sign-in (not firm ERP)" },
-  /** Path alias on apex; canonical marketing host is consultancy.aorms.in. */
-  consultancyMarketing: { path: "/aconsulting", label: "AConsulting" },
-  /** Legacy path — redirects to /aconsulting. */
-  consultancyMarketingLegacy: { path: "/aorms-consultancy", label: "AConsulting" },
-  /** Path alias on apex; canonical host is proc.aorms.in. */
-  pmcMarketing: { path: "/aproc", label: "AProc" },
-  pmcMarketingLegacy: { path: "/aorms-pmc", label: "AProc" },
+  login: { path: "/login", label: "AORMS office hub sign-in" },
 } as const;
 
-/** Subdomains retired 2026-07 — nginx / client redirect to apex paths. */
+/** Subdomains retired 2026-07+ — nginx / client redirect to apex paths. */
 export const LEGACY_SUBDOMAIN_HOSTS = [
-  "wiki.aorms.in",
-  "kbank.aorms.in",
   "external.aorms.in",
   "account.aorms.in",
+  // Allied apps removed 2026-09
+  "studio.aorms.in",
+  "consultancy.aorms.in",
+  "proc.aorms.in",
+  "pmc.aorms.in",
 ] as const;
 
 export const AORMS_SURFACES = {
-  /** Platform marketing + path-based pages — apex only. */
+  /** AORMS office hub + marketing — apex only. */
   platform: {
     id: "platform",
-    label: "AORMS platform",
+    label: "AORMS office hub",
     host: `https://${AORMS_DOMAIN}`,
     hostnames: [AORMS_DOMAIN, `www.${AORMS_DOMAIN}`] as const,
-  },
-  /** AStudio marketing host (staff app is desktop). */
-  studio: {
-    id: "studio",
-    label: "AStudio",
-    host: `https://studio.${AORMS_DOMAIN}`,
-    hostnames: [`studio.${AORMS_DOMAIN}`, `app.${AORMS_DOMAIN}`] as const,
-    legacyRedirectFrom: [`app.${AORMS_DOMAIN}`] as const,
-    loginPath: AORMS_PLATFORM_PAGES.studioLogin.path,
-  },
-  /** AConsulting marketing host (staff app is desktop). */
-  consultancy: {
-    id: "consultancy",
-    label: "AConsulting",
-    host: `https://consultancy.${AORMS_DOMAIN}`,
-    hostnames: [`consultancy.${AORMS_DOMAIN}`] as const,
-    marketingPath: AORMS_PLATFORM_PAGES.consultancyMarketing.path,
-  },
-  /** AQC / AProc marketing host. */
-  pmc: {
-    id: "pmc",
-    label: "AProc",
-    host: `https://proc.${AORMS_DOMAIN}`,
-    hostnames: [`proc.${AORMS_DOMAIN}`, `pmc.${AORMS_DOMAIN}`] as const,
-    marketingPath: AORMS_PLATFORM_PAGES.pmcMarketing.path,
+    loginPath: AORMS_PLATFORM_PAGES.login.path,
   },
   /** HCW licensing console (platform admin). */
   admin: {
@@ -90,7 +60,6 @@ export function detectSurface(
   const exact = HOST_TO_SURFACE.get(hostname);
   if (exact) return exact;
   if (/^admin\./.test(hostname)) return "admin";
-  if (/^(proc|pmc)\./.test(hostname)) return "pmc";
   return "unknown";
 }
 
@@ -103,27 +72,29 @@ export function legacySubdomainRedirectUrl(
 ): string | null {
   const apex = AORMS_SURFACES.platform.host;
   const q = `${search}${hash}`;
-  switch (hostname) {
-    case "wiki.aorms.in":
-      if (pathname === "/" || pathname === "") return `${apex}${AORMS_PLATFORM_PAGES.wiki.path}${q}`;
-      if (pathname.startsWith(AORMS_PLATFORM_PAGES.wiki.path))
-        return `${apex}${pathname}${q}`;
-      return `${apex}${AORMS_PLATFORM_PAGES.wiki.path}${pathname}${q}`;
-    case "kbank.aorms.in":
-      return `${apex}${AORMS_PLATFORM_PAGES.knowledgeBank.path}${q}`;
-    case "external.aorms.in":
-      if (pathname === "/" || pathname === "") return `${apex}${AORMS_PLATFORM_PAGES.externalAccess.path}${q}`;
-      return `${apex}${pathname}${q}`;
-    case "account.aorms.in":
-      if (pathname === "/" || pathname === "") return `${apex}${AORMS_PLATFORM_PAGES.account.path}${q}`;
-      return `${apex}${pathname}${q}`;
-    default:
-      return null;
-  }
-}
 
-export function isStudioHost(hostname?: string): boolean {
-  return detectSurface(hostname) === "studio";
+  // Legacy paths redirect to office hub home or login
+  if (hostname === "external.aorms.in") {
+    if (pathname === "/" || pathname === "") return `${apex}${AORMS_PLATFORM_PAGES.externalAccess.path}${q}`;
+    return `${apex}${pathname}${q}`;
+  }
+
+  if (hostname === "account.aorms.in") {
+    if (pathname === "/" || pathname === "") return `${apex}${AORMS_PLATFORM_PAGES.account.path}${q}`;
+    return `${apex}${pathname}${q}`;
+  }
+
+  // Allied apps (studio, consultancy, proc, pmc) redirect to office hub login
+  if (
+    hostname === "studio.aorms.in" ||
+    hostname === "consultancy.aorms.in" ||
+    hostname === "proc.aorms.in" ||
+    hostname === "pmc.aorms.in"
+  ) {
+    return `${apex}${AORMS_PLATFORM_PAGES.login.path}${q}`;
+  }
+
+  return null;
 }
 
 export function isPlatformHost(hostname?: string): boolean {
@@ -133,14 +104,6 @@ export function isPlatformHost(hostname?: string): boolean {
 
 export function isAdminHost(hostname?: string): boolean {
   return detectSurface(hostname) === "admin";
-}
-
-export function isConsultancyHost(hostname?: string): boolean {
-  return detectSurface(hostname) === "consultancy";
-}
-
-export function isPmcHost(hostname?: string): boolean {
-  return detectSurface(hostname) === "pmc";
 }
 
 /** Absolute URL for a subdomain surface + optional path. */

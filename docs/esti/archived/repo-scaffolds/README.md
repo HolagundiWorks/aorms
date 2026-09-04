@@ -1,4 +1,8 @@
-# Empty sibling-repo scaffolds
+> **⚠️ HISTORICAL.** Archived 2026-09-04 — AStudio and AConsulting were
+> removed in the web-only office hub pivot; these sibling-repo scaffolds were
+> never created and are no longer planned. Kept for historical reference only.
+
+# Empty sibling-repo scaffolds (archived)
 
 README-only templates for optional GitHub shells **AStudio** and **AConsulting**.
 

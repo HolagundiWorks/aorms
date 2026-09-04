@@ -3,7 +3,7 @@
 **Status:** ◐ P-1 + P-2 + P-3 shipped 2026-07-03, P-4 backlog · **Owner:** Holagundi Consulting Works (HCW) · **Adopted:** 2026-07-02
 
 ESTI Pulse is an **ESTI capability** — part of the Embedded Studio
-Intelligence layer inside the **AORMS-Studio** workspace — that periodically reviews
+Intelligence layer inside the **AORMS office hub** — that periodically reviews
 project tasks, detects missing dependencies and information, asks the right
 team member the right question, recalculates task priority and confidence,
 and tells the office **what must be done first**.
@@ -12,7 +12,7 @@ This is not a chatbot. It is a **task-risk and dependency-resolution engine**
 for architecture offices.
 
 > **Nomenclature:** **AORMS** (**Accelerated Operational Resources Management
-> System**, platform) — **AORMS-Studio** is the workspace vertical that
+> System**, platform) — the **AORMS office hub** is the single workspace that
 > holds the tasks, drawings, approvals and records Pulse reads. **ESTI**
 > (Embedded Studio Intelligence) is the intelligence layer;
 > Pulse is one of its capabilities, beside ESTI AI / Ask ESTI and the

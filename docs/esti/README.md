@@ -1,82 +1,76 @@
 # AORMS Documentation
 
-**Status:** Canonical index · **Owner:** Human Centric Works (HCW) · **Reviewed:** 2026-08-05
+**Status:** Canonical index · **Owner:** Human Centric Works (HCW) · **Reviewed:** 2026-09-04
 
-> **Nomenclature:** **AORMS** = platform (AEC consulting firms). **AORMS-Studio** =
-> architecture app (this repo). **AORMS-Consultancy** = engineering app (code-complete;
-> live (P9.V ✅ · P9.M ✅)). **EOMS** = knowledge bank; **ESTI** = internal AI agent.
-> Full rules: [AORMS-PLATFORM-NOMENCLATURE](AORMS-PLATFORM-NOMENCLATURE.md).
+> **Nomenclature:** **AORMS** = the platform. **AORMS Office Hub** = the single
+> unified web app (no allied apps, no desktop apps, no per-app logins). **EOMS**
+> = external knowledge bank API; **ESTI** = built-in AI agent. Full rules:
+> [`../../CLAUDE.md`](../../CLAUDE.md) § Product naming.
 
-This directory is the **single source of truth**. Superseded specs are **removed** —
-use Git history for old versions.
+This directory is the **single source of truth**. Superseded specs are moved to
+[`archived/`](archived/) with a historical-notice banner — do not follow naming
+or architecture guidance from anything under `archived/`.
 
-**Platform north-star:** [AORMS-DEVELOPMENT-SPEC](AORMS-DEVELOPMENT-SPEC.md) ·
-**Landing brief:** [../marketing/LANDING-REDESIGN-CONTEXT.md](../marketing/LANDING-REDESIGN-CONTEXT.md) ·
-**Public wiki:** [aorms.in/wiki](https://aorms.in/wiki).
+**Platform north-star:** [AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md) ·
+**Cleanup plan (in progress):** [OFFICE-SYSTEM-CLEANUP-PLAN.md](OFFICE-SYSTEM-CLEANUP-PLAN.md).
 
 ## Read first
 
-1. [AORMS-PLATFORM-NOMENCLATURE](AORMS-PLATFORM-NOMENCLATURE.md) — naming
-2. [UNIFIED-ARCHITECTURE-V4](UNIFIED-ARCHITECTURE-V4.md) — live system state
-3. [NAVIGATION](NAVIGATION.md) — sidebar IA (Canonical V3)
-4. [PLANS-AND-TIERS](PLANS-AND-TIERS.md) + [ACCESS-HIERARCHY](ACCESS-HIERARCHY.md) — licence + roles
-5. [LOCAL-FIRST](LOCAL-FIRST.md) + [DESKTOP-WEB-PARITY-UX](DESKTOP-WEB-PARITY-UX.md) — desktop node + hub + UX parity
-6. [WEB-PORTAL](WEB-PORTAL.md) — public `/downloads` + signed-installer fill  
-7. [HCW-UI-KIT](HCW-UI-KIT.md) + [HCW-UI-UX-PRINCIPLES](HCW-UI-UX-PRINCIPLES.md) — design system
-8. [ROADMAP](ROADMAP.md) — delivery status (ACTIVE — local-first LF3–LF6 open)
-9. [PRD](PRD.md) — requirements
+1. [`../../CLAUDE.md`](../../CLAUDE.md) — naming, launch status, agent do/don't
+2. [AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md) — product definition, what's live vs. removed
+3. [NAVIGATION.md](NAVIGATION.md) — sidebar IA (unified office hub nav)
+4. [ACCESS-HIERARCHY.md](ACCESS-HIERARCHY.md) — roles + access ladder
+5. [ROADMAP.md](ROADMAP.md) — index into [ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) (what's live) and [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) (engineering in progress)
+6. [ARCHITECTURE.md](ARCHITECTURE.md) — stack + ADRs
+7. [CARBON-MIGRATION.md](CARBON-MIGRATION.md) + [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md) — design system
 
-Repo agent entry: [`CLAUDE.md`](../../CLAUDE.md).
+Repo agent entry: [`../../CLAUDE.md`](../../CLAUDE.md).
 
 ## Canonical documents (one per topic)
 
 | Topic | Document |
 | --- | --- |
-| Naming | [AORMS-PLATFORM-NOMENCLATURE](AORMS-PLATFORM-NOMENCLATURE.md) |
-| Hosts / URLs | [AORMS-SURFACE-URLS](AORMS-SURFACE-URLS.md) |
-| System state | [UNIFIED-ARCHITECTURE-V4](UNIFIED-ARCHITECTURE-V4.md) |
-| Navigation IA | [NAVIGATION](NAVIGATION.md) |
-| Roadmap | [ROADMAP](ROADMAP.md) |
-| Market fit / GTM | [MARKET-FIT](MARKET-FIT.md) |
-| Licence | [PLANS-AND-TIERS](PLANS-AND-TIERS.md) |
-| Local-first desktop + hub | [LOCAL-FIRST](LOCAL-FIRST.md) |
-| Desktop ↔ web UX parity | [DESKTOP-WEB-PARITY-UX](DESKTOP-WEB-PARITY-UX.md) |
-| Public downloads portal | [WEB-PORTAL](WEB-PORTAL.md) |
-| Figma ↔ kit tokens (LF6) | [FIGMA-TOKEN-SYNC](FIGMA-TOKEN-SYNC.md) |
-| Design system | [HCW-UI-KIT](HCW-UI-KIT.md) |
-| UX laws | [HCW-UI-UX-PRINCIPLES](HCW-UI-UX-PRINCIPLES.md) |
-| Design debt | [DESIGN-DEBT-REGISTER](../hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md) |
-| Licensing ops | [HCW-LICENSE-MANAGER](HCW-LICENSE-MANAGER.md) |
-| Consultancy design | [AORMS-CONSULTANCY-OPERATING-MODEL-AND-ARCHITECTURE](AORMS-CONSULTANCY-OPERATING-MODEL-AND-ARCHITECTURE.md) |
-| Consultancy SOP map | [AORMS-CONSULTANCY-SOP-CASE-STUDY](AORMS-CONSULTANCY-SOP-CASE-STUDY.md) |
-| Pre-con R&O | [AORMS-PRECONSTRUCTION-RO-FRAMEWORK](AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md) |
-| P9.V record | [P9V-CONSULTANCY-WALKTHROUGH](P9V-CONSULTANCY-WALKTHROUGH.md) |
-| Philosophy | [AORMS-CONSULTING-FRAMEWORKS](AORMS-CONSULTING-FRAMEWORKS.md) |
-| Product boundary | [PRODUCT-VISION](PRODUCT-VISION.md) · [STABILITY-CHARTER](STABILITY-CHARTER.md) |
-| Requirements | [PRD](PRD.md) |
-| Stack | [ARCHITECTURE](ARCHITECTURE.md) |
-| India profile | [INDIA-PROFILE](INDIA-PROFILE.md) |
-| Deploy | [VPS-INSTALL](VPS-INSTALL.md) · [ADMIN-GUIDE](ADMIN-GUIDE.md) · [PRODUCTION-OPS](PRODUCTION-OPS.md) |
-| Demo | [DEMO-AND-HR-MODE](DEMO-AND-HR-MODE.md) · [DEMO-SEED-ITEMS](DEMO-SEED-ITEMS.md) |
-| EOMS | [EOMS-ARCHITECTURE](EOMS-ARCHITECTURE.md) · [EOMS-INTEGRATION](EOMS-INTEGRATION.md) |
-| Brand heritage | [AORMS-BRANDING-KIT](AORMS-BRANDING-KIT.md) |
+| Naming | [`../../CLAUDE.md`](../../CLAUDE.md) § Product naming |
+| Product definition | [AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md) |
+| Hosts / URLs | [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md) |
+| Navigation IA | [NAVIGATION.md](NAVIGATION.md) |
+| Roadmap — what's live (cloud) | [ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) |
+| Roadmap — engineering (local dev) | [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) |
+| Market fit / GTM | [MARKET-FIT.md](MARKET-FIT.md) |
+| Design system (Carbon migration) | [CARBON-MIGRATION.md](CARBON-MIGRATION.md) · [CARBON-PHASE1-STATUS.md](CARBON-PHASE1-STATUS.md) |
+| Legacy design system (pre-Carbon) | [HCW-UI-KIT.md](HCW-UI-KIT.md) — being retired, see Carbon docs |
+| UX laws | [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md) |
+| Design debt | [`../hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md`](../hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md) |
+| Stack | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| India profile | [INDIA-PROFILE.md](INDIA-PROFILE.md) |
+| Access / roles | [ACCESS-HIERARCHY.md](ACCESS-HIERARCHY.md) |
+| Identity / login | [AORMS-IDENTITY.md](AORMS-IDENTITY.md) |
+| HR / staff registry | [HR-PROFILE-SYSTEM.md](HR-PROFILE-SYSTEM.md) |
+| Deploy | [VPS-INSTALL.md](VPS-INSTALL.md) · [PRODUCTION-OPS.md](PRODUCTION-OPS.md) |
+| Brand heritage | [AORMS-BRANDING-KIT.md](AORMS-BRANDING-KIT.md) |
+| Cleanup plan (pivot execution) | [OFFICE-SYSTEM-CLEANUP-PLAN.md](OFFICE-SYSTEM-CLEANUP-PLAN.md) |
 
 Build: [DEVELOPMENT.md](../../DEVELOPMENT.md) · [INSTALL.md](../../INSTALL.md).  
 Firm SOP: [docs/holagundi/](../holagundi/README.md).  
-Reference data: [docs/reference/](../reference/README.md).  
 Kit docs: [docs/hcw-kit/](../hcw-kit/README.md).
 
 ## Precedence
 
-0. `AORMS-PLATFORM-NOMENCLATURE.md` — naming  
-1. `UNIFIED-ARCHITECTURE-V4.md` § System state — what exists in code  
-2. `NAVIGATION.md` — sidebar  
-3. `PRODUCT-VISION.md` / `STABILITY-CHARTER.md` — boundary  
-4. `PRD.md` — behaviour  
-5. `ARCHITECTURE.md` / `INDIA-PROFILE.md` / `HCW-UI-KIT.md` — constraints  
-6. `ROADMAP.md` — delivery status  
+0. [`../../CLAUDE.md`](../../CLAUDE.md) — naming + agent instructions
+1. [AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md) — product definition, what exists
+2. [NAVIGATION.md](NAVIGATION.md) — sidebar
+3. [ARCHITECTURE.md](ARCHITECTURE.md) / [INDIA-PROFILE.md](INDIA-PROFILE.md) — constraints
+4. [ROADMAP-CLOUD.md](ROADMAP-CLOUD.md) / [ROADMAP-LOCAL.md](ROADMAP-LOCAL.md) — delivery status
+
+## Archived (`archived/`)
+
+Historical documents from the pre-pivot multi-app suite era (AStudio,
+AConsulting, AProc, ADraft, ShilpiDB, AORMS Connect desktop launcher) and the
+local-first desktop-node model. Each carries a **⚠️ HISTORICAL** banner. Use
+Git history for anything not preserved there.
 
 ## Change rule
 
-Material features update PRD / NAVIGATION / ROADMAP in the same PR. **Delete**
-superseded specs — do not leave competing instructions. Git history is the archive.
+Material features update this index / NAVIGATION / ROADMAP-CLOUD / ROADMAP-LOCAL in the same PR.
+**Archive** superseded specs (move to `archived/` with a historical banner) —
+do not leave competing instructions live in this directory.
