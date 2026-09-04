@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@carbon/icons-react": "^11.85.0",
+    "@carbon/react": "^1.113.0",
     "@carbon/styles": "^1.112.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
@@ -36,7 +37,7 @@
     "qrcode.react": "^4.2.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.1",
+    "react-router-dom": "npm:react-router@8.3.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^4.4.3"
   },
