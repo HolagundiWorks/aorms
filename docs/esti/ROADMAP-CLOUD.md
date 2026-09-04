@@ -33,6 +33,18 @@ is merged and verified — the `web/` package is new, additive code; nothing in
 | Phase 7 — Optional AI | 🔲 Repo audit done — [NEXTJS-MIGRATION-PHASE7-AUDIT.md](./NEXTJS-MIGRATION-PHASE7-AUDIT.md). **Central finding**: `CLAUDE.md` (desktop-only Ollama, cites archived `LOCAL-FIRST.md`), `PRODUCTION-OPS.md`/`ARCHITECTURE.md` (2026-09 pivot to office-hub backend gateway, `LOCAL-FIRST.md` explicitly archived/superseded), and the actual code (`ai/gateway.ts` still hardcodes desktop-only Ollama, calling `127.0.0.1:11434` from the server — which cannot reach a user's desktop in a cloud deployment) all disagree with each other. Flagged as a product decision to resolve before implementing, not resolved here. What's real and portable regardless: the `esti_ai_run` provenance/audit table + draft-approval-lock workflow, PII redaction, permission-filtered retrieval from firm data, and the mock/template fallback provider. Drops the plan/licensing gate (consistent with Phase 2's tenancy decision). |
 | Phase 8 — Roadmap gaps (HR/Payroll, Delivery/AProc, CPI, Knowledge Bank) — **not in the migration spec; proposed here** | 🔲 Repo audit done — [NEXTJS-MIGRATION-PHASE8-AUDIT.md](./NEXTJS-MIGRATION-PHASE8-AUDIT.md). Defined at explicit user request to cover four domains Phases 6–7 surfaced as having no assigned phase number. Resolves two earlier open questions: `esti_repo_source`/Knowledge Bank Portal is live (not dead code, Phase 6/7 audits corrected), and `esti_attendance` exists (unblocks Phase 5's ASPRF reliability KPI). Reopens a Phase 2 decision: HR's `teamMembers` table is separate from `profiles`, contradicting Phase 2's live choice to FK `tasks.assignee_id` straight to `profiles` — needs a decision before `tasks` needs a breaking migration. Notes CPI's `generateReport` is blocked on Phase 7's unresolved AI-provider question. Whoever owns this roadmap should decide whether to adopt this phase as written, renumber it, or merge it elsewhere — not yet adopted. |
 
+**Cleanup backlog (found during the Phase 6 audit, not yet actioned):**
+- **Dead code** — `worker/esti_worker/jobs/pdf.py`'s `engagement_register`
+  PDF render target reads/writes `esti_cons_*` tables that no longer exist
+  (removed in the 2026-09 consultancy-module teardown, per `CLAUDE.md`
+  § Removed). Not ported to Next.js/Supabase; needs deleting from the
+  current worker too, since it can only fail if ever invoked.
+- **Stale comment** — `worker/esti_worker/jobs/pdf_to_markdown.py`'s
+  docstring still describes its role as "before EOMS ingest." EOMS was
+  retired and physically removed 2026-09 (`CLAUDE.md` § Removed); the
+  function itself is fine (kept, unrelated internal processing per that
+  same note), just the comment needs updating.
+
 **Known gotcha (documented in `web/next.config.ts`):** Next 16's default
 Turbopack can't resolve `@carbon/styles`' internal Sass `@use` imports
 through pnpm's symlinked `node_modules` — `web/package.json`'s dev/build
