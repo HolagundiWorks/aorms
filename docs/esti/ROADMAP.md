@@ -1,161 +1,256 @@
-﻿# AORMS Implementation Roadmap
+# AORMS Office Management System — Roadmap
 
-**Status:** ACTIVE · **Updated:** 2026-08-06  
-**Platform build:** COMPLETE (P0–P10 · P9.V · P9.M)  
-**Market-fit waves:** COMPLETE (W1–W3) · **W4 integrations deferred** — see [MARKET-FIT.md](MARKET-FIT.md)  
-**AProc waves:** COMPLETE (W0–W5) — see [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md)  
-**Local-first waves:** LF0–LF3 ✅ · LF4 🚧 (unsigned Setup.exe + bind UI) · LF5–LF6 open — see [LOCAL-FIRST.md](LOCAL-FIRST.md)  
-**Crew:** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) (Vishwakarma · Bhoomi · Gagan · Aakash)
-
-**Crew:** [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) (Vishwakarma · Bhoomi · Gagan · Aakash)
-
-**Active delivery (2026-08-06):** hub `0227` + panel `syncToken` ✅ (Gagan #45) ·
-portal `/downloads` placeholders ✅ (Aakash #46) · LF4 Tauri scaffold +
-`DesktopLicenceBind` 🚧 (Bhoomi — sign + physical bind per
-[MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)). Live installer URLs stay gated.
-The 2026-07-19 **web-only** product law is **superseded** for runtime shape
-([PLANS-AND-TIERS.md](PLANS-AND-TIERS.md), [LOCAL-FIRST.md](LOCAL-FIRST.md)).
-Legacy Community / Manager installers and a separate Estimate desktop app stay
-**retired**.
+**Status:** ACTIVE | Web-only office hub (no allied apps)  
+**Updated:** 2026-09-04 (MAJOR PIVOT: office system only)  
+**Platform:** React + Carbon Design System + Fastify backend + PostgreSQL
 
 ---
 
-## Soft launch (aorms.in — now)
+## Current Phase
 
-| Surface | State |
-| --- | --- |
-| [UNIFIED-ARCHITECTURE-V4.md](UNIFIED-ARCHITECTURE-V4.md) | **System state** — modules live vs removed |
-| [NAVIGATION.md](NAVIGATION.md) | Canonical sidebar IA |
-| [LOCAL-FIRST.md](LOCAL-FIRST.md) | **Local-first + hub sync** — planes, APIs, LF waves |
-| [HUB-API.md](HUB-API.md) | Hub wire contract (`2026-08`) — activate→`syncToken`, sync REST/WS, node `sync.*` |
-| [DESKTOP-REPOS.md](DESKTOP-REPOS.md) | Desktop contracts gate · installer ownership |
-| [AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) | Crew split — Vishwakarma · Bhoomi · Gagan · Aakash |
-| [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md) | Desktop ↔ web UX consistency |
-| [MARKET-FIT.md](MARKET-FIT.md) | **GTM + market-fit backlog** (ICP, competitors, waves) |
-| [PLANS-AND-TIERS.md](PLANS-AND-TIERS.md) | Standard licence law (desktop + web) |
-| [AORMS-PLATFORM-NOMENCLATURE.md](AORMS-PLATFORM-NOMENCLATURE.md) | Naming (platform · apps · EOMS · ESTI) |
-| [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md) | Host / path map |
-| [APROC-ARCHITECTURE.md](APROC-ARCHITECTURE.md) | **AProc** product law + delivery waves |
-| [P9V-CONSULTANCY-WALKTHROUGH.md](P9V-CONSULTANCY-WALKTHROUGH.md) | P9.V acceptance checklist (signed) |
-| [AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md](AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md) | Pre-con R&O law |
-| [AORMS-CONSULTANCY-SOP-CASE-STUDY.md](AORMS-CONSULTANCY-SOP-CASE-STUDY.md) | Consultancy SOP ↔ product |
-| [HCW-LICENSE-MANAGER.md](HCW-LICENSE-MANAGER.md) | In-tree licensing authority |
-| [DESIGN-DEBT-REGISTER.md](../hcw-kit/11-audits/DESIGN-DEBT-REGISTER.md) | Living design debt |
-| [PRD.md](PRD.md) | Requirements |
-
-Gate: `VITE_MARKETING_ONLY` (default on for public builds) · `frontend/src/lib/marketing-gate.ts`.  
-Desktop firm login target: **AORMS Connect** (not apex).
+**🚧 Phase 0: Infrastructure & Foundation (Sept 2026)**
+- ✅ **Strategy locked** — office management system only (no AStudio, AConsulting, AProc, ADraft, ShilpiDB)
+- ✅ **CLAUDE.md updated** — product definition changed to office hub
+- ✅ **Legacy docs archived** — 46+ old documents removed
+- 🚧 **Carbon Design System migration** — Wave 2 complete, Wave 3 launching Week 2
+- 🚧 **Codebase cleanup** — Remove 77+ allied app references, delete `desktop/` directory
 
 ---
 
-## Suite waves
+## Active Workstreams
 
-| # | Work | Where | Exit |
-| --- | --- | --- | --- |
-| S0 | Suite canon docs | esti | ✅ [AORMS-SUITE.md](AORMS-SUITE.md) |
-| S1 | Mongo ops spike + portal read | esti hub | ✅ [MONGO-OPS.md](MONGO-OPS.md) |
-| S2 | Shilpi wire + portal drawing packages | esti · portals | ✅ [SHILPI-WIRE.md](SHILPI-WIRE.md) |
-| S3 | AQC three-app packaging | AQC | ✅ Estimation · BBS · PM shells |
-| S4 | Manager Tasks module | AStudio · AConsulting | ✅ local tasks + publish ops |
-| S5 | Online ops DB manager | esti | ✅ `/ops-db` |
-| S6 | Soft-launch marketing | esti | ✅ Landing · blog · SEO · marketing-only gate · VPS bootstrap |
-| S7 | Soft-launch ops + agent law | esti | ✅ [PRODUCTION-OPS](PRODUCTION-OPS.md) § Soft launch · CLAUDE/AGENTS |
-| **C0** | AORMS Connect canon + nomenclature + downloads stub | esti | ✅ [AORMS-CONNECT.md](AORMS-CONNECT.md) |
-| **C1** | Connect WinUI shell (login · launcher · catalog stub) | AORMS-Connect | ✅ shell scaffold · deepen C2 |
-| **C2** | Session broker + project catalog for sibling apps | Connect · Bridge | ✅ `session.json` · `ConnectCatalog` · sibling import |
-| **C3** | Licence Manager surface in Connect | Connect | ✅ local status · admin.aorms.in link |
-| **S8** | Reopen apex auth / portal demos | esti | 🟡 code ready (gate-aware CTAs · `s8-reopen-demos.sh`) · VPS flip 🔲 |
-| **S9** | Per-app installer packaging (MSIX) | AQC-* repos | 🟡 unsigned MSIX ✅ · code sign 🔲 D6 |
-| **S10** | Firm portal depth | esti portals | ✅ collab tx+ack · Documents+RA · contractor/site Drawings · collab demo login |
-| **S11** | Joint measurement → approval → rate books · PDF annotate · AQC sync contract | esti · AQC | ✅ hub + [AQC-JM-SYNC.md](AQC-JM-SYNC.md) · **AQC Pull JM** ✅ (`GET /api/ops/joint-measurements` · Bridge · BBSApp Outputs) |
-| **S12** | UX audit wave (1B+2C) — landing honesty · portal docks · SPA de-Carbon · manager HCW chrome start | esti · AStudio · AConsulting | ✅ [2026-08-09-UX-AUDIT-WAVE.md](../hcw-kit/11-audits/2026-08-09-UX-AUDIT-WAVE.md) · SPA `@carbon/react` removed ✅ · AConsulting Engagements ✅ · AStudio S2c polish ✅ · AQC chrome out of S12 |
+### 1. **Cleanup & Migration (Weeks 1–2)**
+
+**Phase 1: Codebase Cleanup**
+- [ ] Remove 77 allied app references (AStudio, AConsulting, AProc, ADraft, ShilpiDB)
+- [ ] Delete `desktop/` directory (Tauri shell removed)
+- [ ] Remove installer/setup logic (`frontend/src/lib/desktop-installers.ts`, etc.)
+- [ ] Remove desktop native bridge (`desktopNativeBridge.ts`)
+- [ ] tsc + eslint + vite build ✅ green
+
+**Phase 2: Landing Pages & Marketing**
+- [ ] Update `Landing.tsx` — focus on office hub benefits (clients, projects, proposals, invoicing, team, KB, delivery)
+- [ ] Remove allied app CTAs + feature cards
+- [ ] Remove/redirect `/downloads` (web-only, no installers)
+- [ ] Update blog, footer, nav, meta tags
+
+**Phase 3: Documentation**
+- [ ] Create `AORMS-OFFICE-SYSTEM.md` (done ✅)
+- [ ] Archive obsolete docs (SUITE, CONNECT, LOCAL-FIRST, APROC, DESKTOP, etc.) (done ✅)
+- [ ] Create fresh roadmap (this file)
+- [ ] Update navigation, architecture, production ops
+
+**Phase 4: Configuration & Backend**
+- [ ] Remove installer env vars + build targets
+- [ ] Remove Tauri dependencies from `package.json`
+- [ ] Remove allied app API endpoints + tRPC namespaces
+- [ ] Update contracts/types (remove allied app constants)
+
+**Effort:** 2–3 days (all phases)
 
 ---
 
-## D-waves (desktop baseline)
+### 2. **Carbon Design System Migration (Weeks 2–8)**
 
-| Wave | Outcome | Status |
-| --- | --- | --- |
-| **LF0** | Contracts: sync planes, meta schemas, capability presets | ✅ 2026-08 |
-| **LF1** | Hub meta event log + catch-up + WS; node meta outbox/cursor | ✅ 2026-08 |
-| **LF2** | Artifact content-hash; publish DTOs; portal-from-hub reads; desktop stub; product-law docs | ✅ 2026-08 |
-| **LF3** | Domain metadata enqueue/apply (tasks, estimate totals, phase progress) + panel `syncToken` | ✅ Gagan 2026-08 |
-| **LF4** | Signed Tauri installer + first-run licence / hub bind | 🚧 Bhoomi — unsigned Studio Setup.exe + `DesktopLicenceBind` · sign/bind morning ([MORNING-TEST-LF4.md](MORNING-TEST-LF4.md)) |
-| **LF5** | Web parity polish (capability badges, degraded AI, shared keymap) | 🔲 Aakash |
-| **LF6** | UX parity checklist + inspector/AI right-slot; Figma ↔ kit tokens | ◐ Aakash — token stub ✅ · right-slot 🔲 |
+[Detailed plan: CARBON-MIGRATION-WAVE3-PLAN.md](./CARBON-MIGRATION-WAVE3-PLAN.md)
 
-**Namespaces / seams:** `sync` (tRPC + REST) · `esti_meta_*` · `esti_sync_*` ·
-`packages/contracts` sync · `desktop/` · `trpc.sync.capabilities` ·
-`/platform/v1/activate` → `syncToken` ([HUB-API.md](HUB-API.md)).
+**Wave 3: App MUI → Carbon (4–6 weeks)**
+- ✅ Wave 2 adapters complete (StatusDot, DataState, ConfirmModal, PageBreadcrumb, ToastHost — 784 call-sites unblocked)
+- 🚧 Wave 3 kick-off: Week 2 (8 tranches, P1–P9)
+  - **P1:** Shared leaves (60 files) — Weeks 2–3
+  - **P2:** DataTables (15 files) — Weeks 2–3 (parallel)
+  - **P3:** Forms (20 files) — Week 3
+  - **P4–6:** Routes (65 files) — Weeks 3–4 (parallel)
+  - **P7:** Layouts (15 files, RailLayout critical) — Week 5 + full QA
+  - **P8:** Portals (12 files) — Week 5
+  - **P9:** Overlays (27 files, deferred) — Post-Wave-3 spike
 
-**Migrations:** `0226_local_first_sync` · `0227_hlp_org_sync_firm`.
+**Wave 4: Icon swap (1 week, parallel to Wave 3 P7–P9)**
+- MUI icons → Carbon icons (93 files)
 
-| App / surface | Role | Repo |
-| --- | --- | --- |
-| **AORMS Connect** | Suite core — SSO · launcher · catalog | [AORMS-Connect](https://github.com/HolagundiWorks/AORMS-Connect) |
-| **AStudio** / **AConsulting** | Practice managers | [AStudio](https://github.com/HolagundiWorks/AStudio) · [AConsulting](https://github.com/HolagundiWorks/AConsulting) |
-| **AQC Estimation / BBS / PM** | Three technical installers · shared engine | [AQC](https://github.com/HolagundiWorks/AQC) SoT · [AQC-Estimation](https://github.com/HolagundiWorks/AQC-Estimation) · [AQC-BBS](https://github.com/HolagundiWorks/AQC-BBS) · [AQC-PM](https://github.com/HolagundiWorks/AQC-PM) |
-| **ADraft** · **ShilpiDB** | Drafting · geometry | [repo](https://github.com/HolagundiWorks/AADT) · [shilpidb](https://github.com/HolagundiWorks/shilpidb) |
-| **aorms** (esti) | Hub · marketing · portals · Mongo ops | [aorms](https://github.com/HolagundiWorks/aorms) |
+**Wave 5: Landing & marketing (2 weeks, parallel)**
+- Rebuild editorial system (`landing.scss`)
+- Unauthenticated pages → Carbon
 
-## Next up (execute in order)
+**Wave 6: Decommission (1 week)**
+- Remove MUI + HCW-UI-Kit
+- Update docs + AI wiki index
 
-### C-wave — AORMS Connect
+**Exit criteria per wave:** tsc + eslint green, visual baselines re-captured
 
-| Slice | Status |
-| --- | --- |
-| Product pivot P0–P10 | One Standard licence · storage + AI · browser takeoff · hygiene/rebrand/deps *(BYO AI key + hosted token metering and the web-only law later superseded by local-first, local-only unmetered AI — #63)* |
-| **P7 billing** | Multi-tenant usage · CSV + mark-billed · suspend-for-non-payment (Stripe auto deferred) |
-| **P9 Consultancy** | Engagements · reliance · fees · SOP · enquiry · fee-stage invoices · intelligence (`0214`–`0219`) |
-| **P9.V / P9.M** | Walkthrough signed · marketing live |
-| **Pre-con R&O** | Consultancy + Studio phase gates |
-| **UI shell U0–U6** | Glass rail · stage · ActionDock · marketing shell |
-| **@hcw/ui-kit 1.4.0** | Vendored + app shell adoption |
-| **Blog / SEO** | `/blog` live; feed/sitemap refreshed |
-| **HCW License Manager** | In-tree (`admin.aorms.in`) |
-| **Market fit W1–W3** | GTM scrub · portal · fee recovery · onboarding · capacity · digests · consultancy chrome · demo seed · packaging |
-| **AProc W0–W5** | Chrome · Delivery · tenders · RA/steel cert · BBS + steel recon · CSV/XER · digest · ESTI (`0220`–`0224`) |
-| **Local-first LF0–LF3** | Sync planes · meta log/WS · artifact hash · portal hub reads · desktop stub · panel `syncToken` · domain meta (`0226`–`0227`) |
-| **Local-first LF5** | Capability badges · Hosted AI empty states · shared `keymap` + `/help` · web-parity capabilities fix |
+---
 
-### S8 — Reopen apex auth (when demos are honest)
+## Office Hub Features (In-Flight & Planned)
 
-| Slice | Status |
-| --- | --- |
-| Honest portal tabs · installers decoupled from auth gate | ✅ |
-| Landing/dock CTAs + FAQ follow marketing gate | ✅ |
-| `deploy/s8-reopen-demos.sh` (`CONFIRM=yes`) | ✅ |
-| Local smoke (`compose` · `VITE_MARKETING_ONLY=false`) | ✅ `deploy/s8-local.ps1` |
-| VPS env flip (`VITE_MARKETING_ONLY=false`) | 🔲 blocked — deploy key not in VPS `authorized_keys` |
-| Actions runner | ✅ `gh workflow run s8-reopen-demos.yml` (needs pubkey auth) |
+### **Clients & Projects** ✅
+- [ ] Client CRM (interactions, leads, tenders)
+- [ ] Project tracking (phases, tasks, milestones)
+- [ ] Project moodboards + mood asset management
 
-### Autopilot in-repo (2026-08-09)
+### **Proposals & Contracts** ✅
+- [ ] Unified proposals (COA fee + scope agreements)
+- [ ] Version control + client approval gates
+- [ ] Digital signatures (DocuSign integration)
 
-| Wave | Work | Status |
-| --- | --- | --- |
-| W1 | **S11** AQC Estimation Pull joint measurements | ✅ |
-| W2 | **S12** Remove remaining `@carbon/react` from esti SPA | ✅ |
-| W3 | AConsulting Engagements/Projects stage on HCW dock | ✅ |
-| W4 | AStudio S2c Portfolio / Focus polish | ✅ |
-| W5+ | Pin Connect · AStudio · AConsulting `vendor/AQC` → `5f553cb` (JM + OutboxCounts) | ✅ |
-| W6 | AConsulting **Office** enquiry go/no-go (`local_office_enquiries` · `officeEnquiry` meta) | ✅ |
-| W7 | AConsulting **Clients** (`local_clients` · `clientStatus`) + AStudio S2e AQC handoff | ✅ |
-| W8 | AConsulting **Practice** live (capacity counts · `local_practice` notes · Flush) | ✅ |
-| W9 | AStudio **S2d** in-process `bbs_engine` P/Invoke (Focus engine smoke · `build-engine.cmd`) | ✅ |
-| W10 | AStudio **S3** Focus Fees · Drawings · Delivery (`invoiceStatus` · `drawingRegister` · `phaseProgress`) | ✅ |
-| W11 | AStudio **S4** Practice Ask ESTI → local Ollama (probe/chat · no transcript sync) | ✅ |
-| W12 | AConsulting Ask ESTI mirror (Practice Ollama · capacity context) | ✅ |
-| W13 | AStudio **S3e** drawing artifact ingest (`drawing` · sha256 · Bridge flush) | ✅ |
-| W14 | AStudio **S5a** web chrome parity (taskbar studioNav · floating dock · clock · Ask ESTI slot) | ✅ |
+### **Invoicing & Finance** ✅
+- [ ] GST-compliant invoicing
+- [ ] Reconciliation (bank, 26AS, AIS, GSTR via Python worker)
+- [ ] Cash book + expense tracking
+- [ ] Financial reports + filing abstracts (GST/TDS)
 
-### Ops-blocked (need human)
+### **Delivery & Supervision** ✅
+- [ ] BBS (bar bending schedules) — IS 456 cutting lengths
+- [ ] Steel reconciliation (scheduled vs issued vs consumed kg)
+- [ ] Running bills (project RA bills with advances/deductions)
+- [ ] Site supervision (snags, inspections, progress reports)
 
-1. **S8 VPS flip** — add deploy pubkey to the droplet, then `gh workflow run s8-reopen-demos.yml -f mode=apply` (or `CONFIRM=yes bash deploy/s8-reopen-demos.sh` on the box).  
-   Pubkey: `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzNk7P4spTM1FBfiiZiIa9k6asphlWNgW4lanTI04DT aorms-deploy-github-actions`  
-2. **D6** — Trusted Authenticode → upload → `apply-installer-manifest.ps1 -ConfirmFlip` → release flag + rebuild. Prefer Connect first.  
+### **Team & HR** ✅
+- [ ] Team roster + assignments
+- [ ] Leaves + payroll management
+- [ ] ASPRF composite scoring (reliability, quality, impact, collaboration, learning, wellbeing)
+- [ ] Attendance + time attribution
 
-Hub-portal SyncEntity allow-list ✅ · portal tenants after D6 · AQC Estimation/BBS/PM native chrome out of S12.
+### **Knowledge Bank** ✅
+- [ ] Specification catalog (materials, finishes, makes)
+- [ ] Compliance library (NBC, FAR, setbacks, fire, regulatory)
+- [ ] Design standards by discipline + attached files
+- [ ] Master plan file library (PDF/DWG)
+- [ ] Lessons learned + NC/CAPA tracking
 
-## Deferred
+### **ESTI AI Agent** 🚧
+- [ ] Built-in office automation (local inference: Ollama/Foundry)
+- [ ] Task recommendations + priority
+- [ ] Project health insights
+- [ ] Document generation (proposals, invoices, specs)
+- [ ] Email draft automation
+- [ ] Reminder creation
 
-SaaS SKUs · Stripe · dual Postgres/Mongo forever · full WinUI domain split from BBSApp · wiki restore on apex · merging AStudio into Connect · cloud Hosted AI / VPS Ollama.
+### **EOMS Knowledge API** 🔲
+- [ ] External knowledge store integration
+- [ ] Search + filtering
+- [ ] Trending + recommendations
+- [ ] Connected to office hub
+
+---
+
+## Technical Debt & Polish
+
+### **Design System** 🚧
+- Carbon Design System migration (Waves 3–6, parallel)
+- Visual regression testing baseline updates
+- Accessibility validation (keyboard nav, focus, COGA)
+
+### **Performance** 🔲
+- Code splitting optimization
+- Bundle size reduction (removing MUI)
+- Caching strategy for office data
+
+### **Testing** 🔲
+- E2E test coverage (Playwright)
+- Unit test coverage (backend, frontend)
+- Visual regression baseline (after Carbon migration)
+
+### **Infrastructure** ✅
+- Docker Compose stack (`compose.yaml`, `compose.prod.yaml`)
+- VPS deployment (`deploy/*.sh`)
+- PostgreSQL + Redis Streams (Python worker)
+- SSL/TLS + Nginx reverse proxy
+
+---
+
+## Q4 2026 Milestones
+
+| Week | Milestone | Status |
+|------|-----------|--------|
+| **This week** | Legacy docs archived · cleanup plan + roadmap ready | ✅ |
+| **Week 2** | Phase 1–2 cleanup complete · Carbon Wave 3 P1/P2 kick-off | 🚧 |
+| **Week 3** | Phase 3–4 cleanup complete · Carbon Wave 3 P3–P6 in parallel | 🔲 |
+| **Week 4** | Phase 5 (backend) complete · Carbon Wave 3 routes complete | 🔲 |
+| **Week 5** | Carbon Wave 3 P7 RailLayout (critical QA) + P8 portals | 🔲 |
+| **Week 6** | Carbon Wave 4 icons (parallel) · Wave 3 exit criteria met | 🔲 |
+| **Week 7–8** | Carbon Wave 5 landing + Wave 6 decommission | 🔲 |
+| **EOQ** | Office hub v2.0 live on Carbon · SSO + ESTI AI ready | 🔲 |
+
+---
+
+## Q1 2027+ Roadmap
+
+### **Q1 2027**
+- ✅ ESTI AI agent integration (local inference)
+- ✅ EOMS knowledge bank live
+- ✅ SSO + federated identity
+- ✅ Office hub fully responsive mobile
+
+### **Q2 2027+**
+- Advanced BI dashboards + reporting
+- Integrations (Shopify, QuickBooks, DocuSign, etc.)
+- Multi-language support (Hindi + regional)
+- Mobile app (if needed; web-responsive primary)
+- Performance optimizations + caching
+
+---
+
+## Documentation Structure
+
+**Active Canon:**
+- [`CLAUDE.md`](../../CLAUDE.md) — Agent instructions (office system)
+- [`AORMS-OFFICE-SYSTEM.md`](./AORMS-OFFICE-SYSTEM.md) — Product overview + architecture
+- [`ARCHITECTURE.md`](./ARCHITECTURE.md) — Technical architecture (backend, frontend, worker)
+- [`PRODUCTION-OPS.md`](./PRODUCTION-OPS.md) — VPS deployment + operations
+- [`CARBON-MIGRATION.md`](./CARBON-MIGRATION.md) — Full Carbon design system roadmap
+- [`CARBON-MIGRATION-WAVE3-PLAN.md`](./CARBON-MIGRATION-WAVE3-PLAN.md) — Wave 3 execution (8 tranches)
+- [`CARBON-PHASE1-STATUS.md`](./CARBON-PHASE1-STATUS.md) — Current readiness status
+- [`OFFICE-SYSTEM-CLEANUP-PLAN.md`](./OFFICE-SYSTEM-CLEANUP-PLAN.md) — 6-phase cleanup (2–3 days)
+- [`NAVIGATION.md`](./NAVIGATION.md) — Canonical sidebar IA
+- [`AORMS-OFFICE-SYSTEM.md`](./AORMS-OFFICE-SYSTEM.md) — Office hub features + data model
+
+**Archived (legacy):**
+- `docs/esti/archived/` — 46+ documents (AORMS-SUITE, AORMS-CONNECT, LOCAL-FIRST, APROC, DESKTOP, etc.)
+
+---
+
+## Getting Started
+
+**Week 1 (Starting now):**
+
+1. **Code cleanup** (Phase 1)
+   ```bash
+   # Remove allied app references
+   grep -r "AStudio\|AConsulting\|AProc\|ADraft\|ShilpiDB" frontend/src --include="*.ts" --include="*.tsx" -l
+   
+   # Delete desktop directory
+   rm -rf desktop/
+   
+   # Run cleanup checklist
+   # → See OFFICE-SYSTEM-CLEANUP-PLAN.md Phase 1
+   ```
+
+2. **Landing pages** (Phase 2)
+   - Update `Landing.tsx` — office hub focus
+   - Remove allied app CTAs
+   - Test locally: `npm run dev`
+
+3. **Documentation** (Phase 3)
+   - Review `AORMS-OFFICE-SYSTEM.md` (new canon)
+   - Update team on changes
+   - Archive links in guides
+
+4. **CI verification** (Phase 4–5)
+   - `tsc --noEmit` ✅ green
+   - `eslint` ✅ green
+   - `vite build` ✅ succeeds
+
+---
+
+## Support & Questions
+
+- **Cleanup questions?** See [OFFICE-SYSTEM-CLEANUP-PLAN.md](./OFFICE-SYSTEM-CLEANUP-PLAN.md)
+- **Carbon migration?** See [CARBON-MIGRATION-WAVE3-PLAN.md](./CARBON-MIGRATION-WAVE3-PLAN.md)
+- **Architecture questions?** See [ARCHITECTURE.md](./ARCHITECTURE.md)
+- **Deployment?** See [PRODUCTION-OPS.md](./PRODUCTION-OPS.md)
+
+---
+
+**Last updated:** 2026-09-04  
+**Prepared by:** Claude Haiku 4.5  
+**Status:** Ready for implementation
