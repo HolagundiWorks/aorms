@@ -1,8 +1,14 @@
 # AORMS — licensing & usage (2026-08)
 
-> **Product law:** One **standard AORMS licence** for desktop apps (AStudio /
-> AConsulting / AQC). **AI is unmetered** and runs on the **desktop**. Cloud stores
-> **published** artifacts only (metadata · progress · finals). See
+> **Product law:** One **standard AORMS licence**. No trials, no tiers, no Community
+> edition, no Lite/Pro/Enterprise split. You sign up, get an **ACTIVE** licence with
+> the full workspace and **5 GB** cloud storage included. You pay for **extra storage**.
+> **AI is unmetered** — it runs locally (Ollama) on the desktop node, or on the hub for
+> web parity (badged **Hosted AI**); there is no per-token billing and no
+> bring-your-own cloud key tier (removed #63).
+>
+> **Local-first (2026-08):** AORMS ships as **desktop preferred** (offline authoring,
+> local calc/AI) with **full web parity** on the cloud hub. See
 > [LOCAL-FIRST.md](LOCAL-FIRST.md).
 >
 > **Open source (now):** Keep products **open source**. **SaaS commercial
@@ -19,9 +25,8 @@
 | **Users** | Unlimited staff on the firm’s desktop seats |
 | **Clients / contractors / consultants / projects** | Unlimited |
 | **Storage (cloud)** | **5 GB** published artifacts included; overage billed per GB-month |
-| **AI** | **Unmetered** on **desktop only** (local Ollama / Foundry Local and/or opt-in keys per app). **No hub / VPS Ollama** — staff AI never required online |
-| **Desktop** | **Only** staff runtime — WinUI 3 + C++ engine (fork [AQC](https://github.com/HolagundiWorks/AQC)) |
-| **Web** | Marketing/demos on `aorms.in` · firm-branded **portals** · License Manager |
+| **AI** | **Unmetered.** Local Ollama on the desktop node; hub Ollama on web parity (badged **Hosted AI**); deterministic mock fallback when Ollama is unavailable |
+| **Desktop** | **First-class** — local-first node (`ESTI_ROLE=node`); same SPA as web |
 
 Capability gates remain **role-based** (`can(role, capability)`). Sync requires an
 ACTIVE licence bound to the hub (`syncToken`).
@@ -38,7 +43,13 @@ ACTIVE licence bound to the hub (`syncToken`).
 
 **Retired:** browser staff ERP / “web parity” staff SPA as a product surface.
 
-## Sync scope
+| Capability | Free / unbound desktop | Licensed desktop (ACTIVE + hub) | Web parity |
+|------------|------------------------|----------------------------------|------------|
+| Local authoring, calc, worker | Yes | Yes | Hub worker |
+| Local Ollama / EOMS | Yes | Yes | Hub (Hosted AI) / degrade |
+| Realtime metadata sync | No | Yes | Yes |
+| Finalized artifact push | No | Yes | Server-side |
+| Client/consultant portals | N/A (no publish) | Via hub after publish | Via hub |
 
 | Capability | Unbound desktop | Licensed desktop | Firm portal |
 |------------|-----------------|------------------|---------------|
@@ -49,12 +60,10 @@ ACTIVE licence bound to the hub (`syncToken`).
 
 Presets in `packages/contracts/src/sync.ts`. Bridge: [PORTAL-SYNC-BRIDGE.md](PORTAL-SYNC-BRIDGE.md).
 
-## Signup flow (target)
-
-1. Firm obtains licence via HCW / License Manager (self-serve later).
-2. Activate on desktop → `syncToken` enables hub sync.
-3. Firm portal tenant provisioned for clients/partners.
-4. Staff never log into `aorms.in` for ERP work.
+1. Self-serve signup at `/account?mode=create` → firm workspace created.
+2. Licence status **`ACTIVE`** with **5 GB** cloud storage quota.
+3. Activate the licence on a desktop node (or use web only) — `syncToken` enables hub sync.
+4. Company → AI to pick the local Ollama model (desktop) or use hub **Hosted AI** (web parity); AI is unmetered.
 
 ## Usage billing
 
@@ -62,15 +71,33 @@ Presets in `packages/contracts/src/sync.ts`. Bridge: [PORTAL-SYNC-BRIDGE.md](POR
 |-------|----------|---------|
 | **Cloud storage** (published artifacts) | 5 GB | Per GB-month |
 
-AI is **not metered**.
+**Cloud storage is the only usage meter.** AI is **not metered** — it runs locally
+(desktop Ollama) or on the hub for web parity (badged **Hosted AI**), with a
+deterministic mock fallback when Ollama is down. No per-token billing, no
+bring-your-own cloud key.
 
 ## Licence states
 
 | Status | Meaning |
 |--------|---------|
-| **`ACTIVE`** | Full desktop workspace; hub sync allowed |
-| `SUSPENDED` | Blocked (billing or admin) |
-| `EXPIRED` / `GRACE` | Desktop keeps local work within signed-token grace |
+| **`ACTIVE`** | Full workspace; cloud-storage meter applies (AI is unmetered); hub sync allowed |
+| `SUSPENDED` | Blocked (billing or admin action) — platform-admin **Suspend for non-payment** (Usage billing) or Licences → Suspend; product node stamps `licence_status` on refresh 403 |
+| `EXPIRED` / `GRACE` | Legacy token lifecycle — renew to ACTIVE; desktop keeps local work within signed-token grace |
+
+### Legacy migration
+
+Firms on historical **`LITE`**, **`PRO`**, **`ENTERPRISE`**, or **`CORE`** DB values
+were migrated to **`ACTIVE`** with the same feature access and 5 GB default storage.
+Tier enums in code are **deprecated shims** only.
+
+## Enforcement
+
+1. **`licenceStatus`** → `ACTIVE | SUSPENDED` (not LITE/PRO). `SUSPENDED` blocks writes even if a cached signed token is still within offline TTL.
+2. **Storage** — `withinStorage(usedBytes, quotaBytes)` for **cloud** published objects; default 5 GB + purchased add-ons. Local FS on desktop is not counted against the cloud quota.
+3. **AI** — **unmetered**. Runs locally (desktop Ollama) or on the hub for web parity (**Hosted AI**), with a deterministic mock fallback when Ollama is unavailable. No per-token meter, no BYO cloud key (removed #63).
+4. **Roles** — `permissions.ts` / `can()` for feature access.
+5. **UI** — show "AORMS Standard" + the cloud-storage meter; desktop shows sync queue when hub-bound.
+6. **Billing (P7)** — manual India path: Usage billing CSV → mark billed → suspend for non-payment. Stripe auto-suspend is not wired.
 
 ## Retired (do not reference)
 

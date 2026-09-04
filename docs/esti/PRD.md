@@ -146,9 +146,8 @@ BACKLOG), and an auditable priority log. Scheduled standup cycles ask targeted,
 role-routed questions and collect typed responses; the standup agent is
 stage-gated (read-only → draft → approval-based → limited auto) and must never
 emit generic update-nag notifications. Deterministic scoring is always available;
-agent/LLM features run on the **local desktop AI** (Ollama / Foundry Local /
-opt-in keys) — **unmetered**, with no edition gate. There is **no hub Hosted AI**;
-Ollama does not run on the cloud VPS.
+agent/LLM features run on the local desktop AI (Ollama) or hub **Hosted AI** once
+AI is enabled — **unmetered**, with no edition gate and no bring-your-own cloud key.
 
 ## Documents And Coordination
 

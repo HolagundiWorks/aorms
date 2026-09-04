@@ -77,11 +77,19 @@ Desktop firm login target: **AORMS Connect** (not apex).
 
 | Slice | Status |
 | --- | --- |
-| C0 Canon · nomenclature · `aorms-connect` manifest stub | ✅ |
-| C1 WinUI: Sign in · Suite apps · Projects · Licence stub | ✅ scaffold |
-| C2 Shared session + catalog API for siblings | ✅ |
-| C3 Licence Manager surface | ✅ |
-| C2+/S5 Connect DB connector + Ops DB Manager wire | ✅ Connect Flush/outbox UI · Bridge `OutboxCounts` · `/ops-db` connector strip + sync/meta browse |
+| Product pivot P0–P10 | One Standard licence · storage + AI · browser takeoff · hygiene/rebrand/deps *(BYO AI key + hosted token metering and the web-only law later superseded by local-first, local-only unmetered AI — #63)* |
+| **P7 billing** | Multi-tenant usage · CSV + mark-billed · suspend-for-non-payment (Stripe auto deferred) |
+| **P9 Consultancy** | Engagements · reliance · fees · SOP · enquiry · fee-stage invoices · intelligence (`0214`–`0219`) |
+| **P9.V / P9.M** | Walkthrough signed · marketing live |
+| **Pre-con R&O** | Consultancy + Studio phase gates |
+| **UI shell U0–U6** | Glass rail · stage · ActionDock · marketing shell |
+| **@hcw/ui-kit 1.4.0** | Vendored + app shell adoption |
+| **Blog / SEO** | `/blog` live; feed/sitemap refreshed |
+| **HCW License Manager** | In-tree (`admin.aorms.in`) |
+| **Market fit W1–W3** | GTM scrub · portal · fee recovery · onboarding · capacity · digests · consultancy chrome · demo seed · packaging |
+| **AProc W0–W5** | Chrome · Delivery · tenders · RA/steel cert · BBS + steel recon · CSV/XER · digest · ESTI (`0220`–`0224`) |
+| **Local-first LF0–LF3** | Sync planes · meta log/WS · artifact hash · portal hub reads · desktop stub · panel `syncToken` · domain meta (`0226`–`0227`) |
+| **Local-first LF5** | Capability badges · Hosted AI empty states · shared `keymap` + `/help` · web-parity capabilities fix |
 
 ### S8 — Reopen apex auth (when demos are honest)
 

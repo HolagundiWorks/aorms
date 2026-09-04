@@ -44,12 +44,8 @@ Desktop may add a **thin native menu** that invokes the **same command IDs** as 
 | Windows | Multi-window (AI / inspector / drawing) | Tabs + docked panels |
 | Files | Native dialogs + FS | Browser picker + drag-drop |
 | Print | Native / system PDF | Browser print |
-| AI compute | **Desktop only** — local Ollama / Foundry Local — badge **Local AI** | **No hub Hosted AI** |
-| Sync | Offline queue in tray | Same chip; usually idle when fully online |
-| Density | **1×** chrome px (= `PORTAL_CHROME`) — never window-scale | Browser zoom is user-controlled |
-| Clock | Design 100 · **shown 0.8×** (face 80) | `clockSizePx` **100** |
-| Wellness / calc | In-window soft panels (same tree as shell) | MUI Popover / float widgets |
-| Popovers | Avoid system `Flyout` for primary chrome peers | Kit / MUI popovers |
+| AI compute | Local Ollama — badge **Local AI** | Hub Ollama — **same panel**, badge **Hosted AI** (`CapabilityBadge`); unmetered, no BYO |
+| Sync | Offline queue in tray | Same chip; usually idle when fully online · tray “Web” hint |
 
 ## PR checklist
 

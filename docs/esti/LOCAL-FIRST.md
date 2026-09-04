@@ -73,23 +73,21 @@ flowchart LR
 
 ## Runtimes
 
-| Runtime | Role |
-| --- | --- |
-| **AStudio / AConsulting** | Practice managers — Tasks · Office · HR · Payroll · comms |
-| **AQC Estimation / BBS / PM** | Technical apps — shared `bbs_engine` |
-| **ADraft** | 2D drafting |
-| **ShilpiDB** | Geometry spine (+ desktop manager) |
-| **Cloud hub** | Licence · Mongo ops · artifacts · portals · ops DB manager — **no LLM / Ollama** |
-| **`aorms.in`** | Marketing · demos · downloads — **no Ask ESTI cloud runtime** |
-| **esti staff SPA** | Reference archive only (legacy AI routes are not the shipping surface) |
+| Runtime | Role | Key env |
+| --- | --- | --- |
+| **Desktop node** | Preferred authoring path | `ESTI_ROLE=node`, `ESTI_DESKTOP=true`, `STORAGE_DRIVER=fs`, `INSTALL_ID`, local Ollama/EOMS |
+| **Cloud hub** | Metadata SoT + published artifacts + portals + web SPA | `ESTI_ROLE=hub`, S3, licensing platform |
+| **Web staff SPA** | Parity path (same SPA, hub API) | Browser → hub; AI/worker on hub (Hosted AI, unmetered) |
+
+Packaging stub: [`desktop/`](../../desktop/) · env: `desktop/env.desktop.example`.
 
 ## Licence / sync scope
 
 | Mode | Local AI / calc | Ops sync | Artifact push |
 | --- | --- | --- | --- |
-| Unbound desktop | Yes | No | No |
-| Licensed + `syncToken` | Yes | Yes → Mongo | Yes |
-| Firm portal | N/A | Read Mongo | Read published |
+| Free / unbound desktop | Yes | No | No |
+| Licensed desktop (`VALID`/`GRACE` + hub + syncToken) | Yes | Yes | Yes |
+| Web parity | Hub (Hosted AI) | Yes | Server-side |
 
 ## Sibling repos
 
