@@ -5,6 +5,7 @@ containers/
 .git/
 **/node_modules/
 **/dist/
+**/.next/
 # Vendor kit packages ship pre-built dist/ — override the exclusion above.
 # Both the directory and its contents must be explicitly un-excluded.
 !vendor/hcw-aorms-ai-kit/dist/
