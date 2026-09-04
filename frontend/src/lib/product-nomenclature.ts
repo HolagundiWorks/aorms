@@ -9,14 +9,14 @@ import { platformPageUrl } from "./aorms-surface-urls.js";
 export const AORMS_PLATFORM = {
   name: "AORMS",
   expansion: "Architecture Operations & Resource Management System",
-  tagline: "The office management system for architecture practices",
+  tagline: "The practice management system, run the way architects think",
   audience: "Architecture studios managing clients, projects, and delivery",
   heroHeadline: [
-    "One unified office hub for architecture practices.",
-    "Clients, projects, proposals, invoicing, team, and knowledge — all in one place.",
+    "Run your practice the way you run a drawing set.",
+    "One record for every client, project, proposal, invoice, and drawing — instead of a folder per app.",
   ] as const,
   heroSupport:
-    "For architects who manage projects, invoices, and teams with precision. Web-based, cloud-only.",
+    "Built for architects, not adapted from generic project software. Every client, project, fee, and drawing lives on one record — precise, cross-referenced, and always current. Web-based, cloud-only.",
   aecDisciplines: ["Architecture"] as const,
   fragmentedTools: [
     "Email",
