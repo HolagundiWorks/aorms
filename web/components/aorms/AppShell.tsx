@@ -63,6 +63,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <SideNavLink href="/pmc-packages">Work Packages</SideNavLink>
           <SideNavLink href="/pmc-steel-certs">Steel Certification</SideNavLink>
           <SideNavLink href="/pmc-ra-bills">RA Bills</SideNavLink>
+          <SideNavLink href="/tenders">Tenders</SideNavLink>
           <SideNavLink href="/master-plans">Master Plans</SideNavLink>
           <SideNavLink href="/standards">Standards</SideNavLink>
           <SideNavLink href="/compliance">Compliance</SideNavLink>
