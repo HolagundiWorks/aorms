@@ -37,7 +37,7 @@ export const ARCHITECTURE_LANDING_FAQ = [
   {
     question: "How is AORMS licensed?",
     answer:
-      "Open source for now. SaaS commercial licensing is deferred. Windows installers are coming soon on aorms.in/downloads.",
+      "Every account includes 5 GB storage and the full workspace. Pay only for additional storage per GB-month — AI is unmetered (local Ollama on desktop, the hub on web), with no per-token billing or bring-your-own key.",
   },
   {
     question: "Is there a desktop app?",

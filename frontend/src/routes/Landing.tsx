@@ -84,18 +84,8 @@ const OUTCOMES = [
   },
   {
     icon: <DnsOutlined fontSize="small" />,
-    title: "Technical work stays local",
-    body: "Estimation, BBS, project management, and drafting run on the desktop. aorms.in is marketing and blog — not staff ERP in the browser.",
-  },
-  {
-    icon: <VerifiedUserOutlined fontSize="small" />,
-    title: "AI that cites your firm — not the open web",
-    body: `${ESTI.name} answers from validated firm repositories on the desktop. ${EOMS.name} supplies external codes. Nothing trains a third-party model.`,
-  },
-  {
-    icon: <SelfImprovementOutlined fontSize="small" />,
-    title: "See the office before it slips",
-    body: `Practice managers surface fee risk, delivery health, and ${ESTI.name} priorities so principals act before the week collapses.`,
+    title: "Runs on your server",
+    body: "Firm data stays in your environment, and nothing is used to train third-party models. AI runs on your own infrastructure — local on desktop, the hub on web.",
   },
 ] as const;
 
@@ -123,6 +113,34 @@ const STATS = [
   { id: "oss", label: "Licensing right now", value: "OSS" },
 ] as const;
 
+const FAQ = [
+  {
+    q: "Who is AORMS for?",
+    a: `${AORMS_PLATFORM.audience}.`,
+  },
+  {
+    q: "Is my data used to train external models?",
+    a: `No. ${ESTI.name} answers only from your validated firm repositories, running on your own infrastructure — nothing is sent to or used to train third-party models.`,
+  },
+  {
+    q: "What is the difference between EOMS and ESTI?",
+    a: `${EOMS.name} is the external knowledge bank — standard codebooks and compliance codes on tap via its API. ${ESTI.name} is the internal agent that answers only from your firm's validated repositories.`,
+  },
+  {
+    q: "Which apps ship today?",
+    a: `${AORMS_STUDIO.title} (architecture) and ${AORMS_CONSULTANCY.title} (engineering) are both live on the same spine — ${AORMS_STUDIO.appUrl.replace(/^https:\/\//, "")} and ${AORMS_CONSULTANCY.appUrl.replace(/^https:\/\//, "")}.`,
+  },
+  {
+    q: "How much does it cost?",
+    a: `One Standard licence — unlimited users, full workspace, 5 GB cloud storage included. You pay only for cloud storage above 5 GB. AI is unmetered — it runs locally on your desktop node, and on the hub for web parity (no per-token billing, no bring-your-own key). Desktop node (local-first) + web parity share the same licence; no Lite/Pro tiers. See Pricing below.`,
+  },
+  {
+    q: "Who should start with AORMS first?",
+    a: `Architecture studios of about 5–25 people in India who lose fee recovery to revisions and site chaos — COA proposals, GST invoices, drawings, and a client portal on one record. Engineering consultancies use ${AORMS_CONSULTANCY.title} on the same spine.`,
+  },
+] as const;
+
+/** Calm section opener — overline + heading + optional lead. */
 function SectionHead({
   eyebrow,
   title,
@@ -552,15 +570,48 @@ export function Landing() {
                   >
                     Downloads — coming soon
                   </Button>
-                ) : (
-                  <Button
-                    component={RouterLink}
-                    to="/login?tab=portals"
-                    variant="contained"
-                    color="primary"
-                    endIcon={<ArrowForward />}
-                    className="esti-lp-cta-primary"
-                    sx={{ textTransform: "none", fontWeight: 700, borderRadius: `${RADIUS}px`, minHeight: 48, px: 3 }}
+                  <Button component="a" href="#how" variant="outlined" size="large">
+                    See how it works
+                  </Button>
+                </Stack>
+
+                {/* Trust indicator */}
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ mt: 3, alignItems: "center", flexWrap: "wrap", rowGap: 1 }}
+                >
+                  <StatusDot color="green" label="" size="sm" />
+                  <Typography variant="caption" color="text.secondary">
+                    Two apps live on one spine · runs on your server · AI runs local,
+                    unmetered
+                  </Typography>
+                </Stack>
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 5 }}>
+                <Box sx={{ height: { xs: 340, md: 400 } }}>
+                  <WorkspacePreview />
+                </Box>
+              </Grid>
+            </Grid>
+
+            {/* From fragmented tools → one system. */}
+            <Surface layer="soft" sx={{ mt: { xs: 6, md: 8 }, p: { xs: 2.5, md: 3 } }}>
+              <Typography variant="overline" color="text.secondary">
+                Replaces the sprawl
+              </Typography>
+              <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1, mt: 1.5 }}>
+                {AORMS_PLATFORM.fragmentedTools.map((tool) => (
+                  <Typography
+                    key={tool}
+                    variant="body2"
+                    sx={{
+                      px: 1.5,
+                      py: 0.5,
+                      color: "text.secondary",
+                      border: (t) => `1px solid ${t.palette.divider}`,
+                    }}
                   >
                     Firm portal demos
                   </Button>
@@ -814,31 +865,161 @@ export function Landing() {
               title="Delivery quality needs recovery — built in, not bolted on"
               lead="Deadline pressure is the job. Focus and wellbeing stay inside the chrome so sharp judgment survives long drawing nights — opt-in, never surveillance."
             />
-            <Stack className="esti-lp-reveal" spacing={0} divider={<Divider />} sx={{ mb: MARKETING_RHYTHM.blockGap }}>
-              <Box sx={{ py: MARKETING_RHYTHM.md }}>
-                <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
-                  Calm between critical sets
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm, maxWidth: 640 }}>
-                  Guided breathe, desk stretches, and eye breaks reset attention before the next revision lands — without leaving the workspace.
-                </Typography>
-              </Box>
-              <Box sx={{ py: MARKETING_RHYTHM.md }}>
-                <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
-                  One Pomodoro on the clock
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm, maxWidth: 640 }}>
-                  Click the orange-ringed analogue clock to start or pause. Drag the crown in 5-minute steps. Double-click to reset.
-                </Typography>
-              </Box>
-              <Box sx={{ py: MARKETING_RHYTHM.md }}>
-                <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 700 }}>
-                  Opt-in, never a scoreboard
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: MARKETING_RHYTHM.sm, maxWidth: 640 }}>
-                  ASPRF wellbeing is only 5% of the composite and each person opts themselves in. Coaching signal — not discipline.
-                </Typography>
-              </Box>
+            <Grid container spacing={3}>
+              {[EOMS, ESTI].map((tier) => (
+                <Grid key={tier.name} size={{ xs: 12, md: 6 }}>
+                  <Surface layer="soft" sx={{ p: 3, height: "100%" }}>
+                    <Stack direction="row" spacing={1.5} sx={{ alignItems: "baseline" }}>
+                      <Typography variant="h5" component="h3" sx={{ fontWeight: 800 }}>
+                        {tier.name}
+                      </Typography>
+                      <Typography variant="overline" color="primary">
+                        {tier.role}
+                      </Typography>
+                    </Stack>
+                    <Typography variant="caption" color="text.disabled" component="p" sx={{ mt: 0.5 }}>
+                      {tier.expansion}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+                      {tier.summary}
+                    </Typography>
+                  </Surface>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+
+          {/* Apps */}
+          <Box id="apps" component="section" sx={{ py: { xs: 6, md: 9 } }}>
+            <SectionHead
+              eyebrow="Apps on one spine"
+              title="Architecture, engineering, and project management."
+              lead="Each AEC discipline runs on the same operational spine — deployed as a focused app."
+            />
+            <Grid container spacing={3}>
+              {PLATFORM_APPS.map((app) => (
+                <Grid key={app.id} size={{ xs: 12, md: 4 }}>
+                  <Surface
+                    layer="soft"
+                    id={app.id}
+                    sx={{ p: 3, height: "100%" }}
+                  >
+                    <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
+                      <Typography variant="h6" component="h3" sx={{ fontWeight: 700 }}>
+                        {app.workspace}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          px: 1,
+                          py: 0.25,
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                          color: app.status === "live" ? "primary.main" : "text.disabled",
+                          border: (t) =>
+                            `1px solid ${app.status === "live" ? t.palette.primary.main : t.palette.divider}`,
+                        }}
+                      >
+                        {app.status === "live"
+                          ? "Live"
+                          : app.status === "preview"
+                            ? "Preview"
+                            : "Roadmap"}
+                      </Typography>
+                    </Stack>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 0.5 }}>
+                      {app.subtitle}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                      {app.body}
+                    </Typography>
+                    <Stack spacing={1} sx={{ mt: 2 }}>
+                      {app.bullets.map((b) => (
+                        <Typography key={b} variant="body2" sx={{ display: "flex", gap: 1 }}>
+                          <Box component="span" sx={{ color: "primary.main", fontWeight: 700 }}>
+                            —
+                          </Box>
+                          {b}
+                        </Typography>
+                      ))}
+                    </Stack>
+                    <Button
+                      component="a"
+                      href={app.href}
+                      variant="contained"
+                      size="medium"
+                      endIcon={<ArrowForward />}
+                      sx={{ mt: 3 }}
+                    >
+                      {app.cta}
+                    </Button>
+                  </Surface>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+
+          {/* Pricing — one Standard licence (PLANS-AND-TIERS). */}
+          <Box id="pricing" component="section" sx={{ py: { xs: 6, md: 9 } }}>
+            <SectionHead
+              eyebrow="Pricing"
+              title="One Standard licence."
+              lead="No tiers. Unlimited users. Pay only for cloud storage over 5 GB — AI is unmetered (local on desktop, hub on web)."
+            />
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Surface layer="soft" sx={{ p: 3, height: "100%" }}>
+                  <Typography variant="overline" color="primary">Included</Typography>
+                  <Typography variant="h6" component="h3" sx={{ mt: 1, fontWeight: 700 }}>
+                    Full workspace
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                    ACTIVE licence from signup — projects, fees, GST invoices, drawings,
+                    portals, Studio Intelligence, and {AORMS_CONSULTANCY.title} on the same spine.
+                    Unlimited staff logins.
+                  </Typography>
+                </Surface>
+              </Grid>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Surface layer="soft" sx={{ p: 3, height: "100%" }}>
+                  <Typography variant="overline" color="primary">Storage</Typography>
+                  <Typography variant="h6" component="h3" sx={{ mt: 1, fontWeight: 700 }}>
+                    5 GB included
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                    Drawings and firm files. Extra storage billed per GB-month when you grow —
+                    no surprise edition upgrades.
+                  </Typography>
+                </Surface>
+              </Grid>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Surface layer="soft" sx={{ p: 3, height: "100%" }}>
+                  <Typography variant="overline" color="primary">AI</Typography>
+                  <Typography variant="h6" component="h3" sx={{ mt: 1, fontWeight: 700 }}>
+                    Local & unmetered
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                    {ESTI.name} runs locally on your desktop node — unmetered, no per-token
+                    billing. On web it runs on the hub (Hosted AI), also unmetered. No
+                    bring-your-own key needed.
+                  </Typography>
+                </Surface>
+              </Grid>
+            </Grid>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mt: 4 }}>
+              <Button
+                component={RouterLink}
+                to="/account?mode=create"
+                variant="contained"
+                size="large"
+                endIcon={<ArrowForward />}
+              >
+                Create account
+              </Button>
+              <Button component={RouterLink} to="/login" variant="outlined" size="large">
+                Sign in
+              </Button>
             </Stack>
             <Box className="esti-lp-reveal" sx={{ mb: MARKETING_RHYTHM.sectionY }}>
               <LandingWellbeingWidget />

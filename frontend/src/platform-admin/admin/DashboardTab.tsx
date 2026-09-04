@@ -122,38 +122,60 @@ export default function DashboardTab({ onGoTo }: { onGoTo: (section: "licenses" 
         />
       </div>
 
-      {usage && (
-        <Box>
-          <Typography variant="h6" component="h3" sx={{ m: 0, mb: 1 }}>
-            {usage.source === "reports"
-              ? `Metered usage — ${usage.reportedOrgCount} org${usage.reportedOrgCount === 1 ? "" : "s"} reported`
-              : "Metered usage — this workspace"}
-          </Typography>
-          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 2 }}>
-            <Paper variant="outlined" sx={{ p: 2, height: "100%" }}>
-              <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>Storage used</Typography>
-              <Typography variant="h5" sx={{ my: 0.5 }}>{fmtBytes(usage.storageUsedBytes)}</Typography>
-              <Box sx={{ my: 1 }}>
-                <LinearProgress
-                  variant="determinate"
-                  value={storagePct}
-                  color={storagePct >= 90 ? "error" : "primary"}
-                  aria-label="Storage used"
-                />
-              </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>
-                {storagePct.toFixed(1)}% of {fmtBytes(usage.storageQuotaBytes)}
-                {usage.storagePurchasedBytes > 0 &&
-                  ` (incl. ${fmtBytes(usage.storagePurchasedBytes)} add-on)`}
-              </Typography>
-            </Paper>
-          </Box>
-          {usage.source === "reports" && usage.reports.length > 1 && (
-            <Stack spacing={0.5} sx={{ mt: 1.5 }}>
-              {usage.reports.slice(0, 8).map((r) => (
-                <Typography key={`${r.orgId}-${r.productCode}`} variant="body2" color="text.secondary" sx={{ m: 0 }}>
-                  {`${r.orgName}: ${fmtBytes(r.storageUsedBytes)}`}
-                </Typography>
+        {usage && (
+          <div>
+            <h3 className="cds--type-heading-03" style={{ margin: "0 0 0.5rem" }}>
+              {usage.source === "reports"
+                ? `Metered usage — ${usage.reportedOrgCount} org${usage.reportedOrgCount === 1 ? "" : "s"} reported`
+                : "Metered usage — this workspace"}
+            </h3>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem" }}>
+              <Tile style={{ height: "100%" }}>
+                <p className="cds--type-body-01" style={SUBTLE}>Storage used</p>
+                <p className="cds--type-productive-heading-05" style={{ margin: "0.25rem 0" }}>{fmtBytes(usage.storageUsedBytes)}</p>
+                <div style={{ margin: "0.5rem 0" }}>
+                  <ProgressBar
+                    label="Storage used"
+                    hideLabel
+                    value={storagePct}
+                    max={100}
+                    status={storagePct >= 90 ? "error" : "active"}
+                  />
+                </div>
+                <p className="cds--type-body-01" style={SUBTLE}>
+                  {storagePct.toFixed(1)}% of {fmtBytes(usage.storageQuotaBytes)}
+                  {usage.storagePurchasedBytes > 0 &&
+                    ` (incl. ${fmtBytes(usage.storagePurchasedBytes)} add-on)`}
+                </p>
+              </Tile>
+            </div>
+            {usage.source === "reports" && usage.reports.length > 1 && (
+              <Stack gap={2} style={{ marginTop: "0.75rem" }}>
+                {usage.reports.slice(0, 8).map((r) => (
+                  <p key={`${r.orgId}-${r.productCode}`} className="cds--type-body-01" style={SUBTLE}>
+                    {`${r.orgName}: ${fmtBytes(r.storageUsedBytes)}`}
+                  </p>
+                ))}
+              </Stack>
+            )}
+          </div>
+        )}
+
+        <div>
+          <h3 className="cds--type-heading-03" style={{ margin: "0 0 0.5rem" }}>Licenses by status</h3>
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            {Object.entries(data.byStatus).map(([status, n]) => (
+              <StatusDot key={status} color={STATUS_COLOR[status] ?? "gray"} label={`${STATUS_LABEL[status] ?? status}: ${n}`} />
+            ))}
+          </div>
+        </div>
+
+        {data.byProduct.length > 0 && (
+          <div>
+            <h3 className="cds--type-heading-03" style={{ margin: "0 0 0.5rem" }}>Licenses by product</h3>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+              {data.byProduct.map((p) => (
+                <Tag key={p.code} type="outline">{`${p.name}: ${p.n}`}</Tag>
               ))}
             </Stack>
           )}
