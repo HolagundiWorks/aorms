@@ -39,7 +39,7 @@ import { trpc } from "../lib/trpc.js";
 import { useNavigate } from "react-router-dom";
 import { RADIUS, Surface, TYPE_SCALE, useScreenActions } from "@hcw/ui-kit";
 import { COMPOSITION_RHYTHM } from "../lib/composition.js";
-import { AORMS_STUDIO } from "../lib/product-nomenclature.js";
+import { AORMS_OFFICE_HUB } from "../lib/product-nomenclature.js";
 
 type StudioTab = "priorities" | "projects" | "work" | "team" | "zoning";
 
@@ -300,7 +300,7 @@ export function StudioAbstract() {
   const navigate  = useNavigate();
 
   useEffect(() => {
-    document.title = `Studio Intelligence — ${AORMS_STUDIO.title}`;
+    document.title = `Studio Intelligence — ${AORMS_OFFICE_HUB.title}`;
   }, []);
 
   const homeQ     = trpc.dashboard.home.useQuery(undefined, { staleTime: 60_000 });

@@ -18,11 +18,9 @@ import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-d
 import { login as platformLogin, type Me } from "../platform-admin/lib/auth.js";
 import { trpc } from "../lib/trpc.js";
 import {
-  AORMS_CONSULTANCY,
+  AORMS_OFFICE_HUB,
   AORMS_PLATFORM,
-  AORMS_PMC,
   AORMS_PORTALS,
-  AORMS_STUDIO,
   HCW_LICENSE_MANAGER,
 } from "../lib/product-nomenclature.js";
 import { AuthRailLayout } from "../components/AuthRailLayout.js";
@@ -88,11 +86,9 @@ function companyItem(c: CompanyOption): TenantItem {
 }
 
 function authProductName(): string {
-  if (isStudioHost()) return AORMS_STUDIO.title;
-  if (isConsultancyHost()) return AORMS_CONSULTANCY.title;
-  if (isPmcHost()) return AORMS_PMC.title;
+  // Office hub only (all surfaces unified)
   if (isAdminHost()) return HCW_LICENSE_MANAGER.consoleTitle;
-  return AORMS_PLATFORM.name;
+  return AORMS_OFFICE_HUB.title;
 }
 
 function parseTab(raw: string | null): LoginTab {
@@ -147,7 +143,7 @@ function brandCopy(
   }
   return {
     title: "Sign in",
-    lead: `One AORMS sign-in for ${AORMS_STUDIO.title}, ${AORMS_CONSULTANCY.title}, firm portals, and licensing. Technical apps publish from the desktop.`,
+    lead: `One AORMS sign-in for your office hub, firm portals, and licensing. All features in the web workspace — no desktop apps required.`,
   };
 }
 
