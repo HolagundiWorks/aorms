@@ -47,6 +47,49 @@ credentials, so that step is left to an operator.
 
 ---
 
+## CI / build health 🚧
+
+**Discovered 2026-09-04: `main` HEAD's CI has been fully broken at the first
+step.** `esti-ci`'s `TypeScript`, `Dependency audit`, and `Visual regression`
+jobs all run `pnpm install` before anything else, and on `main` (confirmed at
+commit `0dfb3ac`) that step **fails outright** — `ERR_PNPM_OUTDATED_LOCKFILE`
+— which skips every downstream step (typecheck, lint, test, build, audit) in
+those three jobs. Only the `Python worker` job (a separate install path) was
+green. This means **no PR or push to `main` has produced a real green check**
+since the drift was introduced — CI was reporting failure, but for a reason
+that had nothing to do with the actual change being pushed.
+
+**Root cause:** `frontend/package.json` had drifted from what
+`pnpm-lock.yaml` actually resolves — `@carbon/react` was missing from
+`package.json` entirely (despite being imported and already resolved in the
+lockfile), and `react-router-dom` was declared as plain `^7.18.1` while the
+root workspace's `pnpm.overrides` (a deliberate security fix, PR #61)
+force-aliases it to `npm:react-router@8.3.0`.
+
+**Fixed, not yet on `main`:** corrected on `claude/fix-lockfile-drift-7315`,
+merged into the `cloud-agent` branch. `pnpm install --frozen-lockfile` now
+succeeds cleanly across all 6 workspace projects with **zero** lockfile
+changes needed. Verified on CI itself, not just locally — re-running
+`esti-ci` on the fixed commit shows `pnpm install` succeeding in all three
+previously-blocked jobs.
+
+**Still red on `cloud-agent`, now for real (pre-existing) reasons — each
+job now fails on its own merits instead of on a shared install failure:**
+
+| Job | Failing step | Cause |
+| --- | --- | --- |
+| `TypeScript` | `pnpm typecheck` | 16 pre-existing JSX errors in `Landing.tsx` / `DashboardTab.tsx` (unrelated to this pivot — see ROADMAP-LOCAL.md Phase 1) |
+| `Visual regression` | `Build · serve · assert` | Downstream of the same `tsc` failure — `vite build` runs `tsc` first |
+| `Dependency audit` | `pnpm audit --audit-level=high` | High-severity finding(s) present even with the existing `pnpm.overrides` — under investigation |
+| `Python worker` | — | ✅ Green (ruff + pytest both pass) |
+
+**Action:** merge `cloud-agent` into `main` to at least restore CI's ability
+to *run* — right now every push is fighting an install failure that has
+nothing to do with the change being reviewed. The typecheck and audit
+findings are then real, addressable red — not blocked from even being seen.
+
+---
+
 ## Cloud infrastructure ✅
 
 | Component | Status |
@@ -58,6 +101,7 @@ credentials, so that step is left to an operator.
 | MinIO/S3 (published artifacts) | ✅ Live |
 | SSL/TLS + nginx reverse proxy | ✅ Live |
 | No cloud Ollama by default — ESTI AI runs through the backend gateway, not a sized-for-inference box | ✅ (see PRODUCTION-OPS.md § ESTI AI) |
+| CI (`esti-ci` — TypeScript, lint, test, build, audit, visual regression, Python worker) | 🚧 Install step fixed (on `cloud-agent`, not yet `main`); typecheck + audit still red — see § CI / build health |
 
 Deploy references: [VPS-INSTALL.md](./VPS-INSTALL.md) ·
 [PRODUCTION-OPS.md](./PRODUCTION-OPS.md) · [`../../deploy/README.md`](../../deploy/README.md).
@@ -125,7 +169,9 @@ Status reflects what a signed-in user reaches on `aorms.in` once S8 reopens
 | Week | Milestone | Status |
 |------|-----------|--------|
 | **This week** | Landing + blog soft launch stays green; legacy docs archived | ✅ |
-| **S8** | Reopen apex `/login` — real sign-in + firm-portal demos | 🔲 |
+| **This week** | Restore CI's ability to run (`pnpm install` fix merged to `main`) | 🚧 fixed on `cloud-agent`, not yet on `main` |
+| **This week** | Clear `pnpm typecheck` red (16 JSX errors) and `pnpm audit --audit-level=high` findings | 🔲 |
+| **S8** | Reopen apex `/login` — real sign-in + firm-portal demos | 🔲 (codebase prerequisite met — ops-only step remains) |
 | **EOQ** | Office hub v2.0 live on Carbon Design System · SSO + ESTI AI ready | 🔲 |
 
 Engineering work that gates these milestones (codebase cleanup, Carbon

@@ -26,6 +26,14 @@ podman compose up -d --build
 # MinIO    → http://localhost:9001 (console)
 ```
 
+**`pnpm install --frozen-lockfile` (2026-09-04):** was failing on `main` HEAD
+(`frontend/package.json` had drifted from `pnpm-lock.yaml` — missing
+`@carbon/react`, a stale `react-router-dom` specifier not matching the root
+`pnpm.overrides` security pin). This broke CI's first step on every job that
+installs — fixed on `cloud-agent`, zero lockfile changes needed. See
+[ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) § CI / build health for the full
+picture (what's still red once install succeeds).
+
 ---
 
 ## Current phase — office system pivot cleanup
