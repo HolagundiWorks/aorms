@@ -25,7 +25,7 @@ is merged and verified — the `web/` package is new, additive code; nothing in
 | Target-architecture spec written | ✅ [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) |
 | Repo audit — Phase 2 domains (map current tRPC procedures / Fastify routes / components to Next.js equivalents — see spec § 36–37) | ✅ [NEXTJS-MIGRATION-PHASE2-AUDIT.md](./NEXTJS-MIGRATION-PHASE2-AUDIT.md) — surfaced and resolved a blocking decision (single-tenant per deployment, no `org_id`, decided 2026-09-04). Later phases (3–7) get their own audit pass when their turn comes. |
 | **Phase 1 — Foundation** (Next.js + TS + Carbon + Supabase + auth + app shell) | ✅ **Complete, connected to a live Supabase project.** `web/` package — Next.js 16 + Carbon + `@supabase/ssr` wired end-to-end (client/server/proxy), Server Action sign-in/sign-out, Carbon `AppShell` (Header+SideNav), `(auth)/login` + `(app)/dashboard` route groups. `next build --webpack` clean, `eslint web` 0/0. Sign-in verified live through the browser against the real project (landing → Supabase Auth session → Server Component → Carbon shell), including confirming Carbon's classes/CSS vars/IBM Plex font all apply correctly (an initial "looks unstyled" impression was just Carbon's flat `white` theme, not a bug). |
-| Phase 2 — Core ERP (orgs, users, roles, clients, projects, tasks) | 🚧 Migration `0001_phase2_core.sql` **applied to the live project** (user ran it via the SQL Editor — direct DB access still isn't available from a session: Supabase's direct connection is IPv6-only and this network has no IPv6 route, confirmed while trying). `profiles`/`audit_log`/`firm`/`clients`/`project_offices`/`phases`/`tasks` all exist with RLS live. **`/clients` slice verified end-to-end against real data**: signed in, created "Sharma Residences LLP" through the actual UI, confirmed it persisted or reloaded, and confirmed `write_audit()` logged the CREATE with full before/after — the whole read+write+audit+RLS pattern is proven, not just built. Remaining: `project_offices`/`phases` and `tasks` UI + actions — see current assignment below. |
+| Phase 2 — Core ERP (orgs, users, roles, clients, projects, tasks) | 🚧 Migration `0001_phase2_core.sql` **applied to the live project** (user ran it via the SQL Editor — direct DB access still isn't available from a session: Supabase's direct connection is IPv6-only and this network has no IPv6 route, confirmed while trying). `profiles`/`audit_log`/`firm`/`clients`/`project_offices`/`phases`/`tasks` all exist with RLS live. **`/clients` slice verified end-to-end against real data**: signed in, created "Sharma Residences LLP" through the actual UI, confirmed it persisted or reloaded, and confirmed `write_audit()` logged the CREATE with full before/after — the whole read+write+audit+RLS pattern is proven, not just built. **`/projects` slice also verified end-to-end (2026-09-04)**: created "Sharma Residence Extension" against that same client through the real UI, confirmed the row renders with the joined client name and an `ENQUIRY` status tag, and confirmed the `audit_log` row via REST API. Remaining: `phases` and `tasks` UI + actions — see current assignment below. |
 | Phase 3 — Commercial (proposals, quotations, contracts, invoices, payments) | 🔲 |
 | Phase 4 — Technical (estimation, BOQ, measurements, documents, drawings) | 🔲 |
 | Phase 5 — Reporting (dashboards, reports, exports, analytics) | 🔲 |
@@ -40,12 +40,17 @@ scripts force `--webpack` until that's fixed upstream.
 **Tenancy decided (2026-09-04): single-tenant per deployment** — no `org_id`
 anywhere, RLS scoped by `auth.uid()` + role only.
 
-**Cloud-agent assignment:** the remaining Phase 2 work (`project_offices`/
-`phases` UI + Server Actions, then `tasks`) is the current cloud-agent task —
-branch as `cloud-agent/phase2-projects-tasks` off a freshly-pulled `main` and
-follow [CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md) exactly (branch
-naming, do/don't, self-verification, handoff — local verifies and merges,
-cloud-agent does not merge to `main`).
+**Cloud-agent assignment:** the remaining Phase 2 work (`phases` UI + Server
+Actions, then `tasks`) is the current cloud-agent task — branch as
+`cloud-agent/phase2-phases-tasks` off a freshly-pulled `main` and follow
+[CLOUD-AGENT-WORKFLOW.md](./CLOUD-AGENT-WORKFLOW.md) exactly (branch naming,
+do/don't, self-verification, handoff — local verifies and merges, cloud-agent
+does not merge to `main`). Follow the same pattern as `/clients` and
+`/projects` (`web/app/(app)/<domain>/page.tsx` + `web/components/aorms/New*
+Form.tsx` + `web/lib/actions/<domain>.ts`) — `phases` nests under a project
+(likely a tab/section on a future project-detail page rather than its own
+top-level nav item; `tasks` needs a new "Tasks" `SideNavLink` added to
+`AppShell.tsx`, which doesn't have one yet).
 
 ---
 
