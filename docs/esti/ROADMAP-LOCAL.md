@@ -1,7 +1,12 @@
 # AORMS Local Development Roadmap
 
-**Status:** ACTIVE — local stack verified working end-to-end; Next.js/Supabase
-migration Phase 1 built here  
+**Status:** ACTIVE — Next.js/Supabase migration (Phases 1–9's schema) built
+here; **local Postgres removed 2026-09-04** — `backend`/`worker` no longer
+run locally without an externally-supplied `DATABASE_URL` (see § Local
+Postgres removed below; the "verified working end-to-end" record right
+after this is a historical snapshot from earlier the same day, before that
+removal, kept for its debugging notes — don't expect `podman compose up`
+to bring up a working `backend`/`worker` today without extra setup)  
 **Updated:** 2026-09-04  
 **Scope:** Work done in the **local dev environment** (Podman compose stack,
 this machine, `main` branch) — plus, per the resumed split
@@ -17,6 +22,32 @@ PostgreSQL, run locally via Podman. **Target platform** (in progress, built
 here): Next.js + Carbon + Supabase — see the `web/` package and
 [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md); this local
 environment now tests both stacks side by side.
+
+---
+
+## Local Postgres removed (2026-09-04)
+
+`compose.yaml`'s `db` service (Postgres 16) is gone, following the schema's
+full migration to Supabase (migrations `0001`–`0015`, 70 tables, 100% RLS —
+see [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)). `backend` and `worker` both had
+their `DATABASE_URL` default removed too, so `docker compose up` now fails
+fast with a clear message on either service instead of silently trying to
+reach a `db` host that no longer resolves.
+
+**Consequence:** the *current, live* stack (React SPA + Fastify backend +
+raw Postgres — still what's actually deployed to `aorms.in`, per
+`CLAUDE.md`'s "current production stack stays live and unchanged" note) can
+no longer be run or verified locally out of the box. This was a deliberate
+trade — decided explicitly, not a side effect — once the schema work made
+local Postgres redundant for `web/`'s purposes. If the old stack ever needs
+running locally again (debugging a production incident, say): the `esti-db-
+data` Podman volume was **not deleted**, only unlinked from compose — `git
+log -- compose.yaml` has the removed `db` service block to restore, and the
+volume's data should still be there to reattach to it.
+
+`worker/`'s Python tests (`pytest`) never depended on the compose Postgres
+directly and are unaffected; `web/`'s Supabase connection is completely
+separate and was never routed through local Postgres either.
 
 ---
 

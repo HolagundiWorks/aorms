@@ -314,6 +314,17 @@ branch before starting anything that could overlap — not just at hand-off.
 
 ## Dev / verify loop
 
+> **Local Postgres removed (2026-09-04).** `compose.yaml`'s `db` service is
+> gone — the full current schema (70 tables as of this date, still growing)
+> now lives on Supabase; see [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md).
+> This means **`backend`/`worker` no longer run locally out of the box** —
+> both require an externally-supplied `DATABASE_URL` (compose fails fast
+> with a clear message if it's unset, rather than silently trying to reach
+> a `db` host that no longer exists). The old `esti-db-data` Podman volume
+> was *not* deleted (only unlinked from compose) — its data is still on
+> disk if ever needed for legacy debugging; recreate the `db` service
+> block from git history (`git log -- compose.yaml`) to reattach it.
+
 - Source for `backend` is bind-mounted but `tsx watch` does not reload across
   the VM mount — `docker restart esti-backend` after backend changes.
 - `frontend` runs in the `esti-frontend` container (Vite at
@@ -323,15 +334,21 @@ branch before starting anything that could overlap — not just at hand-off.
 - After editing `packages/contracts`, rebuild it in the relevant container
   (`cd /app/esti/packages/contracts && pnpm build`).
 - Quick render check: `GET http://localhost:5173/src/<path>` should return 200.
-- Migrations live in `backend/drizzle/`; generate with drizzle-kit, copy the
-  `.sql` + `meta/` into the container, applied on boot by `runMigrations()`.
-- **Apply migrations manually** using `docker cp` (stdin pipe is unreliable):
-  ```
-  docker cp backend/drizzle/NNNN_name.sql esti-db:/tmp/NNNN_name.sql
-  docker exec esti-db sh -lc "psql -U esti -d esti -f /tmp/NNNN_name.sql"
-  ```
-  Multi-column `ALTER TABLE` via PowerShell heredoc to a container stdin only
-  applies the first column — always use `docker cp` + `-f` instead.
+- `backend/drizzle/` still holds the old raw-Postgres migration history —
+  kept for reference, not applied anywhere locally anymore (no `db` service
+  to apply them to). New schema work happens in `web/supabase/migrations/`
+  against the live Supabase project instead — see the next bullet.
+- **Supabase migrations**: write a new numbered `.sql` file under
+  `web/supabase/migrations/`, then apply it via the Supabase Management API
+  (`POST https://api.supabase.com/v1/projects/{ref}/database/query`, authed
+  with a personal access token from supabase.com/dashboard/account/tokens —
+  not the project's `anon`/`service_role` keys) since the direct Postgres
+  connection is IPv6-only and unreachable from this network. The token is
+  provided fresh each session, never committed. Verify every migration
+  against the live project afterward (table + RLS-policy existence, and any
+  non-trivial logic smoke-tested with real inserted rows) — see
+  [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) for the established pattern
+  across migrations `0001`–`0015`.
 
 ## Conventions
 

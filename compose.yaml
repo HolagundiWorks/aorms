@@ -9,21 +9,6 @@ name: esti-aorms
 # otherwise leaves the whole stack down until someone runs `up` again. An
 # explicit `aorms stop` still stays stopped.
 services:
-  db:
-    image: docker.io/library/postgres:16-alpine
-    container_name: esti-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-esti}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-esti}
-      POSTGRES_DB: ${POSTGRES_DB:-esti}
-    ports: ["5432:5432"]
-    volumes: ["esti-db-data:/var/lib/postgresql/data"]
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U esti"]
-      interval: 10s
-      retries: 5
-
   redis:
     image: docker.io/library/redis:7-alpine
     container_name: esti-redis
@@ -65,7 +50,10 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-change-me}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
-      DATABASE_URL: ${DATABASE_URL:-postgres://esti:esti@db:5432/esti}
+      # Local Postgres removed 2026-09-04 (schema fully migrated to Supabase
+      # — see ROADMAP-CLOUD.md). No default host left: backend/worker no
+      # longer run locally without an externally-supplied DATABASE_URL.
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL to run backend locally — see ROADMAP-LOCAL.md}
       MONGODB_URL: ${MONGODB_URL:-mongodb://mongo:27017}
       MONGODB_DB: ${MONGODB_DB:-aorms_ops}
       REDIS_URL: redis://redis:6379
@@ -125,8 +113,6 @@ services:
       - ./desktop/artifacts/keys:/keys:ro
     ports: ["4000:4000"]
     depends_on:
-      db:
-        condition: service_started
       redis:
         condition: service_started
       ollama:
@@ -154,7 +140,9 @@ services:
     restart: unless-stopped
     environment:
       REDIS_URL: redis://redis:6379
-      DATABASE_URL: ${DATABASE_URL:-postgres://esti:esti@db:5432/esti}
+      # See the backend service's DATABASE_URL comment above — no local
+      # Postgres to default to anymore.
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL to run the worker locally — see ROADMAP-LOCAL.md}
       WORKER_JOB_STREAM: ${WORKER_JOB_STREAM:-esti:jobs}
       WORKER_GROUP: ${WORKER_GROUP:-esti-workers}
       WORKER_DEAD_LETTER_STREAM: ${WORKER_DEAD_LETTER_STREAM:-esti:jobs:dead}
@@ -166,8 +154,6 @@ services:
       # Dev hot-reload: job handlers (incl. pdf_to_markdown for Knowledge Bank portal).
       - ./worker/esti_worker:/app/esti_worker
     depends_on:
-      db:
-        condition: service_started
       redis:
         condition: service_started
       minio:
@@ -206,7 +192,6 @@ services:
     depends_on: [backend]
 
 volumes:
-  esti-db-data:
   esti-mongo-data:
   esti-minio-data:
   esti-ollama-data:
