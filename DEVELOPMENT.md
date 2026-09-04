@@ -1,10 +1,11 @@
 # AORMS — Development
 
-Greenfield monorepo for **AORMS-Studio** (`aorms-studio`) — the **architecture app** on the AORMS platform
-(**Accelerated Operational Resources Management System** for AEC consulting firms) by Human Centric Works.
-**AORMS-Consultancy** (engineering app) is live at `consultancy.aorms.in`. Nomenclature:
-[docs/esti/AORMS-PLATFORM-NOMENCLATURE.md](docs/esti/AORMS-PLATFORM-NOMENCLATURE.md).
-See [docs/esti/ARCHITECTURE.md](docs/esti/ARCHITECTURE.md).
+Monorepo for **AORMS** — a **cloud-based, web-only office management system**
+(**Accelerated Operational Resources Management System**) for AEC firms &
+consultancies by Human Centric Works. A single unified **AORMS Office Hub**
+SPA (clients, projects, proposals, invoices, team, finances, knowledge bank)
+— no per-app logins, no desktop apps. Nomenclature: [CLAUDE.md](CLAUDE.md)
+§ Product naming. See [docs/esti/ARCHITECTURE.md](docs/esti/ARCHITECTURE.md).
 
 ## Layout
 
@@ -12,8 +13,7 @@ See [docs/esti/ARCHITECTURE.md](docs/esti/ARCHITECTURE.md).
 packages/contracts/   shared TS: money (paise/Indian format), GST systems, FY, Zod schemas
 backend/              Fastify + tRPC + Drizzle (PostgreSQL) — system of record
 worker/               Python: ezdxf (DXF takeoff), pymupdf4llm (Knowledge Bank PDF→Markdown), WeasyPrint (PDF), pandas (reconcile)
-frontend/             Vite + React + TS + MUI/HCW-UI-Kit — the SPA (tRPC, type-safe to backend)
-packages/hcw-ui-kit/  @hcw/ui-kit v0.5.0 — design system (see docs/hcw-kit/README.md)
+frontend/             Vite + React + TS + Carbon Design System — the SPA (tRPC, type-safe to backend)
 compose.yaml          Podman pod: postgres, redis, minio, backend, worker, frontend
 .github/workflows/    ESTI-only CI (TS typecheck/lint/test + Python ruff/pytest)
 ```

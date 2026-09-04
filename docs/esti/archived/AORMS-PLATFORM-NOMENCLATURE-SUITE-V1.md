@@ -1,3 +1,13 @@
+# AORMS platform nomenclature (archived — suite era)
+
+> **⚠️ HISTORICAL.** Superseded 2026-09-04 by the web-only office hub pivot.
+> This document describes the pre-pivot **multi-app suite** model (AStudio,
+> AConsulting, AProc/AQC, ADraft, ShilpiDB, AORMS Connect desktop launcher).
+> All of those products were removed. For current naming, see
+> [`../CLAUDE.md`](../../../CLAUDE.md) § Product naming and
+> [`AORMS-OFFICE-SYSTEM.md`](../AORMS-OFFICE-SYSTEM.md). Kept here for
+> historical reference only — do not follow naming guidance below.
+
 # AORMS platform nomenclature
 
 **Status:** Canonical · **Owner:** Human Centric Works (HCW) · **Updated:** 2026-08-12

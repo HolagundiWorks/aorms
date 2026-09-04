@@ -1,4 +1,10 @@
-# LF6 — Figma ↔ `@hcw/ui-kit` token sync
+> **⚠️ HISTORICAL.** Archived 2026-09-04 — this local-first (LF6) desktop ↔ web
+> token-sync ritual and its `@hcw/ui-kit` (MUI-based) token pipeline predate
+> the web-only office hub pivot and the Carbon Design System migration
+> ([CARBON-MIGRATION.md](../CARBON-MIGRATION.md)). Kept for historical
+> reference only.
+
+# LF6 — Figma ↔ `@hcw/ui-kit` token sync (archived)
 
 **Status:** Stub shipped · DesignOps ritual ongoing · **Updated:** 2026-08-06  
 **Kit bridge (canonical):** [02-TOKEN-EXPORT.md](../hcw-kit/02-TOKEN-EXPORT.md)  

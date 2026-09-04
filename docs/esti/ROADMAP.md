@@ -22,23 +22,25 @@
 ### 1. **Cleanup & Migration (Weeks 1–2)**
 
 **Phase 1: Codebase Cleanup**
-- [ ] Remove 77 allied app references (AStudio, AConsulting, AProc, ADraft, ShilpiDB)
-- [ ] Delete `desktop/` directory (Tauri shell removed)
-- [ ] Remove installer/setup logic (`frontend/src/lib/desktop-installers.ts`, etc.)
-- [ ] Remove desktop native bridge (`desktopNativeBridge.ts`)
-- [ ] tsc + eslint + vite build ✅ green
+- [x] Remove allied app constant references from frontend (`AStudio`, `AConsulting`, `AProc`, `ADraft`, `ShilpiDB`, `AORMS_CONNECT` — 0 remaining, verified by grep)
+- [ ] Delete `desktop/` directory (Tauri shell still present — `desktop/src-tauri/`, `desktop/AStudio.Shell/`)
+- [x] Remove installer/setup logic (`frontend/src/lib/desktop-installers.ts` deleted)
+- [ ] Remove desktop native bridge (`frontend/src/lib/desktopNativeBridge.ts` still present)
+- [x] Fix UTF-8 smart-quote corruption in `landing-seo.ts` (was breaking `tsc`)
+- [~] tsc + eslint + vite build — down to 16 pre-existing JSX errors in `Landing.tsx` / `DashboardTab.tsx` (unrelated to this cleanup, not yet fixed)
 
-**Phase 2: Landing Pages & Marketing**
-- [ ] Update `Landing.tsx` — focus on office hub benefits (clients, projects, proposals, invoicing, team, KB, delivery)
-- [ ] Remove allied app CTAs + feature cards
-- [ ] Remove/redirect `/downloads` (web-only, no installers)
-- [ ] Update blog, footer, nav, meta tags
+**Phase 2: Landing Pages & Marketing** ✅
+- [x] Update `Landing.tsx` — office hub benefits (clients, projects, proposals, invoicing, team, KB, delivery)
+- [x] Remove allied app CTAs + feature cards
+- [x] `/downloads` redirects to `/login` (web-only, no installers)
+- [x] Update blog, footer, nav, meta tags, auth pages (Login, ComingSoonAuth, AccountHub, RequestPlan)
 
-**Phase 3: Documentation**
-- [ ] Create `AORMS-OFFICE-SYSTEM.md` (done ✅)
-- [ ] Archive obsolete docs (SUITE, CONNECT, LOCAL-FIRST, APROC, DESKTOP, etc.) (done ✅)
-- [ ] Create fresh roadmap (this file)
-- [ ] Update navigation, architecture, production ops
+**Phase 3: Documentation** ✅
+- [x] Create `AORMS-OFFICE-SYSTEM.md` (done ✅)
+- [x] Archive obsolete docs (SUITE, CONNECT, LOCAL-FIRST, PLATFORM-NOMENCLATURE-suite-v1, etc.)
+- [x] Create fresh roadmap (this file)
+- [x] Update navigation (`NAVIGATION.md` rewritten for unified single nav tree)
+- [ ] Update `ARCHITECTURE.md`, `PRODUCTION-OPS.md`, `MARKET-FIT.md` (in progress)
 
 **Phase 4: Configuration & Backend**
 - [ ] Remove installer env vars + build targets

@@ -1,14 +1,15 @@
 # AORMS — Market fit brief
 
-**Status:** Canonical GTM + product priority · **Updated:** 2026-08-06  
+**Status:** Canonical GTM + product priority · **Updated:** 2026-09-04
+(web-only office hub pivot)  
 **Owner:** Human Centric Works (HCW)
 
-Companion to [ROADMAP.md](ROADMAP.md) (suite soft launch · next **S8**) and
-[PRODUCT-VISION.md](PRODUCT-VISION.md) (boundary). Suite law:
-[AORMS-SUITE.md](AORMS-SUITE.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md).
+Companion to [ROADMAP.md](ROADMAP.md) (office hub soft launch · next **S8**) and
+[AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md) (product definition).
 
 **Delivery status:** Market-fit Waves **W1–W3 shipped**; **W4 integrations deferred**;
-**M8 local-first GTM** in progress ([WEB-PORTAL.md](WEB-PORTAL.md) · [LOCAL-FIRST.md](LOCAL-FIRST.md)).
+**web-only pivot** superseded the desktop/local-first GTM (M8, below) — the product
+is now a single cloud office hub, no installers.
 
 ---
 
@@ -33,10 +34,10 @@ revision control, site supervision, and GST on one spine.
 | Generic PM ignores COA fees, GST/TDS, FY April | India-first money (paise), proposals, invoices, reconcile |
 | Global A/E PSA ignores Indian site supervision | Drawings, transmittals, snags, instructions, progress (architect-side) |
 | “AI for architects” = chat wrappers | Dual-tier: **ESTI** (validated firm data) + **EOMS** (codes / knowledge bank) |
-| Architecture tools ignore engineering (and vice versa) | Same spine: **AORMS-Studio** + **AORMS-Consultancy** |
+| Architecture tools ignore engineering (and vice versa) | Same spine: one office hub serves both architecture and engineering consultancies |
 | Scope creep into construction ERP | Explicit teardown — **advise, don’t deliver** |
 | Fragmented external access | Client / consultant / contractor / site portals |
-| Desktop install friction | Desktop preferred + web parity · one Standard licence · storage + AI usage |
+| Install / per-app login friction | Web-only, one login, no installers · one Standard licence · storage + AI usage |
 
 ---
 
@@ -59,9 +60,9 @@ Biggest competitor: **inertia**, not any single SaaS.
 **Viable as** a focused vertical SaaS for Indian AEC consultancies.  
 **Not viable as** a horizontal AI/PM platform.
 
-Path: land **Studio** (architects) → expand **Consultancy** (engineers) → upsell
-cloud storage + multi-company licensing. (AI is unmetered — local Ollama or hub
-**Hosted AI** — so it is a capability, not a usage upsell.)
+Path: land architecture firms → expand to engineering consultancies (same
+office hub) → upsell cloud storage + multi-company licensing. (AI is
+unmetered and built into the hub — a capability, not a usage upsell.)
 
 Risks to manage: GTM consistency, time→WIP UX depth vs global PSA, reference
 customers, “boring reliability” (invoice PDF / GST) before ESTI storytelling.
@@ -110,23 +111,13 @@ full P6 CPM · “AI that designs the building.” · W4 integrations.
 **In scope (shipped):** project **Tenders** — firm issues; contractors bid in portal
 (`/office/tenders`, Project → Tenders).
 
-**In scope (local-first):** desktop node preferred + web parity ([LOCAL-FIRST.md](LOCAL-FIRST.md)) —
-signed installer URL on `/downloads` stays open until Bhoomi signs (M8 item 4).
+### M8 — Web-only GTM (superseded desktop/local-first GTM)
 
-### M8 — Local-first GTM
-
-Align public story with desktop-preferred product law. Delivery checklist:
-
-| # | Item | Status |
-|---|---|---|
-| 1 | Product / blog / FAQ: desktop preferred + web parity (no “web-only / no desktop”) | ✅ 2026-08-06 |
-| 2 | `/downloads` portal with honest `web_fallback` CTAs | ✅ prep |
-| 3 | Update manifests + env one-line fill documented ([WEB-PORTAL.md](WEB-PORTAL.md)) | ✅ prep |
-| 4 | Live signed installer URL + sha256 for AStudio / AConsulting | 🔲 until Bhoomi publishes |
-| 5 | LF6 Figma ↔ kit token sync notes / stub ([FIGMA-TOKEN-SYNC.md](FIGMA-TOKEN-SYNC.md)) | ✅ stub |
-
-Portal fill fields: [WEB-PORTAL.md](WEB-PORTAL.md). Crew status tables: Vishwakarma
-([AGENT-WORKSTREAMS.md](AGENT-WORKSTREAMS.md) after orch merge). Hub bind: Gagan.
+**2026-09-04 pivot:** AORMS dropped the desktop-preferred / local-first product
+law entirely. There is no installer, no signed download, no desktop node. The
+prior M8 checklist (desktop manifests, signed installer URLs, `/downloads`
+installer CTAs) is retired — `/downloads` now redirects straight to `/login`.
+Public story is simply: **one web app, sign in, start working.**
 
 ---
 

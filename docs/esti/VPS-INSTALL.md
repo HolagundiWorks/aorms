@@ -53,10 +53,11 @@ One box runs containers behind the host's nginx (which terminates TLS):
    └────────────────────────────────────────────────────┘
 ```
 
-- **No cloud Ollama.** ESTI AI runs on **desktop apps** only
-  ([LOCAL-FIRST.md](LOCAL-FIRST.md) · [PRODUCTION-OPS.md](PRODUCTION-OPS.md) § ESTI AI).
-  A leftover `esti-ollama` service in compose is **not** a production requirement —
-  do not size the VPS for LLM inference.
+- **No cloud Ollama by default.** ESTI AI runs through the backend AI gateway
+  as part of the office hub, not a desktop app ([PRODUCTION-OPS.md](PRODUCTION-OPS.md)
+  § ESTI AI). A leftover `esti-ollama` service in compose is **not** a production
+  requirement — do not size the VPS for local LLM inference unless a specific
+  deployment opts into it.
 - Only the **backend** binds a host port, and only on **loopback** (`127.0.0.1:4000`).
   Postgres/Redis/Mongo/MinIO are never exposed to the internet.
 - The SPA is built once and served as static files by nginx from `/opt/esti/frontend/dist`.
@@ -298,15 +299,12 @@ Legacy `FIRM_PLAN=CORE` / `FIRM_PLAN=ENTERPRISE` values still resolve to Pro.
 
 ---
 
-## 9a. Desktop installers
+## 9a. Web-only — no desktop installers
 
-**Retired forever:** Lite / Pro / Community Manager SKUs and `fetch-installers.sh`.
-
-**Local-first (LF4):** public `/downloads` serves signed AStudio / AConsulting
-installers when wired — see [WEB-PORTAL.md](WEB-PORTAL.md). Leave
-`VITE_ASTUDIO_INSTALLER_URL` / `VITE_ACONSULTING_INSTALLER_URL` empty (or keep
-manifests at `web_fallback`) until Bhoomi publishes a **code-signed** binary.
-Legacy `/download` redirects to `/downloads`.
+**Retired forever (2026-09 pivot):** desktop apps, Tauri shell, Windows
+installers, Lite / Pro / Community Manager SKUs, `fetch-installers.sh`, and the
+local-first desktop-node model. AORMS is a single web SPA — `/downloads`
+redirects to `/login`. Legacy `/download` redirects to `/downloads` → `/login`.
 
 Operators on pre-2026-07 VPS layouts may still have leftover Manager binaries under
 `frontend/dist/downloads/` — safe to delete via `deploy/cleanup-vps.sh`.

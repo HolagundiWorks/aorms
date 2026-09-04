@@ -10,21 +10,21 @@ Use this before declaring a VPS instance production-ready.
 
 ---
 
-## Soft launch (aorms.in marketing — 2026-08)
+## Soft launch (aorms.in marketing — 2026-09)
 
-Goal: **landing + blog only**. Apex login and installers stay Coming soon.
+Goal: **landing + blog only**. Apex login stays Coming soon until S8. No
+installers — AORMS is web-only (`/downloads` redirects to `/login`).
 
 | Check | How |
 | --- | --- |
 | DNS A/AAAA → VPS | `dig +short YOUR_DOMAIN` |
 | Install | `PROFILE=landing` via `deploy/bootstrap-vps.sh` or `deploy/install-landing.sh` |
 | Day-2 update | `bash deploy/update-landing.sh` (SPA) · `FULL=true` for backend too · or `deploy/update.sh` |
-| Env | `VITE_PUBLIC_SITE=true` · `VITE_MARKETING_ONLY=true` (default) · Mongo URL set by installer |
+| Env | `VITE_PUBLIC_SITE=true` · `VITE_MARKETING_ONLY=true` (default) |
 | Build | Frontend image bakes `VITE_MARKETING_ONLY` ([Dockerfile.prod](../../frontend/Dockerfile.prod)) |
 | Smoke | `bash deploy/verify-vps.sh https://YOUR_DOMAIN` |
-| Expect 200 | `/` · `/blog` · `/downloads` · `/wiki`→home · `/login`→Coming soon · `/landing/hero/aorms-aec-poster.jpg` |
-| Blog explainers | `/blog/why-aorms-suite-matters` · `how-aorms-suite-solves-fragmented-practice` · `aorms-suite-map` |
-| Do **not** | Seed demo for marketing-only · Flip installers without signed URL+sha256 |
+| Expect 200 | `/` · `/blog` · `/downloads`→`/login` · `/wiki`→home · `/login`→Coming soon · `/landing/hero/aorms-aec-poster.jpg` |
+| Do **not** | Seed demo for marketing-only |
 
 One-shot:
 
@@ -38,8 +38,7 @@ PROFILE=landing DOMAIN=aorms.in ADMIN_EMAIL=ops@aorms.in \
 ### S8 — Reopen apex auth / portal demos
 
 **When:** Firm portal tabs are honest (see [FIRM-PORTAL-SECTIONS.md](FIRM-PORTAL-SECTIONS.md)).  
-**Does not:** Flip signed Windows Download CTAs (that is **D6**).  
-**Staff ERP:** Still desktop via **AORMS Connect** — apex reopens portal/demo login only.
+**Staff:** Sign in via the web-only office hub at `/login` — no desktop app.
 
 **Local first (docker compose):**
 
@@ -78,8 +77,7 @@ in chat and the agent will run it).
 
 
 Manual equivalent: set `VITE_MARKETING_ONLY=false` in `/opt/esti/.env`, then
-`bash deploy/update.sh`. Keep `VITE_INSTALLERS_COMING_SOON` default / true until D6
-(signed URL + sha256 + `VITE_PORTAL_USE_RELEASE_INSTALLERS`). See [ROADMAP.md](ROADMAP.md).
+`bash deploy/update.sh`. See [ROADMAP.md](ROADMAP.md).
 
 ---
 
@@ -210,26 +208,24 @@ See [DEMO-AND-HR-MODE.md](DEMO-AND-HR-MODE.md).
 
 ---
 
-## ESTI AI — desktop only (no cloud Ollama)
+## ESTI AI — office hub, not desktop
 
-**Product law (2026-08):** ESTI / staff AI runs inside **desktop apps**
-(AStudio · AConsulting · AQC / ADraft via Connect) with **local** instruct
-(Ollama / Foundry Local / opt-in keys). See [LOCAL-FIRST.md](LOCAL-FIRST.md) ·
-[AORMS-SUITE.md](AORMS-SUITE.md) § AI.
+**Product law (2026-09 pivot):** AORMS is web-only. ESTI (the built-in AI
+agent) runs as part of the **office hub**, not a desktop app — the pre-pivot
+"desktop-only Ollama" model (`LOCAL-FIRST.md`, `AORMS-SUITE.md` § AI, both
+now archived) is superseded. ESTI answers only from validated firm
+repositories via the backend AI gateway (see [ARCHITECTURE.md](ARCHITECTURE.md)
+§ AI Boundary).
 
 | Surface | AI runtime |
 | --- | --- |
-| Desktop managers / technical apps | Local Ollama (or equivalent) on the machine |
-| aorms.in / hub VPS | **No Ollama** — do not require `esti-ollama` for production |
+| Office hub (aorms.in app) | Backend AI gateway — provider TBD per deployment; not a local Ollama requirement by default |
 | Firm portals | No staff LLM; optional future chat on **published** context only |
-| esti SPA `marketing.askEsti` / AI Studio | **Reference archive** — not a shipping cloud AI product |
+| Marketing landing / blog | No live AI surface — "Ask ESTI" is an office-hub feature, not marketing |
 
-Prompts / SDK package **`@hcw/aorms-ai-kit`** may still exist in the monorepo for
-desktop or transitional local compose — it is **not** an ops requirement to pull
-models on the VPS. Soft-launch marketing does not depend on a live LLM.
-
-**Do not** treat “Ask ESTI on the landing page” or hub **Hosted AI** as live
-product surfaces. Operators should not size VPS RAM/GPU for Ollama.
+Soft-launch marketing does not depend on a live LLM. Do not size VPS RAM/GPU
+for Ollama unless a specific deployment opts into local/on-prem inference —
+that is a per-firm operational decision, not the default.
 
 ---
 

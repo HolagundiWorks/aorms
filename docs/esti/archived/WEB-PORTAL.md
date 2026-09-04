@@ -1,4 +1,10 @@
-# AORMS web portal — desktop downloads
+> **⚠️ HISTORICAL.** Archived 2026-09-04 — desktop installers were removed in
+> the web-only office hub pivot. `frontend/src/lib/desktop-installers.ts`,
+> the `VITE_ASTUDIO_INSTALLER_URL` / `VITE_ACONSULTING_INSTALLER_URL` env vars,
+> and the update-manifest wiring described below no longer exist. `/downloads`
+> now redirects straight to `/login`. Kept for historical reference only.
+
+# AORMS web portal — desktop downloads (archived)
 
 **Status:** Canonical · **Updated:** 2026-08-06 · **Owner:** Aakash (Portal / GTM / UX)  
 **Runtime law:** [LOCAL-FIRST.md](LOCAL-FIRST.md) · **UX:** [DESKTOP-WEB-PARITY-UX.md](DESKTOP-WEB-PARITY-UX.md)  

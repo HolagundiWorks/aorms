@@ -141,33 +141,49 @@ After removals:
 
 ---
 
-## Phase 3: Documentation Cleanup
+## Phase 3: Documentation Cleanup ✅
 
 ### 3.1 Update core docs
 
-- [ ] **[`AORMS-OFFICE-SYSTEM.md`](./AORMS-OFFICE-SYSTEM.md)** (create new)
-  - Office hub overview, features, architecture
-  - Remove suite references
-  
-- [ ] **`AORMS-SUITE.md`** → archive or delete (superseded)
-- [ ] **`AORMS-CONNECT.md`** → delete (desktop launcher removed)
-- [ ] **`LOCAL-FIRST.md`** → delete (web-only, no local-first)
+- [x] **[`AORMS-OFFICE-SYSTEM.md`](./AORMS-OFFICE-SYSTEM.md)** — office hub overview, features, architecture; suite references confined to "Removed (Legacy)" section
+- [x] **`AORMS-SUITE.md`** → archived
+- [x] **`AORMS-CONNECT.md`** → archived
+- [x] **`LOCAL-FIRST.md`** → archived
 
 ### 3.2 Update other docs
 
-- [ ] **`NAVIGATION.md`** — update sidebar IA; remove allied app references
-- [ ] **`ROADMAP.md`** — remove allied app milestones; focus on office hub
-- [ ] **`ARCHITECTURE.md`** — web-only architecture (no desktop/Tauri)
-- [ ] **`PRODUCTION-OPS.md`** — remove desktop installer, launcher deploy steps
-- [ ] **`MARKET-FIT.md`** — update positioning (office mgmt, not suite)
+- [x] **`NAVIGATION.md`** — rewritten for the unified single `nav` tree (matches `App.tsx`); removed the 3-surface taskbar model
+- [x] **`ROADMAP.md`** — checklist reconciled against actual repo state (Phase 1/2/3 status corrected)
+- [x] **`ARCHITECTURE.md`** — rewritten for web-only stack (Carbon, no desktop/Tauri/local-first)
+- [x] **`PRODUCTION-OPS.md`** — removed installer/D6 gating, AORMS Connect staff-ERP note, and the "ESTI is desktop-only" AI section; rewrote ESTI AI § for office hub
+- [x] **`MARKET-FIT.md`** — repositioned from suite/local-first GTM to web-only office hub GTM; M8 checklist retired
 
 ### 3.3 Archive removed docs
 
-**Move to `docs/esti/archived/`:**
-- `AORMS-SUITE.md`
-- `AORMS-CONNECT.md`
-- `LOCAL-FIRST.md`
-- Desktop/installer-related docs
+**Moved to `docs/esti/archived/` (this pass):**
+- `AORMS-PLATFORM-NOMENCLATURE.md` → `AORMS-PLATFORM-NOMENCLATURE-SUITE-V1.md` (superseded by `CLAUDE.md` § Product naming)
+- `AORMS-DEVELOPMENT-SPEC.md` (superseded by `AORMS-OFFICE-SYSTEM.md`)
+- `WEB-PORTAL.md` (desktop installer wiring — feature removed)
+- `FIGMA-TOKEN-SYNC.md` (LF6 desktop↔web token-sync ritual — superseded by Carbon migration)
+- `repo-scaffolds/` (AStudio/AConsulting sibling-repo scaffolds — never created, no longer planned)
+- `docs/marketing/LANDING-REDESIGN-CONTEXT.md` → `docs/marketing/archived/` (pre-pivot suite landing brief)
+
+**Also rewritten in place (not archived — still active, now accurate):**
+- `AORMS-SURFACE-URLS.md` — matches current `aorms-surface-urls.ts` (single `platform` + `admin` surface, allied-app subdomains redirect to `/login`)
+- `README.md` (docs index) — dropped ~20 links to already-archived docs, added an Archived section
+- Root `README.md`, `DEVELOPMENT.md` — opening description rewritten from "AORMS-Studio shipped app" to web-only office hub; nomenclature links repointed from the archived doc to `CLAUDE.md`
+- `ESTI-PULSE.md` — "AORMS-Studio workspace" → "AORMS office hub" (2 lines)
+- `ACCESS-HIERARCHY.md`, `VPS-INSTALL.md` — broken/stale links and desktop-installer language fixed
+
+**Known still-stale (out of this pass's scope — kit/marketing docs, not core product docs):**
+`HCW-UI-KIT.md`, `PAGE-STRUCTURE.md`, `UI-SITE-MAP.md`, `HCW-UI-UX-PRINCIPLES.md`,
+`AORMS-BRANDING-KIT.md`, `HCW-KIT-AI-KNOWLEDGE-BASE.md`, marketing campaign docs
+(`docs/marketing/INSTAGRAM-CAMPAIGN.md`, `LINKEDIN-CAMPAIGN.md`), `docs/holagundi/*`,
+`docs/HCW-UX.md`. `HCW-UI-KIT.md` is already scheduled for rewrite at the Carbon
+Wave 6 decommission (see `CLAUDE.md` § UI). There is also a large pre-existing web
+of broken doc-to-doc links across `docs/hcw-kit/` and `docs/` unrelated to the
+allied-app pivot (e.g. `COGNITION-ENGINE.md`, `DESKTOP-WINUI-UX.md`,
+`HCW-CONSTRUCTION-PATTERNS.md` never existed) — not touched here.
 
 ---
 
@@ -269,11 +285,11 @@ grep -r "AStudio\|AConsulting\|AProc\|ADraft\|ShilpiDB\|astudio\|aconsulting\|ap
 - [ ] Update nav, footer, meta tags
 - [ ] Clean up `landing.scss` (remove allied app styling)
 
-### Documentation
-- [ ] Create `AORMS-OFFICE-SYSTEM.md` (new canon)
-- [ ] Archive obsolete docs (SUITE, CONNECT, LOCAL-FIRST)
-- [ ] Update nav, roadmap, architecture, production ops, market-fit
-- [ ] Remove allied app examples + references
+### Documentation ✅
+- [x] Create `AORMS-OFFICE-SYSTEM.md` (new canon)
+- [x] Archive obsolete docs (SUITE, CONNECT, LOCAL-FIRST, PLATFORM-NOMENCLATURE-v1, DEVELOPMENT-SPEC, WEB-PORTAL, FIGMA-TOKEN-SYNC, repo-scaffolds, LANDING-REDESIGN-CONTEXT)
+- [x] Update nav, roadmap, architecture, production ops, market-fit
+- [x] Remove allied app examples + references from core product docs (kit/marketing docs deferred — see § 3.3 note)
 
 ### Configuration
 - [ ] Remove installer env vars

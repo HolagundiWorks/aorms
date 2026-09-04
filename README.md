@@ -1,21 +1,21 @@
 # AORMS — Accelerated Operational Resources Management System
 
-**AORMS** is the **platform** for **AEC consulting firms** (architecture and
-engineering practices that advise clients — workflow consolidation, collaboration,
-audit-first AI). The **shipped app** in this repo is **AORMS-Studio** (`aorms-studio`)
-— software to run an Indian architecture consultancy. **AORMS-Consultancy** for
-engineering consultancies is **live** in this monorepo (`consultancy.aorms.in`).
-**ESTI** (Embedded Studio Intelligence) is the intelligence layer in **AORMS-Studio**
-only. Developed by **Human Centric Works (HCW)**.
+**AORMS** is a **cloud-based, web-only office management system** for **AEC
+firms & consultancies** (architecture and engineering practices — clients,
+projects, proposals, invoices, team, finances, knowledge bank). It ships as a
+**single unified web app**, the **AORMS Office Hub**, accessed via SSO —
+no desktop apps, no installers, no per-app logins. **ESTI** is the built-in
+AI agent for office automation and insights; **EOMS** is the external
+knowledge-bank API the hub queries. Developed by **Human Centric Works (HCW)**.
 *(The repo, `@esti/*` packages and `esti_*` tables keep the `esti` codename.)*
 
-Nomenclature: [docs/esti/AORMS-PLATFORM-NOMENCLATURE.md](docs/esti/AORMS-PLATFORM-NOMENCLATURE.md).
-Platform north-star: [docs/esti/AORMS-DEVELOPMENT-SPEC.md](docs/esti/AORMS-DEVELOPMENT-SPEC.md).
+Nomenclature: [CLAUDE.md](CLAUDE.md) § Product naming.
+Platform north-star: [docs/esti/AORMS-OFFICE-SYSTEM.md](docs/esti/AORMS-OFFICE-SYSTEM.md).
 
 Stack: a **TypeScript** backend (Fastify + tRPC + PostgreSQL), a **React** SPA on
-**Material UI** styled by the shared [HCW-UI-Kit](docs/esti/HCW-UI-KIT.md)
-(`@hcw/ui-kit`, including the landing page), and a **Python** worker for
-drawings/PDF/reconciliation. See
+**IBM Carbon Design System** (migrating from Material UI — see
+[docs/esti/CARBON-MIGRATION.md](docs/esti/CARBON-MIGRATION.md)), and a **Python**
+worker for drawings/PDF/reconciliation. See
 [docs/esti/ARCHITECTURE.md](docs/esti/ARCHITECTURE.md) and
 [INSTALL.md](INSTALL.md).
 
