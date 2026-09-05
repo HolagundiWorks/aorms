@@ -141,12 +141,23 @@ services:
     environment:
       REDIS_URL: redis://redis:6379
       # See the backend service's DATABASE_URL comment above — no local
-      # Postgres to default to anymore.
-      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL to run the worker locally — see ROADMAP-LOCAL.md}
+      # Postgres to default to anymore. Only needed for the three domains
+      # db.py hasn't migrated to Supabase (inspection, measurement_book,
+      # reconcile) — leave unset if you're only exercising a migrated domain.
+      DATABASE_URL: ${DATABASE_URL:-}
+      # Phase 6 (docs/esti/NEXTJS-MIGRATION-PHASE6-AUDIT.md): everything else
+      # db.py fetches/patches goes through PostgREST against the same live
+      # Supabase project web/ uses — copy these two from web/.env.
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?set from web/.env to run the worker locally}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:?set from web/.env to run the worker locally}
       WORKER_JOB_STREAM: ${WORKER_JOB_STREAM:-esti:jobs}
       WORKER_GROUP: ${WORKER_GROUP:-esti-workers}
       WORKER_DEAD_LETTER_STREAM: ${WORKER_DEAD_LETTER_STREAM:-esti:jobs:dead}
-      S3_ENDPOINT: http://minio:9000
+      # DEFAULT storage mode now targets Supabase Storage's S3-compatible API
+      # (worker/esti_worker/storage.py) — set these to a project's Storage S3
+      # access-key pair, not MinIO, unless you're deliberately running the
+      # old local MinIO container for this instead.
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
       S3_BUCKET: ${S3_BUCKET:-esti-documents}
       S3_ACCESS_KEY: ${S3_ACCESS_KEY:-esti}
       S3_SECRET_KEY: ${S3_SECRET_KEY:-esti-secret}

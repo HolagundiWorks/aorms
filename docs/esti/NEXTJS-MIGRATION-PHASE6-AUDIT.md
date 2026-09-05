@@ -1,7 +1,10 @@
 # Phase 6 repo audit — Advanced processing (PDF/DWG, Python worker)
 
-**Status:** Draft audit, not yet reviewed against a Phase 6 implementation
-**Date:** 2026-09-04
+**Status:** ✅ Hosting-topology question RESOLVED (2026-09-05, sourced —
+see the new section below); worker/db.py + storage.py ported for every
+domain with a Supabase table; see [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)'s
+Phase 6 row for the full account.
+**Date:** 2026-09-04 (audit), resolved 2026-09-05
 **Scope:** Per [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) § 36–37
 and [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)'s Phase 6 definition — the Python
 worker (`worker/`), the Redis Streams job bus that feeds it, and every PDF/DXF/
@@ -54,6 +57,77 @@ primitives, but neither replicates Redis Streams' consumer-group retry/DLQ
 semantics without real engineering). **Don't guess at this — it's a decision
 for whoever has visited Hostinger's actual docs/dashboard, not something to
 infer from this codebase.**
+
+---
+
+## RESOLVED (2026-09-05) — the hosting-topology question, with sources
+
+Researched Hostinger's actual docs/support pages rather than guessing, per
+this audit's own instruction above:
+
+- **Node.js Web Apps / Managed App Hosting is Node.js-only** — versions
+  18.x/20.x/22.x/24.x. No Python runtime is offered on this product; Hostinger's
+  own support docs are explicit that Python "is supported exclusively on VPS
+  Hosting... root access is required" ([Is Python supported at
+  Hostinger?](https://support.hostinger.com/en/articles/3648030-is-python-supported-at-hostinger)).
+- **Redis is not available on Web/Cloud hosting plans** ("configuration and
+  permission access requirements are restricted"); it's offered only on
+  **VPS** (self-managed — "you will be responsible for installing and
+  configuring Redis yourself") or **Agency Hosting** via a WordPress-specific
+  Object Cache plugin, not a general-purpose queue backend ([Is Redis
+  Supported at
+  Hostinger?](https://www.hostinger.com/support/9581774-is-redis-supported-at-hostinger/)).
+- Hostinger's own Node.js deployment docs describe build/runtime/SSR/routing
+  support but document no background-worker process, job queue, or cron
+  capability alongside the web process ([How to add a Node.js web app in
+  Hostinger](https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/)).
+
+**Conclusion: Hostinger Managed App Hosting cannot host the persistent Python
+worker or Redis.** This settles the question this audit flagged as its single
+biggest open decision — it's the "keep `worker/` + Redis external, on the
+existing VPS" branch of the two options above, not the Hostinger-native
+queue-redesign branch. Concretely:
+
+- `worker/` stays exactly what it is — a standalone Python process reading
+  Redis Streams — hosted wherever it runs today (the existing VPS,
+  unchanged), not on Hostinger alongside `web/`.
+- The migration's "single deployment target" objective
+  (NEXTJS-SUPABASE-MIGRATION.md § 1) does **not** fully hold, as this audit
+  anticipated — `web/` deploys to Hostinger, `worker/` + Redis stay where they
+  are. Flagging this explicitly rather than letting the spec's stated
+  objective quietly go stale.
+- Raw Redis is not re-exposed to the public internet for `web/` (on
+  Hostinger) to reach — the standard reason to front an internal queue with
+  an authenticated HTTP boundary instead of a raw TCP port, the same reason
+  Supabase itself fronts Postgres with PostgREST. Designing and building that
+  boundary (a small enqueue endpoint) is **not done in this pass** — see
+  "What's still open" below.
+- What Redis/worker topology does NOT block, and what this pass actually
+  did: **the fetch/update functions in `worker/esti_worker/db.py` now target
+  Supabase** (via a new `supabase_client.py` PostgREST helper) for every
+  domain that has a real Supabase table — the exact item #2 this audit's
+  "Suggested Phase 6 approach" called for, independent of the topology
+  answer. See ROADMAP-CLOUD.md's Phase 6 row for the full list and how it
+  was verified (live, against the real project, not just read from the
+  code).
+
+### What's still open after this pass
+
+- **The enqueue boundary itself** — a small authenticated HTTP service on the
+  VPS that `web/`'s Server Actions call to XADD a job (Redis stays
+  internal-only behind it). Not built this pass — needs its own
+  implementation + a real VPS deployment step this session had no access to
+  perform or verify live.
+- **Wiring "Generate PDF" / "Convert to SVG" actions into `web/`'s existing
+  screens** (Invoices, Proposals, Letters, Transmittals, Spec Sheets,
+  Drawings, Payslips, Progress Reports, Site Instructions, PMC RA Bills,
+  Feasibility Reports) — none of these screens call the worker yet; today
+  they only read/write the row's own fields. This is real, separate,
+  per-screen UI work, sequenced after the enqueue boundary exists.
+- **`inspection`, `measurement_book`, `reconcile`** stay un-migrated — no
+  Supabase table backs any of the three yet (see db.py's own module
+  docstring for why each specifically). Not this pass's job to invent those
+  tables.
 
 ---
 

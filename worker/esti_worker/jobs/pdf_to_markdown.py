@@ -1,7 +1,12 @@
-"""PDF → Markdown for Repo/Knowledge Bank portal (HCW Markdown Tool pipeline).
+"""PDF → Markdown for the Knowledge Bank portal (HCW Markdown Tool pipeline).
 
 Uses pymupdf4llm — the same library as HolagundiWorks/hcw-markdown-tool — to
-convert uploaded textbooks into markdown for the Knowledge Bank portal.
+convert an uploaded source PDF into markdown, written to `repo_sources`
+(Phase 8's Knowledge Bank Portal domain, Supabase-backed — see db.py's
+`update_repo_source`). Not "before EOMS ingest": EOMS was retired and
+physically removed 2026-09 (CLAUDE.md's Removed section) — this conversion
+step was never part of that pipeline stage and needed no change when EOMS
+went, it's unrelated internal processing that stays exactly as it was.
 """
 from __future__ import annotations
 

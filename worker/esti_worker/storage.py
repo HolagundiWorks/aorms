@@ -1,11 +1,27 @@
 """Object-storage access for the worker (MinIO / S3 via boto3) with BYOS.
 
-The active backend is resolved per-firm from esti_orgsettings.storage_settings,
-mirroring the TypeScript backend so worker outputs (PDFs, SVGs) land in the same
-store as user uploads:
-  - DEFAULT → env config (the passed bucket + env MinIO/S3) — unchanged behavior
-  - NAS     → local filesystem at a configured (mounted) path
-  - S3      → the firm's own S3-compatible endpoint/bucket/keys
+DEFAULT mode targets **Supabase Storage** (Phase 6, docs/esti/
+NEXTJS-MIGRATION-PHASE6-AUDIT.md) via its S3-compatible API — set
+`S3_ENDPOINT` to `https://<project-ref>.supabase.co/storage/v1/s3` and
+`S3_ACCESS_KEY`/`S3_SECRET_KEY` to a set of Storage S3 access keys (Supabase
+dashboard → Storage → S3 Access Keys, a *different* credential pair from the
+service-role key `supabase_client.py` uses for PostgREST). The boto3 client
+code below is unchanged from the old MinIO setup — Supabase Storage's
+S3-compatible surface is a drop-in target for the same client, only the
+endpoint/credentials move. This is storage, a single axis independent of
+which domains' *rows* have migrated to Supabase (db.py) — every job's file
+bytes move here regardless.
+
+Per-firm BYOS is otherwise resolved from `esti_orgsettings.storage_settings`
+in the old schema, which has no Supabase-side equivalent yet (`db.py`'s
+`fetch_storage_settings()` always returns DEFAULT now — flagged there, not
+silently dropped, per the Phase 6 audit's recommendation to keep S3/NAS BYOS
+modes real rather than remove them from a live self-hosted-VPS feature):
+  - DEFAULT → env config (now Supabase Storage; was MinIO)
+  - NAS     → local filesystem at a configured (mounted) path — unaffected,
+              still real for the self-hosted VPS deployment model
+  - S3      → the firm's own S3-compatible endpoint/bucket/keys — unaffected,
+              already storage-agnostic
 """
 from __future__ import annotations
 
