@@ -11,6 +11,8 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { NewTransmittalForm } from "../../../components/aorms/NewTransmittalForm";
+import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { generateTransmittalPdf } from "../../../lib/actions/transmittals";
 
 export default async function TransmittalsPage() {
   const supabase = await createClient();
@@ -18,7 +20,7 @@ export default async function TransmittalsPage() {
   const [{ data: transmittals, error }, { data: projects }] = await Promise.all([
     supabase
       .from("transmittals")
-      .select("id, ref, recipient, purpose, channel, date_issued, acknowledged_at, project_offices(title)")
+      .select("id, ref, recipient, purpose, channel, date_issued, acknowledged_at, pdf_status, project_offices(title)")
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
@@ -50,6 +52,7 @@ export default async function TransmittalsPage() {
                 <TableHeader>Project</TableHeader>
                 <TableHeader>Channel</TableHeader>
                 <TableHeader>Acknowledged</TableHeader>
+                <TableHeader>PDF</TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -69,12 +72,18 @@ export default async function TransmittalsPage() {
                         {t.acknowledged_at ? "Acknowledged" : "Pending"}
                       </Tag>
                     </TableCell>
+                    <TableCell>
+                      <GeneratePdfButton
+                        action={generateTransmittalPdf.bind(null, t.id)}
+                        pdfStatus={t.pdf_status}
+                      />
+                    </TableCell>
                   </TableRow>
                 );
               })}
               {(transmittals ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6}>
+                  <TableCell colSpan={7}>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                       No transmittals yet.
                     </p>

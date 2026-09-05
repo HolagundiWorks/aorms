@@ -11,6 +11,8 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewSpecItemForm } from "../../../../components/aorms/NewSpecItemForm";
+import { GeneratePdfButton } from "../../../../components/aorms/GeneratePdfButton";
+import { generateSpecSheetPdf } from "../../../../lib/actions/spec-sheets";
 
 export default async function SpecSheetDetailPage({
   params,
@@ -21,7 +23,7 @@ export default async function SpecSheetDetailPage({
   const supabase = await createClient();
 
   const [{ data: sheet, error: sheetError }, { data: items, error: itemsError }] = await Promise.all([
-    supabase.from("spec_sheets").select("id, ref, title, status").eq("id", id).maybeSingle(),
+    supabase.from("spec_sheets").select("id, ref, title, status, pdf_status").eq("id", id).maybeSingle(),
     supabase
       .from("spec_items")
       .select("id, category, item, make, specification, finish")
@@ -52,9 +54,10 @@ export default async function SpecSheetDetailPage({
         >
           {sheet.ref}
         </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "2rem" }}>
-          {sheet.title}
-        </h1>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }}>
+          <h1 className="cds--type-heading-05">{sheet.title}</h1>
+          <GeneratePdfButton action={generateSpecSheetPdf.bind(null, sheet.id)} pdfStatus={sheet.pdf_status} />
+        </div>
 
         <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
           Items

@@ -11,7 +11,8 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { NewInvoiceForm } from "../../../components/aorms/NewInvoiceForm";
-import { GenerateInvoicePdfButton } from "../../../components/aorms/GenerateInvoicePdfButton";
+import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { generateInvoicePdf } from "../../../lib/actions/invoices";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -92,7 +93,10 @@ export default async function InvoicesPage() {
                       </Tag>
                     </TableCell>
                     <TableCell>
-                      <GenerateInvoicePdfButton invoiceId={inv.id} pdfStatus={inv.pdf_status} />
+                      <GeneratePdfButton
+                        action={generateInvoicePdf.bind(null, inv.id)}
+                        pdfStatus={inv.pdf_status}
+                      />
                     </TableCell>
                   </TableRow>
                 );

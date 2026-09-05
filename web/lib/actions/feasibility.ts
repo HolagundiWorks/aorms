@@ -3,13 +3,15 @@
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { generatePdfForTarget } from "../jobs/generate-pdf";
 
 /**
  * Port of feasibility.generate (backend/src/modules/projectos/feasibility.ts)
- * minus the render_pdf enqueue — the Python worker isn't wired up to this
- * app (same Phase 6 gap every other render target has). pdf_status stays
- * NONE rather than PENDING, since nothing will ever process a PENDING job
- * here — honest about the gap rather than implying a job is in flight.
+ * minus the render_pdf enqueue — snapshotting the assessment and rendering
+ * its PDF are two separate steps here (matching every other domain's own
+ * "create" vs. "generate PDF" split), not because the worker gap is still
+ * open — see generateFeasibilityReportPdf below for that. pdf_status stays
+ * NONE (not PENDING) until a caller explicitly asks for the PDF.
  */
 export async function generateFeasibilityReport(projectId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
@@ -78,4 +80,19 @@ export async function generateFeasibilityReport(projectId: string): Promise<{ er
 
   revalidatePath(`/projects/${projectId}/feasibility`);
   return {};
+}
+
+/** Phase 6 enqueue boundary (docs/esti/NEXTJS-MIGRATION-PHASE6-AUDIT.md). */
+export async function generateFeasibilityReportPdf(
+  reportId: string,
+  projectId: string,
+): Promise<{ error: string } | null> {
+  const supabase = await createClient();
+  return generatePdfForTarget({
+    supabase,
+    table: "feasibility_reports",
+    target: "feasibility_report",
+    id: reportId,
+    revalidate: `/projects/${projectId}/feasibility`,
+  });
 }

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { generatePdfForTarget } from "../jobs/generate-pdf";
 
 export type ProposalActionState = { error: string } | null;
 
@@ -63,4 +64,23 @@ export async function createProposalRecord(
 
   revalidatePath("/proposals");
   return null;
+}
+
+/**
+ * Phase 6 enqueue boundary (docs/esti/NEXTJS-MIGRATION-PHASE6-AUDIT.md).
+ * Targets "feeproposal" — worker/esti_worker/jobs/pdf.py's `_RENDERERS` has
+ * both "feeproposal" and "proposal" keys (two HTML templates) reading the
+ * same unified `proposals` table now, but only the feeproposal template
+ * prints the COA fee-scale breakdown (work_category/fee_basis/cost_of_works/
+ * doc_comm_pct) this screen's own fields are actually about.
+ */
+export async function generateProposalPdf(proposalId: string): Promise<{ error: string } | null> {
+  const supabase = await createClient();
+  return generatePdfForTarget({
+    supabase,
+    table: "proposals",
+    target: "feeproposal",
+    id: proposalId,
+    revalidate: "/proposals",
+  });
 }

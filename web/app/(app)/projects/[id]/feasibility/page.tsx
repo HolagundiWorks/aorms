@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@carbon/react";
 import { createClient } from "../../../../../lib/supabase/server";
 import { GenerateFeasibilityButton } from "../../../../../components/aorms/GenerateFeasibilityButton";
+import { GeneratePdfButton } from "../../../../../components/aorms/GeneratePdfButton";
+import { generateFeasibilityReportPdf } from "../../../../../lib/actions/feasibility";
 
 export default async function FeasibilityPage({
   params,
@@ -18,7 +20,7 @@ export default async function FeasibilityPage({
     supabase.from("project_offices").select("id, title").eq("id", id).maybeSingle(),
     supabase
       .from("feasibility_reports")
-      .select("id, share_token, generated_at, snapshot")
+      .select("id, share_token, generated_at, snapshot, pdf_status")
       .eq("project_id", id)
       .order("created_at", { ascending: false }),
   ]);
@@ -64,6 +66,7 @@ export default async function FeasibilityPage({
                 <TableHeader>Generated</TableHeader>
                 <TableHeader>Estimated cost</TableHeader>
                 <TableHeader>Share link</TableHeader>
+                <TableHeader>PDF</TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -81,12 +84,18 @@ export default async function FeasibilityPage({
                     <TableCell>
                       <code style={{ fontSize: "0.75rem", wordBreak: "break-all" }}>{shareUrl}</code>
                     </TableCell>
+                    <TableCell>
+                      <GeneratePdfButton
+                        action={generateFeasibilityReportPdf.bind(null, r.id, project.id)}
+                        pdfStatus={r.pdf_status}
+                      />
+                    </TableCell>
                   </TableRow>
                 );
               })}
               {(reports ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={3}>
+                  <TableCell colSpan={4}>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                       No reports generated yet.
                     </p>

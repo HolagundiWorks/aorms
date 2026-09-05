@@ -11,6 +11,8 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { NewProposalForm } from "../../../components/aorms/NewProposalForm";
+import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { generateProposalPdf } from "../../../lib/actions/proposals";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -31,7 +33,7 @@ export default async function ProposalsPage() {
     supabase
       .from("proposals")
       .select(
-        "id, ref, status, work_category, work_type, fee_basis, fee_paise, client_approval_status, project_offices(title)",
+        "id, ref, status, work_category, work_type, fee_basis, fee_paise, client_approval_status, pdf_status, project_offices(title)",
       )
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
@@ -65,6 +67,7 @@ export default async function ProposalsPage() {
                 <TableHeader>Fee</TableHeader>
                 <TableHeader>Status</TableHeader>
                 <TableHeader>Client approval</TableHeader>
+                <TableHeader>PDF</TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -85,12 +88,15 @@ export default async function ProposalsPage() {
                       </Tag>
                     </TableCell>
                     <TableCell>{p.client_approval_status}</TableCell>
+                    <TableCell>
+                      <GeneratePdfButton action={generateProposalPdf.bind(null, p.id)} pdfStatus={p.pdf_status} />
+                    </TableCell>
                   </TableRow>
                 );
               })}
               {(proposals ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7}>
+                  <TableCell colSpan={8}>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                       No proposals yet.
                     </p>

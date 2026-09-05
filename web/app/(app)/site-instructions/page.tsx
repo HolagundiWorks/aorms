@@ -10,6 +10,8 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { NewSiteInstructionForm } from "../../../components/aorms/NewSiteInstructionForm";
+import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { generateSiteInstructionPdf } from "../../../lib/actions/site-instructions";
 
 export default async function SiteInstructionsPage() {
   const supabase = await createClient();
@@ -17,7 +19,7 @@ export default async function SiteInstructionsPage() {
   const [{ data: instructions, error }, { data: projects }, { data: contractors }] = await Promise.all([
     supabase
       .from("site_instructions")
-      .select("id, ref, subject, issued_at, acknowledged_at, project_offices(title), contractors(name)")
+      .select("id, ref, subject, issued_at, acknowledged_at, pdf_status, project_offices(title), contractors(name)")
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
     supabase.from("contractors").select("id, name").order("name"),
@@ -50,6 +52,7 @@ export default async function SiteInstructionsPage() {
                 <TableHeader>Subject</TableHeader>
                 <TableHeader>Issued</TableHeader>
                 <TableHeader>Acknowledged</TableHeader>
+                <TableHeader>PDF</TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -64,12 +67,18 @@ export default async function SiteInstructionsPage() {
                     <TableCell>{s.subject}</TableCell>
                     <TableCell>{s.issued_at ?? "—"}</TableCell>
                     <TableCell>{s.acknowledged_at ? new Date(s.acknowledged_at).toLocaleDateString("en-IN") : "—"}</TableCell>
+                    <TableCell>
+                      <GeneratePdfButton
+                        action={generateSiteInstructionPdf.bind(null, s.id)}
+                        pdfStatus={s.pdf_status}
+                      />
+                    </TableCell>
                   </TableRow>
                 );
               })}
               {(instructions ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6}>
+                  <TableCell colSpan={7}>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                       No instructions issued yet.
                     </p>

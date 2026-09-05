@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { generatePdfForTarget } from "../jobs/generate-pdf";
 
 type ActionState = { error: string } | null;
 
@@ -127,4 +128,16 @@ export async function updateRaBillStatus(billId: string, status: string): Promis
   revalidatePath(`/pmc-ra-bills/${billId}`);
   revalidatePath("/pmc-ra-bills");
   return {};
+}
+
+/** Phase 6 enqueue boundary (docs/esti/NEXTJS-MIGRATION-PHASE6-AUDIT.md). */
+export async function generateRaBillPdf(billId: string): Promise<{ error: string } | null> {
+  const supabase = await createClient();
+  return generatePdfForTarget({
+    supabase,
+    table: "pmc_ra_bills",
+    target: "pmc_ra_bill",
+    id: billId,
+    revalidate: `/pmc-ra-bills/${billId}`,
+  });
 }

@@ -12,6 +12,8 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { NewProgressReportForm } from "../../../components/aorms/NewProgressReportForm";
 import { IssueProgressReportButton } from "../../../components/aorms/IssueProgressReportButton";
+import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { generateProgressReportPdf } from "../../../lib/actions/progress-reports";
 
 export default async function ProgressReportsPage() {
   const supabase = await createClient();
@@ -19,7 +21,7 @@ export default async function ProgressReportsPage() {
   const [{ data: reports, error }, { data: projects }] = await Promise.all([
     supabase
       .from("progress_reports")
-      .select("id, period_start, period_end, physical_progress_pct, schedule_progress_pct, status, project_offices(title)")
+      .select("id, period_start, period_end, physical_progress_pct, schedule_progress_pct, status, pdf_status, project_offices(title)")
       .order("period_start", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
@@ -32,8 +34,7 @@ export default async function ProgressReportsPage() {
           className="cds--type-body-01"
           style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
         >
-          Periodic project progress narrative and completion percentages. PDF rendering isn&apos;t
-          wired up.
+          Periodic project progress narrative and completion percentages.
         </p>
 
         <NewProgressReportForm projects={projects ?? []} />
@@ -52,6 +53,7 @@ export default async function ProgressReportsPage() {
                 <TableHeader>Schedule %</TableHeader>
                 <TableHeader>Status</TableHeader>
                 <TableHeader />
+                <TableHeader>PDF</TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -71,12 +73,18 @@ export default async function ProgressReportsPage() {
                       </Tag>
                     </TableCell>
                     <TableCell>{r.status === "DRAFT" && <IssueProgressReportButton reportId={r.id} />}</TableCell>
+                    <TableCell>
+                      <GeneratePdfButton
+                        action={generateProgressReportPdf.bind(null, r.id)}
+                        pdfStatus={r.pdf_status}
+                      />
+                    </TableCell>
                   </TableRow>
                 );
               })}
               {(reports ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6}>
+                  <TableCell colSpan={7}>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                       No progress reports yet.
                     </p>

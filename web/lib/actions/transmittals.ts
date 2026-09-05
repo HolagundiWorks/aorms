@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { generatePdfForTarget } from "../jobs/generate-pdf";
 
 export type TransmittalActionState = { error: string } | null;
 
@@ -58,4 +59,16 @@ export async function createTransmittalRecord(
 
   revalidatePath("/transmittals");
   return null;
+}
+
+/** Phase 6 enqueue boundary (docs/esti/NEXTJS-MIGRATION-PHASE6-AUDIT.md). */
+export async function generateTransmittalPdf(transmittalId: string): Promise<{ error: string } | null> {
+  const supabase = await createClient();
+  return generatePdfForTarget({
+    supabase,
+    table: "transmittals",
+    target: "transmittal",
+    id: transmittalId,
+    revalidate: "/transmittals",
+  });
 }

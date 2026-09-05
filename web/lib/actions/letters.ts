@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { generatePdfForTarget } from "../jobs/generate-pdf";
 
 export type LetterActionState = { error: string } | null;
 
@@ -45,4 +46,16 @@ export async function createLetterRecord(
 
   revalidatePath("/letters");
   return null;
+}
+
+/** Phase 6 enqueue boundary (docs/esti/NEXTJS-MIGRATION-PHASE6-AUDIT.md). */
+export async function generateLetterPdf(letterId: string): Promise<{ error: string } | null> {
+  const supabase = await createClient();
+  return generatePdfForTarget({
+    supabase,
+    table: "letters",
+    target: "letter",
+    id: letterId,
+    revalidate: "/letters",
+  });
 }

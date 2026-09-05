@@ -7,10 +7,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { NewLetterForm } from "../../../components/aorms/NewLetterForm";
+import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { generateLetterPdf } from "../../../lib/actions/letters";
 
 export default async function LettersPage() {
   const supabase = await createClient();
@@ -65,9 +66,7 @@ export default async function LettersPage() {
                     <TableCell>{project?.title ?? "—"}</TableCell>
                     <TableCell>{l.date_letter ?? "—"}</TableCell>
                     <TableCell>
-                      <Tag type={l.pdf_status === "READY" ? "green" : "gray"} size="sm">
-                        {l.pdf_status}
-                      </Tag>
+                      <GeneratePdfButton action={generateLetterPdf.bind(null, l.id)} pdfStatus={l.pdf_status} />
                     </TableCell>
                   </TableRow>
                 );

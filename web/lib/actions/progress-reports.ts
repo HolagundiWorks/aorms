@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { generatePdfForTarget } from "../jobs/generate-pdf";
 
 type ActionState = { error: string } | null;
 
@@ -63,4 +64,16 @@ export async function issueProgressReport(reportId: string): Promise<{ error?: s
 
   revalidatePath("/progress-reports");
   return {};
+}
+
+/** Phase 6 enqueue boundary (docs/esti/NEXTJS-MIGRATION-PHASE6-AUDIT.md). */
+export async function generateProgressReportPdf(reportId: string): Promise<{ error: string } | null> {
+  const supabase = await createClient();
+  return generatePdfForTarget({
+    supabase,
+    table: "progress_reports",
+    target: "progress_report",
+    id: reportId,
+    revalidate: "/progress-reports",
+  });
 }

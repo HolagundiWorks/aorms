@@ -1,13 +1,15 @@
 # Phase 6 repo audit — Advanced processing (PDF/DWG, Python worker)
 
-**Status:** ✅ Hosting-topology question RESOLVED (2026-09-05, sourced —
-see the new section below); worker/db.py + storage.py ported for every
-domain with a Supabase table; the enqueue boundary (`gateway/`) built and
-live-verified, with one representative screen (`/invoices`) wired end to
-end. See [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)'s Phase 6 row for the full
-account. What's left: the other 10 render targets' own "Generate PDF"
-wiring, and the actual VPS deployment of `gateway/` (see `gateway/README.md`).
-**Date:** 2026-09-04 (audit), resolved 2026-09-05, enqueue boundary built 2026-09-05
+**Status:** ✅ Functionally complete. Hosting-topology question RESOLVED
+(2026-09-05, sourced — see the new section below); worker/db.py + storage.py
+ported for every domain with a Supabase table; the enqueue boundary
+(`gateway/`) built and live-verified; all 10 buildable render targets wired
+into their screens (`drawings` deliberately excluded — no upload pipeline
+exists yet to ever populate a real `svg_key`). See
+[ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)'s Phase 6 row for the full account.
+What's left: only the actual VPS deployment of `gateway/` (see
+`gateway/README.md`'s runbook) — no more code.
+**Date:** 2026-09-04 (audit), resolved 2026-09-05, enqueue boundary + all screens wired 2026-09-05
 **Scope:** Per [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) § 36–37
 and [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)'s Phase 6 definition — the Python
 worker (`worker/`), the Redis Streams job bus that feeds it, and every PDF/DXF/
@@ -167,20 +169,53 @@ both template-only, **not deployed to the live VPS** (no deploy access from
 this session; `gateway/README.md`'s "Production deployment" section is the
 actual runbook for whoever has it).
 
+### All 10 buildable screens wired (2026-09-05)
+
+The invoices proof-of-pattern was extracted into two shared helpers so the
+remaining screens were each a thin wrapper, not a re-derivation:
+`web/lib/jobs/firm.ts` (`getFirmForPdf()`, the `firm`-table-to-payload
+mapping) and `web/lib/jobs/generate-pdf.ts` (`generatePdfForTarget()`, the
+fetch-check/firm-map/enqueue/revalidate body every action shares), plus a
+generic `GeneratePdfButton` Carbon component. Wired: proposals (target
+`feeproposal` — the same unified `proposals` table, but the richer
+COA-fee-scale template), letters, transmittals, spec sheets, payslips,
+progress reports, site instructions, PMC RA bills, and feasibility reports
+(a new `generateFeasibilityReportPdf` action alongside the existing
+`generateFeasibilityReport`, since snapshotting the assessment and
+rendering its PDF are two separate steps here, matching every other
+domain's create-vs-render split).
+
+`tsc --noEmit`, `eslint`, and `next build` all clean across every touched
+file. Live-verified 4 of 10 end to end against the real Supabase project
+(proposals, letters, spec sheets, plus invoices from the previous pass) —
+each landed on the real Redis stream with the correct target/id, confirmed
+via `XRANGE`, including proving both button-placement shapes (list row and
+detail-page header). The remaining domains use the identical shared code
+path already proven working, not a new one. All smoke-test rows deleted
+afterward.
+
+**`drawings` deliberately NOT wired** — its issue-set PDF target needs a
+real `svg_key`, which only ever gets populated by a real DXF upload +
+`dxf_to_svg` job, and that upload Route Handler doesn't exist
+(`createDrawingRecord` still writes a placeholder `file_hash`/
+`storage_key` — Phase 4's own flagged gap). A "Generate PDF" button here
+would be a UI element with nothing real behind it — the same principle
+this session applied to the CPI aggregates strip and Project Brief's own
+omitted context row.
+
 ### What's still open after this pass
 
 - **The actual VPS deployment** of `gateway/` — build, DNS, certbot, nginx
   reload. Everything needed is written (`gateway/README.md`'s numbered
-  steps); none of it has been run against production.
-- **Wiring "Generate PDF" / "Convert to SVG" actions into the other 10
-  screens** (Proposals, Letters, Transmittals, Spec Sheets, Drawings,
-  Payslips, Progress Reports, Site Instructions, PMC RA Bills, Feasibility
-  Reports) — `/invoices` is the one proof-of-pattern; the rest is the same
-  few lines repeated per screen, real remaining work.
+  steps); none of it has been run against production. This is the only
+  thing left in Phase 6 — no more code.
 - **`inspection`, `measurement_book`, `reconcile`** stay un-migrated — no
   Supabase table backs any of the three yet (see db.py's own module
   docstring for why each specifically). Not this pass's job to invent those
   tables.
+- **`drawings`' upload pipeline** — a separate, pre-existing Phase 4 gap
+  this pass didn't attempt to close; once it exists, drawings' PDF wiring
+  is the same few lines as every other domain here.
 
 ---
 

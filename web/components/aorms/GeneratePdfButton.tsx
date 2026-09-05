@@ -3,21 +3,28 @@
 import { useState, useTransition } from "react";
 import { Button, InlineNotification } from "@carbon/react";
 import { Document } from "@carbon/icons-react";
-import { generateInvoicePdf } from "../../lib/actions/invoices";
 
 /**
- * The one representative "Generate PDF" wiring for Phase 6's enqueue
- * boundary (docs/esti/NEXTJS-MIGRATION-PHASE6-AUDIT.md) — proves the
- * intended call pattern (Server Action → gateway → Redis → worker) end to
- * end. The other 10 render targets need the same few lines on their own
- * screens; not built here, left as follow-up per the roadmap.
+ * Generic "Generate PDF" row/detail action for Phase 6's enqueue boundary
+ * (docs/esti/NEXTJS-MIGRATION-PHASE6-AUDIT.md) — the shared UI half of
+ * `generatePdfForTarget()` (lib/jobs/generate-pdf.ts). Originally built
+ * once for `/invoices` as the proof-of-pattern screen
+ * (GenerateInvoicePdfButton.tsx, since replaced by this generic version)
+ * and now reused across every other render target.
+ *
+ * `action` is the domain's own bound Server Action (e.g.
+ * `generateProposalPdf.bind(null, proposalId)`) — this component has no
+ * per-domain knowledge, just calls whatever's passed in and renders the
+ * pending/error state.
  */
-export function GenerateInvoicePdfButton({
-  invoiceId,
+export function GeneratePdfButton({
+  action,
   pdfStatus,
+  label = "Generate PDF",
 }: {
-  invoiceId: string;
+  action: () => Promise<{ error: string } | null>;
   pdfStatus: string | null;
+  label?: string;
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +32,7 @@ export function GenerateInvoicePdfButton({
   function handleClick() {
     setError(null);
     startTransition(async () => {
-      const res = await generateInvoicePdf(invoiceId);
+      const res = await action();
       if (res?.error) setError(res.error);
     });
   }
@@ -43,7 +50,7 @@ export function GenerateInvoicePdfButton({
         disabled={isPending || pdfStatus === "PROCESSING"}
         onClick={handleClick}
       >
-        {isPending ? "Queuing…" : pdfStatus === "PROCESSING" ? "Processing…" : "Generate PDF"}
+        {isPending ? "Queuing…" : pdfStatus === "PROCESSING" ? "Processing…" : label}
       </Button>
       {error && (
         <InlineNotification kind="error" title="Could not queue PDF" subtitle={error} hideCloseButton lowContrast />

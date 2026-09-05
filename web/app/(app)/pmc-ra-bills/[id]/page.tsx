@@ -3,6 +3,8 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../../lib/supabase/server";
 import { NewRaLineForm } from "../../../../components/aorms/NewRaLineForm";
 import { RaBillStatusSelect } from "../../../../components/aorms/RaBillStatusSelect";
+import { GeneratePdfButton } from "../../../../components/aorms/GeneratePdfButton";
+import { generateRaBillPdf } from "../../../../lib/actions/pmc-ra-bills";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -17,7 +19,7 @@ export default async function PmcRaBillDetailPage({
   const supabase = await createClient();
 
   const [{ data: bill, error: billError }, { data: lines, error: linesError }] = await Promise.all([
-    supabase.from("pmc_ra_bills").select("id, ref, bill_no, period_start, period_end, gross_paise, status").eq("id", id).maybeSingle(),
+    supabase.from("pmc_ra_bills").select("id, ref, bill_no, period_start, period_end, gross_paise, status, pdf_status").eq("id", id).maybeSingle(),
     supabase.from("pmc_ra_lines").select("id, description, unit, this_qty, rate_paise, amount_paise").eq("bill_id", id).order("sort_order"),
   ]);
 
@@ -43,6 +45,7 @@ export default async function PmcRaBillDetailPage({
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
           <h1 className="cds--type-heading-05">Bill {bill.bill_no}</h1>
           <RaBillStatusSelect billId={bill.id} status={bill.status} />
+          <GeneratePdfButton action={generateRaBillPdf.bind(null, bill.id)} pdfStatus={bill.pdf_status} />
         </div>
 
         <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>

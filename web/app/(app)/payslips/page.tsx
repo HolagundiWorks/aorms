@@ -12,6 +12,8 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { NewPayslipForm } from "../../../components/aorms/NewPayslipForm";
 import { MarkPaidButton } from "../../../components/aorms/MarkPaidButton";
+import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { generatePayslipPdf } from "../../../lib/actions/payslips";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -23,7 +25,7 @@ export default async function PayslipsPage() {
   const [{ data: payslips, error }, { data: members }] = await Promise.all([
     supabase
       .from("payslips")
-      .select("id, month, gross_paise, deductions_paise, net_paise, paid, team_members(name)")
+      .select("id, month, gross_paise, deductions_paise, net_paise, paid, pdf_status, team_members(name)")
       .order("month", { ascending: false }),
     supabase.from("team_members").select("id, name").order("name"),
   ]);
@@ -36,8 +38,7 @@ export default async function PayslipsPage() {
           className="cds--type-body-01"
           style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
         >
-          Monthly payslips per team member. PDF generation isn&apos;t wired up — same worker/
-          hosting-topology question Phase 6 flagged for every render target.
+          Monthly payslips per team member.
         </p>
 
         <NewPayslipForm members={members ?? []} />
@@ -56,6 +57,7 @@ export default async function PayslipsPage() {
                 <TableHeader>Deductions</TableHeader>
                 <TableHeader>Net</TableHeader>
                 <TableHeader>Status</TableHeader>
+                <TableHeader>PDF</TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -77,12 +79,15 @@ export default async function PayslipsPage() {
                         <MarkPaidButton payslipId={p.id} />
                       )}
                     </TableCell>
+                    <TableCell>
+                      <GeneratePdfButton action={generatePayslipPdf.bind(null, p.id)} pdfStatus={p.pdf_status} />
+                    </TableCell>
                   </TableRow>
                 );
               })}
               {(payslips ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6}>
+                  <TableCell colSpan={7}>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                       No payslips yet.
                     </p>
