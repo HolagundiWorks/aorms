@@ -34,14 +34,14 @@ export function NewPhaseForm({ projectId }: { projectId: string }) {
           id="billingPct"
           name="billingPct"
           labelText="Billing %"
-          type="number"
+          type="number" step="any"
           defaultValue="0"
         />
         <TextInput
           id="sortOrder"
           name="sortOrder"
           labelText="Sort order"
-          type="number"
+          type="number" step="any"
           defaultValue="0"
         />
         <Button type="submit" disabled={pending} size="sm">

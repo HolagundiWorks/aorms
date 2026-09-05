@@ -21,7 +21,7 @@ export function NewJobApplicationForm() {
           <TextInput id="appliedRole" name="appliedRole" labelText="Applied role" required />
           <TextInput id="email" name="email" labelText="Email" type="email" />
           <TextInput id="phone" name="phone" labelText="Phone" />
-          <TextInput id="experienceYears" name="experienceYears" labelText="Experience (years)" type="number" />
+          <TextInput id="experienceYears" name="experienceYears" labelText="Experience (years)" type="number" step="any" />
         </div>
         <TextInput id="notes" name="notes" labelText="Notes" />
         <Button type="submit" disabled={pending} size="sm">

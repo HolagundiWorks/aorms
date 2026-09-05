@@ -56,10 +56,10 @@ export function NewEstimateForm({
           id="contingencyPct"
           name="contingencyPct"
           labelText="Contingency %"
-          type="number"
+          type="number" step="any"
           defaultValue="0"
         />
-        <TextInput id="gstPct" name="gstPct" labelText="GST %" type="number" defaultValue="0" />
+        <TextInput id="gstPct" name="gstPct" labelText="GST %" type="number" step="any" defaultValue="0" />
         <TextArea id="notes" name="notes" labelText="Notes" rows={2} />
         <Button type="submit" disabled={pending}>
           {pending ? "Creating…" : "Create estimate"}

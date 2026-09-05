@@ -18,7 +18,7 @@ export function NewRewardPointsForm({ memberId }: { memberId: string }) {
           <InlineNotification kind="error" title="Could not grant points" subtitle={state.error} hideCloseButton lowContrast />
         )}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
-          <TextInput id="points" name="points" labelText="Points (+/-)" type="number" required />
+          <TextInput id="points" name="points" labelText="Points (+/-)" type="number" step="any" required />
           <TextInput id="reason" name="reason" labelText="Reason" required />
         </div>
         <Button type="submit" disabled={pending} size="sm">

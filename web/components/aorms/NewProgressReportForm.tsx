@@ -26,8 +26,8 @@ export function NewProgressReportForm({ projects }: { projects: ProjectOption[] 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
           <TextInput id="periodStart" name="periodStart" labelText="Period start" type="date" required />
           <TextInput id="periodEnd" name="periodEnd" labelText="Period end" type="date" required />
-          <TextInput id="physicalProgressPct" name="physicalProgressPct" labelText="Physical progress %" type="number" />
-          <TextInput id="scheduleProgressPct" name="scheduleProgressPct" labelText="Schedule progress %" type="number" />
+          <TextInput id="physicalProgressPct" name="physicalProgressPct" labelText="Physical progress %" type="number" step="any" />
+          <TextInput id="scheduleProgressPct" name="scheduleProgressPct" labelText="Schedule progress %" type="number" step="any" />
         </div>
         <TextArea id="narrative" name="narrative" labelText="Narrative" rows={3} />
         <Button type="submit" disabled={pending}>

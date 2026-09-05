@@ -63,7 +63,7 @@ export function NewInvoiceForm({
           id="taxablePaise"
           name="taxablePaise"
           labelText="Taxable amount (₹)"
-          type="number"
+          type="number" step="any"
           defaultValue="0"
         />
         <TextInput id="dateInvoice" name="dateInvoice" labelText="Invoice date" type="date" />

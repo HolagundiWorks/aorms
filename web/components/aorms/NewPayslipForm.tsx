@@ -25,8 +25,8 @@ export function NewPayslipForm({ members }: { members: MemberOption[] }) {
             ))}
           </Select>
           <TextInput id="month" name="month" labelText="Month" placeholder="2026-09" required />
-          <TextInput id="gross" name="gross" labelText="Gross (₹)" type="number" required />
-          <TextInput id="deductions" name="deductions" labelText="Deductions (₹)" type="number" />
+          <TextInput id="gross" name="gross" labelText="Gross (₹)" type="number" step="any" required />
+          <TextInput id="deductions" name="deductions" labelText="Deductions (₹)" type="number" step="any" />
         </div>
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Creating…" : "Create payslip"}

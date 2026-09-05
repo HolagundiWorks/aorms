@@ -27,7 +27,7 @@ export function NewTeamMemberForm() {
           </Select>
           <TextInput id="email" name="email" labelText="Email" type="email" />
           <TextInput id="phone" name="phone" labelText="Phone" />
-          <TextInput id="monthlySalary" name="monthlySalary" labelText="Monthly salary (₹)" type="number" />
+          <TextInput id="monthlySalary" name="monthlySalary" labelText="Monthly salary (₹)" type="number" step="any" />
           <TextInput id="dateJoined" name="dateJoined" labelText="Date joined" type="date" />
         </div>
         <Button type="submit" disabled={pending} size="sm">

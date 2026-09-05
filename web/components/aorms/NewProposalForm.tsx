@@ -60,10 +60,10 @@ export function NewProposalForm({ projects }: { projects: ProjectOption[] }) {
           id="costOfWorksPaise"
           name="costOfWorksPaise"
           labelText="Cost of works (₹)"
-          type="number"
+          type="number" step="any"
           defaultValue="0"
         />
-        <TextInput id="feePaise" name="feePaise" labelText="Fee (₹)" type="number" defaultValue="0" />
+        <TextInput id="feePaise" name="feePaise" labelText="Fee (₹)" type="number" step="any" defaultValue="0" />
         <TextArea id="scope" name="scope" labelText="Scope" rows={3} />
         <TextArea id="notes" name="notes" labelText="Notes" rows={2} />
         <Button type="submit" disabled={pending}>

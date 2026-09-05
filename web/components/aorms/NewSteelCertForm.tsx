@@ -26,8 +26,8 @@ export function NewSteelCertForm({ projects }: { projects: ProjectOption[] }) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
           <TextInput id="periodStart" name="periodStart" labelText="Period start" type="date" required />
           <TextInput id="periodEnd" name="periodEnd" labelText="Period end" type="date" required />
-          <TextInput id="issuedKg" name="issuedKg" labelText="Issued (kg)" type="number" />
-          <TextInput id="consumedKg" name="consumedKg" labelText="Consumed (kg)" type="number" />
+          <TextInput id="issuedKg" name="issuedKg" labelText="Issued (kg)" type="number" step="any" />
+          <TextInput id="consumedKg" name="consumedKg" labelText="Consumed (kg)" type="number" step="any" />
         </div>
         <TextArea id="narrative" name="narrative" labelText="Narrative" rows={2} />
         <Button type="submit" disabled={pending}>

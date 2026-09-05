@@ -43,7 +43,7 @@ export function NewPurchaseOrderForm({ projects }: { projects: ProjectOption[] }
         </Select>
         <TextInput id="vendor" name="vendor" labelText="Vendor" />
         <TextInput id="title" name="title" labelText="Title" />
-        <TextInput id="totalPaise" name="totalPaise" labelText="Total (₹)" type="number" defaultValue="0" />
+        <TextInput id="totalPaise" name="totalPaise" labelText="Total (₹)" type="number" step="any" defaultValue="0" />
         <TextInput id="datePo" name="datePo" labelText="PO date" type="date" />
         <TextArea id="notes" name="notes" labelText="Notes" rows={2} />
         <Button type="submit" disabled={pending}>

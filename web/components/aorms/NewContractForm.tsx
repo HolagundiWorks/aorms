@@ -44,7 +44,7 @@ export function NewContractForm({ projects }: { projects: ProjectOption[] }) {
           <SelectItem value="CONSULTANT" text="Consultant" />
           <SelectItem value="VENDOR" text="Vendor" />
         </Select>
-        <TextInput id="valuePaise" name="valuePaise" labelText="Value (₹)" type="number" defaultValue="0" />
+        <TextInput id="valuePaise" name="valuePaise" labelText="Value (₹)" type="number" step="any" defaultValue="0" />
         <TextInput id="startDate" name="startDate" labelText="Start date" type="date" />
         <TextInput id="endDate" name="endDate" labelText="End date" type="date" />
         <Button type="submit" disabled={pending}>

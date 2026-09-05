@@ -20,8 +20,8 @@ export function NewRaLineForm({ billId }: { billId: string }) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
           <TextInput id="description" name="description" labelText="Description" required />
           <TextInput id="unit" name="unit" labelText="Unit" />
-          <TextInput id="thisQty" name="thisQty" labelText="This period qty" type="number" required />
-          <TextInput id="rate" name="rate" labelText="Rate (₹)" type="number" required />
+          <TextInput id="thisQty" name="thisQty" labelText="This period qty" type="number" step="any" required />
+          <TextInput id="rate" name="rate" labelText="Rate (₹)" type="number" step="any" required />
         </div>
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Adding…" : "Add line"}

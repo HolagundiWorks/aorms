@@ -28,7 +28,7 @@ export function NewRateBookItemForm({ rateBookId }: { rateBookId: string }) {
         <TextInput id="itemCode" name="itemCode" labelText="Item code" />
         <TextInput id="description" name="description" labelText="Description" required />
         <TextInput id="unit" name="unit" labelText="Unit" placeholder="e.g. sqm, cum, nos" required />
-        <TextInput id="ratePaise" name="ratePaise" labelText="Rate (₹)" type="number" defaultValue="0" />
+        <TextInput id="ratePaise" name="ratePaise" labelText="Rate (₹)" type="number" step="any" defaultValue="0" />
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Adding…" : "Add item"}
         </Button>
