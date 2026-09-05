@@ -79,6 +79,7 @@ export default async function ProjectDetailPage({
         </div>
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: "2rem" }}>
+          <Link href={`/projects/${project.id}/brief`}>Project Brief →</Link>
           <Link href={`/projects/${project.id}/cpi`}>Client–Project Intelligence (CPI) →</Link>
           <Link href={`/projects/${project.id}/dna`}>Project DNA →</Link>
           <Link href={`/projects/${project.id}/assessment`}>Pre-Project Assessment →</Link>
