@@ -5,11 +5,16 @@
 --
 -- NOT ported here: the upload path itself. registerDrawingUpload() is a raw
 -- Fastify multipart route (content-hash de-dup, DXF/DWG/PDF sniffing,
--- rate-limited) that becomes a Next.js Route Handler, not a table — no DDL
--- involved, tracked as UI/route work, not schema work.
+-- rate-limited) — no DDL involved, tracked as UI/route work, not schema work.
 -- dxf_to_svg worker job (SVG conversion) still depends on Phase 6's
 -- Redis-Streams/worker decision, same as Phase 3's PDF-render dependency —
 -- the table ships regardless; svg_key just stays null until that lands.
+--
+-- Update 2026-09-06: both landed — see Phase 6's row in ROADMAP-CLOUD.md.
+-- The upload path shipped as a Server Action (web/lib/actions/drawings.ts,
+-- core logic in web/lib/drawings/upload.ts), not a Route Handler as first
+-- guessed above — Next.js Server Actions accept a real file input's File
+-- natively via FormData, no separate multipart route needed after all.
 
 create table public.drawings (
   id uuid primary key default gen_random_uuid(),

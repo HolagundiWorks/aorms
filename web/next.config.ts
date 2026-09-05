@@ -15,6 +15,15 @@ const nextConfig: NextConfig = {
   sassOptions: {
     includePaths: ["./styles"],
   },
+  experimental: {
+    // Server Actions default to a 1MB body — too small for the drawings
+    // upload Server Action (DRAWING_MAX_BYTES is 25MB, matching the old
+    // backend's Fastify multipart route). Matches that cap exactly rather
+    // than picking an arbitrary bigger number.
+    serverActions: {
+      bodySizeLimit: "25mb",
+    },
+  },
 };
 
 export default nextConfig;

@@ -1,15 +1,15 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
-import { createDrawingRecord, type DrawingActionState } from "../../lib/actions/drawings";
+import { Button, FileUploader, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
+import { uploadDrawing, type DrawingActionState } from "../../lib/actions/drawings";
 
 type ProjectOption = { id: string; title: string };
 
 const initialState: DrawingActionState = null;
 
 export function NewDrawingForm({ projects }: { projects: ProjectOption[] }) {
-  const [state, formAction, pending] = useActionState(createDrawingRecord, initialState);
+  const [state, formAction, pending] = useActionState(uploadDrawing, initialState);
 
   return (
     <Form action={formAction}>
@@ -17,19 +17,12 @@ export function NewDrawingForm({ projects }: { projects: ProjectOption[] }) {
         {state?.error && (
           <InlineNotification
             kind="error"
-            title="Could not create drawing"
+            title="Could not upload drawing"
             subtitle={state.error}
             hideCloseButton
             lowContrast
           />
         )}
-        <InlineNotification
-          kind="info"
-          title="Upload not wired up yet"
-          subtitle="This registers a drawing entry; the actual DXF/PDF upload path lands separately."
-          hideCloseButton
-          lowContrast
-        />
         <Select id="projectId" name="projectId" labelText="Project" defaultValue="">
           <SelectItem value="" text="— Select a project —" />
           {projects.map((p) => (
@@ -37,9 +30,17 @@ export function NewDrawingForm({ projects }: { projects: ProjectOption[] }) {
           ))}
         </Select>
         <TextInput id="title" name="title" labelText="Title" required />
-        <TextInput id="fileName" name="fileName" labelText="File name" placeholder="e.g. GF-Plan.dxf" required />
+        <FileUploader
+          id="file"
+          name="file"
+          labelTitle="File"
+          labelDescription="DXF (worker-rendered SVG + takeoff) or PDF (plan sheet), 25 MB max."
+          buttonLabel="Choose file"
+          accept={[".dxf", ".pdf"]}
+          filenameStatus="edit"
+        />
         <Button type="submit" disabled={pending}>
-          {pending ? "Creating…" : "Register drawing"}
+          {pending ? "Uploading…" : "Upload drawing"}
         </Button>
       </Stack>
     </Form>

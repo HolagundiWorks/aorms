@@ -11,6 +11,8 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { NewDrawingForm } from "../../../components/aorms/NewDrawingForm";
+import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { generateDrawingIssuePdf } from "../../../lib/actions/drawings";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   PENDING: "gray",
@@ -24,7 +26,9 @@ export default async function DrawingsPage() {
   const [{ data: drawings, error }, { data: projects }] = await Promise.all([
     supabase
       .from("drawings")
-      .select("id, ref, title, file_name, status, review_status, rev_no, project_offices(title)")
+      .select(
+        "id, ref, title, file_name, status, error_text, svg_key, issue_pdf_status, review_status, rev_no, project_offices(title)",
+      )
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
@@ -56,6 +60,7 @@ export default async function DrawingsPage() {
                 <TableHeader>Rev</TableHeader>
                 <TableHeader>Review</TableHeader>
                 <TableHeader>Status</TableHeader>
+                <TableHeader>Issue-set PDF</TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -74,13 +79,25 @@ export default async function DrawingsPage() {
                       <Tag type={STATUS_TAG[d.status] ?? "gray"} size="sm">
                         {d.status}
                       </Tag>
+                      {d.status === "FAILED" && d.error_text && (
+                        <p className="cds--type-helper-text-01" style={{ color: "var(--cds-support-error)", marginTop: "0.25rem" }}>
+                          {d.error_text}
+                        </p>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <GeneratePdfButton
+                        action={generateDrawingIssuePdf.bind(null, d.id)}
+                        pdfStatus={d.issue_pdf_status}
+                        label="Generate issue-set PDF"
+                      />
                     </TableCell>
                   </TableRow>
                 );
               })}
               {(drawings ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6}>
+                  <TableCell colSpan={7}>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                       No drawings yet.
                     </p>

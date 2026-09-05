@@ -1,15 +1,15 @@
 # Phase 6 repo audit — Advanced processing (PDF/DWG, Python worker)
 
-**Status:** ✅ Functionally complete. Hosting-topology question RESOLVED
-(2026-09-05, sourced — see the new section below); worker/db.py + storage.py
-ported for every domain with a Supabase table; the enqueue boundary
-(`gateway/`) built and live-verified; all 10 buildable render targets wired
-into their screens (`drawings` deliberately excluded — no upload pipeline
-exists yet to ever populate a real `svg_key`). See
-[ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)'s Phase 6 row for the full account.
-What's left: only the actual VPS deployment of `gateway/` (see
-`gateway/README.md`'s runbook) — no more code.
-**Date:** 2026-09-04 (audit), resolved 2026-09-05, enqueue boundary + all screens wired 2026-09-05
+**Status:** ✅ Functionally complete, drawings included. Hosting-topology
+question RESOLVED (2026-09-05, sourced — see the new section below);
+worker/db.py + storage.py ported for every domain with a Supabase table;
+the enqueue boundary (`gateway/`) built and live-verified; all 11 render
+targets wired into their screens — `drawings`' own upload pipeline (the
+thing that was blocking it) shipped 2026-09-06, closing the one gap this
+audit originally left open. See [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)'s
+Phase 6 row for the full account. What's left: only the actual VPS
+deployment of `gateway/` (see `gateway/README.md`'s runbook) — no more code.
+**Date:** 2026-09-04 (audit), resolved 2026-09-05, enqueue boundary + 10 screens wired 2026-09-05, drawings' upload pipeline + wiring 2026-09-06
 **Scope:** Per [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) § 36–37
 and [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)'s Phase 6 definition — the Python
 worker (`worker/`), the Redis Streams job bus that feeds it, and every PDF/DXF/
@@ -194,28 +194,39 @@ detail-page header). The remaining domains use the identical shared code
 path already proven working, not a new one. All smoke-test rows deleted
 afterward.
 
-**`drawings` deliberately NOT wired** — its issue-set PDF target needs a
-real `svg_key`, which only ever gets populated by a real DXF upload +
-`dxf_to_svg` job, and that upload Route Handler doesn't exist
-(`createDrawingRecord` still writes a placeholder `file_hash`/
-`storage_key` — Phase 4's own flagged gap). A "Generate PDF" button here
-would be a UI element with nothing real behind it — the same principle
-this session applied to the CPI aggregates strip and Project Brief's own
-omitted context row.
+**`drawings` wired too, 2026-09-06** — its issue-set PDF target needed a
+real `svg_key`, which only a real DXF upload + `dxf_to_svg` job populates,
+and that upload Route Handler (Phase 4's own flagged gap, `createDrawingRecord`
+previously wrote only a placeholder `file_hash`/`storage_key`) is now built:
+`uploadDrawing()`/`uploadDrawingCore()` (a Next.js Server Action, split into
+a plain-function core + thin "use server" wrapper), content-addressed
+storage in a new `esti-documents` Supabase Storage bucket, DWG/DXF/PDF magic-
+byte sniffing ported verbatim from `backend/src/lib/filetype.ts`, revision
+chaining, and a `dxf_to_svg` enqueue on real DXF uploads. `generateDrawingIssuePdf()`
+(a small dedicated action, not `generatePdfForTarget()` — drawings uses
+`issue_pdf_key`/`issue_pdf_status`, not the common column names) guards on
+`status === "READY" && svg_key`, mirroring the old worker's own
+`ValueError("drawing/svg not found")` check. Live-verified against the real
+Supabase project (a temporary test Route Handler calling the plain core
+function directly, since this session's browser tools can't drive a native
+file-picker — see ROADMAP-CLOUD.md's Phase 6 row for the full account):
+real DXF → real content-addressed storage object → real `drawings` row →
+real `dxf_to_svg` job with the exact expected payload; a bogus file
+correctly rejected; a PDF correctly skipped the queue straight to `READY`;
+the issue-set PDF button correctly blocked until `svg_key` exists, then
+correctly enqueued once it did (simulated the worker's completion by hand,
+no live worker running). All smoke-test data deleted afterward.
 
 ### What's still open after this pass
 
 - **The actual VPS deployment** of `gateway/` — build, DNS, certbot, nginx
   reload. Everything needed is written (`gateway/README.md`'s numbered
   steps); none of it has been run against production. This is the only
-  thing left in Phase 6 — no more code.
+  thing left in Phase 6 — no more code, drawings included.
 - **`inspection`, `measurement_book`, `reconcile`** stay un-migrated — no
   Supabase table backs any of the three yet (see db.py's own module
   docstring for why each specifically). Not this pass's job to invent those
   tables.
-- **`drawings`' upload pipeline** — a separate, pre-existing Phase 4 gap
-  this pass didn't attempt to close; once it exists, drawings' PDF wiring
-  is the same few lines as every other domain here.
 
 ---
 
