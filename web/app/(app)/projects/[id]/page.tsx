@@ -9,19 +9,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Tag,
 } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewPhaseForm } from "../../../../components/aorms/NewPhaseForm";
-
-const STATUS_TAG: Record<string, "green" | "blue" | "gray" | "purple" | "teal"> = {
-  ENQUIRY: "gray",
-  PROPOSAL: "purple",
-  ACTIVE: "green",
-  ON_HOLD: "blue",
-  COMPLETED: "teal",
-  ARCHIVED: "gray",
-};
+import { ProjectStatusSelect } from "../../../../components/aorms/ProjectStatusSelect";
+import { ActivationGate } from "../../../../components/aorms/ActivationGate";
+import { getActivationGate } from "../../../../lib/actions/activation";
 
 export default async function ProjectDetailPage({
   params,
@@ -63,6 +56,8 @@ export default async function ProjectDetailPage({
     ? project.clients[0]?.name
     : (project.clients as { name: string } | null)?.name;
 
+  const gate = await getActivationGate(project.id);
+
   return (
     <Grid style={{ padding: "2rem" }}>
       <Column sm={4} md={8} lg={16}>
@@ -76,18 +71,34 @@ export default async function ProjectDetailPage({
           {project.title}
         </h1>
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem" }}>
-          <Tag type={STATUS_TAG[project.status] ?? "gray"} size="sm">
-            {project.status}
-          </Tag>
+          <ProjectStatusSelect projectId={project.id} status={project.status} />
           <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
             {clientName ?? "No client"} · {project.project_type} · {project.work_type}
             {project.city ? ` · ${project.city}` : ""}
           </span>
         </div>
 
-        <p style={{ marginBottom: "2rem" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: "2rem" }}>
           <Link href={`/projects/${project.id}/cpi`}>Client–Project Intelligence (CPI) →</Link>
-        </p>
+          <Link href={`/projects/${project.id}/dna`}>Project DNA →</Link>
+          <Link href={`/projects/${project.id}/assessment`}>Pre-Project Assessment →</Link>
+          <Link href={`/projects/${project.id}/feasibility`}>Feasibility Reports →</Link>
+          <Link href={`/projects/${project.id}/negotiation`}>Negotiation →</Link>
+          <Link href={`/projects/${project.id}/program`}>Program →</Link>
+          <Link href={`/projects/${project.id}/onboarding`}>Client Onboarding →</Link>
+          <Link href={`/projects/${project.id}/precon`}>Pre-Construction R&amp;O →</Link>
+        </div>
+
+        {project.status !== "ACTIVE" && project.status !== "COMPLETED" && project.status !== "CANCELLED" && (
+          <>
+            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+              Activation gate
+            </h2>
+            <div style={{ marginBottom: "2rem" }}>
+              <ActivationGate projectId={project.id} gate={gate} />
+            </div>
+          </>
+        )}
 
         <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
           Phases

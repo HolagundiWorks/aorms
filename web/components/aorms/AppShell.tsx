@@ -34,6 +34,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SideNav aria-label="Side navigation" isFixedNav expanded isChildOfHeader={false}>
         <SideNavItems>
           <SideNavLink href="/dashboard">Dashboard</SideNavLink>
+          <SideNavLink href="/leads">Leads</SideNavLink>
           <SideNavLink href="/clients">Clients</SideNavLink>
           <SideNavLink href="/projects">Projects</SideNavLink>
           <SideNavLink href="/tasks">Tasks</SideNavLink>
