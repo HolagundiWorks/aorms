@@ -2,9 +2,12 @@
 
 **Status:** ✅ Hosting-topology question RESOLVED (2026-09-05, sourced —
 see the new section below); worker/db.py + storage.py ported for every
-domain with a Supabase table; see [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)'s
-Phase 6 row for the full account.
-**Date:** 2026-09-04 (audit), resolved 2026-09-05
+domain with a Supabase table; the enqueue boundary (`gateway/`) built and
+live-verified, with one representative screen (`/invoices`) wired end to
+end. See [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)'s Phase 6 row for the full
+account. What's left: the other 10 render targets' own "Generate PDF"
+wiring, and the actual VPS deployment of `gateway/` (see `gateway/README.md`).
+**Date:** 2026-09-04 (audit), resolved 2026-09-05, enqueue boundary built 2026-09-05
 **Scope:** Per [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md) § 36–37
 and [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md)'s Phase 6 definition — the Python
 worker (`worker/`), the Redis Streams job bus that feeds it, and every PDF/DXF/
@@ -111,19 +114,69 @@ queue-redesign branch. Concretely:
   was verified (live, against the real project, not just read from the
   code).
 
+### The enqueue boundary — built and live-verified (2026-09-05)
+
+A new standalone service, [`gateway/`](../../gateway/README.md) (its own
+README has the full deploy runbook) — no framework, ~150 lines, one real
+route:
+
+- `POST /jobs` — bearer-token auth (`crypto.timingSafeEqual`, not `===`),
+  validates `type` against the same four job types the worker knows, and
+  `XADD`s onto the exact same stream/field shape
+  `backend/src/lib/redis.ts`'s `enqueueJob()` used. `worker/esti_worker/
+  main.py` needed **zero changes** — it can't tell the difference between a
+  job produced by the old backend and one produced here.
+- `GET /healthz` — liveness, unauthenticated, for the reverse proxy.
+
+Verified live, in two stages:
+
+1. **Wire-format proof, no application code involved**: an ephemeral podman
+   Redis + the built gateway image, driven with raw `curl` — confirmed
+   `/healthz` (200), missing/wrong bearer token (401 both), an unknown job
+   `type` (400), a non-object `payload` (400), and a valid enqueue (202 with
+   a real stream id). Then read the actual stream entry back with
+   `XRANGE` **and** simulated the worker's own consumer-group read with
+   `XGROUP CREATE` + `XREADGROUP` (the exact call `main.py` makes) — both
+   returned the identical `type`/`payload` fields the gateway wrote,
+   confirming byte-for-byte compatibility with the unmodified Python
+   consumer, not just that the gateway's own code is internally consistent.
+2. **Real browser click-through**: wired ONE representative screen —
+   `web/lib/actions/invoices.ts`'s new `generateInvoicePdf()` Server Action,
+   a "Generate PDF" button on `/invoices` — pointed at a locally-running
+   gateway + Redis (`JOBS_GATEWAY_URL`/`JOBS_GATEWAY_TOKEN` in `web/.env`,
+   removed again afterward since they pointed at throwaway local
+   containers). Clicked the real button on the real dev server against the
+   real existing invoice `INV/2026-27/0001` — confirmed the exact job
+   landed on Redis with the correct invoice id and a firm-fields payload
+   correctly mapped from the `firm` table's columns into the flat shape
+   `pdf.py`'s HTML templates expect. Then removed the env vars and
+   confirmed the button surfaces a clear `JobEnqueueError` in the UI
+   ("the enqueue boundary isn't deployed yet") rather than crashing, when
+   the gateway isn't configured — the state every other, not-yet-wired
+   screen and this screen in any environment before the VPS deploy step
+   will actually be in.
+
+`web/lib/jobs/enqueue.ts` is the shared client every future
+"Generate PDF"/"Convert to SVG" wiring should call — the same few lines
+`invoices.ts` uses, repeated on the other 10 screens.
+
+`compose.prod.yaml` gained a `jobs-gateway` service block (bound to
+`127.0.0.1`, same as every other backend service there) and
+`deploy/nginx-proxy.conf` gained a `jobs.DOMAIN_PLACEHOLDER` server block —
+both template-only, **not deployed to the live VPS** (no deploy access from
+this session; `gateway/README.md`'s "Production deployment" section is the
+actual runbook for whoever has it).
+
 ### What's still open after this pass
 
-- **The enqueue boundary itself** — a small authenticated HTTP service on the
-  VPS that `web/`'s Server Actions call to XADD a job (Redis stays
-  internal-only behind it). Not built this pass — needs its own
-  implementation + a real VPS deployment step this session had no access to
-  perform or verify live.
-- **Wiring "Generate PDF" / "Convert to SVG" actions into `web/`'s existing
-  screens** (Invoices, Proposals, Letters, Transmittals, Spec Sheets,
-  Drawings, Payslips, Progress Reports, Site Instructions, PMC RA Bills,
-  Feasibility Reports) — none of these screens call the worker yet; today
-  they only read/write the row's own fields. This is real, separate,
-  per-screen UI work, sequenced after the enqueue boundary exists.
+- **The actual VPS deployment** of `gateway/` — build, DNS, certbot, nginx
+  reload. Everything needed is written (`gateway/README.md`'s numbered
+  steps); none of it has been run against production.
+- **Wiring "Generate PDF" / "Convert to SVG" actions into the other 10
+  screens** (Proposals, Letters, Transmittals, Spec Sheets, Drawings,
+  Payslips, Progress Reports, Site Instructions, PMC RA Bills, Feasibility
+  Reports) — `/invoices` is the one proof-of-pattern; the rest is the same
+  few lines repeated per screen, real remaining work.
 - **`inspection`, `measurement_book`, `reconcile`** stay un-migrated — no
   Supabase table backs any of the three yet (see db.py's own module
   docstring for why each specifically). Not this pass's job to invent those

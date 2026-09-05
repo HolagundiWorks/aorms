@@ -222,6 +222,33 @@ services:
         condition: service_healthy
       esti-redis:
         condition: service_healthy
+
+  # ── Jobs gateway (Phase 6 enqueue boundary) ──────────────────────────────────
+  # Authenticated HTTP boundary in front of esti-redis's job stream, so web/
+  # (deployed on Hostinger, not this VPS) can enqueue a job over HTTPS —
+  # see docs/esti/NEXTJS-MIGRATION-PHASE6-AUDIT.md and gateway/'s own README.
+  # Bound to 127.0.0.1 only, same as every other backend service here — the
+  # host nginx (deploy/nginx-proxy.conf's jobs.DOMAIN_PLACEHOLDER block)
+  # terminates TLS and proxies to it, not the container's own port directly.
+  jobs-gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: esti-jobs-gateway
+    restart: always
+    env_file: .env
+    environment:
+      REDIS_URL:          ${REDIS_URL}
+      WORKER_JOB_STREAM:  ${WORKER_JOB_STREAM:-esti:jobs}
+      JOBS_GATEWAY_TOKEN: ${JOBS_GATEWAY_TOKEN:?set a long random token — see gateway/.env.example}
+      PORT:               "4100"
+    ports:
+      - "127.0.0.1:4100:4100"
+    networks:
+      - esti-network
+    depends_on:
+      esti-redis:
+        condition: service_healthy
       esti-minio:
         condition: service_started
 

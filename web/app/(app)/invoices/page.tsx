@@ -11,6 +11,7 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { NewInvoiceForm } from "../../../components/aorms/NewInvoiceForm";
+import { GenerateInvoicePdfButton } from "../../../components/aorms/GenerateInvoicePdfButton";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -31,7 +32,7 @@ export default async function InvoicesPage() {
     supabase
       .from("invoices")
       .select(
-        "id, ref, status, gst_system, document_kind, taxable_paise, grand_total_paise, paid_paise, date_invoice, project_offices(title), clients(name)",
+        "id, ref, status, gst_system, document_kind, taxable_paise, grand_total_paise, paid_paise, date_invoice, pdf_status, project_offices(title), clients(name)",
       )
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
@@ -66,6 +67,7 @@ export default async function InvoicesPage() {
                 <TableHeader>Grand total</TableHeader>
                 <TableHeader>Paid</TableHeader>
                 <TableHeader>Status</TableHeader>
+                <TableHeader>PDF</TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -89,12 +91,15 @@ export default async function InvoicesPage() {
                         {inv.status}
                       </Tag>
                     </TableCell>
+                    <TableCell>
+                      <GenerateInvoicePdfButton invoiceId={inv.id} pdfStatus={inv.pdf_status} />
+                    </TableCell>
                   </TableRow>
                 );
               })}
               {(invoices ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7}>
+                  <TableCell colSpan={8}>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                       No invoices yet.
                     </p>
