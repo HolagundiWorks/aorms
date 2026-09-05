@@ -320,10 +320,28 @@ branch before starting anything that could overlap — not just at hand-off.
 > This means **`backend`/`worker` no longer run locally out of the box** —
 > both require an externally-supplied `DATABASE_URL` (compose fails fast
 > with a clear message if it's unset, rather than silently trying to reach
-> a `db` host that no longer exists). The old `esti-db-data` Podman volume
-> was *not* deleted (only unlinked from compose) — its data is still on
-> disk if ever needed for legacy debugging; recreate the `db` service
-> block from git history (`git log -- compose.yaml`) to reattach it.
+> a `db` host that no longer exists).
+>
+> **`backend`'s Postgres/Drizzle dependencies removed entirely (2026-09-05,
+> explicit user request, full production-impact tradeoff confirmed before
+> acting).** `pg`/`drizzle-orm`/`drizzle-kit`/`postgres` are gone from
+> `backend/package.json`, `backend/drizzle/` (the raw-Postgres migration
+> history — ~7,200 lines, 19+ files) is deleted, and the local `esti-db-data`
+> Podman volume (previously kept "for legacy debugging") is deleted too.
+> **This breaks `backend` completely, not just locally**: `backend/src`
+> imports `drizzle-orm` in 204 files, so `tsc` now fails with 500+ errors,
+> and `compose.prod.yaml` still runs its own **live production** Postgres
+> (`esti-db`, `postgres:16-alpine`) that the currently-deployed `backend`/
+> `worker` connect to via `DATABASE_URL` — the next rebuild/redeploy of
+> `backend` (from this repo state) will fail to build. This was a knowing,
+> explicit choice, not an accident: nothing has yet replaced `backend`'s
+> role in production (that's a separate, larger undertaking — either
+> `web/` fully replacing it, per the Next.js/Supabase migration in
+> progress, or some other retirement plan), so **do not attempt to
+> redeploy `backend` from this repo state** until that's resolved. If
+> `backend` still needs to run again before then, restoring the three
+> dependencies + `backend/drizzle/` from git history is the fastest path
+> back, not writing a new DB layer from scratch.
 
 - Source for `backend` is bind-mounted but `tsx watch` does not reload across
   the VM mount — `docker restart esti-backend` after backend changes.
@@ -334,10 +352,10 @@ branch before starting anything that could overlap — not just at hand-off.
 - After editing `packages/contracts`, rebuild it in the relevant container
   (`cd /app/esti/packages/contracts && pnpm build`).
 - Quick render check: `GET http://localhost:5173/src/<path>` should return 200.
-- `backend/drizzle/` still holds the old raw-Postgres migration history —
-  kept for reference, not applied anywhere locally anymore (no `db` service
-  to apply them to). New schema work happens in `web/supabase/migrations/`
-  against the live Supabase project instead — see the next bullet.
+- `backend/drizzle/` (the old raw-Postgres migration history) and
+  `backend`'s `pg`/`drizzle-orm`/`drizzle-kit`/`postgres` dependencies are
+  gone (2026-09-05, see the callout above) — all schema work happens in
+  `web/supabase/migrations/` against the live Supabase project now.
 - **Supabase migrations**: write a new numbered `.sql` file under
   `web/supabase/migrations/`, then apply it via the Supabase Management API
   (`POST https://api.supabase.com/v1/projects/{ref}/database/query`, authed

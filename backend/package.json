@@ -20,8 +20,6 @@
     "test:smtp": "tsx src/scripts/testSmtp.ts",
     "test:smtp:prod": "node dist/scripts/testSmtp.js",
     "setup:ollama": "tsx src/scripts/setupOllama.ts",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
     "seed": "tsx src/scripts/seed.ts",
     "seed:demo": "tsx src/scripts/seedDemo.ts",
     "migrate:workspace-profile": "tsx src/scripts/migrateWorkspaceProfileGate.ts",
@@ -39,17 +37,14 @@
     "@hcw/aorms-ai-kit": "workspace:*",
     "@node-rs/argon2": "^2.0.2",
     "@trpc/server": "^11.0.0",
-    "drizzle-orm": "^0.45.2",
     "fastify": "^5.12.3",
     "ioredis": "^5.4.1",
     "minio": "^8.0.1",
     "mongodb": "6",
-    "postgres": "^3.4.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
-    "drizzle-kit": "^0.31.10",
     "tsx": "^4.23.1",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"

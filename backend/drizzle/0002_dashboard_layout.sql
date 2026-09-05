@@ -1,1 +1,0 @@
-ALTER TABLE "esti_user" ADD COLUMN "dashboard_layout" jsonb;

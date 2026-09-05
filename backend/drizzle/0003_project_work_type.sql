@@ -1,1 +1,0 @@
-ALTER TABLE "esti_projectoffice" ADD COLUMN "work_type" text DEFAULT 'ARCHITECTURE' NOT NULL;

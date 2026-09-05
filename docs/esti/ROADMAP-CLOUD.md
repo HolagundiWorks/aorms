@@ -109,6 +109,23 @@ assignment below.) Whoever picks this up next: run each domain through an
 audit doc first, same as every phase here did — this list is the honest
 remainder, not a secret backlog.
 
+**`backend`'s Postgres/Drizzle dependencies removed entirely (2026-09-05,
+explicit user request, production tradeoff confirmed before acting).**
+`backend/drizzle/` (raw-Postgres migration history, ~7,200 lines) and the
+`pg`/`drizzle-orm`/`drizzle-kit`/`postgres` packages in `backend/package.json`
+are gone — see CLAUDE.md's Dev/verify loop callout for the full account. This
+is **not** the same as the local-Postgres removal above: `compose.prod.yaml`
+still runs its own live Postgres (`esti-db`) that the currently-deployed
+`backend`/`worker` connect to in production, and `backend/src` imports
+`drizzle-orm` in 204 files — `tsc` now fails with 500+ errors. **The live
+production backend cannot be rebuilt or redeployed from this repo state
+until something replaces its role** (most likely `web/` finishing the
+migration, per the Stack migration section above, but that's not decided
+here). Flagged loudly, not silently absorbed, because it's a real
+consequence, not a cleanup detail — restoring the three dependencies +
+`backend/drizzle/` from git history is the fastest path back if `backend`
+needs to run again before a replacement lands.
+
 **Phase 2 finished twice in parallel (2026-09-04) — collision, resolved.**
 A cloud-agent session (`claude/cloud-agent-roadmap-xnvtml`) and this local
 session both built the same `phases`/`tasks` slices independently and pushed
