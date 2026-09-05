@@ -5,17 +5,6 @@ import { createClient } from "../supabase/server";
 
 export type ProjectActionState = { error: string } | null;
 
-/**
- * Temporary ref scheme — esti_projectoffice.ref is normally issued by the
- * gap-free per-scope-per-FY sequence table (esti_sequence), not yet ported
- * (flagged in NEXTJS-MIGRATION-PHASE2-AUDIT.md as a cross-cutting piece with
- * no owning phase yet). Replace this with the real sequence once that lands.
- */
-function draftRef(): string {
-  const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
-  return `PRJ-${suffix}`;
-}
-
 export async function createProjectRecord(
   _prev: ProjectActionState,
   formData: FormData,
@@ -34,10 +23,20 @@ export async function createProjectRecord(
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Was a random placeholder (draftRef()) before Phase 10 — next_ref() existed
+  // since migration 0003 but this action predated it and was never switched
+  // over. Fixed here rather than knowingly introducing the same inconsistency
+  // for Phase 10's lead-conversion path, which creates project_offices rows too.
+  const { data: refData, error: refError } = await supabase.rpc("next_ref", {
+    p_scope: "projectoffice",
+    p_default_prefix: "PRJ",
+  });
+  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+
   const { data: inserted, error } = await supabase
     .from("project_offices")
     .insert({
-      ref: draftRef(),
+      ref: refData,
       title,
       project_type: projectType,
       work_type: workType,
