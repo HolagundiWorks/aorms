@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { grantRewardPoints } from "../../../lib/actions/hr";
+import { FormGrid } from "../FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -17,10 +18,10 @@ export function NewRewardPointsForm({ memberId }: { memberId: string }) {
         {state?.error && (
           <InlineNotification kind="error" title="Could not grant points" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <TextInput id="points" name="points" labelText="Points (+/-)" type="number" step="any" required />
           <TextInput id="reason" name="reason" labelText="Reason" required />
-        </div>
+        </FormGrid>
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Granting…" : "Grant points"}
         </Button>

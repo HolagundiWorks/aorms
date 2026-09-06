@@ -11,6 +11,7 @@ import {
   TextInput,
 } from "@carbon/react";
 import { createProjectRecord, type ProjectActionState } from "../../lib/actions/projects";
+import { FormGrid } from "./FormGrid";
 
 type ClientOption = { id: string; name: string };
 
@@ -31,27 +32,29 @@ export function NewProjectForm({ clients }: { clients: ClientOption[] }) {
             lowContrast
           />
         )}
-        <TextInput id="title" name="title" labelText="Project title" required />
-        <TextInput
-          id="projectType"
-          name="projectType"
-          labelText="Project type"
-          placeholder="e.g. Residential, Commercial"
-          required
-        />
-        <Select id="workType" name="workType" labelText="Work type" defaultValue="ARCHITECTURE">
-          <SelectItem value="ARCHITECTURE" text="Architecture" />
-          <SelectItem value="INTERIOR" text="Interior" />
-          <SelectItem value="LANDSCAPE" text="Landscape" />
-          <SelectItem value="MISC" text="Misc" />
-        </Select>
-        <Select id="clientId" name="clientId" labelText="Client" defaultValue="">
-          <SelectItem value="" text="— No client —" />
-          {clients.map((c) => (
-            <SelectItem key={c.id} value={c.id} text={c.name} />
-          ))}
-        </Select>
-        <TextInput id="city" name="city" labelText="City" />
+        <FormGrid>
+          <TextInput id="title" name="title" labelText="Project title" required />
+          <TextInput
+            id="projectType"
+            name="projectType"
+            labelText="Project type"
+            placeholder="e.g. Residential, Commercial"
+            required
+          />
+          <Select id="workType" name="workType" labelText="Work type" defaultValue="ARCHITECTURE">
+            <SelectItem value="ARCHITECTURE" text="Architecture" />
+            <SelectItem value="INTERIOR" text="Interior" />
+            <SelectItem value="LANDSCAPE" text="Landscape" />
+            <SelectItem value="MISC" text="Misc" />
+          </Select>
+          <Select id="clientId" name="clientId" labelText="Client" defaultValue="">
+            <SelectItem value="" text="— No client —" />
+            {clients.map((c) => (
+              <SelectItem key={c.id} value={c.id} text={c.name} />
+            ))}
+          </Select>
+          <TextInput id="city" name="city" labelText="City" />
+        </FormGrid>
         <Button type="submit" disabled={pending}>
           {pending ? "Creating…" : "Create project"}
         </Button>

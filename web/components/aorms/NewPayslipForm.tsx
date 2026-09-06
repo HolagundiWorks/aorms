@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { createPayslip } from "../../lib/actions/payslips";
+import { FormGrid } from "./FormGrid";
 
 type MemberOption = { id: string; name: string };
 type ActionState = { error: string } | null;
@@ -17,7 +18,7 @@ export function NewPayslipForm({ members }: { members: MemberOption[] }) {
         {state?.error && (
           <InlineNotification kind="error" title="Could not create payslip" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <Select id="teamMemberId" name="teamMemberId" labelText="Team member" defaultValue="">
             <SelectItem value="" text="— Select —" />
             {members.map((m) => (
@@ -27,7 +28,7 @@ export function NewPayslipForm({ members }: { members: MemberOption[] }) {
           <TextInput id="month" name="month" labelText="Month" placeholder="2026-09" required />
           <TextInput id="gross" name="gross" labelText="Gross (₹)" type="number" step="any" required />
           <TextInput id="deductions" name="deductions" labelText="Deductions (₹)" type="number" step="any" />
-        </div>
+        </FormGrid>
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Creating…" : "Create payslip"}
         </Button>

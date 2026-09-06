@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { markAttendance } from "../../../lib/actions/hr";
+import { FormGrid } from "../FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -18,7 +19,7 @@ export function NewAttendanceForm({ memberId }: { memberId: string }) {
         {state?.error && (
           <InlineNotification kind="error" title="Could not mark attendance" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <TextInput id="attendanceDate" name="attendanceDate" labelText="Date" type="date" required />
           <Select id="status" name="status" labelText="Status" defaultValue="PRESENT">
             {STATUSES.map((s) => (
@@ -26,7 +27,7 @@ export function NewAttendanceForm({ memberId }: { memberId: string }) {
             ))}
           </Select>
           <TextInput id="notes" name="notes" labelText="Notes" />
-        </div>
+        </FormGrid>
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Saving…" : "Mark attendance"}
         </Button>

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { saveOnboarding } from "../../lib/actions/onboarding";
+import { FormGrid } from "./FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -26,7 +27,7 @@ export function OnboardingForm({ projectId, values }: { projectId: string; value
           <InlineNotification kind="error" title="Could not save onboarding" subtitle={state.error} hideCloseButton lowContrast />
         )}
         <TextArea id="billingAddress" name="billingAddress" labelText="Billing address" rows={2} defaultValue={values?.billing_address ?? ""} />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <TextInput id="gstin" name="gstin" labelText="GSTIN" defaultValue={values?.gstin ?? ""} />
           <TextInput id="pan" name="pan" labelText="PAN" defaultValue={values?.pan ?? ""} />
           <Select id="communicationPreference" name="communicationPreference" labelText="Communication preference" defaultValue={values?.communication_preference ?? ""}>
@@ -36,16 +37,16 @@ export function OnboardingForm({ projectId, values }: { projectId: string; value
             <SelectItem value="PHONE" text="Phone" />
             <SelectItem value="PORTAL" text="Client portal" />
           </Select>
-        </div>
+        </FormGrid>
 
         <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
           Add an authorized representative (appends to the list)
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <TextInput id="repName" name="repName" labelText="Name" />
           <TextInput id="repDesignation" name="repDesignation" labelText="Designation" />
           <TextInput id="repPhone" name="repPhone" labelText="Phone" />
-        </div>
+        </FormGrid>
 
         <Button type="submit" disabled={pending}>
           {pending ? "Saving…" : "Save onboarding"}

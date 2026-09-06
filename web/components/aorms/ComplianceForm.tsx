@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { createComplianceRow, type ComplianceActionState } from "../../lib/actions/compliance";
 import type { ComplianceTable } from "../../lib/compliance-fields";
+import { FormGrid } from "./FormGrid";
 
 const initialState: ComplianceActionState = null;
 
@@ -34,7 +35,7 @@ export function ComplianceForm({
         {state?.error && (
           <InlineNotification kind="error" title="Could not save" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(14rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           {fields.map((f) => (
             <TextInput
               key={f.name}
@@ -44,7 +45,7 @@ export function ComplianceForm({
               required={f.required}
             />
           ))}
-        </div>
+        </FormGrid>
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Saving…" : "Add row"}
         </Button>

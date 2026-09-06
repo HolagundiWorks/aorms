@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Checkbox, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { convertLead, type ConvertActionState } from "../../lib/actions/leads";
+import { FormGrid } from "./FormGrid";
 
 type ClientOption = { id: string; name: string };
 const initialState: ConvertActionState = null;
@@ -23,20 +24,22 @@ export function ConvertLeadForm({ leadId, clients }: { leadId: string; clients: 
         {state?.error && (
           <InlineNotification kind="error" title="Could not convert lead" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <Select id="clientId" name="clientId" labelText="Existing client (optional)" defaultValue="">
-          <SelectItem value="" text="— Create a new client from this lead —" />
-          {clients.map((c) => (
-            <SelectItem key={c.id} value={c.id} text={c.name} />
-          ))}
-        </Select>
-        <TextInput id="projectTitle" name="projectTitle" labelText="Project title" required />
-        <TextInput id="projectType" name="projectType" labelText="Project type" placeholder="e.g. Residential Architecture" required />
-        <Select id="workType" name="workType" labelText="Work type" defaultValue="ARCHITECTURE">
-          <SelectItem value="ARCHITECTURE" text="Architecture" />
-          <SelectItem value="INTERIOR" text="Interior" />
-          <SelectItem value="LANDSCAPE" text="Landscape" />
-          <SelectItem value="MISC" text="Misc" />
-        </Select>
+        <FormGrid>
+          <Select id="clientId" name="clientId" labelText="Existing client (optional)" defaultValue="">
+            <SelectItem value="" text="— Create a new client from this lead —" />
+            {clients.map((c) => (
+              <SelectItem key={c.id} value={c.id} text={c.name} />
+            ))}
+          </Select>
+          <TextInput id="projectTitle" name="projectTitle" labelText="Project title" required />
+          <TextInput id="projectType" name="projectType" labelText="Project type" placeholder="e.g. Residential Architecture" required />
+          <Select id="workType" name="workType" labelText="Work type" defaultValue="ARCHITECTURE">
+            <SelectItem value="ARCHITECTURE" text="Architecture" />
+            <SelectItem value="INTERIOR" text="Interior" />
+            <SelectItem value="LANDSCAPE" text="Landscape" />
+            <SelectItem value="MISC" text="Misc" />
+          </Select>
+        </FormGrid>
         <Checkbox
           id="conflictCheckDone"
           name="conflictCheckDone"

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { createContractor, type ContractorActionState } from "../../lib/actions/contractors";
+import { FormGrid } from "./FormGrid";
 
 const initialState: ContractorActionState = null;
 
@@ -32,7 +33,7 @@ export function NewContractorForm() {
         {state?.error && (
           <InlineNotification kind="error" title="Could not add contractor" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(14rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <TextInput id="name" name="name" labelText="Name" required />
           <Select id="category" name="category" labelText="Category" defaultValue="GENERAL">
             {Object.entries(CATEGORIES).map(([code, label]) => (
@@ -45,7 +46,7 @@ export function NewContractorForm() {
           <TextInput id="phone" name="phone" labelText="Phone" />
           <TextInput id="city" name="city" labelText="City" />
           <TextInput id="state" name="state" labelText="State" />
-        </div>
+        </FormGrid>
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Adding…" : "Add contractor"}
         </Button>

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { createOpportunity } from "../../lib/actions/project-precon";
+import { FormGrid } from "./FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -23,7 +24,7 @@ export function NewOpportunityForm({ projectId }: { projectId: string }) {
           <InlineNotification kind="error" title="Could not add opportunity" subtitle={state.error} hideCloseButton lowContrast />
         )}
         <TextInput id="title" name="title" labelText="Title" required />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(10rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <Select id="source" name="source" labelText="Source" defaultValue="WORKSHOP">
             <SelectItem value="WORKSHOP" text="Workshop" />
             <SelectItem value="DESIGN_REVIEW" text="Design review" />
@@ -47,7 +48,7 @@ export function NewOpportunityForm({ projectId }: { projectId: string }) {
             <SelectItem value="ACCEPT" text="Accept" />
           </Select>
           <TextInput id="owner" name="owner" labelText="Owner" />
-        </div>
+        </FormGrid>
         <TextArea id="actionPlan" name="actionPlan" labelText="Action plan" rows={2} />
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Adding…" : "Add opportunity"}

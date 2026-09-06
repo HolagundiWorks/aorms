@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { createStandardFile, type StandardFileActionState } from "../../lib/actions/standards";
+import { FormGrid } from "./FormGrid";
 
 const initialState: StandardFileActionState = null;
 const KINDS = ["PDF", "DWG", "IMAGE", "OTHER"];
@@ -24,12 +25,14 @@ export function NewStandardFileForm({ standardId }: { standardId: string }) {
           hideCloseButton
           lowContrast
         />
-        <TextInput id="fileName" name="fileName" labelText="File name" required />
-        <Select id="kind" name="kind" labelText="Kind" defaultValue="PDF">
-          {KINDS.map((k) => (
-            <SelectItem key={k} value={k} text={k} />
-          ))}
-        </Select>
+        <FormGrid>
+          <TextInput id="fileName" name="fileName" labelText="File name" required />
+          <Select id="kind" name="kind" labelText="Kind" defaultValue="PDF">
+            {KINDS.map((k) => (
+              <SelectItem key={k} value={k} text={k} />
+            ))}
+          </Select>
+        </FormGrid>
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Registering…" : "Add file"}
         </Button>

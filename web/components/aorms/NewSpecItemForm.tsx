@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { createSpecItemRecord, type SpecItemActionState } from "../../lib/actions/spec-sheets";
+import { FormGrid } from "./FormGrid";
 
 const initialState: SpecItemActionState = null;
 
@@ -22,11 +23,13 @@ export function NewSpecItemForm({ specSheetId }: { specSheetId: string }) {
             lowContrast
           />
         )}
-        <TextInput id="category" name="category" labelText="Category" placeholder="e.g. Flooring" />
-        <TextInput id="item" name="item" labelText="Item" required />
-        <TextInput id="make" name="make" labelText="Make" />
-        <TextInput id="specification" name="specification" labelText="Specification" />
-        <TextInput id="finish" name="finish" labelText="Finish" />
+        <FormGrid>
+          <TextInput id="category" name="category" labelText="Category" placeholder="e.g. Flooring" />
+          <TextInput id="item" name="item" labelText="Item" required />
+          <TextInput id="make" name="make" labelText="Make" />
+          <TextInput id="specification" name="specification" labelText="Specification" />
+          <TextInput id="finish" name="finish" labelText="Finish" />
+        </FormGrid>
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Adding…" : "Add item"}
         </Button>

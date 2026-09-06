@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea } from "@carbon/react";
 import { saveProjectDna } from "../../lib/actions/project-dna";
+import { FormGrid } from "./FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -79,7 +80,7 @@ export function ProjectDnaForm({ projectId, values }: { projectId: string; value
         {state?.error && (
           <InlineNotification kind="error" title="Could not save DNA" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(14rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           {(Object.keys(OPTIONS) as (keyof typeof OPTIONS)[]).map((field) => (
             <Select key={field} id={field} name={field} labelText={LABELS[field]} defaultValue={current[field]}>
               <SelectItem value="" text="— Select —" />
@@ -88,7 +89,7 @@ export function ProjectDnaForm({ projectId, values }: { projectId: string; value
               ))}
             </Select>
           ))}
-        </div>
+        </FormGrid>
         <TextArea id="customNotes" name="customNotes" labelText="Custom notes" rows={2} defaultValue={values?.custom_notes ?? ""} />
         <Button type="submit" disabled={pending}>
           {pending ? "Saving…" : "Save DNA"}

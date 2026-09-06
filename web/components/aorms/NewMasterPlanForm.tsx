@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { createMasterPlan, type MasterPlanActionState } from "../../lib/actions/master-plans";
+import { FormGrid } from "./FormGrid";
 
 const initialState: MasterPlanActionState = null;
 const CATEGORIES = ["PDF", "DWG", "IMAGE", "OTHER"];
@@ -23,14 +24,16 @@ export function NewMasterPlanForm() {
           hideCloseButton
           lowContrast
         />
-        <TextInput id="name" name="name" labelText="Name" required />
-        <Select id="category" name="category" labelText="Category" defaultValue="PDF">
-          {CATEGORIES.map((c) => (
-            <SelectItem key={c} value={c} text={c} />
-          ))}
-        </Select>
-        <TextInput id="fileName" name="fileName" labelText="File name" placeholder="e.g. Zoning-Master-Plan-2026.pdf" required />
-        <TextInput id="notes" name="notes" labelText="Notes" />
+        <FormGrid>
+          <TextInput id="name" name="name" labelText="Name" required />
+          <Select id="category" name="category" labelText="Category" defaultValue="PDF">
+            {CATEGORIES.map((c) => (
+              <SelectItem key={c} value={c} text={c} />
+            ))}
+          </Select>
+          <TextInput id="fileName" name="fileName" labelText="File name" placeholder="e.g. Zoning-Master-Plan-2026.pdf" required />
+          <TextInput id="notes" name="notes" labelText="Notes" />
+        </FormGrid>
         <Button type="submit" disabled={pending}>
           {pending ? "Registering…" : "Register plan"}
         </Button>

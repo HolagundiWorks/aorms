@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextArea, TextInput } from "@carbon/react";
 import { saveBasicInfo } from "../../../lib/actions/project-brief";
+import { FormGrid } from "../FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -30,7 +31,7 @@ export function BasicInfoForm({ projectId, values, readOnly }: { projectId: stri
         {state?.error && (
           <InlineNotification kind="error" title="Could not save" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(13rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <TextInput id="clientName" name="clientName" labelText="Client name" readOnly={readOnly} defaultValue={values?.clientName ?? ""} />
           <TextInput id="mobile" name="mobile" labelText="Mobile" readOnly={readOnly} defaultValue={values?.mobile ?? ""} />
           <TextInput id="email" name="email" labelText="Email" type="email" readOnly={readOnly} defaultValue={values?.email ?? ""} />
@@ -38,7 +39,7 @@ export function BasicInfoForm({ projectId, values, readOnly }: { projectId: stri
           <TextInput id="plotSize" name="plotSize" labelText="Plot size" readOnly={readOnly} defaultValue={values?.plotSize ?? ""} />
           <TextInput id="terrain" name="terrain" labelText="Terrain" readOnly={readOnly} defaultValue={values?.terrain ?? ""} />
           <TextInput id="vegetation" name="vegetation" labelText="Vegetation" readOnly={readOnly} defaultValue={values?.vegetation ?? ""} />
-        </div>
+        </FormGrid>
         <TextArea id="currentAddress" name="currentAddress" labelText="Current address" rows={2} readOnly={readOnly} defaultValue={values?.currentAddress ?? ""} />
         <TextArea id="siteAddress" name="siteAddress" labelText="Site address" rows={2} readOnly={readOnly} defaultValue={values?.siteAddress ?? ""} />
         <TextArea id="orientationNotes" name="orientationNotes" labelText="Orientation notes" rows={2} readOnly={readOnly} defaultValue={values?.orientationNotes ?? ""} />

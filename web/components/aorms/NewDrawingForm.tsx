@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, FileUploader, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { uploadDrawing, type DrawingActionState } from "../../lib/actions/drawings";
+import { FormGrid } from "./FormGrid";
 
 type ProjectOption = { id: string; title: string };
 
@@ -23,13 +24,15 @@ export function NewDrawingForm({ projects }: { projects: ProjectOption[] }) {
             lowContrast
           />
         )}
-        <Select id="projectId" name="projectId" labelText="Project" defaultValue="">
-          <SelectItem value="" text="— Select a project —" />
-          {projects.map((p) => (
-            <SelectItem key={p.id} value={p.id} text={p.title} />
-          ))}
-        </Select>
-        <TextInput id="title" name="title" labelText="Title" required />
+        <FormGrid>
+          <Select id="projectId" name="projectId" labelText="Project" defaultValue="">
+            <SelectItem value="" text="— Select a project —" />
+            {projects.map((p) => (
+              <SelectItem key={p.id} value={p.id} text={p.title} />
+            ))}
+          </Select>
+          <TextInput id="title" name="title" labelText="Title" required />
+        </FormGrid>
         <FileUploader
           id="file"
           name="file"

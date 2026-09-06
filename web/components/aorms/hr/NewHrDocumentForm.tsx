@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { createHrDocument } from "../../../lib/actions/hr";
+import { FormGrid } from "../FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -25,7 +26,7 @@ export function NewHrDocumentForm({ memberId }: { memberId: string }) {
           hideCloseButton
           lowContrast
         />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <Select id="documentType" name="documentType" labelText="Document type" defaultValue="OTHER">
             {DOC_TYPES.map((t) => (
               <SelectItem key={t} value={t} text={t} />
@@ -34,7 +35,7 @@ export function NewHrDocumentForm({ memberId }: { memberId: string }) {
           <TextInput id="documentName" name="documentName" labelText="Document name" required />
           <TextInput id="issueDate" name="issueDate" labelText="Issue date" type="date" />
           <TextInput id="expiryDate" name="expiryDate" labelText="Expiry date" type="date" />
-        </div>
+        </FormGrid>
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Registering…" : "Add document"}
         </Button>

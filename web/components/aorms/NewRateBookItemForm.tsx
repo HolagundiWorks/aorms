@@ -6,6 +6,7 @@ import {
   createRateBookItemRecord,
   type RateBookItemActionState,
 } from "../../lib/actions/rate-books";
+import { FormGrid } from "./FormGrid";
 
 const initialState: RateBookItemActionState = null;
 
@@ -25,10 +26,12 @@ export function NewRateBookItemForm({ rateBookId }: { rateBookId: string }) {
             lowContrast
           />
         )}
-        <TextInput id="itemCode" name="itemCode" labelText="Item code" />
-        <TextInput id="description" name="description" labelText="Description" required />
-        <TextInput id="unit" name="unit" labelText="Unit" placeholder="e.g. sqm, cum, nos" required />
-        <TextInput id="ratePaise" name="ratePaise" labelText="Rate (₹)" type="number" step="any" defaultValue="0" />
+        <FormGrid>
+          <TextInput id="itemCode" name="itemCode" labelText="Item code" />
+          <TextInput id="description" name="description" labelText="Description" required />
+          <TextInput id="unit" name="unit" labelText="Unit" placeholder="e.g. sqm, cum, nos" required />
+          <TextInput id="ratePaise" name="ratePaise" labelText="Rate (₹)" type="number" step="any" defaultValue="0" />
+        </FormGrid>
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Adding…" : "Add item"}
         </Button>

@@ -11,6 +11,7 @@ import {
   TextInput,
 } from "@carbon/react";
 import { createContractRecord, type ContractActionState } from "../../lib/actions/contracts";
+import { FormGrid } from "./FormGrid";
 
 type ProjectOption = { id: string; title: string };
 
@@ -31,22 +32,24 @@ export function NewContractForm({ projects }: { projects: ProjectOption[] }) {
             lowContrast
           />
         )}
-        <Select id="projectId" name="projectId" labelText="Project" defaultValue="">
-          <SelectItem value="" text="— Firm-level (no project) —" />
-          {projects.map((p) => (
-            <SelectItem key={p.id} value={p.id} text={p.title} />
-          ))}
-        </Select>
-        <TextInput id="title" name="title" labelText="Title" required />
-        <TextInput id="party" name="party" labelText="Party" required />
-        <Select id="contractType" name="contractType" labelText="Type" defaultValue="CLIENT">
-          <SelectItem value="CLIENT" text="Client" />
-          <SelectItem value="CONSULTANT" text="Consultant" />
-          <SelectItem value="VENDOR" text="Vendor" />
-        </Select>
-        <TextInput id="valuePaise" name="valuePaise" labelText="Value (₹)" type="number" step="any" defaultValue="0" />
-        <TextInput id="startDate" name="startDate" labelText="Start date" type="date" />
-        <TextInput id="endDate" name="endDate" labelText="End date" type="date" />
+        <FormGrid>
+          <Select id="projectId" name="projectId" labelText="Project" defaultValue="">
+            <SelectItem value="" text="— Firm-level (no project) —" />
+            {projects.map((p) => (
+              <SelectItem key={p.id} value={p.id} text={p.title} />
+            ))}
+          </Select>
+          <TextInput id="title" name="title" labelText="Title" required />
+          <TextInput id="party" name="party" labelText="Party" required />
+          <Select id="contractType" name="contractType" labelText="Type" defaultValue="CLIENT">
+            <SelectItem value="CLIENT" text="Client" />
+            <SelectItem value="CONSULTANT" text="Consultant" />
+            <SelectItem value="VENDOR" text="Vendor" />
+          </Select>
+          <TextInput id="valuePaise" name="valuePaise" labelText="Value (₹)" type="number" step="any" defaultValue="0" />
+          <TextInput id="startDate" name="startDate" labelText="Start date" type="date" />
+          <TextInput id="endDate" name="endDate" labelText="End date" type="date" />
+        </FormGrid>
         <Button type="submit" disabled={pending}>
           {pending ? "Creating…" : "Create contract"}
         </Button>

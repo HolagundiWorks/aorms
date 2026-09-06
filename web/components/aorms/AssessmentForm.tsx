@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { saveAssessment } from "../../lib/actions/project-assessment";
+import { FormGrid } from "./FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -34,7 +35,7 @@ export function AssessmentForm({ projectId, values }: { projectId: string; value
         {state?.error && (
           <InlineNotification kind="error" title="Could not save assessment" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <TextInput id="siteLength" name="siteLength" labelText="Site length (m)" type="number" step="any" defaultValue={values?.site_length ?? ""} />
           <TextInput id="siteWidth" name="siteWidth" labelText="Site width (m)" type="number" step="any" defaultValue={values?.site_width ?? ""} />
           <TextInput id="manualArea" name="manualArea" labelText="Manual area override (sqm)" type="number" step="any" defaultValue={values?.manual_area ?? ""} />
@@ -60,7 +61,7 @@ export function AssessmentForm({ projectId, values }: { projectId: string; value
             step="any"
             defaultValue={values ? values.construction_rate_paise / 100 : ""}
           />
-        </div>
+        </FormGrid>
         <Button type="submit" disabled={pending}>
           {pending ? "Saving…" : "Save assessment"}
         </Button>

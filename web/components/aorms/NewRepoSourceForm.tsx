@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { createRepoSource, type RepoSourceActionState } from "../../lib/actions/knowledge-bank";
+import { FormGrid } from "./FormGrid";
 
 const initialState: RepoSourceActionState = null;
 const CATEGORIES = ["GENERAL", "DESIGN", "STRUCTURE", "MEP", "COMPLIANCE", "MANAGEMENT", "OTHER"];
@@ -16,13 +17,15 @@ export function NewRepoSourceForm() {
         {state?.error && (
           <InlineNotification kind="error" title="Could not add source" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <TextInput id="title" name="title" labelText="Title" required />
-        <TextInput id="author" name="author" labelText="Author" />
-        <Select id="category" name="category" labelText="Category" defaultValue="GENERAL">
-          {CATEGORIES.map((c) => (
-            <SelectItem key={c} value={c} text={c} />
-          ))}
-        </Select>
+        <FormGrid>
+          <TextInput id="title" name="title" labelText="Title" required />
+          <TextInput id="author" name="author" labelText="Author" />
+          <Select id="category" name="category" labelText="Category" defaultValue="GENERAL">
+            {CATEGORIES.map((c) => (
+              <SelectItem key={c} value={c} text={c} />
+            ))}
+          </Select>
+        </FormGrid>
         <TextArea
           id="rawText"
           name="rawText"

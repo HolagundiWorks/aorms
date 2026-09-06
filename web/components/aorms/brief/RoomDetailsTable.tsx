@@ -18,6 +18,7 @@ import {
 } from "@carbon/react";
 import { TrashCan } from "@carbon/icons-react";
 import { addRoomDetail, removeRoomDetail } from "../../../lib/actions/project-brief";
+import { FormGrid } from "../FormGrid";
 import type { SpaceRow } from "./SpaceScheduleTable";
 
 type ActionState = { error: string } | null;
@@ -72,19 +73,19 @@ export function RoomDetailsTable({
               </p>
             ) : (
               <>
-                <Select id="roomCode" name="roomCode" labelText="Space" defaultValue="">
-                  <SelectItem value="" text="— Select a space —" />
-                  {spaces.map((s) => (
-                    <SelectItem key={s.code} value={s.code} text={`${s.code} — ${s.title}`} />
-                  ))}
-                </Select>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))", gap: "1rem" }}>
+                <FormGrid>
+                  <Select id="roomCode" name="roomCode" labelText="Space" defaultValue="">
+                    <SelectItem value="" text="— Select a space —" />
+                    {spaces.map((s) => (
+                      <SelectItem key={s.code} value={s.code} text={`${s.code} — ${s.title}`} />
+                    ))}
+                  </Select>
                   <TextInput id="ambience" name="ambience" labelText="Ambience" />
                   <TextInput id="lighting" name="lighting" labelText="Lighting" />
                   <TextInput id="rd-flooring" name="flooring" labelText="Flooring" />
                   <TextInput id="furniture" name="furniture" labelText="Furniture" />
-                </div>
-                <TextInput id="rd-notes" name="notes" labelText="Notes" />
+                  <TextInput id="rd-notes" name="notes" labelText="Notes" />
+                </FormGrid>
                 <Button type="submit" disabled={addPending} size="sm">
                   {addPending ? "Adding…" : "Add room detail"}
                 </Button>

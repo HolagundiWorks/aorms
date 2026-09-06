@@ -12,6 +12,8 @@ export default function LoginPage() {
     <Form action={formAction}>
       <Stack gap={6}>
         <div>
+          {/* Plain <img>, not next/image — a fixed brand asset, not user content. */}
+          <img src="/aorms-logo.png" alt="AORMS" style={{ height: "28px", width: "auto", marginBottom: "1.5rem" }} />
           <h1 className="cds--type-heading-04">Sign in to AORMS</h1>
           <p className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
             Office management for architecture practices.

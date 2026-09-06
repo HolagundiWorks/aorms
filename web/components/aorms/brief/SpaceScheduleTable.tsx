@@ -17,6 +17,7 @@ import {
 } from "@carbon/react";
 import { TrashCan } from "@carbon/icons-react";
 import { addSpaceRow, removeSpaceRow } from "../../../lib/actions/project-brief";
+import { FormGrid } from "../FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -47,12 +48,12 @@ export function SpaceScheduleTable({ projectId, rows, readOnly }: { projectId: s
             {addState?.error && (
               <InlineNotification kind="error" title="Could not add space" subtitle={addState.error} hideCloseButton lowContrast />
             )}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(9rem, 1fr))", gap: "1rem" }}>
+            <FormGrid>
               <TextInput id="space-code" name="code" labelText="Code" placeholder="e.g. LR-01" required />
               <TextInput id="space-title" name="title" labelText="Space" required />
               <TextInput id="space-floor" name="floor" labelText="Floor" placeholder="e.g. Ground" />
               <TextInput id="space-area" name="areaSqm" labelText="Area (sqm)" type="number" step="any" />
-            </div>
+            </FormGrid>
             <TextArea id="space-description" name="description" labelText="Description" rows={2} />
             <Button type="submit" disabled={addPending} size="sm">
               {addPending ? "Adding…" : "Add space"}

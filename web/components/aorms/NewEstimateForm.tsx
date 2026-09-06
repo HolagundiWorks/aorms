@@ -12,6 +12,7 @@ import {
   TextInput,
 } from "@carbon/react";
 import { createEstimateRecord, type EstimateActionState } from "../../lib/actions/estimates";
+import { FormGrid } from "./FormGrid";
 
 type ProjectOption = { id: string; title: string };
 type RateBookOption = { id: string; name: string };
@@ -39,27 +40,29 @@ export function NewEstimateForm({
             lowContrast
           />
         )}
-        <Select id="projectId" name="projectId" labelText="Project" defaultValue="">
-          <SelectItem value="" text="— Select a project —" />
-          {projects.map((p) => (
-            <SelectItem key={p.id} value={p.id} text={p.title} />
-          ))}
-        </Select>
-        <Select id="rateBookId" name="rateBookId" labelText="Rate book" defaultValue="">
-          <SelectItem value="" text="— Select a rate book —" />
-          {rateBooks.map((rb) => (
-            <SelectItem key={rb.id} value={rb.id} text={rb.name} />
-          ))}
-        </Select>
-        <TextInput id="title" name="title" labelText="Title" required />
-        <TextInput
-          id="contingencyPct"
-          name="contingencyPct"
-          labelText="Contingency %"
-          type="number" step="any"
-          defaultValue="0"
-        />
-        <TextInput id="gstPct" name="gstPct" labelText="GST %" type="number" step="any" defaultValue="0" />
+        <FormGrid>
+          <Select id="projectId" name="projectId" labelText="Project" defaultValue="">
+            <SelectItem value="" text="— Select a project —" />
+            {projects.map((p) => (
+              <SelectItem key={p.id} value={p.id} text={p.title} />
+            ))}
+          </Select>
+          <Select id="rateBookId" name="rateBookId" labelText="Rate book" defaultValue="">
+            <SelectItem value="" text="— Select a rate book —" />
+            {rateBooks.map((rb) => (
+              <SelectItem key={rb.id} value={rb.id} text={rb.name} />
+            ))}
+          </Select>
+          <TextInput id="title" name="title" labelText="Title" required />
+          <TextInput
+            id="contingencyPct"
+            name="contingencyPct"
+            labelText="Contingency %"
+            type="number" step="any"
+            defaultValue="0"
+          />
+          <TextInput id="gstPct" name="gstPct" labelText="GST %" type="number" step="any" defaultValue="0" />
+        </FormGrid>
         <TextArea id="notes" name="notes" labelText="Notes" rows={2} />
         <Button type="submit" disabled={pending}>
           {pending ? "Creating…" : "Create estimate"}

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { createSiteInstruction } from "../../lib/actions/site-instructions";
+import { FormGrid } from "./FormGrid";
 
 type ProjectOption = { id: string; title: string };
 type ContractorOption = { id: string; name: string };
@@ -24,21 +25,23 @@ export function NewSiteInstructionForm({
         {state?.error && (
           <InlineNotification kind="error" title="Could not issue instruction" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <Select id="projectId" name="projectId" labelText="Project" defaultValue="">
-          <SelectItem value="" text="— Select a project —" />
-          {projects.map((p) => (
-            <SelectItem key={p.id} value={p.id} text={p.title} />
-          ))}
-        </Select>
-        <Select id="contractorId" name="contractorId" labelText="Contractor" defaultValue="">
-          <SelectItem value="" text="— None —" />
-          {contractors.map((c) => (
-            <SelectItem key={c.id} value={c.id} text={c.name} />
-          ))}
-        </Select>
-        <TextInput id="subject" name="subject" labelText="Subject" required />
+        <FormGrid>
+          <Select id="projectId" name="projectId" labelText="Project" defaultValue="">
+            <SelectItem value="" text="— Select a project —" />
+            {projects.map((p) => (
+              <SelectItem key={p.id} value={p.id} text={p.title} />
+            ))}
+          </Select>
+          <Select id="contractorId" name="contractorId" labelText="Contractor" defaultValue="">
+            <SelectItem value="" text="— None —" />
+            {contractors.map((c) => (
+              <SelectItem key={c.id} value={c.id} text={c.name} />
+            ))}
+          </Select>
+          <TextInput id="subject" name="subject" labelText="Subject" required />
+          <TextInput id="issuedAt" name="issuedAt" labelText="Issued date" type="date" />
+        </FormGrid>
         <TextArea id="body" name="body" labelText="Body" rows={3} />
-        <TextInput id="issuedAt" name="issuedAt" labelText="Issued date" type="date" />
         <Button type="submit" disabled={pending}>
           {pending ? "Issuing…" : "Issue instruction"}
         </Button>

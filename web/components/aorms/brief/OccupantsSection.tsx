@@ -17,6 +17,7 @@ import {
 } from "@carbon/react";
 import { TrashCan } from "@carbon/icons-react";
 import { addHouseholdMember, removeHouseholdMember, saveStaffRequirements } from "../../../lib/actions/project-brief";
+import { FormGrid } from "../FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -63,12 +64,12 @@ export function OccupantsSection({
               {addState?.error && (
                 <InlineNotification kind="error" title="Could not add" subtitle={addState.error} hideCloseButton lowContrast />
               )}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(10rem, 1fr))", gap: "1rem" }}>
+              <FormGrid>
                 <TextInput id="occ-name" name="name" labelText="Name" required />
                 <TextInput id="occ-relation" name="relation" labelText="Relation" />
                 <TextInput id="occ-age" name="age" labelText="Age" type="number" step="any" />
                 <TextInput id="occ-occupation" name="occupation" labelText="Occupation" />
-              </div>
+              </FormGrid>
               <Button type="submit" disabled={addPending} size="sm">
                 {addPending ? "Adding…" : "Add household member"}
               </Button>

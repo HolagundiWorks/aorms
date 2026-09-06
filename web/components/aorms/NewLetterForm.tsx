@@ -12,6 +12,7 @@ import {
   TextInput,
 } from "@carbon/react";
 import { createLetterRecord, type LetterActionState } from "../../lib/actions/letters";
+import { FormGrid } from "./FormGrid";
 
 type ProjectOption = { id: string; title: string };
 
@@ -32,16 +33,18 @@ export function NewLetterForm({ projects }: { projects: ProjectOption[] }) {
             lowContrast
           />
         )}
-        <Select id="projectId" name="projectId" labelText="Project" defaultValue="">
-          <SelectItem value="" text="— Firm-level (no project) —" />
-          {projects.map((p) => (
-            <SelectItem key={p.id} value={p.id} text={p.title} />
-          ))}
-        </Select>
-        <TextInput id="recipient" name="recipient" labelText="Recipient" required />
-        <TextInput id="subject" name="subject" labelText="Subject" required />
+        <FormGrid>
+          <Select id="projectId" name="projectId" labelText="Project" defaultValue="">
+            <SelectItem value="" text="— Firm-level (no project) —" />
+            {projects.map((p) => (
+              <SelectItem key={p.id} value={p.id} text={p.title} />
+            ))}
+          </Select>
+          <TextInput id="recipient" name="recipient" labelText="Recipient" required />
+          <TextInput id="subject" name="subject" labelText="Subject" required />
+          <TextInput id="dateLetter" name="dateLetter" labelText="Letter date" type="date" />
+        </FormGrid>
         <TextArea id="body" name="body" labelText="Body" rows={4} required />
-        <TextInput id="dateLetter" name="dateLetter" labelText="Letter date" type="date" />
         <Button type="submit" disabled={pending}>
           {pending ? "Creating…" : "Create letter"}
         </Button>

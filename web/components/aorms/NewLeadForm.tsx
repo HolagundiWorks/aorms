@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { createLead } from "../../lib/actions/leads";
+import { FormGrid } from "./FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -26,7 +27,7 @@ export function NewLeadForm() {
         {state?.error && (
           <InlineNotification kind="error" title="Could not add lead" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <TextInput id="clientName" name="clientName" labelText="Client name" required />
           <Select id="leadSource" name="leadSource" labelText="Lead source" defaultValue="WEBSITE">
             {Object.entries(LEAD_SOURCES).map(([code, label]) => (
@@ -38,7 +39,7 @@ export function NewLeadForm() {
           <TextInput id="projectType" name="projectType" labelText="Project type" placeholder="e.g. Residential" />
           <TextInput id="siteLocation" name="siteLocation" labelText="Site location" />
           <TextInput id="city" name="city" labelText="City" />
-        </div>
+        </FormGrid>
         <TextInput id="notes" name="notes" labelText="Notes" />
         <Button type="submit" disabled={pending}>
           {pending ? "Adding…" : "Add lead"}

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextArea, TextInput } from "@carbon/react";
 import { saveDesignPrefs } from "../../../lib/actions/project-brief";
+import { FormGrid } from "../FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -30,12 +31,12 @@ export function DesignPrefsForm({ projectId, values, readOnly }: { projectId: st
         {state?.error && (
           <InlineNotification kind="error" title="Could not save" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(13rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <TextInput id="orientation" name="orientation" labelText="Orientation" readOnly={readOnly} defaultValue={values?.orientation ?? ""} />
           <TextInput id="doorDirection" name="doorDirection" labelText="Main door direction" readOnly={readOnly} defaultValue={values?.doorDirection ?? ""} />
           <TextInput id="basement" name="basement" labelText="Basement" readOnly={readOnly} defaultValue={values?.basement ?? ""} />
           <TextInput id="vastu" name="vastu" labelText="Vastu requirements" readOnly={readOnly} defaultValue={values?.vastu ?? ""} />
-        </div>
+        </FormGrid>
         <TextArea id="views" name="views" labelText="Desired views" rows={2} readOnly={readOnly} defaultValue={values?.views ?? ""} />
         <TextArea id="style" name="style" labelText="Style & preferences" rows={2} readOnly={readOnly} defaultValue={values?.style ?? ""} />
         <TextArea id="lovedPlaces" name="lovedPlaces" labelText="Loved places / inspirations" rows={2} readOnly={readOnly} defaultValue={values?.lovedPlaces ?? ""} />

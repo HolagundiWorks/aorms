@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Checkbox, Form, InlineNotification, Stack, TextArea, TextInput } from "@carbon/react";
 import { saveProjectInfo } from "../../../lib/actions/project-brief";
+import { FormGrid } from "../FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -27,10 +28,10 @@ export function ProjectInfoForm({ projectId, values, readOnly }: { projectId: st
           <InlineNotification kind="error" title="Could not save" subtitle={state.error} hideCloseButton lowContrast />
         )}
         <TextArea id="intendedUse" name="intendedUse" labelText="Intended use" rows={2} readOnly={readOnly} defaultValue={values?.intendedUse ?? ""} />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(13rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <TextInput id="builtUpAreaSqm" name="builtUpAreaSqm" labelText="Built-up area (sqm)" type="number" step="any" readOnly={readOnly} defaultValue={values?.builtUpAreaSqm ?? ""} />
           <TextInput id="tentativeStart" name="tentativeStart" labelText="Tentative start" type="date" readOnly={readOnly} defaultValue={values?.tentativeStart ?? ""} />
-        </div>
+        </FormGrid>
         <Checkbox id="phasedConstruction" name="phasedConstruction" labelText="Phased construction" readOnly={readOnly} defaultChecked={values?.phasedConstruction ?? false} />
         <TextArea id="budgetNote" name="budgetNote" labelText="Budget note" rows={2} readOnly={readOnly} defaultValue={values?.budgetNote ?? ""} />
         <TextArea id="financeNote" name="financeNote" labelText="Finance note" rows={2} readOnly={readOnly} defaultValue={values?.financeNote ?? ""} />

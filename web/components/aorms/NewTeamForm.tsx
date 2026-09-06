@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { createTeam } from "../../lib/actions/teams";
+import { FormGrid } from "./FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -16,8 +17,10 @@ export function NewTeamForm() {
         {state?.error && (
           <InlineNotification kind="error" title="Could not create team" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <TextInput id="name" name="name" labelText="Name" required />
-        <TextInput id="description" name="description" labelText="Description" />
+        <FormGrid>
+          <TextInput id="name" name="name" labelText="Name" required />
+          <TextInput id="description" name="description" labelText="Description" />
+        </FormGrid>
         <Button type="submit" disabled={pending}>
           {pending ? "Creating…" : "Create team"}
         </Button>

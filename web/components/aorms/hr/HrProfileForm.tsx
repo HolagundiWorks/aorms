@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { saveHrProfile } from "../../../lib/actions/hr";
+import { FormGrid } from "../FormGrid";
 
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
@@ -30,7 +31,7 @@ export function HrProfileForm({ memberId, values }: { memberId: string; values: 
         {state?.error && (
           <InlineNotification kind="error" title="Could not save HR profile" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(14rem, 1fr))", gap: "1rem" }}>
+        <FormGrid>
           <TextInput id="dateOfBirth" name="dateOfBirth" labelText="Date of birth" type="date" defaultValue={values?.date_of_birth ?? ""} />
           <Select id="gender" name="gender" labelText="Gender" defaultValue={values?.gender ?? ""}>
             <SelectItem value="" text="—" />
@@ -66,7 +67,7 @@ export function HrProfileForm({ memberId, values }: { memberId: string; values: 
           <TextInput id="bankIfsc" name="bankIfsc" labelText="Bank IFSC" defaultValue={values?.bank_ifsc ?? ""} />
           <TextInput id="bankName" name="bankName" labelText="Bank name" defaultValue={values?.bank_name ?? ""} />
           <TextInput id="pfUan" name="pfUan" labelText="PF UAN" defaultValue={values?.pf_uan ?? ""} />
-        </div>
+        </FormGrid>
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Saving…" : "Save HR profile"}
         </Button>
