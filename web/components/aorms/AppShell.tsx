@@ -99,6 +99,7 @@ const GROUPS: NavGroup[] = [
       { href: "/snags", label: "Snags" },
       { href: "/site-instructions", label: "Site Instructions" },
       { href: "/progress-reports", label: "Progress Reports" },
+      { href: "/bbs", label: "BBS" },
       { href: "/pmc-milestones", label: "Milestones" },
       { href: "/pmc-packages", label: "Work Packages" },
       { href: "/pmc-steel-certs", label: "Steel Certification" },
