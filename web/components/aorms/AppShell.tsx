@@ -106,6 +106,7 @@ const GROUPS: NavGroup[] = [
       { href: "/pmc-steel-certs", label: "Steel Certification" },
       { href: "/pmc-ra-bills", label: "RA Bills" },
       { href: "/contractors", label: "Contractors" },
+      { href: "/consultants", label: "Consultants" },
       { href: "/approvals", label: "Approvals" },
     ],
   },
