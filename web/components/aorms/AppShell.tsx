@@ -136,6 +136,7 @@ const GROUPS: NavGroup[] = [
     items: [
       { href: "/workload", label: "Workload" },
       { href: "/audit-log", label: "Audit Log" },
+      { href: "/firm-settings", label: "Firm Settings" },
     ],
   },
 ];
