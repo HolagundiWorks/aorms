@@ -1,7 +1,7 @@
 {
-  "name": "AORMS — AEC consulting suite",
+  "name": "AORMS — Architecture Operations & Resource Management System",
   "short_name": "AORMS",
-  "description": "AORMS suite for AEC consultancies — practice managers, AQC technical apps, AADT, ShilpiDB, and firm portals. Soft launch: suite home and blog live; installers coming soon.",
+  "description": "AORMS is the web-based office hub for architecture practices: clients, projects, fee proposals, GST invoicing, drawings, and team — one record, not six apps.",
   "icons": [
     { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }

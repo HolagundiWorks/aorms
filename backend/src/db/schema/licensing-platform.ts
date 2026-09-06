@@ -19,7 +19,10 @@ import {
 /**
  * HCW License Manager schema. Multi-product, multi-org licensing.
  * Tables are prefixed `hlp_`. Ids are app-generated opaque strings (see ids.ts).
- * See docs/esti/HCW-LICENSE-MANAGER.md.
+ * (The doc this used to cite, docs/esti/HCW-LICENSE-MANAGER.md, does not
+ * exist anywhere in the repo — a broken pointer, flagged not guessed at.
+ * `admin.aorms.in`, the license manager's public surface, is itself removed
+ * per CLAUDE.md — not applicable to the web-only model.)
  */
 
 const createdAt = timestamp("created_at", { withTimezone: true }).defaultNow().notNull();

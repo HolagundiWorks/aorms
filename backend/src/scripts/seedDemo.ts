@@ -6,7 +6,9 @@
  *
  * Idempotent — skips full re-seed if principal@demo.aorms.in already exists
  * (still backfills studio glance / team / leads). Set SEED_DEMO_FORCE=1 to wipe
- * and rebuild. Item inventory: docs/esti/DEMO-SEED-ITEMS.md
+ * and rebuild. (The doc this used to cite for its item inventory,
+ * docs/esti/DEMO-SEED-ITEMS.md, does not exist anywhere in the repo — a
+ * broken pointer, flagged not guessed at.)
  *
  * NOT for production use.
  */
@@ -372,7 +374,9 @@ async function main() {
     { name: "Tanvi Desai",                               kind: "INDIVIDUAL", city: "Belagavi",  state: "Karnataka",     email: "tanvi.desai@example.in",     phone: "+91 98450 99006" },
   ]).returning();
 
-  // Client / contractor / collaborator portal logins (docs/esti/DEMO-AND-HR-MODE.md).
+  // Client / contractor / collaborator portal logins. (The doc this used to
+  // cite, docs/esti/DEMO-AND-HR-MODE.md, does not exist anywhere in the
+  // repo — a broken pointer, flagged not guessed at.)
   await ensureDemoClientPortalUser(pwHash);
 
   // ── Consultants ───────────────────────────────────────────────────────────

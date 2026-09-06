@@ -1,6 +1,8 @@
 /**
  * Suite ops store (MongoDB) — firm-scoped documents for non-drawing cloud data.
- * Canon: docs/esti/MONGO-OPS.md · AORMS-SUITE.md
+ * (Both docs this used to cite, docs/esti/MONGO-OPS.md and AORMS-SUITE.md,
+ * do not exist anywhere in the repo — broken pointers, flagged not guessed
+ * at; AORMS-SUITE.md's deletion is already noted elsewhere in CLAUDE.md.)
  *
  * When MONGODB_URL is empty or the driver cannot connect, falls back to an
  * in-process Map so colocated smoke still works.

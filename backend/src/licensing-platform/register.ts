@@ -14,7 +14,8 @@ export type PlatformRouter = typeof appRouter;
  * app: `/platform/auth/*`, `/platform/onboard`, `/platform/v1/*`, and admin tRPC
  * at `/platform/trpc`. Uses its own session cookie (`hlp_session`), distinct
  * from the firm session. `@fastify/cookie` must be registered before this runs.
- * Docs: docs/esti/HCW-LICENSE-MANAGER.md.
+ * (The doc this used to cite, docs/esti/HCW-LICENSE-MANAGER.md, does not
+ * exist anywhere in the repo — a broken pointer, flagged not guessed at.)
  */
 export async function registerLicensingPlatform(app: FastifyInstance): Promise<void> {
   await app.register(

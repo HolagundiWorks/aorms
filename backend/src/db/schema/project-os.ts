@@ -17,8 +17,11 @@ import {
 } from "./_helpers.js";
 
 /**
- * Project OS — the lead → active-project acquisition pipeline.
- * See docs/esti/UNIFIED-ARCHITECTURE-V4.md. Money is integer paise.
+ * Project OS — the lead → active-project acquisition pipeline. Money is
+ * integer paise. (The doc this used to cite, docs/esti/
+ * UNIFIED-ARCHITECTURE-V4.md, does not exist anywhere in the repo — see
+ * docs/esti/NEXTJS-MIGRATION-PHASE10-AUDIT.md, which found the same broken
+ * pointer independently, or CLAUDE.md's current module map.)
  */
 
 /** Slice A — inbound enquiry recorded before a client/project exists. */

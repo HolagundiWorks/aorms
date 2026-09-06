@@ -1,6 +1,9 @@
 /**
- * Paste-and-parse helpers for vendor quotes / rate schedules.
- * See docs/esti/UNIFIED-ARCHITECTURE-V4.md — canonical units + line parser.
+ * Paste-and-parse helpers for vendor quotes / rate schedules — canonical
+ * units + line parser. (The doc this used to cite, docs/esti/
+ * UNIFIED-ARCHITECTURE-V4.md, does not exist anywhere in the repo — see
+ * docs/esti/NEXTJS-MIGRATION-PHASE10-AUDIT.md for the same broken pointer,
+ * found independently.)
  */
 
 export type ParsedRateRow = {

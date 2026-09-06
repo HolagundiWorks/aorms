@@ -9,7 +9,8 @@ import { z } from "zod";
  *
  * Authority limits are representative defaults of typical Indian municipal
  * bye-laws — override per jurisdiction before relying on a verdict for a real
- * submission. See docs/esti/COMPLIANCE-NBC.md.
+ * submission. (The doc this used to cite, docs/esti/COMPLIANCE-NBC.md, does
+ * not exist anywhere in the repo — a broken pointer, flagged not guessed at.)
  */
 export const NBC_RULES_VERSION = "NBC-IND-2016";
 export const FLOOR_TO_FLOOR_M = 3.0;

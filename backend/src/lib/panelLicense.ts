@@ -10,8 +10,9 @@ import { z } from "zod";
  * {@link verifyLicense} does for the legacy ESTI hub format.
  *
  * Keep this constant in sync with
- * `backend/src/licensing-platform/lib/license.ts`. Docs:
- * `docs/esti/HCW-LICENSE-MANAGER.md`.
+ * `backend/src/licensing-platform/lib/license.ts`. (The doc this used to
+ * cite, `docs/esti/HCW-LICENSE-MANAGER.md`, does not exist anywhere in the
+ * repo — a broken pointer, flagged not guessed at.)
  */
 const PANEL_PUBLIC_KEY_SPKI_DER_B64 =
   process.env.LICENSE_PANEL_PUBLIC_KEY_SPKI_B64?.trim() ||

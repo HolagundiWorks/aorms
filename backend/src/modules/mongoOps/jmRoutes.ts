@@ -1,6 +1,7 @@
 /**
- * Desktop joint-measurement pull (Bearer syncToken).
- * Canon: docs/esti/AQC-JM-SYNC.md · ROADMAP S11
+ * Desktop joint-measurement pull (Bearer syncToken). ROADMAP S11. (The doc
+ * this used to cite, docs/esti/AQC-JM-SYNC.md, does not exist anywhere in
+ * the repo — a broken pointer, flagged not guessed at.)
  */
 import type { FastifyInstance } from "fastify";
 import { db } from "../../db/index.js";

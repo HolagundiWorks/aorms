@@ -46,20 +46,32 @@ Monorepo (pnpm): `packages/contracts`, `backend` (Fastify + tRPC + Drizzle),
 `frontend` (React + Vite), Python `worker`. Dev: `compose.yaml`. Prod VPS:
 `compose.prod.yaml` + `deploy/*`.
 
-## Stack migration — Next.js + Supabase (planned, not yet started)
+## Stack migration — Next.js + Supabase (in progress, `web/` package)
 
-A target-architecture rewrite is specified in
-[`docs/esti/NEXTJS-SUPABASE-MIGRATION.md`](docs/esti/NEXTJS-SUPABASE-MIGRATION.md):
+**Stale-doc correction (2026-09-06): this section used to say "planned, not
+yet started" / "nothing in the current codebase changes" / "do not assume
+Next.js/Supabase exist in this repo" — all three claims are false as of this
+date and had been for some time.** The `web/` package is real, live, and
+under active development: Next.js 16 + Carbon + Supabase, ~26 migrations
+applied against both a live cloud Supabase project and a local Supabase CLI
+stack, dozens of features shipped and browser-verified end-to-end (clients,
+projects, tasks, invoicing, estimates/BOQ/BBS, portals, HR, an ESTI AI
+agent, Pomodoro/Calculator/Wellness modules, and more). Target architecture
+is specified in [`docs/esti/NEXTJS-SUPABASE-MIGRATION.md`](docs/esti/NEXTJS-SUPABASE-MIGRATION.md):
 **Next.js + TypeScript + Carbon Design System + Supabase**, replacing the
 current React SPA + tRPC + Fastify + raw PostgreSQL + Python worker stack,
-deploying to Hostinger Managed App Hosting instead of the VPS. It is a
-**development specification** — nothing in the current codebase changes until
-this migration is executed. Do not assume Next.js/Supabase exist in this repo
-until that doc's status line says otherwise; the tables below (Architecture,
-Module map, Frontend routes) describe the **current, live** stack.
+deploying to Hostinger Managed App Hosting instead of the VPS. What's still
+true from the old wording: **the current production stack (`frontend`/
+`backend` on the VPS) stays live and unchanged** until a given migration
+phase is merged and verified — `web/` is new, additive code, not a rewrite
+of `frontend`/`backend` in place. The tables below (Architecture, Module
+map, Frontend routes) describe the **VPS-deployed, currently-live** stack —
+`web/`'s own routes/modules are documented in its own files and in
+[ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md), not duplicated here.
 
-Migration sequencing lives in [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md);
-see also § Branch & environment split below for where this work happens.
+Migration sequencing and full phase-by-phase status lives in
+[ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) § Stack migration; see also
+§ Branch & environment split below for where this work happens.
 
 ## Launch status (2026-09-04)
 
@@ -210,13 +222,38 @@ Rewrite CLAUDE.md § UI, `HCW-UI-KIT.md` (mark superseded), all `docs/hcw-kit/*`
 `HCW-KIT-AI-KNOWLEDGE-BASE.md`, the design-debt register.
 
 **AORMS AI:** ESTI runs as part of the **office hub** (web-only, 2026-09 pivot)
-— not a desktop app. It calls a self-hosted Ollama container alongside the
-backend (`compose.yaml`/`compose.prod.yaml` `ollama` service), not a user's
-own machine. `@hcw/aorms-ai-kit` (`vendor/hcw-aorms-ai-kit`) is prompts +
-Ollama SDK, still live, imported from `backend/src/lib/ai/*`. Canon:
-`docs/esti/PRODUCTION-OPS.md` § ESTI AI. (The old "desktop-only Ollama" docs
-— `LOCAL-FIRST.md`, `AORMS-SUITE.md` § AI — were deleted 2026-09 with the
-rest of `docs/esti/archived/`; this was the stale claim they left behind.)
+— not a desktop app. In **production** it calls a self-hosted Ollama
+container alongside the backend (`compose.prod.yaml`'s `esti-ollama`
+service), not a user's own machine. `@hcw/aorms-ai-kit`
+(`vendor/hcw-aorms-ai-kit`) is prompts + Ollama SDK; the old `backend/src/
+lib/ai/*` gateway that imported it is dead code now (`backend` itself
+doesn't run locally — drizzle-orm removed, see § Dev / verify loop — and
+isn't redeployed from this repo state). **`web/`'s own ESTI agent**
+(`web/lib/ai/*`, `web/lib/actions/ai.ts`, header "Ask ESTI" — 2026-09-06) is
+the live implementation: a read-only Q&A mode only (no draft-generation
+modes yet, see `docs/esti/NEXTJS-MIGRATION-PHASE7-AUDIT.md`), calling
+Ollama's plain HTTP API directly (ported `callOllamaChat`/`checkOllamaHealth`,
+no drizzle dependency). Every call is recorded in `ai_runs` (migration
+`0010`, already live). Canon: `docs/esti/PRODUCTION-OPS.md` § ESTI AI. (The
+old "desktop-only Ollama" docs — `LOCAL-FIRST.md`, `AORMS-SUITE.md` § AI —
+were deleted 2026-09 with the rest of `docs/esti/archived/`; this was the
+stale claim they left behind.)
+
+**Local dev Ollama runs natively on Windows, not in Podman (2026-09-06).**
+`compose.yaml`'s local `ollama` service (Podman/WSL) is what the *old*
+backend/worker stack used — moot now that stack is broken locally anyway.
+For `web/` dev, Ollama is installed as a native Windows app (`winget install
+Ollama.Ollama`) and binds `127.0.0.1:11434` directly — no container, no
+gvproxy port-forwarding, no WSL memory contention with the Supabase local
+stack. This is the fix for a real incident, not a preference: the Podman
+WSL VM (capped at 2GiB RAM) OOM'd and wedged (`podman machine start/stop`
+both failing) while running 12 Supabase containers plus an Ollama model
+pull at once; recovery needed `wsl --terminate podman-machine-default` then
+`podman machine start` again. `web/lib/ai/ollama.ts`'s `127.0.0.1:11434`
+default just works natively — no `OLLAMA_BASE_URL` override needed in
+`web/.env.local`. Podman itself stays, scoped to *only* the local Supabase
+stack now (see below) — lighter load, less likely to wedge again. Pull the
+model once via `ollama pull llama3.2` (matches `OLLAMA_MODEL`'s default).
 
 ### Carbon Sass & tokens (`styles.scss`, `landing.scss`)
 
@@ -395,6 +432,20 @@ branch before starting anything that could overlap — not just at hand-off.
   once against the live project's already-evolved schema." `next dev`
   confirmed loading `.env.local` ahead of `.env` and serving pages correctly
   against the local stack's REST API.
+- **Podman is scoped to the local Supabase stack only (2026-09-06).** After
+  the Ollama-native migration above, Podman on this machine holds nothing
+  but the 12 `supabase_*_web` containers/images/volumes `supabase start`
+  creates — cleaned out: the standalone `esti-ollama` container/image/
+  volumes (moved native), a leftover `mongo:7` image (from the
+  MongoDB-for-dev idea above, which this repo did not adopt), dangling
+  `<none>:<none>` build layers, orphaned anonymous volumes, and the old
+  compose.yaml stack's cached images (`esti-jobs-gateway:test`,
+  `esti-frontend:dev`, `esti-backend:dev`, `esti-worker:dev`, plus their
+  `redis`/`postgres:16-alpine`/`minio`/`python`/`node` base images) — none
+  had a running container; `docker compose up` against that stack will just
+  rebuild/re-pull them if it's ever run again. Reclaimed roughly 12GB
+  total (incl. the 5.47GB Ollama image); `podman system df` afterward shows
+  12 images / 5.735GB, all Supabase, with no reclaimable dangling layers.
 
 ## Conventions
 

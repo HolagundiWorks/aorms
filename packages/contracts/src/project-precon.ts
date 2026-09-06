@@ -1,6 +1,8 @@
 /**
  * AORMS-Studio pre-construction R&O — project risk, opportunity, phase gates.
- * docs/esti/AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md
+ * (The doc this used to cite, docs/esti/AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md,
+ * does not exist anywhere in the repo — a broken pointer, flagged not
+ * guessed at.)
  *
  * The shared risk/opportunity/phase-gate enums, labels, and the phase-gate
  * decision rule below were originally defined in the (now-removed)

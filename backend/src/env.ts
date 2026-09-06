@@ -41,8 +41,11 @@ const Env = z.object({
   /**
    * NODE — base URL of the HCW License Manager Product License API
    * (e.g. https://aorms.in/platform). When set with ESTI_PRODUCT_API_KEY,
-   * activate/refresh call `/v1` instead of the legacy hub. Empty = use the hub
-   * (or same-process manager on the hub itself). See HCW-LICENSE-MANAGER.md.
+   * activate/refresh call `/v1` instead of the legacy hub. Empty = use the
+   * hub (or same-process manager on the hub itself). (The doc this used to
+   * cite, docs/esti/HCW-LICENSE-MANAGER.md, does not exist anywhere in the
+   * repo — a broken pointer, flagged not guessed at; `admin.aorms.in`, the
+   * license manager's public surface, is itself removed per CLAUDE.md.)
    */
   ESTI_LICENSE_API_URL: z.string().default(""),
   /** NODE — AORMS product API key for the License Manager `/v1` API (Bearer). */

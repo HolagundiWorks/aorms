@@ -2,7 +2,9 @@
 // into AORMS (2026-06-28). Issues Ed25519-signed entitlement tokens that products
 // verify offline. NOTE: the license-lifecycle enum is `LicenseLifecycle` here
 // (ACTIVE/TRIAL/…) to avoid clashing with the consumer-side `LicenseStatus`
-// (VALID/GRACE/…) in license.ts. Docs: docs/esti/HCW-LICENSE-MANAGER.md.
+// (VALID/GRACE/…) in license.ts. (The doc this used to cite, docs/esti/
+// HCW-LICENSE-MANAGER.md, does not exist anywhere in the repo — a broken
+// pointer, flagged not guessed at.)
 import { z } from "zod";
 
 /** A product is either an installable app or a metered API. */

@@ -356,8 +356,11 @@ export const siteVisits = pgTable("esti_site_visit", {
 });
 
 /**
- * Studio pre-construction R&O — project risk register.
- * See docs/esti/AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md.
+ * Studio pre-construction R&O — project risk register. (The doc this used
+ * to cite, docs/esti/AORMS-PRECONSTRUCTION-RO-FRAMEWORK.md, does not exist
+ * anywhere in the repo — a broken pointer, flagged not guessed at; see
+ * packages/contracts/src/project-precon.ts for the shared enums this table
+ * actually depends on.)
  */
 export const projectRisks = pgTable("esti_project_risk", {
   id: id(),

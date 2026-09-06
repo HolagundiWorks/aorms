@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-/** Statutory approvals tracked per project (see docs/esti/ARCHITECT-PROFILE.md). */
+/** Statutory approvals tracked per project. (The doc this used to cite,
+ * docs/esti/ARCHITECT-PROFILE.md, does not exist anywhere in the repo — a
+ * broken pointer, flagged not guessed at.) */
 export const PERMIT_TYPES = {
   BPAS: { label: "BPAS / Building plan approval", authorities: ["BBMP", "BDA", "Panchayat"] },
   RERA: { label: "RERA registration", authorities: ["RERA Karnataka"] },

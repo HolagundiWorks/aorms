@@ -71,7 +71,7 @@ Key tables: \`esti_cognition_event\`, \`esti_cognition_behavior_profile\`, \`est
 
 - [How to use AORMS ? Studio Intelligence](how-to-use-aorms#studio-intelligence--your-morning-surface)
 - [AORMS-Studio overview](aorms-studio)
-- Engineering: \`docs/esti/COGNITION-ENGINE.md\`, \`docs/esti/ESTI-PULSE.md\`
+- Engineering: \`docs/esti/ESTI-PULSE.md\`
 
 ## Frequently asked questions
 

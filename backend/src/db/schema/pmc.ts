@@ -100,7 +100,9 @@ export const phaseProgress = pgTable("esti_phase_progress", {
 
 /**
  * AProc master programme milestone — client reporting / governance.
- * Not a contractor CPM activity network (see docs/esti/APROC-ARCHITECTURE.md).
+ * Not a contractor CPM activity network (docs/esti/APROC-ARCHITECTURE.md
+ * doesn't exist in this repo — see docs/esti/NEXTJS-MIGRATION-PHASE8-AUDIT.md
+ * § Delivery / Site-supervision / AProc for the closest current mapping).
  */
 export const pmcMilestones = pgTable("esti_pmc_milestone", {
   id: id(),
