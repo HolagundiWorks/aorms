@@ -2,10 +2,11 @@
  * Canonical list of legacy keyword landing-page slugs. Kept as a tiny static
  * module (no markdown imports) so App.tsx can gate the public router.
  *
- * The standalone SEO landing pages were retired in the desktop-first trim: these
- * slugs now serve two purposes only — `isLandingSlug` lets App.tsx 301 old
- * `/<keyword>` URLs home instead of 404ing, and `LANDING_NAV` supplies short link
- * labels for the blog's related-links map (see blog-related.ts).
+ * The standalone SEO landing pages were retired in the desktop-first trim:
+ * `isLandingSlug` lets App.tsx 301 old `/<keyword>` URLs home instead of
+ * 404ing. `LANDING_NAV` is unused pending a future internal-linking section
+ * (no `blog-related.ts` exists — the live `/blog` route at
+ * frontend/src/routes/Blog.tsx does not consume this file).
  */
 import { AORMS_PORTALS } from "./product-nomenclature.js";
 
