@@ -32,6 +32,11 @@ import {
   MachineLearning,
 } from "@carbon/icons-react";
 import { signOut } from "../../lib/actions/auth";
+import { PomodoroProvider } from "./pomodoro/PomodoroContext";
+import { HeaderPomodoro } from "./pomodoro/HeaderPomodoro";
+import { HeaderCalculator } from "./calculator/HeaderCalculator";
+import { HeaderWellness } from "./wellness/HeaderWellness";
+import { HeaderEsti } from "./esti/HeaderEsti";
 
 type NavLeaf = { href: string; label: string };
 type NavGroup = { title: string; icon: ComponentType; items: NavLeaf[] };
@@ -159,7 +164,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   return (
-    <>
+    <PomodoroProvider>
       <Header aria-label="AORMS">
         <HeaderName href="/dashboard" prefix="">
           <span style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
@@ -170,6 +175,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </span>
         </HeaderName>
         <HeaderGlobalBar>
+          <HeaderEsti />
+          <HeaderWellness />
+          <HeaderCalculator />
+          <HeaderPomodoro />
           <HeaderGlobalAction
             aria-label="AI Runs"
             isActive={isActiveHref(pathname, "/ai-runs")}
@@ -214,6 +223,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </SideNavItems>
       </SideNav>
       <Content>{children}</Content>
-    </>
+    </PomodoroProvider>
   );
 }
