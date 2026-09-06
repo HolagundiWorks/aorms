@@ -8,9 +8,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");
 
-  // Defense in depth: a CLIENT-role profile hitting a staff URL directly
-  // (bookmark, stale link) bounces to their own portal instead of landing
-  // on a staff shell RLS would mostly show empty anyway.
+  // Defense in depth: a CLIENT/CONSULTANT/CONTRACTOR profile hitting a
+  // staff URL directly (bookmark, stale link) bounces to their own portal
+  // instead of landing on a staff shell RLS would mostly show empty anyway.
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -19,7 +19,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .select("role")
     .eq("id", user?.id ?? "")
     .maybeSingle();
-  if (roleHome(profile?.role) === "/portal") redirect("/portal");
+  const home = roleHome(profile?.role);
+  if (home && home !== "/dashboard") redirect(home);
 
   return <AppShell>{children}</AppShell>;
 }
