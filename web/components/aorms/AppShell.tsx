@@ -71,6 +71,7 @@ const GROUPS: NavGroup[] = [
       { href: "/transmittals", label: "Transmittals" },
       { href: "/tenders", label: "Tenders" },
       { href: "/purchase-orders", label: "Purchase Orders" },
+      { href: "/office-templates", label: "Office Templates" },
     ],
   },
   {
@@ -117,6 +118,7 @@ const GROUPS: NavGroup[] = [
       { href: "/master-plans", label: "Master Plans" },
       { href: "/standards", label: "Standards" },
       { href: "/compliance", label: "Compliance" },
+      { href: "/spec-catalog", label: "Spec Catalog" },
       { href: "/lessons", label: "Lessons Learned" },
       { href: "/knowledge-bank", label: "Knowledge Bank" },
     ],
