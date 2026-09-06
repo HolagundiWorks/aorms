@@ -202,7 +202,8 @@ Per [`../../CLAUDE.md`](../../CLAUDE.md) § Launch status:
 
 | Surface | Status |
 | --- | --- |
-| `/` (landing page) | ✅ **Live** — pure architecture-practice messaging, no blog (removed 2026-09) |
+| `/` (landing page) | ✅ **Live** — pure architecture-practice messaging |
+| `/blog`, `/blog/:slug` | ✅ **Live (restored 2026-09-06)** — briefly removed 2026-09-04 (`515696cf`), then rebuilt same day on `cloud-agent-roadmap-xnvtml` per an explicit user scope decision (five posts grounded in this session's own phase-audit mechanics), merged to `main` 2026-09-06 after local re-verification. Matches `CLAUDE.md`'s own stated launch status ("aorms.in ships landing + blog") |
 | `/#sign-in` (sign in / create workspace / reset password) | ✅ **Live** — embedded on the landing page (`LandingAuth`), not gated behind `VITE_MARKETING_ONLY` |
 | `/login`, `/access`, `/signup`, `/forgot-password`, `/reset-password` | ✅ Redirect to `/#sign-in` |
 | `/downloads` | Web-only, no installers |
@@ -214,8 +215,9 @@ into the landing page rather than reopening the old dedicated `/login` page.
 `VITE_MARKETING_ONLY` still gates the smaller remaining surface above.
 
 **Ops step still needed:** deploy the current `main` to the VPS — the
-landing-page sign-in, blog removal, and EOMS/consultancy removal are all
-committed but this session has no VPS/deploy credentials to push them live.
+landing-page sign-in, the blog (removed then restored, see above), and
+EOMS/consultancy removal are all committed but this session has no
+VPS/deploy credentials to push them live.
 
 ---
 
@@ -349,7 +351,7 @@ ROADMAP-LOCAL.md for that).
 
 | Week | Milestone | Status |
 |------|-----------|--------|
-| **This week** | Landing soft launch stays green; legacy docs archived; blog removed entirely | ✅ |
+| **This week** | Landing soft launch stays green; legacy docs archived; blog rebuilt and restored (briefly removed 2026-09-04, back live 2026-09-06 — see § Current phase) | ✅ |
 | **This week** | Restore CI's ability to run (`pnpm install` fix on `main`) | ✅ |
 | **This week** | Clear `pnpm typecheck` and `pnpm audit --audit-level=high` findings | ✅ |
 | **This week** | EOMS + engineering-consultancy angle removed (pure architectural consultancy) | ✅ |
