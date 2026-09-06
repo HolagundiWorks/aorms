@@ -12,6 +12,7 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewEstimateItemForm } from "../../../../components/aorms/NewEstimateItemForm";
+import { computeEstimateMarkups } from "../../../../lib/tax/estimate-markups";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -24,16 +25,40 @@ function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
 }
 
-/** Read-time totals rollup — port of computeEstimateTotalsFromSubtotal()
- * (packages/contracts/src/estimation.ts). Estimates never store totals,
- * items always do (amount_paise, maintained by the recompute trigger). */
-function computeTotals(items: { amount_paise: number }[], contingencyPct: number, gstPct: number) {
+/**
+ * Read-time totals rollup — port of computeEstimateTotalsFromSubtotal()
+ * (packages/contracts/src/estimation.ts), extended with the markup cascade
+ * (lib/tax/estimate-markups.ts, ported from AQC's EstimateMarkups) sitting
+ * between the rate-book subtotal and contingency/GST: items subtotal →
+ * +Electrical/+Plumbing → +Escalation (on that) → +Consulting fee (on
+ * that) → markupped subtotal → +contingency → taxable → +GST → grand
+ * total. Estimates never store totals, items always do (amount_paise,
+ * maintained by the recompute trigger).
+ */
+function computeTotals(
+  items: { amount_paise: number }[],
+  estimate: {
+    contingency_pct: number;
+    gst_pct: number;
+    electrical_pct: number;
+    plumbing_pct: number;
+    escalation_pct: number;
+    consulting_fee_pct: number;
+  },
+) {
   const itemsSubtotalPaise = items.reduce((sum, it) => sum + it.amount_paise, 0);
-  const contingencyPaise = Math.round((itemsSubtotalPaise * contingencyPct) / 100);
-  const taxablePaise = itemsSubtotalPaise + contingencyPaise;
-  const gstPaise = Math.round((taxablePaise * gstPct) / 100);
+  const markups = computeEstimateMarkups(itemsSubtotalPaise, {
+    electricalPct: estimate.electrical_pct,
+    plumbingPct: estimate.plumbing_pct,
+    escalationPct: estimate.escalation_pct,
+    consultingFeePct: estimate.consulting_fee_pct,
+  });
+  const markuppedSubtotalPaise = markups.grandTotalPaise;
+  const contingencyPaise = Math.round((markuppedSubtotalPaise * estimate.contingency_pct) / 100);
+  const taxablePaise = markuppedSubtotalPaise + contingencyPaise;
+  const gstPaise = Math.round((taxablePaise * estimate.gst_pct) / 100);
   const grandTotalPaise = taxablePaise + gstPaise;
-  return { itemsSubtotalPaise, contingencyPaise, taxablePaise, gstPaise, grandTotalPaise };
+  return { itemsSubtotalPaise, markups, markuppedSubtotalPaise, contingencyPaise, taxablePaise, gstPaise, grandTotalPaise };
 }
 
 export default async function EstimateDetailPage({
@@ -51,7 +76,7 @@ export default async function EstimateDetailPage({
     supabase
       .from("estimates")
       .select(
-        "id, ref, title, status, contingency_pct, gst_pct, project_offices(title), rate_books(id, name)",
+        "id, ref, title, status, contingency_pct, gst_pct, electrical_pct, plumbing_pct, escalation_pct, consulting_fee_pct, project_offices(title), rate_books(id, name)",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -84,7 +109,7 @@ export default async function EstimateDetailPage({
     : (estimate.rate_books as { id: string; name: string } | null);
 
   const rows = items ?? [];
-  const totals = computeTotals(rows, estimate.contingency_pct, estimate.gst_pct);
+  const totals = computeTotals(rows, estimate);
 
   const { data: rateBookItems } = rateBook
     ? await supabase
@@ -163,6 +188,26 @@ export default async function EstimateDetailPage({
               <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>
                 <span className="cds--type-body-01">Items subtotal</span>
                 <span className="cds--type-body-01">{formatInr(totals.itemsSubtotalPaise)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>
+                <span className="cds--type-body-01">Electrical ({estimate.electrical_pct}%)</span>
+                <span className="cds--type-body-01">{formatInr(totals.markups.electricalPaise)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>
+                <span className="cds--type-body-01">Plumbing ({estimate.plumbing_pct}%)</span>
+                <span className="cds--type-body-01">{formatInr(totals.markups.plumbingPaise)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>
+                <span className="cds--type-body-01">Escalation ({estimate.escalation_pct}%)</span>
+                <span className="cds--type-body-01">{formatInr(totals.markups.escalationPaise)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>
+                <span className="cds--type-body-01">Consulting fee ({estimate.consulting_fee_pct}%)</span>
+                <span className="cds--type-body-01">{formatInr(totals.markups.consultingFeePaise)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0", fontWeight: 600 }}>
+                <span className="cds--type-body-01">Subtotal after markups</span>
+                <span className="cds--type-body-01">{formatInr(totals.markuppedSubtotalPaise)}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>
                 <span className="cds--type-body-01">Contingency ({estimate.contingency_pct}%)</span>

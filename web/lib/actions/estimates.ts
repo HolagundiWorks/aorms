@@ -14,6 +14,13 @@ export async function createEstimateRecord(
   const title = String(formData.get("title") ?? "").trim();
   const contingencyPctRaw = String(formData.get("contingencyPct") ?? "0").trim();
   const gstPctRaw = String(formData.get("gstPct") ?? "0").trim();
+  // Markup cascade (port of AQC's EstimateMarkups — see lib/tax/estimate-
+  // markups.ts) — defaults match its own Reset() values, a real DSR-abstract
+  // convention, not arbitrary.
+  const electricalPctRaw = String(formData.get("electricalPct") ?? "8").trim();
+  const plumbingPctRaw = String(formData.get("plumbingPct") ?? "6").trim();
+  const escalationPctRaw = String(formData.get("escalationPct") ?? "5").trim();
+  const consultingFeePctRaw = String(formData.get("consultingFeePct") ?? "3").trim();
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
   if (!projectId) return { error: "Project is required." };
@@ -22,8 +29,14 @@ export async function createEstimateRecord(
 
   const contingencyPct = Number(contingencyPctRaw);
   const gstPct = Number(gstPctRaw);
-  if (!Number.isFinite(contingencyPct) || !Number.isFinite(gstPct)) {
-    return { error: "Contingency and GST % must be numbers." };
+  const electricalPct = Number(electricalPctRaw);
+  const plumbingPct = Number(plumbingPctRaw);
+  const escalationPct = Number(escalationPctRaw);
+  const consultingFeePct = Number(consultingFeePctRaw);
+  if (
+    ![contingencyPct, gstPct, electricalPct, plumbingPct, escalationPct, consultingFeePct].every(Number.isFinite)
+  ) {
+    return { error: "All percentage fields must be numbers." };
   }
 
   const supabase = await createClient();
@@ -43,6 +56,10 @@ export async function createEstimateRecord(
       title,
       contingency_pct: contingencyPct,
       gst_pct: gstPct,
+      electrical_pct: electricalPct,
+      plumbing_pct: plumbingPct,
+      escalation_pct: escalationPct,
+      consulting_fee_pct: consultingFeePct,
       notes,
     })
     .select("id")
