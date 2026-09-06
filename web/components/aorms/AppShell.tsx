@@ -1,5 +1,8 @@
 "use client";
 
+import type { ComponentType } from "react";
+import NextLink from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Header,
   HeaderName,
@@ -8,13 +11,146 @@ import {
   SideNav,
   SideNavItems,
   SideNavLink,
+  SideNavMenu,
+  SideNavMenuItem,
   Content,
 } from "@carbon/react";
-import { Logout } from "@carbon/icons-react";
+import {
+  Logout,
+  Dashboard,
+  UserFollow,
+  Building,
+  FolderDetails,
+  Task,
+  Document,
+  Currency,
+  Ruler,
+  Delivery as DeliveryIcon,
+  Book,
+  Group,
+  Settings,
+  MachineLearning,
+} from "@carbon/icons-react";
 import { signOut } from "../../lib/actions/auth";
 
-/** Root application shell — Carbon UI Shell (Header + SideNav). One instance for the whole (app) route group. */
+type NavLeaf = { href: string; label: string };
+type NavGroup = { title: string; icon: ComponentType; items: NavLeaf[] };
+
+/**
+ * Top-level items (always visible, no group) — the pillars a user reaches
+ * for constantly: the office-wide feed, the sales pipeline, the client
+ * register, the project list, and the personal work queue. Everything else
+ * is a supporting register, grouped below by who reaches for it and how
+ * often, not by which Supabase table it happens to read.
+ */
+const TOP_LEVEL: (NavLeaf & { icon: ComponentType })[] = [
+  { href: "/dashboard", label: "Dashboard", icon: Dashboard },
+  { href: "/leads", label: "Leads", icon: UserFollow },
+  { href: "/clients", label: "Clients", icon: Building },
+  { href: "/projects", label: "Projects", icon: FolderDetails },
+  { href: "/tasks", label: "Tasks", icon: Task },
+];
+
+/**
+ * Grouped by domain, matching this codebase's own module map (CLAUDE.md) —
+ * Office (capture + papers), Finance, Estimation/Technical, Delivery
+ * (site supervision + AProc), Library, People (HR), and Admin/Ops — rather
+ * than NAVIGATION.md's old-frontend IA verbatim, since web/'s actual routes
+ * (this rebuild's own page-per-phase naming) don't map 1:1 onto that
+ * document's tab/facet structure. See docs/esti/NAVIGATION.md's own header:
+ * it documents `frontend/src/App.tsx`'s nav, not this app's.
+ */
+const GROUPS: NavGroup[] = [
+  {
+    title: "Office",
+    icon: Document,
+    items: [
+      { href: "/proposals", label: "Proposals" },
+      { href: "/letters", label: "Letters" },
+      { href: "/contracts", label: "Contracts" },
+      { href: "/transmittals", label: "Transmittals" },
+      { href: "/tenders", label: "Tenders" },
+      { href: "/purchase-orders", label: "Purchase Orders" },
+    ],
+  },
+  {
+    title: "Finance",
+    icon: Currency,
+    items: [
+      { href: "/invoices", label: "Invoices" },
+      { href: "/reports", label: "Financial Reports" },
+    ],
+  },
+  {
+    title: "Estimation & Technical",
+    icon: Ruler,
+    items: [
+      { href: "/rate-books", label: "Rate Books" },
+      { href: "/estimates", label: "Estimates" },
+      { href: "/spec-sheets", label: "Spec Sheets" },
+      { href: "/drawings", label: "Drawings" },
+      { href: "/moms", label: "Meeting Minutes" },
+    ],
+  },
+  {
+    title: "Delivery",
+    icon: DeliveryIcon,
+    items: [
+      { href: "/snags", label: "Snags" },
+      { href: "/site-instructions", label: "Site Instructions" },
+      { href: "/progress-reports", label: "Progress Reports" },
+      { href: "/pmc-milestones", label: "Milestones" },
+      { href: "/pmc-packages", label: "Work Packages" },
+      { href: "/pmc-steel-certs", label: "Steel Certification" },
+      { href: "/pmc-ra-bills", label: "RA Bills" },
+      { href: "/contractors", label: "Contractors" },
+      { href: "/approvals", label: "Approvals" },
+    ],
+  },
+  {
+    title: "Library",
+    icon: Book,
+    items: [
+      { href: "/master-plans", label: "Master Plans" },
+      { href: "/standards", label: "Standards" },
+      { href: "/compliance", label: "Compliance" },
+      { href: "/lessons", label: "Lessons Learned" },
+      { href: "/knowledge-bank", label: "Knowledge Bank" },
+    ],
+  },
+  {
+    title: "People",
+    icon: Group,
+    items: [
+      { href: "/team-members", label: "Team Members" },
+      { href: "/teams", label: "Teams" },
+      { href: "/payslips", label: "Payslips" },
+      { href: "/job-applications", label: "Job Applications" },
+    ],
+  },
+  {
+    title: "Admin",
+    icon: Settings,
+    items: [
+      { href: "/workload", label: "Workload" },
+      { href: "/audit-log", label: "Audit Log" },
+    ],
+  },
+];
+
+/** A route is "active" for a link at exactly itself, and for a group's
+ * expand/highlight state at itself or any of its own sub-pages (so /projects/[id]
+ * still highlights the Projects link, matching the old frontend's isActive
+ * convention) — never by bare prefix, which would e.g. wrongly light up
+ * /invoices for a route like /invoices-archive if one ever existed. */
+function isActiveHref(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+
   return (
     <>
       <Header aria-label="AORMS">
@@ -22,6 +158,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           Office Hub
         </HeaderName>
         <HeaderGlobalBar>
+          <HeaderGlobalAction
+            aria-label="AI Runs"
+            isActive={isActiveHref(pathname, "/ai-runs")}
+            onClick={() => router.push("/ai-runs")}
+          >
+            <MachineLearning size={20} />
+          </HeaderGlobalAction>
           <form action={signOut}>
             {/* Carbon doesn't forward a `type` prop, but a <button> defaults to
                 type="submit" inside a <form> — this still triggers signOut. */}
@@ -33,45 +176,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </Header>
       <SideNav aria-label="Side navigation" isFixedNav expanded isChildOfHeader={false}>
         <SideNavItems>
-          <SideNavLink href="/dashboard">Dashboard</SideNavLink>
-          <SideNavLink href="/leads">Leads</SideNavLink>
-          <SideNavLink href="/clients">Clients</SideNavLink>
-          <SideNavLink href="/projects">Projects</SideNavLink>
-          <SideNavLink href="/tasks">Tasks</SideNavLink>
-          <SideNavLink href="/proposals">Proposals</SideNavLink>
-          <SideNavLink href="/letters">Letters</SideNavLink>
-          <SideNavLink href="/contracts">Contracts</SideNavLink>
-          <SideNavLink href="/invoices">Invoices</SideNavLink>
-          <SideNavLink href="/purchase-orders">Purchase Orders</SideNavLink>
-          <SideNavLink href="/rate-books">Rate Books</SideNavLink>
-          <SideNavLink href="/estimates">Estimates</SideNavLink>
-          <SideNavLink href="/spec-sheets">Spec Sheets</SideNavLink>
-          <SideNavLink href="/transmittals">Transmittals</SideNavLink>
-          <SideNavLink href="/drawings">Drawings</SideNavLink>
-          <SideNavLink href="/moms">Meeting Minutes</SideNavLink>
-          <SideNavLink href="/ai-runs">AI Runs</SideNavLink>
-          <SideNavLink href="/knowledge-bank">Knowledge Bank</SideNavLink>
-          <SideNavLink href="/contractors">Contractors</SideNavLink>
-          <SideNavLink href="/approvals">Approvals</SideNavLink>
-          <SideNavLink href="/team-members">Team Members</SideNavLink>
-          <SideNavLink href="/teams">Teams</SideNavLink>
-          <SideNavLink href="/payslips">Payslips</SideNavLink>
-          <SideNavLink href="/job-applications">Job Applications</SideNavLink>
-          <SideNavLink href="/snags">Snags</SideNavLink>
-          <SideNavLink href="/site-instructions">Site Instructions</SideNavLink>
-          <SideNavLink href="/progress-reports">Progress Reports</SideNavLink>
-          <SideNavLink href="/pmc-milestones">Milestones</SideNavLink>
-          <SideNavLink href="/pmc-packages">Work Packages</SideNavLink>
-          <SideNavLink href="/pmc-steel-certs">Steel Certification</SideNavLink>
-          <SideNavLink href="/pmc-ra-bills">RA Bills</SideNavLink>
-          <SideNavLink href="/tenders">Tenders</SideNavLink>
-          <SideNavLink href="/master-plans">Master Plans</SideNavLink>
-          <SideNavLink href="/standards">Standards</SideNavLink>
-          <SideNavLink href="/compliance">Compliance</SideNavLink>
-          <SideNavLink href="/lessons">Lessons Learned</SideNavLink>
-          <SideNavLink href="/reports">Financial Reports</SideNavLink>
-          <SideNavLink href="/workload">Workload</SideNavLink>
-          <SideNavLink href="/audit-log">Audit Log</SideNavLink>
+          {TOP_LEVEL.map((item) => (
+            <SideNavLink
+              key={item.href}
+              as={NextLink}
+              href={item.href}
+              renderIcon={item.icon}
+              isActive={isActiveHref(pathname, item.href)}
+            >
+              {item.label}
+            </SideNavLink>
+          ))}
+          {GROUPS.map((group) => {
+            const groupIsActive = group.items.some((item) => isActiveHref(pathname, item.href));
+            return (
+              <SideNavMenu key={group.title} title={group.title} renderIcon={group.icon} defaultExpanded={groupIsActive}>
+                {group.items.map((item) => (
+                  <SideNavMenuItem key={item.href} as={NextLink} href={item.href} isActive={isActiveHref(pathname, item.href)}>
+                    {item.label}
+                  </SideNavMenuItem>
+                ))}
+              </SideNavMenu>
+            );
+          })}
         </SideNavItems>
       </SideNav>
       <Content>{children}</Content>

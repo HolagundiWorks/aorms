@@ -171,6 +171,37 @@ sidebar entry.
 certification, BBS, Steel reconciliation, and Moodboard are project tabs, not
 standalone nav pillars.
 
+## Addendum: `web/`'s own navigation (Next.js/Supabase migration, 2026-09-06)
+
+Everything above documents `frontend/src/App.tsx`'s nav tree — the **current
+production** SPA. `web/` (the target-stack rebuild, see CLAUDE.md § Stack
+migration) is additive, pre-launch code with its own route inventory built
+phase-by-phase (`docs/esti/ROADMAP-CLOUD.md`), not a port of the old IA —
+route names, page groupings, and even which domains exist differ enough
+(e.g. `leads`/`team-members` vs. the old `teams`/`hr`) that mapping this
+doc's tab/facet structure onto it 1:1 would misrepresent what's actually
+built. Its sidebar (`web/components/aorms/AppShell.tsx`) is the source of
+truth for its own IA — a flat 39-link list until 2026-09-06, now grouped:
+
+| Top-level (no group) | Group | Sub-items |
+|---|---|---|
+| Dashboard · Leads · Clients · Projects · Tasks | **Office** | Proposals · Letters · Contracts · Transmittals · Tenders · Purchase Orders |
+| | **Finance** | Invoices · Financial Reports |
+| | **Estimation & Technical** | Rate Books · Estimates · Spec Sheets · Drawings · Meeting Minutes |
+| | **Delivery** | Snags · Site Instructions · Progress Reports · Milestones · Work Packages · Steel Certification · RA Bills · Contractors · Approvals |
+| | **Library** | Master Plans · Standards · Compliance · Lessons Learned · Knowledge Bank |
+| | **People** | Team Members · Teams · Payslips · Job Applications |
+| | **Admin** | Workload · Audit Log |
+
+Groups use Carbon `SideNavMenu`/`SideNavMenuItem`, auto-expand when the
+current route is inside them, and both top-level links and sub-items use
+real Next.js client-side routing (`as={NextLink}`) rather than full-page
+anchor reloads. AI Runs is a header icon action (next to sign-out), not a
+sidebar entry — it's a single cross-cutting log, not a domain with
+sub-items. This addendum documents the grouping as of 2026-09-06; if
+`web/`'s route inventory changes meaningfully, update the table above
+rather than `AppShell.tsx`'s own inline comments alone.
+
 ## Closing philosophy
 AORMS is a **unified office management system**: work and knowledge coexist in
 one hub, knowledge becomes infrastructure (LXOS), growth becomes measurable.
