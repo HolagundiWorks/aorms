@@ -367,6 +367,34 @@ branch before starting anything that could overlap — not just at hand-off.
   non-trivial logic smoke-tested with real inserted rows) — see
   [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) for the established pattern
   across migrations `0001`–`0015`.
+- **Local Supabase stack for `web/` (2026-09-06)** — `web/supabase/` is now
+  also a real Supabase CLI project (`config.toml`), so `web/` can run
+  against a **local** Postgres+PostgREST+Auth+Storage stack instead of the
+  live cloud project, applying every migration in `web/supabase/migrations/`
+  identically (same RLS, same SQL functions, same constraints — not a
+  different database engine, so nothing needs a parallel implementation).
+  This is unrelated to the *old* backend/worker's removed local Postgres
+  (still gone, see the callout above) — it's `web/`'s own, separate stack.
+  This machine has no Docker install; the CLI talks to **Podman** instead
+  via `DOCKER_HOST="npipe:////./pipe/podman-machine-default"` (the running
+  `podman-machine-default` WSL machine's Docker-compatible named pipe) — set
+  that env var before any `supabase` CLI command. Start: `cd web && DOCKER_HOST=... npx supabase start`
+  (first run pulls ~10 images, several minutes; needs `web/supabase/snippets/`
+  to exist — an empty dir with `.gitkeep`, or Studio's container fails to
+  start with a `statfs ... snippets: no such file or directory` error).
+  Stop: `npx supabase stop` (add `--no-backup` to also drop the local DB
+  volume for a truly fresh next start). `web/.env.local` (gitignored, not
+  committed — recreate from `supabase start`'s own JSON output if it's ever
+  lost) holds the local stack's URL + fixed demo `anon`/`service_role` keys
+  and takes precedence over `.env` (the cloud project) in Next.js dev —
+  production keeps using `.env`'s cloud values unchanged. Verified live
+  (2026-09-06): a fresh `supabase start` applied all 24 existing migrations
+  (`0001`–`0024`) cleanly against a brand-new local Postgres with zero
+  errors — real, independent confirmation every RLS policy/SQL function/
+  constraint written this session is valid, portable SQL, not just "worked
+  once against the live project's already-evolved schema." `next dev`
+  confirmed loading `.env.local` ahead of `.env` and serving pages correctly
+  against the local stack's REST API.
 
 ## Conventions
 
