@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Accordion, AccordionItem, Column, Grid, Tag, Tile } from "@carbon/react";
 import { createClient } from "../lib/supabase/server";
+import { roleHome } from "../lib/auth/role-home";
 import { BandCtas, HeroCtas } from "../components/aorms/LandingButtons";
 import {
   AORMS_PLATFORM,
@@ -26,13 +27,25 @@ const SECTION_PAD = "clamp(3rem, 6vw, 6rem) 0";
  * `@carbon/react` only, matching CLAUDE.md's Pure Carbon rule that
  * `web/` already follows everywhere else, rather than porting the old
  * page's MUI/`@hcw/ui-kit` marketing chrome (`MarketingNeuFrame` etc.)
- * verbatim. Signed-in visitors still land on /dashboard; signed-out
+ * verbatim. Signed-in visitors land on their role's home (`/dashboard` for
+ * staff, `/portal` for a client — see `lib/auth/role-home.ts`); signed-out
  * visitors get this page with a "Sign in" link to the existing
  * `(auth)/login` route, not an embedded auth form.
  */
 export default async function LandingPage() {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
+  if (data?.claims) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user?.id ?? "")
+      .maybeSingle();
+    redirect(roleHome(profile?.role) ?? "/login");
+  }
   if (data?.claims) redirect("/dashboard");
 
   return (
