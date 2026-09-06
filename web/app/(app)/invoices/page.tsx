@@ -33,7 +33,7 @@ export default async function InvoicesPage() {
     supabase
       .from("invoices")
       .select(
-        "id, ref, status, gst_system, document_kind, taxable_paise, grand_total_paise, paid_paise, date_invoice, pdf_status, project_offices(title), clients(name)",
+        "id, ref, status, gst_system, document_kind, taxable_paise, gst_total_paise, tds_paise, grand_total_paise, net_receivable_paise, paid_paise, date_invoice, pdf_status, project_offices(title), clients(name)",
       )
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
@@ -48,7 +48,7 @@ export default async function InvoicesPage() {
           className="cds--type-body-01"
           style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
         >
-          GST invoicing — tax computation is not wired up yet; taxable amount only.
+          GST invoicing — CGST/SGST/IGST, place of supply, and s.194J TDS computed automatically.
         </p>
 
         <NewInvoiceForm projects={projects ?? []} clients={clients ?? []} />
@@ -65,7 +65,11 @@ export default async function InvoicesPage() {
                 <TableHeader>Project</TableHeader>
                 <TableHeader>Client</TableHeader>
                 <TableHeader>Kind</TableHeader>
+                <TableHeader>Taxable</TableHeader>
+                <TableHeader>GST</TableHeader>
+                <TableHeader>TDS</TableHeader>
                 <TableHeader>Grand total</TableHeader>
+                <TableHeader>Net receivable</TableHeader>
                 <TableHeader>Paid</TableHeader>
                 <TableHeader>Status</TableHeader>
                 <TableHeader>PDF</TableHeader>
@@ -85,7 +89,11 @@ export default async function InvoicesPage() {
                     <TableCell>{project?.title ?? "—"}</TableCell>
                     <TableCell>{client?.name ?? "—"}</TableCell>
                     <TableCell>{inv.document_kind}</TableCell>
+                    <TableCell>{formatInr(inv.taxable_paise)}</TableCell>
+                    <TableCell>{formatInr(inv.gst_total_paise)}</TableCell>
+                    <TableCell>{formatInr(inv.tds_paise)}</TableCell>
                     <TableCell>{formatInr(inv.grand_total_paise)}</TableCell>
+                    <TableCell>{formatInr(inv.net_receivable_paise)}</TableCell>
                     <TableCell>{formatInr(inv.paid_paise)}</TableCell>
                     <TableCell>
                       <Tag type={STATUS_TAG[inv.status] ?? "gray"} size="sm">
@@ -103,7 +111,7 @@ export default async function InvoicesPage() {
               })}
               {(invoices ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8}>
+                  <TableCell colSpan={12}>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                       No invoices yet.
                     </p>

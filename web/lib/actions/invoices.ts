@@ -3,15 +3,38 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
+import { computeGst, computeTds194j, GstSystem, tds194jApplies } from "../tax/gst";
+import { derivePlaceOfSupply } from "../tax/place-of-supply";
+import { financialYearRange } from "../tax/fy";
 
 export type InvoiceActionState = { error: string } | null;
 
 /**
- * GST/TDS computation (cgst/sgst/igst/composition/tds rollup) is NOT ported
- * here — this creates a DRAFT invoice with a taxable amount only, matching
- * every other domain's "schema + basic CRUD first" pattern this session.
- * The current backend's tax engine (packages/contracts) is a separate,
- * substantial port — flagged, not attempted as a side effect of this form.
+ * Fee value (excluding GST) already invoiced to a client this financial
+ * year — port of backend/src/lib/createInvoice.ts's clientFyTaxablePaise(),
+ * feeding the s.194J(B) ₹30,000/FY aggregate threshold.
+ */
+async function clientFyTaxablePaise(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  clientId: string,
+): Promise<number> {
+  const { start, end } = financialYearRange();
+  const { data } = await supabase
+    .from("invoices")
+    .select("taxable_paise")
+    .eq("client_id", clientId)
+    .in("status", ["DRAFT", "ISSUED", "PAID"])
+    .gte("created_at", start.toISOString())
+    .lt("created_at", end.toISOString());
+  return (data ?? []).reduce((sum, r) => sum + r.taxable_paise, 0);
+}
+
+/**
+ * GST/TDS/place-of-supply computation — port of backend/src/lib/
+ * createInvoice.ts's createStudioInvoice(). Every tax column already
+ * existed on `invoices` (migration 0002); this is what actually fills them
+ * in, closing Phase 3's own flagged gap ("invoices don't compute GST —
+ * DRAFT with a taxable amount only").
  */
 export async function createInvoiceRecord(
   _prev: InvoiceActionState,
@@ -19,18 +42,50 @@ export async function createInvoiceRecord(
 ): Promise<InvoiceActionState> {
   const projectId = String(formData.get("projectId") ?? "").trim();
   const clientId = String(formData.get("clientId") ?? "").trim() || null;
-  const gstSystem = String(formData.get("gstSystem") ?? "REGULAR");
-  const documentKind = String(formData.get("documentKind") ?? "TAX_INVOICE");
+  const gstSystemOverride = String(formData.get("gstSystem") ?? "").trim() || null;
+  const sac = String(formData.get("sac") ?? "998322").trim();
   const taxableRaw = String(formData.get("taxablePaise") ?? "").trim();
   const dateInvoice = String(formData.get("dateInvoice") ?? "").trim() || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const isAdvance = formData.get("isAdvance") === "on";
 
   if (!projectId) return { error: "Project is required." };
 
   const taxablePaise = taxableRaw ? Math.round(Number(taxableRaw) * 100) : 0;
-  if (!Number.isFinite(taxablePaise)) return { error: "Taxable amount must be a number." };
+  if (!Number.isFinite(taxablePaise) || taxablePaise < 0) {
+    return { error: "Taxable amount must be a non-negative number." };
+  }
 
   const supabase = await createClient();
+
+  const [{ data: firm, error: firmError }, { data: project, error: projectError }] = await Promise.all([
+    supabase.from("firm").select("gst_type, state, gstin, tds_applicable_default").limit(1).maybeSingle(),
+    supabase.from("project_offices").select("state").eq("id", projectId).maybeSingle(),
+  ]);
+  if (firmError) return { error: `Could not load firm settings: ${firmError.message}` };
+  if (projectError) return { error: `Could not load project: ${projectError.message}` };
+
+  const { data: client } = clientId
+    ? await supabase.from("clients").select("state, gstin").eq("id", clientId).maybeSingle()
+    : { data: null };
+
+  const system = (gstSystemOverride || firm?.gst_type || GstSystem.REGULAR) as GstSystem;
+  const pos = derivePlaceOfSupply({
+    firmState: firm?.state ?? null,
+    firmGstin: firm?.gstin ?? null,
+    projectState: project?.state ?? null,
+    clientState: client?.state ?? null,
+    clientGstin: client?.gstin ?? null,
+  });
+
+  const firmDeducts = firm?.tds_applicable_default ?? true;
+  const priorTaxablePaise = clientId ? await clientFyTaxablePaise(supabase, clientId) : 0;
+  const tdsCheck = tds194jApplies({ priorTaxablePaise, taxablePaise });
+  const tdsApplicable = firmDeducts && tdsCheck.applies;
+
+  const g = computeGst(system, taxablePaise, pos.interState);
+  const tdsPaise = tdsApplicable ? computeTds194j(taxablePaise) : 0;
+  const netReceivablePaise = g.grandTotal - tdsPaise;
 
   const { data: refData, error: refError } = await supabase.rpc("next_ref", {
     p_scope: "invoice",
@@ -44,11 +99,22 @@ export async function createInvoiceRecord(
       ref: refData,
       project_id: projectId,
       client_id: clientId,
-      gst_system: gstSystem,
-      document_kind: documentKind,
-      taxable_paise: taxablePaise,
-      grand_total_paise: taxablePaise,
-      net_receivable_paise: taxablePaise,
+      gst_system: system,
+      document_kind: g.documentKind,
+      sac: system === GstSystem.REGULAR ? sac : null,
+      inter_state: pos.interState,
+      place_of_supply_state: pos.state,
+      tds_applicable: tdsApplicable,
+      taxable_paise: g.taxable,
+      cgst_paise: g.cgst,
+      sgst_paise: g.sgst,
+      igst_paise: g.igst,
+      gst_total_paise: g.gstTotal,
+      composition_levy_paise: g.compositionLevy,
+      tds_paise: tdsPaise,
+      grand_total_paise: g.grandTotal,
+      net_receivable_paise: netReceivablePaise,
+      is_advance: isAdvance,
       date_invoice: dateInvoice,
       notes,
     })
@@ -62,7 +128,16 @@ export async function createInvoiceRecord(
     p_entity_id: inserted.id,
     p_action: "CREATE",
     p_before: null,
-    p_after: { ref: refData, projectId, clientId, gstSystem, documentKind, taxablePaise },
+    p_after: {
+      ref: refData,
+      projectId,
+      clientId,
+      gstSystem: system,
+      taxablePaise,
+      grandTotalPaise: g.grandTotal,
+      tdsPaise,
+      netReceivablePaise,
+    },
   });
 
   revalidatePath("/invoices");

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import {
   Button,
+  Checkbox,
   Form,
   InlineNotification,
   Select,
@@ -12,6 +13,7 @@ import {
   TextInput,
 } from "@carbon/react";
 import { createInvoiceRecord, type InvoiceActionState } from "../../lib/actions/invoices";
+import { SAC_CODES } from "../../lib/tax/gst";
 import { FormGrid } from "./FormGrid";
 
 type ProjectOption = { id: string; title: string };
@@ -53,13 +55,16 @@ export function NewInvoiceForm({
               <SelectItem key={c.id} value={c.id} text={c.name} />
             ))}
           </Select>
-          <Select id="gstSystem" name="gstSystem" labelText="GST system" defaultValue="REGULAR">
+          <Select id="gstSystem" name="gstSystem" labelText="GST system (blank = firm default)" defaultValue="">
+            <SelectItem value="" text="— Firm default —" />
             <SelectItem value="REGULAR" text="Regular" />
             <SelectItem value="COMPOSITION" text="Composition" />
+            <SelectItem value="NOT_APPLICABLE" text="Not applicable" />
           </Select>
-          <Select id="documentKind" name="documentKind" labelText="Document kind" defaultValue="TAX_INVOICE">
-            <SelectItem value="TAX_INVOICE" text="Tax invoice" />
-            <SelectItem value="BILL_OF_SUPPLY" text="Bill of supply" />
+          <Select id="sac" name="sac" labelText="SAC code (Regular only)" defaultValue="998322">
+            {SAC_CODES.map((s) => (
+              <SelectItem key={s.code} value={s.code} text={`${s.code} — ${s.label}`} />
+            ))}
           </Select>
           <TextInput
             id="taxablePaise"
@@ -70,6 +75,7 @@ export function NewInvoiceForm({
           />
           <TextInput id="dateInvoice" name="dateInvoice" labelText="Invoice date" type="date" />
         </FormGrid>
+        <Checkbox id="isAdvance" name="isAdvance" labelText="Advance invoice" />
         <TextArea id="notes" name="notes" labelText="Notes" rows={2} />
         <Button type="submit" disabled={pending}>
           {pending ? "Creating…" : "Create invoice"}
