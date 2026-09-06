@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Column,
   Grid,
@@ -62,7 +63,9 @@ export default async function TransmittalsPage() {
                   : (t.project_offices as { title: string } | null);
                 return (
                   <TableRow key={t.id}>
-                    <TableCell>{t.ref}</TableCell>
+                    <TableCell>
+                      <Link href={`/transmittals/${t.id}`}>{t.ref}</Link>
+                    </TableCell>
                     <TableCell>{t.recipient}</TableCell>
                     <TableCell>{t.purpose}</TableCell>
                     <TableCell>{project?.title ?? "—"}</TableCell>

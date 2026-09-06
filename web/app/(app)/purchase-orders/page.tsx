@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Column,
   Grid,
@@ -71,7 +72,9 @@ export default async function PurchaseOrdersPage() {
                   : (po.project_offices as { title: string } | null);
                 return (
                   <TableRow key={po.id}>
-                    <TableCell>{po.ref}</TableCell>
+                    <TableCell>
+                      <Link href={`/purchase-orders/${po.id}`}>{po.ref}</Link>
+                    </TableCell>
                     <TableCell>{po.title ?? "—"}</TableCell>
                     <TableCell>{po.vendor ?? "—"}</TableCell>
                     <TableCell>{project?.title ?? "—"}</TableCell>

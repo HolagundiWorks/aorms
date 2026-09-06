@@ -90,6 +90,7 @@ const GROUPS: NavGroup[] = [
       { href: "/spec-sheets", label: "Spec Sheets" },
       { href: "/drawings", label: "Drawings" },
       { href: "/moms", label: "Meeting Minutes" },
+      { href: "/document-issues", label: "Document Issues" },
     ],
   },
   {

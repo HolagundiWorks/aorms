@@ -54,3 +54,82 @@ export async function createMomRecord(
   revalidatePath("/moms");
   return null;
 }
+
+export type MomActionItemState = { error: string } | null;
+
+/**
+ * MoM action items — Phase 4's own flagged gap ("mom_actions ... sub-
+ * resources" not built). `task_id` (a linked `tasks` row) exists on the
+ * table but is left null here — wiring a MoM action into a real assigned
+ * task is a further step this pass doesn't attempt, matching the same
+ * "don't guess ahead of what's asked" discipline as everywhere else.
+ */
+export async function addMomActionRecord(
+  _prev: MomActionItemState,
+  formData: FormData,
+): Promise<MomActionItemState> {
+  const momId = String(formData.get("momId") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const assigneeName = String(formData.get("assigneeName") ?? "").trim() || null;
+  const dueDate = String(formData.get("dueDate") ?? "").trim() || null;
+
+  if (!momId) return { error: "Missing meeting minutes." };
+  if (!description) return { error: "Description is required." };
+
+  const supabase = await createClient();
+
+  const { count } = await supabase
+    .from("mom_actions")
+    .select("id", { count: "exact", head: true })
+    .eq("mom_id", momId);
+
+  const { data: inserted, error } = await supabase
+    .from("mom_actions")
+    .insert({
+      mom_id: momId,
+      description,
+      assignee_name: assigneeName,
+      due_date: dueDate,
+      status: "OPEN",
+      sort_order: count ?? 0,
+    })
+    .select("id")
+    .single();
+  if (error) return { error: error.message };
+
+  await supabase.rpc("write_audit", {
+    p_entity: "mom_action",
+    p_entity_id: inserted.id,
+    p_action: "CREATE",
+    p_before: null,
+    p_after: { momId, description, assigneeName, dueDate },
+  });
+
+  revalidatePath(`/moms/${momId}`);
+  return null;
+}
+
+const MOM_ACTION_STATUSES = ["OPEN", "IN_PROGRESS", "DONE"];
+
+export async function updateMomActionStatus(
+  actionId: string,
+  momId: string,
+  status: string,
+): Promise<{ error?: string }> {
+  if (!MOM_ACTION_STATUSES.includes(status)) return { error: "Invalid status." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("mom_actions").update({ status }).eq("id", actionId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/moms/${momId}`);
+  return {};
+}
+
+export async function removeMomAction(actionId: string, momId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("mom_actions").delete().eq("id", actionId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/moms/${momId}`);
+  return {};
+}

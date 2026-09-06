@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Column,
   Grid,
@@ -59,7 +60,9 @@ export default async function MomsPage() {
                   : (m.project_offices as { title: string } | null);
                 return (
                   <TableRow key={m.id}>
-                    <TableCell>{m.ref}</TableCell>
+                    <TableCell>
+                      <Link href={`/moms/${m.id}`}>{m.ref}</Link>
+                    </TableCell>
                     <TableCell>{m.title}</TableCell>
                     <TableCell>{project?.title ?? "—"}</TableCell>
                     <TableCell>{m.meeting_date ?? "—"}</TableCell>
