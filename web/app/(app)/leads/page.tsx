@@ -14,16 +14,6 @@ import { createClient } from "../../../lib/supabase/server";
 import { NewLeadForm } from "../../../components/aorms/NewLeadForm";
 import { LeadStatusSelect } from "../../../components/aorms/LeadStatusSelect";
 
-const STATUS_TAG: Record<string, "blue" | "cyan" | "teal" | "purple" | "green" | "gray" | "red"> = {
-  NEW: "blue",
-  CONTACTED: "cyan",
-  ASSESSMENT_STARTED: "teal",
-  AWAITING_REVIEW: "purple",
-  QUALIFIED: "green",
-  DROPPED: "gray",
-  LOST: "red",
-};
-
 export default async function LeadsPage() {
   const supabase = await createClient();
 
