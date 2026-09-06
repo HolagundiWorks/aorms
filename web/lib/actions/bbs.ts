@@ -7,6 +7,8 @@ import {
   BbsBeamInput,
   BbsSlabInput,
   BbsFootingInput,
+  BbsWallInput,
+  BbsStairInput,
   type BbsElement,
 } from "../bbs/formulas";
 import { computeMember, type BbsMemberStored } from "../bbs/engine";
@@ -279,6 +281,75 @@ export async function addFootingMember(_prev: BbsActionState, formData: FormData
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid footing input." };
 
   const result = await insertMemberAndBars(bbsId, { element: "FOOTING", input: parsed.data });
+  if ("error" in result) return result;
+  return null;
+}
+
+export async function addWallMember(_prev: BbsActionState, formData: FormData): Promise<BbsActionState> {
+  const bbsId = String(formData.get("bbsId") ?? "").trim();
+  if (!bbsId) return { error: "Missing schedule." };
+
+  const parsed = BbsWallInput.safeParse({
+    mark: String(formData.get("mark") ?? "").trim() || undefined,
+    wallLengthMm: numberField(formData, "wallLengthMm"),
+    stemHeightMm: numberField(formData, "stemHeightMm"),
+    stemThicknessMm: numberField(formData, "stemThicknessMm"),
+    heelMm: numberField(formData, "heelMm"),
+    toeMm: numberField(formData, "toeMm"),
+    baseThicknessMm: numberField(formData, "baseThicknessMm"),
+    coverMm: numberField(formData, "coverMm"),
+    concreteGrade: String(formData.get("concreteGrade") ?? "M20"),
+    steelGrade: String(formData.get("steelGrade") ?? "Fe415"),
+    tensionFace: String(formData.get("tensionFace") ?? "Front"),
+    stemVDiaMm: numberField(formData, "stemVDiaMm"),
+    stemVSpacingMm: numberField(formData, "stemVSpacingMm"),
+    stemVBackDiaMm: numberField(formData, "stemVBackDiaMm"),
+    stemVBackSpacingMm: numberField(formData, "stemVBackSpacingMm"),
+    stemHDiaMm: numberField(formData, "stemHDiaMm"),
+    stemHSpacingMm: numberField(formData, "stemHSpacingMm"),
+    baseLDiaMm: numberField(formData, "baseLDiaMm"),
+    baseLSpacingMm: numberField(formData, "baseLSpacingMm"),
+    baseBDiaMm: numberField(formData, "baseBDiaMm"),
+    baseBSpacingMm: numberField(formData, "baseBSpacingMm"),
+    linkDiaMm: numberField(formData, "linkDiaMm"),
+    linkSpacingMm: numberField(formData, "linkSpacingMm"),
+    linkLegs: numberField(formData, "linkLegs"),
+    hookAngle: numberField(formData, "hookAngle"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid wall input." };
+
+  const result = await insertMemberAndBars(bbsId, { element: "WALL", input: parsed.data });
+  if ("error" in result) return result;
+  return null;
+}
+
+export async function addStairMember(_prev: BbsActionState, formData: FormData): Promise<BbsActionState> {
+  const bbsId = String(formData.get("bbsId") ?? "").trim();
+  if (!bbsId) return { error: "Missing schedule." };
+
+  const parsed = BbsStairInput.safeParse({
+    mark: String(formData.get("mark") ?? "").trim() || undefined,
+    nRisers: numberField(formData, "nRisers"),
+    nFlights: numberField(formData, "nFlights"),
+    goingMm: numberField(formData, "goingMm"),
+    riserMm: numberField(formData, "riserMm"),
+    waistThicknessMm: numberField(formData, "waistThicknessMm"),
+    flightWidthMm: numberField(formData, "flightWidthMm"),
+    coverMm: numberField(formData, "coverMm"),
+    landingLengthMm: numberField(formData, "landingLengthMm"),
+    landingWidthMm: numberField(formData, "landingWidthMm"),
+    concreteGrade: String(formData.get("concreteGrade") ?? "M20"),
+    steelGrade: String(formData.get("steelGrade") ?? "Fe415"),
+    mainDiaMm: numberField(formData, "mainDiaMm"),
+    mainSpacingMm: numberField(formData, "mainSpacingMm"),
+    distDiaMm: numberField(formData, "distDiaMm"),
+    distSpacingMm: numberField(formData, "distSpacingMm"),
+    landingDiaMm: numberField(formData, "landingDiaMm"),
+    landingSpacingMm: numberField(formData, "landingSpacingMm"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid stair input." };
+
+  const result = await insertMemberAndBars(bbsId, { element: "STAIR", input: parsed.data });
   if ("error" in result) return result;
   return null;
 }

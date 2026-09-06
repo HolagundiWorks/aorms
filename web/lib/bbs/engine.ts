@@ -1,11 +1,11 @@
 /**
  * BBS member engine — geometry → schedule bar lines + advisory checks.
- * Ported verbatim from packages/contracts/src/bbs-engine.ts (live, tested
- * code backing the old backend's `bbs.addMember`/`regenerateMember`
- * procedures) — only the import path changes (`./bbs.js` → `./formulas`,
- * since `web/` doesn't depend on packages/contracts). See
- * web/lib/bbs/formulas.ts's header note for the porting rationale and scope
- * (Column/Beam/Slab/Footing only — Wall/Stair are a follow-up).
+ * Column/Beam/Slab/Footing ported verbatim from packages/contracts/src/
+ * bbs-engine.ts; Wall/Stair ported from HolagundiWorks/AQC's C++ engine
+ * (`BBSDesktop/src/core/Engine.cpp`'s `generate_wall_bbs`/
+ * `generate_stair_bbs`) — see web/lib/bbs/formulas.ts's header note for
+ * the full account of what's ported vs. what's flagged as a known
+ * discrepancy between the two engines' Column/Beam formulas.
  */
 import {
   type BbsBeamInput,
@@ -13,6 +13,8 @@ import {
   type BbsElement,
   type BbsFootingInput,
   type BbsSlabInput,
+  type BbsStairInput,
+  type BbsWallInput,
   barCount,
   bbsItemTotals,
   calculateAvailableAnchorage,
@@ -25,7 +27,17 @@ import {
   calculateFootingBarLength,
   calculateSlabDistributionBarLength,
   calculateSlabMainBarLength,
+  calculateStairDistBarLength,
+  calculateStairMainBarLength,
+  calculateStairSlopeLengthMm,
+  calculateWallBaseAcrossLength,
+  calculateWallBaseLengthwiseLength,
+  calculateWallBaseWidth,
+  calculateWallStemHorizontalLength,
+  calculateWallStemVerticalLength,
+  closedLinkCuttingLengthMm,
   developmentLengthMm,
+  hookedLegCuttingLengthMm,
 } from "./formulas";
 
 export type BbsBarRole =
@@ -37,7 +49,15 @@ export type BbsBarRole =
   | "tie"
   | "distribution"
   | "mesh-L"
-  | "mesh-B";
+  | "mesh-B"
+  | "stem-v-front"
+  | "stem-v-back"
+  | "stem-h"
+  | "base-l"
+  | "base-b"
+  | "link"
+  | "landing-l"
+  | "landing-b";
 
 export interface BbsBarLine {
   barMark: string;
@@ -452,11 +472,151 @@ export function computeFootingMember(
   };
 }
 
+/** Cantilever retaining wall — port of Engine.cpp's generate_wall_bbs(). */
+export function computeWallMember(input: BbsWallInput, index = 0): BbsMemberResult {
+  const mark = markOf(input, `W${index + 1}`);
+  const bars: BbsBarLine[] = [];
+  const baseWidth = calculateWallBaseWidth(input.heelMm, input.toeMm, input.stemThicknessMm);
+
+  if (input.stemVDiaMm > 0 && input.stemVSpacingMm > 0) {
+    const len = calculateWallStemVerticalLength(input.stemHeightMm, input.coverMm, input.baseThicknessMm);
+    const nos = barCount(input.wallLengthMm, input.stemVSpacingMm);
+    const role: BbsBarRole = input.tensionFace === "Back" ? "stem-v-back" : "stem-v-front";
+    bars.push(line(`${mark}-SV`, mark, "WALL", role, input.stemVDiaMm, nos, len, "straight"));
+  }
+  if (input.stemVBackDiaMm > 0 && input.stemVBackSpacingMm > 0) {
+    const len = input.stemHeightMm - input.coverMm;
+    const nos = barCount(input.wallLengthMm, input.stemVBackSpacingMm);
+    const role: BbsBarRole = input.tensionFace === "Back" ? "stem-v-front" : "stem-v-back";
+    bars.push(line(`${mark}-SVB`, mark, "WALL", role, input.stemVBackDiaMm, nos, len, "straight"));
+  }
+  if (input.stemHDiaMm > 0 && input.stemHSpacingMm > 0) {
+    const len = calculateWallStemHorizontalLength(input.wallLengthMm, input.coverMm);
+    const nos = barCount(input.stemHeightMm, input.stemHSpacingMm);
+    bars.push(line(`${mark}-SH`, mark, "WALL", "stem-h", input.stemHDiaMm, nos, len, "straight"));
+  }
+  if (baseWidth > 0 && input.baseThicknessMm > 0) {
+    if (input.baseLDiaMm > 0 && input.baseLSpacingMm > 0) {
+      const len = calculateWallBaseLengthwiseLength(input.wallLengthMm, input.coverMm);
+      const nos = barCount(baseWidth, input.baseLSpacingMm);
+      bars.push(line(`${mark}-BL`, mark, "WALL", "base-l", input.baseLDiaMm, nos, len, "straight"));
+    }
+    if (input.baseBDiaMm > 0 && input.baseBSpacingMm > 0) {
+      const len = calculateWallBaseAcrossLength(baseWidth, input.coverMm);
+      const nos = barCount(input.wallLengthMm, input.baseBSpacingMm);
+      bars.push(line(`${mark}-BB`, mark, "WALL", "base-b", input.baseBDiaMm, nos, len, "straight"));
+    }
+  }
+  if (input.linkDiaMm > 0 && input.linkSpacingMm > 0) {
+    const bClear = Math.max(0, input.stemThicknessMm - 2 * input.coverMm);
+    const hClear = 100; // matches Engine.cpp's fixed 100mm h-clear for wall shear links
+    let lengthEach = closedLinkCuttingLengthMm(bClear, hClear, input.linkDiaMm, input.hookAngle);
+    if (input.linkLegs >= 4) lengthEach += hookedLegCuttingLengthMm(hClear, input.linkDiaMm, input.hookAngle);
+    const along = input.stemVSpacingMm > 0 ? input.stemVSpacingMm : input.linkSpacingMm;
+    const nos = barCount(input.stemHeightMm, input.linkSpacingMm) * barCount(input.wallLengthMm, along);
+    bars.push(line(`${mark}-LK`, mark, "WALL", "link", input.linkDiaMm, nos, lengthEach, "closed-tie"));
+  }
+
+  const astMinStem = calculateAstMin(input.stemThicknessMm, input.steelGrade);
+  const astProvStem = calculateAstProvided(input.stemVDiaMm, input.stemVSpacingMm);
+  const astMinBase = input.baseThicknessMm > 0 ? calculateAstMin(input.baseThicknessMm, input.steelGrade) : 0;
+  const baseDia = input.baseLDiaMm > 0 ? input.baseLDiaMm : input.baseBDiaMm;
+  const baseSpacing = input.baseLSpacingMm > 0 ? input.baseLSpacingMm : input.baseBSpacingMm;
+  const astProvBase = calculateAstProvided(baseDia, baseSpacing);
+
+  const checks: BbsCheckRow[] = [
+    {
+      mark,
+      label: "Ast stem (mm²/m)",
+      value: round2(astProvStem),
+      limit: round2(astMinStem),
+      ok: astProvStem >= astMinStem,
+      message: astProvStem >= astMinStem ? "OK" : "Increase stem steel / reduce spacing",
+    },
+    {
+      mark,
+      label: "Ast base (mm²/m)",
+      value: round2(astProvBase),
+      limit: round2(astMinBase),
+      ok: input.baseThicknessMm <= 0 || astProvBase >= astMinBase,
+      message:
+        input.baseThicknessMm <= 0
+          ? "N/A"
+          : astProvBase >= astMinBase
+            ? "OK"
+            : "Increase base steel / reduce spacing",
+    },
+  ];
+
+  return {
+    element: "WALL",
+    mark,
+    bars,
+    checks,
+    totalWeightKg: round2(bars.reduce((s, b) => s + b.weightKg, 0)),
+  };
+}
+
+/** Staircase waist slab + landings — port of Engine.cpp's generate_stair_bbs(). */
+export function computeStairMember(input: BbsStairInput, index = 0): BbsMemberResult {
+  const mark = markOf(input, `ST${index + 1}`);
+  const bars: BbsBarLine[] = [];
+  const flights = Math.max(1, input.nFlights);
+
+  const goingTotal = (input.nRisers - 1) * input.goingMm;
+  const riseTotal = input.nRisers * input.riserMm;
+  const slope = calculateStairSlopeLengthMm(goingTotal, riseTotal);
+  const landingWidth = input.landingWidthMm > 0 ? input.landingWidthMm : input.flightWidthMm;
+
+  if (input.mainDiaMm > 0 && input.mainSpacingMm > 0) {
+    const len = calculateStairMainBarLength(slope, input.mainDiaMm, input.concreteGrade, input.steelGrade);
+    const nos = barCount(input.flightWidthMm, input.mainSpacingMm) * flights;
+    bars.push(line(`${mark}-M`, mark, "STAIR", "main", input.mainDiaMm, nos, len, "straight"));
+  }
+  if (input.distDiaMm > 0 && input.distSpacingMm > 0) {
+    const len = calculateStairDistBarLength(input.flightWidthMm, input.coverMm);
+    const nos = barCount(slope, input.distSpacingMm) * flights;
+    bars.push(line(`${mark}-D`, mark, "STAIR", "distribution", input.distDiaMm, nos, len, "straight"));
+  }
+  if (input.landingDiaMm > 0 && input.landingSpacingMm > 0 && input.landingLengthMm > 0) {
+    const lenAlong = Math.max(0, input.landingLengthMm - 2 * input.coverMm);
+    const lenAcross = Math.max(0, landingWidth - 2 * input.coverMm);
+    const nosAlong = barCount(landingWidth, input.landingSpacingMm);
+    const nosAcross = barCount(input.landingLengthMm, input.landingSpacingMm);
+    const landings = 2 * flights; // top + bottom landing per flight
+    bars.push(line(`${mark}-LL`, mark, "STAIR", "landing-l", input.landingDiaMm, nosAlong * landings, lenAlong, "straight"));
+    bars.push(line(`${mark}-LB`, mark, "STAIR", "landing-b", input.landingDiaMm, nosAcross * landings, lenAcross, "straight"));
+  }
+
+  const astMain = calculateAstProvided(input.mainDiaMm, input.mainSpacingMm);
+  const astMin = calculateAstMin(input.waistThicknessMm, input.steelGrade);
+  const checks: BbsCheckRow[] = [
+    {
+      mark,
+      label: "Ast main (mm²/m)",
+      value: round2(astMain),
+      limit: round2(astMin),
+      ok: input.mainDiaMm <= 0 || astMain >= astMin,
+      message: input.mainDiaMm <= 0 ? "N/A" : astMain >= astMin ? "OK" : "Increase main steel / reduce spacing",
+    },
+  ];
+
+  return {
+    element: "STAIR",
+    mark,
+    bars,
+    checks,
+    totalWeightKg: round2(bars.reduce((s, b) => s + b.weightKg, 0)),
+  };
+}
+
 export type BbsMemberStored =
   | { element: "COLUMN"; input: BbsColumnInput }
   | { element: "BEAM"; input: BbsBeamInput }
   | { element: "SLAB"; input: BbsSlabInput }
-  | { element: "FOOTING"; input: BbsFootingInput };
+  | { element: "FOOTING"; input: BbsFootingInput }
+  | { element: "WALL"; input: BbsWallInput }
+  | { element: "STAIR"; input: BbsStairInput };
 
 export function computeMember(
   stored: BbsMemberStored,
@@ -471,5 +631,9 @@ export function computeMember(
       return computeSlabMember(stored.input, index);
     case "FOOTING":
       return computeFootingMember(stored.input, index);
+    case "WALL":
+      return computeWallMember(stored.input, index);
+    case "STAIR":
+      return computeStairMember(stored.input, index);
   }
 }

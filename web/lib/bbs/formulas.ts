@@ -2,13 +2,17 @@ import { z } from "zod";
 
 /**
  * Project Bar Bending Schedule — IS 456 / IS 2502 cutting-length helpers and
- * schedule schemas. Ported verbatim from packages/contracts/src/bbs.ts
- * (live, tested code in this repo's current backend — `web/` doesn't depend
- * on packages/contracts, per this migration's own established convention).
- * Requested against HolagundiWorks/AQC (a much larger reference desktop app
- * with the same IS 456 rigor plus Wall/Stair, which this port doesn't cover
- * — see this file's own README note in the Column/Beam/Slab/Footing scope
- * call, or docs/esti/ROADMAP-CLOUD.md's Phase 4 row for the full account).
+ * schedule schemas. Originally ported from packages/contracts/src/bbs.ts;
+ * Wall + Stair (below) are now also ported from HolagundiWorks/AQC's C++
+ * engine (`BBSDesktop/src/core/Engine.cpp`'s `generate_wall_bbs`/
+ * `generate_stair_bbs`), the reference repo this was requested to match —
+ * see docs/esti/ROADMAP-CLOUD.md for the full account of what's ported
+ * verbatim vs. what's flagged as a still-open discrepancy between the two
+ * engines (AQC uses a more rigorous bend-deduction-aware stirrup cutting
+ * length and an IS 456 Cl. 26.5.3.2 tie-type auto-resolver for Column/Beam
+ * that this file's existing Column/Beam formulas don't have — not silently
+ * rewritten here, since that's already-shipped code this port didn't
+ * re-verify against; flagged for the user's own call, not guessed at).
  *
  * Lengths in mm; weight via d²/162 kg/m.
  */
@@ -45,13 +49,23 @@ export type SlabType = z.infer<typeof SlabType>;
 export const ConcreteGrade = z.enum(["M20", "M25", "M30", "M35", "M40"]);
 export type ConcreteGrade = z.infer<typeof ConcreteGrade>;
 
-/** Design bond stress τbd for deformed bars (N/mm²). */
+/**
+ * Design bond stress τbd for deformed (HYSD) bars (N/mm²) — IS 456 Table 21
+ * plain-bar values (M20 1.2, M25 1.4, M30 1.5, M35 1.7, M40 1.9) × the
+ * Cl. 26.2.1.1 HYSD uplift factor (1.6). M35/M40 were previously 2.56/2.72
+ * here — a bug caught while comparing against HolagundiWorks/AQC's
+ * Engine.cpp (which carries the plain-bar table + uplift as two explicit
+ * steps and gets 2.72/3.04): 1.7×1.6 = 2.72, not 2.56; 1.9×1.6 = 3.04, not
+ * 2.72. M20/M25/M30 already matched (1.2×1.6=1.92, 1.4×1.6=2.24,
+ * 1.5×1.6=2.4). Fixed here, independent of AQC — these are IS 456's own
+ * published Table 21 numbers, not a matter of convention.
+ */
 export const CONCRETE_TAU_BD: Record<ConcreteGrade, number> = {
   M20: 1.92,
   M25: 2.24,
   M30: 2.4,
-  M35: 2.56,
-  M40: 2.72,
+  M35: 2.72,
+  M40: 3.04,
 };
 
 export const SteelGrade = z.enum(["Fe250", "Fe415", "Fe500", "Fe550"]);
@@ -64,7 +78,7 @@ export const STEEL_FY: Record<SteelGrade, number> = {
   Fe550: 550,
 };
 
-export const BbsElement = z.enum(["COLUMN", "BEAM", "SLAB", "FOOTING"]);
+export const BbsElement = z.enum(["COLUMN", "BEAM", "SLAB", "FOOTING", "WALL", "STAIR"]);
 export type BbsElement = z.infer<typeof BbsElement>;
 
 export const BBS_ELEMENT_LABEL: Record<BbsElement, string> = {
@@ -72,6 +86,8 @@ export const BBS_ELEMENT_LABEL: Record<BbsElement, string> = {
   BEAM: "Beam",
   SLAB: "Slab",
   FOOTING: "Footing",
+  WALL: "Retaining wall",
+  STAIR: "Staircase",
 };
 
 export const BbsStatus = z.enum(["DRAFT", "ISSUED"]);
@@ -375,6 +391,97 @@ export function calculateAvailableAnchorage(
   return (footingDimMm - columnDimMm) / 2 - coverMm;
 }
 
+// ── Wall (retaining wall) ────────────────────────────────────────────────────
+// Port of Engine.cpp's generate_wall_bbs() — a cantilever retaining wall's
+// stem (vertical + horizontal distribution, both faces) + base (mesh both
+// ways) + shear links, quantity-estimate only (not a design check).
+
+/** Stem vertical bar length — embeds into the base when one exists. */
+export function calculateWallStemVerticalLength(
+  stemHeightMm: number,
+  coverMm: number,
+  baseThicknessMm?: number,
+): number {
+  let len = stemHeightMm - coverMm;
+  if (baseThicknessMm && baseThicknessMm > 0) {
+    len += Math.min(baseThicknessMm - coverMm, baseThicknessMm);
+  }
+  return len;
+}
+
+export function calculateWallStemHorizontalLength(wallLengthMm: number, coverMm: number): number {
+  return wallLengthMm - 2 * coverMm;
+}
+
+export function calculateWallBaseLengthwiseLength(wallLengthMm: number, coverMm: number): number {
+  return wallLengthMm - 2 * coverMm;
+}
+
+export function calculateWallBaseAcrossLength(baseWidthMm: number, coverMm: number): number {
+  return baseWidthMm - 2 * coverMm;
+}
+
+/** heel + toe + stem thickness = total base width. */
+export function calculateWallBaseWidth(heelMm: number, toeMm: number, stemThicknessMm: number): number {
+  return heelMm + toeMm + stemThicknessMm;
+}
+
+/**
+ * IS 2502 closed rectangular link/stirrup cutting length — perimeter + hooks
+ * − bend deductions at each corner. Port of Engine.cpp's closed_link_cutting()
+ * (used here for wall shear links); this is the more rigorous, bend-
+ * deduction-aware formula AQC uses everywhere ties/stirrups appear — this
+ * repo's existing Column/Beam stirrup formulas (above) use a simpler
+ * perimeter-plus-hooks-only cutting length with no bend deduction, a known
+ * discrepancy flagged in this file's own header comment, not silently
+ * changed for those two already-shipped element types.
+ */
+export function closedLinkCuttingLengthMm(
+  aMm: number,
+  bMm: number,
+  diaMm: number,
+  hookAngle: number,
+): number {
+  const hookPerHook = hookAllowancePerHook(hookAngle) * diaMm;
+  const hooks = 2 * hookPerHook;
+  // 3×90° corners + 2×135° hook bends (≈12d) for 135°/180° hooks; five 90°
+  // bends (≈10d) otherwise — bend deduction factors ×d: 90°→2d, 135°→3d.
+  const deduct = hookAngle >= 135 ? (3 * 2 + 2 * 3) * diaMm : 5 * 2 * diaMm;
+  return Math.max(0, 2 * (aMm + bMm) + hooks - deduct);
+}
+
+/** Straight crosstie / open leg with two end hooks — port of hooked_leg_cutting(). */
+export function hookedLegCuttingLengthMm(clearMm: number, diaMm: number, hookAngle: number): number {
+  const hookPerHook = hookAllowancePerHook(hookAngle) * diaMm;
+  const hooks = 2 * hookPerHook;
+  const bendAngle = hookAngle >= 135 ? 135 : 90;
+  const deduct = 2 * (bendAngle === 90 ? 2 : 3) * diaMm;
+  return Math.max(0, clearMm + hooks - deduct);
+}
+
+// ── Stair ────────────────────────────────────────────────────────────────────
+// Port of Engine.cpp's generate_stair_bbs() — waist-slab main/distribution
+// bars plus two-way landing mesh, quantity-estimate only.
+
+/** Waist slope length: √((goingTotal)² + (riseTotal)²). */
+export function calculateStairSlopeLengthMm(goingTotalMm: number, riseTotalMm: number): number {
+  return Math.sqrt(goingTotalMm * goingTotalMm + riseTotalMm * riseTotalMm);
+}
+
+/** Main bars run along the slope and develop Ld into each landing. */
+export function calculateStairMainBarLength(
+  slopeMm: number,
+  diaMm: number,
+  concreteGrade: ConcreteGrade | string,
+  steelGrade: SteelGrade | string,
+): number {
+  return slopeMm + 2 * developmentLengthMm(diaMm, concreteGrade, steelGrade);
+}
+
+export function calculateStairDistBarLength(flightWidthMm: number, coverMm: number): number {
+  return Math.max(0, flightWidthMm - 2 * coverMm);
+}
+
 // ── Zod input schemas ────────────────────────────────────────────────────────
 
 export const BbsDiaCount = z.object({
@@ -448,16 +555,69 @@ export const BbsFootingInput = z.object({
 });
 export type BbsFootingInput = z.infer<typeof BbsFootingInput>;
 
+export const BbsWallInput = z.object({
+  mark: z.string().max(80).optional(),
+  wallLengthMm: z.number().positive(),
+  stemHeightMm: z.number().positive(),
+  stemThicknessMm: z.number().positive(),
+  heelMm: z.number().nonnegative().default(0),
+  toeMm: z.number().nonnegative().default(0),
+  baseThicknessMm: z.number().nonnegative().default(0),
+  coverMm: z.number().nonnegative(),
+  concreteGrade: ConcreteGrade.default("M20"),
+  steelGrade: SteelGrade.default("Fe415"),
+  tensionFace: z.enum(["Front", "Back"]).default("Front"),
+  stemVDiaMm: z.number().nonnegative().default(0),
+  stemVSpacingMm: z.number().nonnegative().default(0),
+  stemVBackDiaMm: z.number().nonnegative().default(0),
+  stemVBackSpacingMm: z.number().nonnegative().default(0),
+  stemHDiaMm: z.number().nonnegative().default(0),
+  stemHSpacingMm: z.number().nonnegative().default(0),
+  baseLDiaMm: z.number().nonnegative().default(0),
+  baseLSpacingMm: z.number().nonnegative().default(0),
+  baseBDiaMm: z.number().nonnegative().default(0),
+  baseBSpacingMm: z.number().nonnegative().default(0),
+  linkDiaMm: z.number().nonnegative().default(0),
+  linkSpacingMm: z.number().nonnegative().default(0),
+  linkLegs: z.union([z.literal(2), z.literal(4)]).default(2),
+  hookAngle: HookAngle.default(135),
+});
+export type BbsWallInput = z.infer<typeof BbsWallInput>;
+
+export const BbsStairInput = z.object({
+  mark: z.string().max(80).optional(),
+  nRisers: z.number().int().positive(),
+  nFlights: z.number().int().positive().default(1),
+  goingMm: z.number().positive(),
+  riserMm: z.number().positive(),
+  waistThicknessMm: z.number().positive(),
+  flightWidthMm: z.number().positive(),
+  coverMm: z.number().nonnegative(),
+  landingLengthMm: z.number().nonnegative().default(0),
+  landingWidthMm: z.number().nonnegative().default(0),
+  concreteGrade: ConcreteGrade.default("M20"),
+  steelGrade: SteelGrade.default("Fe415"),
+  mainDiaMm: z.number().nonnegative().default(0),
+  mainSpacingMm: z.number().nonnegative().default(0),
+  distDiaMm: z.number().nonnegative().default(0),
+  distSpacingMm: z.number().nonnegative().default(0),
+  landingDiaMm: z.number().nonnegative().default(0),
+  landingSpacingMm: z.number().nonnegative().default(0),
+});
+export type BbsStairInput = z.infer<typeof BbsStairInput>;
+
 export const BbsMemberCreate = z.discriminatedUnion("element", [
   z.object({ bbsId: z.string().uuid(), element: z.literal("COLUMN"), input: BbsColumnInput }),
   z.object({ bbsId: z.string().uuid(), element: z.literal("BEAM"), input: BbsBeamInput }),
   z.object({ bbsId: z.string().uuid(), element: z.literal("SLAB"), input: BbsSlabInput }),
   z.object({ bbsId: z.string().uuid(), element: z.literal("FOOTING"), input: BbsFootingInput }),
+  z.object({ bbsId: z.string().uuid(), element: z.literal("WALL"), input: BbsWallInput }),
+  z.object({ bbsId: z.string().uuid(), element: z.literal("STAIR"), input: BbsStairInput }),
 ]);
 export type BbsMemberCreate = z.infer<typeof BbsMemberCreate>;
 
 export const BbsMemberUpdate = z.object({
   id: z.string().uuid(),
-  input: z.union([BbsColumnInput, BbsBeamInput, BbsSlabInput, BbsFootingInput]),
+  input: z.union([BbsColumnInput, BbsBeamInput, BbsSlabInput, BbsFootingInput, BbsWallInput, BbsStairInput]),
 });
 export type BbsMemberUpdate = z.infer<typeof BbsMemberUpdate>;

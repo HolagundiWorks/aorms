@@ -20,6 +20,8 @@ import {
   addColumnMember,
   addFootingMember,
   addSlabMember,
+  addStairMember,
+  addWallMember,
   type BbsActionState,
 } from "../../lib/actions/bbs";
 import { FormGrid } from "./FormGrid";
@@ -232,6 +234,115 @@ function FootingForm({ bbsId }: { bbsId: string }) {
   );
 }
 
+function WallForm({ bbsId }: { bbsId: string }) {
+  const [state, formAction, pending] = useActionState(addWallMember, initialState);
+  return (
+    <Form action={formAction}>
+      <input type="hidden" name="bbsId" value={bbsId} />
+      <Stack gap={5}>
+        {state?.error && (
+          <InlineNotification kind="error" title="Could not add wall" subtitle={state.error} hideCloseButton lowContrast />
+        )}
+        <FormGrid>
+          <TextInput id="wallMark" name="mark" labelText="Mark (optional)" placeholder="e.g. RW1" />
+          <TextInput id="wallLengthMm" name="wallLengthMm" labelText="Wall length (mm)" type="number" step="any" required />
+          <TextInput id="stemHeightMm" name="stemHeightMm" labelText="Stem height (mm)" type="number" step="any" required />
+          <TextInput id="stemThicknessMm" name="stemThicknessMm" labelText="Stem thickness (mm)" type="number" step="any" required />
+          <TextInput id="heelMm" name="heelMm" labelText="Heel (mm)" type="number" step="any" defaultValue="0" />
+          <TextInput id="toeMm" name="toeMm" labelText="Toe (mm)" type="number" step="any" defaultValue="0" />
+          <TextInput id="baseThicknessMm" name="baseThicknessMm" labelText="Base thickness (mm)" type="number" step="any" defaultValue="0" />
+          <TextInput id="wallCoverMm" name="coverMm" labelText="Cover (mm)" type="number" step="any" defaultValue="50" />
+          <Select id="wallConcreteGrade" name="concreteGrade" labelText="Concrete grade" defaultValue="M20">
+            {["M20", "M25", "M30", "M35", "M40"].map((g) => (
+              <SelectItem key={g} value={g} text={g} />
+            ))}
+          </Select>
+          <Select id="wallSteelGrade" name="steelGrade" labelText="Steel grade" defaultValue="Fe415">
+            {["Fe250", "Fe415", "Fe500", "Fe550"].map((g) => (
+              <SelectItem key={g} value={g} text={g} />
+            ))}
+          </Select>
+          <Select id="tensionFace" name="tensionFace" labelText="Tension face" defaultValue="Front">
+            <SelectItem value="Front" text="Front (earth/water side)" />
+            <SelectItem value="Back" text="Back" />
+          </Select>
+          <Select id="wallHookAngle" name="hookAngle" labelText="Hook angle" defaultValue="135">
+            <SelectItem value="90" text="90°" />
+            <SelectItem value="135" text="135°" />
+            <SelectItem value="180" text="180°" />
+          </Select>
+        </FormGrid>
+        <FormGrid>
+          <TextInput id="stemVDiaMm" name="stemVDiaMm" labelText="Stem vertical dia (mm)" type="number" step="any" />
+          <TextInput id="stemVSpacingMm" name="stemVSpacingMm" labelText="Stem vertical spacing (mm)" type="number" step="any" />
+          <TextInput id="stemVBackDiaMm" name="stemVBackDiaMm" labelText="Stem vertical (back face) dia (mm)" type="number" step="any" />
+          <TextInput id="stemVBackSpacingMm" name="stemVBackSpacingMm" labelText="Stem vertical (back face) spacing (mm)" type="number" step="any" />
+          <TextInput id="stemHDiaMm" name="stemHDiaMm" labelText="Stem horizontal dia (mm)" type="number" step="any" />
+          <TextInput id="stemHSpacingMm" name="stemHSpacingMm" labelText="Stem horizontal spacing (mm)" type="number" step="any" />
+          <TextInput id="baseLDiaMm" name="baseLDiaMm" labelText="Base (lengthwise) dia (mm)" type="number" step="any" />
+          <TextInput id="baseLSpacingMm" name="baseLSpacingMm" labelText="Base (lengthwise) spacing (mm)" type="number" step="any" />
+          <TextInput id="baseBDiaMm" name="baseBDiaMm" labelText="Base (across) dia (mm)" type="number" step="any" />
+          <TextInput id="baseBSpacingMm" name="baseBSpacingMm" labelText="Base (across) spacing (mm)" type="number" step="any" />
+          <TextInput id="linkDiaMm" name="linkDiaMm" labelText="Shear link dia (mm)" type="number" step="any" />
+          <TextInput id="linkSpacingMm" name="linkSpacingMm" labelText="Shear link spacing (mm)" type="number" step="any" />
+          <Select id="linkLegs" name="linkLegs" labelText="Shear link legs" defaultValue="2">
+            <SelectItem value="2" text="2-leg" />
+            <SelectItem value="4" text="4-leg" />
+          </Select>
+        </FormGrid>
+        <Button type="submit" disabled={pending} size="sm">
+          {pending ? "Adding…" : "Add wall"}
+        </Button>
+      </Stack>
+    </Form>
+  );
+}
+
+function StairForm({ bbsId }: { bbsId: string }) {
+  const [state, formAction, pending] = useActionState(addStairMember, initialState);
+  return (
+    <Form action={formAction}>
+      <input type="hidden" name="bbsId" value={bbsId} />
+      <Stack gap={5}>
+        {state?.error && (
+          <InlineNotification kind="error" title="Could not add staircase" subtitle={state.error} hideCloseButton lowContrast />
+        )}
+        <FormGrid>
+          <TextInput id="stairMark" name="mark" labelText="Mark (optional)" placeholder="e.g. ST1" />
+          <TextInput id="nRisers" name="nRisers" labelText="No. of risers" type="number" required />
+          <TextInput id="nFlights" name="nFlights" labelText="No. of flights" type="number" defaultValue="1" />
+          <TextInput id="goingMm" name="goingMm" labelText="Going (mm)" type="number" step="any" required />
+          <TextInput id="riserMm" name="riserMm" labelText="Riser (mm)" type="number" step="any" required />
+          <TextInput id="waistThicknessMm" name="waistThicknessMm" labelText="Waist thickness (mm)" type="number" step="any" required />
+          <TextInput id="flightWidthMm" name="flightWidthMm" labelText="Flight width (mm)" type="number" step="any" required />
+          <TextInput id="stairCoverMm" name="coverMm" labelText="Cover (mm)" type="number" step="any" defaultValue="20" />
+          <TextInput id="landingLengthMm" name="landingLengthMm" labelText="Landing length (mm)" type="number" step="any" defaultValue="0" />
+          <TextInput id="landingWidthMm" name="landingWidthMm" labelText="Landing width (mm, 0 = flight width)" type="number" step="any" defaultValue="0" />
+          <Select id="stairConcreteGrade" name="concreteGrade" labelText="Concrete grade" defaultValue="M20">
+            {["M20", "M25", "M30", "M35", "M40"].map((g) => (
+              <SelectItem key={g} value={g} text={g} />
+            ))}
+          </Select>
+          <Select id="stairSteelGrade" name="steelGrade" labelText="Steel grade" defaultValue="Fe415">
+            {["Fe250", "Fe415", "Fe500", "Fe550"].map((g) => (
+              <SelectItem key={g} value={g} text={g} />
+            ))}
+          </Select>
+          <TextInput id="mainDiaMm" name="mainDiaMm" labelText="Main bar dia (mm)" type="number" step="any" />
+          <TextInput id="mainSpacingMm" name="mainSpacingMm" labelText="Main bar spacing (mm)" type="number" step="any" />
+          <TextInput id="distDiaMm" name="distDiaMm" labelText="Distribution bar dia (mm)" type="number" step="any" />
+          <TextInput id="distSpacingMm" name="distSpacingMm" labelText="Distribution bar spacing (mm)" type="number" step="any" />
+          <TextInput id="landingDiaMm" name="landingDiaMm" labelText="Landing mesh dia (mm)" type="number" step="any" />
+          <TextInput id="landingSpacingMm" name="landingSpacingMm" labelText="Landing mesh spacing (mm)" type="number" step="any" />
+        </FormGrid>
+        <Button type="submit" disabled={pending} size="sm">
+          {pending ? "Adding…" : "Add staircase"}
+        </Button>
+      </Stack>
+    </Form>
+  );
+}
+
 export function NewBbsMemberForms({ bbsId }: { bbsId: string }) {
   return (
     <Tabs>
@@ -240,6 +351,8 @@ export function NewBbsMemberForms({ bbsId }: { bbsId: string }) {
         <Tab>Beam</Tab>
         <Tab>Slab</Tab>
         <Tab>Footing</Tab>
+        <Tab>Wall</Tab>
+        <Tab>Stair</Tab>
       </TabList>
       <TabPanels>
         <TabPanel>
@@ -253,6 +366,12 @@ export function NewBbsMemberForms({ bbsId }: { bbsId: string }) {
         </TabPanel>
         <TabPanel>
           <FootingForm bbsId={bbsId} />
+        </TabPanel>
+        <TabPanel>
+          <WallForm bbsId={bbsId} />
+        </TabPanel>
+        <TabPanel>
+          <StairForm bbsId={bbsId} />
         </TabPanel>
       </TabPanels>
     </Tabs>

@@ -23,6 +23,8 @@ const ELEMENT_LABEL: Record<string, string> = {
   BEAM: "Beam",
   SLAB: "Slab",
   FOOTING: "Footing",
+  WALL: "Retaining wall",
+  STAIR: "Staircase",
 };
 
 export default async function BbsDetailPage({ params }: { params: Promise<{ id: string }> }) {
