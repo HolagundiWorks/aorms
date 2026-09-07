@@ -208,6 +208,36 @@ correct single gutter, not the doubled one from before. Also noted, still
 cosmetic and still not changed: Dashboard's 7 KPI tiles in a 2-column grid
 leave "Outstanding receivables" alone in its own row.
 
+**Padding audit, round three (2026-09-07) — the real, app-wide bug, found
+after the user reported it directly ("in input boxex, and dashboard boxex
+there is no proper padding").** Every Carbon `Tile` and every form input
+(`TextInput`/`Select`/etc.) across the entire app had **zero internal
+padding** — text sat flush against the box edges everywhere, on every
+page. Root cause, confirmed via `getComputedStyle()`: Carbon v11's Tile
+and form components don't hardcode their padding — they read it via
+`clamp()` from a set of `--cds-layout-density-padding-inline-*` CSS
+custom properties, which are only defined by a `:root { @include
+emit-layout-tokens(); }` block that Carbon's own `layout` SCSS module
+emits *when that module is `@use`d* — and `app/globals.scss` never `@use`d
+it. Confirmed precisely: querying `--cds-layout-density-padding-inline-min`
+(and its siblings) on `:root` returned an empty string — completely
+undefined anywhere in the cascade, not just overridden — so every
+`clamp()` reading them resolved to nothing and the padding shorthand fell
+back to its CSS initial value, `0`. This is a different, deeper bug than
+the two earlier "padding" passes above (page-level gutters, both correct
+as far as they went) — this one was about component-internal padding
+being silently absent everywhere, the whole time. Fixed with one line:
+`@use "@carbon/react/scss/layout";` added to `globals.scss`. Verified via
+`getComputedStyle()` before/after (`.cds--tile` padding `0px` → `16px`;
+`.cds--text-input` padding `0px` → `0px 16px`; the custom property itself
+empty → a real value) and visually across three different pages
+(`/dashboard`'s KPI tiles, `/estimates`'s form, `/leads`'s form) — text
+now sits with correct breathing room inside every tile and input, buttons
+are correctly sized, nothing else (header, sidenav, tables) visibly
+shifted. No `tsc`/`eslint` implications (pure SCSS change, no TS/JS
+touched) — a dev-server restart-free hot-reload confirmed the fix live
+without a rebuild.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

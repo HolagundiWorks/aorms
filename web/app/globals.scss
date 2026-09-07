@@ -10,6 +10,16 @@
 @use "@carbon/react/scss/type";
 @use "@carbon/react/scss/theme";
 @use "@carbon/react/scss/themes";
+// Emits the --cds-layout-density-* custom properties (a :root block) that
+// v11 components — Tile, TextInput, Select, and others — read via clamp()
+// for their own padding/sizing. Without this, those properties are simply
+// undefined everywhere, and every component depending on them silently
+// falls back to 0 padding — found 2026-09-07 after the user reported
+// input boxes and dashboard KPI tiles had no padding at all; confirmed via
+// getComputedStyle() that .cds--tile and .cds--text-input both computed to
+// padding: 0px, and that every --cds-layout-density-padding-inline-* custom
+// property was empty even at :root. This one missing @use was the cause.
+@use "@carbon/react/scss/layout";
 @use "@carbon/react/scss/components/button";
 @use "@carbon/react/scss/components/text-input";
 @use "@carbon/react/scss/components/text-area";
