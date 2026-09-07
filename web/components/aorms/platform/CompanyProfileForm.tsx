@@ -30,6 +30,13 @@ export type CompanyProfile = {
  * this is the actual source of truth now; the Office Hub's Firm Settings
  * page only shows a read-only copy pointing here (see FirmSettingsForm.tsx).
  * Same field set/shape as that form deliberately (same data, new home).
+ *
+ * The caller MUST pass a `key` derived from `company`'s own fields (see
+ * app/(platform)/companies/[companyId]/page.tsx) — every field here is an
+ * uncontrolled input, which only applies its `defaultValue` on mount. See
+ * UpdateLicenceForm.tsx's header comment for the exact bug this avoids
+ * (a save silently reverting an untouched field to its stale first-load
+ * value on the next save, found live testing this exact class of form).
  */
 export function CompanyProfileForm({ company }: { company: CompanyProfile }) {
   const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(updateCompanyProfile, null);

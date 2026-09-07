@@ -164,7 +164,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
             </h2>
             <Tile>
               {isOwner ? (
-                <CompanyProfileForm company={company} />
+                <CompanyProfileForm key={JSON.stringify(company)} company={company} />
               ) : (
                 <Stack gap={3}>
                   <p className="cds--type-body-01">COA reg. no.: {company.coa_registration_no ?? "—"}</p>

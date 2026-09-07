@@ -50,7 +50,7 @@ export default async function FirmSettingsPage() {
             No firm record exists. This should have been seeded by migration 0024 — contact support.
           </p>
         ) : (
-          <FirmSettingsForm firm={firm} />
+          <FirmSettingsForm key={JSON.stringify(firm)} firm={firm} />
         )}
       </Column>
     </Grid>

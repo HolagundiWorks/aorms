@@ -111,7 +111,13 @@ export default async function LicencesPage() {
                         {licence.seats} seat{licence.seats === 1 ? "" : "s"}
                         {licence.expires_at ? ` · expires ${new Date(licence.expires_at).toLocaleDateString()}` : " · no expiry"}
                       </p>
-                      {isOwner && <UpdateLicenceForm companyId={company.id} licence={licence} />}
+                      {isOwner && (
+                        <UpdateLicenceForm
+                          key={`${licence.plan}-${licence.seats}-${licence.expires_at}`}
+                          companyId={company.id}
+                          licence={licence}
+                        />
+                      )}
                     </>
                   ) : (
                     <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

@@ -7,6 +7,15 @@ import { FormGrid } from "../FormGrid";
 
 type Licence = { plan: string; seats: number; expires_at: string | null };
 
+/**
+ * The caller MUST pass a `key` derived from `licence`'s own fields (see
+ * app/(platform)/licences/page.tsx) — every field here is an uncontrolled
+ * input (`defaultValue`), which React only applies on mount. Found live:
+ * without a changing key, saving once (e.g. plan -> PREMIUM) then saving
+ * again with only `seats` touched silently reverted plan back to its
+ * value from the page's first load, because the already-mounted <select>
+ * never picked up the new defaultValue on re-render.
+ */
 export function UpdateLicenceForm({ companyId, licence }: { companyId: string; licence: Licence }) {
   const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(updateLicence, null);
 

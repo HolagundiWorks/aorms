@@ -518,6 +518,49 @@ to it anywhere. `tsc --noEmit`/`eslint` clean across every new/touched
 file. All four platform migrations (`0001`–`0004`) apply cleanly from a
 fresh `db reset`. Both databases reset to a clean slate afterward.
 
+**AORMS Licence Management, follow-up (2026-09-07) — update flow tested
+thoroughly, a real stale-form bug found and fixed.** Full pass on
+`updateLicence`: plan change, seat count, and clearing expiry (blank =
+"no expiry") all verified round-tripping to the database correctly.
+
+Along the way, found a genuine bug by resubmitting the form twice in a
+row: after successfully changing the plan to `PREMIUM`, a second save
+that only touched `seats` **silently reverted the plan back to
+`TRIAL`** — the value it had on the page's first load. Root cause: every
+field in `UpdateLicenceForm.tsx` (and, found by the same pattern search,
+every field in `CompanyProfileForm.tsx` and the still-editable
+`companyName`/`firmType` in `FirmSettingsForm.tsx`) is an uncontrolled
+input keyed off `defaultValue` — React only applies `defaultValue` on
+initial mount, so once a Server Action's `revalidatePath` re-renders the
+page with fresh data, the already-mounted `<select>`/`<input>` keeps
+showing (and submitting) its stale first-load value forever, silently
+undoing any change made in an earlier save the moment a *different*
+field is edited next. Fixed all three call sites the same way — a `key` on the form component
+derived from the record's own fields (a template string combining
+`licence.plan`/`seats`/`expires_at` for the licence form,
+`JSON.stringify(company)` for the company-profile form), forcing a full
+remount whenever the underlying data changes so every `defaultValue`
+re-applies correctly.
+Documented the requirement directly in both `UpdateLicenceForm.tsx`'s
+and `CompanyProfileForm.tsx`'s header comments so it isn't silently
+dropped by a future edit to either parent page.
+
+Verified live: reproduced the exact bug first (plan silently reverting),
+confirmed the fix (plan now correctly persists across an unrelated
+field's save), confirmed client-side validation (`seats` `min={1}`)
+blocks `0`, then confirmed **server-side** validation independently
+rejects it too — bypassed the client guard directly via
+`removeAttribute('min')` + `requestSubmit()` and got "Seats must be a
+positive whole number" back from `updateLicence` itself, proving the
+check isn't only client-side. Also verified RLS end-to-end, not just UI
+gating: a non-owner member's `/licences` view correctly shows no edit
+form, and a **direct** PostgREST `PATCH` attempt against `licences`
+using that member's own real access token (bypassing the app UI
+entirely) returned zero rows and left the licence completely
+unmodified — `"licences: owner update"` RLS holding on its own, not
+just the app hiding a button. `tsc --noEmit`/`eslint` clean. Both
+databases reset to a clean slate afterward.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
