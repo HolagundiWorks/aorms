@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType } from "react";
+import { useState, type ComponentType } from "react";
 import NextLink from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -8,6 +8,7 @@ import {
   HeaderName,
   HeaderGlobalBar,
   HeaderGlobalAction,
+  HeaderMenuButton,
   SideNav,
   SideNavItems,
   SideNavLink,
@@ -163,10 +164,24 @@ function isActiveHref(pathname: string, href: string): boolean {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  // isPersistent (Carbon's default, left un-set here) means Carbon's own
+  // ui-shell CSS ignores this state above its ~66rem breakpoint — nav stays
+  // fixed-open on desktop exactly as before — and respects it below that
+  // breakpoint, where the SideNav becomes a dismissible overlay. Previously
+  // hardcoded isFixedNav + expanded (no state, no toggle at all) forced the
+  // nav permanently open even on a phone-width viewport, squeezing all page
+  // content into a sliver — found during a UI audit, this is the fix.
+  const [sideNavExpanded, setSideNavExpanded] = useState(true);
 
   return (
     <PomodoroProvider>
       <Header aria-label="AORMS">
+        <HeaderMenuButton
+          aria-label={sideNavExpanded ? "Close menu" : "Open menu"}
+          isActive={sideNavExpanded}
+          isCollapsible
+          onClick={() => setSideNavExpanded((v) => !v)}
+        />
         <HeaderName href="/dashboard" prefix="">
           <span style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
             {/* Plain <img>, not next/image: a fixed 14KB brand asset that
@@ -196,7 +211,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </form>
         </HeaderGlobalBar>
       </Header>
-      <SideNav aria-label="Side navigation" isFixedNav expanded isChildOfHeader={false}>
+      <SideNav
+        aria-label="Side navigation"
+        expanded={sideNavExpanded}
+        onOverlayClick={() => setSideNavExpanded(false)}
+        onSideNavBlur={() => setSideNavExpanded(false)}
+        isChildOfHeader={false}
+      >
         <SideNavItems>
           {TOP_LEVEL.map((item) => (
             <SideNavLink
