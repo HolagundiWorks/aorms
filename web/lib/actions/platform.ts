@@ -343,6 +343,31 @@ export async function addBoardMember(
   return null;
 }
 
+export async function updateBoardMember(
+  _prev: PlatformActionState,
+  formData: FormData,
+): Promise<PlatformActionState> {
+  const boardMemberId = String(formData.get("boardMemberId") ?? "");
+  const companyId = String(formData.get("companyId") ?? "");
+  const fullName = String(formData.get("fullName") ?? "").trim();
+  if (!boardMemberId || !companyId || !fullName) return { error: "Name is required." };
+
+  const supabase = await createPlatformClient();
+  const { error } = await supabase
+    .from("company_board_members")
+    .update({
+      full_name: fullName,
+      din: String(formData.get("din") ?? "").trim() || null,
+      designation: String(formData.get("designation") ?? "").trim() || null,
+      appointed_at: String(formData.get("appointedAt") ?? "").trim() || null,
+    })
+    .eq("id", boardMemberId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/companies/${companyId}`);
+  return null;
+}
+
 export async function removeBoardMember(boardMemberId: string, companyId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
   const { error } = await supabase.from("company_board_members").delete().eq("id", boardMemberId);
@@ -371,6 +396,32 @@ export async function addCompanyContact(
     phone: String(formData.get("phone") ?? "").trim() || null,
     is_primary: formData.get("isPrimary") === "on",
   });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/companies/${companyId}`);
+  return null;
+}
+
+export async function updateCompanyContact(
+  _prev: PlatformActionState,
+  formData: FormData,
+): Promise<PlatformActionState> {
+  const contactId = String(formData.get("contactId") ?? "");
+  const companyId = String(formData.get("companyId") ?? "");
+  const fullName = String(formData.get("fullName") ?? "").trim();
+  if (!contactId || !companyId || !fullName) return { error: "Name is required." };
+
+  const supabase = await createPlatformClient();
+  const { error } = await supabase
+    .from("company_contacts")
+    .update({
+      full_name: fullName,
+      role_title: String(formData.get("roleTitle") ?? "").trim() || null,
+      email: String(formData.get("email") ?? "").trim() || null,
+      phone: String(formData.get("phone") ?? "").trim() || null,
+      is_primary: formData.get("isPrimary") === "on",
+    })
+    .eq("id", contactId);
   if (error) return { error: error.message };
 
   revalidatePath(`/companies/${companyId}`);

@@ -8,9 +8,9 @@ import { MembershipRoleSelect } from "../../../../components/aorms/platform/Memb
 import { LeaveCompanyButton } from "../../../../components/aorms/platform/LeaveCompanyButton";
 import { CompanyProfileForm } from "../../../../components/aorms/platform/CompanyProfileForm";
 import { AddBoardMemberForm } from "../../../../components/aorms/platform/AddBoardMemberForm";
-import { RemoveBoardMemberButton } from "../../../../components/aorms/platform/RemoveBoardMemberButton";
+import { BoardMemberRow } from "../../../../components/aorms/platform/BoardMemberRow";
 import { AddContactForm } from "../../../../components/aorms/platform/AddContactForm";
-import { RemoveContactButton } from "../../../../components/aorms/platform/RemoveContactButton";
+import { ContactRow } from "../../../../components/aorms/platform/ContactRow";
 
 type AccountEmbed = { id: string; full_name: string; public_id: string } | null;
 
@@ -196,17 +196,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
               </TableHead>
               <TableBody>
                 {(boardMembers ?? []).map((b) => (
-                  <TableRow key={b.id}>
-                    <TableCell>{b.full_name}</TableCell>
-                    <TableCell>{b.designation ?? "—"}</TableCell>
-                    <TableCell>{b.din ?? "—"}</TableCell>
-                    <TableCell>{b.appointed_at ?? "—"}</TableCell>
-                    {isOwner && (
-                      <TableCell>
-                        <RemoveBoardMemberButton boardMemberId={b.id} companyId={company.id} name={b.full_name} />
-                      </TableCell>
-                    )}
-                  </TableRow>
+                  <BoardMemberRow key={b.id} member={b} companyId={company.id} isOwner={isOwner} />
                 ))}
                 {(boardMembers ?? []).length === 0 && (
                   <TableRow>
@@ -245,19 +235,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
               </TableHead>
               <TableBody>
                 {(contacts ?? []).map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell>
-                      {c.full_name} {c.is_primary && <Tag type="green" size="sm">Primary</Tag>}
-                    </TableCell>
-                    <TableCell>{c.role_title ?? "—"}</TableCell>
-                    <TableCell>{c.email ?? "—"}</TableCell>
-                    <TableCell>{c.phone ?? "—"}</TableCell>
-                    {isOwner && (
-                      <TableCell>
-                        <RemoveContactButton contactId={c.id} companyId={company.id} name={c.full_name} />
-                      </TableCell>
-                    )}
-                  </TableRow>
+                  <ContactRow key={c.id} contact={c} companyId={company.id} isOwner={isOwner} />
                 ))}
                 {(contacts ?? []).length === 0 && (
                   <TableRow>

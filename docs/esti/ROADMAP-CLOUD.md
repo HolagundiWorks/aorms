@@ -561,6 +561,35 @@ unmodified — `"licences: owner update"` RLS holding on its own, not
 just the app hiding a button. `tsc --noEmit`/`eslint` clean. Both
 databases reset to a clean slate afterward.
 
+**Board of Directors / Who's Who — edit added, then the full add/edit/
+remove flow verified (2026-09-07).** Asked to test the "edit" flow for
+both; only add + remove actually existed. Added `updateBoardMember`/
+`updateCompanyContact` (`web/lib/actions/platform.ts`, owner-only via
+the existing `company_board_members`/`company_contacts` RLS from
+migration `0003`) and two new owner-only edit-in-place row components,
+`BoardMemberRow.tsx`/`ContactRow.tsx`, replacing the plain server-
+rendered `<TableRow>` mapping in `companies/[companyId]/page.tsx`: view
+mode shows plain text + Edit/Remove icon buttons; Edit swaps the row for
+a pre-filled form (Save/Cancel) in place, reusing the existing
+`RemoveBoardMemberButton`/`RemoveContactButton` for removal. Each row
+closes itself back to view mode on a successful save — watched via the
+`pending`-then-not-`pending`-with-no-error transition from
+`useActionState` (there's no built-in `onSuccess` callback) — rather
+than relying on the parent re-rendering, since the row's own local
+`editing` state wouldn't otherwise reset.
+
+Verified live: added a board member, edited its designation/DIN in
+place (persisted, row auto-closed to view), opened Edit again and typed
+a throwaway change into Cancel instead — confirmed discarded, no
+server round-trip. Same for Who's Who: added a contact, edited its
+phone and toggled "Primary contact" on — the green Primary tag appeared
+correctly. Removed both via the same Remove buttons as before,
+confirming the table returns to its empty state. Non-owner gating on
+these rows uses the same `isOwner` prop already verified for the
+Members table and Company Profile form earlier this session, not
+re-tested separately. `tsc --noEmit`/`eslint` clean. Both databases
+reset to a clean slate afterward.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
