@@ -93,6 +93,7 @@ const GROUPS: NavGroup[] = [
     items: [
       { href: "/rate-books", label: "Rate Books" },
       { href: "/estimates", label: "Estimates" },
+      { href: "/takeoff", label: "Take-off" },
       { href: "/spec-sheets", label: "Spec Sheets" },
       { href: "/drawings", label: "Drawings" },
       { href: "/moms", label: "Meeting Minutes" },

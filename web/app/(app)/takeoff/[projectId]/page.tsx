@@ -1,0 +1,380 @@
+import { notFound } from "next/navigation";
+import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tile } from "@carbon/react";
+import { createClient } from "../../../../lib/supabase/server";
+import { NewTakeoffItemForms } from "../../../../components/aorms/NewTakeoffItemForms";
+import { DeleteTakeoffItemButton } from "../../../../components/aorms/DeleteTakeoffItemButton";
+import {
+  computeMasonry,
+  computePlaster,
+  computePainting,
+  computeOpeningAreaM2,
+  MasonryFields,
+  PlasterFields,
+  PaintingFields,
+  OpeningFields,
+  type LinkedOpening,
+} from "../../../../lib/takeoff/formulas";
+
+type TakeoffRow = {
+  id: string;
+  category: string;
+  mark: string;
+  wall_mark: string | null;
+  fields: Record<string, unknown>;
+  notes: string | null;
+};
+
+function fmt(n: number): string {
+  return n.toLocaleString("en-IN", { maximumFractionDigits: 3 });
+}
+
+/**
+ * Project take-off detail — masonry/plaster/painting quantities computed
+ * live from stored dimension fields + linked door/window openings on the
+ * same wall_mark, never cached. See lib/takeoff/formulas.ts's docstring for
+ * the AQC port this is based on.
+ */
+export default async function TakeoffProjectPage({
+  params,
+}: {
+  params: Promise<{ projectId: string }>;
+}) {
+  const { projectId } = await params;
+  const supabase = await createClient();
+
+  const [{ data: project, error: projError }, { data: rows, error: itemsError }] = await Promise.all([
+    supabase.from("project_offices").select("id, title, ref").eq("id", projectId).maybeSingle(),
+    supabase
+      .from("takeoff_items")
+      .select("id, category, mark, wall_mark, fields, notes")
+      .eq("project_id", projectId)
+      .order("mark"),
+  ]);
+
+  if (projError) {
+    return (
+      <Grid style={{ padding: "2rem" }}>
+        <Column sm={4} md={8} lg={16}>
+          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+            Couldn&apos;t load project: {projError.message}
+          </p>
+        </Column>
+      </Grid>
+    );
+  }
+  if (!project) notFound();
+
+  const items = (rows ?? []) as TakeoffRow[];
+  const openings = items.filter((r) => r.category === "DOOR" || r.category === "WINDOW");
+
+  function linkedOpenings(wallMark: string | null): LinkedOpening[] {
+    if (!wallMark) return [];
+    return openings
+      .filter((o) => (o.wall_mark ?? "").toLowerCase() === wallMark.toLowerCase())
+      .map((o) => {
+        const f = OpeningFields.safeParse(o.fields);
+        if (!f.success) return null;
+        return {
+          widthMm: f.data.widthMm,
+          heightMm: f.data.heightMm,
+          nos: f.data.nos,
+          deductFromWall: f.data.deductFromWall,
+        };
+      })
+      .filter((x): x is LinkedOpening => x !== null);
+  }
+
+  let totalCementBags = 0;
+  let totalSandM3 = 0;
+  let totalAggregateM3 = 0;
+  let totalBricks = 0;
+
+  const masonryRows = items
+    .filter((r) => r.category === "MASONRY")
+    .map((r) => {
+      const parsed = MasonryFields.safeParse(r.fields);
+      if (!parsed.success) return { row: r, error: "Invalid stored fields" as const };
+      const result = computeMasonry(parsed.data, linkedOpenings(r.mark));
+      totalCementBags += result.cementBags;
+      totalSandM3 += result.sandM3;
+      totalAggregateM3 += result.aggregateM3;
+      totalBricks += result.bricks;
+      return { row: r, fields: parsed.data, result };
+    });
+
+  const plasterRows = items
+    .filter((r) => r.category === "PLASTER")
+    .map((r) => {
+      const parsed = PlasterFields.safeParse(r.fields);
+      if (!parsed.success) return { row: r, error: "Invalid stored fields" as const };
+      const result = computePlaster(parsed.data, linkedOpenings(r.wall_mark));
+      totalCementBags += result.cementBags;
+      totalSandM3 += result.sandM3;
+      totalAggregateM3 += result.aggregateM3;
+      return { row: r, fields: parsed.data, result };
+    });
+
+  const paintingRows = items
+    .filter((r) => r.category === "PAINTING")
+    .map((r) => {
+      const parsed = PaintingFields.safeParse(r.fields);
+      if (!parsed.success) return { row: r, error: "Invalid stored fields" as const };
+      const result = computePainting(parsed.data, linkedOpenings(r.wall_mark));
+      return { row: r, fields: parsed.data, result };
+    });
+
+  const doorRows = items
+    .filter((r) => r.category === "DOOR")
+    .map((r) => {
+      const parsed = OpeningFields.safeParse(r.fields);
+      if (!parsed.success) return { row: r, error: "Invalid stored fields" as const };
+      return { row: r, fields: parsed.data, areaM2: computeOpeningAreaM2(parsed.data) };
+    });
+
+  const windowRows = items
+    .filter((r) => r.category === "WINDOW")
+    .map((r) => {
+      const parsed = OpeningFields.safeParse(r.fields);
+      if (!parsed.success) return { row: r, error: "Invalid stored fields" as const };
+      return { row: r, fields: parsed.data, areaM2: computeOpeningAreaM2(parsed.data) };
+    });
+
+  return (
+    <Grid style={{ padding: "2rem" }}>
+      <Column sm={4} md={8} lg={16}>
+        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
+          {project.ref}
+        </p>
+        <h1 className="cds--type-heading-05" style={{ marginBottom: "1.5rem" }}>
+          {project.title} — Take-off
+        </h1>
+
+        <NewTakeoffItemForms projectId={project.id} />
+
+        {itemsError ? (
+          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)", marginTop: "1.5rem" }}>
+            Couldn&apos;t load take-off items: {itemsError.message}
+          </p>
+        ) : (
+          <>
+            <h2 className="cds--type-heading-03" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
+              Masonry walls
+            </h2>
+            <Table aria-label="Masonry walls" className="aorms-table-spaced">
+              <TableHead>
+                <TableRow>
+                  <TableHeader>Mark</TableHeader>
+                  <TableHeader>L × H (mm)</TableHeader>
+                  <TableHeader>Thk (mm)</TableHeader>
+                  <TableHeader>Unit</TableHeader>
+                  <TableHeader>Net qty</TableHeader>
+                  <TableHeader>Bricks / blocks</TableHeader>
+                  <TableHeader>Cement / sand / agg</TableHeader>
+                  <TableHeader>Note</TableHeader>
+                  <TableHeader />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {masonryRows.map(({ row, fields, result, error }) => (
+                  <TableRow key={row.id}>
+                    <TableCell>{row.mark}</TableCell>
+                    <TableCell>{fields ? `${fields.lengthMm} × ${fields.heightMm}` : "—"}</TableCell>
+                    <TableCell>{fields?.thicknessMm ?? "—"}</TableCell>
+                    <TableCell>{result?.unit ?? "—"}</TableCell>
+                    <TableCell>{result ? fmt(result.qty) : "—"}</TableCell>
+                    <TableCell>
+                      {result
+                        ? [
+                            result.bricks > 0 ? `${fmt(result.bricks)} bricks` : null,
+                            result.accBlocks > 0 ? `${fmt(result.accBlocks)} ACC` : null,
+                            result.cementBlocks > 0 ? `${fmt(result.cementBlocks)} cem. blk` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(", ") || "—"
+                        : (error ?? "—")}
+                    </TableCell>
+                    <TableCell>
+                      {result
+                        ? `${fmt(result.cementBags)} bags / ${fmt(result.sandM3)} m³ / ${fmt(result.aggregateM3)} m³`
+                        : "—"}
+                    </TableCell>
+                    <TableCell>{result?.note ?? "—"}</TableCell>
+                    <TableCell>
+                      <DeleteTakeoffItemButton itemId={row.id} projectId={project.id} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {masonryRows.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={9}>
+                      <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        No masonry walls yet.
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+
+            <h2 className="cds--type-heading-03" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
+              Plaster
+            </h2>
+            <Table aria-label="Plaster" className="aorms-table-spaced">
+              <TableHead>
+                <TableRow>
+                  <TableHeader>Mark</TableHeader>
+                  <TableHeader>Wall</TableHeader>
+                  <TableHeader>L × H (mm)</TableHeader>
+                  <TableHeader>Net area (m²)</TableHeader>
+                  <TableHeader>Cement / sand / agg</TableHeader>
+                  <TableHeader>Note</TableHeader>
+                  <TableHeader />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {plasterRows.map(({ row, fields, result, error }) => (
+                  <TableRow key={row.id}>
+                    <TableCell>{row.mark}</TableCell>
+                    <TableCell>{row.wall_mark ?? "—"}</TableCell>
+                    <TableCell>{fields ? `${fields.lengthMm} × ${fields.heightMm}` : "—"}</TableCell>
+                    <TableCell>{result ? fmt(result.areaM2) : (error ?? "—")}</TableCell>
+                    <TableCell>
+                      {result
+                        ? `${fmt(result.cementBags)} bags / ${fmt(result.sandM3)} m³ / ${fmt(result.aggregateM3)} m³`
+                        : "—"}
+                    </TableCell>
+                    <TableCell>{result?.note ?? "—"}</TableCell>
+                    <TableCell>
+                      <DeleteTakeoffItemButton itemId={row.id} projectId={project.id} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {plasterRows.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7}>
+                      <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        No plaster items yet.
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+
+            <h2 className="cds--type-heading-03" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
+              Painting
+            </h2>
+            <Table aria-label="Painting" className="aorms-table-spaced">
+              <TableHead>
+                <TableRow>
+                  <TableHeader>Mark</TableHeader>
+                  <TableHeader>Wall</TableHeader>
+                  <TableHeader>L × H (mm)</TableHeader>
+                  <TableHeader>Net area (m²)</TableHeader>
+                  <TableHeader>Type / coats</TableHeader>
+                  <TableHeader>Note</TableHeader>
+                  <TableHeader />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paintingRows.map(({ row, fields, result, error }) => (
+                  <TableRow key={row.id}>
+                    <TableCell>{row.mark}</TableCell>
+                    <TableCell>{row.wall_mark ?? "—"}</TableCell>
+                    <TableCell>{fields ? `${fields.lengthMm} × ${fields.heightMm}` : "—"}</TableCell>
+                    <TableCell>{result ? fmt(result.areaM2) : (error ?? "—")}</TableCell>
+                    <TableCell>{fields ? `${fields.paintType} · ${fields.coats} coats` : "—"}</TableCell>
+                    <TableCell>{result?.note ?? "—"}</TableCell>
+                    <TableCell>
+                      <DeleteTakeoffItemButton itemId={row.id} projectId={project.id} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {paintingRows.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7}>
+                      <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        No painting items yet.
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+
+            <h2 className="cds--type-heading-03" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
+              Doors &amp; windows
+            </h2>
+            <Table aria-label="Doors and windows" className="aorms-table-spaced">
+              <TableHead>
+                <TableRow>
+                  <TableHeader>Kind</TableHeader>
+                  <TableHeader>Mark</TableHeader>
+                  <TableHeader>Wall</TableHeader>
+                  <TableHeader>W × H (mm)</TableHeader>
+                  <TableHeader>Nos</TableHeader>
+                  <TableHeader>Area (m²)</TableHeader>
+                  <TableHeader>Deducts?</TableHeader>
+                  <TableHeader />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[...doorRows.map((r) => ({ ...r, kind: "Door" })), ...windowRows.map((r) => ({ ...r, kind: "Window" }))].map(
+                  ({ row, fields, areaM2, error, kind }) => (
+                    <TableRow key={row.id}>
+                      <TableCell>{kind}</TableCell>
+                      <TableCell>{row.mark}</TableCell>
+                      <TableCell>{row.wall_mark ?? "—"}</TableCell>
+                      <TableCell>{fields ? `${fields.widthMm} × ${fields.heightMm}` : "—"}</TableCell>
+                      <TableCell>{fields?.nos ?? "—"}</TableCell>
+                      <TableCell>{areaM2 !== undefined ? fmt(areaM2) : (error ?? "—")}</TableCell>
+                      <TableCell>{fields?.deductFromWall ? "Yes" : "No"}</TableCell>
+                      <TableCell>
+                        <DeleteTakeoffItemButton itemId={row.id} projectId={project.id} />
+                      </TableCell>
+                    </TableRow>
+                  ),
+                )}
+                {doorRows.length === 0 && windowRows.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8}>
+                      <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        No doors or windows yet.
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+
+            <Tile style={{ marginTop: "2rem", maxWidth: "28rem" }}>
+              <h3 className="cds--type-heading-compact-02" style={{ marginBottom: "0.75rem" }}>
+                Materials — masonry + plaster combined
+              </h3>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>
+                <span className="cds--type-body-01">Bricks</span>
+                <span className="cds--type-body-01">{fmt(totalBricks)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>
+                <span className="cds--type-body-01">Cement (50 kg bags)</span>
+                <span className="cds--type-body-01">{fmt(totalCementBags)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>
+                <span className="cds--type-body-01">Sand (m³)</span>
+                <span className="cds--type-body-01">{fmt(totalSandM3)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>
+                <span className="cds--type-body-01">Aggregate (m³)</span>
+                <span className="cds--type-body-01">{fmt(totalAggregateM3)}</span>
+              </div>
+              <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)", marginTop: "0.5rem" }}>
+                Quantity take-off only — no rates. Copy a computed quantity into an Estimate item
+                manually; this doesn&apos;t write to Estimates yet.
+              </p>
+            </Tile>
+          </>
+        )}
+      </Column>
+    </Grid>
+  );
+}
