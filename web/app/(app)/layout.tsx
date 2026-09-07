@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
 import { AppShell } from "../../components/aorms/AppShell";
 import { roleHome } from "../../lib/auth/role-home";
+import { UsageHeartbeat } from "../../components/aorms/platform/UsageHeartbeat";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -22,5 +23,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const home = roleHome(profile?.role);
   if (home && home !== "/dashboard") redirect(home);
 
-  return <AppShell>{children}</AppShell>;
+  return (
+    <>
+      <UsageHeartbeat />
+      <AppShell>{children}</AppShell>
+    </>
+  );
 }

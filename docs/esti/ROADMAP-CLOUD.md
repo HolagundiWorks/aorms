@@ -255,6 +255,120 @@ nav to its icon rail shows all 6 header actions (Ask ESTI/Calculator/
 Pomodoro/Wellbeing/AI Runs/Sign out) fitting cleanly with no scrollbar in
 either axis. `tsc --noEmit` clean (pure SCSS change).
 
+**AORMS Platform — portable user/company identity + licensing tiers
+(2026-09-07).** New feature, on explicit request: a person gets a
+portable `AORMS-U-` identity independent of any one firm; a company gets
+its own `AORMS-C-` identity; **one person can belong to multiple
+companies**; usage hours are tracked (an active-app-usage heartbeat, not
+logged task hours — confirmed via `AskUserQuestion`); a person's level
+(`BASIC`→`PRO`) flips **automatically** at 100 hours (confirmed
+automatic, not an apply/approve step, resolving the request's ambiguous
+"apply for Pro" phrasing). Rebuilds the shape of the old, now-dead
+`backend/`'s licensing platform design (`docs/esti/AORMS-IDENTITY.md`,
+`AORMS-U-`/`AORMS-C-` handles, many-companies-per-person membership, a
+100-hour threshold) fresh, on Supabase, for `web/` — full design
+rationale, confirmed decisions, and the deliberate simplification (both
+handles mint **immediately** on creation here, not "earned" at 100h like
+the old design) are in the plan this was built from
+(`C:\Users\holag\.claude\plans\staged-purring-blum.md` on the machine
+this was built on).
+
+**Why a second, separate local Supabase project, not new tables in
+`web/`'s own schema:** `web/`'s schema is deliberately single-tenant per
+deployment (`web/supabase/migrations/0001_phase2_core.sql`'s own header
+comment; `firm` is a hard Postgres singleton,
+`web/supabase/migrations/0024_seed_firm_singleton.sql`) — "one person,
+many companies" can't be modeled inside that without undoing that
+decision, so it needs a genuinely separate layer. New top-level Supabase
+CLI project `platform/supabase/` (2 migrations: `0001_core.sql` —
+`accounts`/`companies`/`memberships`, the `new_public_id()` Crockford
+base32 generator, RLS built the same way `web/`'s own
+`current_app_role()`/`is_office_staff()` avoid recursive-policy issues
+(`is_company_owner()` here); `0002_usage_and_level.sql` —
+`usage_heartbeats` + an `after insert` trigger that atomically increments
+`total_active_seconds` and flips `level` at the 360000-second/100-hour
+threshold, avoiding any read-then-write race between concurrent
+heartbeats). Local ports are every one of `web/supabase/config.toml`'s
+own ports **+100** (full table + start/stop commands now in root
+`CLAUDE.md`'s Dev/verify loop section).
+
+**`web/` integration ("link, don't merge"):** `web/lib/platform/{client,server,service}.ts`
+mirror `web/lib/supabase/*` byte-for-byte (same `@supabase/ssr` pattern),
+pointed at the platform project. The **only** change to `web/`'s own
+schema is one additive column, `web/supabase/migrations/0029_platform_link.sql`
+(`profiles.platform_public_id text unique`, nullable) — stores a linked
+person's `AORMS-U-` handle as a plain value, not a live FK (impossible
+across separate Supabase projects), verified server-side before being
+written. New Server Actions (`web/lib/actions/platform.ts`):
+`platformSignUp`/`platformSignIn`/`platformSignOut` (the platform
+project's own, separate login — `web/`'s first signup flow, confirmed via
+Explore that none existed anywhere in `web/` before this),
+`linkPlatformIdentity`, `createCompany`, `joinCompany`, `leaveCompany`,
+`inviteMember`, `updateMembershipRole`, and `recordHeartbeat` (server-side
+only, no-ops silently when unlinked). New UI: `app/(platform)/platform-signup`
++ `platform-login` (a genuinely separate, unauthenticated-to-the-firm-app
+login boundary — own minimal layout, mirrors `(auth)/layout.tsx`); `app/(app)/identity`
++ `app/(app)/companies/[companyId]` (kept under the existing `(app)/`
+group, not the plan's literally-drafted `(platform)/` path, so they keep
+the app shell/nav like every other admin page — a deliberate, disclosed
+deviation from the plan's file layout, not its architecture). New nav
+entry: "AORMS Identity" in `AppShell.tsx`'s Admin group. `UsageHeartbeat.tsx`
+(a no-UI Client Component posting a beat roughly every 60s while the tab
+is visible) is mounted in `app/(app)/layout.tsx`, so hours accrue from
+real usage of the firm app itself, not just the platform's own pages.
+
+**A real bug found and fixed mid-build, not just a verification note:**
+`@supabase/ssr`'s default auth-cookie name derives from the project URL's
+*host*, not the full origin — both local stacks share `127.0.0.1` as
+host, so they collided on the identical default cookie name
+(`sb-127-auth-token`). Caught live: right after platform signup, linking
+failed with "Not signed in" — signing into the platform had silently
+overwritten `web/`'s own session cookie, signing the user out of the firm
+app in the same browser tab. Fixed with an explicit
+`cookieOptions: { name: "sb-platform-auth-token" }` on the platform
+client/server files (documented at length in both those files' own
+header comments and in root `CLAUDE.md`, since it's exactly the kind of
+thing that silently reappears if a future `platform/`-adjacent client is
+added without it).
+
+**Verified, live, real browser click-through, on the fixed cookie code
+(the earlier collision-affected run was redone from a clean session
+after the fix):** platform sign-up → `/identity` correctly detects the
+active platform session and pre-fills the handle → link → linked view
+renders the real handle/`BASIC` tag/`0.0h of 100h` → create a company →
+`AORMS-C-` handle appears immediately, `OWNER` tag, auto-created
+membership → company detail page renders the member table + add-member
+form → service-role-seeded heartbeats crossing 360000 cumulative seconds
+→ reload → tag flips to `PRO` live in the UI (`100.0h of 100h`, no "to
+Pro" suffix). Also hand-verified directly against the platform database
+before any UI existed: `new_public_id()` produces unique, correctly-shaped
+handles across repeated calls (`AORMS-U-V5PK`/`AORMS-U-FATS`/
+`AORMS-C-FS8B`/`AORMS-C-QY30` across two test accounts and two test
+companies); one account joining two different companies (one as `OWNER`,
+one as `MEMBER`) proves many-companies-per-person structurally; the
+`usage_heartbeats` seconds `CHECK` constraint correctly rejects `0` and
+`121`. `tsc --noEmit`/`eslint` clean across every new/touched file. Both
+Supabase projects' migrations apply cleanly from a fresh `db reset`
+(platform: 2/2; `web/`'s new `0029`: applied cleanly to the running
+stack). The platform database was reset to a clean slate after
+verification (matching this session's established discipline); `web/`'s
+own database picked up one new test login,
+`owner-test@aorms.local`/`testpass123`, created because the cookie-
+collision bug (before it was found and fixed) had invalidated the
+session already signed in for testing.
+
+**Deliberate simplifications, not gaps to be surprised by later:** no
+INVITED/owner-approval step on joining a company (self-serve join and
+owner-invite both land straight at `ACTIVE` — flagged the same way
+`web/lib/actions/users.ts` already flags "invite a new staff member" as a
+known follow-up, not a bug); no ownership-transfer flow (an `OWNER` can
+"Leave" like anyone else, which would leave a company ownerless — not
+guarded against in this pass); no company-level `AORMS-C-` "earned at
+100h" mechanic (the old design's own nuance, deliberately dropped — see
+the Context section of the build plan above); no cert-issuance UI (the
+portable-certifications side of the old design was out of scope for this
+request, which only asked for identity + companies + hours + tier).
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

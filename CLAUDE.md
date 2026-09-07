@@ -446,6 +446,32 @@ branch before starting anything that could overlap — not just at hand-off.
   rebuild/re-pull them if it's ever run again. Reclaimed roughly 12GB
   total (incl. the 5.47GB Ollama image); `podman system df` afterward shows
   12 images / 5.735GB, all Supabase, with no reclaimable dangling layers.
+- **AORMS Platform — separate local Supabase stack (2026-09-07).** Portable
+  user/company identity + licensing tiers (`AORMS-U-`/`AORMS-C-` handles,
+  many-companies-per-person membership, usage-hour tracking, automatic
+  Basic→Pro at 100h) lives in its **own** Supabase CLI project,
+  `platform/supabase/`, deliberately separate from `web/supabase/` — see
+  `docs/esti/AORMS-IDENTITY.md` and `docs/esti/ROADMAP-CLOUD.md` for why
+  (short version: `web/`'s schema is single-tenant per deployment, so
+  "one person, many companies" needs a genuinely separate database).
+  Start/stop the same way as `web/`'s own stack, from `platform/`:
+  `cd platform && DOCKER_HOST="npipe:////./pipe/podman-machine-default" npx supabase start` /
+  `... npx supabase stop`. Ports are every one of `web/supabase/config.toml`'s
+  own ports **+100** (API 54421, DB 54422, Studio 54423 — see
+  `platform/supabase/config.toml`'s header comment for the full table);
+  `[local_smtp]`/`[analytics]` are disabled there to keep its container
+  footprint down (this machine's Podman VM OOM'd once already at 12
+  containers + an Ollama pull — see above). `web/.env.local` holds the
+  matching `NEXT_PUBLIC_PLATFORM_SUPABASE_URL`/`_ANON_KEY`/
+  `PLATFORM_SUPABASE_SERVICE_ROLE_KEY` (same fixed local demo keys as
+  `web/`'s own, not secrets). **A real gotcha, already hit and fixed:**
+  `@supabase/ssr`'s default auth-cookie name is derived from the project
+  URL's *host*, not the full origin — two local stacks both on
+  `http://127.0.0.1:<port>` collide on the same default cookie name
+  (`sb-127-auth-token`), so signing into one silently clobbers the other's
+  session. `web/lib/platform/client.ts`/`server.ts` set an explicit
+  `cookieOptions: { name: "sb-platform-auth-token" }` to keep the two
+  sessions apart — never drop that when touching those files.
 
 ## Conventions
 
