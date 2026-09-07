@@ -7,14 +7,28 @@ import {
   PlasterFields,
   PaintingFields,
   OpeningFields,
+  PccFields,
+  EarthworkFields,
+  SsmFields,
+  WaterproofingFields,
+  WaterproofingWorkMode,
+  DpcFields,
+  CopingFields,
+  ScreedFields,
+  VdfFields,
+  SkirtingFields,
+  ParapetFields,
+  PlinthProtectionFields,
+  FlooringFields,
   DeductRule,
   WallUnitType,
 } from "../takeoff/formulas";
 
 /**
  * Project take-off Server Actions — see web/lib/takeoff/formulas.ts and
- * migration 0027_project_takeoff.sql for what this is and deliberately
- * isn't (masonry/plaster/painting/doors/windows only).
+ * migrations 0027_project_takeoff.sql / 0028_takeoff_more_categories.sql
+ * for what this is (17 of AQC's ~18 measured-item categories — everything
+ * but "shuttering", which AQC computes only from RCC members).
  */
 
 export type TakeoffActionState = { error: string } | null;
@@ -101,6 +115,139 @@ export async function createTakeoffItem(
       });
       if (!parsed.success) return { error: "Check the opening dimensions — width/height must be positive numbers." };
       if (!wallMark) return { error: "Wall mark is required for a door/window (which wall it deducts from)." };
+      fields = parsed.data;
+      break;
+    }
+    case "PCC": {
+      const parsed = PccFields.safeParse({
+        lengthMm: num(formData, "lengthMm"),
+        breadthMm: num(formData, "breadthMm"),
+        thicknessMm: num(formData, "thicknessMm") || undefined,
+        mix: str(formData, "mix") || undefined,
+      });
+      if (!parsed.success) return { error: "Check the PCC dimensions — length/breadth must be positive numbers." };
+      fields = parsed.data;
+      break;
+    }
+    case "EARTHWORK": {
+      const parsed = EarthworkFields.safeParse({
+        lengthMm: num(formData, "lengthMm"),
+        breadthMm: num(formData, "breadthMm"),
+        depthMm: num(formData, "depthMm"),
+        workType: str(formData, "workType") || undefined,
+      });
+      if (!parsed.success) return { error: "Check the earthwork dimensions — length/breadth/depth must be positive numbers." };
+      fields = parsed.data;
+      break;
+    }
+    case "SSM": {
+      const parsed = SsmFields.safeParse({
+        lengthMm: num(formData, "lengthMm"),
+        breadthMm: num(formData, "breadthMm"),
+        heightMm: num(formData, "heightMm"),
+        mortarMix: str(formData, "mortarMix") || undefined,
+      });
+      if (!parsed.success) return { error: "Check the SSM dimensions — length/breadth/height must be positive numbers." };
+      fields = parsed.data;
+      break;
+    }
+    case "WATERPROOFING": {
+      const parsed = WaterproofingFields.safeParse({
+        workMode: (str(formData, "workMode") || undefined) as WaterproofingWorkMode | undefined,
+        lengthMm: num(formData, "lengthMm"),
+        breadthMm: num(formData, "breadthMm") || undefined,
+        heightMm: num(formData, "heightMm") || undefined,
+      });
+      if (!parsed.success) return { error: "Check the waterproofing dimensions." };
+      fields = parsed.data;
+      break;
+    }
+    case "DPC": {
+      const parsed = DpcFields.safeParse({
+        lengthMm: num(formData, "lengthMm"),
+        widthMm: num(formData, "widthMm"),
+        thicknessMm: num(formData, "thicknessMm") || undefined,
+        mortarMix: str(formData, "mortarMix") || undefined,
+      });
+      if (!parsed.success) return { error: "Check the DPC dimensions — length/width must be positive numbers." };
+      fields = parsed.data;
+      break;
+    }
+    case "COPING": {
+      const parsed = CopingFields.safeParse({
+        lengthMm: num(formData, "lengthMm"),
+        widthMm: num(formData, "widthMm"),
+        depthMm: num(formData, "depthMm"),
+        concreteGrade: str(formData, "concreteGrade") || undefined,
+      });
+      if (!parsed.success) return { error: "Check the coping dimensions — length/width/depth must be positive numbers." };
+      fields = parsed.data;
+      break;
+    }
+    case "SCREED": {
+      const parsed = ScreedFields.safeParse({
+        lengthMm: num(formData, "lengthMm"),
+        breadthMm: num(formData, "breadthMm"),
+        thicknessMm: num(formData, "thicknessMm") || undefined,
+        mix: str(formData, "mix") || undefined,
+      });
+      if (!parsed.success) return { error: "Check the screed dimensions — length/breadth must be positive numbers." };
+      fields = parsed.data;
+      break;
+    }
+    case "VDF": {
+      const parsed = VdfFields.safeParse({
+        lengthMm: num(formData, "lengthMm"),
+        breadthMm: num(formData, "breadthMm"),
+        thicknessMm: num(formData, "thicknessMm") || undefined,
+        concreteGrade: str(formData, "concreteGrade") || undefined,
+      });
+      if (!parsed.success) return { error: "Check the VDF dimensions — length/breadth must be positive numbers." };
+      fields = parsed.data;
+      break;
+    }
+    case "SKIRTING": {
+      const parsed = SkirtingFields.safeParse({
+        lengthMm: num(formData, "lengthMm"),
+        heightMm: num(formData, "heightMm") || undefined,
+        finishType: str(formData, "finishType") || undefined,
+      });
+      if (!parsed.success) return { error: "Check the skirting dimensions — length must be a positive number." };
+      fields = parsed.data;
+      break;
+    }
+    case "PARAPET": {
+      const parsed = ParapetFields.safeParse({
+        lengthMm: num(formData, "lengthMm"),
+        heightMm: num(formData, "heightMm") || undefined,
+        thicknessMm: num(formData, "thicknessMm") || undefined,
+        unitType: (str(formData, "unitType") || undefined) as WallUnitType | undefined,
+        blockSize: str(formData, "blockSize") || undefined,
+      });
+      if (!parsed.success) return { error: "Check the parapet dimensions — length must be a positive number." };
+      fields = parsed.data;
+      break;
+    }
+    case "PLINTH_PROTECTION": {
+      const parsed = PlinthProtectionFields.safeParse({
+        lengthMm: num(formData, "lengthMm"),
+        breadthMm: num(formData, "breadthMm") || undefined,
+        thicknessMm: num(formData, "thicknessMm") || undefined,
+        finishType: str(formData, "finishType") || undefined,
+      });
+      if (!parsed.success) return { error: "Check the plinth protection dimensions — length must be a positive number." };
+      fields = parsed.data;
+      break;
+    }
+    case "FLOORING": {
+      const parsed = FlooringFields.safeParse({
+        lengthMm: num(formData, "lengthMm"),
+        breadthMm: num(formData, "breadthMm"),
+        deductRule: (str(formData, "deductRule") || undefined) as DeductRule | undefined,
+        finishType: str(formData, "finishType") || undefined,
+        surfaceKind: (str(formData, "surfaceKind") || undefined) as "Floor" | "Wall" | undefined,
+      });
+      if (!parsed.success) return { error: "Check the flooring dimensions — length/breadth must be positive numbers." };
       fields = parsed.data;
       break;
     }

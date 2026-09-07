@@ -307,3 +307,282 @@ export function computePainting(input: PaintingFields, openings: LinkedOpening[]
 export function computeOpeningAreaM2(input: OpeningFields): number {
   return round3((input.widthMm * input.heightMm * input.nos) / 1e6);
 }
+
+// ── The other ~12 AQC take-off categories — flagged as a follow-up in
+// migration 0027_project_takeoff.sql, ported here. Each is a simple L×B×T
+// (or similar) volume/area formula, none with the masonry/plaster/paint
+// family's opening-deduction complexity except Flooring (which reuses
+// deductFaceArea() above). "Shuttering" is deliberately not ported — AQC
+// itself computes it only from RCC members, never as a manually-measured
+// category ("Shuttering is calculated from RCC concrete members — not
+// entered manually", CivilBoqCalculator.cs's own Checks note). ──
+
+export type SimpleResult = {
+  unit: "m" | "m²" | "m³";
+  qty: number;
+  areaM2: number;
+  volumeM3: number;
+  cementBags: number;
+  sandM3: number;
+  aggregateM3: number;
+};
+
+const NO_YIELD = { cementBags: 0, sandM3: 0, aggregateM3: 0 };
+
+export const PccFields = z.object({
+  lengthMm: z.number().positive(),
+  breadthMm: z.number().positive(),
+  thicknessMm: z.number().positive().default(100),
+  mix: z.string().default("1:4:8"),
+});
+export type PccFields = z.infer<typeof PccFields>;
+
+/** PCC's own material split — the *proper* mix-ratio yield (same shape as
+ * mortarYield's dry-factor split, just concrete's 1.54 dry factor and a
+ * 1:4:8 fallback when no aggregate part is given). Ported from
+ * CivilBoqCalculator.YieldPcc() — deliberately NOT the same formula Screed
+ * uses below (AQC itself splits these two differently; ported as-is, not
+ * unified, since that's a real distinction in the reference, not a bug). */
+function pccYield(mix: string, wetVolumeM3: number): MaterialYield {
+  if (wetVolumeM3 <= 0) return { cementBags: 0, sandM3: 0, aggregateM3: 0 };
+  let { c, s, a } = parseMix(mix);
+  if (a <= 0) {
+    c = 1;
+    s = 4;
+    a = 8;
+  }
+  const dry = wetVolumeM3 * 1.54; // MaterialsCalculator.DryFactor
+  const parts = c + s + a;
+  const cementM3 = dry * (c / parts);
+  return {
+    cementBags: round3((cementM3 * CEMENT_DENSITY_KG_PER_M3) / CEMENT_BAG_KG),
+    sandM3: round3(dry * (s / parts)),
+    aggregateM3: round3(dry * (a / parts)),
+  };
+}
+
+/** Ported from CivilBoqCalculator.PccLines(). */
+export function computePcc(input: PccFields): SimpleResult {
+  const volumeM3 = (input.lengthMm * input.breadthMm * input.thicknessMm) / 1e9;
+  return { unit: "m³", qty: round3(volumeM3), areaM2: 0, volumeM3: round3(volumeM3), ...pccYield(input.mix, volumeM3) };
+}
+
+export const EarthworkFields = z.object({
+  lengthMm: z.number().positive(),
+  breadthMm: z.number().positive(),
+  depthMm: z.number().positive(),
+  workType: z.string().default("Excavation"),
+});
+export type EarthworkFields = z.infer<typeof EarthworkFields>;
+
+/** Ported from CivilBoqCalculator.EarthLines() — no material yield (AQC's own note: "no material yield"). */
+export function computeEarthwork(input: EarthworkFields): SimpleResult {
+  const volumeM3 = (input.lengthMm * input.breadthMm * input.depthMm) / 1e9;
+  return { unit: "m³", qty: round3(volumeM3), areaM2: 0, volumeM3: round3(volumeM3), ...NO_YIELD };
+}
+
+export const SsmFields = z.object({
+  lengthMm: z.number().positive(),
+  breadthMm: z.number().positive(),
+  heightMm: z.number().positive(),
+  mortarMix: z.string().default("1:6"),
+});
+export type SsmFields = z.infer<typeof SsmFields>;
+
+/** Ported from CivilBoqCalculator.SsmLines() — size-stone masonry, 30% mortar fraction (AQC's SsmMortarFraction default, same value as masonry's own MORTAR_FRACTION). */
+export function computeSsm(input: SsmFields): SimpleResult {
+  const volumeM3 = (input.lengthMm * input.breadthMm * input.heightMm) / 1e9;
+  const mortar = mortarYield(input.mortarMix, volumeM3 * MORTAR_FRACTION);
+  return { unit: "m³", qty: round3(volumeM3), areaM2: 0, volumeM3: round3(volumeM3), ...mortar };
+}
+
+export const WaterproofingWorkMode = z.enum(["Area", "Periphery"]);
+export type WaterproofingWorkMode = z.infer<typeof WaterproofingWorkMode>;
+
+export const WaterproofingFields = z.object({
+  workMode: WaterproofingWorkMode.default("Area"),
+  lengthMm: z.number().positive(),
+  breadthMm: z.number().positive().default(0),
+  heightMm: z.number().positive().default(0),
+});
+export type WaterproofingFields = z.infer<typeof WaterproofingFields>;
+
+/** Ported from CivilBoqCalculator.WaterproofingLines() — "Area" mode is length×breadth (a slab/terrace); "Periphery" mode is length×height (a vertical band, e.g. around a parapet upstand). */
+export function computeWaterproofing(input: WaterproofingFields): SimpleResult {
+  const areaM2 =
+    input.workMode === "Periphery"
+      ? (input.lengthMm * input.heightMm) / 1e6
+      : (input.lengthMm * input.breadthMm) / 1e6;
+  return { unit: "m²", qty: round3(areaM2), areaM2: round3(areaM2), volumeM3: 0, ...NO_YIELD };
+}
+
+export const DpcFields = z.object({
+  lengthMm: z.number().positive(),
+  widthMm: z.number().positive(),
+  thicknessMm: z.number().positive().default(40),
+  mortarMix: z.string().default("1:3"),
+});
+export type DpcFields = z.infer<typeof DpcFields>;
+
+/** Ported from CivilBoqCalculator.DpcLines() — damp-proof course; area + volume, no material split computed (AQC reports volume as a note only). */
+export function computeDpc(input: DpcFields): SimpleResult {
+  const areaM2 = (input.lengthMm * input.widthMm) / 1e6;
+  const volumeM3 = (input.lengthMm * input.widthMm * input.thicknessMm) / 1e9;
+  return { unit: "m²", qty: round3(areaM2), areaM2: round3(areaM2), volumeM3: round3(volumeM3), ...NO_YIELD };
+}
+
+export const CopingFields = z.object({
+  lengthMm: z.number().positive(),
+  widthMm: z.number().positive(),
+  depthMm: z.number().positive(),
+  concreteGrade: z.string().default("PCC"),
+});
+export type CopingFields = z.infer<typeof CopingFields>;
+
+/** Ported from CivilBoqCalculator.CopingLines() — quantity is run length (m), not volume; volume shown as a note only, matching AQC. */
+export function computeCoping(input: CopingFields): SimpleResult {
+  const lenM = input.lengthMm / 1000;
+  const volumeM3 = (input.lengthMm * input.widthMm * input.depthMm) / 1e9;
+  return { unit: "m", qty: round3(lenM), areaM2: 0, volumeM3: round3(volumeM3), ...NO_YIELD };
+}
+
+export const ScreedFields = z.object({
+  lengthMm: z.number().positive(),
+  breadthMm: z.number().positive(),
+  thicknessMm: z.number().positive().default(40),
+  mix: z.string().default("1:4:8"),
+});
+export type ScreedFields = z.infer<typeof ScreedFields>;
+
+/** Screed's own rough empirical material yield — a per-mix lookup divisor
+ * (0.16 for 1:3:6, 0.28 for 1:5:10, 0.22 default), deliberately cruder than
+ * pccYield()'s proper ratio split. Ported from CivilBoqCalculator.
+ * ApplyPccMaterials() exactly as AQC has it — not "fixed" to match PCC's
+ * formula, since AQC uses two different formulas for these two categories
+ * on purpose (not a bug found in AQC, a real design choice, kept as-is). */
+function screedYield(mix: string, wetVolumeM3: number): MaterialYield {
+  const dry = wetVolumeM3 * 1.52 * WASTAGE;
+  const divisor = mix === "1:3:6" ? 0.16 : mix === "1:5:10" ? 0.28 : 0.22;
+  return {
+    cementBags: round3(dry / divisor),
+    sandM3: round3(dry * 0.45),
+    aggregateM3: round3(dry * 0.9),
+  };
+}
+
+/** Ported from CivilBoqCalculator.ScreedLines(). */
+export function computeScreed(input: ScreedFields): SimpleResult {
+  const areaM2 = (input.lengthMm * input.breadthMm) / 1e6;
+  const volumeM3 = (input.lengthMm * input.breadthMm * input.thicknessMm) / 1e9;
+  return { unit: "m³", qty: round3(volumeM3), areaM2: round3(areaM2), volumeM3: round3(volumeM3), ...screedYield(input.mix, volumeM3) };
+}
+
+export const VdfFields = z.object({
+  lengthMm: z.number().positive(),
+  breadthMm: z.number().positive(),
+  thicknessMm: z.number().positive().default(100),
+  concreteGrade: z.string().default("M25"),
+});
+export type VdfFields = z.infer<typeof VdfFields>;
+
+/** Ported from CivilBoqCalculator.VdfLines() — vacuum-dewatered flooring; area is the priced quantity, volume shown as a note only, no material yield computed (matching AQC). */
+export function computeVdf(input: VdfFields): SimpleResult {
+  const areaM2 = (input.lengthMm * input.breadthMm) / 1e6;
+  const volumeM3 = (input.lengthMm * input.breadthMm * input.thicknessMm) / 1e9;
+  return { unit: "m²", qty: round3(areaM2), areaM2: round3(areaM2), volumeM3: round3(volumeM3), ...NO_YIELD };
+}
+
+export const SkirtingFields = z.object({
+  lengthMm: z.number().positive(),
+  heightMm: z.number().positive().default(100),
+  finishType: z.string().default("Tile"),
+});
+export type SkirtingFields = z.infer<typeof SkirtingFields>;
+
+/** Ported from CivilBoqCalculator.SkirtingLines(). */
+export function computeSkirting(input: SkirtingFields): SimpleResult {
+  const areaM2 = (input.lengthMm * input.heightMm) / 1e6;
+  return { unit: "m²", qty: round3(areaM2), areaM2: round3(areaM2), volumeM3: 0, ...NO_YIELD };
+}
+
+export const ParapetFields = z.object({
+  lengthMm: z.number().positive(),
+  heightMm: z.number().positive().default(900),
+  thicknessMm: z.number().positive().default(115),
+  unitType: WallUnitType.default("Brick"),
+  blockSize: z.string().default("600x200x150"),
+});
+export type ParapetFields = z.infer<typeof ParapetFields>;
+
+export type ParapetResult = SimpleResult & { bricks: number; accBlocks: number; cementBlocks: number };
+
+/** Ported from CivilBoqCalculator.ParapetLines() — reuses the same brick/block yield masonry uses (YieldUnits()), no opening deduction (a parapet has no doors/windows). */
+export function computeParapet(input: ParapetFields): ParapetResult {
+  const volumeM3 = (input.lengthMm * input.heightMm * input.thicknessMm) / 1e9;
+  const faceM2 = (input.lengthMm * input.heightMm) / 1e6;
+  const is110 = input.thicknessMm <= 120;
+
+  let bricks = 0,
+    accBlocks = 0,
+    cementBlocks = 0;
+  if (input.unitType === "Brick") {
+    bricks = is110
+      ? round3(faceM2 * BRICKS_PER_M2_HALF * WASTAGE)
+      : round3(volumeM3 * BRICKS_PER_M3 * WASTAGE);
+  } else {
+    const { l, h } = parseBlockMm(input.blockSize);
+    const count = is110
+      ? round3((faceM2 / Math.max(1e-6, (l / 1000) * (h / 1000))) * WASTAGE)
+      : round3((volumeM3 / Math.max(1e-9, blockVolumeM3(input.blockSize))) * WASTAGE);
+    if (input.unitType === "ACC Block") accBlocks = count;
+    else cementBlocks = count;
+  }
+
+  return {
+    unit: "m³",
+    qty: round3(volumeM3),
+    areaM2: round3(faceM2),
+    volumeM3: round3(volumeM3),
+    cementBags: 0,
+    sandM3: 0,
+    aggregateM3: 0,
+    bricks,
+    accBlocks,
+    cementBlocks,
+  };
+}
+
+export const PlinthProtectionFields = z.object({
+  lengthMm: z.number().positive(),
+  breadthMm: z.number().positive().default(600),
+  thicknessMm: z.number().positive().default(75),
+  finishType: z.string().default("PCC"),
+});
+export type PlinthProtectionFields = z.infer<typeof PlinthProtectionFields>;
+
+/** Ported from CivilBoqCalculator.PlinthProtectionLines(). */
+export function computePlinthProtection(input: PlinthProtectionFields): SimpleResult {
+  const areaM2 = (input.lengthMm * input.breadthMm) / 1e6;
+  const volumeM3 = (input.lengthMm * input.breadthMm * input.thicknessMm) / 1e9;
+  return { unit: "m²", qty: round3(areaM2), areaM2: round3(areaM2), volumeM3: round3(volumeM3), ...NO_YIELD };
+}
+
+export const FlooringFields = z.object({
+  lengthMm: z.number().positive(),
+  breadthMm: z.number().positive(),
+  deductRule: DeductRule.default("Openings full"),
+  finishType: z.string().default("Vitrified tiles"),
+  surfaceKind: z.enum(["Floor", "Wall"]).default("Floor"),
+});
+export type FlooringFields = z.infer<typeof FlooringFields>;
+
+export type FlooringResult = { areaM2: number; note: string };
+
+/** Ported from CivilBoqCalculator.FlooringLines() — plan area (length ×
+ * breadth) net of openings on the linked wall_mark, same deduction engine
+ * masonry/plaster/painting use above (the only one of these ~12 "simple"
+ * categories that has deduction logic at all). */
+export function computeFlooring(input: FlooringFields, openings: LinkedOpening[]): FlooringResult {
+  const { netM2, note } = deductFaceArea(input.lengthMm, input.breadthMm, openings, input.deductRule, false, 0);
+  return { areaM2: round3(netM2), note };
+}
