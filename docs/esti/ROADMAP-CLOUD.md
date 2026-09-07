@@ -721,6 +721,62 @@ privilege-escalation exploit checks (`8a5b07bc`) against the renamed
 (`0001`–`0006`) apply cleanly from a fresh `db reset`. Both databases
 reset to a clean slate afterward.
 
+**Studio/Company split — Phase B, the new supplier Company entity
+(2026-09-07).** Second phase of the same plan: "Company" is now a
+material-supplier business (building materials, interior materials,
+finishes, other products) with its own full parallel identity system —
+own `AORMS-C-` handle (the prefix Phase A's rename just freed), own
+membership/ownership model — reusing the same platform `accounts`/
+`auth.users` as Studios (one person, one login, can belong to both a
+Studio and a Company; no second signup/login flow needed).
+
+`platform/supabase/migrations/0007_supplier_companies.sql`: `companies`
+(id, name, `public_id` `AORMS-C-`, `owner_id`, GSTIN/PAN/GST type/TDS
+default, address fields, email, phone — same shape as `studios`' profile
+**minus** `coa_registration_no`, which is architecture-specific and
+doesn't apply to a supplier), `company_memberships`, `company_board_members`,
+`company_contacts` — all four mirroring the Studio equivalents' shape/RLS
+exactly, including `handle_new_company()` (mints the `AORMS-C-` handle +
+founding OWNER membership) and `enforce_company_membership_update_invariants()`
+(the privilege-escalation guard from this session's `8a5b07bc` fix,
+**built in from day one this time**, not found by exploit after the
+fact).
+
+`web/` side, mirroring the Studio pages/actions/components file-for-file:
+`web/lib/actions/company.ts` (12 Server Actions — create/join/invite/
+role-change/leave/profile/board/contact CRUD); a new components subfolder
+`web/components/aorms/platform/company/` (one level under the Studio
+components, so the two entity types' identically-named components don't
+collide on disk); `web/app/(platform)/companies/[companyId]/page.tsx`
+(the route Studios vacated in Phase A) — identical structure to
+`studios/[studioId]/page.tsx` minus the COA field; `identity/page.tsx`
+grows a "Companies" section alongside "Studios" (own create/join tiles,
+own membership list with a Leave button).
+
+Verified live: full signup → link → create-company (confirmed
+`AORMS-C-P6G9` handle, not `AORMS-S-`) → company-detail-page renders →
+company profile save (city/state/pincode, confirmed via direct REST
+read against the service-role API) → add board member → edit-in-place
+save (DIN field, confirmed via REST read) → add contact, all through the
+real browser. Re-ran the full privilege-escalation exploit pair from
+this session's `8a5b07bc` fix against the **new** `company_memberships`
+table specifically (not assumed safe by resemblance to the already-fixed
+`studio_memberships`): self-promotion to OWNER via direct REST `PATCH`
+— blocked (`P0001`, "self-service updates may only set status to LEFT");
+cross-company membership hijack (attacker owns Company B, attempts to
+repoint their own OWNER membership row's `company_id` to Company A via
+direct REST `PATCH`) — blocked (`P0001`, "account_id and company_id
+cannot be changed after creation"); confirmed the legitimate self-leave
+path (`status` → `LEFT`) still succeeds on the same row afterward, so
+the guard isn't over-broad. `tsc --noEmit`/`eslint` clean across the
+whole `web/` tree. All seven platform migrations (`0001`–`0007`) apply
+cleanly from a fresh `db reset`. Both databases (platform + `web/`'s own)
+reset to a clean slate afterward.
+
+Phase C (Material Catalogue — products/specs/test-results owned by a
+Company, browsable by Studios with city/state nearest-vendor ranking)
+is next, not yet started.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

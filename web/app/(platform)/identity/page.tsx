@@ -8,10 +8,14 @@ import { CreateStudioForm } from "../../../components/aorms/platform/CreateStudi
 import { JoinStudioForm } from "../../../components/aorms/platform/JoinStudioForm";
 import { LeaveStudioButton } from "../../../components/aorms/platform/LeaveStudioButton";
 import { PlatformAuthCta } from "../../../components/aorms/platform/PlatformAuthCta";
+import { CreateCompanyForm } from "../../../components/aorms/platform/company/CreateCompanyForm";
+import { JoinCompanyForm } from "../../../components/aorms/platform/company/JoinCompanyForm";
+import { LeaveCompanyButton } from "../../../components/aorms/platform/company/LeaveCompanyButton";
 
 const HOURS_TO_PRO = 100;
 
 type StudioEmbed = { id: string; name: string; public_id: string } | null;
+type CompanyEmbed = { id: string; name: string; public_id: string } | null;
 
 /**
  * My AORMS Identity — the portable personal account (AORMS-U- handle,
@@ -23,9 +27,10 @@ type StudioEmbed = { id: string; name: string; public_id: string } | null;
  * (app)/identity/ on explicit request — see the AORMS Identity/Licence
  * portal split plan). "Studio" = an architecture firm (renamed from
  * "Company" 2026-09-07, freeing that name for material-supplier
- * businesses — see the Studio/Company split + Material Catalogue plan;
- * a "Companies" section for the supplier side lands here alongside
- * Studios once that phase ships).
+ * businesses — see the Studio/Company split + Material Catalogue plan).
+ * "Company" is now a material-supplier business — its own parallel
+ * membership model, same underlying account, shown in its own section
+ * below alongside Studios.
  */
 export default async function IdentityPage() {
   const webSupabase = await createWebClient();
@@ -122,6 +127,13 @@ export default async function IdentityPage() {
     .neq("status", "LEFT")
     .order("created_at", { ascending: true });
 
+  const { data: companyMemberships } = await platformService
+    .from("company_memberships")
+    .select("id, role, status, companies(id, name, public_id)")
+    .eq("account_id", account.id)
+    .neq("status", "LEFT")
+    .order("created_at", { ascending: true });
+
   const hours = account.total_active_seconds / 3600;
 
   return (
@@ -201,6 +213,58 @@ export default async function IdentityPage() {
                 Join a studio
               </h3>
               <JoinStudioForm />
+            </Tile>
+          </Stack>
+
+          <div>
+            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+              Companies
+            </h2>
+            <Stack gap={4}>
+              {(companyMemberships ?? []).map((m) => {
+                const company = (Array.isArray(m.companies) ? m.companies[0] : m.companies) as CompanyEmbed;
+                if (!company) return null;
+                return (
+                  <Tile key={m.id}>
+                    <Stack gap={3} orientation="horizontal" style={{ alignItems: "center", justifyContent: "space-between" }}>
+                      <div>
+                        <NextLink href={`/companies/${company.id}`}>
+                          <strong>{company.name}</strong>
+                        </NextLink>{" "}
+                        <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          {company.public_id}
+                        </span>
+                        <div>
+                          <Tag type={m.role === "OWNER" ? "purple" : "gray"} size="sm">
+                            {m.role}
+                          </Tag>
+                        </div>
+                      </div>
+                      <LeaveCompanyButton membershipId={m.id} companyName={company.name} />
+                    </Stack>
+                  </Tile>
+                );
+              })}
+              {(companyMemberships ?? []).length === 0 && (
+                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  Not a member of any company yet.
+                </p>
+              )}
+            </Stack>
+          </div>
+
+          <Stack gap={6} orientation="horizontal">
+            <Tile style={{ flex: 1 }}>
+              <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                Create a company
+              </h3>
+              <CreateCompanyForm />
+            </Tile>
+            <Tile style={{ flex: 1 }}>
+              <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                Join a company
+              </h3>
+              <JoinCompanyForm />
             </Tile>
           </Stack>
         </Stack>
