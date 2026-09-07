@@ -24,7 +24,7 @@ export default async function PmcMilestonesPage() {
   ]);
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <h1 className="cds--type-heading-05">Programme Milestones</h1>
         <p

@@ -34,7 +34,7 @@ export default async function PortalProjectDetailPage({
 
   if (projectError) {
     return (
-      <Grid style={{ padding: "2rem" }}>
+      <Grid>
         <Column sm={4} md={8} lg={16}>
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load this project: {projectError.message}
@@ -94,7 +94,7 @@ export default async function PortalProjectDetailPage({
   const currentSortOrder = (phases ?? []).find((p) => p.id === project.current_phase_id)?.sort_order ?? -1;
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
           {project.ref}

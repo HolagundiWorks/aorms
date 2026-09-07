@@ -20,7 +20,7 @@ export default async function ClientsPage() {
     .order("name");
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <h1 className="cds--type-heading-05">Clients</h1>
         <p className="cds--type-body-01" style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}>

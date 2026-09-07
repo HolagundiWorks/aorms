@@ -36,7 +36,7 @@ export default async function RateBookDetailPage({
 
   if (rbError) {
     return (
-      <Grid style={{ padding: "2rem" }}>
+      <Grid>
         <Column sm={4} md={8} lg={16}>
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load rate book: {rbError.message}
@@ -49,7 +49,7 @@ export default async function RateBookDetailPage({
   if (!rateBook) notFound();
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
           {rateBook.name}

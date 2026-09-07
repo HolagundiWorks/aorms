@@ -37,7 +37,7 @@ export default async function PurchaseOrdersPage() {
   ]);
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <h1 className="cds--type-heading-05">Purchase Orders</h1>
         <p

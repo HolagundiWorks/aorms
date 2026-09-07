@@ -38,7 +38,7 @@ export default async function ContractorInvitationDetailPage({
 
   if (error) {
     return (
-      <Grid style={{ padding: "2rem" }}>
+      <Grid>
         <Column sm={4} md={8} lg={16}>
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load this invitation: {error.message}
@@ -69,7 +69,7 @@ export default async function ContractorInvitationDetailPage({
   const canBid = tender?.status === "OPEN" && invitation.status !== "DECLINED";
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
           {project?.title ?? "—"} ({project?.ref ?? "—"})

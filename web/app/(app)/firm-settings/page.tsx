@@ -22,7 +22,7 @@ export default async function FirmSettingsPage() {
     .maybeSingle();
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={12}>
         <h1 className="cds--type-heading-05">Firm Settings</h1>
         <p

@@ -33,7 +33,7 @@ export default async function AuditLogPage() {
 
   if (profile?.role !== "OWNER") {
     return (
-      <Grid style={{ padding: "2rem" }}>
+      <Grid>
         <Column sm={4} md={8} lg={16}>
           <h1 className="cds--type-heading-05">Audit Log</h1>
           <InlineNotification
@@ -55,7 +55,7 @@ export default async function AuditLogPage() {
     .limit(100);
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <h1 className="cds--type-heading-05">Audit Log</h1>
         <p

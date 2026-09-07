@@ -103,7 +103,7 @@ export default async function ReportsPage({
 
   if (!canView) {
     return (
-      <Grid style={{ padding: "2rem" }}>
+      <Grid>
         <Column sm={4} md={8} lg={16}>
           <h1 className="cds--type-heading-05">Financial Reports</h1>
           <InlineNotification
@@ -177,7 +177,7 @@ export default async function ReportsPage({
   );
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <h1 className="cds--type-heading-05">Financial Reports</h1>
         <p

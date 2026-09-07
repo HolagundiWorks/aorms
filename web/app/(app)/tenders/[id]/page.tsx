@@ -32,7 +32,7 @@ export default async function TenderDetailPage({
 
   if (tenderError) {
     return (
-      <Grid style={{ padding: "2rem" }}>
+      <Grid>
         <Column sm={4} md={8} lg={16}>
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load tender: {tenderError.message}
@@ -65,7 +65,7 @@ export default async function TenderDetailPage({
   const sealed = tender.status !== "CLOSED" && tender.status !== "AWARDED";
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
           {project?.title ?? "—"} {tender.category ? `· ${tender.category}` : ""}

@@ -24,7 +24,7 @@ export default async function LessonsPage() {
   ]);
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <h1 className="cds--type-heading-05">Lessons Learned</h1>
         <p

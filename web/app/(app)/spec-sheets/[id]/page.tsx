@@ -33,7 +33,7 @@ export default async function SpecSheetDetailPage({
 
   if (sheetError) {
     return (
-      <Grid style={{ padding: "2rem" }}>
+      <Grid>
         <Column sm={4} md={8} lg={16}>
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load spec sheet: {sheetError.message}
@@ -46,7 +46,7 @@ export default async function SpecSheetDetailPage({
   if (!sheet) notFound();
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <p
           className="cds--type-body-01"

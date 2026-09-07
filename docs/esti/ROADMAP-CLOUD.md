@@ -183,25 +183,30 @@ is merged and verified — the `web/` package is new, additive code; nothing in
   that looked heading-like in a grep was confirmed to be a KPI tile's large
   *value* text, correctly not marked as a document heading.
 
-**Padding audit (2026-09-07), on explicit request:** surveyed every inline
-`padding`/`margin` value across `app/` and `components/` (a few hundred
-occurrences) — all of them land on Carbon's own spacing scale (0.25rem/
-0.5rem/0.75rem/1rem/1.5rem/2rem/3rem — spacing-02 through spacing-09), no
-arbitrary off-scale values (no stray `17px`/`1.3rem` anything) found
-anywhere. Every page wraps its content in the same `padding: "2rem"` Grid
-pattern (121 occurrences) — checked live at 375px mobile width (now that
-the sidenav fix above makes that width usable at all) and confirmed this
-doesn't clip or overflow anything, just leaves somewhat less breathing
-room than a narrower mobile-specific padding would (~263px of the 327px
-post-sidenav content width is inside the 2rem gutters). **Flagged, not
-changed**: since this is an inline `style` prop repeated 121 times (not a
-shared component or CSS class), a responsive override would need either a
-mechanical edit across all 121 call sites or a `!important` CSS escape
-hatch — neither felt like a good trade for a cosmetic, non-blocking gain;
-noted here as a real but low-priority candidate for a future shared
-`<PageGrid>` wrapper component, not attempted in this pass. Also noted:
-Dashboard's 7 KPI tiles in a 2-column grid leave "Outstanding receivables"
-alone in its own row — cosmetic, not a bug, not changed.
+**Padding audit (2026-09-07), on explicit request — first pass was wrong,
+corrected same day after the user pushed back ("padding is not correct").**
+The first pass checked whether individual padding/margin *values* matched
+Carbon's spacing scale (they all did — 0.25rem–3rem, no off-scale values
+anywhere) but never checked whether padding was being applied *twice*.
+It was: all four authenticated route groups (`(app)` via `AppShell.tsx`,
+`(portal)`/`(collab-portal)`/`(contractor-portal)` directly) wrap children
+in Carbon's own `<Content>`, which already carries its own built-in
+`padding: 2rem` — and **every single page** (86 files, one consistent
+`<Grid style={{ padding: "2rem" }}>` wrapper each) added *another* 2rem on
+top, doubling the real padding to effectively ~4rem on every side of every
+page in the app. Confirmed live via computed styles before the fix
+(`.cds--content` padding `32px` + the page's own `Grid` padding `32px`,
+stacking) and after (`Grid` back to its own built-in `0px 16px` gutter,
+`.cds--content`'s `32px` now the only page-level padding). Fixed
+mechanically across all 86 files (`<Grid style={{ padding: "2rem" }}>` →
+`<Grid>`) — confirmed via grep that every one of the 121 `padding: "2rem"`
+occurrences found in the first pass was this exact pattern, none legitimate
+elsewhere, so the fix needed no manual judgment calls file-by-file.
+Verified: `tsc --noEmit`/`eslint` clean across `app/`; confirmed live in
+the browser on `/dashboard` and `/takeoff` that content now sits at the
+correct single gutter, not the doubled one from before. Also noted, still
+cosmetic and still not changed: Dashboard's 7 KPI tiles in a 2-column grid
+leave "Outstanding receivables" alone in its own row.
 
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —

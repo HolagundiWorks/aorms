@@ -20,7 +20,7 @@ export default async function ConsultantDetailPage({ params }: { params: Promise
 
   if (consultantError) {
     return (
-      <Grid style={{ padding: "2rem" }}>
+      <Grid>
         <Column sm={4} md={8} lg={16}>
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load consultant: {consultantError.message}
@@ -38,7 +38,7 @@ export default async function ConsultantDetailPage({ params }: { params: Promise
     .order("created_at", { ascending: false });
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
           {consultant.name}

@@ -9,7 +9,7 @@ export default async function TeamsPage() {
   const { data: teams, error } = await supabase.from("teams").select("id, name, description").order("name");
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <h1 className="cds--type-heading-05">Teams</h1>
         <p

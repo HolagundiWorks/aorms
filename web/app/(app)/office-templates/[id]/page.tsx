@@ -16,7 +16,7 @@ export default async function OfficeTemplateDetailPage({ params }: { params: Pro
 
   if (error) {
     return (
-      <Grid style={{ padding: "2rem" }}>
+      <Grid>
         <Column sm={4} md={8} lg={16}>
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load template: {error.message}
@@ -28,7 +28,7 @@ export default async function OfficeTemplateDetailPage({ params }: { params: Pro
   if (!template) notFound();
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={12}>
         <h1 className="cds--type-heading-05" style={{ marginBottom: "1.5rem" }}>
           {template.title}

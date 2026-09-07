@@ -21,7 +21,7 @@ export default async function JobApplicationsPage() {
     .order("applied_at", { ascending: false });
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <h1 className="cds--type-heading-05">Job Applications</h1>
         <p

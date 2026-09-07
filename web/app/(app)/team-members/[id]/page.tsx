@@ -63,7 +63,7 @@ export default async function TeamMemberDetailPage({
 
   if (memberError) {
     return (
-      <Grid style={{ padding: "2rem" }}>
+      <Grid>
         <Column sm={4} md={8} lg={16}>
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load team member: {memberError.message}
@@ -77,7 +77,7 @@ export default async function TeamMemberDetailPage({
   const totalPoints = (rewards ?? []).reduce((sum, r) => sum + r.points, 0);
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
           {member.role}

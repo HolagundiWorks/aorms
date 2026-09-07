@@ -38,7 +38,7 @@ export default async function PmcPackageDetailPage({
 
   if (pkgError) {
     return (
-      <Grid style={{ padding: "2rem" }}>
+      <Grid>
         <Column sm={4} md={8} lg={16}>
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load package: {pkgError.message}
@@ -59,7 +59,7 @@ export default async function PmcPackageDetailPage({
   }
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
           {pkg.ref} · {project?.title ?? "—"}

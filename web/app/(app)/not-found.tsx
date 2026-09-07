@@ -20,7 +20,7 @@ import { ArrowLeft } from "@carbon/icons-react";
  */
 export default function AppNotFound() {
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
           Not found

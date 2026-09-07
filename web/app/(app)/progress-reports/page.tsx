@@ -27,7 +27,7 @@ export default async function ProgressReportsPage() {
   ]);
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <h1 className="cds--type-heading-05">Progress Reports</h1>
         <p

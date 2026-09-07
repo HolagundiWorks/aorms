@@ -9,7 +9,7 @@ import { Column, Grid, SkeletonPlaceholder, SkeletonText } from "@carbon/react";
  */
 export default function AppLoading() {
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <div style={{ marginBottom: "1.5rem" }}>
           <SkeletonText heading width="40%" />

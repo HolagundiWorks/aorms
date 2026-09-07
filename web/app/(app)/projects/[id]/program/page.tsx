@@ -25,7 +25,7 @@ export default async function ProgramPage({
 
   if (projectError) {
     return (
-      <Grid style={{ padding: "2rem" }}>
+      <Grid>
         <Column sm={4} md={8} lg={16}>
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load project: {projectError.message}
@@ -51,7 +51,7 @@ export default async function ProgramPage({
   const overEnvelope = envelope > 0 && totalProgrammedAreaSqm > envelope;
 
   return (
-    <Grid style={{ padding: "2rem" }}>
+    <Grid>
       <Column sm={4} md={8} lg={16}>
         <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
           {project.title}
