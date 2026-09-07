@@ -35,10 +35,27 @@ export default async function IdentityPage() {
 
   const handle = profile?.platform_public_id ?? null;
 
-  if (!handle) {
-    // Not linked yet. If this browser tab happens to have an active AORMS
-    // Platform session, offer a one-click link with the handle pre-filled;
-    // either way, also offer a plain text field + sign-up/sign-in links.
+  // Resolve the linked handle (if any) up front — a stale link (the
+  // handle is set but no longer resolves, e.g. the platform database was
+  // reset independently of this one, which happened live during this
+  // feature's own testing) falls through to the same link/re-link UI as
+  // "never linked," rather than a dead-end error with no way to recover.
+  const platformService = createPlatformServiceRoleClient();
+  const { data: account } = handle
+    ? await platformService
+        .from("accounts")
+        .select("id, public_id, full_name, level, total_active_seconds")
+        .eq("public_id", handle)
+        .maybeSingle()
+    : { data: null };
+
+  const isStaleLink = !!handle && !account;
+
+  if (!account) {
+    // Not linked yet (or the link is stale — see isStaleLink). If this
+    // browser tab happens to have an active AORMS Platform session, offer
+    // a one-click link with the handle pre-filled; either way, also offer
+    // a plain text field + sign-up/sign-in links.
     const platformSupabase = await createPlatformClient();
     const {
       data: { user: platformUser },
@@ -46,12 +63,12 @@ export default async function IdentityPage() {
 
     let knownHandle: string | undefined;
     if (platformUser) {
-      const { data: account } = await platformSupabase
+      const { data: sessionAccount } = await platformSupabase
         .from("accounts")
         .select("public_id")
         .eq("id", platformUser.id)
         .maybeSingle();
-      knownHandle = account?.public_id ?? undefined;
+      knownHandle = sessionAccount?.public_id ?? undefined;
     }
 
     return (
@@ -63,10 +80,16 @@ export default async function IdentityPage() {
             style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
           >
             A portable personal identity — your own AORMS-U- handle, usage hours, and level, independent of any
-            one company. Not linked to this login yet.
+            one company. {isStaleLink ? "Linked handle no longer resolves." : "Not linked to this login yet."}
           </p>
           <Tile>
             <Stack gap={5}>
+              {isStaleLink && (
+                <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                  Previously linked to <strong>{handle}</strong>, which no longer exists on the AORMS Platform.
+                  Link a different (or newly re-created) identity below.
+                </p>
+              )}
               {knownHandle ? (
                 <p className="cds--type-body-01">
                   You&apos;re signed in to the AORMS Platform as <strong>{knownHandle}</strong>.
@@ -82,28 +105,19 @@ export default async function IdentityPage() {
     );
   }
 
-  // Linked — read the live account + memberships from the platform
+  // Linked and resolved — read the live memberships from the platform
   // project via its service-role client. Scoped by the already-verified
-  // handle (not client input), so bypassing the platform's own RLS here
+  // account (not client input), so bypassing the platform's own RLS here
   // carries no privilege-escalation risk — this browser tab need not have
   // an active platform session for its own linked identity to be visible.
-  const platformService = createPlatformServiceRoleClient();
-  const { data: account } = await platformService
-    .from("accounts")
-    .select("id, public_id, full_name, level, total_active_seconds")
-    .eq("public_id", handle)
-    .maybeSingle();
+  const { data: memberships } = await platformService
+    .from("memberships")
+    .select("id, role, status, companies(id, name, public_id)")
+    .eq("account_id", account.id)
+    .neq("status", "LEFT")
+    .order("created_at", { ascending: true });
 
-  const { data: memberships } = account
-    ? await platformService
-        .from("memberships")
-        .select("id, role, status, companies(id, name, public_id)")
-        .eq("account_id", account.id)
-        .neq("status", "LEFT")
-        .order("created_at", { ascending: true })
-    : { data: [] };
-
-  const hours = account ? account.total_active_seconds / 3600 : 0;
+  const hours = account.total_active_seconds / 3600;
 
   return (
     <Grid>
@@ -116,81 +130,75 @@ export default async function IdentityPage() {
           Your portable personal identity — carries across every company you work with.
         </p>
 
-        {!account ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Linked handle {handle} no longer resolves on the AORMS Platform.
-          </p>
-        ) : (
-          <Stack gap={6}>
-            <Tile>
-              <Stack gap={4}>
-                <Stack gap={2} orientation="horizontal">
-                  <h2 className="cds--type-heading-03">{account.public_id}</h2>
-                  <Tag type={account.level === "PRO" ? "green" : "cool-gray"} size="md">
-                    {account.level}
-                  </Tag>
-                </Stack>
-                <p className="cds--type-body-01">{account.full_name}</p>
-                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                  {hours.toFixed(1)}h of {HOURS_TO_PRO}h logged
-                  {account.level === "BASIC" ? ` — ${Math.max(0, HOURS_TO_PRO - hours).toFixed(1)}h to Pro` : ""}
-                </p>
+        <Stack gap={6}>
+          <Tile>
+            <Stack gap={4}>
+              <Stack gap={2} orientation="horizontal">
+                <h2 className="cds--type-heading-03">{account.public_id}</h2>
+                <Tag type={account.level === "PRO" ? "green" : "cool-gray"} size="md">
+                  {account.level}
+                </Tag>
               </Stack>
-            </Tile>
-
-            <div>
-              <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
-                Companies
-              </h2>
-              <Stack gap={4}>
-                {(memberships ?? []).map((m) => {
-                  const company = (Array.isArray(m.companies) ? m.companies[0] : m.companies) as CompanyEmbed;
-                  if (!company) return null;
-                  return (
-                    <Tile key={m.id}>
-                      <Stack gap={3} orientation="horizontal" style={{ alignItems: "center", justifyContent: "space-between" }}>
-                        <div>
-                          <NextLink href={`/companies/${company.id}`}>
-                            <strong>{company.name}</strong>
-                          </NextLink>{" "}
-                          <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                            {company.public_id}
-                          </span>
-                          <div>
-                            <Tag type={m.role === "OWNER" ? "purple" : "gray"} size="sm">
-                              {m.role}
-                            </Tag>
-                          </div>
-                        </div>
-                        <LeaveCompanyButton membershipId={m.id} companyName={company.name} />
-                      </Stack>
-                    </Tile>
-                  );
-                })}
-                {(memberships ?? []).length === 0 && (
-                  <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                    Not a member of any company yet.
-                  </p>
-                )}
-              </Stack>
-            </div>
-
-            <Stack gap={6} orientation="horizontal">
-              <Tile style={{ flex: 1 }}>
-                <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-                  Create a company
-                </h3>
-                <CreateCompanyForm />
-              </Tile>
-              <Tile style={{ flex: 1 }}>
-                <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-                  Join a company
-                </h3>
-                <JoinCompanyForm />
-              </Tile>
+              <p className="cds--type-body-01">{account.full_name}</p>
+              <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                {hours.toFixed(1)}h of {HOURS_TO_PRO}h logged
+                {account.level === "BASIC" ? ` — ${Math.max(0, HOURS_TO_PRO - hours).toFixed(1)}h to Pro` : ""}
+              </p>
             </Stack>
+          </Tile>
+
+          <div>
+            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+              Companies
+            </h2>
+            <Stack gap={4}>
+              {(memberships ?? []).map((m) => {
+                const company = (Array.isArray(m.companies) ? m.companies[0] : m.companies) as CompanyEmbed;
+                if (!company) return null;
+                return (
+                  <Tile key={m.id}>
+                    <Stack gap={3} orientation="horizontal" style={{ alignItems: "center", justifyContent: "space-between" }}>
+                      <div>
+                        <NextLink href={`/companies/${company.id}`}>
+                          <strong>{company.name}</strong>
+                        </NextLink>{" "}
+                        <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          {company.public_id}
+                        </span>
+                        <div>
+                          <Tag type={m.role === "OWNER" ? "purple" : "gray"} size="sm">
+                            {m.role}
+                          </Tag>
+                        </div>
+                      </div>
+                      <LeaveCompanyButton membershipId={m.id} companyName={company.name} />
+                    </Stack>
+                  </Tile>
+                );
+              })}
+              {(memberships ?? []).length === 0 && (
+                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  Not a member of any company yet.
+                </p>
+              )}
+            </Stack>
+          </div>
+
+          <Stack gap={6} orientation="horizontal">
+            <Tile style={{ flex: 1 }}>
+              <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                Create a company
+              </h3>
+              <CreateCompanyForm />
+            </Tile>
+            <Tile style={{ flex: 1 }}>
+              <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                Join a company
+              </h3>
+              <JoinCompanyForm />
+            </Tile>
           </Stack>
-        )}
+        </Stack>
       </Column>
     </Grid>
   );

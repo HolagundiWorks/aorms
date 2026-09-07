@@ -369,6 +369,32 @@ the Context section of the build plan above); no cert-issuance UI (the
 portable-certifications side of the old design was out of scope for this
 request, which only asked for identity + companies + hours + tier).
 
+**AORMS Platform, follow-up (2026-09-07) — invite/join flows verified +
+re-link gap fixed.** Manually built a three-account scenario in the real
+browser to exercise both membership paths end-to-end: Owner Alice creates
+a company, **invites** Charlie Invitee by handle from the company detail
+page's "Add a member" form (owner-only), and Dana Joiner **self-serve
+joins** the same company by its `AORMS-C-` handle from her own identity
+page. Confirmed both from the UI and directly against the database
+(`memberships` rows: Alice `OWNER`/`ACTIVE`, Charlie `MEMBER`/`ACTIVE` via
+invite, Dana `MEMBER`/`ACTIVE` via join) — both flows work as designed.
+
+Along the way, resetting the platform database (routine cleanup between
+test rounds) reproduced a real gap: `identity/page.tsx`'s "linked but the
+handle no longer resolves" branch was a dead end — an error message with
+no way to recover, forcing a manual service-role `UPDATE` to clear
+`profiles.platform_public_id` before the page was usable again. Fixed by
+resolving the account *before* branching: a stale link now falls through
+to the same link/re-link UI a never-linked profile sees, with an extra
+notice naming the dead handle ("Previously linked to AORMS-U-DEAD, which
+no longer exists... link a different (or newly re-created) identity
+below"). Verified live: manufactured a stale link
+(`profiles.platform_public_id = 'AORMS-U-DEAD'`), confirmed the recovery
+UI renders correctly, then re-linked to a fresh handle through the same
+`LinkIdentityForm` and confirmed the page immediately shows the newly
+resolved account. `tsc --noEmit`/`eslint` clean. Both databases reset to
+a clean slate after this round too.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
