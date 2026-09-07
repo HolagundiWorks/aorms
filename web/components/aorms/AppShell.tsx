@@ -187,7 +187,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {/* Plain <img>, not next/image: a fixed 14KB brand asset that
                 never changes doesn't need the Image optimizer. */}
             <img src="/aorms-logo.png" alt="AORMS" style={{ height: "16px", width: "auto" }} />
-            <span>Office Hub</span>
+            <span className="aorms-header-brand-text">Office Hub</span>
           </span>
         </HeaderName>
         <HeaderGlobalBar>

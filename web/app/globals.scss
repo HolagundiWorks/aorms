@@ -40,3 +40,23 @@ body {
 .aorms-table-spaced {
   margin-top: 1.5rem;
 }
+
+// Header overflow fix (structural only — found in a UI audit, 2026-09-07).
+// The header's brand text + 6 global actions (Ask ESTI/Wellbeing/
+// Calculator/Pomodoro/AI Runs/Sign out) don't all fit a phone-width
+// viewport; Carbon's HeaderGlobalBar has no built-in responsive overflow
+// behavior. Two-part fix: below this breakpoint, drop the redundant
+// "Office Hub" text (AppShell.tsx's logo <img> already carries the brand)
+// to reclaim space; and let the actions bar itself scroll horizontally as
+// a safety net so nothing is ever truly unreachable regardless of width.
+@media (max-width: 42rem) {
+  .aorms-header-brand-text {
+    display: none;
+  }
+}
+
+.cds--header__global {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  min-width: 0;
+}

@@ -81,12 +81,29 @@ is merged and verified — the `web/` package is new, additive code; nothing in
   375px phone width (rail → hamburger → full-width readable content) and an
   800px window (confirmed this isn't a desktop regression — the same
   toggle correctly opens/closes at this width too, matching Carbon's
-  intended per-breakpoint behavior, not a bug). **Not fixed, flagged for a
-  follow-up**: the header overflow itself (6 `HeaderGlobalAction`s don't
-  fit a 375px header) — the SideNav fix makes navigation reachable on
-  mobile, but "AI Runs"/"Sign out" are still unreachable there; needs a
-  design call (an `OverflowMenu`, hiding some actions below a breakpoint,
-  or a different header layout) rather than a mechanical fix.
+  intended per-breakpoint behavior, not a bug).
+- ✅ **Header overflow — fixed same day, as a follow-up.** The 6
+  `HeaderGlobalAction`s (Ask ESTI/Wellbeing/Calculator/Pomodoro/AI Runs/
+  Sign out) don't all fit a 375px header alongside the "AORMS Office Hub"
+  brand text — at that width only 3–4 icons rendered, with "AI Runs"/
+  "Sign out" genuinely absent from the interactive DOM (confirmed via
+  `read_page`, not just visually clipped). An `OverflowMenu` wasn't a good
+  fit — these aren't simple links, each is a rich `Popover` (Ask ESTI's
+  chat form, Calculator's input, Pomodoro's SVG dial) that can't fold into
+  a generic menu item. Two-part CSS-only fix instead (`app/globals.scss`,
+  structural-only, matching this repo's established convention): below a
+  42rem breakpoint, hide the redundant "Office Hub" text (the logo `<img>`
+  already carries the brand) to reclaim space — that alone was enough to
+  fit all 6 icons at 375px with no scrolling needed; `.cds--header__global`
+  also gets `overflow-x: auto` as a safety net so nothing is ever truly
+  unreachable regardless of how many header actions this app grows to.
+  Verified live: at true 375px (confirmed via `read_page`'s reported
+  viewport, not just a screenshot at a glance — an earlier measurement
+  attempt via `window.innerWidth` gave a stale/inconsistent reading and was
+  discarded in favor of this), all 6 actions are back in the interactive
+  DOM including "AI Runs" and "Sign out"; at 800px desktop, brand text and
+  all 6 icons still show exactly as before (confirmed no regression above
+  the breakpoint).
 - ✅ **Confirmed clean** — zero MUI/`@hcw/ui-kit` imports anywhere in
   `web/` (one `hcw-ui-kit` grep hit in `app/page.tsx` is a comment
   explaining it was deliberately *not* ported, not a real import), zero
