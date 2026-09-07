@@ -590,6 +590,74 @@ Members table and Company Profile form earlier this session, not
 re-tested separately. `tsc --noEmit`/`eslint` clean. Both databases
 reset to a clean slate afterward.
 
+**🔴 CRITICAL SECURITY FIX — membership privilege escalation, two
+independent exploit paths (2026-09-07), found live while testing
+role-editing.** Asked to test the "edit" side of the invite/join
+flows — `MembershipRoleSelect`/`updateMembershipRole`, which lets a
+company owner change a member's role. That path itself worked
+correctly, but poking at it surfaced a severe gap: **neither** UPDATE
+policy on `memberships` (migration `0001_core.sql`) had a `with check`
+clause, so Postgres silently reused each `using` expression to validate
+the *resulting* row too — and neither expression constrains which
+*columns* an update can touch. Confirmed exploitable via direct
+PostgREST `PATCH` calls with real access tokens, no app UI involved, in
+two independent ways:
+1. **Via `"memberships: self update (leave)"`** (`account_id =
+   auth.uid()`) — any plain member could self-promote `role` to `OWNER`
+   in their real company, or reassign `company_id` to a company they
+   were never invited to **and** set `role` to `OWNER` in the same
+   request — an uninvited takeover of an arbitrary company by anyone
+   with a platform account.
+2. **Via `"memberships: owner update"`** (`is_company_owner(company_id)`)
+   — a *separate*, independently-exploitable path: a legitimate owner of
+   their own Company A (trivial to become — anyone can self-serve create
+   a company) could reassign one of Company A's own membership rows'
+   `company_id` into a **completely unrelated** Company B, landing as
+   its uninvited `OWNER` too. Confirmed this succeeds even after an
+   initial, narrower fix that only closed path 1 — a second Explore-style
+   pass over every `UPDATE`/`ALL` RLS policy in the platform schema
+   caught it before the user had to find it independently.
+
+A `with check` addition can't fully close either path — Postgres RLS
+only ever sees the candidate *new* row, not an old-vs-new diff, so
+"these columns must not change" isn't expressible as a bare predicate.
+Fixed with a `BEFORE UPDATE` trigger instead (which sees both `OLD` and
+`NEW`),
+`platform/supabase/migrations/0005_membership_self_update_guard.sql`'s
+`enforce_membership_update_invariants()`:
+- `account_id`/`company_id` are immutable after creation for **every**
+  caller, including the owner path — a membership belongs to exactly the
+  person and company it was created for; "moving" one is a delete +
+  insert (a fresh membership), never an in-place mutation.
+- The trusted service-role path (this app's own server-side admin/
+  cleanup code, already fully trusted everywhere else in this codebase)
+  may still freely change `role`/`status`/`activated_at`/`left_at` —
+  checked via `auth.role() = 'service_role'`.
+- A genuine company owner may change `role`/`status` for members of
+  their own company (the original policy's intent, preserved).
+- Everyone else's update is only accepted if it's a genuine self-leave:
+  `status` becomes `'LEFT'` and `role` is unchanged.
+
+Verified live, exhaustively, with three real accounts (an owner of
+Company A, an unrelated owner of Company B, and a plain member of
+Company A): reproduced all three exploit variants first on the
+corrected-so-far schema (self-promotion, self-hijack-into-another-
+company, and the separate owner-hijack-into-an-unrelated-company path),
+confirmed each is now rejected with a clear `P0001` error and the
+underlying data completely unmodified, then re-verified all three
+legitimate paths still work unchanged: an owner promoting a member to
+`OWNER`, a member leaving their own company, and a service-role
+administrative role fix. No application code changed — this was a pure
+database migration; `tsc --noEmit` unaffected. All five platform
+migrations (`0001`–`0005`) apply cleanly from a fresh `db reset`.
+Both databases reset to a clean slate afterward.
+
+Added a standing note to root `CLAUDE.md`'s Conventions: any future
+"row owner can update their own row" RLS policy in this codebase needs
+the same scrutiny — ask specifically which *columns* a bare `using`
+clause actually leaves unconstrained, not just whether the row is
+reachable.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

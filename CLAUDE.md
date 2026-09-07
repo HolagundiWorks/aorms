@@ -472,6 +472,35 @@ branch before starting anything that could overlap — not just at hand-off.
   session. `web/lib/platform/client.ts`/`server.ts` set an explicit
   `cookieOptions: { name: "sb-platform-auth-token" }` to keep the two
   sessions apart — never drop that when touching those files.
+- **RLS update policies need `with check`, or they're a privilege-
+  escalation hole (2026-09-07 incident, fixed) — and check EVERY such
+  policy on a table, not just the first one you find.** Both UPDATE
+  policies on `memberships` had this gap, independently exploitable:
+  `"memberships: self update (leave)"`'s `using (account_id =
+  auth.uid())` let any member `PATCH` their own row to self-promote to
+  `OWNER`, or reassign `company_id` to an uninvited company and land as
+  its `OWNER` in one request; separately, `"memberships: owner
+  update"`'s `using (is_company_owner(company_id))` let a legitimate
+  owner of their *own* company reassign one of that company's membership
+  rows into a completely unrelated company, landing as its uninvited
+  owner too — a narrower fix that only closed the first path left the
+  second one live, caught by re-auditing every `UPDATE`/`ALL` policy in
+  the schema rather than stopping at the first bug found. Both confirmed
+  exploitable via direct PostgREST calls, no app UI involved. A bare
+  `with check` can't fully close either (RLS only sees the candidate new
+  row, not an old-vs-new diff); the fix is a `BEFORE UPDATE` trigger
+  (`platform/supabase/migrations/0005_membership_self_update_guard.sql`,
+  `enforce_membership_update_invariants()`) that makes `account_id`/
+  `company_id` immutable after creation for *every* caller (owner
+  included — "moving" a membership should be a delete+insert, never a
+  mutation), lets the trusted service-role path and the genuine company
+  owner change `role`/`status` freely, and accepts anyone else's update
+  only if it's a pure self-leave. **Any future "row owner can update
+  their own row" RLS policy in this codebase needs the same scrutiny** —
+  ask specifically "which columns does this `using` clause alone
+  actually leave unconstrained?", not just whether the row is reachable,
+  and check every UPDATE/ALL policy on the table, not just the one
+  you're already looking at.
 
 ## Conventions
 
