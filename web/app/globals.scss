@@ -67,6 +67,14 @@ body {
 
 .cds--header__global {
   overflow-x: auto;
+  // Explicit, not just "leave it unset": per the CSS Overflow spec, when one
+  // axis is non-visible and the other is left at the initial `visible`, the
+  // `visible` axis is behaviorally treated as `auto` too — so without this,
+  // overflow-y silently computed to `auto` and a stray 1px scrollHeight/
+  // clientHeight mismatch painted an unwanted vertical scrollbar on the
+  // header (found 2026-09-07, user report: "vertical scroll existing on
+  // header"). This bar only ever needs to scroll horizontally.
+  overflow-y: hidden;
   overscroll-behavior-x: contain;
   min-width: 0;
 }

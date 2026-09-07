@@ -238,6 +238,23 @@ shifted. No `tsc`/`eslint` implications (pure SCSS change, no TS/JS
 touched) — a dev-server restart-free hot-reload confirmed the fix live
 without a rebuild.
 
+**Header mobile audit, follow-up (2026-09-07) — stray vertical scrollbar on
+the header.** After the earlier header-overflow fix (horizontal-scroll
+safety net on `.cds--header__global`, above), the user reported a vertical
+scrollbar on the header itself at mobile width. Root cause: the fix set
+`overflow-x: auto` but left `overflow-y` unset — per the CSS Overflow spec,
+when one axis is non-`visible` and the sibling axis is left at the initial
+`visible`, that sibling axis is behaviorally treated as `auto` too, so
+`overflow-y` silently computed to `auto` even though it was never written.
+Confirmed via `getComputedStyle()`: `overflow-y: auto` with `scrollHeight:
+48` vs `clientHeight: 47` — a 1px mismatch, enough to paint an unwanted
+scrollbar. Fixed by adding an explicit `overflow-y: hidden;` (this bar only
+ever needs to scroll horizontally). Verified live at 375px width:
+`overflow-y` now computes `hidden`; screenshot after collapsing the side
+nav to its icon rail shows all 6 header actions (Ask ESTI/Calculator/
+Pomodoro/Wellbeing/AI Runs/Sign out) fitting cleanly with no scrollbar in
+either axis. `tsc --noEmit` clean (pure SCSS change).
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
