@@ -16,11 +16,12 @@ type CompanyEmbed = { id: string; name: string; public_id: string } | null;
 /**
  * My AORMS Identity — the portable personal account (AORMS-U- handle,
  * usage hours, Basic/Pro level) and every company membership, sourced from
- * the separate AORMS Platform Supabase project (see lib/platform/*). This
- * page lives under (app)/ (not the plan's literally-drafted (platform)/
- * route group) so it keeps the app shell/nav like every other admin page —
- * only the *login* boundary (platform-signup/platform-login) is genuinely
- * separate, not this page's own chrome.
+ * the separate AORMS Platform Supabase project (see lib/platform/*). Lives
+ * under the (platform) route group — its own portal, genuinely separate
+ * from the Office Hub: no AppShell/SideNav, not linked from the Office
+ * Hub's nav at all, reached only by its own direct URL (moved here from
+ * (app)/identity/ on explicit request — see the AORMS Identity/Licence
+ * portal split plan).
  */
 export default async function IdentityPage() {
   const webSupabase = await createWebClient();

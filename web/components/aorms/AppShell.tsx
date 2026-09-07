@@ -148,7 +148,6 @@ const GROUPS: NavGroup[] = [
       { href: "/audit-log", label: "Audit Log" },
       { href: "/users", label: "Users" },
       { href: "/firm-settings", label: "Firm Settings" },
-      { href: "/identity", label: "AORMS Identity" },
     ],
   },
 ];

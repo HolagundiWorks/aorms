@@ -430,6 +430,94 @@ detail page's "Add a member" form — both now show `ACTIVE` again, exactly
 as a fresh join would. `tsc --noEmit`/`eslint` clean. Both databases reset
 to a clean slate after this round.
 
+**AORMS Identity / Licence — separate portals + company profile data
+(2026-09-07).** On explicit request: Identity split into a genuinely
+separate portal from the Office Hub (no `AppShell`/`SideNav`, no link
+anywhere in the Office Hub's own nav — reached only by its own direct
+URL), a new Licence Management portal, and the company's regulatory/
+contact data (COA, GST, tax, board of directors, "who's who") moved out
+of the Office Hub's Firm Settings page into the Identity portal's company
+profile, which is now the source of truth.
+
+**Portal move:** `identity/page.tsx` and `companies/[companyId]/page.tsx`
+moved from `web/app/(app)/` to `web/app/(platform)/` (a directory rename —
+both are the same depth from `web/lib/`, so no import changes). Removed
+the "AORMS Identity" entry from `AppShell.tsx`'s `GROUPS` (added last
+round, reverted now). `(platform)/layout.tsx` changed from a fixed
+narrow `Grid`/`Column` (sized for the login card) to a light header —
+"AORMS Identity" wordmark, Identity/Licences nav links, and a **Sign
+out** link — with each page controlling its own width now (the
+`Grid`/`Column` the old layout did moved into `platform-login`/
+`platform-signup` themselves). This closed a real, pre-existing gap
+along the way: `platformSignOut` had existed since the original AORMS
+Platform build but had never had a UI button anywhere — verified live
+that it now actually clears the `sb-platform-auth-token` cookie.
+
+**New platform schema** (`platform/supabase/migrations/`):
+- `0003_company_profile.sql` — extends `companies` with
+  `coa_registration_no`/`gstin`/`pan`/`gst_type`/`tds_applicable_default`/
+  address fields (mirrors `web/`'s own `firm` table's shape — same data,
+  new home); new `company_board_members` (name, DIN, designation,
+  appointed-on date) and `company_contacts` ("who's who" — name, role/
+  title, email, phone, primary flag), both member-readable/owner-writable
+  via the existing `is_company_owner()` helper. Also added a genuinely
+  missing **`companies: owner update`** RLS policy — migration `0001`
+  had granted `companies` only `SELECT`/`INSERT`, no `UPDATE` at all,
+  found while wiring this.
+- `0004_licences.sql` — one `licences` row per company (`plan`
+  `TRIAL`/`STANDARD`/`PREMIUM`, `seats`, `starts_at`, `expires_at`),
+  auto-provisioned as a 30-day `TRIAL` by a second `after_company_insert`
+  trigger alongside the existing founding-owner-membership one. No stored
+  `status` column — `ACTIVE`/`EXPIRED` is computed from `expires_at` at
+  render time, not a column that needs to stay in sync with the clock.
+  Owner-editable (`plan`/`seats`/`expires_at`) — no billing/payment
+  integration exists in this stack, self-serve is the same trust model as
+  every other owner-only mutation built so far.
+
+**`companies/[companyId]/page.tsx`** grew three new sections (Company
+Profile, Board of Directors, Who's Who), each with an owner-only add/
+edit form and member-visible read view; new components under
+`web/components/aorms/platform/`: `CompanyProfileForm.tsx`,
+`AddBoardMemberForm.tsx`/`RemoveBoardMemberButton.tsx`,
+`AddContactForm.tsx`/`RemoveContactButton.tsx`. New page
+`web/app/(platform)/licences/page.tsx` + `UpdateLicenceForm.tsx`. New
+Server Actions in `web/lib/actions/platform.ts`: `updateCompanyProfile`,
+`addBoardMember`/`removeBoardMember`, `addCompanyContact`/
+`removeCompanyContact`, `updateLicence` — same house style as every
+existing action there.
+
+**Firm Settings becomes a read-only mirror, deliberately without
+touching `web/`'s own schema or invoicing/PDF code:** an Explore pass
+confirmed `web/lib/actions/invoices.ts`'s GST/TDS calculation and
+`web/lib/jobs/firm.ts`'s PDF generation both read `firm.gstin`/`pan`/
+etc. directly, so those columns stay exactly as they are. Only
+`FirmSettingsForm.tsx` changed — `readOnly`/`disabled` on the moved
+fields, an `InlineNotification` + a link to `/identity`.
+`updateFirmSettings` (`web/lib/actions/firm.ts`) now only ever writes
+`company_name`/`firm_type`, never the moved fields — found and avoided a
+real landmine here: a `disabled` `<Select>`/`<Checkbox>` doesn't submit a
+value in a native form at all, so if the action had kept reading
+`gstType`/`tdsApplicableDefault` from `formData`, every save would have
+silently reset them to the form's hardcoded defaults. **No live sync
+back into `web/`'s own `firm` table in this pass** — a disclosed
+limitation matching the plan, not an oversight.
+
+**Verified live, real browser, full flow:** platform sign-up → link →
+create a company → company profile save (COA/GSTIN round-tripped,
+confirmed via direct DB read) → add a board member (Rahul Sharma,
+Managing Director, DIN, appointed date) → add a "who's who" contact
+(Priya Menon, Authorized Signatory) → `/licences` shows the
+auto-provisioned `TRIAL` licence (`1 seat · expires` 30 days out,
+`ACTIVE`) → updated to `STANDARD`/5 seats, persisted → **Sign out**
+confirmed clearing the platform cookie, with `/identity` still correctly
+showing the linked identity afterward (service-role read, no live
+platform session required — the "link, don't merge" design holding up
+exactly as intended). Confirmed `/identity` renders with zero
+`AppShell`/`SideNav` chrome and the Office Hub's own nav no longer links
+to it anywhere. `tsc --noEmit`/`eslint` clean across every new/touched
+file. All four platform migrations (`0001`–`0004`) apply cleanly from a
+fresh `db reset`. Both databases reset to a clean slate afterward.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

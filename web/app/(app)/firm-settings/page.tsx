@@ -9,6 +9,15 @@ import { FirmSettingsForm } from "../../../components/aorms/FirmSettingsForm";
  * update"); a VIEWER/ASSOCIATE etc. opening this page just sees a save
  * that silently fails via RLS today — a clearer "you can't edit this"
  * state is a possible follow-up, not attempted here.
+ *
+ * GST/PAN/COA/architect/address fields are now a **read-only mirror**
+ * (FirmSettingsForm.tsx) — the AORMS Identity portal's company profile
+ * (/companies/[id]) is the actual place to edit them now (see the AORMS
+ * Identity/Licence portal split plan). Kept here, unchanged, because
+ * web/lib/actions/invoices.ts's GST/TDS calculation and
+ * web/lib/jobs/firm.ts's PDF generation both still read these columns
+ * directly from this table — no schema change, no sync back from the
+ * Identity portal in this pass (a disclosed limitation, not an oversight).
  */
 export default async function FirmSettingsPage() {
   const supabase = await createClient();

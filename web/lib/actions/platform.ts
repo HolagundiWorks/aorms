@@ -279,6 +279,149 @@ export async function leaveCompany(membershipId: string): Promise<{ error?: stri
   return {};
 }
 
+// ── Company profile (COA/GST/tax/address) ───────────────────────────────
+
+/**
+ * Owner-only (enforced by the "companies: owner update" RLS policy added
+ * in migration 0003_company_profile.sql). This is the data that used to
+ * live only in web/'s own `firm` table — Firm Settings now mirrors it
+ * read-only and links here to actually edit it.
+ */
+export async function updateCompanyProfile(
+  _prev: PlatformActionState,
+  formData: FormData,
+): Promise<PlatformActionState> {
+  const companyId = String(formData.get("companyId") ?? "");
+  if (!companyId) return { error: "Missing company." };
+
+  const supabase = await createPlatformClient();
+  const { error } = await supabase
+    .from("companies")
+    .update({
+      coa_registration_no: String(formData.get("coaRegistrationNo") ?? "").trim() || null,
+      gstin: String(formData.get("gstin") ?? "").trim() || null,
+      pan: String(formData.get("pan") ?? "").trim() || null,
+      gst_type: String(formData.get("gstType") ?? "REGULAR"),
+      tds_applicable_default: formData.get("tdsApplicableDefault") === "on",
+      address_line1: String(formData.get("addressLine1") ?? "").trim() || null,
+      address_line2: String(formData.get("addressLine2") ?? "").trim() || null,
+      city: String(formData.get("city") ?? "").trim() || null,
+      district: String(formData.get("district") ?? "").trim() || null,
+      state: String(formData.get("state") ?? "").trim() || null,
+      pincode: String(formData.get("pincode") ?? "").trim() || null,
+      email: String(formData.get("email") ?? "").trim() || null,
+      phone: String(formData.get("phone") ?? "").trim() || null,
+    })
+    .eq("id", companyId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/companies/${companyId}`);
+  return null;
+}
+
+// ── Board of directors ───────────────────────────────────────────────────
+
+export async function addBoardMember(
+  _prev: PlatformActionState,
+  formData: FormData,
+): Promise<PlatformActionState> {
+  const companyId = String(formData.get("companyId") ?? "");
+  const fullName = String(formData.get("fullName") ?? "").trim();
+  if (!companyId || !fullName) return { error: "Name is required." };
+
+  const supabase = await createPlatformClient();
+  const { error } = await supabase.from("company_board_members").insert({
+    company_id: companyId,
+    full_name: fullName,
+    din: String(formData.get("din") ?? "").trim() || null,
+    designation: String(formData.get("designation") ?? "").trim() || null,
+    appointed_at: String(formData.get("appointedAt") ?? "").trim() || null,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/companies/${companyId}`);
+  return null;
+}
+
+export async function removeBoardMember(boardMemberId: string, companyId: string): Promise<{ error?: string }> {
+  const supabase = await createPlatformClient();
+  const { error } = await supabase.from("company_board_members").delete().eq("id", boardMemberId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/companies/${companyId}`);
+  return {};
+}
+
+// ── "Who's who" — key contacts ───────────────────────────────────────────
+
+export async function addCompanyContact(
+  _prev: PlatformActionState,
+  formData: FormData,
+): Promise<PlatformActionState> {
+  const companyId = String(formData.get("companyId") ?? "");
+  const fullName = String(formData.get("fullName") ?? "").trim();
+  if (!companyId || !fullName) return { error: "Name is required." };
+
+  const supabase = await createPlatformClient();
+  const { error } = await supabase.from("company_contacts").insert({
+    company_id: companyId,
+    full_name: fullName,
+    role_title: String(formData.get("roleTitle") ?? "").trim() || null,
+    email: String(formData.get("email") ?? "").trim() || null,
+    phone: String(formData.get("phone") ?? "").trim() || null,
+    is_primary: formData.get("isPrimary") === "on",
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/companies/${companyId}`);
+  return null;
+}
+
+export async function removeCompanyContact(contactId: string, companyId: string): Promise<{ error?: string }> {
+  const supabase = await createPlatformClient();
+  const { error } = await supabase.from("company_contacts").delete().eq("id", contactId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/companies/${companyId}`);
+  return {};
+}
+
+// ── Licence management ───────────────────────────────────────────────────
+
+/**
+ * Owner-only (enforced by "licences: owner update" RLS). No billing/
+ * payment integration exists in this stack — the owner self-serves
+ * plan/seats/expiry directly, same trust model as every other owner-only
+ * mutation in this system so far.
+ */
+export async function updateLicence(
+  _prev: PlatformActionState,
+  formData: FormData,
+): Promise<PlatformActionState> {
+  const companyId = String(formData.get("companyId") ?? "");
+  const plan = String(formData.get("plan") ?? "");
+  const seatsRaw = String(formData.get("seats") ?? "");
+  const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
+  if (!companyId) return { error: "Missing company." };
+  if (!["TRIAL", "STANDARD", "PREMIUM"].includes(plan)) return { error: "Invalid plan." };
+  const seats = Number(seatsRaw);
+  if (!Number.isInteger(seats) || seats < 1) return { error: "Seats must be a positive whole number." };
+
+  const supabase = await createPlatformClient();
+  const { error } = await supabase
+    .from("licences")
+    .update({
+      plan,
+      seats,
+      expires_at: expiresAtRaw ? new Date(expiresAtRaw).toISOString() : null,
+    })
+    .eq("company_id", companyId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/licences");
+  return null;
+}
+
 // ── Usage heartbeat ──────────────────────────────────────────────────────
 
 /**

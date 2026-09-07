@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import NextLink from "next/link";
 import { Button, Checkbox, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { updateFirmSettings, type FirmSettingsActionState } from "../../lib/actions/firm";
 import { GST_STATE_CODES } from "../../lib/tax/place-of-supply";
@@ -44,44 +45,59 @@ export function FirmSettingsForm({ firm }: { firm: FirmSettings }) {
             <SelectItem value="SOLO" text="Solo practice" />
             <SelectItem value="PARTNERSHIP" text="Partnership" />
           </Select>
-          <TextInput id="architectName" name="architectName" labelText="Principal architect" defaultValue={firm.architect_name ?? ""} />
-          <TextInput id="coaRegNo" name="coaRegNo" labelText="COA registration no." defaultValue={firm.coa_reg_no ?? ""} />
-          <TextInput id="email" name="email" labelText="Email" type="email" defaultValue={firm.email ?? ""} />
-          <TextInput id="phone" name="phone" labelText="Phone" defaultValue={firm.phone ?? ""} />
+        </FormGrid>
+
+        <InlineNotification
+          kind="info"
+          lowContrast
+          hideCloseButton
+          title="GST, COA, tax, and address now live in the AORMS Identity portal"
+          subtitle="The fields below are a read-only copy (invoices and PDFs still read them from here). Edit them at the company's profile in the Identity portal instead."
+        />
+        <p className="cds--type-body-01">
+          <NextLink href="/identity">Manage GST, tax, COA, board, and contacts in the AORMS Identity portal →</NextLink>
+        </p>
+
+        <FormGrid>
+          <TextInput id="architectName" name="architectName" labelText="Principal architect" defaultValue={firm.architect_name ?? ""} readOnly />
+          <TextInput id="coaRegNo" name="coaRegNo" labelText="COA registration no." defaultValue={firm.coa_reg_no ?? ""} readOnly />
+          <TextInput id="email" name="email" labelText="Email" type="email" defaultValue={firm.email ?? ""} readOnly />
+          <TextInput id="phone" name="phone" labelText="Phone" defaultValue={firm.phone ?? ""} readOnly />
         </FormGrid>
 
         <h3 className="cds--type-productive-heading-02">GST & Tax</h3>
         <FormGrid>
-          <Select id="gstType" name="gstType" labelText="GST system" defaultValue={firm.gst_type}>
+          <Select id="gstType" name="gstType" labelText="GST system" defaultValue={firm.gst_type} disabled>
             <SelectItem value="REGULAR" text="Regular" />
             <SelectItem value="COMPOSITION" text="Composition" />
             <SelectItem value="NOT_APPLICABLE" text="Not applicable" />
           </Select>
-          <TextInput id="gstin" name="gstin" labelText="GSTIN" defaultValue={firm.gstin ?? ""} />
-          <TextInput id="pan" name="pan" labelText="PAN" defaultValue={firm.pan ?? ""} />
+          <TextInput id="gstin" name="gstin" labelText="GSTIN" defaultValue={firm.gstin ?? ""} readOnly />
+          <TextInput id="pan" name="pan" labelText="PAN" defaultValue={firm.pan ?? ""} readOnly />
         </FormGrid>
         <Checkbox
           id="tdsApplicableDefault"
           name="tdsApplicableDefault"
           labelText="Deduct TDS (s.194J) by default"
           defaultChecked={firm.tds_applicable_default}
+          disabled
         />
 
         <h3 className="cds--type-productive-heading-02" style={{ marginTop: "0.5rem" }}>
           Address
         </h3>
         <FormGrid>
-          <TextInput id="addressLine1" name="addressLine1" labelText="Address line 1" defaultValue={firm.address_line1 ?? ""} />
-          <TextInput id="addressLine2" name="addressLine2" labelText="Address line 2" defaultValue={firm.address_line2 ?? ""} />
-          <TextInput id="city" name="city" labelText="City" defaultValue={firm.city ?? ""} />
-          <TextInput id="district" name="district" labelText="District" defaultValue={firm.district ?? ""} />
-          <Select id="state" name="state" labelText="State" defaultValue={firm.state ?? ""}>
+          <TextInput id="addressLine1" name="addressLine1" labelText="Address line 1" defaultValue={firm.address_line1 ?? ""} readOnly />
+          <TextInput id="addressLine2" name="addressLine2" labelText="Address line 2" defaultValue={firm.address_line2 ?? ""} readOnly />
+          <TextInput id="city" name="city" labelText="City" defaultValue={firm.city ?? ""} readOnly />
+          <TextInput id="district" name="district" labelText="District" defaultValue={firm.district ?? ""} readOnly />
+          <Select id="state" name="state" labelText="State" defaultValue={firm.state ?? ""} disabled>
             <SelectItem value="" text="— Select a state —" />
             {STATE_NAMES.map((s) => (
               <SelectItem key={s} value={s} text={s} />
             ))}
           </Select>
-          <TextInput id="pincode" name="pincode" labelText="PIN code" defaultValue={firm.pincode ?? ""} />
+          <TextInput id="pincode" name="pincode" labelText="PIN code" defaultValue={firm.pincode ?? ""} readOnly />
         </FormGrid>
 
         <Button type="submit" disabled={pending}>

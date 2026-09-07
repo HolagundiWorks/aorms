@@ -6,11 +6,23 @@ import { createClient } from "../supabase/server";
 /**
  * Firm settings — a Postgres singleton row (migration 0024 seeded it; the
  * table's own RLS only allows UPDATE, never INSERT, matching the "exactly
- * one row, always exists" design). Surfaced as a real gap while wiring the
- * invoice tax engine: every firm-level default (GST system, state, GSTIN,
- * TDS default) was silently falling back to code defaults with nothing to
- * actually read. Gated to OWNER/PARTNER at the RLS layer already — this
- * action doesn't re-check the role, same as every other domain here.
+ * one row, always exists" design). Gated to OWNER/PARTNER at the RLS layer
+ * already — this action doesn't re-check the role, same as every other
+ * domain here.
+ *
+ * GST/PAN/COA/architect/address/TDS fields moved to the AORMS Identity
+ * portal's company profile (platform/supabase/migrations/
+ * 0003_company_profile.sql) — see the AORMS Identity/Licence portal split
+ * plan. This action now only ever writes company_name/firm_type; those
+ * columns still exist on `firm` (invoices/PDF generation still read them
+ * directly — web/lib/actions/invoices.ts, web/lib/jobs/firm.ts) but are no
+ * longer editable from here, only mirrored read-only
+ * (FirmSettingsForm.tsx). Deliberately not accepting those fields from
+ * `formData` at all any more, rather than relying on the form's
+ * readOnly/disabled inputs to keep them unchanged — a disabled `<Select>`/
+ * `<Checkbox>` doesn't submit a value at all, which would have silently
+ * reset gstType/tdsApplicableDefault to their form defaults on every save
+ * had this action still tried to read them.
  */
 
 export type FirmSettingsActionState = { error: string } | null;
@@ -21,20 +33,6 @@ export async function updateFirmSettings(
 ): Promise<FirmSettingsActionState> {
   const companyName = String(formData.get("companyName") ?? "").trim();
   const firmType = String(formData.get("firmType") ?? "SOLO");
-  const gstType = String(formData.get("gstType") ?? "REGULAR");
-  const gstin = String(formData.get("gstin") ?? "").trim() || null;
-  const pan = String(formData.get("pan") ?? "").trim() || null;
-  const architectName = String(formData.get("architectName") ?? "").trim() || null;
-  const coaRegNo = String(formData.get("coaRegNo") ?? "").trim() || null;
-  const email = String(formData.get("email") ?? "").trim() || null;
-  const phone = String(formData.get("phone") ?? "").trim() || null;
-  const addressLine1 = String(formData.get("addressLine1") ?? "").trim() || null;
-  const addressLine2 = String(formData.get("addressLine2") ?? "").trim() || null;
-  const city = String(formData.get("city") ?? "").trim() || null;
-  const district = String(formData.get("district") ?? "").trim() || null;
-  const state = String(formData.get("state") ?? "").trim() || null;
-  const pincode = String(formData.get("pincode") ?? "").trim() || null;
-  const tdsApplicableDefault = formData.get("tdsApplicableDefault") === "on";
 
   if (!companyName) return { error: "Company name is required." };
 
@@ -49,20 +47,6 @@ export async function updateFirmSettings(
     .update({
       company_name: companyName,
       firm_type: firmType,
-      gst_type: gstType,
-      gstin,
-      pan,
-      architect_name: architectName,
-      coa_reg_no: coaRegNo,
-      email,
-      phone,
-      address_line1: addressLine1,
-      address_line2: addressLine2,
-      city,
-      district,
-      state,
-      pincode,
-      tds_applicable_default: tdsApplicableDefault,
       updated_at: new Date().toISOString(),
     })
     .eq("id", firm.id);
@@ -73,7 +57,7 @@ export async function updateFirmSettings(
     p_entity_id: firm.id,
     p_action: "UPDATE",
     p_before: null,
-    p_after: { companyName, gstType, state },
+    p_after: { companyName, firmType },
   });
 
   revalidatePath("/firm-settings");
