@@ -3,6 +3,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../../lib/supabase/server";
 import { NewTakeoffItemForms } from "../../../../components/aorms/NewTakeoffItemForms";
 import { DeleteTakeoffItemButton } from "../../../../components/aorms/DeleteTakeoffItemButton";
+import { SendTakeoffToEstimateButton } from "../../../../components/aorms/SendTakeoffToEstimateButton";
 import {
   computeMasonry,
   computePlaster,
@@ -66,13 +67,14 @@ export default async function TakeoffProjectPage({
   const { projectId } = await params;
   const supabase = await createClient();
 
-  const [{ data: project, error: projError }, { data: rows, error: itemsError }] = await Promise.all([
+  const [{ data: project, error: projError }, { data: rows, error: itemsError }, { data: estimates }] = await Promise.all([
     supabase.from("project_offices").select("id, title, ref").eq("id", projectId).maybeSingle(),
     supabase
       .from("takeoff_items")
       .select("id, category, mark, wall_mark, fields, notes")
       .eq("project_id", projectId)
       .order("mark"),
+    supabase.from("estimates").select("id, ref, title").eq("project_id", projectId).order("created_at", { ascending: false }),
   ]);
 
   if (projError) {
@@ -321,6 +323,7 @@ export default async function TakeoffProjectPage({
                   <TableHeader>Bricks / blocks</TableHeader>
                   <TableHeader>Cement / sand / agg</TableHeader>
                   <TableHeader>Note</TableHeader>
+                  <TableHeader>Send to Estimate</TableHeader>
                   <TableHeader />
                 </TableRow>
               </TableHead>
@@ -350,13 +353,16 @@ export default async function TakeoffProjectPage({
                     </TableCell>
                     <TableCell>{result?.note ?? "—"}</TableCell>
                     <TableCell>
+                      <SendTakeoffToEstimateButton takeoffItemId={row.id} projectId={project.id} estimates={estimates ?? []} />
+                    </TableCell>
+                    <TableCell>
                       <DeleteTakeoffItemButton itemId={row.id} projectId={project.id} />
                     </TableCell>
                   </TableRow>
                 ))}
                 {masonryRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={9}>
+                    <TableCell colSpan={10}>
                       <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                         No masonry walls yet.
                       </p>
@@ -378,6 +384,7 @@ export default async function TakeoffProjectPage({
                   <TableHeader>Net area (m²)</TableHeader>
                   <TableHeader>Cement / sand / agg</TableHeader>
                   <TableHeader>Note</TableHeader>
+                  <TableHeader>Send to Estimate</TableHeader>
                   <TableHeader />
                 </TableRow>
               </TableHead>
@@ -395,13 +402,16 @@ export default async function TakeoffProjectPage({
                     </TableCell>
                     <TableCell>{result?.note ?? "—"}</TableCell>
                     <TableCell>
+                      <SendTakeoffToEstimateButton takeoffItemId={row.id} projectId={project.id} estimates={estimates ?? []} />
+                    </TableCell>
+                    <TableCell>
                       <DeleteTakeoffItemButton itemId={row.id} projectId={project.id} />
                     </TableCell>
                   </TableRow>
                 ))}
                 {plasterRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7}>
+                    <TableCell colSpan={8}>
                       <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                         No plaster items yet.
                       </p>
@@ -423,6 +433,7 @@ export default async function TakeoffProjectPage({
                   <TableHeader>Net area (m²)</TableHeader>
                   <TableHeader>Type / coats</TableHeader>
                   <TableHeader>Note</TableHeader>
+                  <TableHeader>Send to Estimate</TableHeader>
                   <TableHeader />
                 </TableRow>
               </TableHead>
@@ -436,13 +447,16 @@ export default async function TakeoffProjectPage({
                     <TableCell>{fields ? `${fields.paintType} · ${fields.coats} coats` : "—"}</TableCell>
                     <TableCell>{result?.note ?? "—"}</TableCell>
                     <TableCell>
+                      <SendTakeoffToEstimateButton takeoffItemId={row.id} projectId={project.id} estimates={estimates ?? []} />
+                    </TableCell>
+                    <TableCell>
                       <DeleteTakeoffItemButton itemId={row.id} projectId={project.id} />
                     </TableCell>
                   </TableRow>
                 ))}
                 {paintingRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7}>
+                    <TableCell colSpan={8}>
                       <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                         No painting items yet.
                       </p>
@@ -465,6 +479,7 @@ export default async function TakeoffProjectPage({
                   <TableHeader>Nos</TableHeader>
                   <TableHeader>Area (m²)</TableHeader>
                   <TableHeader>Deducts?</TableHeader>
+                  <TableHeader>Send to Estimate</TableHeader>
                   <TableHeader />
                 </TableRow>
               </TableHead>
@@ -480,6 +495,9 @@ export default async function TakeoffProjectPage({
                       <TableCell>{areaM2 !== undefined ? fmt(areaM2) : (error ?? "—")}</TableCell>
                       <TableCell>{fields?.deductFromWall ? "Yes" : "No"}</TableCell>
                       <TableCell>
+                        <SendTakeoffToEstimateButton takeoffItemId={row.id} projectId={project.id} estimates={estimates ?? []} />
+                      </TableCell>
+                      <TableCell>
                         <DeleteTakeoffItemButton itemId={row.id} projectId={project.id} />
                       </TableCell>
                     </TableRow>
@@ -487,7 +505,7 @@ export default async function TakeoffProjectPage({
                 )}
                 {doorRows.length === 0 && windowRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8}>
+                    <TableCell colSpan={9}>
                       <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                         No doors or windows yet.
                       </p>
@@ -516,6 +534,7 @@ export default async function TakeoffProjectPage({
                   <TableHeader>Qty</TableHeader>
                   <TableHeader>Materials</TableHeader>
                   <TableHeader>Note</TableHeader>
+                  <TableHeader>Send to Estimate</TableHeader>
                   <TableHeader />
                 </TableRow>
               </TableHead>
@@ -531,13 +550,16 @@ export default async function TakeoffProjectPage({
                     <TableCell>{o.materials}</TableCell>
                     <TableCell>{o.note}</TableCell>
                     <TableCell>
+                      <SendTakeoffToEstimateButton takeoffItemId={o.id} projectId={project.id} estimates={estimates ?? []} />
+                    </TableCell>
+                    <TableCell>
                       <DeleteTakeoffItemButton itemId={o.id} projectId={project.id} />
                     </TableCell>
                   </TableRow>
                 ))}
                 {otherRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={9}>
+                    <TableCell colSpan={10}>
                       <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                         No other measured items yet.
                       </p>
@@ -568,8 +590,9 @@ export default async function TakeoffProjectPage({
                 <span className="cds--type-body-01">{fmt(totalAggregateM3)}</span>
               </div>
               <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)", marginTop: "0.5rem" }}>
-                Quantity take-off only — no rates. Copy a computed quantity into an Estimate item
-                manually; this doesn&apos;t write to Estimates yet.
+                Quantity take-off only — no rates. Use &quot;Send to Estimate&quot; on any row above
+                to create a priced-at-₹0 line on an existing estimate; price it there afterward,
+                same as any other line.
               </p>
             </Tile>
           </>

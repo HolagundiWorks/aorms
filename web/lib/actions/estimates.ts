@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { computeTakeoffQuantity, type StoredTakeoffItem } from "../takeoff/formulas";
 
 export type EstimateActionState = { error: string } | null;
 
@@ -81,6 +83,55 @@ export async function createEstimateRecord(
 
 export type EstimateItemActionState = { error: string } | null;
 
+/**
+ * Shared insert core for estimate_items — used by both the plain "New
+ * item" form (createEstimateItemRecord) and sendTakeoffItemToEstimate
+ * below, so the two entry points don't duplicate the audit/error/
+ * revalidate logic.
+ */
+async function insertEstimateItem(
+  supabase: SupabaseClient,
+  input: {
+    estimateId: string;
+    rateBookItemId: string | null;
+    description: string;
+    unit: string;
+    quantity: number;
+    ratePaise: number;
+    linkedItemId?: string | null;
+  },
+): Promise<{ error: string } | null> {
+  const { data: inserted, error } = await supabase
+    .from("estimate_items")
+    .insert({
+      estimate_id: input.estimateId,
+      rate_book_item_id: input.rateBookItemId,
+      description: input.description,
+      unit: input.unit,
+      quantity: input.quantity,
+      rate_paise: input.ratePaise,
+      linked_item_id: input.linkedItemId ?? null,
+    })
+    .select("id")
+    .single();
+
+  // The estimate-editable-lock trigger (assert_estimate_editable) surfaces as
+  // a Postgres exception here if the parent estimate is APPROVED/CANCELLED —
+  // its message is already user-facing ("This estimate is approved...").
+  if (error) return { error: error.message };
+
+  await supabase.rpc("write_audit", {
+    p_entity: "estimate_item",
+    p_entity_id: inserted.id,
+    p_action: "CREATE",
+    p_before: null,
+    p_after: input,
+  });
+
+  revalidatePath(`/estimates/${input.estimateId}`);
+  return null;
+}
+
 export async function createEstimateItemRecord(
   _prev: EstimateItemActionState,
   formData: FormData,
@@ -103,33 +154,58 @@ export async function createEstimateItemRecord(
   }
 
   const supabase = await createClient();
+  return insertEstimateItem(supabase, { estimateId, rateBookItemId, description, unit, quantity, ratePaise });
+}
 
-  const { data: inserted, error } = await supabase
-    .from("estimate_items")
-    .insert({
-      estimate_id: estimateId,
-      rate_book_item_id: rateBookItemId,
-      description,
-      unit,
-      quantity,
-      rate_paise: ratePaise,
-    })
-    .select("id")
-    .single();
+export type SendTakeoffActionState = { error: string } | null;
 
-  // The estimate-editable-lock trigger (assert_estimate_editable) surfaces as
-  // a Postgres exception here if the parent estimate is APPROVED/CANCELLED —
-  // its message is already user-facing ("This estimate is approved...").
-  if (error) return { error: error.message };
+/**
+ * "Send to Estimate" — turns one computed take-off row (masonry/plaster/
+ * .../plinth-protection) into a real estimate_item: same quantity/unit the
+ * take-off page shows, rate 0 (take-off is "quantity only, no rates" — the
+ * user prices it afterward on the Estimate itself, same as picking any
+ * other rate-book item), and linked_item_id set to the take-off row's own
+ * id (that column's own comment already calls this out as "provenance
+ * only... e.g. plastering -> brickwork" — this is the same kind of link,
+ * just take-off -> estimate instead of item -> item).
+ */
+export async function sendTakeoffItemToEstimate(
+  _prev: SendTakeoffActionState,
+  formData: FormData,
+): Promise<SendTakeoffActionState> {
+  const takeoffItemId = String(formData.get("takeoffItemId") ?? "").trim();
+  const estimateId = String(formData.get("estimateId") ?? "").trim();
+  const projectId = String(formData.get("projectId") ?? "").trim();
 
-  await supabase.rpc("write_audit", {
-    p_entity: "estimate_item",
-    p_entity_id: inserted.id,
-    p_action: "CREATE",
-    p_before: null,
-    p_after: { estimateId, rateBookItemId, description, unit, quantity, ratePaise },
+  if (!takeoffItemId) return { error: "Missing take-off item." };
+  if (!estimateId) return { error: "Pick an estimate first." };
+
+  const supabase = await createClient();
+
+  const { data: rows, error: fetchError } = await supabase
+    .from("takeoff_items")
+    .select("id, category, mark, wall_mark, fields")
+    .eq("project_id", projectId);
+  if (fetchError) return { error: fetchError.message };
+
+  const allRows = (rows ?? []) as StoredTakeoffItem[];
+  const row = allRows.find((r) => r.id === takeoffItemId);
+  if (!row) return { error: "That take-off item no longer exists." };
+
+  const computed = computeTakeoffQuantity(row, allRows);
+  if (!computed) return { error: "Couldn't compute a quantity for this item — its stored fields look invalid." };
+
+  const result = await insertEstimateItem(supabase, {
+    estimateId,
+    rateBookItemId: null,
+    description: computed.description,
+    unit: computed.unit,
+    quantity: computed.quantity,
+    ratePaise: 0,
+    linkedItemId: takeoffItemId,
   });
+  if (result) return result;
 
-  revalidatePath(`/estimates/${estimateId}`);
+  revalidatePath(`/takeoff/${projectId}`);
   return null;
 }

@@ -586,3 +586,142 @@ export function computeFlooring(input: FlooringFields, openings: LinkedOpening[]
   const { netM2, note } = deductFaceArea(input.lengthMm, input.breadthMm, openings, input.deductRule, false, 0);
   return { areaM2: round3(netM2), note };
 }
+
+// ── Shared dispatcher — turns one stored takeoff_items row into a single
+// {description, unit, quantity}, for "send to Estimate" (web/lib/actions/
+// estimates.ts's sendTakeoffItemToEstimate). Kept separate from the
+// richer per-category rendering in app/(app)/takeoff/[projectId]/page.tsx
+// (which shows dims/materials/notes columns, not just one quantity) —
+// this dispatcher only needs to answer "what row would this become in an
+// Estimate", so it doesn't replace that page's existing, already-verified
+// table logic. ──
+
+export type StoredTakeoffItem = {
+  id: string;
+  category: string;
+  mark: string;
+  wall_mark: string | null;
+  fields: unknown;
+};
+
+/** Doors/windows on the same project sharing a wall_mark (case-insensitive), as the LinkedOpening shape deductFaceArea() expects. */
+export function linkedOpeningsFromRows(rows: StoredTakeoffItem[], wallMark: string | null): LinkedOpening[] {
+  if (!wallMark) return [];
+  return rows
+    .filter((o) => (o.category === "DOOR" || o.category === "WINDOW") && (o.wall_mark ?? "").toLowerCase() === wallMark.toLowerCase())
+    .map((o) => {
+      const f = OpeningFields.safeParse(o.fields);
+      return f.success ? { widthMm: f.data.widthMm, heightMm: f.data.heightMm, nos: f.data.nos, deductFromWall: f.data.deductFromWall } : null;
+    })
+    .filter((x): x is LinkedOpening => x !== null);
+}
+
+export type TakeoffQuantity = { description: string; unit: string; quantity: number };
+
+/** One row's {description, unit, quantity} — the only three fields an
+ * estimate_item actually needs. Returns null when the stored fields don't
+ * parse (shouldn't happen for a row this app itself wrote, but a stored
+ * jsonb blob is never fully trusted). */
+export function computeTakeoffQuantity(row: StoredTakeoffItem, allRows: StoredTakeoffItem[]): TakeoffQuantity | null {
+  switch (row.category) {
+    case "MASONRY": {
+      const f = MasonryFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computeMasonry(f.data, linkedOpeningsFromRows(allRows, row.mark));
+      return { description: `Masonry wall ${row.mark} — ${f.data.thicknessMm} mm (${f.data.unitType})`, unit: r.unit, quantity: r.qty };
+    }
+    case "PLASTER": {
+      const f = PlasterFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computePlaster(f.data, linkedOpeningsFromRows(allRows, row.wall_mark));
+      return { description: `Plaster ${row.mark} — ${f.data.thicknessMm} mm, CM ${f.data.mortarMix}`, unit: "m²", quantity: r.areaM2 };
+    }
+    case "PAINTING": {
+      const f = PaintingFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computePainting(f.data, linkedOpeningsFromRows(allRows, row.wall_mark));
+      return { description: `Painting ${row.mark} — ${f.data.paintType}, ${f.data.coats} coats`, unit: "m²", quantity: r.areaM2 };
+    }
+    case "DOOR":
+    case "WINDOW": {
+      const f = OpeningFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const label = row.category === "DOOR" ? "Door" : "Window";
+      return { description: `${label} ${row.mark} — ${f.data.widthMm}×${f.data.heightMm} mm × ${f.data.nos} nos`, unit: "m²", quantity: computeOpeningAreaM2(f.data) };
+    }
+    case "FLOORING": {
+      const f = FlooringFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computeFlooring(f.data, linkedOpeningsFromRows(allRows, row.wall_mark));
+      return { description: `Flooring ${row.mark} — ${f.data.finishType}`, unit: "m²", quantity: r.areaM2 };
+    }
+    case "PCC": {
+      const f = PccFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computePcc(f.data);
+      return { description: `PCC ${row.mark} — ${f.data.mix}`, unit: r.unit, quantity: r.qty };
+    }
+    case "EARTHWORK": {
+      const f = EarthworkFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computeEarthwork(f.data);
+      return { description: `Earthwork ${row.mark} — ${f.data.workType}`, unit: r.unit, quantity: r.qty };
+    }
+    case "SSM": {
+      const f = SsmFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computeSsm(f.data);
+      return { description: `Size-stone masonry ${row.mark} — CM ${f.data.mortarMix}`, unit: r.unit, quantity: r.qty };
+    }
+    case "WATERPROOFING": {
+      const f = WaterproofingFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computeWaterproofing(f.data);
+      return { description: `Waterproofing ${row.mark} — ${f.data.workMode}`, unit: r.unit, quantity: r.qty };
+    }
+    case "DPC": {
+      const f = DpcFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computeDpc(f.data);
+      return { description: `DPC ${row.mark} — ${f.data.mortarMix}`, unit: r.unit, quantity: r.qty };
+    }
+    case "COPING": {
+      const f = CopingFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computeCoping(f.data);
+      return { description: `Coping ${row.mark} — ${f.data.concreteGrade}`, unit: r.unit, quantity: r.qty };
+    }
+    case "SCREED": {
+      const f = ScreedFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computeScreed(f.data);
+      return { description: `Screed ${row.mark} — ${f.data.mix}`, unit: r.unit, quantity: r.qty };
+    }
+    case "VDF": {
+      const f = VdfFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computeVdf(f.data);
+      return { description: `VDF ${row.mark} — ${f.data.concreteGrade}`, unit: r.unit, quantity: r.qty };
+    }
+    case "SKIRTING": {
+      const f = SkirtingFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computeSkirting(f.data);
+      return { description: `Skirting ${row.mark} — ${f.data.finishType}`, unit: r.unit, quantity: r.qty };
+    }
+    case "PARAPET": {
+      const f = ParapetFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computeParapet(f.data);
+      return { description: `Parapet ${row.mark} — ${f.data.thicknessMm} mm (${f.data.unitType})`, unit: r.unit, quantity: r.qty };
+    }
+    case "PLINTH_PROTECTION": {
+      const f = PlinthProtectionFields.safeParse(row.fields);
+      if (!f.success) return null;
+      const r = computePlinthProtection(f.data);
+      return { description: `Plinth protection ${row.mark} — ${f.data.finishType}`, unit: r.unit, quantity: r.qty };
+    }
+    default:
+      return null;
+  }
+}
