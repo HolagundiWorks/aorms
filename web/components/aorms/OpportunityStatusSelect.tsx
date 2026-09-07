@@ -12,7 +12,7 @@ export function OpportunityStatusSelect({ projectId, opportunityId, status }: { 
   return (
     <Select
       id={`opportunity-status-${opportunityId}`}
-      labelText=""
+      labelText="Opportunity status"
       hideLabel
       size="sm"
       value={status}

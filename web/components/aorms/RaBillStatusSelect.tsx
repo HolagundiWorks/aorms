@@ -14,7 +14,7 @@ export function RaBillStatusSelect({ billId, status }: { billId: string; status:
     <div>
       <Select
         id={`ra-bill-status-${billId}`}
-        labelText=""
+        labelText="RA bill status"
         hideLabel
         size="sm"
         value={status}

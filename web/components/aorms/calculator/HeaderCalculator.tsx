@@ -55,7 +55,7 @@ export function HeaderCalculator() {
             <Toggle
               id="calc-output-unit"
               size="sm"
-              labelText=""
+              labelText="Output unit — metric or imperial"
               labelA="m"
               labelB="ft·in"
               toggled={outputUnit === "imperial"}

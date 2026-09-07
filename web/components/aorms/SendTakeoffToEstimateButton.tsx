@@ -36,7 +36,7 @@ export function SendTakeoffToEstimateButton({
     <form action={formAction} style={{ display: "flex", alignItems: "flex-end", gap: "0.25rem" }}>
       <input type="hidden" name="takeoffItemId" value={takeoffItemId} />
       <input type="hidden" name="projectId" value={projectId} />
-      <Select id={`send-${takeoffItemId}`} name="estimateId" labelText="" hideLabel size="sm" defaultValue="">
+      <Select id={`send-${takeoffItemId}`} name="estimateId" labelText="Send to estimate" hideLabel size="sm" defaultValue="">
         <SelectItem value="" text="Send to…" />
         {estimates.map((e) => (
           <SelectItem key={e.id} value={e.id} text={`${e.ref} — ${e.title}`} />

@@ -20,7 +20,7 @@ export function EngagementStatusSelect({
   return (
     <Select
       id={`engagement-status-${engagementId}`}
-      labelText=""
+      labelText="Engagement status"
       hideLabel
       size="sm"
       value={status}

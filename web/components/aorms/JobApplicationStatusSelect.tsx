@@ -12,7 +12,7 @@ export function JobApplicationStatusSelect({ applicationId, status }: { applicat
   return (
     <Select
       id={`job-app-status-${applicationId}`}
-      labelText=""
+      labelText="Application status"
       hideLabel
       size="sm"
       value={status}

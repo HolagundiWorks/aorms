@@ -12,7 +12,7 @@ export function RiskStatusSelect({ projectId, riskId, status }: { projectId: str
   return (
     <Select
       id={`risk-status-${riskId}`}
-      labelText=""
+      labelText="Risk status"
       hideLabel
       size="sm"
       value={status}

@@ -22,7 +22,7 @@ export function NegotiationOutcomeSelect({
     <div>
       <Select
         id={`negotiation-outcome-${negotiationId}`}
-        labelText=""
+        labelText="Negotiation outcome"
         hideLabel
         size="sm"
         value={outcome}

@@ -57,6 +57,36 @@ export function PomodoroRing() {
     pom.setDuration(pom.mode, minutes * 60);
   }
 
+  const currentMinutes = Math.round(shownSecs / 60);
+
+  /** Keyboard equivalent of dragging the knob — the pointer drag above has
+   * no keyboard analogue on its own, so a focused knob also responds to
+   * arrow keys. WCAG 2.1.1 (keyboard) — this custom widget is licensed to
+   * look non-Carbon, not to skip keyboard operability. */
+  function handleKnobKeyDown(e: React.KeyboardEvent) {
+    if (pom.running) return;
+    let next: number | null = null;
+    if (e.key === "ArrowUp" || e.key === "ArrowRight") next = Math.min(60, currentMinutes + 1);
+    else if (e.key === "ArrowDown" || e.key === "ArrowLeft") next = Math.max(1, currentMinutes - 1);
+    else if (e.key === "Home") next = 1;
+    else if (e.key === "End") next = 60;
+    if (next !== null) {
+      e.preventDefault();
+      pom.setDuration(pom.mode, next * 60);
+    }
+  }
+
+  /** Enter/Space activation for the SVG shapes standing in for buttons —
+   * they're real click handlers already, just also reachable by keyboard now. */
+  function activateOnKey(handler: () => void) {
+    return (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handler();
+      }
+    };
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", alignItems: "center" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
@@ -73,13 +103,19 @@ export function PomodoroRing() {
         <span className="cds--type-body-01">{POMODORO_MODE_LABEL[pom.mode]}</span>
       </div>
 
+      {/* Visually-hidden, not aria-live — the SVG's own big countdown digits
+          are aria-hidden (a screen reader announcing every second would be
+          unusable noise), so this is the equivalent text discoverable on
+          demand instead: present in the DOM, not forced on the user. */}
+      <span className="cds--visually-hidden">
+        {fmtPomTime(pom.timeLeft)} remaining, {pom.running ? "running" : "paused"}
+      </span>
+
       <svg
         ref={svgRef}
         viewBox="0 0 220 220"
         width="200"
         height="200"
-        role="img"
-        aria-label="Pomodoro dial"
         style={{ touchAction: "none" }}
         onPointerMove={(e) => {
           if (dragging && !pom.running) setFromPointer(e);
@@ -96,14 +132,22 @@ export function PomodoroRing() {
           fill={FOCUS}
           opacity={isBreak ? 0.06 : 0.16}
           style={{ cursor: "pointer" }}
+          role="button"
+          tabIndex={0}
+          aria-label={pom.running && !isBreak ? "Pause focus session" : "Start focus session"}
           onClick={() => (pom.running && !isBreak ? pom.toggle() : pom.start("work"))}
+          onKeyDown={activateOnKey(() => (pom.running && !isBreak ? pom.toggle() : pom.start("work")))}
         />
         <path
           d="M 24 110 A 86 86 0 0 0 196 110 Z"
           fill={BREAK}
           opacity={isBreak ? 0.16 : 0.06}
           style={{ cursor: "pointer" }}
+          role="button"
+          tabIndex={0}
+          aria-label={pom.running && isBreak ? "Pause break" : "Start break"}
           onClick={() => (pom.running && isBreak ? pom.toggle() : pom.start("short"))}
+          onKeyDown={activateOnKey(() => (pom.running && isBreak ? pom.toggle() : pom.start("short")))}
         />
 
         <circle cx={DIAL.cx} cy={DIAL.cy} r={DIAL.r} fill="none" stroke="var(--cds-layer-accent)" strokeWidth="10" />
@@ -115,7 +159,15 @@ export function PomodoroRing() {
           cy={hy}
           r="11"
           fill={color}
-          style={{ cursor: pom.running ? "not-allowed" : "grab" }}
+          style={{ cursor: pom.running ? "not-allowed" : "grab", outlineOffset: "3px" }}
+          role="slider"
+          tabIndex={pom.running ? -1 : 0}
+          aria-label="Session duration (minutes)"
+          aria-valuemin={1}
+          aria-valuemax={60}
+          aria-valuenow={currentMinutes}
+          aria-disabled={pom.running}
+          onKeyDown={handleKnobKeyDown}
           onPointerDown={(e) => {
             if (!pom.running) {
               (e.target as Element).setPointerCapture?.(e.pointerId);
@@ -125,7 +177,7 @@ export function PomodoroRing() {
         />
 
         <circle cx={DIAL.cx} cy={DIAL.cy} r="46" fill="var(--cds-layer)" stroke="var(--cds-border-subtle)" />
-        <text x={DIAL.cx} y={DIAL.cy - 4} textAnchor="middle" fontSize="26" fontWeight="600" fill="var(--cds-text-primary)">
+        <text x={DIAL.cx} y={DIAL.cy - 4} textAnchor="middle" fontSize="26" fontWeight="600" fill="var(--cds-text-primary)" aria-hidden>
           {fmtPomTime(pom.timeLeft)}
         </text>
         <text
@@ -135,7 +187,11 @@ export function PomodoroRing() {
           fontSize="13"
           fill={color}
           style={{ cursor: "pointer" }}
+          role="button"
+          tabIndex={0}
+          aria-label={pom.running ? "Pause" : "Start"}
           onClick={pom.toggle}
+          onKeyDown={activateOnKey(pom.toggle)}
         >
           {pom.running ? "❚❚ Pause" : "▶ Start"}
         </text>

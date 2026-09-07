@@ -14,7 +14,7 @@ export function SteelCertStatusSelect({ certId, status }: { certId: string; stat
     <div>
       <Select
         id={`steel-cert-status-${certId}`}
-        labelText=""
+        labelText="Steel certification status"
         hideLabel
         size="sm"
         value={status}

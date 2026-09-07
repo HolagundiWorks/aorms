@@ -12,7 +12,7 @@ export function MomActionStatusSelect({ actionId, momId, status }: { actionId: s
   return (
     <Select
       id={`mom-action-status-${actionId}`}
-      labelText=""
+      labelText="Action status"
       hideLabel
       size="sm"
       value={status}

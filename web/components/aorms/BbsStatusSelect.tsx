@@ -12,7 +12,7 @@ export function BbsStatusSelect({ bbsId, status }: { bbsId: string; status: stri
   return (
     <Select
       id={`bbs-status-${bbsId}`}
-      labelText=""
+      labelText="BBS status"
       hideLabel
       size="sm"
       value={status}

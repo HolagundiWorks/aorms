@@ -12,7 +12,7 @@ export function MilestoneStatusSelect({ milestoneId, status }: { milestoneId: st
   return (
     <Select
       id={`milestone-status-${milestoneId}`}
-      labelText=""
+      labelText="Milestone status"
       hideLabel
       size="sm"
       value={status}

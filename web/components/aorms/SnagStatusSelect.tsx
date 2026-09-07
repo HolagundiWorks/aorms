@@ -12,7 +12,7 @@ export function SnagStatusSelect({ snagId, status }: { snagId: string; status: s
   return (
     <Select
       id={`snag-status-${snagId}`}
-      labelText=""
+      labelText="Snag status"
       hideLabel
       size="sm"
       value={status}

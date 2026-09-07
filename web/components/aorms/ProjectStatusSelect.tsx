@@ -15,7 +15,7 @@ export function ProjectStatusSelect({ projectId, status }: { projectId: string; 
     <div>
       <Select
         id={`project-status-${projectId}`}
-        labelText=""
+        labelText="Project status"
         hideLabel
         size="sm"
         value={status}

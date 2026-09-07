@@ -14,7 +14,7 @@ export function RecordEngagementPaymentForm({ engagementId, consultantId }: { en
       <input type="hidden" name="engagementId" value={engagementId} />
       <input type="hidden" name="consultantId" value={consultantId} />
       <Stack gap={3} orientation="horizontal">
-        <TextInput id={`amount-${engagementId}`} name="amountPaise" labelText="" hideLabel size="sm" type="number" step="any" placeholder="Amount (₹)" />
+        <TextInput id={`amount-${engagementId}`} name="amountPaise" labelText="Amount" hideLabel size="sm" type="number" step="any" placeholder="Amount (₹)" />
         <Button type="submit" disabled={pending} size="sm" kind="tertiary">
           {pending ? "Recording…" : "Record payment"}
         </Button>

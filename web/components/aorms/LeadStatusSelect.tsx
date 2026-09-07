@@ -15,7 +15,7 @@ export function LeadStatusSelect({ leadId, status, disabled }: { leadId: string;
     <div>
       <Select
         id={`lead-status-${leadId}`}
-        labelText=""
+        labelText="Lead status"
         hideLabel
         size="sm"
         value={status}

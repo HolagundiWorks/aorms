@@ -119,6 +119,90 @@ is merged and verified — the `web/` package is new, additive code; nothing in
   worth a product decision rather than silently building a theme switcher
   unasked.
 
+**WCAG audit (2026-09-07), on explicit request:**
+- ✅ **Fixed — 20 form controls had no accessible name at all.** Grepped
+  every `hideLabel` usage (23 files) and found 20 paired it with
+  `labelText=""` — Carbon's `hideLabel` renders a real (CSS
+  `visually-hidden`, confirmed by reading `TextInput.js`) label element, so
+  this isn't "no label shown," it's "the hidden label itself says nothing"
+  — a genuine WCAG 1.3.1/4.1.2 failure (a screen reader tabbing to any of
+  these would announce e.g. "combobox" with zero indication of what it
+  controls). Mostly inline status-change `<Select>`s used in table cells
+  (`LeadStatusSelect`, `ProjectStatusSelect`, `RiskStatusSelect`, and 15
+  more of the same shape, one per domain), plus this session's own
+  `SendTakeoffToEstimateButton.tsx`. Fixed all 20 with real descriptive
+  `labelText` values (`"Lead status"`, `"RA bill status"`, etc.) — two
+  needed dynamic labels built from context already in scope rather than a
+  static string (`cpi/FieldControl.tsx`'s per-item rank select → `` `Rank —
+  ${item}` ``; `PhaseGateChecklist.tsx`'s decision select → `` `${GATE_LABELS[gateKey]} decision` ``).
+  Visual layout is unchanged (`hideLabel` stays on all 20) — this is purely
+  an accessible-name fix. Verified: `tsc --noEmit`/`eslint` clean on all 21
+  touched files (20 fixes + confirming zero `labelText=""` remain anywhere).
+- ✅ **Fixed — the Pomodoro dial (this session's one licensed custom-UI
+  exception) was keyboard-inoperable.** Its `<svg>` was marked `role="img"
+  aria-label="Pomodoro dial"` — a static-image role — despite containing 4
+  real interactive controls (start-focus, start-break, the drag-to-set-
+  duration knob, and the start/pause toggle text), none reachable by
+  keyboard and all invisible to a screen reader as anything but a picture.
+  The custom-UI license was for visual design, not an exemption from
+  keyboard operability (WCAG 2.1.1). Fixed: dropped the blanket image role;
+  gave each of the 3 click targets `role="button"` + `tabIndex={0}` +
+  a real `aria-label` + `onKeyDown` Enter/Space activation; gave the
+  duration knob `role="slider"` + `aria-valuemin/max/now` + arrow-key
+  increment/decrement (Home/End jump to 1/60) as the keyboard equivalent of
+  dragging it, guarded by the same `!pom.running` check the pointer-drag
+  already had. The big countdown digits inside the SVG are `aria-hidden`
+  (a screen reader announcing every second would be unusable noise) with a
+  `cds--visually-hidden` status line added alongside instead — present in
+  the DOM for on-demand reading, not `aria-live`, so it doesn't spam
+  updates. Verified live in the real browser: real `Tab` key presses moved
+  focus onto all 4 SVG controls in order (confirmed via
+  `document.activeElement`, not just DOM attribute presence); a
+  well-formed synthetic `KeyboardEvent('keydown', {key: 'Enter'})`
+  dispatched at the focus-session path correctly started the timer
+  (aria-label flipped `"Start focus session"` → `"Pause focus session"`);
+  a well-formed `{key: 'ArrowUp'}` event on the focused knob correctly
+  incremented `aria-valuenow` 25 → 26. (This session's own browser-
+  automation tool's synthetic "Up"/"Down" key dispatch doesn't populate
+  `event.key`/`event.code` at all in this sandboxed environment — confirmed
+  via a live listener showing every field empty — so the well-formed-event
+  dispatch above was used as the real test instead of trusting that tool's
+  raw key-press action for this one interaction; real hardware key presses
+  in a real browser populate `event.key` normally, this is a test-tooling
+  limitation, not an app bug.)
+- **Swept for the same class of bug elsewhere**: zero `<div>`/`<span>` with
+  a raw `onClick` anywhere else in `web/` — every other interactive
+  surface already goes through real Carbon `Button`/`Link`/form elements,
+  which are keyboard-accessible by construction. The Pomodoro dial was a
+  one-off (the one place custom SVG UI is licensed at all), not a pattern.
+- **Confirmed clean, no other findings**: all 7 `<img>` tags in `web/`
+  have real `alt="AORMS"` text (an earlier grep pass flagged JSX comments
+  mentioning `<img>`, not actual tags — re-checked precisely). Heading
+  hierarchy on the two pages checked (`/dashboard`, `/takeoff/[projectId]`)
+  is clean h1→h2→h3 with no skipped levels; a `<p className="cds--type-heading-04">`
+  that looked heading-like in a grep was confirmed to be a KPI tile's large
+  *value* text, correctly not marked as a document heading.
+
+**Padding audit (2026-09-07), on explicit request:** surveyed every inline
+`padding`/`margin` value across `app/` and `components/` (a few hundred
+occurrences) — all of them land on Carbon's own spacing scale (0.25rem/
+0.5rem/0.75rem/1rem/1.5rem/2rem/3rem — spacing-02 through spacing-09), no
+arbitrary off-scale values (no stray `17px`/`1.3rem` anything) found
+anywhere. Every page wraps its content in the same `padding: "2rem"` Grid
+pattern (121 occurrences) — checked live at 375px mobile width (now that
+the sidenav fix above makes that width usable at all) and confirmed this
+doesn't clip or overflow anything, just leaves somewhat less breathing
+room than a narrower mobile-specific padding would (~263px of the 327px
+post-sidenav content width is inside the 2rem gutters). **Flagged, not
+changed**: since this is an inline `style` prop repeated 121 times (not a
+shared component or CSS class), a responsive override would need either a
+mechanical edit across all 121 call sites or a `!important` CSS escape
+hatch — neither felt like a good trade for a cosmetic, non-blocking gain;
+noted here as a real but low-priority candidate for a future shared
+`<PageGrid>` wrapper component, not attempted in this pass. Also noted:
+Dashboard's 7 KPI tiles in a 2-column grid leave "Outstanding receivables"
+alone in its own row — cosmetic, not a bug, not changed.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

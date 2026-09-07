@@ -12,7 +12,7 @@ export function ApprovalStatusSelect({ approvalId, status }: { approvalId: strin
   return (
     <Select
       id={`approval-status-${approvalId}`}
-      labelText=""
+      labelText="Approval status"
       hideLabel
       size="sm"
       value={status}

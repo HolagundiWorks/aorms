@@ -12,7 +12,7 @@ export function LeaveStatusSelect({ memberId, leaveId, status }: { memberId: str
   return (
     <Select
       id={`leave-status-${leaveId}`}
-      labelText=""
+      labelText="Leave status"
       hideLabel
       size="sm"
       value={status}

@@ -14,7 +14,7 @@ export function UserRoleSelect({ userId, role }: { userId: string; role: string 
     <div>
       <Select
         id={`user-role-${userId}`}
-        labelText=""
+        labelText="User role"
         hideLabel
         size="sm"
         value={role}

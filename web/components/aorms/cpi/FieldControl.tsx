@@ -121,7 +121,7 @@ export function FieldControl({
                 <span className="cds--type-body-01">{item}</span>
                 <Select
                   id={`${idBase}-${item}`}
-                  labelText=""
+                  labelText={`Rank — ${item}`}
                   hideLabel
                   size="sm"
                   value={ranks[item] != null ? String(ranks[item]) : ""}

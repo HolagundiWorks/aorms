@@ -53,7 +53,7 @@ function GateCard({ projectId, gateKey, row }: { projectId: string; gateKey: str
         <p className="cds--type-heading-03">{GATE_LABELS[gateKey]}</p>
         <Select
           id={`gate-decision-${gateKey}`}
-          labelText=""
+          labelText={`${GATE_LABELS[gateKey]} decision`}
           hideLabel
           size="sm"
           value={decision}
