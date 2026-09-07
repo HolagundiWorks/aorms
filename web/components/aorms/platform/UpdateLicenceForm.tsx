@@ -16,12 +16,12 @@ type Licence = { plan: string; seats: number; expires_at: string | null };
  * value from the page's first load, because the already-mounted <select>
  * never picked up the new defaultValue on re-render.
  */
-export function UpdateLicenceForm({ companyId, licence }: { companyId: string; licence: Licence }) {
+export function UpdateLicenceForm({ studioId, licence }: { studioId: string; licence: Licence }) {
   const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(updateLicence, null);
 
   return (
     <Form action={formAction}>
-      <input type="hidden" name="companyId" value={companyId} />
+      <input type="hidden" name="studioId" value={studioId} />
       <Stack gap={4}>
         <FormGrid>
           <Select id="licence-plan" name="plan" labelText="Plan" defaultValue={licence.plan}>

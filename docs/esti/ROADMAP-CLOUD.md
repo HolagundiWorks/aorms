@@ -658,6 +658,69 @@ the same scrutiny — ask specifically which *columns* a bare `using`
 clause actually leaves unconstrained, not just whether the row is
 reachable.
 
+**Studio/Company split — Phase A, the rename (2026-09-07).** On explicit
+request: architecture-firm entities become "Studio" everywhere (schema,
+routes, code identifiers, not just UI copy), freeing "Company" for a
+genuinely new entity — material supplier businesses with their own
+Material Catalogue (Phases B/C of the same plan, not yet built).
+
+`platform/supabase/migrations/0006_rename_companies_to_studios.sql`:
+`companies`→`studios`, `memberships`→`studio_memberships`,
+`company_board_members`→`studio_board_members`, `company_contacts`→
+`studio_contacts`; every `company_id` column (including on `licences`)
+→`studio_id`; `is_company_owner()`→`is_studio_owner()`,
+`handle_new_company()`→`handle_new_studio()`, and so on for every
+trigger function; the Studio public-ID prefix changes from `AORMS-C-`
+to **`AORMS-S-`**. RLS policy names renamed for clarity too (their
+USING/WITH CHECK expressions didn't need touching — see below).
+
+**A real Postgres internals lesson, caught by testing the migration
+before it ever shipped, not assumed:** table/column renames are
+transparently safe for RLS policies, views, and check constraints —
+confirmed live, these are stored as compiled expression trees bound by
+attnum/OID, so `pg_get_expr()` reflects the new names automatically and
+nothing needs rewriting. **Function bodies are not** — `pg_proc.prosrc`
+is stored as literal text for every PL, `language sql` included
+(dependency tracking there only blocks a `DROP` without `CASCADE`, it
+doesn't rewrite the stored text). A bare `ALTER FUNCTION is_company_owner
+RENAME TO is_studio_owner` left the function's *body* still calling
+`public.memberships`, which broke at the very next invocation (`relation
+"public.memberships" does not exist`) — caught immediately by running
+the migration against a real reset before considering it done, fixed by
+pairing the rename with a `CREATE OR REPLACE` correcting the body (kept
+the original parameter name — `CREATE OR REPLACE` can't rename a
+parameter, only `DROP`+`CREATE` could, which would've required dropping
+every policy that already calls the function by OID first; purely
+cosmetic either way).
+
+`web/` side: `app/(platform)/companies/[companyId]/` →
+`app/(platform)/studios/[studioId]/`; every Studio-side Server Action in
+`web/lib/actions/platform.ts` renamed for clarity and to avoid colliding
+with the real Company actions Phase B will add next to them in the same
+file (`createCompany`→`createStudio`, `joinCompany`→`joinStudio`,
+`inviteMember`→`inviteStudioMember`, `updateMembershipRole`→
+`updateStudioMembershipRole`, `leaveCompany`→`leaveStudio`,
+`updateCompanyProfile`→`updateStudioProfile`, board/contact CRUD
+similarly); `CreateCompanyForm.tsx`/`JoinCompanyForm.tsx`/
+`CompanyProfileForm.tsx`/`LeaveCompanyButton.tsx` renamed to their Studio
+equivalents; every `companyId` prop across the shared row/form components
+(`BoardMemberRow.tsx`, `ContactRow.tsx`, `AddBoardMemberForm.tsx`,
+`RemoveBoardMemberButton.tsx`, `AddContactForm.tsx`,
+`RemoveContactButton.tsx`, `UpdateLicenceForm.tsx`, `InviteMemberForm.tsx`,
+`MembershipRoleSelect.tsx`) renamed to `studioId`. `identity/page.tsx`'s
+"Companies" section → "Studios" (leaving the natural spot for a
+"Companies" section to land alongside it once Phase B ships).
+
+Verified live: full signup → link → create-studio → studio-detail-page →
+licence-page round trip through the real browser, confirming the
+`AORMS-S-` handle prefix, the renamed route, and every renamed section
+label render correctly. Directly re-ran this session's earlier
+privilege-escalation exploit checks (`8a5b07bc`) against the renamed
+`studio_memberships` table — still correctly blocked. `tsc --noEmit`/
+`eslint` clean across the whole `web/` tree. All six platform migrations
+(`0001`–`0006`) apply cleanly from a fresh `db reset`. Both databases
+reset to a clean slate afterward.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

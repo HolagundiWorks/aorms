@@ -5,8 +5,8 @@ import { createClient as createWebClient } from "../../../../lib/supabase/server
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { InviteMemberForm } from "../../../../components/aorms/platform/InviteMemberForm";
 import { MembershipRoleSelect } from "../../../../components/aorms/platform/MembershipRoleSelect";
-import { LeaveCompanyButton } from "../../../../components/aorms/platform/LeaveCompanyButton";
-import { CompanyProfileForm } from "../../../../components/aorms/platform/CompanyProfileForm";
+import { LeaveStudioButton } from "../../../../components/aorms/platform/LeaveStudioButton";
+import { StudioProfileForm } from "../../../../components/aorms/platform/StudioProfileForm";
 import { AddBoardMemberForm } from "../../../../components/aorms/platform/AddBoardMemberForm";
 import { BoardMemberRow } from "../../../../components/aorms/platform/BoardMemberRow";
 import { AddContactForm } from "../../../../components/aorms/platform/AddContactForm";
@@ -15,23 +15,24 @@ import { ContactRow } from "../../../../components/aorms/platform/ContactRow";
 type AccountEmbed = { id: string; full_name: string; public_id: string } | null;
 
 /**
- * Company profile — reads via the platform's service-role client, scoped
- * by the current web/ user's own already-verified linked handle (same
- * justification as identity/page.tsx). OWNER-only invite/role-change/
- * remove controls only render for the caller's own ACTIVE OWNER
- * membership — the real gate is still the platform's RLS on the
- * underlying mutations, this is just what decides what to show.
+ * Studio profile (an architecture firm — was called "Company" until the
+ * 2026-09-07 rename freed that name for material-supplier businesses, see
+ * the Studio/Company split + Material Catalogue plan) — reads via the
+ * platform's service-role client, scoped by the current web/ user's own
+ * already-verified linked handle (same justification as identity/page.tsx).
+ * OWNER-only invite/role-change/remove controls only render for the
+ * caller's own ACTIVE OWNER membership — the real gate is still the
+ * platform's RLS on the underlying mutations, this is just what decides
+ * what to show.
  *
  * Lives under the (platform) route group — see identity/page.tsx's header
- * comment (moved here from (app)/companies/[companyId]/ on explicit
- * request, per the AORMS Identity/Licence portal split plan). Now also
- * carries the company's regulatory/contact profile (COA/GST/tax/address,
- * board of directors, "who's who") — this is the data the Office Hub's
- * own Firm Settings page used to be the only place to edit; it's now a
- * read-only mirror pointing here.
+ * comment. Carries the studio's regulatory/contact profile (COA/GST/tax/
+ * address, board of directors, "who's who") — this is the data the Office
+ * Hub's own Firm Settings page used to be the only place to edit; it's now
+ * a read-only mirror pointing here.
  */
-export default async function CompanyDetailPage({ params }: { params: Promise<{ companyId: string }> }) {
-  const { companyId } = await params;
+export default async function StudioDetailPage({ params }: { params: Promise<{ studioId: string }> }) {
+  const { studioId } = await params;
 
   const webSupabase = await createWebClient();
   const {
@@ -46,32 +47,32 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
 
   const platformService = createPlatformServiceRoleClient();
 
-  const { data: company, error: companyError } = await platformService
-    .from("companies")
+  const { data: studio, error: studioError } = await platformService
+    .from("studios")
     .select(
       "id, name, public_id, coa_registration_no, gstin, pan, gst_type, tds_applicable_default, address_line1, address_line2, city, district, state, pincode, email, phone",
     )
-    .eq("id", companyId)
+    .eq("id", studioId)
     .maybeSingle();
-  if (companyError) throw new Error(companyError.message);
-  if (!company) notFound();
+  if (studioError) throw new Error(studioError.message);
+  if (!studio) notFound();
 
   const [{ data: memberships }, { data: boardMembers }, { data: contacts }] = await Promise.all([
     platformService
-      .from("memberships")
+      .from("studio_memberships")
       .select("id, account_id, role, status, accounts(full_name, public_id)")
-      .eq("company_id", companyId)
+      .eq("studio_id", studioId)
       .neq("status", "LEFT")
       .order("created_at", { ascending: true }),
     platformService
-      .from("company_board_members")
+      .from("studio_board_members")
       .select("id, full_name, din, designation, appointed_at")
-      .eq("company_id", companyId)
+      .eq("studio_id", studioId)
       .order("created_at", { ascending: true }),
     platformService
-      .from("company_contacts")
+      .from("studio_contacts")
       .select("id, full_name, role_title, email, phone, is_primary")
-      .eq("company_id", companyId)
+      .eq("studio_id", studioId)
       .order("created_at", { ascending: true }),
   ]);
 
@@ -93,9 +94,9 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
     <Grid>
       <Column sm={4} md={8} lg={12}>
         <Stack gap={2} orientation="horizontal">
-          <h1 className="cds--type-heading-05">{company.name}</h1>
+          <h1 className="cds--type-heading-05">{studio.name}</h1>
           <Tag type="cool-gray" size="md">
-            {company.public_id}
+            {studio.public_id}
           </Tag>
         </Stack>
         <p
@@ -110,7 +111,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
             <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
               Members
             </h2>
-            <Table aria-label="Company members" className="aorms-table-spaced">
+            <Table aria-label="Studio members" className="aorms-table-spaced">
               <TableHead>
                 <TableRow>
                   <TableHeader>Member</TableHeader>
@@ -139,7 +140,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                       <TableCell>{m.status}</TableCell>
                       {isOwner && (
                         <TableCell>
-                          <LeaveCompanyButton membershipId={m.id} companyName={company.name} />
+                          <LeaveStudioButton membershipId={m.id} studioName={studio.name} />
                         </TableCell>
                       )}
                     </TableRow>
@@ -153,25 +154,25 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                 <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
                   Add a member
                 </h3>
-                <InviteMemberForm companyId={company.id} />
+                <InviteMemberForm studioId={studio.id} />
               </Tile>
             )}
           </div>
 
           <div>
             <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
-              Company Profile
+              Studio Profile
             </h2>
             <Tile>
               {isOwner ? (
-                <CompanyProfileForm key={JSON.stringify(company)} company={company} />
+                <StudioProfileForm key={JSON.stringify(studio)} studio={studio} />
               ) : (
                 <Stack gap={3}>
-                  <p className="cds--type-body-01">COA reg. no.: {company.coa_registration_no ?? "—"}</p>
-                  <p className="cds--type-body-01">GSTIN: {company.gstin ?? "—"}</p>
-                  <p className="cds--type-body-01">PAN: {company.pan ?? "—"}</p>
+                  <p className="cds--type-body-01">COA reg. no.: {studio.coa_registration_no ?? "—"}</p>
+                  <p className="cds--type-body-01">GSTIN: {studio.gstin ?? "—"}</p>
+                  <p className="cds--type-body-01">PAN: {studio.pan ?? "—"}</p>
                   <p className="cds--type-body-01">
-                    Address: {[company.address_line1, company.address_line2, company.city, company.state, company.pincode]
+                    Address: {[studio.address_line1, studio.address_line2, studio.city, studio.state, studio.pincode]
                       .filter(Boolean)
                       .join(", ") || "—"}
                   </p>
@@ -196,7 +197,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
               </TableHead>
               <TableBody>
                 {(boardMembers ?? []).map((b) => (
-                  <BoardMemberRow key={b.id} member={b} companyId={company.id} isOwner={isOwner} />
+                  <BoardMemberRow key={b.id} member={b} studioId={studio.id} isOwner={isOwner} />
                 ))}
                 {(boardMembers ?? []).length === 0 && (
                   <TableRow>
@@ -214,7 +215,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                 <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
                   Add a board member
                 </h3>
-                <AddBoardMemberForm companyId={company.id} />
+                <AddBoardMemberForm studioId={studio.id} />
               </Tile>
             )}
           </div>
@@ -235,7 +236,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
               </TableHead>
               <TableBody>
                 {(contacts ?? []).map((c) => (
-                  <ContactRow key={c.id} contact={c} companyId={company.id} isOwner={isOwner} />
+                  <ContactRow key={c.id} contact={c} studioId={studio.id} isOwner={isOwner} />
                 ))}
                 {(contacts ?? []).length === 0 && (
                   <TableRow>
@@ -253,7 +254,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                 <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
                   Add a contact
                 </h3>
-                <AddContactForm companyId={company.id} />
+                <AddContactForm studioId={studio.id} />
               </Tile>
             )}
           </div>

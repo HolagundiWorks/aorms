@@ -3,15 +3,15 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { UserFollow } from "@carbon/icons-react";
-import { addBoardMember, type PlatformActionState } from "../../../lib/actions/platform";
+import { addStudioBoardMember, type PlatformActionState } from "../../../lib/actions/platform";
 import { FormGrid } from "../FormGrid";
 
-export function AddBoardMemberForm({ companyId }: { companyId: string }) {
-  const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(addBoardMember, null);
+export function AddBoardMemberForm({ studioId }: { studioId: string }) {
+  const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(addStudioBoardMember, null);
 
   return (
     <Form action={formAction}>
-      <input type="hidden" name="companyId" value={companyId} />
+      <input type="hidden" name="studioId" value={studioId} />
       <Stack gap={4}>
         <FormGrid>
           <TextInput id="board-full-name" name="fullName" labelText="Full name" required />

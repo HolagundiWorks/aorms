@@ -3,15 +3,15 @@
 import { useState, useTransition } from "react";
 import { Button, InlineNotification } from "@carbon/react";
 import { TrashCan } from "@carbon/icons-react";
-import { removeCompanyContact } from "../../../lib/actions/platform";
+import { removeStudioContact } from "../../../lib/actions/platform";
 
 export function RemoveContactButton({
   contactId,
-  companyId,
+  studioId,
   name,
 }: {
   contactId: string;
-  companyId: string;
+  studioId: string;
   name: string;
 }) {
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export function RemoveContactButton({
           if (!window.confirm(`Remove ${name} from contacts?`)) return;
           setError(null);
           startTransition(async () => {
-            const res = await removeCompanyContact(contactId, companyId);
+            const res = await removeStudioContact(contactId, studioId);
             if (res.error) setError(res.error);
           });
         }}

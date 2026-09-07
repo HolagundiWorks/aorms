@@ -3,15 +3,15 @@
 import { useActionState } from "react";
 import { Button, Checkbox, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { UserFollow } from "@carbon/icons-react";
-import { addCompanyContact, type PlatformActionState } from "../../../lib/actions/platform";
+import { addStudioContact, type PlatformActionState } from "../../../lib/actions/platform";
 import { FormGrid } from "../FormGrid";
 
-export function AddContactForm({ companyId }: { companyId: string }) {
-  const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(addCompanyContact, null);
+export function AddContactForm({ studioId }: { studioId: string }) {
+  const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(addStudioContact, null);
 
   return (
     <Form action={formAction}>
-      <input type="hidden" name="companyId" value={companyId} />
+      <input type="hidden" name="studioId" value={studioId} />
       <Stack gap={4}>
         <FormGrid>
           <TextInput id="contact-full-name" name="fullName" labelText="Full name" required />

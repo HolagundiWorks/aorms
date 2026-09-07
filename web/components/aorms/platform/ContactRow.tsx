@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button, Checkbox, Form, InlineNotification, Stack, Tag, TableCell, TableRow, TextInput } from "@carbon/react";
 import { Edit } from "@carbon/icons-react";
-import { updateCompanyContact, type PlatformActionState } from "../../../lib/actions/platform";
+import { updateStudioContact, type PlatformActionState } from "../../../lib/actions/platform";
 import { RemoveContactButton } from "./RemoveContactButton";
 
 export type Contact = {
@@ -20,9 +20,9 @@ export type Contact = {
  * its header comment for why `editing` closes itself on a successful
  * save rather than relying on the parent's re-render).
  */
-export function ContactRow({ contact, companyId, isOwner }: { contact: Contact; companyId: string; isOwner: boolean }) {
+export function ContactRow({ contact, studioId, isOwner }: { contact: Contact; studioId: string; isOwner: boolean }) {
   const [editing, setEditing] = useState(false);
-  const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(updateCompanyContact, null);
+  const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(updateStudioContact, null);
   const wasPending = useRef(false);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export function ContactRow({ contact, companyId, isOwner }: { contact: Contact; 
         <TableCell colSpan={isOwner ? 5 : 4}>
           <Form action={formAction}>
             <input type="hidden" name="contactId" value={contact.id} />
-            <input type="hidden" name="companyId" value={companyId} />
+            <input type="hidden" name="studioId" value={studioId} />
             <Stack gap={3}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
                 <TextInput id={`edit-contact-name-${contact.id}`} name="fullName" labelText="Full name" defaultValue={contact.full_name} required />
@@ -87,7 +87,7 @@ export function ContactRow({ contact, companyId, isOwner }: { contact: Contact; 
         <TableCell>
           <Stack gap={2} orientation="horizontal">
             <Button kind="ghost" size="sm" hasIconOnly iconDescription={`Edit ${contact.full_name}`} renderIcon={Edit} onClick={() => setEditing(true)} />
-            <RemoveContactButton contactId={contact.id} companyId={companyId} name={contact.full_name} />
+            <RemoveContactButton contactId={contact.id} studioId={studioId} name={contact.full_name} />
           </Stack>
         </TableCell>
       )}

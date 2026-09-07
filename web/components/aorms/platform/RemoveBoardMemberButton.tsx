@@ -3,15 +3,15 @@
 import { useState, useTransition } from "react";
 import { Button, InlineNotification } from "@carbon/react";
 import { TrashCan } from "@carbon/icons-react";
-import { removeBoardMember } from "../../../lib/actions/platform";
+import { removeStudioBoardMember } from "../../../lib/actions/platform";
 
 export function RemoveBoardMemberButton({
   boardMemberId,
-  companyId,
+  studioId,
   name,
 }: {
   boardMemberId: string;
-  companyId: string;
+  studioId: string;
   name: string;
 }) {
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export function RemoveBoardMemberButton({
           if (!window.confirm(`Remove ${name} from the board?`)) return;
           setError(null);
           startTransition(async () => {
-            const res = await removeBoardMember(boardMemberId, companyId);
+            const res = await removeStudioBoardMember(boardMemberId, studioId);
             if (res.error) setError(res.error);
           });
         }}

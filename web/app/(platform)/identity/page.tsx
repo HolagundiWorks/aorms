@@ -4,24 +4,28 @@ import { createClient as createWebClient } from "../../../lib/supabase/server";
 import { createClient as createPlatformClient } from "../../../lib/platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
 import { LinkIdentityForm } from "../../../components/aorms/platform/LinkIdentityForm";
-import { CreateCompanyForm } from "../../../components/aorms/platform/CreateCompanyForm";
-import { JoinCompanyForm } from "../../../components/aorms/platform/JoinCompanyForm";
-import { LeaveCompanyButton } from "../../../components/aorms/platform/LeaveCompanyButton";
+import { CreateStudioForm } from "../../../components/aorms/platform/CreateStudioForm";
+import { JoinStudioForm } from "../../../components/aorms/platform/JoinStudioForm";
+import { LeaveStudioButton } from "../../../components/aorms/platform/LeaveStudioButton";
 import { PlatformAuthCta } from "../../../components/aorms/platform/PlatformAuthCta";
 
 const HOURS_TO_PRO = 100;
 
-type CompanyEmbed = { id: string; name: string; public_id: string } | null;
+type StudioEmbed = { id: string; name: string; public_id: string } | null;
 
 /**
  * My AORMS Identity — the portable personal account (AORMS-U- handle,
- * usage hours, Basic/Pro level) and every company membership, sourced from
+ * usage hours, Basic/Pro level) and every Studio membership, sourced from
  * the separate AORMS Platform Supabase project (see lib/platform/*). Lives
  * under the (platform) route group — its own portal, genuinely separate
  * from the Office Hub: no AppShell/SideNav, not linked from the Office
  * Hub's nav at all, reached only by its own direct URL (moved here from
  * (app)/identity/ on explicit request — see the AORMS Identity/Licence
- * portal split plan).
+ * portal split plan). "Studio" = an architecture firm (renamed from
+ * "Company" 2026-09-07, freeing that name for material-supplier
+ * businesses — see the Studio/Company split + Material Catalogue plan;
+ * a "Companies" section for the supplier side lands here alongside
+ * Studios once that phase ships).
  */
 export default async function IdentityPage() {
   const webSupabase = await createWebClient();
@@ -81,7 +85,7 @@ export default async function IdentityPage() {
             style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
           >
             A portable personal identity — your own AORMS-U- handle, usage hours, and level, independent of any
-            one company. {isStaleLink ? "Linked handle no longer resolves." : "Not linked to this login yet."}
+            one studio. {isStaleLink ? "Linked handle no longer resolves." : "Not linked to this login yet."}
           </p>
           <Tile>
             <Stack gap={5}>
@@ -112,8 +116,8 @@ export default async function IdentityPage() {
   // carries no privilege-escalation risk — this browser tab need not have
   // an active platform session for its own linked identity to be visible.
   const { data: memberships } = await platformService
-    .from("memberships")
-    .select("id, role, status, companies(id, name, public_id)")
+    .from("studio_memberships")
+    .select("id, role, status, studios(id, name, public_id)")
     .eq("account_id", account.id)
     .neq("status", "LEFT")
     .order("created_at", { ascending: true });
@@ -128,7 +132,7 @@ export default async function IdentityPage() {
           className="cds--type-body-01"
           style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
         >
-          Your portable personal identity — carries across every company you work with.
+          Your portable personal identity — carries across every studio you work with.
         </p>
 
         <Stack gap={6}>
@@ -150,21 +154,21 @@ export default async function IdentityPage() {
 
           <div>
             <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
-              Companies
+              Studios
             </h2>
             <Stack gap={4}>
               {(memberships ?? []).map((m) => {
-                const company = (Array.isArray(m.companies) ? m.companies[0] : m.companies) as CompanyEmbed;
-                if (!company) return null;
+                const studio = (Array.isArray(m.studios) ? m.studios[0] : m.studios) as StudioEmbed;
+                if (!studio) return null;
                 return (
                   <Tile key={m.id}>
                     <Stack gap={3} orientation="horizontal" style={{ alignItems: "center", justifyContent: "space-between" }}>
                       <div>
-                        <NextLink href={`/companies/${company.id}`}>
-                          <strong>{company.name}</strong>
+                        <NextLink href={`/studios/${studio.id}`}>
+                          <strong>{studio.name}</strong>
                         </NextLink>{" "}
                         <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                          {company.public_id}
+                          {studio.public_id}
                         </span>
                         <div>
                           <Tag type={m.role === "OWNER" ? "purple" : "gray"} size="sm">
@@ -172,14 +176,14 @@ export default async function IdentityPage() {
                           </Tag>
                         </div>
                       </div>
-                      <LeaveCompanyButton membershipId={m.id} companyName={company.name} />
+                      <LeaveStudioButton membershipId={m.id} studioName={studio.name} />
                     </Stack>
                   </Tile>
                 );
               })}
               {(memberships ?? []).length === 0 && (
                 <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                  Not a member of any company yet.
+                  Not a member of any studio yet.
                 </p>
               )}
             </Stack>
@@ -188,15 +192,15 @@ export default async function IdentityPage() {
           <Stack gap={6} orientation="horizontal">
             <Tile style={{ flex: 1 }}>
               <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-                Create a company
+                Create a studio
               </h3>
-              <CreateCompanyForm />
+              <CreateStudioForm />
             </Tile>
             <Tile style={{ flex: 1 }}>
               <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-                Join a company
+                Join a studio
               </h3>
-              <JoinCompanyForm />
+              <JoinStudioForm />
             </Tile>
           </Stack>
         </Stack>

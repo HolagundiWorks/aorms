@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button, Form, InlineNotification, Stack, TableCell, TableRow, TextInput } from "@carbon/react";
 import { Edit } from "@carbon/icons-react";
-import { updateBoardMember, type PlatformActionState } from "../../../lib/actions/platform";
+import { updateStudioBoardMember, type PlatformActionState } from "../../../lib/actions/platform";
 import { RemoveBoardMemberButton } from "./RemoveBoardMemberButton";
 
 export type BoardMember = {
@@ -23,9 +23,9 @@ export type BoardMember = {
  * since this row's own `editing` state would otherwise persist even
  * after the underlying data changes.
  */
-export function BoardMemberRow({ member, companyId, isOwner }: { member: BoardMember; companyId: string; isOwner: boolean }) {
+export function BoardMemberRow({ member, studioId, isOwner }: { member: BoardMember; studioId: string; isOwner: boolean }) {
   const [editing, setEditing] = useState(false);
-  const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(updateBoardMember, null);
+  const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(updateStudioBoardMember, null);
   const wasPending = useRef(false);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export function BoardMemberRow({ member, companyId, isOwner }: { member: BoardMe
         <TableCell colSpan={isOwner ? 5 : 4}>
           <Form action={formAction}>
             <input type="hidden" name="boardMemberId" value={member.id} />
-            <input type="hidden" name="companyId" value={companyId} />
+            <input type="hidden" name="studioId" value={studioId} />
             <Stack gap={3}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))", gap: "1rem" }}>
                 <TextInput id={`edit-board-name-${member.id}`} name="fullName" labelText="Full name" defaultValue={member.full_name} required />
@@ -88,7 +88,7 @@ export function BoardMemberRow({ member, companyId, isOwner }: { member: BoardMe
         <TableCell>
           <Stack gap={2} orientation="horizontal">
             <Button kind="ghost" size="sm" hasIconOnly iconDescription={`Edit ${member.full_name}`} renderIcon={Edit} onClick={() => setEditing(true)} />
-            <RemoveBoardMemberButton boardMemberId={member.id} companyId={companyId} name={member.full_name} />
+            <RemoveBoardMemberButton boardMemberId={member.id} studioId={studioId} name={member.full_name} />
           </Stack>
         </TableCell>
       )}

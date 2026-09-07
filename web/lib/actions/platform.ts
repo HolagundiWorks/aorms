@@ -3,13 +3,21 @@
 /**
  * AORMS Platform integration — Server Actions bridging web/'s own
  * single-tenant app to the separate central identity/licensing Supabase
- * project (platform/supabase/). See the AORMS Platform plan and
- * docs/esti/AORMS-IDENTITY.md for the design.
+ * project (platform/supabase/). See the AORMS Platform plan, the Studio/
+ * Company split + Material Catalogue plan, and docs/esti/AORMS-IDENTITY.md
+ * for the design.
+ *
+ * Naming: "Studio" = an architecture firm (was "Company" until the
+ * 2026-09-07 rename — platform/supabase/migrations/0006_rename_
+ * companies_to_studios.sql); "Company" now means a material-supplier
+ * business (Phase B of that same plan). Every Studio-side action below is
+ * named accordingly so it can't collide with the real Company actions
+ * that follow it in this same file.
  *
  * House style matches web/lib/actions/clients.ts and auth.ts exactly:
  * errors are returned as {error} objects, never thrown; revalidatePath
  * runs right before a successful return. The one deliberate deviation:
- * platform-side mutations (signup/company create/join/leave) don't call
+ * platform-side mutations (signup/studio create/join/leave) don't call
  * write_audit — that RPC only exists on web/'s own project, and the
  * platform project has no audit_log table of its own (out of scope for
  * this pass). linkPlatformIdentity DOES call it, since that mutation
@@ -125,14 +133,14 @@ export async function linkPlatformIdentity(
   return null;
 }
 
-// ── Companies + memberships ─────────────────────────────────────────────
+// ══ STUDIOS (architecture firms) ═══════════════════════════════════════
 
-export async function createCompany(
+export async function createStudio(
   _prev: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
   const name = String(formData.get("name") ?? "").trim();
-  if (!name) return { error: "Company name is required." };
+  if (!name) return { error: "Studio name is required." };
 
   const supabase = await createPlatformClient();
   const {
@@ -140,10 +148,10 @@ export async function createCompany(
   } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to the AORMS Platform first." };
 
-  // owner_id = auth.uid() satisfies "companies: self insert"; the
-  // before_company_insert/after_company_insert triggers mint the
-  // AORMS-C- handle and the founding OWNER membership automatically.
-  const { error } = await supabase.from("companies").insert({ name, owner_id: user.id });
+  // owner_id = auth.uid() satisfies "studios: self insert"; the
+  // before_studio_insert/after_studio_insert triggers mint the AORMS-S-
+  // handle and the founding OWNER membership automatically.
+  const { error } = await supabase.from("studios").insert({ name, owner_id: user.id });
   if (error) return { error: error.message };
 
   revalidatePath("/identity");
@@ -151,25 +159,26 @@ export async function createCompany(
 }
 
 /**
- * Self-serve join by AORMS-C- handle, landing straight at ACTIVE — no
+ * Self-serve join by AORMS-S- handle, landing straight at ACTIVE — no
  * INVITED/owner-approval step in this pass (docs/esti/AORMS-IDENTITY.md's
  * domain-match-vs-pending-approval nuance is a deliberate simplification
  * left for later, matching how web/lib/actions/users.ts already flags the
  * "invite a new staff member" gap as a known follow-up rather than a bug).
  *
- * upsert, not insert: `(account_id, company_id)` is unique, so a plain
+ * upsert, not insert: `(account_id, studio_id)` is unique, so a plain
  * insert fails with a duplicate-key error for anyone who previously left
- * this company (their row still exists, status LEFT) — found live while
+ * this studio (their row still exists, status LEFT) — found live while
  * testing the leave flow. onConflict resurrects that row back to ACTIVE
- * instead of erroring; "memberships: self insert"/"self update (leave)"
- * RLS covers the insert and the ON CONFLICT DO UPDATE path respectively.
+ * instead of erroring; "studio_memberships: self insert"/"self update
+ * (leave)" RLS covers the insert and the ON CONFLICT DO UPDATE path
+ * respectively.
  */
-export async function joinCompany(
+export async function joinStudio(
   _prev: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
   const handle = String(formData.get("handle") ?? "").trim().toUpperCase();
-  if (!handle) return { error: "Enter the company's AORMS-C- handle." };
+  if (!handle) return { error: "Enter the studio's AORMS-S- handle." };
 
   const supabase = await createPlatformClient();
   const {
@@ -177,24 +186,24 @@ export async function joinCompany(
   } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to the AORMS Platform first." };
 
-  const { data: company, error: lookupError } = await supabase
-    .from("companies")
+  const { data: studio, error: lookupError } = await supabase
+    .from("studios")
     .select("id")
     .eq("public_id", handle)
     .maybeSingle();
   if (lookupError) return { error: lookupError.message };
-  if (!company) return { error: `No company found with handle ${handle}.` };
+  if (!studio) return { error: `No studio found with handle ${handle}.` };
 
-  const { error } = await supabase.from("memberships").upsert(
+  const { error } = await supabase.from("studio_memberships").upsert(
     {
       account_id: user.id,
-      company_id: company.id,
+      studio_id: studio.id,
       role: "MEMBER",
       status: "ACTIVE",
       activated_at: new Date().toISOString(),
       left_at: null,
     },
-    { onConflict: "account_id,company_id" },
+    { onConflict: "account_id,studio_id" },
   );
   if (error) return { error: error.message };
 
@@ -203,28 +212,28 @@ export async function joinCompany(
 }
 
 /**
- * OWNER-only (enforced by "memberships: owner insert (invite)" RLS, not
- * app code). Looks the invitee up by handle via the service-role client —
- * "accounts: self read" only lets someone read their own row, so an owner
- * can't resolve another handle to an id through the RLS-scoped client —
- * then inserts the membership through the caller's own RLS-scoped client
- * so the actual authorization check (is this caller really this company's
- * owner?) is the database's, not this function's. Lands straight at
- * ACTIVE, same simplification as joinCompany — no separate accept-invite
- * step in this pass.
+ * OWNER-only (enforced by "studio_memberships: owner insert (invite)"
+ * RLS, not app code). Looks the invitee up by handle via the service-role
+ * client — "accounts: self read" only lets someone read their own row, so
+ * an owner can't resolve another handle to an id through the RLS-scoped
+ * client — then inserts the membership through the caller's own
+ * RLS-scoped client so the actual authorization check (is this caller
+ * really this studio's owner?) is the database's, not this function's.
+ * Lands straight at ACTIVE, same simplification as joinStudio — no
+ * separate accept-invite step in this pass.
  *
- * upsert, not insert — same reason as joinCompany: re-inviting someone
- * who previously left hits the `(account_id, company_id)` unique
- * constraint on a plain insert. "memberships: owner insert (invite)"/
- * "owner update" RLS covers the insert and ON CONFLICT DO UPDATE paths.
+ * upsert, not insert — same reason as joinStudio: re-inviting someone who
+ * previously left hits the `(account_id, studio_id)` unique constraint on
+ * a plain insert. "studio_memberships: owner insert (invite)"/"owner
+ * update" RLS covers the insert and ON CONFLICT DO UPDATE paths.
  */
-export async function inviteMember(
+export async function inviteStudioMember(
   _prev: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  const companyId = String(formData.get("companyId") ?? "");
+  const studioId = String(formData.get("studioId") ?? "");
   const handle = String(formData.get("handle") ?? "").trim().toUpperCase();
-  if (!companyId || !handle) return { error: "Missing company or handle." };
+  if (!studioId || !handle) return { error: "Missing studio or handle." };
 
   const platformService = createPlatformServiceRoleClient();
   const { data: account, error: lookupError } = await platformService
@@ -236,41 +245,41 @@ export async function inviteMember(
   if (!account) return { error: `No AORMS Platform account found with handle ${handle}.` };
 
   const supabase = await createPlatformClient();
-  const { error } = await supabase.from("memberships").upsert(
+  const { error } = await supabase.from("studio_memberships").upsert(
     {
       account_id: account.id,
-      company_id: companyId,
+      studio_id: studioId,
       role: "MEMBER",
       status: "ACTIVE",
       activated_at: new Date().toISOString(),
       left_at: null,
     },
-    { onConflict: "account_id,company_id" },
+    { onConflict: "account_id,studio_id" },
   );
   if (error) return { error: error.message };
 
-  revalidatePath(`/companies/${companyId}`);
+  revalidatePath(`/studios/${studioId}`);
   return null;
 }
 
-export async function updateMembershipRole(membershipId: string, role: "OWNER" | "MEMBER"): Promise<{ error?: string }> {
+export async function updateStudioMembershipRole(membershipId: string, role: "OWNER" | "MEMBER"): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
   const { data: membership, error } = await supabase
-    .from("memberships")
+    .from("studio_memberships")
     .update({ role })
     .eq("id", membershipId)
-    .select("company_id")
+    .select("studio_id")
     .single();
   if (error) return { error: error.message };
 
-  revalidatePath(`/companies/${membership.company_id}`);
+  revalidatePath(`/studios/${membership.studio_id}`);
   return {};
 }
 
-export async function leaveCompany(membershipId: string): Promise<{ error?: string }> {
+export async function leaveStudio(membershipId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
   const { error } = await supabase
-    .from("memberships")
+    .from("studio_memberships")
     .update({ status: "LEFT", left_at: new Date().toISOString() })
     .eq("id", membershipId);
   if (error) return { error: error.message };
@@ -279,24 +288,24 @@ export async function leaveCompany(membershipId: string): Promise<{ error?: stri
   return {};
 }
 
-// ── Company profile (COA/GST/tax/address) ───────────────────────────────
+// ── Studio profile (COA/GST/tax/address) ────────────────────────────────
 
 /**
- * Owner-only (enforced by the "companies: owner update" RLS policy added
- * in migration 0003_company_profile.sql). This is the data that used to
- * live only in web/'s own `firm` table — Firm Settings now mirrors it
- * read-only and links here to actually edit it.
+ * Owner-only (enforced by the "studios: owner update" RLS policy added in
+ * migration 0003_company_profile.sql, since renamed in 0006). This is the
+ * data that used to live only in web/'s own `firm` table — Firm Settings
+ * now mirrors it read-only and links here to actually edit it.
  */
-export async function updateCompanyProfile(
+export async function updateStudioProfile(
   _prev: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  const companyId = String(formData.get("companyId") ?? "");
-  if (!companyId) return { error: "Missing company." };
+  const studioId = String(formData.get("studioId") ?? "");
+  if (!studioId) return { error: "Missing studio." };
 
   const supabase = await createPlatformClient();
   const { error } = await supabase
-    .from("companies")
+    .from("studios")
     .update({
       coa_registration_no: String(formData.get("coaRegistrationNo") ?? "").trim() || null,
       gstin: String(formData.get("gstin") ?? "").trim() || null,
@@ -312,26 +321,26 @@ export async function updateCompanyProfile(
       email: String(formData.get("email") ?? "").trim() || null,
       phone: String(formData.get("phone") ?? "").trim() || null,
     })
-    .eq("id", companyId);
+    .eq("id", studioId);
   if (error) return { error: error.message };
 
-  revalidatePath(`/companies/${companyId}`);
+  revalidatePath(`/studios/${studioId}`);
   return null;
 }
 
 // ── Board of directors ───────────────────────────────────────────────────
 
-export async function addBoardMember(
+export async function addStudioBoardMember(
   _prev: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  const companyId = String(formData.get("companyId") ?? "");
+  const studioId = String(formData.get("studioId") ?? "");
   const fullName = String(formData.get("fullName") ?? "").trim();
-  if (!companyId || !fullName) return { error: "Name is required." };
+  if (!studioId || !fullName) return { error: "Name is required." };
 
   const supabase = await createPlatformClient();
-  const { error } = await supabase.from("company_board_members").insert({
-    company_id: companyId,
+  const { error } = await supabase.from("studio_board_members").insert({
+    studio_id: studioId,
     full_name: fullName,
     din: String(formData.get("din") ?? "").trim() || null,
     designation: String(formData.get("designation") ?? "").trim() || null,
@@ -339,22 +348,22 @@ export async function addBoardMember(
   });
   if (error) return { error: error.message };
 
-  revalidatePath(`/companies/${companyId}`);
+  revalidatePath(`/studios/${studioId}`);
   return null;
 }
 
-export async function updateBoardMember(
+export async function updateStudioBoardMember(
   _prev: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
   const boardMemberId = String(formData.get("boardMemberId") ?? "");
-  const companyId = String(formData.get("companyId") ?? "");
+  const studioId = String(formData.get("studioId") ?? "");
   const fullName = String(formData.get("fullName") ?? "").trim();
-  if (!boardMemberId || !companyId || !fullName) return { error: "Name is required." };
+  if (!boardMemberId || !studioId || !fullName) return { error: "Name is required." };
 
   const supabase = await createPlatformClient();
   const { error } = await supabase
-    .from("company_board_members")
+    .from("studio_board_members")
     .update({
       full_name: fullName,
       din: String(formData.get("din") ?? "").trim() || null,
@@ -364,32 +373,32 @@ export async function updateBoardMember(
     .eq("id", boardMemberId);
   if (error) return { error: error.message };
 
-  revalidatePath(`/companies/${companyId}`);
+  revalidatePath(`/studios/${studioId}`);
   return null;
 }
 
-export async function removeBoardMember(boardMemberId: string, companyId: string): Promise<{ error?: string }> {
+export async function removeStudioBoardMember(boardMemberId: string, studioId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
-  const { error } = await supabase.from("company_board_members").delete().eq("id", boardMemberId);
+  const { error } = await supabase.from("studio_board_members").delete().eq("id", boardMemberId);
   if (error) return { error: error.message };
 
-  revalidatePath(`/companies/${companyId}`);
+  revalidatePath(`/studios/${studioId}`);
   return {};
 }
 
 // ── "Who's who" — key contacts ───────────────────────────────────────────
 
-export async function addCompanyContact(
+export async function addStudioContact(
   _prev: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  const companyId = String(formData.get("companyId") ?? "");
+  const studioId = String(formData.get("studioId") ?? "");
   const fullName = String(formData.get("fullName") ?? "").trim();
-  if (!companyId || !fullName) return { error: "Name is required." };
+  if (!studioId || !fullName) return { error: "Name is required." };
 
   const supabase = await createPlatformClient();
-  const { error } = await supabase.from("company_contacts").insert({
-    company_id: companyId,
+  const { error } = await supabase.from("studio_contacts").insert({
+    studio_id: studioId,
     full_name: fullName,
     role_title: String(formData.get("roleTitle") ?? "").trim() || null,
     email: String(formData.get("email") ?? "").trim() || null,
@@ -398,22 +407,22 @@ export async function addCompanyContact(
   });
   if (error) return { error: error.message };
 
-  revalidatePath(`/companies/${companyId}`);
+  revalidatePath(`/studios/${studioId}`);
   return null;
 }
 
-export async function updateCompanyContact(
+export async function updateStudioContact(
   _prev: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
   const contactId = String(formData.get("contactId") ?? "");
-  const companyId = String(formData.get("companyId") ?? "");
+  const studioId = String(formData.get("studioId") ?? "");
   const fullName = String(formData.get("fullName") ?? "").trim();
-  if (!contactId || !companyId || !fullName) return { error: "Name is required." };
+  if (!contactId || !studioId || !fullName) return { error: "Name is required." };
 
   const supabase = await createPlatformClient();
   const { error } = await supabase
-    .from("company_contacts")
+    .from("studio_contacts")
     .update({
       full_name: fullName,
       role_title: String(formData.get("roleTitle") ?? "").trim() || null,
@@ -424,20 +433,22 @@ export async function updateCompanyContact(
     .eq("id", contactId);
   if (error) return { error: error.message };
 
-  revalidatePath(`/companies/${companyId}`);
+  revalidatePath(`/studios/${studioId}`);
   return null;
 }
 
-export async function removeCompanyContact(contactId: string, companyId: string): Promise<{ error?: string }> {
+export async function removeStudioContact(contactId: string, studioId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
-  const { error } = await supabase.from("company_contacts").delete().eq("id", contactId);
+  const { error } = await supabase.from("studio_contacts").delete().eq("id", contactId);
   if (error) return { error: error.message };
 
-  revalidatePath(`/companies/${companyId}`);
+  revalidatePath(`/studios/${studioId}`);
   return {};
 }
 
-// ── Licence management ───────────────────────────────────────────────────
+// ── Licence management (Studio-scoped only in this pass — Companies/
+// suppliers don't get licence management here, an explicit, disclosed
+// scope boundary, not an oversight) ─────────────────────────────────────
 
 /**
  * Owner-only (enforced by "licences: owner update" RLS). No billing/
@@ -449,11 +460,11 @@ export async function updateLicence(
   _prev: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  const companyId = String(formData.get("companyId") ?? "");
+  const studioId = String(formData.get("studioId") ?? "");
   const plan = String(formData.get("plan") ?? "");
   const seatsRaw = String(formData.get("seats") ?? "");
   const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
-  if (!companyId) return { error: "Missing company." };
+  if (!studioId) return { error: "Missing studio." };
   if (!["TRIAL", "STANDARD", "PREMIUM"].includes(plan)) return { error: "Invalid plan." };
   const seats = Number(seatsRaw);
   if (!Number.isInteger(seats) || seats < 1) return { error: "Seats must be a positive whole number." };
@@ -466,7 +477,7 @@ export async function updateLicence(
       seats,
       expires_at: expiresAtRaw ? new Date(expiresAtRaw).toISOString() : null,
     })
-    .eq("company_id", companyId);
+    .eq("studio_id", studioId);
   if (error) return { error: error.message };
 
   revalidatePath("/licences");

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { InlineNotification, Select, SelectItem } from "@carbon/react";
-import { updateMembershipRole } from "../../../lib/actions/platform";
+import { updateStudioMembershipRole } from "../../../lib/actions/platform";
 
 export function MembershipRoleSelect({ membershipId, role }: { membershipId: string; role: string }) {
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export function MembershipRoleSelect({ membershipId, role }: { membershipId: str
           const next = e.target.value as "OWNER" | "MEMBER";
           setError(null);
           startTransition(async () => {
-            const res = await updateMembershipRole(membershipId, next);
+            const res = await updateStudioMembershipRole(membershipId, next);
             if (res.error) setError(res.error);
           });
         }}
