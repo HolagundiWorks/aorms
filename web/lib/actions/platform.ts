@@ -156,6 +156,13 @@ export async function createCompany(
  * domain-match-vs-pending-approval nuance is a deliberate simplification
  * left for later, matching how web/lib/actions/users.ts already flags the
  * "invite a new staff member" gap as a known follow-up rather than a bug).
+ *
+ * upsert, not insert: `(account_id, company_id)` is unique, so a plain
+ * insert fails with a duplicate-key error for anyone who previously left
+ * this company (their row still exists, status LEFT) — found live while
+ * testing the leave flow. onConflict resurrects that row back to ACTIVE
+ * instead of erroring; "memberships: self insert"/"self update (leave)"
+ * RLS covers the insert and the ON CONFLICT DO UPDATE path respectively.
  */
 export async function joinCompany(
   _prev: PlatformActionState,
@@ -178,13 +185,17 @@ export async function joinCompany(
   if (lookupError) return { error: lookupError.message };
   if (!company) return { error: `No company found with handle ${handle}.` };
 
-  const { error } = await supabase.from("memberships").insert({
-    account_id: user.id,
-    company_id: company.id,
-    role: "MEMBER",
-    status: "ACTIVE",
-    activated_at: new Date().toISOString(),
-  });
+  const { error } = await supabase.from("memberships").upsert(
+    {
+      account_id: user.id,
+      company_id: company.id,
+      role: "MEMBER",
+      status: "ACTIVE",
+      activated_at: new Date().toISOString(),
+      left_at: null,
+    },
+    { onConflict: "account_id,company_id" },
+  );
   if (error) return { error: error.message };
 
   revalidatePath("/identity");
@@ -201,6 +212,11 @@ export async function joinCompany(
  * owner?) is the database's, not this function's. Lands straight at
  * ACTIVE, same simplification as joinCompany — no separate accept-invite
  * step in this pass.
+ *
+ * upsert, not insert — same reason as joinCompany: re-inviting someone
+ * who previously left hits the `(account_id, company_id)` unique
+ * constraint on a plain insert. "memberships: owner insert (invite)"/
+ * "owner update" RLS covers the insert and ON CONFLICT DO UPDATE paths.
  */
 export async function inviteMember(
   _prev: PlatformActionState,
@@ -220,13 +236,17 @@ export async function inviteMember(
   if (!account) return { error: `No AORMS Platform account found with handle ${handle}.` };
 
   const supabase = await createPlatformClient();
-  const { error } = await supabase.from("memberships").insert({
-    account_id: account.id,
-    company_id: companyId,
-    role: "MEMBER",
-    status: "ACTIVE",
-    activated_at: new Date().toISOString(),
-  });
+  const { error } = await supabase.from("memberships").upsert(
+    {
+      account_id: account.id,
+      company_id: companyId,
+      role: "MEMBER",
+      status: "ACTIVE",
+      activated_at: new Date().toISOString(),
+      left_at: null,
+    },
+    { onConflict: "account_id,company_id" },
+  );
   if (error) return { error: error.message };
 
   revalidatePath(`/companies/${companyId}`);

@@ -395,6 +395,41 @@ UI renders correctly, then re-linked to a fresh handle through the same
 resolved account. `tsc --noEmit`/`eslint` clean. Both databases reset to
 a clean slate after this round too.
 
+**AORMS Platform, follow-up (2026-09-07) — leave flow verified + a real
+rejoin bug found and fixed.** Built a three-account scenario (Owner Eve +
+company "Eve Studio", members Frank and Grace) to test both ways a
+membership ends: **owner-initiated removal** (Eve's "Leave" button on
+Frank's row in the company detail page's member table — company stays
+visible to the owner, the removed row just drops off the active list) and
+**self-leave** (Grace's own "Leave" button on her `/identity` page, tested
+with her own active platform session so `"memberships: self update
+(leave)"` RLS is what actually authorizes it, not just the UI showing the
+button). Both confirmed via the UI and the database: `status` → `LEFT`,
+`left_at` stamped, row filtered out of the active member/company lists
+either side.
+
+Testing the natural next step — **can a departed member rejoin?** —
+found a real bug: `(account_id, company_id)` is a unique constraint on
+`memberships`, and both `joinCompany` and `inviteMember` did a plain
+`.insert()`, so re-joining or re-inviting anyone who'd previously left hit
+a duplicate-key error (`memberships_account_id_company_id_key`) and
+failed outright — a departed member could never come back. Fixed by
+switching both to `.upsert(..., { onConflict: "account_id,company_id" })`,
+resurrecting the existing row (`status` back to `ACTIVE`, `left_at`
+cleared) instead of trying to insert a new one; the existing self/owner
+RLS policies already cover both the insert and the `ON CONFLICT DO
+UPDATE` path, so no policy changes were needed. Verified live, deliberately
+isolating the fix from a recurring browser-automation click flake (a
+button's first click sometimes doesn't register in this sandboxed
+environment — confirmed via server logs, not an app bug) by resetting
+Grace's row back to `LEFT` via the service-role client and re-running the
+join purely through the real UI + Server Action path before trusting the
+result: Grace rejoined "Eve Studio" through `/identity`'s own "Join a
+company" form, and Eve separately re-invited Frank through the company
+detail page's "Add a member" form — both now show `ACTIVE` again, exactly
+as a fresh join would. `tsc --noEmit`/`eslint` clean. Both databases reset
+to a clean slate after this round.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
