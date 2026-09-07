@@ -11,6 +11,8 @@ import { AddCompanyBoardMemberForm } from "../../../../components/aorms/platform
 import { CompanyBoardMemberRow } from "../../../../components/aorms/platform/company/CompanyBoardMemberRow";
 import { AddCompanyContactForm } from "../../../../components/aorms/platform/company/AddCompanyContactForm";
 import { CompanyContactRow } from "../../../../components/aorms/platform/company/CompanyContactRow";
+import { ProductCard, type Product } from "../../../../components/aorms/platform/company/ProductCard";
+import { AddProductForm } from "../../../../components/aorms/platform/company/AddProductForm";
 
 type AccountEmbed = { id: string; full_name: string; public_id: string } | null;
 
@@ -54,7 +56,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
   if (companyError) throw new Error(companyError.message);
   if (!company) notFound();
 
-  const [{ data: memberships }, { data: boardMembers }, { data: contacts }] = await Promise.all([
+  const [{ data: memberships }, { data: boardMembers }, { data: contacts }, { data: products }] = await Promise.all([
     platformService
       .from("company_memberships")
       .select("id, account_id, role, status, accounts(full_name, public_id)")
@@ -69,6 +71,13 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
     platformService
       .from("company_contacts")
       .select("id, full_name, role_title, email, phone, is_primary")
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: true }),
+    platformService
+      .from("products")
+      .select(
+        "id, name, category, sku, mrp_paise, description, product_specifications(id, label, value), product_test_results(id, test_name, result, lab_name, tested_at)",
+      )
       .eq("company_id", companyId)
       .order("created_at", { ascending: true }),
   ]);
@@ -251,6 +260,30 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                   Add a contact
                 </h3>
                 <AddCompanyContactForm companyId={company.id} />
+              </Tile>
+            )}
+          </div>
+
+          <div>
+            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+              Material Catalogue
+            </h2>
+            <Stack gap={4}>
+              {((products ?? []) as Product[]).map((product) => (
+                <ProductCard key={product.id} product={product} companyId={company.id} isOwner={isOwner} />
+              ))}
+              {(products ?? []).length === 0 && (
+                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  No products in the catalogue yet.
+                </p>
+              )}
+            </Stack>
+            {isOwner && (
+              <Tile style={{ marginTop: "1rem" }}>
+                <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                  Add a product
+                </h3>
+                <AddProductForm companyId={company.id} />
               </Tile>
             )}
           </div>

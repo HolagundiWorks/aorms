@@ -33,6 +33,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           <NextLink href="/identity" className="cds--type-body-01">
             Identity
           </NextLink>
+          <NextLink href="/materials" className="cds--type-body-01">
+            Materials
+          </NextLink>
           <NextLink href="/licences" className="cds--type-body-01">
             Licences
           </NextLink>

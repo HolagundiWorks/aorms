@@ -777,6 +777,69 @@ Phase C (Material Catalogue — products/specs/test-results owned by a
 Company, browsable by Studios with city/state nearest-vendor ranking)
 is next, not yet started.
 
+**Studio/Company split — Phase C, the Material Catalogue (2026-09-07).**
+Final phase of the plan: a Company (material supplier) now owns and
+operates a searchable product catalogue — product name, category, SKU,
+MRP, description, flexible key-value specs, and structured test results
+— browsable platform-wide by any account, with city/state nearest-vendor
+ranking for the browsing Studio (no geocoding/lat-lng/external API,
+confirmed with the user up front).
+
+`platform/supabase/migrations/0008_material_catalogue.sql`: `products`
+(`company_id` FK, name, `category` check-constrained to
+`BUILDING_MATERIAL`/`INTERIOR_MATERIAL`/`FINISH`/`OTHER`, SKU, `mrp_paise`
+bigint — this codebase's integer-paise money convention — description),
+`product_specifications` (flexible label/value pairs), `product_test_results`
+(test name, result, lab/agency, tested-on date). RLS: readable by any
+`authenticated` platform account on all three tables (catalogue browsing
+is platform-wide, same precedent as `"companies: authenticated
+read"`/`"studios: authenticated read"`), writable only by the owning
+company's OWNER (`is_company_owner(company_id)` on `products` directly;
+specs/test-results check ownership one hop through their `product_id` FK,
+via an `exists (select 1 from products where …)` subquery in both the
+`using` and `with check` clauses of their `for all` policy).
+
+`web/` side: `web/lib/actions/materials.ts` (12 Server Actions — add/
+update/remove × products/specs/test-results; the `mrpPaise` form field
+carries a rupee amount the user typed, multiplied by 100 before the
+insert, same naming convention already used by `rate-books.ts`'s
+`ratePaise` field). `companies/[companyId]/page.tsx` grows a "Material
+Catalogue" section: each product is a `ProductCard.tsx` — owner-only
+edit-in-place (identical toggle pattern to `CompanyBoardMemberRow.tsx`)
+containing, one level deeper, its own specs (`ProductSpecRow.tsx`) and
+test results (`ProductTestResultRow.tsx`), each with their own owner-only
+add-forms and the same edit-in-place pattern again. New
+`web/app/(platform)/materials/page.tsx` — cross-company browsing/search
+(keyword + category filters via GET query params) reading `products`
+joined to `companies` platform-wide via the service-role client; nearest-
+first ordering is a plain three-tier sort computed in the page's own
+server code (same city as the viewer's first active Studio membership →
+same state → everything else), no new SQL needed for anything this
+simple. `(platform)/layout.tsx` nav grows a "Materials" link.
+
+Verified live, full round trip through the real browser: added a product
+via the UI (₹85 MRP → confirmed stored as `8500` paise via direct REST),
+added a spec via the UI, opened the edit-in-place form on a product
+(confirmed correctly pre-filled, including the paise→rupee reverse
+conversion) and changed its MRP — confirmed saved via REST. Nearest-
+vendor ranking confirmed against a real two-company control: created a
+second Company in Mumbai with its own product, gave the browsing account
+a Studio in Bengaluru, and `/materials` correctly listed both Bengaluru
+products ahead of the Mumbai one with a "Showing nearest vendors first
+(Bengaluru, Karnataka)" banner; keyword search (`?q=marble`) and category
+filter (`?category=BUILDING_MATERIAL`) both narrowed results correctly.
+RLS re-verified directly (not assumed from the schema alone): a
+non-owner's `DELETE` on another company's product is silently a no-op
+(RLS returns zero rows affected, row still exists) while the actual
+owner's `DELETE` succeeds and cascades to remove that product's spec and
+test-result rows. `tsc --noEmit`/`eslint` clean across the whole `web/`
+tree. All eight platform migrations (`0001`–`0008`) apply cleanly from a
+fresh `db reset`. Both local Supabase stacks (platform + `web/`'s own)
+reset to a clean slate afterward.
+
+This completes the Studio/Company split + Material Catalogue plan (all
+three phases: A the rename, B the new Company entity, C the catalogue).
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
