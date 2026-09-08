@@ -6,13 +6,41 @@ import { z } from "zod";
  * Wall + Stair (below) are now also ported from HolagundiWorks/AQC's C++
  * engine (`BBSDesktop/src/core/Engine.cpp`'s `generate_wall_bbs`/
  * `generate_stair_bbs`), the reference repo this was requested to match —
- * see docs/esti/ROADMAP-CLOUD.md for the full account of what's ported
- * verbatim vs. what's flagged as a still-open discrepancy between the two
- * engines (AQC uses a more rigorous bend-deduction-aware stirrup cutting
- * length and an IS 456 Cl. 26.5.3.2 tie-type auto-resolver for Column/Beam
- * that this file's existing Column/Beam formulas don't have — not silently
- * rewritten here, since that's already-shipped code this port didn't
- * re-verify against; flagged for the user's own call, not guessed at).
+ * see docs/esti/ROADMAP-CLOUD.md for the full account of what's ported.
+ *
+ * **Column/Beam reconciliation (2026-09-08):** `calculateColumnStirrups`/
+ * `calculateBeamStirrups` below now call `closedLinkCuttingLengthMm()` /
+ * `hookedLegCuttingLengthMm()` — the same bend-deduction-aware formula
+ * AQC's `closed_link_cutting()`/`hooked_leg_cutting()` use everywhere,
+ * already ported and shipped here for Wall's own links. Their previous
+ * "perimeter + hooks, no bend deduction" formula wasn't a style choice,
+ * it was a missing term — any real bar-bending schedule has to account
+ * for the fact that a bar doesn't bend at a sharp corner, so the earlier
+ * numbers genuinely overstated cutting length. Retrofitting this was
+ * low-risk specifically *because* the replacement formula already existed
+ * and was already tested (Wall), not new, unverified logic.
+ *
+ * **Deliberately still not reconciled, two genuinely different things
+ * left open, not overlooked:**
+ * 1. The 135° hook allowance itself: `HOOK_ALLOWANCE_PER_HOOK_D[135]`
+ *    below is 12d; AQC's own `Settings::hook_allowance` uses 10d (both
+ *    cite IS 2502 — confirmed by reading AQC's actual `Model.h`, not
+ *    assumed). This is a genuine sourced-differently convention, not a
+ *    missing term the way bend deduction was, and this repo's own value
+ *    is already shared consistently across Wall/Stair/Column/Beam — so
+ *    changing it now wouldn't just match AQC, it would silently change
+ *    Wall/Stair's own already-verified output too. Left as-is,
+ *    disclosed here rather than picked with false confidence either way.
+ * 2. AQC's IS 456 Cl. 26.5.3.2 tie-type auto-resolver (`resolve_column_
+ *    tie()` — heuristically choosing among Closed/Cross Ties/Group Ties/
+ *    Open Ties/U-Ties/Diagonal Ties by bar count + spacing + column
+ *    shape) has no equivalent here (`ColumnTieType` above is a smaller,
+ *    differently-shaped vocabulary: Closed/Closed+Crosstie/Double Tie/
+ *    Circular/Spiral). This is genuinely new scope, not a bug fix — it's
+ *    AQC's own heuristic approximation of a design-code judgment call,
+ *    not a settled formula, and changing what tie types this repo's UI
+ *    even exposes is a real product decision. Not attempted in this
+ *    pass; flagged for a dedicated one.
  *
  * Lengths in mm; weight via d²/162 kg/m.
  */
@@ -266,7 +294,7 @@ export function calculateColumnStirrups(input: {
 
   const b = input.widthMm - 2 * input.coverMm;
   const h = input.depthMm - 2 * input.coverMm;
-  const lengthEach = 2 * (b + h) + totalHookAllowance;
+  const lengthEach = closedLinkCuttingLengthMm(b, h, input.diaMm, input.hookAngle);
   const multiplier = tie === "Double Tie" ? 2 : 1;
   return {
     kind: "discrete",
@@ -297,11 +325,9 @@ export function calculateBeamStirrups(input: {
   crosstieCount: number;
   crosstieLengthMm: number;
 } {
-  const hookPerEnd = hookAllowancePerHook(input.hookAngle) * input.diaMm;
-  const totalHookAllowance = 2 * hookPerEnd;
   const b = input.widthMm - 2 * input.coverMm;
   const h = input.depthMm - 2 * input.coverMm;
-  const lengthEach = 2 * (b + h) + totalHookAllowance;
+  const lengthEach = closedLinkCuttingLengthMm(b, h, input.diaMm, input.hookAngle);
 
   const effectiveDepth = input.depthMm - input.coverMm;
   const supportZoneLen = 2 * effectiveDepth;
@@ -316,7 +342,7 @@ export function calculateBeamStirrups(input: {
       count: totalCount,
       lengthEachMm: lengthEach,
       crosstieCount: totalCount,
-      crosstieLengthMm: h + totalHookAllowance,
+      crosstieLengthMm: hookedLegCuttingLengthMm(h, input.diaMm, input.hookAngle),
     };
   }
   return {
@@ -428,13 +454,9 @@ export function calculateWallBaseWidth(heelMm: number, toeMm: number, stemThickn
 
 /**
  * IS 2502 closed rectangular link/stirrup cutting length — perimeter + hooks
- * − bend deductions at each corner. Port of Engine.cpp's closed_link_cutting()
- * (used here for wall shear links); this is the more rigorous, bend-
- * deduction-aware formula AQC uses everywhere ties/stirrups appear — this
- * repo's existing Column/Beam stirrup formulas (above) use a simpler
- * perimeter-plus-hooks-only cutting length with no bend deduction, a known
- * discrepancy flagged in this file's own header comment, not silently
- * changed for those two already-shipped element types.
+ * − bend deductions at each corner. Port of Engine.cpp's closed_link_cutting().
+ * Used for wall shear links, and (2026-09-08) for Column/Beam stirrups too —
+ * see this file's header comment for the reconciliation account.
  */
 export function closedLinkCuttingLengthMm(
   aMm: number,

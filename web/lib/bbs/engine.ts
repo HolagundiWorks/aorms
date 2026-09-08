@@ -4,8 +4,9 @@
  * bbs-engine.ts; Wall/Stair ported from HolagundiWorks/AQC's C++ engine
  * (`BBSDesktop/src/core/Engine.cpp`'s `generate_wall_bbs`/
  * `generate_stair_bbs`) — see web/lib/bbs/formulas.ts's header note for
- * the full account of what's ported vs. what's flagged as a known
- * discrepancy between the two engines' Column/Beam formulas.
+ * the full Column/Beam reconciliation account (bend-deduction cutting
+ * length now shared with Wall; the 135° hook-allowance constant and
+ * AQC's tie-type auto-resolver remain genuinely open, not overlooked).
  */
 import {
   type BbsBeamInput,
