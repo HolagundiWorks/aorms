@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
+import { logAutoDocumentIssue } from "../document-issues-log";
 
 export type TransmittalActionState = { error: string } | null;
 
@@ -56,6 +57,19 @@ export async function createTransmittalRecord(
     p_before: null,
     p_after: { ref: refData, projectId, recipient, purpose, channel },
   });
+
+  // Only logged when actually issued (date_issued set) — a transmittal
+  // created with no issue date is a real draft, not yet a document. Same
+  // column the client-portal RLS policy already keys visibility off.
+  if (dateIssued) {
+    await logAutoDocumentIssue(supabase, {
+      entityType: "TRANSMITTAL",
+      entityId: inserted.id,
+      projectId,
+      ref: refData,
+      issuedById: user?.id ?? null,
+    });
+  }
 
   revalidatePath("/transmittals");
   return null;

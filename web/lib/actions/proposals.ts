@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
+import { logAutoDocumentIssue } from "../document-issues-log";
 
 export type ProposalActionState = { error: string } | null;
 
@@ -60,6 +61,17 @@ export async function createProposalRecord(
     p_action: "CREATE",
     p_before: null,
     p_after: { ref: refData, projectId, workCategory, workType, feeBasis, costOfWorksPaise, feePaise },
+  });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  await logAutoDocumentIssue(supabase, {
+    entityType: "PROPOSAL",
+    entityId: inserted.id,
+    projectId,
+    ref: refData,
+    issuedById: user?.id ?? null,
   });
 
   revalidatePath("/proposals");

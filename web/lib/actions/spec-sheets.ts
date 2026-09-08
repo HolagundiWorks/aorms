@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
+import { logAutoDocumentIssue } from "../document-issues-log";
 
 export type SpecSheetActionState = { error: string } | null;
 
@@ -38,6 +39,17 @@ export async function createSpecSheetRecord(
     p_action: "CREATE",
     p_before: null,
     p_after: { ref: refData, projectId, title },
+  });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  await logAutoDocumentIssue(supabase, {
+    entityType: "SPEC_SHEET",
+    entityId: inserted.id,
+    projectId,
+    ref: refData,
+    issuedById: user?.id ?? null,
   });
 
   revalidatePath("/spec-sheets");

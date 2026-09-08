@@ -195,6 +195,14 @@ export default async function ReportsPage({
           <Button type="submit" size="md">
             Apply
           </Button>
+          <Button
+            kind="tertiary"
+            size="md"
+            as="a"
+            href={`/api/reports/invoice-register?preset=${periodInput.preset}`}
+          >
+            Download invoice register (CSV)
+          </Button>
         </form>
 
         {error ? (

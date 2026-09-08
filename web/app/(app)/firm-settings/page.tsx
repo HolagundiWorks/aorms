@@ -51,6 +51,7 @@ export default async function FirmSettingsPage() {
   ]);
 
   const isOwner = myProfile?.role === "OWNER";
+  const canEditFirm = isOwner || myProfile?.role === "PARTNER";
 
   return (
     <Grid>
@@ -63,6 +64,17 @@ export default async function FirmSettingsPage() {
           Company profile, GST/tax defaults, and address — used across invoices, PDFs, and portal branding.
         </p>
 
+        {!canEditFirm && (
+          <InlineNotification
+            kind="info"
+            title="Read-only"
+            subtitle="Only the firm owner or a partner can change the company profile — you can still see what's set below."
+            hideCloseButton
+            lowContrast
+            style={{ marginBottom: "1.5rem" }}
+          />
+        )}
+
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load firm settings: {error.message}
@@ -72,7 +84,7 @@ export default async function FirmSettingsPage() {
             No firm record exists. This should have been seeded by migration 0024 — contact support.
           </p>
         ) : (
-          <FirmSettingsForm key={JSON.stringify(firm)} firm={firm} />
+          <FirmSettingsForm key={JSON.stringify(firm)} firm={firm} canEdit={canEditFirm} />
         )}
 
         <h2 className="cds--type-heading-03" style={{ marginTop: "3rem", marginBottom: "0.5rem" }}>

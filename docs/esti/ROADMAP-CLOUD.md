@@ -15,7 +15,11 @@ active-state highlighting, plus loading/error/not-found route boundaries —
 the last visible UX gap now closed too; Firm Settings now also has
 per-scope numbering-pattern overrides and AI Studio document drafting
 (9 of the old 14 `AiDraftKind` modes) closes the other half of Phase 7's
-own flagged gap, both same-day)  
+own flagged gap, both same-day; a same-day autopilot follow-up pass then
+closed the GST/TDS CSV export, a non-owner Firm Settings notice, portal
+login provisioning for contractors/consultants/new staff, and
+`document_issues`' automatic wiring — self-service name editing is
+code-complete but blocked on a migration apply, the one open item)  
 **Updated:** 2026-09-08  
 **Scope:** What ships to the **production VPS** (`aorms.in`) and when — deployment
 status, feature rollout to the live office hub, and cloud infrastructure.
@@ -1055,6 +1059,166 @@ rows) deleted afterward and confirmed empty; the test account itself
 deleted cleanly this time (no `write_audit` calls from this feature, so
 none of the FK-blocks-delete situation the numbering-patterns test
 account hit above).
+
+**Autopilot pass — polish bundle, portal login provisioning,
+`document_issues` auto-wiring (2026-09-08).** On explicit request to work
+through the rest of the standing follow-up list without a check-in after
+each item. Four pieces, in the order built:
+
+1. **GST/TDS filing CSV export** — the one export Phase 5's `/reports`
+   rebuild deliberately skipped: `backend/src/modules/reports/router.ts`'s
+   `invoiceRegisterExport`. New Route Handler
+   `web/app/api/reports/invoice-register/route.ts` — same
+   `reports:view`-equivalent gate (rank ≥ 80) re-checked at the handler
+   itself (a Route Handler has no page-level gate to inherit), same
+   ISSUED/PAID + date-in-period filter as the abstract page, one row per
+   invoice with formatted (not raw-paise) amounts since this is meant to
+   be opened directly. `/reports` gained a "Download invoice register
+   (CSV)" button next to the existing period filter. Verified live via an
+   in-page `fetch` (a real download can't be triggered through this
+   session's sandboxed browser): 200, correct `Content-Type`/
+   `Content-Disposition`, correct header row.
+
+2. **Non-owner notice on Firm Settings' company-profile form** — the
+   *other* half of `/firm-settings` (the Reference Numbering section
+   already got this treatment when it shipped) had no notice at all;
+   most of `FirmSettingsForm.tsx` is already a read-only mirror (GST/COA/
+   tax/address, since the AORMS Identity portal split), but its two live
+   inputs (`companyName`/`firmType`) plus the Save button were fully
+   interactive for *any* signed-in staff, silently no-op'ing under RLS
+   (`firm: owner/partner update`) for anyone below PARTNER. Added a
+   `canEdit` prop (default `true`, so no other caller breaks): when
+   false, those two inputs become `readOnly`/`disabled` and the Save
+   button doesn't render at all; the page computes `canEditFirm` (OWNER
+   or PARTNER) and shows the same `isOwner`-style `InlineNotification`
+   convention used everywhere else in this codebase. Verified live: as
+   OWNER, no notice, fields editable; demoted the test account to VIEWER
+   and reloaded — notice shown, Firm type visibly disabled, no Save
+   button in the DOM at all (not just visually hidden).
+
+3. **Self-service "edit my own name"** — `/users`' own header comment
+   flagged this: RLS (`profiles: owner manages`) only ever let OWNER
+   UPDATE *someone else's* row, so nobody — OWNER included — had any way
+   to correct their own display name. **Deliberately not** a second bare
+   `using (id = auth.uid()) with check (id = auth.uid())` RLS policy —
+   that exact shape already burned this codebase once on `memberships`
+   (the 2026-09-07 privilege-escalation fix logged above): it restricts
+   *which row* you can touch, not *which columns*, so a caller could ride
+   it straight into self-promoting their own `role`. Migration
+   `0031_self_update_full_name.sql` instead adds a single-purpose
+   `security definer` function, `update_my_full_name(p_full_name text)`,
+   that only ever touches `full_name` for `auth.uid()`'s own row — no
+   other column for the function body to expose, so no trigger is needed
+   the way the memberships fix needed one. `lib/actions/users.ts` gained
+   `updateMyName()`; new `MyNameEditor.tsx` (inline edit-in-place, same
+   pattern as the board/contact editors) renders on the signed-in user's
+   own row in `/users`, regardless of role. **Blocked on a live apply**:
+   this session had no fresh Supabase personal-access token for the
+   Management API (the standing pattern needs one requested fresh each
+   session, never reused) — migration 0031 is written and ready but not
+   yet applied to the cloud project. Confirmed the code path is correctly
+   wired, not just typechecked: clicking Save produced the exact expected
+   Postgres error, `Could not find the function
+   public.update_my_full_name(p_full_name) in the schema cache` — the
+   honest, correct failure mode for "code shipped, migration pending",
+   not a masked or swallowed error. **Needs a follow-up session with a
+   token to apply 0031 and re-verify the actual save.**
+
+4. **Portal login provisioning** — the `createLogin` gap flagged on both
+   `/contractors` and `/consultants` when they first shipped ("Supabase
+   Auth admin operation, not built"), plus `/users`' own "inviting a new
+   staff member isn't built here" gap. All three use Supabase Auth
+   Admin's `inviteUserByEmail` (`web/lib/supabase/service.ts`'s existing
+   service-role client) rather than the old backend's owner-supplied-
+   password `createLogin` (`backend/src/modules/consultant/router.ts`) —
+   this app never sees or sets a password anywhere, matching the
+   password-handling discipline the rest of the codebase already follows;
+   the invited person sets their own via Supabase's emailed link.
+   `web/lib/actions/portal-invites.ts`: `inviteContractorLogin`/
+   `inviteConsultantLogin` (sets `role`/`contractor_id`|`consultant_id`/
+   `full_name` on the profile `inviteUserByEmail` creates via
+   `handle_new_user()`'s existing trigger) and `inviteStaffMember` (new
+   staff, role from `ASSIGNABLE_STAFF_ROLES` minus OWNER). All three
+   OWNER-only, re-checked at the app layer (the invite call is
+   service-role, bypasses RLS entirely, so there's no RLS backstop to
+   lean on the way most of this codebase's other gates do). New shared
+   `ProvisionPortalLoginForm.tsx` (email input + Invite button) wired
+   into a new "Portal login" column on `/contractors` and `/consultants`;
+   new `NewStaffInviteForm.tsx` wired into `/users`. Verified live: added
+   a real test contractor, invited a real login for it through the UI,
+   confirmed the resulting `profiles` row (`role: CONTRACTOR`,
+   `contractor_id` set, `full_name` matching) and the `write_audit` entry
+   directly; the row correctly shows "Provisioned" afterward. The
+   consultant-invite retry hit Supabase's own project email rate limit
+   (`"email rate limit exceeded"`) — a real infrastructure constraint,
+   not a bug, and itself proof the error path surfaces a genuine Auth
+   error rather than swallowing it; the underlying code is the identical
+   path already proven working on the contractor case.
+
+   **A real bug found via this live testing, not just imagined**: once a
+   CONTRACTOR-role profile existed, it showed up in `/users`' own
+   "staff directory" query too (no role filter had ever been needed
+   before, since no non-staff role had reached `profiles` this way) —
+   and its role rendered through `UserRoleSelect` as **"OWNER"**, because
+   Carbon's `Select` falls back to its first `SelectItem` when the given
+   value isn't one of the options it renders (`ASSIGNABLE_STAFF_ROLES`
+   never included CONTRACTOR/CONSULTANT/CLIENT). Purely a display bug —
+   Carbon only fires `onChange` on an actual pick, so nothing silently
+   wrote a bad role — but a real one: an owner glancing at that row would
+   see "OWNER" for what's actually a CONTRACTOR login. Fixed by scoping
+   `/users`' own query to `STAFF_ROLES`, matching what the page already
+   claims to be ("Staff directory") — portal logins get their status
+   shown on `/contractors`/`/consultants` instead. Re-verified live after
+   the fix: the contractor row no longer appears on `/users` at all.
+
+5. **`document_issues` automatic wiring** — the cross-cutting half of
+   Phase 4's own flagged gap the manual-entry-only register shipped
+   without ("a genuinely cross-cutting change touching every domain's own
+   action, not a side effect of this pass"). New
+   `web/lib/document-issues-log.ts` (`logAutoDocumentIssue()`, best-effort
+   — a failed log insert is caught and reported to server logs, never
+   allowed to fail the real action that triggered it) wired into the six
+   entity types with an unambiguous "this was just issued" moment:
+   `createLetterRecord`/`createContractRecord`/`createProposalRecord`/
+   `createSpecSheetRecord` (create *is* issue — none of these tables have
+   a draft/issue lifecycle), `createTransmittalRecord` (only when
+   `date_issued` is actually set — a transmittal created with no issue
+   date is a real draft, the same column the client-portal RLS policy
+   already keys visibility off), and a **new** `issueMomRecord()` DRAFT →
+   ISSUED transition. That last one is a genuine gap this pass found, not
+   assumed: `moms` has had a `status` column defaulting to `'DRAFT'`
+   since migration 0008, and the client-portal RLS policy
+   (`moms(status = ISSUED)`, migration 0020) already filtered on it, but
+   `createMomRecord` never moved a MoM past DRAFT and no other action
+   did either — the client-portal MoM visibility path was unreachable in
+   practice. Added the transition (`lib/actions/moms.ts`, DRAFT-only
+   guard, `write_audit`'d as `ISSUE`) and a new `IssueMomButton.tsx` on
+   `/moms/[id]`. **Deliberately not wired**: INSPECTION (no `inspections`
+   table exists in `web/` at all — confirmed via a schema sweep) and
+   MOOD_BOARD (a project canvas with no issue/version concept). Every
+   `PROPOSAL`-kind insert logs as `PROPOSAL`, not a `PROPOSAL`/
+   `FEE_PROPOSAL` split — `proposals` is this repo's own unified model,
+   so there's no separate action to log the other way. Verified live
+   end-to-end: created a firm-level letter, confirmed a real
+   `document_issues` row with the correct `entity_id` (cross-checked
+   against the real `letters` row, not assumed), `project_id: null`,
+   correct `issued_by_id`; created a MoM (stays DRAFT, confirmed **no**
+   auto-log yet), clicked Issue, confirmed the status flip, both
+   `write_audit` entries (CREATE + ISSUE), and the new `document_issues`
+   row with the real `project_id` this time; created a transmittal with
+   no issue date (confirmed **zero** `document_issues` rows — the
+   negative case, not skipped) and a second one with a date set
+   (confirmed exactly one row); confirmed both auto-logged rows render
+   correctly on `/document-issues` itself, not just via direct query.
+
+`tsc --noEmit`, `eslint .` (repo-wide, not just touched files), and
+`next build --webpack` all clean throughout (0 errors, 0 warnings). All
+test data (contractor, consultant, letter, MoM, 2 transmittals, 3
+`document_issues` rows) deleted afterward and confirmed empty via a full
+table sweep; the contractor-login test account deleted cleanly (no
+`write_audit` calls of its own), the main OWNER test account disabled
+rather than deleted (it called `write_audit` several times, same FK
+situation as every other test-account cleanup this session).
 
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —

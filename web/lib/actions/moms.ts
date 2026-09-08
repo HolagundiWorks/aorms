@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { logAutoDocumentIssue } from "../document-issues-log";
 
 export type MomActionState = { error: string } | null;
 
@@ -53,6 +54,48 @@ export async function createMomRecord(
 
   revalidatePath("/moms");
   return null;
+}
+
+/** DRAFT → ISSUED — a transition this action file never had (found while
+ * wiring document_issues' automatic logging: `createMomRecord` always
+ * starts a MoM at the table's own `status = 'DRAFT'` default, and nothing
+ * ever moved it past that, so the client-portal RLS policy that already
+ * filters on `moms(status = ISSUED)` was unreachable in practice). */
+export async function issueMomRecord(momId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: mom, error } = await supabase
+    .from("moms")
+    .update({ status: "ISSUED" })
+    .eq("id", momId)
+    .eq("status", "DRAFT")
+    .select("ref, project_id")
+    .maybeSingle();
+  if (error) return { error: error.message };
+  if (!mom) return { error: "Already issued, or not found." };
+
+  await supabase.rpc("write_audit", {
+    p_entity: "mom",
+    p_entity_id: momId,
+    p_action: "ISSUE",
+    p_before: { status: "DRAFT" },
+    p_after: { status: "ISSUED" },
+  });
+
+  await logAutoDocumentIssue(supabase, {
+    entityType: "MOM",
+    entityId: momId,
+    projectId: mom.project_id,
+    ref: mom.ref,
+    issuedById: user?.id ?? null,
+  });
+
+  revalidatePath(`/moms/${momId}`);
+  revalidatePath("/moms");
+  return {};
 }
 
 export type MomActionItemState = { error: string } | null;

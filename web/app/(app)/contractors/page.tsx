@@ -11,14 +11,22 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { NewContractorForm } from "../../../components/aorms/NewContractorForm";
+import { ProvisionPortalLoginForm } from "../../../components/aorms/ProvisionPortalLoginForm";
+import { inviteContractorLogin } from "../../../lib/actions/portal-invites";
 
 export default async function ContractorsPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const { data: contractors, error } = await supabase
-    .from("contractors")
-    .select("id, name, category, company_name, contact_person, phone, city, active")
-    .order("name");
+  const [{ data: contractors, error }, { data: myProfile }, { data: withLogin }] = await Promise.all([
+    supabase.from("contractors").select("id, name, category, company_name, contact_person, phone, city, active").order("name"),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+    supabase.from("profiles").select("contractor_id").not("contractor_id", "is", null),
+  ]);
+  const isOwner = myProfile?.role === "OWNER";
+  const loginedIds = new Set((withLogin ?? []).map((p) => p.contractor_id));
 
   return (
     <Grid>
@@ -28,9 +36,7 @@ export default async function ContractorsPage() {
           className="cds--type-body-01"
           style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
         >
-          Directory of empanelled contractors, by trade category. Portal logins for tender
-          bidding aren&apos;t provisioned here yet — that&apos;s a Supabase Auth admin action,
-          not built.
+          Directory of empanelled contractors, by trade category. {isOwner ? "Invite a contractor to a tender-bidding portal login below." : "Only the firm owner can provision portal logins."}
         </p>
 
         <NewContractorForm />
@@ -50,6 +56,7 @@ export default async function ContractorsPage() {
                 <TableHeader>Phone</TableHeader>
                 <TableHeader>City</TableHeader>
                 <TableHeader>Status</TableHeader>
+                <TableHeader>Portal login</TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -66,11 +73,20 @@ export default async function ContractorsPage() {
                       {c.active ? "Active" : "Inactive"}
                     </Tag>
                   </TableCell>
+                  <TableCell>
+                    {loginedIds.has(c.id) ? (
+                      <Tag type="blue" size="sm">Provisioned</Tag>
+                    ) : isOwner ? (
+                      <ProvisionPortalLoginForm action={inviteContractorLogin.bind(null, c.id)} />
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
               {(contractors ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7}>
+                  <TableCell colSpan={8}>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                       No contractors yet.
                     </p>

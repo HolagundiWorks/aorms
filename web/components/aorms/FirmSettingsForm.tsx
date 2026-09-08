@@ -30,7 +30,13 @@ export type FirmSettings = {
 
 const initialState: FirmSettingsActionState = null;
 
-export function FirmSettingsForm({ firm }: { firm: FirmSettings }) {
+/** `canEdit` defaults true for back-compat with any other caller — the
+ * page itself is the one that actually knows the signed-in role and
+ * passes false for non-OWNER/PARTNER staff, matching the RLS policy
+ * ("firm: owner/partner update") this form's only two real inputs
+ * (companyName/firmType) write through. Without this, a VIEWER/ASSOCIATE
+ * etc. saw a fully live Save button that silently no-op'd under RLS. */
+export function FirmSettingsForm({ firm, canEdit = true }: { firm: FirmSettings; canEdit?: boolean }) {
   const [state, formAction, pending] = useActionState(updateFirmSettings, initialState);
 
   return (
@@ -40,8 +46,15 @@ export function FirmSettingsForm({ firm }: { firm: FirmSettings }) {
           <InlineNotification kind="error" title="Could not save" subtitle={state.error} hideCloseButton lowContrast />
         )}
         <FormGrid>
-          <TextInput id="companyName" name="companyName" labelText="Company name" defaultValue={firm.company_name} required />
-          <Select id="firmType" name="firmType" labelText="Firm type" defaultValue={firm.firm_type}>
+          <TextInput
+            id="companyName"
+            name="companyName"
+            labelText="Company name"
+            defaultValue={firm.company_name}
+            required
+            readOnly={!canEdit}
+          />
+          <Select id="firmType" name="firmType" labelText="Firm type" defaultValue={firm.firm_type} disabled={!canEdit}>
             <SelectItem value="SOLO" text="Solo practice" />
             <SelectItem value="PARTNERSHIP" text="Partnership" />
           </Select>
@@ -100,9 +113,11 @@ export function FirmSettingsForm({ firm }: { firm: FirmSettings }) {
           <TextInput id="pincode" name="pincode" labelText="PIN code" defaultValue={firm.pincode ?? ""} readOnly />
         </FormGrid>
 
-        <Button type="submit" disabled={pending}>
-          {pending ? "Saving…" : "Save firm settings"}
-        </Button>
+        {canEdit && (
+          <Button type="submit" disabled={pending}>
+            {pending ? "Saving…" : "Save firm settings"}
+          </Button>
+        )}
       </Stack>
     </Form>
   );

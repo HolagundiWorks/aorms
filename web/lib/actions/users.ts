@@ -50,3 +50,25 @@ export async function toggleUserDisabled(userId: string, disabled: boolean): Pro
   revalidatePath("/users");
   return {};
 }
+
+/**
+ * Self-service "edit my own name" — migration 0031's `update_my_full_name`
+ * security-definer function, the one column `profiles` RLS never let
+ * anyone touch for their own row (even OWNER, since "profiles: owner
+ * manages" is an UPDATE-any-row policy, not a self-service one). No
+ * write_audit call here, unlike updateUserRole/toggleUserDisabled above —
+ * this is a person editing their own display name, not an admin action on
+ * someone else's account.
+ */
+export async function updateMyName(fullName: string): Promise<{ error?: string }> {
+  const trimmed = fullName.trim();
+  if (!trimmed) return { error: "Name cannot be empty." };
+  if (trimmed.length > 200) return { error: "Name is too long (200 characters max)." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("update_my_full_name", { p_full_name: trimmed });
+  if (error) return { error: error.message };
+
+  revalidatePath("/users");
+  return {};
+}

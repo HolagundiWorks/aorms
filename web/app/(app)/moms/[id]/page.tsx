@@ -4,6 +4,7 @@ import { createClient } from "../../../../lib/supabase/server";
 import { NewMomActionForm } from "../../../../components/aorms/NewMomActionForm";
 import { MomActionStatusSelect } from "../../../../components/aorms/MomActionStatusSelect";
 import { RemoveLineItemButton } from "../../../../components/aorms/RemoveLineItemButton";
+import { IssueMomButton } from "../../../../components/aorms/IssueMomButton";
 import { removeMomAction } from "../../../../lib/actions/moms";
 
 export default async function MomDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -53,6 +54,7 @@ export default async function MomDetailPage({ params }: { params: Promise<{ id: 
           <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
             {project?.title ?? "—"} · {mom.meeting_date ?? "—"} · {mom.venue ?? "—"}
           </span>
+          {mom.status === "DRAFT" && <IssueMomButton momId={mom.id} />}
         </div>
 
         {mom.attendees && (

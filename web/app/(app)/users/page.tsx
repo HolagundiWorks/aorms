@@ -2,6 +2,8 @@ import { Column, Grid, InlineNotification, Table, TableBody, TableCell, TableHea
 import { createClient } from "../../../lib/supabase/server";
 import { UserRoleSelect } from "../../../components/aorms/UserRoleSelect";
 import { UserDisabledToggle } from "../../../components/aorms/UserDisabledToggle";
+import { MyNameEditor } from "../../../components/aorms/MyNameEditor";
+import { NewStaffInviteForm } from "../../../components/aorms/NewStaffInviteForm";
 
 /**
  * Staff user management — this repo's own module map calls out
@@ -10,12 +12,34 @@ import { UserDisabledToggle } from "../../../components/aorms/UserDisabledToggle
  * UPDATE any profile, so this page gates itself the same way, matching
  * the actual DB permission rather than a looser page-level check.
  *
- * Inviting a brand-new staff member isn't built here — that needs
- * Supabase Auth admin's `inviteUserByEmail` (a service-role operation),
- * flagged as a follow-up. `profiles` also has no email column (that lives
- * in `auth.users`, not exposed via the public API), so full name is the
- * only identifier shown.
+ * Inviting a brand-new staff member (2026-09-08, portal-invites.ts) uses
+ * Supabase Auth admin's `inviteUserByEmail` — this app never sees or sets
+ * a password, the invited person sets their own via the emailed link.
+ * `profiles` has no email column (that lives in `auth.users`, not exposed
+ * via the public API), so full name is the only identifier shown for
+ * existing rows.
+ *
+ * "Edit my own name" (2026-09-08, migration 0031) is a genuinely separate
+ * permission path from the isOwner gate above — RLS never let *anyone*,
+ * OWNER included, self-edit their own row (`profiles: owner manages` only
+ * covers updating someone *else's*), so `MyNameEditor` renders on the
+ * signed-in user's own row regardless of role.
+ *
+ * Explicitly scoped to STAFF_ROLES (2026-09-08) — found live while
+ * verifying the new portal-login provisioning: a freshly-invited
+ * CONTRACTOR/CONSULTANT profile showed up in this "staff directory" too
+ * (no role filter existed before, since no non-staff role had ever
+ * reached `profiles` this way), and its role rendered through
+ * `UserRoleSelect` as "OWNER" — Carbon's `Select` falls back to its first
+ * `SelectItem` when the given `role` isn't one of the options it renders
+ * (ASSIGNABLE_STAFF_ROLES never included CONTRACTOR/CONSULTANT/CLIENT),
+ * which visually misrepresented the real stored role and risked an owner
+ * unknowingly promoting a portal login to real staff access via that
+ * dropdown. The real fix is filtering this page's own query to the roles
+ * it's actually meant to manage — portal users have their own login
+ * status shown on /contractors and /consultants instead.
  */
+const STAFF_ROLES = ["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE", "VIEWER", "SITE_SUPERVISOR"];
 export default async function UsersPage() {
   const supabase = await createClient();
   const {
@@ -31,6 +55,7 @@ export default async function UsersPage() {
   const { data: profiles, error } = await supabase
     .from("profiles")
     .select("id, full_name, role, disabled")
+    .in("role", STAFF_ROLES)
     .order("full_name");
 
   return (
@@ -41,8 +66,17 @@ export default async function UsersPage() {
           className="cds--type-body-01"
           style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
         >
-          Staff directory — role and access. Inviting a new staff member isn&apos;t built here yet.
+          Staff directory — role and access.
         </p>
+
+        {isOwner && (
+          <div style={{ marginBottom: "2rem" }}>
+            <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+              Invite a staff member
+            </h2>
+            <NewStaffInviteForm />
+          </div>
+        )}
 
         {!isOwner && (
           <InlineNotification
@@ -72,7 +106,7 @@ export default async function UsersPage() {
             <TableBody>
               {(profiles ?? []).map((p) => (
                 <TableRow key={p.id}>
-                  <TableCell>{p.full_name || "—"}</TableCell>
+                  <TableCell>{p.id === user?.id ? <MyNameEditor initialName={p.full_name} /> : p.full_name || "—"}</TableCell>
                   <TableCell>
                     {isOwner ? <UserRoleSelect userId={p.id} role={p.role} /> : p.role}
                   </TableCell>
