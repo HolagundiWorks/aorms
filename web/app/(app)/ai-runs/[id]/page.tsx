@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
 import { Column, Grid, Tag } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
+import { updateAiRunApproval } from "../../../../lib/actions/ai";
+import { AiRunApprovalActions } from "../../../../components/aorms/esti/AiRunApprovalActions";
+
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
 
 export default async function AiRunDetailPage({
   params,
@@ -9,14 +13,20 @@ export default async function AiRunDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const { data: run, error } = await supabase
-    .from("ai_runs")
-    .select(
-      "id, kind, provider, model, prompt_summary, sources, output_text, approval_state, issued_entity_type, issued_entity_id, used_external_api, token_estimate, created_at, project_offices(title), profiles(full_name)"
-    )
-    .eq("id", id)
-    .maybeSingle();
+  const [{ data: run, error }, { data: profile }] = await Promise.all([
+    supabase
+      .from("ai_runs")
+      .select(
+        "id, kind, provider, model, prompt_summary, sources, output_text, approval_state, issued_entity_type, issued_entity_id, used_external_api, token_estimate, created_at, project_offices(title), profiles(full_name)"
+      )
+      .eq("id", id)
+      .maybeSingle(),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+  ]);
 
   if (error) {
     return (
@@ -71,6 +81,12 @@ export default async function AiRunDetailPage({
             </Tag>
           )}
         </div>
+
+        {profile && WRITE_TIER_ROLES.has(profile.role) && (
+          <div style={{ marginBottom: "1.5rem" }}>
+            <AiRunApprovalActions actions={approvalActionsFor(run.approval_state, run.id)} />
+          </div>
+        )}
 
         <dl style={{ marginBottom: "1.5rem" }}>
           <dt className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
@@ -139,4 +155,27 @@ export default async function AiRunDetailPage({
       </Column>
     </Grid>
   );
+}
+
+/** Mirrors updateAiRunApproval()'s own APPROVAL_TRANSITIONS map — kept in
+ * sync manually since a "use server" file can only export async functions,
+ * not a plain object, for the client to import directly. */
+function approvalActionsFor(state: string, runId: string) {
+  const bind = (nextState: string) => updateAiRunApproval.bind(null, runId, nextState);
+  switch (state) {
+    case "DRAFT":
+      return [
+        { label: "Approve", kind: "primary" as const, action: bind("APPROVED") },
+        { label: "Reject", kind: "danger--ghost" as const, action: bind("REJECTED") },
+      ];
+    case "APPROVED":
+      return [
+        { label: "Mark issued", kind: "primary" as const, action: bind("ISSUED") },
+        { label: "Reject", kind: "danger--ghost" as const, action: bind("REJECTED") },
+      ];
+    case "REJECTED":
+      return [{ label: "Reopen as draft", kind: "tertiary" as const, action: bind("DRAFT") }];
+    default:
+      return [];
+  }
 }

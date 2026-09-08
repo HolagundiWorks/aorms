@@ -11,16 +11,17 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
+import { NewDraftLinkButton } from "../../../components/aorms/esti/NewDraftLinkButton";
 
 /**
- * Read-only viewer over ai_runs (migration 0010) — no create form here.
- * Every row is provenance for a generation the AI gateway itself produced;
- * that gateway isn't ported (Phase 7's open architecture question — see
- * NEXTJS-MIGRATION-PHASE7-AUDIT.md), so there's nothing in this app that
- * writes to this table yet. RLS is bare is_office_staff() (any staff can
- * see any run, matching modules/ai/router.ts's actual gating today), so no
- * extra page-level gate is added here either — don't invent a narrower
- * policy the current backend doesn't enforce.
+ * Viewer + entry point over ai_runs (migration 0010). Two writers now:
+ * askEsti() (Q&A, kind "AGENT_QA") and generateAiDraft() (AI Studio
+ * document drafting, 2026-09-08 — see /ai-runs/new). RLS is bare
+ * is_office_staff() (any staff can see any run, matching
+ * modules/ai/router.ts's actual gating today), so no extra page-level
+ * read gate is added here either — don't invent a narrower policy the
+ * current backend doesn't enforce. The write-tier gate for *creating* a
+ * draft lives on /ai-runs/new (and is re-checked server-side there).
  */
 export default async function AiRunsPage() {
   const supabase = await createClient();
@@ -36,13 +37,15 @@ export default async function AiRunsPage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">AI Runs</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Provenance for every ESTI generation — most recent 200, newest first.
-        </p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.5rem" }}>
+          <div>
+            <h1 className="cds--type-heading-05">AI Runs</h1>
+            <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
+              Provenance for every ESTI generation — most recent 200, newest first.
+            </p>
+          </div>
+          <NewDraftLinkButton />
+        </div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
