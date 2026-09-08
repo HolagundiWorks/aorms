@@ -1,6 +1,19 @@
-import { Column, Grid } from "@carbon/react";
+import {
+  Column,
+  Grid,
+  InlineNotification,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { FirmSettingsForm } from "../../../components/aorms/FirmSettingsForm";
+import { NewNumberingPatternForm } from "../../../components/aorms/NewNumberingPatternForm";
+import { RemoveLineItemButton } from "../../../components/aorms/RemoveLineItemButton";
+import { removeNumberingPatternRecord } from "../../../lib/actions/numbering";
 
 /**
  * Firm Settings — the singleton `firm` row (migration 0024 seeded it after
@@ -21,14 +34,23 @@ import { FirmSettingsForm } from "../../../components/aorms/FirmSettingsForm";
  */
 export default async function FirmSettingsPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const { data: firm, error } = await supabase
-    .from("firm")
-    .select(
-      "company_name, firm_type, gst_type, gstin, pan, architect_name, coa_reg_no, email, phone, address_line1, address_line2, city, district, state, pincode, tds_applicable_default",
-    )
-    .limit(1)
-    .maybeSingle();
+  const [{ data: firm, error }, { data: myProfile }, { data: patterns, error: patternsError }] = await Promise.all([
+    supabase
+      .from("firm")
+      .select(
+        "company_name, firm_type, gst_type, gstin, pan, architect_name, coa_reg_no, email, phone, address_line1, address_line2, city, district, state, pincode, tds_applicable_default",
+      )
+      .limit(1)
+      .maybeSingle(),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+    supabase.from("numbering_patterns").select("id, scope, prefix, padding").order("scope"),
+  ]);
+
+  const isOwner = myProfile?.role === "OWNER";
 
   return (
     <Grid>
@@ -51,6 +73,76 @@ export default async function FirmSettingsPage() {
           </p>
         ) : (
           <FirmSettingsForm key={JSON.stringify(firm)} firm={firm} />
+        )}
+
+        <h2 className="cds--type-heading-03" style={{ marginTop: "3rem", marginBottom: "0.5rem" }}>
+          Reference Numbering
+        </h2>
+        <p
+          className="cds--type-body-01"
+          style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
+        >
+          Override the prefix and/or digit-padding used for a document scope&apos;s reference numbers (e.g.{" "}
+          <code>LTR/2026-27/0001</code>). A scope with no override here uses its built-in default.
+        </p>
+
+        {!isOwner && (
+          <InlineNotification
+            kind="info"
+            title="Read-only"
+            subtitle="Only the firm owner can change numbering overrides — you can still see what's set."
+            hideCloseButton
+            lowContrast
+            style={{ marginBottom: "1.5rem" }}
+          />
+        )}
+
+        {patternsError ? (
+          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+            Couldn&apos;t load numbering overrides: {patternsError.message}
+          </p>
+        ) : (
+          <>
+            <Table aria-label="Numbering overrides" className="aorms-table-spaced">
+              <TableHead>
+                <TableRow>
+                  <TableHeader>Scope</TableHeader>
+                  <TableHeader>Prefix</TableHeader>
+                  <TableHeader>Padding</TableHeader>
+                  {isOwner && <TableHeader>Remove</TableHeader>}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {(patterns ?? []).map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell>{p.scope}</TableCell>
+                    <TableCell>{p.prefix ?? "—"}</TableCell>
+                    <TableCell>{p.padding ?? "—"}</TableCell>
+                    {isOwner && (
+                      <TableCell>
+                        <RemoveLineItemButton action={removeNumberingPatternRecord.bind(null, p.id)} />
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+                {(patterns ?? []).length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={isOwner ? 4 : 3}>
+                      <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        No overrides set — every scope is using its default prefix and 4-digit padding.
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+
+            {isOwner && (
+              <div style={{ marginTop: "1.5rem" }}>
+                <NewNumberingPatternForm />
+              </div>
+            )}
+          </>
         )}
       </Column>
     </Grid>

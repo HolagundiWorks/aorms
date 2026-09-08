@@ -894,6 +894,71 @@ its `profiles` row cascaded. `tsc --noEmit`/`eslint` clean. **This closes
 Phase 4's last remaining gap — Phase 4 is now fully UI-complete**, same
 status as every other phase 1–10.
 
+**Phase 4 — numbering-pattern overrides (2026-09-08), same day.** One more
+gap surfaced while checking Phase 4's actual state: migration 0003's own
+header comment had flagged per-firm numbering overrides
+("`org settings' numberingPatterns`, which can override prefix/padding
+per scope") as deferred, but the roadmap never carried that forward as an
+open item — found by re-reading the migration file itself, not by
+trusting either doc. Closed the same day as the measurement drill-down
+above.
+
+Migration `0030_numbering_patterns.sql`: a new `numbering_patterns` table
+(one row per scope, `prefix`/`padding` both nullable — set either or
+both), port of `backend/src/modules/document/router.ts`'s
+`numberingPatterns`/`setNumberingPatterns` + `packages/contracts/src/
+document.ts`'s `NumberingPattern` shape. Deliberately **not** a JSON blob
+on `firm` the way the old system stored it — RLS can't restrict a single
+JSON *column's* writes to OWNER while leaving the rest of `firm` at
+OWNER-or-PARTNER (`firm`'s own existing update policy), so a real table
+with its own dedicated `numbering_patterns: owner write` policy
+(`current_app_role() = 'OWNER'`, narrower than `firm`'s, matching the
+Phase 4 audit's own explicit call-out) was the direct way to get that
+right, not a JSON column riding on a broader policy. `next_ref()` (the
+same function migration 0003 shipped) gained one lookup at the top:
+checks for a `numbering_patterns` row matching the requested scope and
+uses its `prefix`/`padding` in place of the hardcoded default whenever
+set — everything else about the function (FY computation, the gap-free
+`sequences` table, the `PREFIX/FY/00001` return shape) is unchanged.
+
+`web/lib/actions/numbering.ts` (`addNumberingPatternRecord` — an upsert
+keyed on `scope`, so re-saving an existing scope updates it rather than
+erroring; `removeNumberingPatternRecord`), a new "Reference Numbering"
+section added to the existing `/firm-settings` page (not a new route —
+this is exactly the kind of setting that page already exists for),
+gated the same way `/users` already gates its own OWNER-only controls
+(`myProfile.role === "OWNER"`, an `InlineNotification` telling
+non-owners it's read-only, table always visible to any staff). Both
+actions call `write_audit` (`entity: "numbering_pattern"`), matching
+`firm.ts`'s own convention that settings changes get audited — unlike
+the lighter transmittal-items/mom-actions/estimate-measurements
+sub-resource pattern, which doesn't.
+
+Verified live against the cloud project: direct SQL confirmed the
+override/fallback behavior first (`next_ref('phase4_test', 'DEF')` →
+`ZZZ/2026-27/000001` with a `{prefix: ZZZ, padding: 6}` override active,
+reverting to `DEF/2026-27/0002` — note the *same*, correctly-continued
+sequence value — the moment the override row was deleted); then the
+full round trip through the real browser as a real OWNER account: added
+a `letter` → `{prefix: COR, padding: 5}` override through the actual UI,
+confirmed it rendered in the table, confirmed `next_ref('letter', 'LTR')`
+now genuinely returned `COR/2026-27/00002` (5-digit padding) via the
+Management API, removed it through the UI, confirmed the table returned
+to its empty state. Confirmed both actions' `write_audit` calls actually
+landed (`UPDATE`/`DELETE` rows on `numbering_pattern`) via a direct read.
+**Test-account cleanup note, worth keeping in mind for future
+verification rounds**: unlike the measurement-drill-down test account
+above (which touched no audited action and deleted cleanly), this
+session's test account *did* trigger `write_audit`, and deleting an
+`auth.users` row cascades to `profiles`, which `audit_log.actor_id`
+references by FK — Postgres correctly refused the delete
+(`audit_log_actor_id_fkey` violation) rather than silently orphaning an
+audit entry. That's the FK working as intended, not a bug to work
+around: disabled the test account (`profiles.disabled = true`, demoted
+off OWNER) instead of deleting it, leaving the real audit trail intact.
+Any future test account that exercises an audited action needs the same
+resolution, not a forced delete. `tsc --noEmit`/`eslint` clean.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
