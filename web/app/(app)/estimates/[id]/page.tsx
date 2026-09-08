@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import {
   Column,
   Grid,
@@ -160,6 +161,7 @@ export default async function EstimateDetailPage({
                   <TableHeader>Quantity</TableHeader>
                   <TableHeader>Rate</TableHeader>
                   <TableHeader>Amount</TableHeader>
+                  <TableHeader>Measurements</TableHeader>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -170,11 +172,14 @@ export default async function EstimateDetailPage({
                     <TableCell>{it.quantity}</TableCell>
                     <TableCell>{formatInr(it.rate_paise)}</TableCell>
                     <TableCell>{formatInr(it.amount_paise)}</TableCell>
+                    <TableCell>
+                      <Link href={`/estimates/${estimate.id}/items/${it.id}`}>Measure →</Link>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {rows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5}>
+                    <TableCell colSpan={6}>
                       <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                         No items yet.
                       </p>

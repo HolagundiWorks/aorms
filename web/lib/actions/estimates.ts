@@ -157,6 +157,81 @@ export async function createEstimateItemRecord(
   return insertEstimateItem(supabase, { estimateId, rateBookItemId, description, unit, quantity, ratePaise });
 }
 
+export type EstimateMeasurementActionState = { error: string } | null;
+
+/**
+ * Measurement-row drill-down — the one Phase 4 gap ROADMAP-CLOUD.md still
+ * flagged open ("measurement-row drill-down for estimate items (direct
+ * quantity entry only)"). The hard part is already live at the DB layer
+ * (migration 0005_phase4_estimation.sql's shape_for_unit()/
+ * measurement_quantity()/recompute_estimate_item_from_measurements()
+ * trigger) — every insert/update/delete here just writes the row; the
+ * trigger derives the item's shape from its own `unit`, recomputes
+ * `quantity`/`amount_paise` from nos/length/breadth/depth (or the direct
+ * `quantity` field for WEIGHT/LUMPSUM units) and re-runs the estimate's
+ * own editable-lock check (assert_estimate_editable) — so a locked
+ * (APPROVED/CANCELLED) estimate's Postgres exception surfaces here as a
+ * normal `error.message`, same as the item-level insert above.
+ */
+export async function addEstimateMeasurementRecord(
+  _prev: EstimateMeasurementActionState,
+  formData: FormData,
+): Promise<EstimateMeasurementActionState> {
+  const estimateItemId = String(formData.get("estimateItemId") ?? "").trim();
+  const estimateId = String(formData.get("estimateId") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
+  const nosRaw = String(formData.get("nos") ?? "1").trim();
+  const lengthRaw = String(formData.get("length") ?? "0").trim();
+  const breadthRaw = String(formData.get("breadth") ?? "0").trim();
+  const depthRaw = String(formData.get("depth") ?? "0").trim();
+  const quantityRaw = String(formData.get("quantity") ?? "0").trim();
+
+  if (!estimateItemId) return { error: "Missing estimate item." };
+  if (!estimateId) return { error: "Missing estimate." };
+
+  const nos = nosRaw ? Number(nosRaw) : 1;
+  const length = lengthRaw ? Number(lengthRaw) : 0;
+  const breadth = breadthRaw ? Number(breadthRaw) : 0;
+  const depth = depthRaw ? Number(depthRaw) : 0;
+  const quantity = quantityRaw ? Number(quantityRaw) : 0;
+  if (![nos, length, breadth, depth, quantity].every(Number.isFinite)) {
+    return { error: "Nos, length, breadth, depth, and quantity must all be numbers." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("estimate_measurements").insert({
+    estimate_item_id: estimateItemId,
+    description,
+    nos,
+    length,
+    breadth,
+    depth,
+    quantity,
+  });
+  // assert_estimate_editable (fired by the recompute trigger) surfaces as a
+  // Postgres exception here if the parent estimate is APPROVED/CANCELLED —
+  // its message is already user-facing.
+  if (error) return { error: error.message };
+
+  revalidatePath(`/estimates/${estimateId}/items/${estimateItemId}`);
+  revalidatePath(`/estimates/${estimateId}`);
+  return null;
+}
+
+export async function removeEstimateMeasurementRecord(
+  measurementId: string,
+  estimateId: string,
+  estimateItemId: string,
+): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("estimate_measurements").delete().eq("id", measurementId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/estimates/${estimateId}/items/${estimateItemId}`);
+  revalidatePath(`/estimates/${estimateId}`);
+  return {};
+}
+
 export type SendTakeoffActionState = { error: string } | null;
 
 /**
