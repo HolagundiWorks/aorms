@@ -197,6 +197,7 @@ export async function addColumnMember(_prev: BbsActionState, formData: FormData)
     spacingMm: numberField(formData, "spacingMm"),
     hookAngle: numberField(formData, "hookAngle"),
     tieType: String(formData.get("tieType") ?? "Closed"),
+    columnShape: String(formData.get("columnShape") ?? "Rectangular"),
     mainBars: diaCountPairs(formData, "main"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid column input." };

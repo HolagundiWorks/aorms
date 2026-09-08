@@ -20,27 +20,34 @@ import { z } from "zod";
  * low-risk specifically *because* the replacement formula already existed
  * and was already tested (Wall), not new, unverified logic.
  *
- * **Deliberately still not reconciled, two genuinely different things
- * left open, not overlooked:**
- * 1. The 135° hook allowance itself: `HOOK_ALLOWANCE_PER_HOOK_D[135]`
- *    below is 12d; AQC's own `Settings::hook_allowance` uses 10d (both
- *    cite IS 2502 — confirmed by reading AQC's actual `Model.h`, not
- *    assumed). This is a genuine sourced-differently convention, not a
- *    missing term the way bend deduction was, and this repo's own value
- *    is already shared consistently across Wall/Stair/Column/Beam — so
- *    changing it now wouldn't just match AQC, it would silently change
- *    Wall/Stair's own already-verified output too. Left as-is,
- *    disclosed here rather than picked with false confidence either way.
- * 2. AQC's IS 456 Cl. 26.5.3.2 tie-type auto-resolver (`resolve_column_
- *    tie()` — heuristically choosing among Closed/Cross Ties/Group Ties/
- *    Open Ties/U-Ties/Diagonal Ties by bar count + spacing + column
- *    shape) has no equivalent here (`ColumnTieType` above is a smaller,
- *    differently-shaped vocabulary: Closed/Closed+Crosstie/Double Tie/
- *    Circular/Spiral). This is genuinely new scope, not a bug fix — it's
- *    AQC's own heuristic approximation of a design-code judgment call,
- *    not a settled formula, and changing what tie types this repo's UI
- *    even exposes is a real product decision. Not attempted in this
- *    pass; flagged for a dedicated one.
+ * **Tie-type auto-resolver (2026-09-08, part two):**
+ * `resolveColumnTieType()` ports AQC's `resolve_column_tie()` —
+ * `ColumnTieType` now covers all six of AQC's rectangular-column shapes
+ * (Closed/Cross Ties/Diagonal Ties/Open Ties/U-Ties/Group Ties, each
+ * directly selectable) plus `"Auto"`, which runs the heuristic
+ * (bar count + clear dimensions + column shape) the way AQC's own UI
+ * does. Two deliberate deviations from AQC's own resolver, not silent
+ * fidelity: `"Double Tie"` and the legacy `"Closed+Crosstie"` are both
+ * treated as already-final picks rather than falling through AQC's own
+ * `Double Tie → U-Ties` alias — this repo's `"Double Tie"` already meant
+ * something else (two full nested closed ties) before this resolver
+ * existed, so existing stored data's meaning wasn't reinterpreted.
+ * `"Closed+Crosstie"` also gained real generation for the first time
+ * here (previously a silent no-op duplicate of `"Closed"`) — it now
+ * shares `"Cross Ties"`' own peripheral-plus-two-crossties behaviour,
+ * matching what its name always implied.
+ *
+ * **Deliberately still not reconciled — the 135° hook allowance
+ * itself**, a genuinely different thing, left open on purpose, not
+ * overlooked: `HOOK_ALLOWANCE_PER_HOOK_D[135]` below is 12d; AQC's own
+ * `Settings::hook_allowance` uses 10d (both cite IS 2502 — confirmed by
+ * reading AQC's actual `Model.h`, not assumed). This is a sourced-
+ * differently convention, not a missing term the way bend deduction
+ * was, and this repo's own value is already shared consistently across
+ * Wall/Stair/Column/Beam — changing it now wouldn't just match AQC, it
+ * would silently change Wall/Stair's own already-verified output too.
+ * Left as-is, disclosed here rather than picked with false confidence
+ * either way.
  *
  * Lengths in mm; weight via d²/162 kg/m.
  */
@@ -59,14 +66,41 @@ export const HOOK_ALLOWANCE_PER_HOOK_D: Record<90 | 135 | 180, number> = {
 export const HookAngle = z.union([z.literal(90), z.literal(135), z.literal(180)]);
 export type HookAngle = z.infer<typeof HookAngle>;
 
+/**
+ * Column tie shape — "Auto" (2026-09-08) runs `resolveColumnTieType()`,
+ * the IS 456 Cl. 26.5.3.2 heuristic port of AQC's `resolve_column_tie()`,
+ * and generates whichever shape it lands on; the five AQC-native shapes
+ * after it (Cross/Group/Open/U/Diagonal Ties) are also directly
+ * selectable, matching AQC's own UI. `Closed`/`Circular`/`Spiral` are
+ * unchanged. `Closed+Crosstie` now has real behaviour (peripheral closed
+ * + two crossties, the same generation `Cross Ties` uses) — it was
+ * previously a selectable value that silently produced identical output
+ * to plain `Closed`, a no-op its own name didn't disclose; `Double Tie`
+ * is deliberately left as this repo's own existing convention (two full
+ * nested closed ties) rather than remapped to match AQC's own internal
+ * `Double Tie → U-Ties` alias, since those are two different real tie
+ * configurations and this repo's stored data already means the former.
+ */
 export const ColumnTieType = z.enum([
+  "Auto",
   "Closed",
   "Closed+Crosstie",
   "Double Tie",
+  "Cross Ties",
+  "Diagonal Ties",
+  "Open Ties",
+  "U-Ties",
+  "Group Ties",
   "Circular",
   "Spiral",
 ]);
 export type ColumnTieType = z.infer<typeof ColumnTieType>;
+
+/** Column cross-section shape — drives `resolveColumnTieType()`'s own
+ * shape-dependent rules (a Square column's own side doubles as both
+ * `widthMm`/`depthMm`; Circular ties/Spiral only make sense here). */
+export const ColumnShape = z.enum(["Rectangular", "Square", "Circular"]);
+export type ColumnShape = z.infer<typeof ColumnShape>;
 
 export const BeamTopBarType = z.enum(["At Support", "Full Span"]);
 export type BeamTopBarType = z.infer<typeof BeamTopBarType>;
@@ -254,9 +288,80 @@ export function bbsDiameterSummary(
 
 // ── Column ties / main bars ──────────────────────────────────────────────────
 
+/**
+ * IS 456 Cl. 26.5.3.2 tie-type resolver — port of Engine.cpp's
+ * `resolve_column_tie()`. Called for every column regardless of the
+ * user's `tieType`, not only when it's "Auto": a direct pick of one of
+ * the six rectangular shapes is honoured as-is (with the one override
+ * AQC itself applies — "Open Ties" isn't meaningful on a Square column,
+ * so it falls back to "Closed" there), while "Auto"/unrecognized/
+ * shape-mismatched picks (e.g. "Circular" tie type on a non-Circular
+ * column) fall through to the real heuristic: bar count + clear
+ * dimensions decide between Closed, Cross/Diagonal Ties (spacing > 75mm
+ * per Cl. 26.5.3.2), Group Ties (12+ bars, Square), and Open/U-Ties for
+ * rectangular columns with unequal sides. `"Double Tie"` deliberately
+ * does NOT fall through here — see `ColumnTieType`'s own header comment
+ * for why this repo doesn't alias it to AQC's `Double Tie → U-Ties`.
+ */
+export function resolveColumnTieType(
+  tieType: ColumnTieType | string,
+  columnShape: ColumnShape | string,
+  widthMm: number,
+  depthMm: number,
+  coverMm: number,
+  stirrupDiaMm: number,
+  mainBarCount: number,
+): ColumnTieType {
+  if (columnShape === "Circular") {
+    return tieType === "Spiral" ? "Spiral" : "Circular";
+  }
+  if (tieType === "Circular" || tieType === "Spiral") {
+    // Not valid for a square/rectangular column — fall through to Auto.
+  } else if (
+    tieType === "Closed" ||
+    tieType === "Open Ties" ||
+    tieType === "U-Ties" ||
+    tieType === "Group Ties" ||
+    tieType === "Cross Ties" ||
+    tieType === "Diagonal Ties" ||
+    // Deliberate deviation from AQC's own resolver, disclosed above: AQC
+    // aliases "Double Tie" straight to "U-Ties" here; this repo instead
+    // treats both legacy values as already-final, honoured as picked.
+    tieType === "Double Tie" ||
+    tieType === "Closed+Crosstie"
+  ) {
+    if (columnShape === "Square" && tieType === "Open Ties") return "Closed";
+    return tieType;
+  }
+
+  const w = widthMm;
+  let d = depthMm;
+  if (columnShape === "Square" || columnShape === "Circular") d = w;
+
+  const minSide = Math.min(w, d);
+  const clearB = Math.max(1, w - 2 * coverMm);
+  const clearD = Math.max(1, d - 2 * coverMm);
+  const longer = Math.max(clearB, clearD);
+  const along = Math.max(2, Math.floor((mainBarCount + 3) / 4) + 1);
+  const spacing = longer / Math.max(1, along - 1);
+
+  if (mainBarCount <= 4 || minSide <= 300) return "Closed";
+  if (mainBarCount <= 8) {
+    if (spacing > 75) return columnShape === "Square" ? "Cross Ties" : "Diagonal Ties";
+    return "Closed";
+  }
+  if (mainBarCount >= 12 && columnShape === "Square") return "Group Ties";
+  if (columnShape !== "Square" && Math.abs(w - d) >= 50) {
+    return spacing > 75 || longer > 48 * Math.max(stirrupDiaMm, 6) ? "Open Ties" : "U-Ties";
+  }
+  return "Cross Ties";
+}
+
+export type StirrupExtra = { role: "crosstie" | "diagonal-tie" | "open-tie" | "u-tie" | "group-tie"; shape: string; count: number; lengthEachMm: number };
+
 export type StirrupResult =
-  | { kind: "discrete"; count: number; lengthEachMm: number }
-  | { kind: "continuous"; totalLengthMm: number };
+  | { kind: "discrete"; count: number; lengthEachMm: number; resolvedTieType: ColumnTieType; extras: StirrupExtra[] }
+  | { kind: "continuous"; totalLengthMm: number; resolvedTieType: ColumnTieType };
 
 export function calculateColumnStirrups(input: {
   widthMm: number;
@@ -267,12 +372,23 @@ export function calculateColumnStirrups(input: {
   spacingMm: number;
   hookAngle: number;
   tieType: ColumnTieType | string;
+  columnShape?: ColumnShape | string;
+  mainBarCount?: number;
 }): StirrupResult {
   const hookPerEnd = hookAllowancePerHook(input.hookAngle) * input.diaMm;
   const totalHookAllowance = 2 * hookPerEnd;
-  const tie = input.tieType;
+  const columnShape = input.columnShape ?? (input.widthMm === input.depthMm ? "Square" : "Rectangular");
+  const resolved = resolveColumnTieType(
+    input.tieType,
+    columnShape,
+    input.widthMm,
+    input.depthMm,
+    input.coverMm,
+    input.diaMm,
+    input.mainBarCount ?? 0,
+  );
 
-  if (tie === "Spiral") {
+  if (resolved === "Spiral") {
     const di = input.widthMm - 2 * input.coverMm;
     const pitch = input.spacingMm;
     const lengthPerTurn = Math.sqrt((Math.PI * di) ** 2 + pitch ** 2);
@@ -280,26 +396,56 @@ export function calculateColumnStirrups(input: {
     return {
       kind: "continuous",
       totalLengthMm: turns * lengthPerTurn + totalHookAllowance,
+      resolvedTieType: resolved,
     };
   }
 
-  if (tie === "Circular") {
+  if (resolved === "Circular") {
     const di = input.widthMm - 2 * input.coverMm;
     return {
       kind: "discrete",
       count: barCount(input.heightMm, input.spacingMm),
       lengthEachMm: Math.PI * di + totalHookAllowance,
+      resolvedTieType: resolved,
+      extras: [],
     };
   }
 
   const b = input.widthMm - 2 * input.coverMm;
   const h = input.depthMm - 2 * input.coverMm;
   const lengthEach = closedLinkCuttingLengthMm(b, h, input.diaMm, input.hookAngle);
-  const multiplier = tie === "Double Tie" ? 2 : 1;
+  const sets = barCount(input.heightMm, input.spacingMm);
+  const multiplier = resolved === "Double Tie" ? 2 : 1;
+
+  // Peripheral closed stirrup + intermediate ties per Cl. 26.5.3.2 — port
+  // of Engine.cpp's push_column_ties(). "Closed+Crosstie" deliberately
+  // shares Cross Ties' own generation (see ColumnTieType's header note).
+  const extras: StirrupExtra[] = [];
+  if (resolved === "Cross Ties" || resolved === "Closed+Crosstie") {
+    extras.push(
+      { role: "crosstie", shape: "cross-tie", count: sets, lengthEachMm: hookedLegCuttingLengthMm(b, input.diaMm, input.hookAngle) },
+      { role: "crosstie", shape: "cross-tie", count: sets, lengthEachMm: hookedLegCuttingLengthMm(h, input.diaMm, input.hookAngle) },
+    );
+  } else if (resolved === "Diagonal Ties") {
+    const diagClear = 2 * Math.sqrt(b * b + h * h);
+    extras.push({ role: "diagonal-tie", shape: "diagonal-tie", count: sets, lengthEachMm: hookedLegCuttingLengthMm(diagClear, input.diaMm, input.hookAngle) });
+  } else if (resolved === "Open Ties") {
+    const openClear = h + totalHookAllowance;
+    extras.push({ role: "open-tie", shape: "open-tie", count: 2 * sets, lengthEachMm: hookedLegCuttingLengthMm(openClear, input.diaMm, input.hookAngle) });
+  } else if (resolved === "U-Ties") {
+    const uClear = h + 0.3 * b;
+    extras.push({ role: "u-tie", shape: "u-tie", count: 2 * sets, lengthEachMm: hookedLegCuttingLengthMm(uClear, input.diaMm, input.hookAngle) });
+  } else if (resolved === "Group Ties") {
+    const g = 0.35 * (b + h);
+    extras.push({ role: "group-tie", shape: "group-tie", count: 4 * sets, lengthEachMm: closedLinkCuttingLengthMm(g, g, input.diaMm, input.hookAngle) });
+  }
+
   return {
     kind: "discrete",
-    count: barCount(input.heightMm, input.spacingMm),
+    count: sets,
     lengthEachMm: multiplier * lengthEach,
+    resolvedTieType: resolved,
+    extras,
   };
 }
 
@@ -521,6 +667,7 @@ export const BbsColumnInput = z.object({
   spacingMm: z.number().positive(),
   hookAngle: HookAngle.default(135),
   tieType: ColumnTieType.default("Closed"),
+  columnShape: ColumnShape.default("Rectangular"),
   mainBars: z.array(BbsDiaCount).default([]),
 });
 export type BbsColumnInput = z.infer<typeof BbsColumnInput>;

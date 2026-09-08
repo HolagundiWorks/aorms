@@ -5,8 +5,9 @@
  * (`BBSDesktop/src/core/Engine.cpp`'s `generate_wall_bbs`/
  * `generate_stair_bbs`) — see web/lib/bbs/formulas.ts's header note for
  * the full Column/Beam reconciliation account (bend-deduction cutting
- * length now shared with Wall; the 135° hook-allowance constant and
- * AQC's tie-type auto-resolver remain genuinely open, not overlooked).
+ * length shared with Wall; the IS 456 Cl. 26.5.3.2 tie-type resolver
+ * ported 2026-09-08; the 135° hook-allowance constant remains genuinely
+ * open, not overlooked).
  */
 import {
   type BbsBeamInput,
@@ -47,6 +48,10 @@ export type BbsBarRole =
   | "bottom"
   | "stirrup"
   | "crosstie"
+  | "diagonal-tie"
+  | "open-tie"
+  | "u-tie"
+  | "group-tie"
   | "tie"
   | "distribution"
   | "mesh-L"
@@ -136,8 +141,10 @@ export function computeColumnMember(
 ): BbsMemberResult {
   const mark = markOf(input, `C${index + 1}`);
   const bars: BbsBarLine[] = [];
+  const checks: BbsCheckRow[] = [];
   let n = 1;
 
+  const mainBarCount = input.mainBars.reduce((sum, mb) => sum + mb.count, 0);
   const stirrup = calculateColumnStirrups({
     widthMm: input.widthMm,
     depthMm: input.depthMm,
@@ -147,6 +154,8 @@ export function computeColumnMember(
     spacingMm: input.spacingMm,
     hookAngle: input.hookAngle,
     tieType: input.tieType,
+    columnShape: input.columnShape,
+    mainBarCount,
   });
 
   if (stirrup.kind === "continuous") {
@@ -172,9 +181,33 @@ export function computeColumnMember(
         input.stirrupDiaMm,
         stirrup.count,
         stirrup.lengthEachMm,
-        input.tieType === "Circular" ? "circular-tie" : "closed-tie",
+        stirrup.resolvedTieType === "Circular" ? "circular-tie" : "closed-tie",
       ),
     );
+    for (const extra of stirrup.extras) {
+      bars.push(
+        line(
+          `${mark}-T${n++}`,
+          mark,
+          "COLUMN",
+          extra.role,
+          input.stirrupDiaMm,
+          extra.count,
+          extra.lengthEachMm,
+          extra.shape,
+        ),
+      );
+    }
+    if (input.tieType === "Auto" && stirrup.resolvedTieType !== input.tieType) {
+      checks.push({
+        mark,
+        label: "Tie type (IS 456 Cl. 26.5.3.2)",
+        value: 0,
+        limit: 0,
+        ok: true,
+        message: `${input.columnShape} column, ${mainBarCount} main bars → resolved to ${stirrup.resolvedTieType}`,
+      });
+    }
   }
 
   const mainLen = calculateColumnMainBarLength(input.heightMm);
@@ -198,7 +231,7 @@ export function computeColumnMember(
     element: "COLUMN",
     mark,
     bars,
-    checks: [],
+    checks,
     totalWeightKg: round2(bars.reduce((s, b) => s + b.weightKg, 0)),
   };
 }

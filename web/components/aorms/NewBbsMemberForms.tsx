@@ -79,10 +79,21 @@ function ColumnForm({ bbsId }: { bbsId: string }) {
             <SelectItem value="135" text="135°" />
             <SelectItem value="180" text="180°" />
           </Select>
-          <Select id="tieType" name="tieType" labelText="Tie type" defaultValue="Closed">
+          <Select id="columnShape" name="columnShape" labelText="Column shape" defaultValue="Rectangular">
+            <SelectItem value="Rectangular" text="Rectangular" />
+            <SelectItem value="Square" text="Square" />
+            <SelectItem value="Circular" text="Circular" />
+          </Select>
+          <Select id="tieType" name="tieType" labelText="Tie type" defaultValue="Auto">
+            <SelectItem value="Auto" text="Auto (IS 456 Cl. 26.5.3.2)" />
             <SelectItem value="Closed" text="Closed" />
             <SelectItem value="Closed+Crosstie" text="Closed + Crosstie" />
             <SelectItem value="Double Tie" text="Double Tie" />
+            <SelectItem value="Cross Ties" text="Cross Ties" />
+            <SelectItem value="Diagonal Ties" text="Diagonal Ties" />
+            <SelectItem value="Open Ties" text="Open Ties" />
+            <SelectItem value="U-Ties" text="U-Ties" />
+            <SelectItem value="Group Ties" text="Group Ties" />
             <SelectItem value="Circular" text="Circular" />
             <SelectItem value="Spiral" text="Spiral" />
           </Select>

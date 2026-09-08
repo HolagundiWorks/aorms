@@ -1492,6 +1492,88 @@ confirmed both tables empty); test account disabled rather than deleted
 (it called `write_audit`, same FK situation as this session's other
 test-account cleanups).
 
+**BBS Column/Beam reconciliation, part two — the IS 456 Cl. 26.5.3.2
+tie-type auto-resolver (2026-09-08).** On explicit request to build the
+piece part one had deliberately left as "genuinely new scope, not a bug
+fix... a real product decision" rather than infer it unprompted. Ported
+AQC's `resolve_column_tie()`/`push_column_ties()` (`Engine.cpp`, re-read
+in full) as `resolveColumnTieType()` in `web/lib/bbs/formulas.ts`.
+
+`ColumnTieType` grew from 5 values to 11: `Auto` (new — runs the
+resolver) plus AQC's five rectangular-column shapes (`Cross Ties`/
+`Diagonal Ties`/`Open Ties`/`U-Ties`/`Group Ties`), each now directly
+selectable too, not just reachable via Auto — matching AQC's own UI,
+and costing little extra once the generation logic existed anyway. A
+new `ColumnShape` (`Rectangular`/`Square`/`Circular`) field was added to
+`BbsColumnInput` — needed because the resolver's own rules genuinely
+depend on column shape separately from tie type (e.g. "Open Ties" isn't
+meaningful on a Square column and falls back to "Closed"), which a bare
+width/depth comparison can't distinguish from a truly circular column
+(both have `width === depth`).
+
+**Two deliberate, disclosed deviations from AQC's own resolver, not
+silent fidelity**: AQC aliases a `"Double Tie"` pick straight to
+`"U-Ties"`; this repo's `"Double Tie"` already meant something else
+(two full nested closed ties, part one's own scope) before this
+resolver existed, so `resolveColumnTieType()` treats both `"Double
+Tie"` and the legacy `"Closed+Crosstie"` as already-final picks,
+short-circuiting past the heuristic entirely rather than reinterpreting
+what existing stored data means. `"Closed+Crosstie"` also gained real
+behaviour for the first time here — it was previously a selectable
+value that silently produced identical output to plain `"Closed"` (a
+no-op its own name never disclosed); it now shares `"Cross Ties"`' own
+generation (peripheral closed stirrup + two crossties), the behaviour
+its name always implied.
+
+`calculateColumnStirrups()` now returns `resolvedTieType` +  an
+`extras: StirrupExtra[]` array (the intermediate tie bars each shape
+beyond plain Closed needs — crosstie/diagonal-tie/open-tie/u-tie/
+group-tie, each with its own AQC-ported clear-length formula:
+`hookedLegCuttingLengthMm()` for the straight-leg shapes, and
+`closedLinkCuttingLengthMm()` again for Group Ties' own small corner
+closed ties). `computeColumnMember()` (`engine.ts`) pushes one bar line
+per extra (four new `BbsBarRole` values), and — when `tieType ===
+"Auto"` — surfaces which shape it actually resolved to as a green
+advisory `BbsCheckRow`, the same Checks column the page already renders
+per member, no new UI plumbing needed there.
+`NewBbsMemberForms.tsx`/`lib/actions/bbs.ts` gained the `Column shape`
+select and the six new `Tie type` options; `Auto` is now the form's own
+default (previously `Closed`), since that's the more useful default now
+that a real resolver exists.
+
+Hand-verified first, thoroughly, before touching the browser: a
+standalone deleted `tsx` script exercised 13 distinct resolver paths
+against worked examples traced by hand against AQC's own algorithm —
+the Rectangular-vs-Square branch split, both `minSide ≤ 300`/`nBars ≤
+4` early-outs, the `Square + Open Ties → Closed` override, confirming
+`"Double Tie"`/`"Closed+Crosstie"` stay final (the deliberate
+deviations) rather than falling through, a mismatched `"Circular"` pick
+on a Rectangular column correctly falling through to the heuristic, and
+both the `columnShape === "Circular"` short-circuit's two branches —
+all 13 passed exactly. Live-verified end-to-end through the real
+signed-in browser UI against the cloud project: a real Square 310×310
+column, 6 main bars, `tieType: "Auto"` — confirmed the advisory Check
+read *"Square column, 6 main bars → resolved to Cross Ties"*, and the
+generated bar schedule (`C1-T1` tie 1016 mm, `C1-T2`/`C1-T3` crossties
+374 mm each) matched the standalone script's own numbers exactly, not
+just the resolved type. **A real click-tooling mistake caught and
+recovered from, not just avoided**: two earlier attempts filling the
+form by raw screen coordinate accidentally submitted the form early
+(a coordinate meant for the "Main bar 1" field landed on the adjacent
+"Add column" button instead), creating two incomplete test columns —
+caught by reading the page back rather than assuming the fill worked,
+both deleted, and the rest of the verification switched to `find`-then-
+`form_input` by element reference instead of raw coordinates, which
+doesn't have this failure mode. Test schedule deleted afterward
+(members cascaded, confirmed empty); test account disabled rather than
+deleted (called `write_audit`).
+
+`tsc --noEmit`, `eslint .` (repo-wide), and `next build --webpack` all
+clean. **This closes the BBS/AQC reconciliation started in part one —
+all three pieces that discrepancy bundled together (bend deduction, the
+hook-allowance constant, the tie-type resolver) are now each either
+fixed or deliberately, disclosedly left open**, not one unresolved flag.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
