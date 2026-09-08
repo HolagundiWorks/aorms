@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import NextLink from "next/link";
-import { Content, Header, HeaderGlobalAction, HeaderGlobalBar, HeaderName } from "@carbon/react";
+import { Content, Header, HeaderGlobalAction, HeaderGlobalBar } from "@carbon/react";
 import { Logout } from "@carbon/icons-react";
 import { createClient } from "../../lib/supabase/server";
 import { signOut } from "../../lib/actions/auth";
 import { roleHome } from "../../lib/auth/role-home";
+import { PortalHeaderName } from "../../components/aorms/PortalHeaderName";
 
 /**
  * Client Portal shell — a minimal Carbon `Header` + `Content`, deliberately
@@ -33,13 +33,7 @@ export default async function PortalLayout({ children }: { children: React.React
   return (
     <>
       <Header aria-label="AORMS Client Portal">
-        <HeaderName as={NextLink} href="/portal" prefix="">
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
-            {/* Plain <img>, not next/image — a fixed brand asset, not user content. */}
-            <img src="/aorms-logo.png" alt="AORMS" style={{ height: "16px", width: "auto" }} />
-            Client Portal
-          </span>
-        </HeaderName>
+        <PortalHeaderName href="/portal" label="Client Portal" />
         <HeaderGlobalBar>
           <form action={signOut}>
             <HeaderGlobalAction aria-label="Sign out">

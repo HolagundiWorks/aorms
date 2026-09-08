@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import NextLink from "next/link";
-import { Content, Header, HeaderGlobalAction, HeaderGlobalBar, HeaderName } from "@carbon/react";
+import { Content, Header, HeaderGlobalAction, HeaderGlobalBar } from "@carbon/react";
 import { Logout } from "@carbon/icons-react";
 import { createClient } from "../../lib/supabase/server";
 import { signOut } from "../../lib/actions/auth";
 import { roleHome } from "../../lib/auth/role-home";
+import { PortalHeaderName } from "../../components/aorms/PortalHeaderName";
 
 /**
  * Contractor Portal shell — same minimal Carbon `Header` + `Content`
@@ -30,13 +30,7 @@ export default async function ContractorPortalLayout({ children }: { children: R
   return (
     <>
       <Header aria-label="AORMS Contractor Portal">
-        <HeaderName as={NextLink} href="/contractor-portal" prefix="">
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
-            {/* Plain <img>, not next/image — a fixed brand asset, not user content. */}
-            <img src="/aorms-logo.png" alt="AORMS" style={{ height: "16px", width: "auto" }} />
-            Contractor Portal
-          </span>
-        </HeaderName>
+        <PortalHeaderName href="/contractor-portal" label="Contractor Portal" />
         <HeaderGlobalBar>
           <form action={signOut}>
             <HeaderGlobalAction aria-label="Sign out">
