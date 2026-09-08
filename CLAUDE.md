@@ -404,7 +404,29 @@ branch before starting anything that could overlap — not just at hand-off.
   non-trivial logic smoke-tested with real inserted rows) — see
   [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) for the established pattern
   across migrations `0001`–`0015`.
-- **Local Supabase stack for `web/` (2026-09-06)** — `web/supabase/` is now
+- **Local Supabase stacks + Podman removed entirely (2026-09-08).** Both
+  local stacks below (`web/supabase/` and `platform/supabase/`) were
+  stopped with `supabase stop --no-backup` and the `podman-machine-default`
+  WSL VM itself was removed (`podman machine rm -f`) — explicit user
+  request to develop directly against the cloud projects instead of a
+  local stack. Confirmed before removing anything: both local databases
+  held zero real rows (just the one seeded `firm` singleton, itself
+  already produced by the same migration on the cloud project), so there
+  was nothing to migrate. `web/.env.local` had its Supabase override
+  lines removed (kept only the unrelated `OLLAMA_MODEL` line) so `next
+  dev` now falls through to `.env`'s cloud values for **both** projects,
+  same as production. Both cloud projects are fully schema-current as of
+  this date — see [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) and the
+  Supabase migrations bullet above, which is the standing discipline that
+  didn't change: still write a migration → verify against the live cloud
+  project via the Management API (no local stack to verify against
+  first anymore) → done. The rest of this section (below) describes the
+  **retired** local-stack setup — kept for history, not a live workflow;
+  Podman itself (the application) is still installed on this machine in
+  case it's needed for something unrelated, only its Supabase-hosting
+  VM was removed.
+- **Local Supabase stack for `web/` (2026-09-06, retired — see above)** —
+  `web/supabase/` is now
   also a real Supabase CLI project (`config.toml`), so `web/` can run
   against a **local** Postgres+PostgREST+Auth+Storage stack instead of the
   live cloud project, applying every migration in `web/supabase/migrations/`
@@ -446,7 +468,8 @@ branch before starting anything that could overlap — not just at hand-off.
   rebuild/re-pull them if it's ever run again. Reclaimed roughly 12GB
   total (incl. the 5.47GB Ollama image); `podman system df` afterward shows
   12 images / 5.735GB, all Supabase, with no reclaimable dangling layers.
-- **AORMS Platform — separate local Supabase stack (2026-09-07).** Portable
+- **AORMS Platform — separate local Supabase stack (2026-09-07, retired
+  2026-09-08 — see above).** Portable
   user/company identity + licensing tiers (`AORMS-U-`/`AORMS-C-` handles,
   many-companies-per-person membership, usage-hour tracking, automatic
   Basic→Pro at 100h) lives in its **own** Supabase CLI project,
