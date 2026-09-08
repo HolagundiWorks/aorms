@@ -1372,6 +1372,53 @@ session found already in the picker, `EST/2026-27/0001 — External wall
 plastering`, completely untouched); the test account deleted cleanly (no
 `write_audit` calls anywhere in `takeoff.ts`).
 
+**Client Portal — respond to an approval (2026-09-08).** Closes the
+write half of the Client Portal's own flagged gap from when it first
+shipped: `respondApproval` (client writes that mutate `approvals`'
+status column) was explicitly deferred as needing "a business-rule-
+guarded RPC, not a broad RLS update policy" — same class of decision as
+the numbering-patterns/self-name-edit work already made this session.
+
+Migration `0032_client_respond_approval.sql`: a single-purpose
+`security definer` function, `respond_to_approval(p_approval_id,
+p_status, p_remarks)` — same shape as migration 0031's
+`update_my_full_name` and for the same reason: `approvals`' only UPDATE
+policy is staff-only, so a bare CLIENT-scoped UPDATE policy would let a
+client rewrite *any* column on their own project's approval rows
+(title, entity_type, status to something not a real response,
+response_date backdated), not just respond to it. The function
+re-verifies CLIENT role and that the caller's own `profiles.client_id`
+matches the approval's project's client (via a join, not trusted from
+the input), only accepts a real terminal response
+(`APPROVED`/`REVISIONS`/`REJECTED`), and only lets a `SENT` approval be
+responded to — never `DRAFT`, and never twice, since an already-
+responded row's status is no longer `SENT`. Writes its own `audit_log`
+row directly (security definer bypasses `audit_log: staff insert`,
+which a CLIENT caller has no policy of their own to satisfy — the
+normal `write_audit()` RPC is `security invoker` and would fail RLS for
+a client caller, same reason none of this file's other client writes
+call it either).
+
+`lib/actions/portal.ts` gained `respondToApproval()` (a thin wrapper —
+the RPC is the real gate, re-checked here only for the response-value
+allow-list); new `PortalApprovalResponse.tsx` (remarks textarea +
+Approve/Request revisions/Reject buttons) renders only for a `SENT` row
+in `/portal/[projectId]`'s Approvals table; a responded row now shows
+its response date + remarks inline instead. `tsc --noEmit`, `eslint .`,
+and `next build --webpack` all clean.
+
+**Blocked on the same thing migration 0031 is** — no fresh Supabase
+Management API token this session, so 0032 isn't applied to the cloud
+project yet either. Live-verified what's possible without it: created a
+real `SENT` approval and a real `CLIENT` test account, confirmed the
+response UI renders correctly and only for `SENT` rows, clicked
+Approve, and confirmed the exact expected honest failure — `Could not
+find the function public.respond_to_approval(...) in the schema cache`
+— the correct "code shipped, migration pending" failure mode, not a
+masked or swallowed error. **Needs the same follow-up session with a
+token as 0031, to apply both migrations and re-verify the actual
+writes.** Test approval and account deleted afterward, confirmed empty.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

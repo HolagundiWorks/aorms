@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { PortalAcknowledgeButton } from "../../../../components/aorms/PortalAcknowledgeButton";
+import { PortalApprovalResponse } from "../../../../components/aorms/PortalApprovalResponse";
 import { PortalSubmissionForms } from "../../../../components/aorms/PortalSubmissionForms";
 
 function formatInr(paise: number | null): string {
@@ -66,7 +67,7 @@ export default async function PortalProjectDetailPage({
       .order("date_invoice", { ascending: false }),
     supabase
       .from("approvals")
-      .select("id, title, entity_type, status, sent_date, response_date")
+      .select("id, title, entity_type, status, sent_date, response_date, remarks")
       .eq("project_id", projectId)
       .order("sent_date", { ascending: false }),
     supabase
@@ -180,6 +181,7 @@ export default async function PortalProjectDetailPage({
               <TableHeader>Type</TableHeader>
               <TableHeader>Sent</TableHeader>
               <TableHeader>Status</TableHeader>
+              <TableHeader>Your response</TableHeader>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -189,15 +191,38 @@ export default async function PortalProjectDetailPage({
                 <TableCell>{a.entity_type ?? "—"}</TableCell>
                 <TableCell>{a.sent_date ?? "—"}</TableCell>
                 <TableCell>
-                  <Tag type={a.status === "APPROVED" ? "green" : a.status === "REJECTED" ? "red" : "blue"} size="sm">
+                  <Tag
+                    type={
+                      a.status === "APPROVED"
+                        ? "green"
+                        : a.status === "REJECTED"
+                          ? "red"
+                          : a.status === "REVISIONS"
+                            ? "purple"
+                            : "blue"
+                    }
+                    size="sm"
+                  >
                     {a.status}
                   </Tag>
+                </TableCell>
+                <TableCell>
+                  {a.status === "SENT" ? (
+                    <PortalApprovalResponse approvalId={a.id} projectId={project.id} />
+                  ) : a.response_date ? (
+                    <span className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>
+                      {a.response_date}
+                      {a.remarks ? ` — ${a.remarks}` : ""}
+                    </span>
+                  ) : (
+                    "—"
+                  )}
                 </TableCell>
               </TableRow>
             ))}
             {(approvals ?? []).length === 0 && (
               <TableRow>
-                <TableCell colSpan={4}>
+                <TableCell colSpan={5}>
                   <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                     Nothing sent for your approval yet.
                   </p>

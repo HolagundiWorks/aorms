@@ -161,3 +161,35 @@ export async function acknowledgeItem(
   revalidatePath(`/portal/${projectId}`);
   return {};
 }
+
+const RESPONSE_STATUSES = ["APPROVED", "REVISIONS", "REJECTED"];
+
+/**
+ * Client Portal write path for `approvals` — the piece deferred when this
+ * file first shipped ("client writes that would mutate approvals/
+ * portal_submissions status columns directly — needs a business-rule-
+ * guarded RPC, not a broad RLS update policy"). Migration
+ * 0032_client_respond_approval.sql's `respond_to_approval()` is that RPC —
+ * it re-checks CLIENT role, project ownership, and the SENT-only
+ * transition itself, so this Server Action is a thin wrapper, not the
+ * real gate.
+ */
+export async function respondToApproval(
+  approvalId: string,
+  status: string,
+  remarks: string,
+  projectId: string,
+): Promise<{ error?: string }> {
+  if (!RESPONSE_STATUSES.includes(status)) return { error: "Pick Approve, Request revisions, or Reject." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("respond_to_approval", {
+    p_approval_id: approvalId,
+    p_status: status,
+    p_remarks: remarks.trim() || null,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/portal/${projectId}`);
+  return {};
+}
