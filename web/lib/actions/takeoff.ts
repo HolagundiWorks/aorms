@@ -275,3 +275,72 @@ export async function deleteTakeoffItem(itemId: string, projectId: string): Prom
   await supabase.from("takeoff_items").delete().eq("id", itemId);
   revalidatePath(`/takeoff/${projectId}`);
 }
+
+/**
+ * Derive Plaster + Painting rows from a Masonry wall — the one piece of
+ * AQC's real architecture take-off's own migration (0027) explicitly did
+ * NOT port: `BBSApp/Services/DerivationEngine.cs`'s link-rule cascade
+ * (Masonry → Plastering → Painting, chained by a configurable Area-basis
+ * multiplier over an abstract per-trade quantity graph). That shape
+ * doesn't map cleanly onto this repo's actual take-off model, which
+ * already computes each category's own wall-face area directly from its
+ * own `lengthMm`/`heightMm` + a category-specific deduction rule (not a
+ * source-quantity × factor) — so this ports the cascade's real *intent*
+ * (don't re-enter the same wall three times) the way this repo's model
+ * actually needs it: copy only the true shared geometry (length/height)
+ * onto new PLASTER/PAINTING rows linked via `wall_mark`, and let each
+ * target category's own Zod schema default everything else (thickness,
+ * mortar mix, paint type, faces, deduct rule) — critically, NOT copying
+ * `deductRule` from the masonry row, since IS 1200 masonry and IS 1200
+ * plaster/paint use genuinely different deduction rules (masonry ignores
+ * small openings under 0.1 m², finishes never do) and blindly copying it
+ * would silently produce a wrong quantity.
+ *
+ * Idempotent per target category: skips (not duplicates) a PLASTER or
+ * PAINTING row that already exists on this wall_mark — safe to click
+ * again after adding a door/window, since openings link automatically via
+ * `wall_mark` regardless of when the finish rows were created.
+ */
+export async function deriveWallFinishes(masonryItemId: string, projectId: string): Promise<{ error?: string; created?: string[] }> {
+  const supabase = await createClient();
+
+  const { data: masonry, error: fetchError } = await supabase
+    .from("takeoff_items")
+    .select("id, category, mark, fields")
+    .eq("id", masonryItemId)
+    .maybeSingle();
+  if (fetchError) return { error: fetchError.message };
+  if (!masonry || masonry.category !== "MASONRY") return { error: "Not a masonry wall." };
+
+  const source = MasonryFields.safeParse(masonry.fields);
+  if (!source.success) return { error: "This wall's own dimensions don't parse — fix it before deriving." };
+
+  const { data: existing, error: existingError } = await supabase
+    .from("takeoff_items")
+    .select("category")
+    .eq("project_id", projectId)
+    .eq("wall_mark", masonry.mark)
+    .in("category", ["PLASTER", "PAINTING"]);
+  if (existingError) return { error: existingError.message };
+  const already = new Set((existing ?? []).map((r) => r.category));
+
+  const rows: { category: string; mark: string; wall_mark: string; fields: Record<string, unknown> }[] = [];
+  if (!already.has("PLASTER")) {
+    const parsed = PlasterFields.parse({ lengthMm: source.data.lengthMm, heightMm: source.data.heightMm });
+    rows.push({ category: "PLASTER", mark: `${masonry.mark}-PL`, wall_mark: masonry.mark, fields: parsed });
+  }
+  if (!already.has("PAINTING")) {
+    const parsed = PaintingFields.parse({ lengthMm: source.data.lengthMm, heightMm: source.data.heightMm });
+    rows.push({ category: "PAINTING", mark: `${masonry.mark}-PT`, wall_mark: masonry.mark, fields: parsed });
+  }
+
+  if (rows.length === 0) return { created: [] };
+
+  const { error: insertError } = await supabase.from("takeoff_items").insert(
+    rows.map((r) => ({ project_id: projectId, category: r.category, mark: r.mark, wall_mark: r.wall_mark, fields: r.fields })),
+  );
+  if (insertError) return { error: insertError.message };
+
+  revalidatePath(`/takeoff/${projectId}`);
+  return { created: rows.map((r) => r.category) };
+}

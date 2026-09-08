@@ -4,6 +4,7 @@ import { createClient } from "../../../../lib/supabase/server";
 import { NewTakeoffItemForms } from "../../../../components/aorms/NewTakeoffItemForms";
 import { DeleteTakeoffItemButton } from "../../../../components/aorms/DeleteTakeoffItemButton";
 import { SendTakeoffToEstimateButton } from "../../../../components/aorms/SendTakeoffToEstimateButton";
+import { DeriveWallFinishesButton } from "../../../../components/aorms/DeriveWallFinishesButton";
 import {
   computeMasonry,
   computePlaster,
@@ -323,6 +324,7 @@ export default async function TakeoffProjectPage({
                   <TableHeader>Bricks / blocks</TableHeader>
                   <TableHeader>Cement / sand / agg</TableHeader>
                   <TableHeader>Note</TableHeader>
+                  <TableHeader>Derive finishes</TableHeader>
                   <TableHeader>Send to Estimate</TableHeader>
                   <TableHeader />
                 </TableRow>
@@ -353,6 +355,9 @@ export default async function TakeoffProjectPage({
                     </TableCell>
                     <TableCell>{result?.note ?? "—"}</TableCell>
                     <TableCell>
+                      <DeriveWallFinishesButton takeoffItemId={row.id} projectId={project.id} />
+                    </TableCell>
+                    <TableCell>
                       <SendTakeoffToEstimateButton takeoffItemId={row.id} projectId={project.id} estimates={estimates ?? []} />
                     </TableCell>
                     <TableCell>
@@ -362,7 +367,7 @@ export default async function TakeoffProjectPage({
                 ))}
                 {masonryRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={10}>
+                    <TableCell colSpan={11}>
                       <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                         No masonry walls yet.
                       </p>
