@@ -67,7 +67,7 @@ export default async function CollabPortalProjectDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader eyebrow={project.ref} title={project.title} />
+        <PageHeader eyebrow={project.ref} eyebrowMono title={project.title} />
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem", marginTop: "-1rem" }}>
           <Tag type="blue" size="sm">
             {project.status}

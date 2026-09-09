@@ -93,7 +93,7 @@ export default async function BbsDetailPage({ params }: { params: Promise<{ id: 
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader eyebrow={schedule.ref} title={schedule.title} />
+        <PageHeader eyebrow={schedule.ref} eyebrowMono title={schedule.title} />
         <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "0.5rem", marginTop: "-1rem" }}>
           <BbsStatusSelect bbsId={schedule.id} status={schedule.status} />
           <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>

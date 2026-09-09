@@ -124,7 +124,7 @@ export default async function EstimateDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader eyebrow={estimate.ref} title={estimate.title} />
+        <PageHeader eyebrow={estimate.ref} eyebrowMono title={estimate.title} />
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem", marginTop: "-1rem" }}>
           <Tag type={STATUS_TAG[estimate.status] ?? "gray"} size="sm">
             {estimate.status}

@@ -48,7 +48,7 @@ export default async function TransmittalDetailPage({ params }: { params: Promis
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader eyebrow={transmittal.ref} title={transmittal.purpose} />
+        <PageHeader eyebrow={transmittal.ref} eyebrowMono title={transmittal.purpose} />
         <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "2rem", marginTop: "-1rem" }}>
           <Tag type={transmittal.acknowledged_at ? "green" : "cool-gray"} size="sm">
             {transmittal.acknowledged_at ? `Acknowledged by ${transmittal.acknowledged_by}` : "Pending"}

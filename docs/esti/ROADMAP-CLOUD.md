@@ -2474,6 +2474,39 @@ No more `h2 className="cds--type-heading-03"` anywhere in `app/` —
 confirmed via the same grep with zero hits, same discipline as every
 audit this pass.
 
+**Third typography gap found and fixed, same "continue with ui/ux
+implementation" pass (2026-09-09): `eyebrowMono` wasn't applied where
+the guide's own rule calls for it.** `PageHeader.tsx`'s `eyebrowMono`
+prop (§3.2/§18: technical identifiers render in IBM Plex Mono) was
+built during the composition-standard work and used exactly once, on
+Project Overview's `eyebrow={project.ref} eyebrowMono`. Every other
+detail page this session gave a bare ref/code string as its eyebrow —
+`schedule.ref`, `mom.ref`, `estimate.ref`, `po.ref`, `sheet.ref`,
+`transmittal.ref`, the Client/Collaborator Portal's `project.ref`,
+Take-off's `project.ref`, Project Brief's `project.ref` — 10 pages in
+total — never set the prop, so those refs rendered in the default sans
+font instead of mono, the same class of silent gap as the `<h1>`/`<h2>`
+misses, just at the prop level instead of the class-name level.
+
+Fixed all 10. Left deliberately plain (not a miss): pages whose eyebrow
+is a **compound** string mixing a ref with a name/description —
+Leads (`ref · lead_source`), Tenders (`project title · category`),
+PMC RA Bills (`ref · period dates`), PMC Packages (`ref · project
+title`), Contractor Portal invitation (`project title (ref)`) — mono-ing
+the whole string would also mono the human-readable half, which the
+guide's own distinction ("an eyebrow that's actually a project name is
+not [mono]") argues against. Every `eyebrow={project.title}` instance
+across the `/projects/[id]/*` sub-pages was already correctly plain —
+those are names, not codes, unchanged.
+
+Verified: `tsc --noEmit` and `eslint .` (whole package) both clean, a
+full `next build --webpack` clean across all 90+ routes. Live-verified
+on a disposable test project's Take-off page via `getComputedStyle` on
+the live DOM node (not just a class-name check) — the ref eyebrow's real
+`font-family` resolved to `"IBM Plex Mono", system-ui, ...`, confirming
+the font actually renders, not just that the right class is present.
+Test project deleted afterward.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

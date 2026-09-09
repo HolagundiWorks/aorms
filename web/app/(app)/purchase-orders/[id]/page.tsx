@@ -52,7 +52,7 @@ export default async function PurchaseOrderDetailPage({ params }: { params: Prom
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader eyebrow={po.ref} title={po.title ?? po.vendor ?? "Purchase order"} />
+        <PageHeader eyebrow={po.ref} eyebrowMono title={po.title ?? po.vendor ?? "Purchase order"} />
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem", marginTop: "-1rem" }}>
           <Tag type={STATUS_TAG[po.status] ?? "gray"} size="sm">
             {po.status}

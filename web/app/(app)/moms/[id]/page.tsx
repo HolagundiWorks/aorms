@@ -42,7 +42,7 @@ export default async function MomDetailPage({ params }: { params: Promise<{ id: 
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader eyebrow={mom.ref} title={mom.title} />
+        <PageHeader eyebrow={mom.ref} eyebrowMono title={mom.title} />
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem", marginTop: "-1rem" }}>
           <Tag type={mom.status === "DRAFT" ? "cool-gray" : "green"} size="sm">
             {mom.status}

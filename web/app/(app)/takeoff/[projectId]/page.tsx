@@ -296,7 +296,7 @@ export default async function TakeoffProjectPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader eyebrow={project.ref} title={`${project.title} — Take-off`} />
+        <PageHeader eyebrow={project.ref} eyebrowMono title={`${project.title} — Take-off`} />
 
         <NewTakeoffItemForms projectId={project.id} />
 

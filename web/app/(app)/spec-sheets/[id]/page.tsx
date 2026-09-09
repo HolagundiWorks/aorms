@@ -51,6 +51,7 @@ export default async function SpecSheetDetailPage({
       <Column sm={4} md={8} lg={16}>
         <PageHeader
           eyebrow={sheet.ref}
+          eyebrowMono
           title={sheet.title}
           actions={<GeneratePdfButton action={generateSpecSheetPdf.bind(null, sheet.id)} pdfStatus={sheet.pdf_status} />}
         />

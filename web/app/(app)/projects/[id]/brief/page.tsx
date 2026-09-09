@@ -67,6 +67,7 @@ export default async function ProjectBriefPage({
       <Column sm={4} md={8} lg={16}>
         <PageHeader
           eyebrow={project.ref}
+          eyebrowMono
           title={`${project.title} — Project Brief`}
           description="Questionnaire answers and site context — the single source for project briefing data."
           actions={<ExportBriefButton projectId={project.id} />}
