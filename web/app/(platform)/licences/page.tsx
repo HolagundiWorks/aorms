@@ -3,6 +3,7 @@ import { Column, Grid, Stack, Tag, Tile } from "@carbon/react";
 import { createClient as createWebClient } from "../../../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
 import { UpdateLicenceForm } from "../../../components/aorms/platform/UpdateLicenceForm";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 type StudioEmbed = { id: string; name: string; public_id: string } | null;
 
@@ -41,13 +42,10 @@ export default async function LicencesPage() {
     return (
       <Grid>
         <Column sm={4} md={8} lg={8}>
-          <h1 className="cds--type-heading-05">Licence Management</h1>
-          <p
-            className="cds--type-body-01"
-            style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-          >
-            Link your AORMS Identity first — licences belong to studios you&apos;re a member of.
-          </p>
+          <PageHeader
+            title="Licence Management"
+            description="Link your AORMS Identity first — licences belong to studios you're a member of."
+          />
           <NextLink href="/identity">Go to My AORMS Identity →</NextLink>
         </Column>
       </Grid>
@@ -75,13 +73,7 @@ export default async function LicencesPage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={10}>
-        <h1 className="cds--type-heading-05">Licence Management</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Plan, seats, and expiry for every studio you belong to.
-        </p>
+        <PageHeader title="Licence Management" description="Plan, seats, and expiry for every studio you belong to." />
 
         <Stack gap={5}>
           {(memberships ?? []).map((m) => {

@@ -13,6 +13,7 @@ import { AddCompanyContactForm } from "../../../../components/aorms/platform/com
 import { CompanyContactRow } from "../../../../components/aorms/platform/company/CompanyContactRow";
 import { ProductCard, type Product } from "../../../../components/aorms/platform/company/ProductCard";
 import { AddProductForm } from "../../../../components/aorms/platform/company/AddProductForm";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 
 type AccountEmbed = { id: string; full_name: string; public_id: string } | null;
 
@@ -99,15 +100,17 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
   return (
     <Grid>
       <Column sm={4} md={8} lg={12}>
-        <Stack gap={2} orientation="horizontal">
-          <h1 className="cds--type-heading-05">{company.name}</h1>
-          <Tag type="cool-gray" size="md">
-            {company.public_id}
-          </Tag>
-        </Stack>
+        <PageHeader
+          title={company.name}
+          actions={
+            <Tag type="cool-gray" size="md">
+              {company.public_id}
+            </Tag>
+          }
+        />
         <p
           className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
+          style={{ marginTop: "-1rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
         >
           <NextLink href="/identity">← Back to My AORMS Identity</NextLink>
         </p>

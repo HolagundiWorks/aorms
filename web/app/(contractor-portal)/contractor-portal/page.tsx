@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "cool-gray" | "blue" | "green" | "red"> = {
   INVITED: "cool-gray",
@@ -20,13 +21,7 @@ export default async function ContractorPortalHomePage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Your tender invitations</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Tenders you've been invited to bid on.
-        </p>
+        <PageHeader title="Your tender invitations" description="Tenders you've been invited to bid on." />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

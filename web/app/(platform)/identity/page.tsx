@@ -11,6 +11,7 @@ import { PlatformAuthCta } from "../../../components/aorms/platform/PlatformAuth
 import { CreateCompanyForm } from "../../../components/aorms/platform/company/CreateCompanyForm";
 import { JoinCompanyForm } from "../../../components/aorms/platform/company/JoinCompanyForm";
 import { LeaveCompanyButton } from "../../../components/aorms/platform/company/LeaveCompanyButton";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const HOURS_TO_PRO = 100;
 
@@ -84,14 +85,15 @@ export default async function IdentityPage() {
     return (
       <Grid>
         <Column sm={4} md={8} lg={8}>
-          <h1 className="cds--type-heading-05">AORMS Identity</h1>
-          <p
-            className="cds--type-body-01"
-            style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-          >
-            A portable personal identity — your own AORMS-U- handle, usage hours, and level, independent of any
-            one studio. {isStaleLink ? "Linked handle no longer resolves." : "Not linked to this login yet."}
-          </p>
+          <PageHeader
+            title="AORMS Identity"
+            description={
+              <>
+                A portable personal identity — your own AORMS-U- handle, usage hours, and level, independent of any
+                one studio. {isStaleLink ? "Linked handle no longer resolves." : "Not linked to this login yet."}
+              </>
+            }
+          />
           <Tile>
             <Stack gap={5}>
               {isStaleLink && (
@@ -139,13 +141,10 @@ export default async function IdentityPage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={12}>
-        <h1 className="cds--type-heading-05">AORMS Identity</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Your portable personal identity — carries across every studio you work with.
-        </p>
+        <PageHeader
+          title="AORMS Identity"
+          description="Your portable personal identity — carries across every studio you work with."
+        />
 
         <Stack gap={6}>
           <Tile>

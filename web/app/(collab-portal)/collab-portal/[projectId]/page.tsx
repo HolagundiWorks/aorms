@@ -3,6 +3,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../../lib/supabase/server";
 import { CollabSubmissionForm } from "../../../../components/aorms/CollabSubmissionForm";
 import { CollabTaskCompleteButton } from "../../../../components/aorms/CollabTaskCompleteButton";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 
 /**
  * Collaborator Portal project detail — port of backend/src/modules/
@@ -66,13 +67,8 @@ export default async function CollabPortalProjectDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project.ref}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {project.title}
-        </h1>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem" }}>
+        <PageHeader eyebrow={project.ref} title={project.title} />
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem", marginTop: "-1rem" }}>
           <Tag type="blue" size="sm">
             {project.status}
           </Tag>

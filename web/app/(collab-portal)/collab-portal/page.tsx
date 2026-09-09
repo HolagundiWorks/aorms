@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 function formatInr(paise: number | null): string {
   if (paise == null) return "—";
@@ -18,13 +19,10 @@ export default async function CollabPortalHomePage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Your engagements</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Projects you're engaged on, agreed fee, and payments received.
-        </p>
+        <PageHeader
+          title="Your engagements"
+          description="Projects you're engaged on, agreed fee, and payments received."
+        />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

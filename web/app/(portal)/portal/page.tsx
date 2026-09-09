@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function PortalHomePage() {
   const supabase = await createClient();
@@ -13,13 +14,10 @@ export default async function PortalHomePage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Your projects</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Published progress, invoices, drawings and documents for your projects with us.
-        </p>
+        <PageHeader
+          title="Your projects"
+          description="Published progress, invoices, drawings and documents for your projects with us."
+        />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

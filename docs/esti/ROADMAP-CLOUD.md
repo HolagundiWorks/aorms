@@ -2402,6 +2402,42 @@ KpiTile's own number size instead of exceeding it); DNA's
 slot; Brief's "Export brief" button `actions` slot — all rendering
 correctly against real (if empty) data. Test project deleted afterward.
 
+**Typography rollout extended to every non-`(app)` route group
+(2026-09-09), same day, on explicit "continue with ui/ux implementation"
+direction.** The composition standard and its typography half were
+scoped to the internal office hub (`(app)`) — the client/consultant/
+contractor portals and the separate AORMS Platform identity/licensing
+surface (`(portal)`, `(collab-portal)`, `(contractor-portal)`,
+`(platform)` route groups) hadn't been swept. Re-ran the same audit grep
+(`cds--type-heading-05">\|cds--type-heading-04">`) across the whole
+`web/app` tree instead of just `(app)`, found 15 more hits, and sorted
+them the same way the earlier audits did: 11 converted to `PageHeader`
+(Client Portal home + project detail, Contractor Portal home +
+invitation detail, Collaborator Portal home + project detail, AORMS
+Identity, Licence Management, Material Catalogue, Company detail,
+Studio detail — the last two folding a `public_id` `Tag` into
+`PageHeader`'s `actions` slot instead of a sibling `Stack`); 4
+deliberately **not** converted — `/login`, `/platform-login`, and
+`/platform-signup` are centered auth cards (a different UI role than a
+full-width "Page Title over a register," which is what `PageHeader`
+encodes — converting them would be structurally wrong, not just
+stylistically different), and the root `app/page.tsx` marketing landing
+page uses its own `landing.scss` editorial system by design (CLAUDE.md's
+own § UI notes it migrates to Carbon tokens separately, in Wave 5 — out
+of scope here on purpose).
+
+Re-running the audit grep across the entire `web/app` tree now returns
+only those 4 known, disclosed exceptions — no accidental miss anywhere
+in the app.
+
+Verified: `tsc --noEmit` and `eslint .` (whole package) both clean; a
+full `next build --webpack` clean across all 90+ routes. Live-verified
+`/identity` and `/materials` (both reachable with the same staff
+session, no separate portal-account setup needed) rendering correctly;
+the other 9 portal-gated pages rely on `tsc`/`eslint`/build-cleanliness
+plus the same `PageHeader` code path already verified dozens of times
+elsewhere this session, disclosed here rather than silently skipped.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

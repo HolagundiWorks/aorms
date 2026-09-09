@@ -3,6 +3,7 @@ import { Column, Grid, Tag } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { ContractorBidForm } from "../../../../components/aorms/ContractorBidForm";
 import { ContractorDeclineButton } from "../../../../components/aorms/ContractorDeclineButton";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { markInvitationViewed } from "../../../../lib/actions/contractor-portal";
 
 const STATUS_TAG: Record<string, "cool-gray" | "blue" | "green" | "red"> = {
@@ -71,12 +72,7 @@ export default async function ContractorInvitationDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project?.title ?? "—"} ({project?.ref ?? "—"})
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {tender?.title ?? "Tender"}
-        </h1>
+        <PageHeader eyebrow={`${project?.title ?? "—"} (${project?.ref ?? "—"})`} title={tender?.title ?? "Tender"} />
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "1.5rem" }}>
           <Tag type={STATUS_TAG[invitation.status] ?? "cool-gray"} size="sm">
             {invitation.status}

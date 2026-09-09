@@ -2,6 +2,7 @@ import NextLink from "next/link";
 import { Button, Column, Grid, Select, SelectItem, Stack, Tag, TextInput, Tile } from "@carbon/react";
 import { createClient as createWebClient } from "../../../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 type CompanyEmbed = { id: string; name: string; public_id: string; city: string | null; state: string | null } | null;
 
@@ -115,14 +116,17 @@ export default async function MaterialsPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={12}>
-        <h1 className="cds--type-heading-05">Material Catalogue</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Browse products from every supplier Company on the AORMS Platform.
-          {referenceCity || referenceState ? ` Showing nearest vendors first (${[referenceCity, referenceState].filter(Boolean).join(", ")}).` : ""}
-        </p>
+        <PageHeader
+          title="Material Catalogue"
+          description={
+            <>
+              Browse products from every supplier Company on the AORMS Platform.
+              {referenceCity || referenceState
+                ? ` Showing nearest vendors first (${[referenceCity, referenceState].filter(Boolean).join(", ")}).`
+                : ""}
+            </>
+          }
+        />
 
         <form method="GET" action="/materials" style={{ marginBottom: "1.5rem" }}>
           <Stack gap={4} orientation="horizontal" style={{ alignItems: "flex-end" }}>

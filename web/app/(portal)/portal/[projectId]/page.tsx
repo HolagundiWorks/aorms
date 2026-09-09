@@ -5,6 +5,7 @@ import { PortalAcknowledgeButton } from "../../../../components/aorms/PortalAckn
 import { PortalApprovalResponse } from "../../../../components/aorms/PortalApprovalResponse";
 import { PortalDecisionResponse } from "../../../../components/aorms/PortalDecisionResponse";
 import { PortalSubmissionForms } from "../../../../components/aorms/PortalSubmissionForms";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 
 function formatInr(paise: number | null): string {
   if (paise == null) return "—";
@@ -104,13 +105,8 @@ export default async function PortalProjectDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project.ref}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {project.title}
-        </h1>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem" }}>
+        <PageHeader eyebrow={project.ref} title={project.title} />
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem", marginTop: "-1rem" }}>
           <Tag type="blue" size="sm">
             {project.status}
           </Tag>
