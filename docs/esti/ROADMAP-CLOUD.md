@@ -2153,15 +2153,43 @@ left-docked beside the still-fully-visible/interactive user table,
 closed cleanly) — real browser session, not a mock. Test account
 disabled afterward (audit-FK discipline, not hard-deleted).
 
-**~25 pages remain** on the identical, now-proven pattern — the
-`/projects/[id]/*` sub-pages (negotiation/precon/program/brief/cpi/dna/
-assessment/feasibility/onboarding) not yet touched, plus any other
-list/detail pages with an inline `NewXForm` not yet surveyed. The
-KPI-strip half of the standard (mandatory 3–6 metrics below every major
-page's H1) is also still only on Dashboard/Project Overview/Decisions —
-each other page needs its own bespoke count queries, a separate pass.
-Continuing the same mechanical rollout is the direct next step, not a
-new design question.
+**Batch 4 (2026-09-09), `/projects/[id]/*` sub-pages surveyed — 2 of 9
+converted, 7 confirmed out of scope:** Negotiation (single form, the
+standard mechanical transform) and Pre-Construction R&O (two independent
+forms — Risks and Opportunities — each behind its own tab). Precon is
+the first page needing **two separate `ContextPanelLayout` scopes on one
+page**: each Carbon `TabPanel` wraps its own layout/panel/trigger, so the
+Risks tab's "Add risk" panel and the Opportunities tab's "Add
+opportunity" panel each own an independent open/close state via their
+own React context instance — opening one never affects the other, and
+neither leaks into Phase Gates (a checklist, not a create-form page, left
+untouched). Program/Space Schedule's `NewProgramSpaceForm` was surveyed
+and deliberately **not** converted — it's a repeated quick-add-row form
+meant to stay open while multiple spaces are entered in sequence (like a
+spreadsheet), not a single-record create dialog; forcing it into a
+panel that closes after each submit would add friction, not remove it.
+Brief/CPI/DNA/Assessment/Feasibility/Onboarding have no inline create
+forms at all — confirmed via grep for `NewXForm`/`useActionState`
+imports, nothing to convert. Both converted pages also picked up
+`PageHeader` in the same pass, matching every other sub-page. Verified:
+`tsc --noEmit`, `eslint`, full `next build --webpack` (`rm -rf .next`
+first) all clean; live end-to-end on a disposable test project — Precon:
+opened "Add risk", submitted, panel closed and the row appeared, then
+independently opened "Add opportunity" on its own tab, confirming the
+two panel scopes don't cross-talk; Negotiation: panel opened left-docked
+beside the still-visible round table. Test project (and its cascaded
+risk row) deleted afterward via the Management API.
+
+**~23 pages remain** on the identical, now-proven pattern — any other
+list/detail pages with an inline `NewXForm` not yet surveyed (e.g.
+`/estimates`, `/pmc-*`, `/spec-catalog/[id]`, `/spec-sheets/[id]`,
+`/standards/[id]`, `/teams/[id]`, `/transmittals/[id]`,
+`/team-members/[id]`, `/tenders/[id]`, `/purchase-orders/[id]`,
+`/firm-settings`). The KPI-strip half of the standard (mandatory 3–6
+metrics below every major page's H1) is also still only on Dashboard/
+Project Overview/Decisions — each other page needs its own bespoke count
+queries, a separate pass. Continuing the same mechanical rollout is the
+direct next step, not a new design question.
 
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —

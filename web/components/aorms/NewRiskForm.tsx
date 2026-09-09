@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { createRisk } from "../../lib/actions/project-precon";
 import { FormGrid } from "./FormGrid";
@@ -8,9 +8,17 @@ import { FormGrid } from "./FormGrid";
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
 
-export function NewRiskForm({ projectId }: { projectId: string }) {
+export function NewRiskForm({ projectId, onSuccess }: { projectId: string; onSuccess?: () => void }) {
   const boundAction = createRisk.bind(null, projectId);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

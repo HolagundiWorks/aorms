@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { createOpportunity } from "../../lib/actions/project-precon";
 import { FormGrid } from "./FormGrid";
@@ -13,9 +13,17 @@ const AREAS = [
   "PROCUREMENT", "COST", "SCHEDULE", "CONTRACT", "SUSTAINABILITY", "DIGITAL",
 ];
 
-export function NewOpportunityForm({ projectId }: { projectId: string }) {
+export function NewOpportunityForm({ projectId, onSuccess }: { projectId: string; onSuccess?: () => void }) {
   const boundAction = createOpportunity.bind(null, projectId);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

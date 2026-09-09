@@ -16,10 +16,12 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../../../lib/supabase/server";
-import { NewRiskForm } from "../../../../../components/aorms/NewRiskForm";
+import { AddRiskForm } from "../../../../../components/aorms/AddRiskForm";
+import { AddOpportunityForm } from "../../../../../components/aorms/AddOpportunityForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../../../components/aorms/ContextPanel";
 import { RiskStatusSelect } from "../../../../../components/aorms/RiskStatusSelect";
-import { NewOpportunityForm } from "../../../../../components/aorms/NewOpportunityForm";
 import { OpportunityStatusSelect } from "../../../../../components/aorms/OpportunityStatusSelect";
+import { PageHeader } from "../../../../../components/aorms/PageHeader";
 import { PhaseGateChecklist } from "../../../../../components/aorms/PhaseGateChecklist";
 import { opportunityPriority } from "../../../../../lib/project-precon";
 
@@ -61,16 +63,11 @@ export default async function ProjectPreconPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project.title}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "1rem" }}>
-          Pre-Construction R&amp;O
-        </h1>
-        <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}>
-          Studio design-stage risk and opportunity registers, plus phase gates — not construction
-          readiness (that&apos;s AProc&apos;s own delivery-side tracking).
-        </p>
+        <PageHeader
+          eyebrow={project.title}
+          title="Pre-Construction R&O"
+          description="Studio design-stage risk and opportunity registers, plus phase gates — not construction readiness (that's AProc's own delivery-side tracking)."
+        />
 
         <Tabs>
           <TabList aria-label="Precon sections">
@@ -81,7 +78,14 @@ export default async function ProjectPreconPage({
           <TabPanels>
             <TabPanel>
               <div style={{ paddingTop: "1.5rem" }}>
-                <NewRiskForm projectId={project.id} />
+                <ContextPanelLayout>
+                  <ContextPanel title="Add risk" description="Log a new design-stage risk.">
+                    <AddRiskForm projectId={project.id} />
+                  </ContextPanel>
+                  <ContextPanelContent>
+                <div style={{ marginBottom: "1.5rem" }}>
+                  <ContextPanelTrigger size="sm">Add risk</ContextPanelTrigger>
+                </div>
                 <Table aria-label="Risks" className="aorms-table-spaced">
                   <TableHead>
                     <TableRow>
@@ -115,12 +119,21 @@ export default async function ProjectPreconPage({
                     )}
                   </TableBody>
                 </Table>
+                  </ContextPanelContent>
+                </ContextPanelLayout>
               </div>
             </TabPanel>
 
             <TabPanel>
               <div style={{ paddingTop: "1.5rem" }}>
-                <NewOpportunityForm projectId={project.id} />
+                <ContextPanelLayout>
+                  <ContextPanel title="Add opportunity" description="Log a new design-stage opportunity.">
+                    <AddOpportunityForm projectId={project.id} />
+                  </ContextPanel>
+                  <ContextPanelContent>
+                <div style={{ marginBottom: "1.5rem" }}>
+                  <ContextPanelTrigger size="sm">Add opportunity</ContextPanelTrigger>
+                </div>
                 <Table aria-label="Opportunities" className="aorms-table-spaced">
                   <TableHead>
                     <TableRow>
@@ -161,6 +174,8 @@ export default async function ProjectPreconPage({
                     )}
                   </TableBody>
                 </Table>
+                  </ContextPanelContent>
+                </ContextPanelLayout>
               </div>
             </TabPanel>
 

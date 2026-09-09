@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@carbon/react";
 import { createClient } from "../../../../../lib/supabase/server";
-import { NewNegotiationRoundForm } from "../../../../../components/aorms/NewNegotiationRoundForm";
+import { AddNegotiationRoundForm } from "../../../../../components/aorms/AddNegotiationRoundForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../../../components/aorms/ContextPanel";
 import { NegotiationOutcomeSelect } from "../../../../../components/aorms/NegotiationOutcomeSelect";
+import { PageHeader } from "../../../../../components/aorms/PageHeader";
 
 function formatInr(paise: number): string {
   const sign = paise < 0 ? "-" : "";
@@ -40,20 +42,19 @@ export default async function NegotiationPage({
   if (!project) notFound();
 
   return (
-    <Grid>
+    <ContextPanelLayout>
+      <ContextPanel title="Add negotiation round" description="Log a commercial negotiation round.">
+        <AddNegotiationRoundForm projectId={project.id} />
+      </ContextPanel>
+      <ContextPanelContent>
+      <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project.title}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "1rem" }}>
-          Negotiation
-        </h1>
-        <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}>
-          Commercial negotiation rounds. Conversion probability is computed automatically —
-          confidence erodes with each extra round and cumulative discount conceded, advisory only.
-        </p>
-
-        <NewNegotiationRoundForm projectId={project.id} />
+        <PageHeader
+          eyebrow={project.title}
+          title="Negotiation"
+          description="Commercial negotiation rounds. Conversion probability is computed automatically — confidence erodes with each extra round and cumulative discount conceded, advisory only."
+          actions={<ContextPanelTrigger size="sm">Add round</ContextPanelTrigger>}
+        />
 
         {roundsError ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
@@ -95,6 +96,8 @@ export default async function NegotiationPage({
           </Table>
         )}
       </Column>
-    </Grid>
+      </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }
