@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { createRepoSource, type RepoSourceActionState } from "../../lib/actions/knowledge-bank";
 import { FormGrid } from "./FormGrid";
@@ -8,8 +8,16 @@ import { FormGrid } from "./FormGrid";
 const initialState: RepoSourceActionState = null;
 const CATEGORIES = ["GENERAL", "DESIGN", "STRUCTURE", "MEP", "COMPLIANCE", "MANAGEMENT", "OTHER"];
 
-export function NewRepoSourceForm() {
+export function NewRepoSourceForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [state, formAction, pending] = useActionState(createRepoSource, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

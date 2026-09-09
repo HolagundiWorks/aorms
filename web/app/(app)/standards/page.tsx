@@ -11,7 +11,9 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewStandardForm } from "../../../components/aorms/NewStandardForm";
+import { AddStandardForm } from "../../../components/aorms/AddStandardForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function StandardsPage() {
   const supabase = await createClient();
@@ -22,56 +24,59 @@ export default async function StandardsPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Standards Library</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Design standards by discipline, with attached reference files.
-        </p>
+    <ContextPanelLayout>
+      <ContextPanel title="New standard" description="Add a design standard for a discipline.">
+        <AddStandardForm />
+      </ContextPanel>
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Standards Library"
+              description="Design standards by discipline, with attached reference files."
+              actions={<ContextPanelTrigger size="sm">Add standard</ContextPanelTrigger>}
+            />
 
-        <NewStandardForm />
-
-        {error ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Couldn&apos;t load standards: {error.message}
-          </p>
-        ) : (
-          <Table aria-label="Standards" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Discipline</TableHeader>
-                <TableHeader>Title</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(standards ?? []).map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell>
-                    <Tag type="blue" size="sm">
-                      {s.discipline}
-                    </Tag>
-                  </TableCell>
-                  <TableCell>
-                    <Link href={`/standards/${s.id}`}>{s.title}</Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {(standards ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={2}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No standards yet.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Column>
-    </Grid>
+            {error ? (
+              <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                Couldn&apos;t load standards: {error.message}
+              </p>
+            ) : (
+              <Table aria-label="Standards" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Discipline</TableHeader>
+                    <TableHeader>Title</TableHeader>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(standards ?? []).map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell>
+                        <Tag type="blue" size="sm">
+                          {s.discipline}
+                        </Tag>
+                      </TableCell>
+                      <TableCell>
+                        <Link href={`/standards/${s.id}`}>{s.title}</Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {(standards ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={2}>
+                        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          No standards yet.
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

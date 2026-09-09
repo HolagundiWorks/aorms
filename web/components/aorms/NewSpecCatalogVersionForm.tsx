@@ -1,14 +1,22 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { createSpecCatalogVersion, type SpecCatalogActionState } from "../../lib/actions/spec-catalog";
 import { FormGrid } from "./FormGrid";
 
 const initialState: SpecCatalogActionState = null;
 
-export function NewSpecCatalogVersionForm() {
+export function NewSpecCatalogVersionForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [state, formAction, pending] = useActionState(createSpecCatalogVersion, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

@@ -2117,17 +2117,28 @@ panel auto-closes → new row + KPI count appear with no reload, main
 content never dimmed; Clients: same, independently, on a page with no
 extra props) — both real submits, not a mock.
 
-**~43 pages remain** on the identical, now-proven pattern — Snags/Site
-Instructions/Progress Reports/Master Plans done, Standards/Spec
-Catalog/Spec Sheets/Lessons/Knowledge Bank/Job Applications/Payslips/
-Team Members/Teams/Tenders/Purchase Orders/Rate Books/Office Templates/
-Consultants/Contractors/Approvals/BBS/Users and the remaining
-`/projects/[id]/*` sub-pages (negotiation/precon/program/brief/cpi/dna/
-assessment/feasibility/onboarding) not yet touched. The KPI-strip half
-of the standard (mandatory 3–6 metrics below every major page's H1) is
-also still only on Dashboard/Project Overview/Decisions — each other
-page needs its own bespoke count queries, a separate pass. Continuing
-the same mechanical rollout is the direct next step, not a new design
+**Continued the same pass, same "autopilot" instruction — 9 more pages:**
+Standards, Spec Catalog, Spec Sheets, Lessons, Knowledge Bank, Job
+Applications, Payslips, Team Members (the one page so far needing a
+conditional panel — `NewTeamMemberForm` is owner-gated, so both the
+`<ContextPanel>` and its `<ContextPanelTrigger>` action are wrapped in
+the same `isOwner` check that already gated the inline form), and
+Teams. **26 pages total now on the corrected pattern.** Same
+verification discipline: `tsc`/`eslint`/full `next build --webpack` all
+clean after each sub-batch; a third independent live end-to-end check
+(Teams: open panel → fill → submit → panel closes → new row appears,
+main content never dimmed) confirms the pattern holds consistently, not
+just on the first couple of pages it was built against.
+
+**~34 pages remain** on the identical, now-proven pattern — Tenders,
+Purchase Orders, Rate Books, Office Templates, Consultants,
+Contractors, Approvals, BBS, Users, and the remaining `/projects/[id]/*`
+sub-pages (negotiation/precon/program/brief/cpi/dna/assessment/
+feasibility/onboarding) not yet touched. The KPI-strip half of the
+standard (mandatory 3–6 metrics below every major page's H1) is also
+still only on Dashboard/Project Overview/Decisions — each other page
+needs its own bespoke count queries, a separate pass. Continuing the
+same mechanical rollout is the direct next step, not a new design
 question.
 
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**

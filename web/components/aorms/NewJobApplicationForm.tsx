@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { createJobApplication } from "../../lib/actions/job-applications";
 import { FormGrid } from "./FormGrid";
@@ -8,8 +8,16 @@ import { FormGrid } from "./FormGrid";
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
 
-export function NewJobApplicationForm() {
+export function NewJobApplicationForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [state, formAction, pending] = useActionState(createJobApplication, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

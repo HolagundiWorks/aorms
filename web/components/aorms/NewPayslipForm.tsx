@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { createPayslip } from "../../lib/actions/payslips";
 import { FormGrid } from "./FormGrid";
@@ -9,8 +9,16 @@ type MemberOption = { id: string; name: string };
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
 
-export function NewPayslipForm({ members }: { members: MemberOption[] }) {
+export function NewPayslipForm({ members, onSuccess }: { members: MemberOption[]; onSuccess?: () => void }) {
   const [state, formAction, pending] = useActionState(createPayslip, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

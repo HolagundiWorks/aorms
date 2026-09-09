@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { createSpecSheetRecord, type SpecSheetActionState } from "../../lib/actions/spec-sheets";
 import { FormGrid } from "./FormGrid";
@@ -9,8 +9,16 @@ type ProjectOption = { id: string; title: string };
 
 const initialState: SpecSheetActionState = null;
 
-export function NewSpecSheetForm({ projects }: { projects: ProjectOption[] }) {
+export function NewSpecSheetForm({ projects, onSuccess }: { projects: ProjectOption[]; onSuccess?: () => void }) {
   const [state, formAction, pending] = useActionState(createSpecSheetRecord, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

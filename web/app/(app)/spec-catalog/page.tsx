@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewSpecCatalogVersionForm } from "../../../components/aorms/NewSpecCatalogVersionForm";
+import { AddSpecCatalogVersionForm } from "../../../components/aorms/AddSpecCatalogVersionForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SetActiveVersionButton } from "../../../components/aorms/SetActiveVersionButton";
 
 /**
@@ -20,61 +22,63 @@ export default async function SpecCatalogPage() {
     .order("label", { ascending: false });
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Spec Catalog</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Versioned material specification catalogue — category/item/make/specification/finish rows
-          that project spec sheets pick from. Only one version is active at a time.
-        </p>
+    <ContextPanelLayout>
+      <ContextPanel title="New catalogue version" description="Start a new spec catalogue version.">
+        <AddSpecCatalogVersionForm />
+      </ContextPanel>
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Spec Catalog"
+              description="Versioned material specification catalogue — category/item/make/specification/finish rows that project spec sheets pick from. Only one version is active at a time."
+              actions={<ContextPanelTrigger size="sm">New version</ContextPanelTrigger>}
+            />
 
-        <NewSpecCatalogVersionForm />
-
-        {error ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Couldn&apos;t load versions: {error.message}
-          </p>
-        ) : (
-          <Table aria-label="Spec catalog versions" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Label</TableHeader>
-                <TableHeader>Description</TableHeader>
-                <TableHeader>Status</TableHeader>
-                <TableHeader>Actions</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(versions ?? []).map((v) => (
-                <TableRow key={v.id}>
-                  <TableCell>
-                    <Link href={`/spec-catalog/${v.id}`}>{v.label}</Link>
-                  </TableCell>
-                  <TableCell>{v.description ?? "—"}</TableCell>
-                  <TableCell>
-                    <Tag type={v.active ? "green" : "cool-gray"} size="sm">
-                      {v.active ? "Active" : "Inactive"}
-                    </Tag>
-                  </TableCell>
-                  <TableCell>{!v.active && <SetActiveVersionButton versionId={v.id} />}</TableCell>
-                </TableRow>
-              ))}
-              {(versions ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No catalogue versions yet.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Column>
-    </Grid>
+            {error ? (
+              <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                Couldn&apos;t load versions: {error.message}
+              </p>
+            ) : (
+              <Table aria-label="Spec catalog versions" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Label</TableHeader>
+                    <TableHeader>Description</TableHeader>
+                    <TableHeader>Status</TableHeader>
+                    <TableHeader>Actions</TableHeader>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(versions ?? []).map((v) => (
+                    <TableRow key={v.id}>
+                      <TableCell>
+                        <Link href={`/spec-catalog/${v.id}`}>{v.label}</Link>
+                      </TableCell>
+                      <TableCell>{v.description ?? "—"}</TableCell>
+                      <TableCell>
+                        <Tag type={v.active ? "green" : "cool-gray"} size="sm">
+                          {v.active ? "Active" : "Inactive"}
+                        </Tag>
+                      </TableCell>
+                      <TableCell>{!v.active && <SetActiveVersionButton versionId={v.id} />}</TableCell>
+                    </TableRow>
+                  ))}
+                  {(versions ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4}>
+                        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          No catalogue versions yet.
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

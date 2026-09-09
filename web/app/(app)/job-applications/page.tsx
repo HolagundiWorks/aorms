@@ -9,8 +9,10 @@ import {
   TableRow,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewJobApplicationForm } from "../../../components/aorms/NewJobApplicationForm";
+import { AddJobApplicationForm } from "../../../components/aorms/AddJobApplicationForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { JobApplicationStatusSelect } from "../../../components/aorms/JobApplicationStatusSelect";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function JobApplicationsPage() {
   const supabase = await createClient();
@@ -21,59 +23,61 @@ export default async function JobApplicationsPage() {
     .order("applied_at", { ascending: false });
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Job Applications</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Recruitment pipeline. Resume upload isn&apos;t wired up — same register-only pattern
-          used elsewhere until an upload Route Handler exists.
-        </p>
+    <ContextPanelLayout>
+      <ContextPanel title="New application" description="Log a job application.">
+        <AddJobApplicationForm />
+      </ContextPanel>
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Job Applications"
+              description="Recruitment pipeline. Resume upload isn't wired up — same register-only pattern used elsewhere until an upload Route Handler exists."
+              actions={<ContextPanelTrigger size="sm">Add application</ContextPanelTrigger>}
+            />
 
-        <NewJobApplicationForm />
-
-        {error ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Couldn&apos;t load applications: {error.message}
-          </p>
-        ) : (
-          <Table aria-label="Job applications" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Name</TableHeader>
-                <TableHeader>Applied role</TableHeader>
-                <TableHeader>Contact</TableHeader>
-                <TableHeader>Experience</TableHeader>
-                <TableHeader>Status</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(applications ?? []).map((a) => (
-                <TableRow key={a.id}>
-                  <TableCell>{a.name}</TableCell>
-                  <TableCell>{a.applied_role}</TableCell>
-                  <TableCell>{a.email ?? a.phone ?? "—"}</TableCell>
-                  <TableCell>{a.experience_years != null ? `${a.experience_years} yrs` : "—"}</TableCell>
-                  <TableCell>
-                    <JobApplicationStatusSelect applicationId={a.id} status={a.status} />
-                  </TableCell>
-                </TableRow>
-              ))}
-              {(applications ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No applications yet.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Column>
-    </Grid>
+            {error ? (
+              <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                Couldn&apos;t load applications: {error.message}
+              </p>
+            ) : (
+              <Table aria-label="Job applications" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Name</TableHeader>
+                    <TableHeader>Applied role</TableHeader>
+                    <TableHeader>Contact</TableHeader>
+                    <TableHeader>Experience</TableHeader>
+                    <TableHeader>Status</TableHeader>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(applications ?? []).map((a) => (
+                    <TableRow key={a.id}>
+                      <TableCell>{a.name}</TableCell>
+                      <TableCell>{a.applied_role}</TableCell>
+                      <TableCell>{a.email ?? a.phone ?? "—"}</TableCell>
+                      <TableCell>{a.experience_years != null ? `${a.experience_years} yrs` : "—"}</TableCell>
+                      <TableCell>
+                        <JobApplicationStatusSelect applicationId={a.id} status={a.status} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {(applications ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5}>
+                        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          No applications yet.
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

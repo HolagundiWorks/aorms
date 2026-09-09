@@ -1,14 +1,22 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { createStandard, type StandardActionState } from "../../lib/actions/standards";
 import { FormGrid } from "./FormGrid";
 
 const initialState: StandardActionState = null;
 
-export function NewStandardForm() {
+export function NewStandardForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [state, formAction, pending] = useActionState(createStandard, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

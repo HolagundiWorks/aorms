@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { createLesson, type LessonActionState } from "../../lib/actions/lessons";
 import { FormGrid } from "./FormGrid";
@@ -11,8 +11,16 @@ const initialState: LessonActionState = null;
 
 const CATEGORIES = ["DESIGN", "COORDINATION", "SITE", "CLIENT", "COMPLIANCE", "OTHER"];
 
-export function NewLessonForm({ projects }: { projects: ProjectOption[] }) {
+export function NewLessonForm({ projects, onSuccess }: { projects: ProjectOption[]; onSuccess?: () => void }) {
   const [state, formAction, pending] = useActionState(createLesson, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction} style={{ marginBottom: "2rem" }}>

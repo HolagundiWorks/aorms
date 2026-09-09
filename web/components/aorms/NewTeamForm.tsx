@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { createTeam } from "../../lib/actions/teams";
 import { FormGrid } from "./FormGrid";
@@ -8,8 +8,16 @@ import { FormGrid } from "./FormGrid";
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
 
-export function NewTeamForm() {
+export function NewTeamForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [state, formAction, pending] = useActionState(createTeam, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

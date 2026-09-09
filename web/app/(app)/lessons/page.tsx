@@ -10,7 +10,9 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewLessonForm } from "../../../components/aorms/NewLessonForm";
+import { AddLessonForm } from "../../../components/aorms/AddLessonForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function LessonsPage() {
   const supabase = await createClient();
@@ -24,65 +26,68 @@ export default async function LessonsPage() {
   ]);
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Lessons Learned</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Firm-wide knowledge captured per project.
-        </p>
+    <ContextPanelLayout>
+      <ContextPanel title="New lesson" description="Capture a lesson learned.">
+        <AddLessonForm projects={projects ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Lessons Learned"
+              description="Firm-wide knowledge captured per project."
+              actions={<ContextPanelTrigger size="sm">Add lesson</ContextPanelTrigger>}
+            />
 
-        <NewLessonForm projects={projects ?? []} />
-
-        {error ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Couldn&apos;t load lessons: {error.message}
-          </p>
-        ) : (
-          <Table aria-label="Lessons learned" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Title</TableHeader>
-                <TableHeader>Project</TableHeader>
-                <TableHeader>Category</TableHeader>
-                <TableHeader>Author</TableHeader>
-                <TableHeader>Status</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(lessons ?? []).map((l) => {
-                const project = Array.isArray(l.project_offices)
-                  ? l.project_offices[0]
-                  : (l.project_offices as { title: string } | null);
-                return (
-                  <TableRow key={l.id}>
-                    <TableCell>{l.title}</TableCell>
-                    <TableCell>{project?.title ?? "—"}</TableCell>
-                    <TableCell>
-                      <Tag type="blue" size="sm">
-                        {l.category}
-                      </Tag>
-                    </TableCell>
-                    <TableCell>{l.author_name ?? "—"}</TableCell>
-                    <TableCell>{l.status}</TableCell>
+            {error ? (
+              <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                Couldn&apos;t load lessons: {error.message}
+              </p>
+            ) : (
+              <Table aria-label="Lessons learned" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Title</TableHeader>
+                    <TableHeader>Project</TableHeader>
+                    <TableHeader>Category</TableHeader>
+                    <TableHeader>Author</TableHeader>
+                    <TableHeader>Status</TableHeader>
                   </TableRow>
-                );
-              })}
-              {(lessons ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No lessons captured yet.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Column>
-    </Grid>
+                </TableHead>
+                <TableBody>
+                  {(lessons ?? []).map((l) => {
+                    const project = Array.isArray(l.project_offices)
+                      ? l.project_offices[0]
+                      : (l.project_offices as { title: string } | null);
+                    return (
+                      <TableRow key={l.id}>
+                        <TableCell>{l.title}</TableCell>
+                        <TableCell>{project?.title ?? "—"}</TableCell>
+                        <TableCell>
+                          <Tag type="blue" size="sm">
+                            {l.category}
+                          </Tag>
+                        </TableCell>
+                        <TableCell>{l.author_name ?? "—"}</TableCell>
+                        <TableCell>{l.status}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {(lessons ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5}>
+                        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          No lessons captured yet.
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }
