@@ -77,7 +77,7 @@ export default async function CollabPortalProjectDetailPage({
           </span>
         </div>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Phases
         </h2>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
@@ -97,7 +97,7 @@ export default async function CollabPortalProjectDetailPage({
           )}
         </div>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Drawings
         </h2>
         <Table aria-label="Drawings" className="aorms-table-spaced" size="sm">
@@ -126,7 +126,7 @@ export default async function CollabPortalProjectDetailPage({
           </TableBody>
         </Table>
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Transmittals
         </h2>
         <Table aria-label="Transmittals" className="aorms-table-spaced" size="sm">
@@ -157,7 +157,7 @@ export default async function CollabPortalProjectDetailPage({
           </TableBody>
         </Table>
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Tasks assigned to you
         </h2>
         <Table aria-label="Assigned tasks" className="aorms-table-spaced" size="sm">
@@ -196,12 +196,12 @@ export default async function CollabPortalProjectDetailPage({
           </TableBody>
         </Table>
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Submit an RFI, deliverable or note
         </h2>
         <CollabSubmissionForm projectId={projectId} />
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Your submissions
         </h2>
         <Table aria-label="Your submissions" className="aorms-table-spaced" size="sm">

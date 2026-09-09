@@ -111,7 +111,7 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
 
         <Stack gap={6}>
           <div>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Members
             </h2>
             <Table aria-label="Studio members" className="aorms-table-spaced">
@@ -163,7 +163,7 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
           </div>
 
           <div>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Studio Profile
             </h2>
             <Tile>
@@ -185,7 +185,7 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
           </div>
 
           <div>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Board of Directors
             </h2>
             <Table aria-label="Board of directors" className="aorms-table-spaced">
@@ -224,7 +224,7 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
           </div>
 
           <div>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Who&apos;s Who
             </h2>
             <Table aria-label="Key contacts" className="aorms-table-spaced">

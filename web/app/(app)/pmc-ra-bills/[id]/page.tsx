@@ -46,7 +46,7 @@ export default async function PmcRaBillDetailPage({
           <GeneratePdfButton action={generateRaBillPdf.bind(null, bill.id)} pdfStatus={bill.pdf_status} />
         </div>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Line items
         </h2>
         <NewRaLineForm billId={bill.id} />

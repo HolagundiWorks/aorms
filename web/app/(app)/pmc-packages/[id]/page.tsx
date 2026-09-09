@@ -64,7 +64,7 @@ export default async function PmcPackageDetailPage({
       <Column sm={4} md={8} lg={16}>
         <PageHeader eyebrow={`${pkg.ref} · ${project?.title ?? "—"}`} title={pkg.title} />
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Invited contractors
         </h2>
         <NewPackageInviteForm packageId={pkg.id} contractors={availableContractors} />
@@ -99,7 +99,7 @@ export default async function PmcPackageDetailPage({
           </Table>
         </div>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Bids {pkg.bids_opened_at ? <Tag type="green" size="sm">Open</Tag> : <Tag type="gray" size="sm">Sealed</Tag>}
         </h2>
         {!pkg.bids_opened_at && <OpenBidsButton packageId={pkg.id} />}

@@ -115,7 +115,7 @@ export default async function PortalProjectDetailPage({
           </span>
         </div>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Phases
         </h2>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
@@ -135,7 +135,7 @@ export default async function PortalProjectDetailPage({
           )}
         </div>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Invoices
         </h2>
         <Table aria-label="Invoices" className="aorms-table-spaced" size="sm">
@@ -174,7 +174,7 @@ export default async function PortalProjectDetailPage({
           </TableBody>
         </Table>
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Approvals
         </h2>
         <Table aria-label="Approvals" className="aorms-table-spaced" size="sm">
@@ -235,7 +235,7 @@ export default async function PortalProjectDetailPage({
           </TableBody>
         </Table>
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Decisions for your review
         </h2>
         <Table aria-label="Decisions" className="aorms-table-spaced" size="sm">
@@ -290,7 +290,7 @@ export default async function PortalProjectDetailPage({
           </TableBody>
         </Table>
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Drawings
         </h2>
         <Table aria-label="Drawings" className="aorms-table-spaced" size="sm">
@@ -323,7 +323,7 @@ export default async function PortalProjectDetailPage({
           </TableBody>
         </Table>
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Transmittals
         </h2>
         <Table aria-label="Transmittals" className="aorms-table-spaced" size="sm">
@@ -364,7 +364,7 @@ export default async function PortalProjectDetailPage({
           </TableBody>
         </Table>
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Meeting minutes
         </h2>
         <Table aria-label="Meeting minutes" className="aorms-table-spaced" size="sm">
@@ -397,12 +397,12 @@ export default async function PortalProjectDetailPage({
           </TableBody>
         </Table>
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Get in touch
         </h2>
         <PortalSubmissionForms projectId={projectId} />
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Your submissions
         </h2>
         <Table aria-label="Your submissions" className="aorms-table-spaced" size="sm">

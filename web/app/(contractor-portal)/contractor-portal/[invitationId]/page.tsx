@@ -84,7 +84,7 @@ export default async function ContractorInvitationDetailPage({
 
         {tender?.scope && (
           <>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
               Scope
             </h2>
             <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", whiteSpace: "pre-wrap" }}>
@@ -94,7 +94,7 @@ export default async function ContractorInvitationDetailPage({
         )}
         {tender?.instructions && (
           <>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
               Instructions
             </h2>
             <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", whiteSpace: "pre-wrap" }}>
@@ -105,7 +105,7 @@ export default async function ContractorInvitationDetailPage({
 
         {canBid ? (
           <>
-            <h2 className="cds--type-heading-03" style={{ margin: "1.5rem 0 1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ margin: "1.5rem 0 1rem" }}>
               {bid ? "Your bid" : "Submit your bid"}
             </h2>
             <ContractorBidForm

@@ -117,7 +117,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
 
         <Stack gap={6}>
           <div>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Members
             </h2>
             <Table aria-label="Company members" className="aorms-table-spaced">
@@ -169,7 +169,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
           </div>
 
           <div>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Company Profile
             </h2>
             <Tile>
@@ -190,7 +190,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
           </div>
 
           <div>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Board of Directors
             </h2>
             <Table aria-label="Board of directors" className="aorms-table-spaced">
@@ -229,7 +229,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
           </div>
 
           <div>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Who&apos;s Who
             </h2>
             <Table aria-label="Key contacts" className="aorms-table-spaced">
@@ -268,7 +268,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
           </div>
 
           <div>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Material Catalogue
             </h2>
             <Stack gap={4}>

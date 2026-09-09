@@ -59,7 +59,7 @@ export default async function TransmittalDetailPage({ params }: { params: Promis
           <GeneratePdfButton action={generateTransmittalPdf.bind(null, transmittal.id)} pdfStatus={transmittal.pdf_status} />
         </div>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Documents
         </h2>
         <NewTransmittalItemForm transmittalId={transmittal.id} drawings={drawings ?? []} />
@@ -108,7 +108,7 @@ export default async function TransmittalDetailPage({ params }: { params: Promis
 
         {transmittal.notes && (
           <>
-            <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
               Notes
             </h2>
             <p className="cds--type-body-01">{transmittal.notes}</p>

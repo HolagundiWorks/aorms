@@ -40,7 +40,7 @@ export default async function StandardDetailPage({
       <Column sm={4} md={8} lg={16}>
         <PageHeader eyebrow={standard.discipline} title={standard.title} description={standard.notes ?? undefined} />
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Files
         </h2>
 

@@ -2438,6 +2438,42 @@ the other 9 portal-gated pages rely on `tsc`/`eslint`/build-cleanliness
 plus the same `PageHeader` code path already verified dozens of times
 elsewhere this session, disclosed here rather than silently skipped.
 
+**Second typography defect found and fixed while continuing this pass
+(2026-09-09): every `<h2>` "Section" heading in the app used the wrong
+Carbon token.** The guide's Section role is 16–18px/22–24px/**600**
+weight, which the real Carbon scale maps to `heading-02` (native
+600-weight) — but a repo-wide grep for `h2 className="cds--type-heading-03"`
+turned up **71 occurrences across 28 files** using `heading-03` instead
+(20px/28px, **400**-weight, no `semibold` companion class) — the exact
+same defect class as the `<h1>` Page Title bug fixed earlier today, just
+one level down the hierarchy, and missed by that pass because it only
+grepped for `<h1>`. Fixed with a single mechanical find-and-replace
+(`h2 className="cds--type-heading-03"` → `h2 className="cds--type-heading-02"`)
+across every `page.tsx` under `app/` — a literal string swap, not a
+structural change, so no `PageHeader`-style refactor needed here. Every
+section heading in the app — "Items", "Files", "Engagements", "GST
+abstract", "Members", etc. — now renders at the guide's real Section
+size instead of silently oversized and underweighted since Phase 1.
+
+Checked and ruled out a related false alarm while auditing: 7 files use
+`cds--type-productive-heading-02` for small bold total/summary lines
+(e.g. Purchase Order's "Total: ₹…"). Verified against `@carbon/type`'s
+own `_classes.scss`/`_styles.scss` source (not just assumption) that
+`productive-heading-02` is a real, correctly-emitted class — it's a
+literal Sass alias for `heading-compact-02` (16px/22px/600), a
+legitimate token, not a naming-convention leftover from Carbon v10. Left
+untouched.
+
+Verified: `tsc --noEmit` and `eslint .` (whole package) both clean; a
+full `next build --webpack` clean across all 90+ routes. Live-verified
+on Firm Settings — "Reference Numbering" now renders visibly smaller and
+bolder than the "Firm Settings" page title above it, correctly
+distinguishing the two typographic roles for the first time.
+
+No more `h2 className="cds--type-heading-03"` anywhere in `app/` —
+confirmed via the same grep with zero hits, same discipline as every
+audit this pass.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

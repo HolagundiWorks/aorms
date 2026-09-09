@@ -306,7 +306,7 @@ export default async function TakeoffProjectPage({
           </p>
         ) : (
           <>
-            <h2 className="cds--type-heading-03" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
               Masonry walls
             </h2>
             <Table aria-label="Masonry walls" className="aorms-table-spaced">
@@ -373,7 +373,7 @@ export default async function TakeoffProjectPage({
               </TableBody>
             </Table>
 
-            <h2 className="cds--type-heading-03" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
               Plaster
             </h2>
             <Table aria-label="Plaster" className="aorms-table-spaced">
@@ -422,7 +422,7 @@ export default async function TakeoffProjectPage({
               </TableBody>
             </Table>
 
-            <h2 className="cds--type-heading-03" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
               Painting
             </h2>
             <Table aria-label="Painting" className="aorms-table-spaced">
@@ -467,7 +467,7 @@ export default async function TakeoffProjectPage({
               </TableBody>
             </Table>
 
-            <h2 className="cds--type-heading-03" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
               Doors &amp; windows
             </h2>
             <Table aria-label="Doors and windows" className="aorms-table-spaced">
@@ -516,7 +516,7 @@ export default async function TakeoffProjectPage({
               </TableBody>
             </Table>
 
-            <h2 className="cds--type-heading-03" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginTop: "2rem", marginBottom: "1rem" }}>
               Other measured items
             </h2>
             <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "1rem" }}>

@@ -150,7 +150,7 @@ export default async function IdentityPage() {
           <Tile>
             <Stack gap={4}>
               <Stack gap={2} orientation="horizontal">
-                <h2 className="cds--type-heading-03">{account.public_id}</h2>
+                <h2 className="cds--type-heading-02">{account.public_id}</h2>
                 <Tag type={account.level === "PRO" ? "green" : "cool-gray"} size="md">
                   {account.level}
                 </Tag>
@@ -164,7 +164,7 @@ export default async function IdentityPage() {
           </Tile>
 
           <div>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Studios
             </h2>
             <Stack gap={4}>
@@ -216,7 +216,7 @@ export default async function IdentityPage() {
           </Stack>
 
           <div>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Companies
             </h2>
             <Stack gap={4}>

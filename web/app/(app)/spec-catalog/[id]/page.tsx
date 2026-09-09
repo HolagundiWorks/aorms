@@ -50,7 +50,7 @@ export default async function SpecCatalogVersionDetailPage({ params }: { params:
           )}
         </div>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Items
         </h2>
         <NewSpecCatalogItemForm versionId={version.id} />

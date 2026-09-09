@@ -57,7 +57,7 @@ export default async function RateBookDetailPage({
           description={`${rateBook.version_label ?? "—"} ${rateBook.description ? `· ${rateBook.description}` : ""}`}
         />
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Items
         </h2>
 

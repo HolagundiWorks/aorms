@@ -62,7 +62,7 @@ export default async function PurchaseOrderDetailPage({ params }: { params: Prom
           </span>
         </div>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Items
         </h2>
         <NewPoItemForm poId={po.id} />
@@ -118,7 +118,7 @@ export default async function PurchaseOrderDetailPage({ params }: { params: Prom
 
         {po.notes && (
           <>
-            <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
               Notes
             </h2>
             <p className="cds--type-body-01">{po.notes}</p>

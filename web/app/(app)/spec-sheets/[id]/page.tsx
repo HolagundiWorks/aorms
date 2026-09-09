@@ -55,7 +55,7 @@ export default async function SpecSheetDetailPage({
           actions={<GeneratePdfButton action={generateSpecSheetPdf.bind(null, sheet.id)} pdfStatus={sheet.pdf_status} />}
         />
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Items
         </h2>
 

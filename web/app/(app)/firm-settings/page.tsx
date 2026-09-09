@@ -94,7 +94,7 @@ export default async function FirmSettingsPage() {
         )}
 
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginTop: "3rem" }}>
-          <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+          <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
             Reference Numbering
           </h2>
           {isOwner && <ContextPanelTrigger size="sm">Add override</ContextPanelTrigger>}

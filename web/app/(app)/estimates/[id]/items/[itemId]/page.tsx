@@ -92,7 +92,7 @@ export default async function EstimateItemMeasurementsPage({
           change them.
         </p>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Measurements
         </h2>
         <NewEstimateMeasurementForm estimateId={estimateId} estimateItemId={itemId} shapeHint={shape} />

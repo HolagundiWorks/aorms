@@ -111,7 +111,7 @@ export default async function AiRunDetailPage({
 
         {run.prompt_summary && (
           <>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
               Prompt summary
             </h2>
             <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", whiteSpace: "pre-wrap" }}>
@@ -120,7 +120,7 @@ export default async function AiRunDetailPage({
           </>
         )}
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
           Output
         </h2>
         <p
@@ -137,7 +137,7 @@ export default async function AiRunDetailPage({
 
         {Array.isArray(run.sources) && run.sources.length > 0 && (
           <>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
               Sources
             </h2>
             <pre

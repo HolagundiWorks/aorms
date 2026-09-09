@@ -65,7 +65,7 @@ export default async function KnowledgeBankSourceDetailPage({
 
         {source.executive_summary && (
           <>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
               Executive summary
             </h2>
             <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", whiteSpace: "pre-wrap" }}>
@@ -74,7 +74,7 @@ export default async function KnowledgeBankSourceDetailPage({
           </>
         )}
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
           Sections
         </h2>
         {sectionsError ? (
@@ -106,7 +106,7 @@ export default async function KnowledgeBankSourceDetailPage({
           </div>
         )}
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
           Source text
         </h2>
         <p

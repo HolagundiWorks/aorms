@@ -215,7 +215,7 @@ export default async function ReportsPage({
           </Tile>
         ) : (
           <>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               GST abstract
             </h2>
             <div style={{ overflowX: "auto" }}>
@@ -262,7 +262,7 @@ export default async function ReportsPage({
             </Table>
             </div>
 
-            <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
               TDS abstract (s.194J)
             </h2>
             <p className="cds--type-body-01" style={{ marginBottom: "1rem", color: "var(--cds-text-secondary)" }}>

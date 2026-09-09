@@ -87,7 +87,7 @@ export default async function LicencesPage() {
               <Tile key={studio.id}>
                 <Stack gap={4}>
                   <Stack gap={2} orientation="horizontal">
-                    <h2 className="cds--type-heading-03">{studio.name}</h2>
+                    <h2 className="cds--type-heading-02">{studio.name}</h2>
                     <Tag type="cool-gray" size="sm">
                       {studio.public_id}
                     </Tag>

@@ -55,7 +55,7 @@ export default async function MomDetailPage({ params }: { params: Promise<{ id: 
 
         {mom.attendees && (
           <>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
               Attendees
             </h2>
             <p className="cds--type-body-01" style={{ marginBottom: "1.5rem" }}>
@@ -64,14 +64,14 @@ export default async function MomDetailPage({ params }: { params: Promise<{ id: 
           </>
         )}
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
           Minutes
         </h2>
         <p className="cds--type-body-01" style={{ marginBottom: "2rem", whiteSpace: "pre-wrap" }}>
           {mom.minutes}
         </p>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Action items
         </h2>
         <NewMomActionForm momId={mom.id} />

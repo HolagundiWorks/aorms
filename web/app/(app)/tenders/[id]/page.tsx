@@ -78,7 +78,7 @@ export default async function TenderDetailPage({
           }
         />
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Invited contractors
         </h2>
         <NewTenderInviteForm tenderId={tender.id} contractors={availableContractors} />
@@ -113,7 +113,7 @@ export default async function TenderDetailPage({
           </Table>
         </div>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Bids {sealed ? <Tag type="gray" size="sm">Sealed</Tag> : <Tag type="green" size="sm">Open</Tag>}
         </h2>
         {sealed && tender.status === "OPEN" && <CloseTenderButton tenderId={tender.id} />}

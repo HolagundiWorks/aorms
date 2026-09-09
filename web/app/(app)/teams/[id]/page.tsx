@@ -36,7 +36,7 @@ export default async function TeamDetailPage({
       <Column sm={4} md={8} lg={16}>
         <PageHeader title={team.name} description={team.description ?? undefined} />
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Members
         </h2>
 

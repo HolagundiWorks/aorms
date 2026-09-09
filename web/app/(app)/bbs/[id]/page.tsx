@@ -106,12 +106,12 @@ export default async function BbsDetailPage({ params }: { params: Promise<{ id: 
           </p>
         )}
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Add member
         </h2>
         <NewBbsMemberForms bbsId={schedule.id} />
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Members
         </h2>
         {membersError ? (
@@ -170,12 +170,12 @@ export default async function BbsDetailPage({ params }: { params: Promise<{ id: 
           </Table>
         )}
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Add manual bar line
         </h2>
         <NewBbsItemForm bbsId={schedule.id} />
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Bar schedule
         </h2>
         {itemsError ? (
@@ -220,7 +220,7 @@ export default async function BbsDetailPage({ params }: { params: Promise<{ id: 
           </Table>
         )}
 
-        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
           Diameter-wise summary
         </h2>
         <Table aria-label="Diameter summary" className="aorms-table-spaced" size="sm">

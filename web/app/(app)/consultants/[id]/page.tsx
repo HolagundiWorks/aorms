@@ -46,7 +46,7 @@ export default async function ConsultantDetailPage({ params }: { params: Promise
           description={`${consultant.discipline} · ${consultant.firm ?? "—"} · ${consultant.email ?? "—"} · ${consultant.phone ?? "—"}`}
         />
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Engagements
         </h2>
         <NewEngagementForm consultantId={consultant.id} projects={projects ?? []} />

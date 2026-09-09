@@ -79,7 +79,7 @@ export default async function LeadDetailPage({
           </p>
         ) : (
           <>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Convert to project
             </h2>
             <ConvertLeadForm leadId={lead.id} clients={clients ?? []} />
