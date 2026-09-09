@@ -3,6 +3,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { UserRoleSelect } from "../../../components/aorms/UserRoleSelect";
 import { UserDisabledToggle } from "../../../components/aorms/UserDisabledToggle";
 import { MyNameEditor } from "../../../components/aorms/MyNameEditor";
+import { MyCalendarFeedButton } from "../../../components/aorms/MyCalendarFeedButton";
 import { NewStaffInviteForm } from "../../../components/aorms/NewStaffInviteForm";
 
 /**
@@ -38,6 +39,11 @@ import { NewStaffInviteForm } from "../../../components/aorms/NewStaffInviteForm
  * dropdown. The real fix is filtering this page's own query to the roles
  * it's actually meant to manage — portal users have their own login
  * status shown on /contractors and /consultants instead.
+ *
+ * "My calendar feed" (2026-09-09, migration 0033) closes Phase 5's own
+ * flagged gap — the `.ics` workload subscription Route Handler
+ * (`/api/calendar/[token]`) was deliberately deferred when the dashboard
+ * shipped. Same self-service-on-my-own-row placement as MyNameEditor.
  */
 const STAFF_ROLES = ["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE", "VIEWER", "SITE_SUPERVISOR"];
 export default async function UsersPage() {
@@ -100,6 +106,7 @@ export default async function UsersPage() {
                 <TableHeader>Name</TableHeader>
                 <TableHeader>Role</TableHeader>
                 <TableHeader>Status</TableHeader>
+                <TableHeader>My calendar feed</TableHeader>
                 {isOwner && <TableHeader>Actions</TableHeader>}
               </TableRow>
             </TableHead>
@@ -115,6 +122,7 @@ export default async function UsersPage() {
                       {p.disabled ? "Disabled" : "Active"}
                     </Tag>
                   </TableCell>
+                  <TableCell>{p.id === user?.id ? <MyCalendarFeedButton /> : "—"}</TableCell>
                   {isOwner && (
                     <TableCell>
                       <UserDisabledToggle userId={p.id} disabled={p.disabled} />
@@ -124,7 +132,7 @@ export default async function UsersPage() {
               ))}
               {(profiles ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={isOwner ? 4 : 3}>
+                  <TableCell colSpan={isOwner ? 5 : 4}>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                       No users found.
                     </p>

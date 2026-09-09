@@ -1730,6 +1730,71 @@ all three pieces that discrepancy bundled together (bend deduction, the
 hook-allowance constant, the tie-type resolver) are now each either
 fixed or deliberately, disclosedly left open**, not one unresolved flag.
 
+**Calendar feed (`.ics` subscription) shipped (2026-09-09) — closes
+Phase 5's own flagged gap.** Phase 5's dashboard/reports build
+deliberately deferred "the `.ics` calendar-feed Route Handler,
+token-based, outside the `(app)` auth group" when it shipped; this
+closes that gap, ported from `backend/src/lib/workloadCalendar.ts` +
+`backend/src/modules/calendar/feed.ts`.
+
+- **Migration `0033`** — two `security definer` RPCs,
+  `ensure_my_calendar_feed_token()`/`rotate_my_calendar_feed_token()`,
+  the same self-service-on-my-own-row pattern migration 0031's
+  `update_my_full_name()` established (RLS's `"profiles: owner
+  manages"` policy is UPDATE-any-row for OWNER, not self-service for
+  anyone, so a person's own `calendar_feed_token` column needed the
+  same narrow definer-function door). Token generation avoids a
+  `pgcrypto` dependency entirely — two concatenated `gen_random_uuid()`
+  calls (Postgres core, already relied on everywhere in this schema for
+  primary keys) give ~244 bits of randomness, more than the old
+  backend's `randomBytes(24)` (192 bits). A fetched token is reused
+  until it's 90 days old, then silently re-issued by the same `ensure_*`
+  call — matching the old backend's TTL exactly.
+- **`web/lib/calendar/ics.ts`** — verbatim port of
+  `packages/contracts/src/calendar.ts`'s `buildIcsFeed()`/`escapeIcsText()`/
+  date helpers, unchanged (pure text formatting, no DB dependency to
+  diverge).
+- **`web/lib/calendar/workload.ts`** — simplified vs. the old backend's
+  `loadWorkloadEvents()`: `web/`'s own `tasks.assignee_id` FKs straight
+  to `profiles` (Phase 2's own schema decision), so the old teamMembers
+  indirection + assignee-name-text fallback (needed only because the old
+  schema's `tasks.assignee` was a plain text column) had nothing to port.
+- **`web/app/api/calendar/[token]/route.ts`** — the public, unauthenticated
+  Route Handler, same reasoning as the feasibility-share route: a
+  calendar app's subscription GET isn't a Supabase Auth session, so the
+  per-user secret token in the URL *is* the authorization check, verified
+  with the service-role client against `profiles.calendar_feed_token`.
+  90-day TTL and the `CLIENT`/`CONSULTANT`/`CONTRACTOR` portal-role
+  exclusion are enforced here in code, mirroring the old backend's
+  `userForCalendarToken()` checks exactly.
+- **`/users`** grew a "My calendar feed" column, own-row-only, same
+  placement convention as `MyNameEditor` (`MyCalendarFeedButton.tsx`,
+  `getMyCalendarFeedToken`/`rotateMyCalendarFeedToken` server actions).
+
+`tsc --noEmit`, `eslint .`, and `next build --webpack` all clean (the
+new `/api/calendar/[token]` route confirmed present in the build's own
+route list). Migration applied to `aorms-web` (`201` from the
+Management API), confirmed live via direct RPC call as service-role
+(correctly raised `Not authenticated` rather than "function not found").
+Live-verified end-to-end through the real signed-in browser UI: created
+a real test account + project + a task with a due date assigned to it,
+clicked "Get calendar feed" on `/users`, confirmed a real subscription
+URL rendered, fetched it directly and confirmed valid ICS content —
+correct `VEVENT` (`DTSTART;VALUE=DATE`/`DTEND;VALUE=DATE` for the
+all-day due date, `[[project ref]] title` summary, escaped multi-line
+description) matching the seeded task exactly. Clicked "Rotate," confirmed
+a new token URL appeared; confirmed (with `cache: "no-store"`, since an
+initial check was a false pass off the route's own `Cache-Control:
+private, max-age=300` header) the **old** token now 404s and the **new**
+one serves the same feed. Directly toggled the test profile's role to
+`CLIENT` (404, correctly excluded) and `disabled` to `true` (404), then
+restored both (200 again) — confirming all three negative paths without
+needing three separate portal-role test accounts. Test task + project
+deleted; test account deleted cleanly with no `audit_log` FK issue
+(`getMyCalendarFeedToken`/`rotateMyCalendarFeedToken` don't call
+`write_audit`, unlike several other test accounts this session) —
+confirmed empty afterward.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

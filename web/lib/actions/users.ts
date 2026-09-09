@@ -72,3 +72,26 @@ export async function updateMyName(fullName: string): Promise<{ error?: string }
   revalidatePath("/users");
   return {};
 }
+
+/**
+ * Calendar feed token issuance — migration 0033's `ensure_my_calendar_
+ * feed_token`/`rotate_my_calendar_feed_token`, the same self-service RLS
+ * gap as `updateMyName` above, for the columns migration 0009 added and
+ * left unused ("the `.ics` calendar-feed Route Handler... deliberately
+ * deferred" — Phase 5's own flagged gap, closed here). Returns the raw
+ * token; the caller builds the actual subscription URL client-side from
+ * `window.location.origin` (no server-side host detection needed).
+ */
+export async function getMyCalendarFeedToken(): Promise<{ token?: string; error?: string }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("ensure_my_calendar_feed_token");
+  if (error) return { error: error.message };
+  return { token: data as string };
+}
+
+export async function rotateMyCalendarFeedToken(): Promise<{ token?: string; error?: string }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("rotate_my_calendar_feed_token");
+  if (error) return { error: error.message };
+  return { token: data as string };
+}
