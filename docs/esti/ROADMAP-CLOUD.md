@@ -1548,9 +1548,32 @@ response UI renders correctly and only for `SENT` rows, clicked
 Approve, and confirmed the exact expected honest failure — `Could not
 find the function public.respond_to_approval(...) in the schema cache`
 — the correct "code shipped, migration pending" failure mode, not a
-masked or swallowed error. **Needs the same follow-up session with a
-token as 0031, to apply both migrations and re-verify the actual
-writes.** Test approval and account deleted afterward, confirmed empty.
+masked or swallowed error. Test approval and account deleted afterward,
+confirmed empty.
+
+**✅ Both migrations 0031 and 0032 fully live-verified (2026-09-09),
+once `aorms-web` existed to apply them to.** Re-ran both, this time with
+real writes, not just the honest-failure confirmation above.
+`update_my_full_name()`: called directly via RPC as `service_role`
+(no `auth.uid()`) — correctly raised `Not authenticated` rather than
+"function not found," confirming the function itself is live and its
+own guard fires before touching anything; then through the real
+signed-in UI on `/users`, changed a real test account's own name via
+`MyNameEditor`, confirmed the new value both rendered in the UI and
+persisted (`profiles.full_name` read back directly, matching exactly).
+`respond_to_approval()`: created a real client + project + `SENT`
+approval, signed in as a real `CLIENT` test account, clicked Approve on
+`/portal/[projectId]` — confirmed the row flipped to `APPROVED` in the
+UI with a response date, then confirmed directly: `approvals.status`/
+`response_date` both correct, and the function's own internal
+`audit_log` insert landed correctly (`action: "CLIENT_RESPOND"`,
+correct `actor_id`, `before`/`after` both accurate) — proving the
+security-definer function's audit-bypass-of-the-staff-only-INSERT-policy
+design actually works, not just reads correctly on paper. All test data
+deleted afterward (client/project/approval clean); the OWNER test
+account (name-edit, no audit call) deleted cleanly, the CLIENT test
+account (triggered `CLIENT_RESPOND`) disabled instead, same FK
+situation as every other audited test account this session.
 
 **BBS Column/Beam reconciliation, part one — bend-deduction cutting
 length (2026-09-08).** On explicit request to keep going on the BBS/AQC
