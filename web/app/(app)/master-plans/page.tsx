@@ -12,6 +12,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddMasterPlanForm } from "../../../components/aorms/AddMasterPlanForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function MasterPlansPage() {
@@ -21,6 +22,9 @@ export default async function MasterPlansPage() {
     .from("master_plans")
     .select("id, name, category, file_name, version, notes, created_at")
     .order("created_at", { ascending: false });
+
+  const rows = plans ?? [];
+  const categoryCount = new Set(rows.map((p) => p.category).filter(Boolean)).size;
 
   return (
     <ContextPanelLayout>
@@ -35,6 +39,18 @@ export default async function MasterPlansPage() {
               description="Firm-wide master plan and zoning file register."
               actions={<ContextPanelTrigger size="sm">Add master plan</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total plans" value={rows.length} />
+              <KpiTile label="Categories" value={categoryCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

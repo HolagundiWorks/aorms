@@ -14,6 +14,7 @@ import { AddPayslipForm } from "../../../components/aorms/AddPayslipForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { MarkPaidButton } from "../../../components/aorms/MarkPaidButton";
 import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generatePayslipPdf } from "../../../lib/actions/payslips";
 
@@ -32,6 +33,10 @@ export default async function PayslipsPage() {
     supabase.from("team_members").select("id, name").order("name"),
   ]);
 
+  const rows = payslips ?? [];
+  const paidCount = rows.filter((p) => p.paid).length;
+  const totalNetPaise = rows.reduce((sum, p) => sum + (p.net_paise ?? 0), 0);
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New payslip" description="Generate a monthly payslip.">
@@ -45,6 +50,19 @@ export default async function PayslipsPage() {
               description="Monthly payslips per team member."
               actions={<ContextPanelTrigger size="sm">Add payslip</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total payslips" value={rows.length} />
+              <KpiTile label="Paid" value={paidCount} />
+              <KpiTile label="Total net" value={formatInr(totalNetPaise)} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

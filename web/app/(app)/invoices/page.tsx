@@ -13,6 +13,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { AddInvoiceForm } from "../../../components/aorms/AddInvoiceForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateInvoicePdf } from "../../../lib/actions/invoices";
 
@@ -42,6 +43,14 @@ export default async function InvoicesPage() {
     supabase.from("clients").select("id, name").order("name"),
   ]);
 
+  const rows = invoices ?? [];
+  const grandTotalPaise = rows.reduce((sum, inv) => sum + (inv.grand_total_paise ?? 0), 0);
+  const outstandingPaise = rows.reduce(
+    (sum, inv) => sum + Math.max((inv.net_receivable_paise ?? 0) - (inv.paid_paise ?? 0), 0),
+    0,
+  );
+  const paidCount = rows.filter((inv) => inv.status === "PAID").length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New invoice" description="Create a GST invoice.">
@@ -55,6 +64,20 @@ export default async function InvoicesPage() {
               description="GST invoicing — CGST/SGST/IGST, place of supply, and s.194J TDS computed automatically."
               actions={<ContextPanelTrigger size="sm">Create invoice</ContextPanelTrigger>}
             />
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <KpiTile label="Total invoices" value={rows.length} />
+          <KpiTile label="Invoiced" value={formatInr(grandTotalPaise)} />
+          <KpiTile label="Outstanding" value={formatInr(outstandingPaise)} />
+          <KpiTile label="Paid" value={paidCount} />
+        </div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

@@ -13,6 +13,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddLeadForm } from "../../../components/aorms/AddLeadForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { LeadStatusSelect } from "../../../components/aorms/LeadStatusSelect";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
@@ -23,6 +24,11 @@ export default async function LeadsPage() {
     .from("leads")
     .select("id, ref, client_name, lead_source, project_type, city, status, converted_project_id")
     .order("created_at", { ascending: false });
+
+  const rows = leads ?? [];
+  const qualifiedCount = rows.filter((l) => l.converted_project_id).length;
+  const lostCount = rows.filter((l) => l.status === "DROPPED" || l.status === "LOST").length;
+  const openCount = rows.length - qualifiedCount - lostCount;
 
   return (
     <ContextPanelLayout>
@@ -37,6 +43,20 @@ export default async function LeadsPage() {
               description="Inbound enquiries, before a client or project exists — the start of the Project OS lead-to-activation pipeline."
               actions={<ContextPanelTrigger size="sm">Add lead</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total leads" value={rows.length} />
+              <KpiTile label="Open" value={openCount} />
+              <KpiTile label="Qualified" value={qualifiedCount} />
+              <KpiTile label="Lost" value={lostCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

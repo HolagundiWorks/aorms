@@ -13,6 +13,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddRepoSourceForm } from "../../../components/aorms/AddRepoSourceForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red" | "purple"> = {
@@ -31,6 +32,10 @@ export default async function KnowledgeBankPage() {
     .select("id, title, author, category, status, updated_at")
     .order("updated_at", { ascending: false });
 
+  const rows = sources ?? [];
+  const publishedCount = rows.filter((s) => s.status === "PUBLISHED").length;
+  const draftCount = rows.filter((s) => s.status === "DRAFT").length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="Add source" description="Add a knowledge bank reference source.">
@@ -44,6 +49,19 @@ export default async function KnowledgeBankPage() {
               description="Firm reference library — books, standards, and notes ESTI can draw on. The AI rephrase step (raw text → reviewable sections) isn't wired up yet, so new sources stay in Draft until that lands."
               actions={<ContextPanelTrigger size="sm">Add source</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total sources" value={rows.length} />
+              <KpiTile label="Published" value={publishedCount} />
+              <KpiTile label="Draft" value={draftCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

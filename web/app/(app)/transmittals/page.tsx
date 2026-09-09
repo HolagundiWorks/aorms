@@ -14,6 +14,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { AddTransmittalForm } from "../../../components/aorms/AddTransmittalForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateTransmittalPdf } from "../../../lib/actions/transmittals";
 
@@ -28,6 +29,10 @@ export default async function TransmittalsPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = transmittals ?? [];
+  const acknowledgedCount = rows.filter((t) => t.acknowledged_at).length;
+  const pendingCount = rows.length - acknowledgedCount;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New transmittal" description="Track a drawing/document issue.">
@@ -41,6 +46,19 @@ export default async function TransmittalsPage() {
               description="Drawing-issue tracking with client/consultant acknowledgment."
               actions={<ContextPanelTrigger size="sm">Add transmittal</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total transmittals" value={rows.length} />
+              <KpiTile label="Acknowledged" value={acknowledgedCount} />
+              <KpiTile label="Pending" value={pendingCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

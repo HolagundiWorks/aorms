@@ -12,6 +12,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { AddJobApplicationForm } from "../../../components/aorms/AddJobApplicationForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { JobApplicationStatusSelect } from "../../../components/aorms/JobApplicationStatusSelect";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function JobApplicationsPage() {
@@ -21,6 +22,10 @@ export default async function JobApplicationsPage() {
     .from("job_applications")
     .select("id, name, applied_role, email, phone, experience_years, status, applied_at")
     .order("applied_at", { ascending: false });
+
+  const rows = applications ?? [];
+  const interviewCount = rows.filter((a) => a.status === "INTERVIEW").length;
+  const hiredCount = rows.filter((a) => a.status === "HIRED").length;
 
   return (
     <ContextPanelLayout>
@@ -35,6 +40,19 @@ export default async function JobApplicationsPage() {
               description="Recruitment pipeline. Resume upload isn't wired up — same register-only pattern used elsewhere until an upload Route Handler exists."
               actions={<ContextPanelTrigger size="sm">Add application</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total applications" value={rows.length} />
+              <KpiTile label="In interview" value={interviewCount} />
+              <KpiTile label="Hired" value={hiredCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

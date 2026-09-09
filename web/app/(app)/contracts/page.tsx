@@ -12,6 +12,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddContractForm } from "../../../components/aorms/AddContractForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
@@ -37,6 +38,10 @@ export default async function ContractsPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = contracts ?? [];
+  const activeCount = rows.filter((c) => c.status === "ACTIVE").length;
+  const totalValuePaise = rows.reduce((sum, c) => sum + (c.value_paise ?? 0), 0);
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New contract" description="Add a contract or agreement record.">
@@ -50,6 +55,19 @@ export default async function ContractsPage() {
               description="Contract / agreement register — clients, consultants, vendors."
               actions={<ContextPanelTrigger size="sm">Add contract</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total contracts" value={rows.length} />
+              <KpiTile label="Active" value={activeCount} />
+              <KpiTile label="Total value" value={formatInr(totalValuePaise)} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

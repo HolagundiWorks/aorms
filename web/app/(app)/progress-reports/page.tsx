@@ -14,6 +14,7 @@ import { AddProgressReportForm } from "../../../components/aorms/AddProgressRepo
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
 import { IssueProgressReportButton } from "../../../components/aorms/IssueProgressReportButton";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateProgressReportPdf } from "../../../lib/actions/progress-reports";
 
@@ -28,6 +29,13 @@ export default async function ProgressReportsPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = reports ?? [];
+  const issuedCount = rows.filter((r) => r.status === "ISSUED").length;
+  const withPhysical = rows.filter((r) => r.physical_progress_pct != null);
+  const avgPhysicalPct = withPhysical.length
+    ? Math.round(withPhysical.reduce((sum, r) => sum + (r.physical_progress_pct ?? 0), 0) / withPhysical.length)
+    : null;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New progress report" description="Add a periodic project progress report.">
@@ -41,6 +49,19 @@ export default async function ProgressReportsPage() {
               description="Periodic project progress narrative and completion percentages."
               actions={<ContextPanelTrigger size="sm">Add report</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total reports" value={rows.length} />
+              <KpiTile label="Issued" value={issuedCount} />
+              <KpiTile label="Avg physical progress" value={avgPhysicalPct != null ? `${avgPhysicalPct}%` : "—"} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

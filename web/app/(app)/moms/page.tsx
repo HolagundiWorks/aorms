@@ -13,6 +13,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddMomForm } from "../../../components/aorms/AddMomForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function MomsPage() {
@@ -25,6 +26,10 @@ export default async function MomsPage() {
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
+
+  const rows = moms ?? [];
+  const draftCount = rows.filter((m) => m.status === "DRAFT").length;
+  const issuedCount = rows.length - draftCount;
 
   return (
     <ContextPanelLayout>
@@ -39,6 +44,19 @@ export default async function MomsPage() {
               description="MOMs — minutes of meeting, per project."
               actions={<ContextPanelTrigger size="sm">Add minutes</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total minutes" value={rows.length} />
+              <KpiTile label="Draft" value={draftCount} />
+              <KpiTile label="Issued" value={issuedCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

@@ -12,6 +12,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddTaskForm } from "../../../components/aorms/AddTaskForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "red" | "green"> = {
@@ -46,6 +47,11 @@ export default async function TasksPage() {
     supabase.from("profiles").select("id, full_name").order("full_name"),
   ]);
 
+  const rows = tasks ?? [];
+  const inProgressCount = rows.filter((t) => t.status === "IN_PROGRESS").length;
+  const blockedCount = rows.filter((t) => t.status === "BLOCKED").length;
+  const doneCount = rows.filter((t) => t.status === "DONE").length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New task" description="Add a task to the office-wide list.">
@@ -59,6 +65,20 @@ export default async function TasksPage() {
               description="Office-wide task list across all projects."
               actions={<ContextPanelTrigger size="sm">Add task</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total tasks" value={rows.length} />
+              <KpiTile label="In progress" value={inProgressCount} />
+              <KpiTile label="Blocked" value={blockedCount} />
+              <KpiTile label="Done" value={doneCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

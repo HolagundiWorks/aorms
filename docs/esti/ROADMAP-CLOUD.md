@@ -2257,13 +2257,52 @@ Approvals, BBS, Users, Negotiation, Pre-Construction R&O, Projects,
 Estimates, the four `pmc-*` pages, and Firm Settings's numbering
 overrides — 42 pages total across 5 batches.
 
-The KPI-strip half of the standard (mandatory 3–6 metrics below every
-major page's H1) remains its own, not-yet-started pass — Dashboard,
-Project Overview, and Decisions are the only pages that have it so far,
-each needing its own bespoke count queries rather than a mechanical
-transform. That, and the Carbon typography guide's rollout beyond the
-handful of pages it's already reached, are what's left of the broader
-UI/UX migration the user asked to complete.
+**KPI-strip rollout begun (2026-09-09), same "autopilot" pass — 19
+pages in the first two batches.** Unlike the panel conversion, this one
+turned out cheap per page: every list page already fetches the full row
+set to render its table, so the 3–4 KPI numbers are almost always a
+plain `.filter()`/`.reduce()` over `rows` the page already has — no new
+Supabase queries needed except where a metric crossed a foreign table
+(none did in this pass). Same `KpiTile` grid used by Dashboard/Project
+Overview/Decisions (`repeat(auto-fill, minmax(11rem, 1fr))`, directly
+below `PageHeader`), same number-first/label-below tile.
+
+Batch 1 (financial/status registers): Clients (total/active/individuals/
+cities), Leads (total/open/qualified/lost — derived from `status` +
+`converted_project_id`, not a separate "is qualified" column), Tasks
+(total/in-progress/blocked/done), Invoices (total/invoiced ₹/outstanding
+₹/paid — outstanding is `max(net_receivable − paid, 0)` summed across
+rows, clamped so a single over-paid invoice can't drag the total
+negative), Proposals (total/sent/approved/fee value), Letters (total/
+PDF-ready/unique recipients), Contracts (total/active/total value),
+Drawings (total/ready/failed/pending review — caught a wrong assumed
+enum value, `PENDING`, against the real `PENDING_REVIEW` default in
+migration `0007_phase4_drawings.sql`; fixed before it shipped), Document
+Issues (total/this-month/document types).
+
+Batch 2: MoMs (total/draft/issued), Transmittals (total/acknowledged/
+pending), Snags (total/open/in-progress/closed), Site Instructions
+(total/acknowledged/pending), Progress Reports (total/issued/avg
+physical-progress %), Master Plans (total/categories), Lessons (total/
+categories), Knowledge Bank (total/published/draft), Job Applications
+(total/in-interview/hired), Payslips (total/paid/total net ₹).
+
+Verified: `tsc --noEmit` and `eslint` clean after each batch; a full
+`next build --webpack` (`rm -rf .next` first) clean after Batch 1; live
+end-to-end on Clients and Invoices (KPI tiles render correctly against
+the real, currently-empty tables — ₹0/0 as expected, confirming the
+formatting path works, not just the zero-state).
+
+**~23 pages remain** for the KPI-strip pass — the rest of the 42
+ContextPanel-converted list pages (Standards, Spec Catalog, Spec Sheets,
+Team Members, Teams, Tenders, Purchase Orders, Rate Books, Office
+Templates, Consultants, Contractors, Approvals, BBS, Users, Negotiation,
+Pre-Construction R&O, Projects, Estimates, the four `pmc-*` pages) plus
+Firm Settings's numbering overrides (likely skipped — a settings
+sub-section, not a metrics-bearing register, matching why it never got
+one on Dashboard-style pages either). The Carbon typography guide's
+rollout beyond its current handful of pages remains a separate,
+not-yet-started pass.
 
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —

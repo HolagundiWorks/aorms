@@ -2,6 +2,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../lib/supabase/server";
 import { AddDocumentIssueForm } from "../../../components/aorms/AddDocumentIssueForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 /**
@@ -24,6 +25,15 @@ export default async function DocumentIssuesPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = issues ?? [];
+  const entityTypeCount = new Set(rows.map((i) => i.entity_type)).size;
+  const thisMonthCount = rows.filter((i) => {
+    if (!i.issued_at) return false;
+    const issued = new Date(i.issued_at);
+    const now = new Date();
+    return issued.getUTCFullYear() === now.getUTCFullYear() && issued.getUTCMonth() === now.getUTCMonth();
+  }).length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="Log document issue" description="Record a cross-entity revision/issue.">
@@ -37,6 +47,19 @@ export default async function DocumentIssuesPage() {
               description="Cross-entity revision/issue register — drawings, transmittals, invoices, and every other issued document, in one place."
               actions={<ContextPanelTrigger size="sm">Log issue</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total issues" value={rows.length} />
+              <KpiTile label="This month" value={thisMonthCount} />
+              <KpiTile label="Document types" value={entityTypeCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

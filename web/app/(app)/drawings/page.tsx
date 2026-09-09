@@ -13,6 +13,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { AddDrawingForm } from "../../../components/aorms/AddDrawingForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateDrawingIssuePdf } from "../../../lib/actions/drawings";
 
@@ -35,6 +36,11 @@ export default async function DrawingsPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = drawings ?? [];
+  const readyCount = rows.filter((d) => d.status === "READY").length;
+  const failedCount = rows.filter((d) => d.status === "FAILED").length;
+  const pendingReviewCount = rows.filter((d) => d.review_status === "PENDING_REVIEW").length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="Add drawing" description="Upload a DXF drawing.">
@@ -48,6 +54,20 @@ export default async function DrawingsPage() {
               description="DXF register with worker-driven takeoff and revision chaining."
               actions={<ContextPanelTrigger size="sm">Add drawing</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total drawings" value={rows.length} />
+              <KpiTile label="Ready" value={readyCount} />
+              <KpiTile label="Failed" value={failedCount} />
+              <KpiTile label="Pending review" value={pendingReviewCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

@@ -13,6 +13,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { AddProposalForm } from "../../../components/aorms/AddProposalForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateProposalPdf } from "../../../lib/actions/proposals";
 
@@ -41,6 +42,11 @@ export default async function ProposalsPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = proposals ?? [];
+  const approvedCount = rows.filter((p) => p.status === "APPROVED").length;
+  const sentCount = rows.filter((p) => p.status === "SENT").length;
+  const totalFeePaise = rows.reduce((sum, p) => sum + (p.fee_paise ?? 0), 0);
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New proposal" description="Create a fee proposal or scope agreement.">
@@ -54,6 +60,20 @@ export default async function ProposalsPage() {
               description="COA fee proposals and scope agreements."
               actions={<ContextPanelTrigger size="sm">Create proposal</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total proposals" value={rows.length} />
+              <KpiTile label="Sent" value={sentCount} />
+              <KpiTile label="Approved" value={approvedCount} />
+              <KpiTile label="Fee value" value={formatInr(totalFeePaise)} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

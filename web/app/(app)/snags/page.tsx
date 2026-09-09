@@ -11,6 +11,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddSnagForm } from "../../../components/aorms/AddSnagForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SnagStatusSelect } from "../../../components/aorms/SnagStatusSelect";
 
@@ -25,6 +26,11 @@ export default async function SnagsPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = snags ?? [];
+  const openCount = rows.filter((s) => s.status === "OPEN").length;
+  const inProgressCount = rows.filter((s) => s.status === "IN_PROGRESS").length;
+  const closedCount = rows.filter((s) => s.status === "CLOSED").length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New snag" description="Log a site defect.">
@@ -38,6 +44,20 @@ export default async function SnagsPage() {
               description="Site defect register. Photo attachments aren't wired up yet."
               actions={<ContextPanelTrigger size="sm">Add snag</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total snags" value={rows.length} />
+              <KpiTile label="Open" value={openCount} />
+              <KpiTile label="In progress" value={inProgressCount} />
+              <KpiTile label="Closed" value={closedCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

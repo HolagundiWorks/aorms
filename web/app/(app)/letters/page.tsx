@@ -12,6 +12,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { AddLetterForm } from "../../../components/aorms/AddLetterForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateLetterPdf } from "../../../lib/actions/letters";
 
@@ -26,6 +27,10 @@ export default async function LettersPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = letters ?? [];
+  const readyCount = rows.filter((l) => l.pdf_status === "READY").length;
+  const recipientCount = new Set(rows.map((l) => l.recipient).filter(Boolean)).size;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New letter" description="Add a correspondence record.">
@@ -39,6 +44,19 @@ export default async function LettersPage() {
               description="Office correspondence register."
               actions={<ContextPanelTrigger size="sm">Add letter</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total letters" value={rows.length} />
+              <KpiTile label="PDF ready" value={readyCount} />
+              <KpiTile label="Recipients" value={recipientCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

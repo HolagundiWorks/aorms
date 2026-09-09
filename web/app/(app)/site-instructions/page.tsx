@@ -12,6 +12,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { AddSiteInstructionForm } from "../../../components/aorms/AddSiteInstructionForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateSiteInstructionPdf } from "../../../lib/actions/site-instructions";
 
@@ -27,6 +28,10 @@ export default async function SiteInstructionsPage() {
     supabase.from("contractors").select("id, name").order("name"),
   ]);
 
+  const rows = instructions ?? [];
+  const acknowledgedCount = rows.filter((s) => s.acknowledged_at).length;
+  const pendingCount = rows.length - acknowledgedCount;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New site instruction" description="Issue a formal instruction to a contractor.">
@@ -40,6 +45,19 @@ export default async function SiteInstructionsPage() {
               description="Formal instructions issued to contractors on site."
               actions={<ContextPanelTrigger size="sm">Issue instruction</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total instructions" value={rows.length} />
+              <KpiTile label="Acknowledged" value={acknowledgedCount} />
+              <KpiTile label="Pending" value={pendingCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
