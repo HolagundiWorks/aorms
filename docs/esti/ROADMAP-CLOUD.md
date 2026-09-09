@@ -2549,6 +2549,56 @@ full-width) page content exactly as `§29` of the composition standard
 specifies. `tsc --noEmit`, `eslint components/aorms/AppShell.tsx`, and a
 full `next build --webpack` all clean across all 90+ routes.
 
+**Dashboard grew four real content widgets (2026-09-09), on explicit
+"dashboard should have task list, site update, scheduled meetings, and
+others" direction.** Previously the Dashboard was KPI tiles plus a bare
+audit-log feed — no actionable "what do I do next" surface at all. Added
+four list widgets in a responsive 2-column grid between the KPIs and
+Recent Activity, every one backed by a table that already existed (no
+new schema):
+
+- **My Tasks** — open tasks (`status != DONE`) assigned to the signed-in
+  user, soonest `due_date` first, overdue ones highlighted in
+  `support-error` red with an "Overdue" prefix instead of "Due".
+- **Scheduled Meetings** — `moms` rows with `meeting_date >= today`.
+  `moms` is "minutes of meeting" (a record of what was discussed, not a
+  calendar), but `meeting_date` carries no constraint against being in
+  the future, so logging a MoM ahead of time doubles as that meeting's
+  schedule entry — the closest real "scheduled meetings" concept this
+  schema has, since no separate calendar/events table exists to build a
+  truer one against. Disclosed as a repurposing, not invented data.
+- **Site Updates** — the most recently logged `progress_reports` across
+  every project, newest first, with the period range and physical-
+  progress-% tag — the literal "site update" concept already in the
+  schema (period narrative + physical/schedule progress).
+- **Decisions Awaiting Client** — CRIF `decisions` in `CLIENT_REVIEW`
+  state, soonest `review_deadline` first, impact-tagged, linking through
+  to that project's own Decisions (CRIF) register. The "and others"
+  slot — ties the CRIF feature (built earlier this session) into the
+  office-wide snapshot rather than leaving it undiscoverable unless a
+  staff member happens to open a specific project.
+
+Each widget shares one small extracted shell (`DashboardWidget` +
+`WidgetRow` + `EmptyRow`, in `dashboard/page.tsx` itself, not yet common
+enough elsewhere to warrant its own `components/aorms/` file) — a
+Section-heading title bar with an optional "View all" link to that
+record's own register page (omitted for Decisions, which has no
+single all-projects register to link to), a row per record, and a
+genuinely empty state per widget rather than a shared generic one.
+
+Verified: `tsc --noEmit` and `eslint` clean, a full `next build
+--webpack` clean across all 90+ routes. Live-verified with real seeded
+data (a disposable test project plus one task/mom/progress-report/
+decision row each): My Tasks showed the seeded task in red with
+"Overdue 2026-09-01" and a HIGH priority tag; Scheduled Meetings and
+Site Updates rendered their rows with the correct secondary metadata
+and tags; Decisions Awaiting Client's row linked through to the real
+project's Decisions (CRIF) page, where its own "Awaiting client" KPI
+independently read the same count (1) — confirming the widget isn't
+reading stale or mismatched data. All seed rows deleted afterward
+(children first, then the project, since `moms`/`progress_reports`/
+`decisions` have no `on delete cascade` from `project_offices`).
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
