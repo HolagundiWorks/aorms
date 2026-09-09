@@ -1,22 +1,25 @@
 # AORMS Cloud Roadmap (aorms.in / production)
 
-**🔴 2026-09-09 — the `web/` Supabase project has been deleted.** The
-cloud project this entire document's "live-verified against the cloud
-project" language refers to (`yrpholqbsbvcwzyrhvew`) was removed outside
-this session (confirmed: `GET /rest/v1/` now returns `410 Project
-removed`). Every migration, every RLS policy, every row of real data
-this roadmap describes as applied/verified there is **gone** — that
-verification was real and accurate *at the time*, but the environment it
-happened in no longer exists. `web/`'s own codebase (this repo's
-`web/supabase/migrations/0001`–`0032`) is unaffected and remains the
-correct, complete source of truth for what the schema should be — this
-is a database-hosting problem, not a lost-code problem. **Only
-`aorms-platform` (`qbgbnhthchhbammzeebg`) still exists**, holding the
-separate AORMS Platform/Identity schema (`platform/supabase/migrations/`
-— Studio/Company/licensing) — confirmed alive and unaffected. Nothing in
-`web/`'s own app schema is currently deployed anywhere. Rebuilding this
-is the current top priority — see the bottom of this file for where that
-stands.
+**✅ 2026-09-09 — `web/`'s cloud Supabase project was deleted, then
+rebuilt same day as a new, properly-named project.** The old project
+(`yrpholqbsbvcwzyrhvew`, everything this document's older "live-verified
+against the cloud project" language refers to) was removed outside this
+session (confirmed at the time: `GET /rest/v1/` returned `410 Project
+removed`). Nothing was actually lost — `web/`'s own codebase
+(`web/supabase/migrations/0001`–`0032`) was always the real source of
+truth, only the hosted database itself was gone. On explicit direction
+("let's set up db with proper names"), rebuilt as **`aorms-web`** (ref
+`fyedovpqjwbslrughwdv`, `ap-south-1`, Free tier) — a new, separate
+project rather than folding into `aorms-platform`, preserving the
+original two-project split's own reasoning (`web/` is single-tenant per
+deployment; `aorms-platform` is multi-tenant identity/licensing —
+genuinely different data models). All 32 migrations applied in one clean
+pass with zero errors — real, fresh confirmation this repo's migration
+history is portable SQL, not tied to the specific project it was first
+written against. `aorms-platform` (`qbgbnhthchhbammzeebg`) itself was
+never affected. Full account, including live verification through the
+real signed-in app against the new database, is in the dated entry
+further down this file.
 
 **Status:** ACTIVE — soft launch, sign-in now live on the landing page;
 Next.js/Supabase stack migration **in progress** (Phases 1–5 and 7–10
@@ -1148,6 +1151,54 @@ migration-apply this session has needed: a fresh Supabase Management API
 personal access token, not carried over between sessions (creating a new
 project, if that's the direction, needs one too — project creation is
 not something this session can do without one either).
+
+**✅ Resolved same day — `aorms-web` created and fully verified
+(2026-09-09).** User decision: keep the two-project split (matching the
+reasoning above), name the new project `aorms-web`, and provided a fresh
+personal access token. Used the Management API to list organizations
+(one: "STUDIO DB", `hbkkehjcuzuarnyxlmub`) and create the new project —
+`POST /v1/projects` with `region: ap-south-1` (Mumbai; `aorms-platform`
+itself is `ap-northeast-1`/Tokyo, but the firm is India-based, so a
+closer region is a real, deliberate improvement, not just consistency
+for its own sake) and `plan: free`, matching `aorms-platform`'s own
+tier. Project came up `ACTIVE_HEALTHY` immediately (ref
+`fyedovpqjwbslrughwdv`).
+
+Applied all 32 migrations (`0001`–`0032`) via the Management API in
+strict numeric order, in one pass, with **zero errors** — a genuinely
+clean, unattended run, not a "fixed as we went" one. This is real
+confirmation the migration history is portable, self-consistent SQL:
+every RLS policy, every SQL function (`next_ref`, `shape_for_unit`,
+`closed_link_cutting`'s TS port, the self-update guards, etc.), every
+constraint written across 6 days of sessions works identically on a
+completely fresh database, not just "worked once against an already-
+evolved live schema." Spot-verified via PostgREST introspection
+afterward: 96 tables present (`takeoff_items`/`numbering_patterns`/
+`estimates`/`profiles.platform_public_id` all confirmed), the `firm`
+singleton correctly auto-seeded by migration `0024`, and `next_ref()`
+correctly minted `SMK/2026-27/0001` for a throwaway smoke-test scope
+(deleted after).
+
+**Live-verified end-to-end through the real app, not just via direct
+REST calls**: updated `web/.env` with the new project's URL/anon/
+service-role keys, restarted the dev server, created a real test OWNER
+account — confirmed `handle_new_user()`'s trigger fired correctly
+(a `profiles` row auto-created at `ASSOCIATE` the instant the
+`auth.users` row was), signed in through the real login page, confirmed
+`/dashboard` renders correctly against the fresh empty database (all
+KPI tiles correctly `0`/`₹0`, "No activity yet."), confirmed
+`/firm-settings` correctly reads the seeded `firm` singleton. Test
+account deleted afterward (no `write_audit` calls, so no FK-blocks-
+delete situation this time); confirmed `profiles` empty and the `firm`
+singleton still intact via a final direct query.
+
+`aorms-platform` (`qbgbnhthchhbammzeebg`) was never touched by any of
+this — confirmed still `ACTIVE_HEALTHY` and unaffected throughout.
+`web/.env`'s comment block updated to record the new project's ref/
+region/tier and the reason it exists, matching the existing convention
+for `aorms-platform`'s own entry there. **Cloud infrastructure is now
+fully rebuilt and live-verified — the previous entry's "nothing works
+right now, not even sign-in" is no longer true.**
 
 **Autopilot pass — polish bundle, portal login provisioning,
 `document_issues` auto-wiring (2026-09-08).** On explicit request to work
