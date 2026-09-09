@@ -3,6 +3,7 @@
 import NextLink from "next/link";
 import { Button, Column, Grid } from "@carbon/react";
 import { ArrowLeft } from "@carbon/icons-react";
+import { PageHeader } from "../../components/aorms/PageHeader";
 
 /**
  * Route-level 404 (Next.js not-found.tsx convention) for every page under
@@ -22,12 +23,7 @@ export default function AppNotFound() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          Not found
-        </h1>
-        <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}>
-          This record or page doesn&apos;t exist, or you don&apos;t have access to it.
-        </p>
+        <PageHeader title="Not found" description="This record or page doesn't exist, or you don't have access to it." />
         <Button as={NextLink} href="/dashboard" renderIcon={ArrowLeft} kind="tertiary">
           Back to dashboard
         </Button>
