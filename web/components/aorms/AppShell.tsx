@@ -171,6 +171,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // hardcoded isFixedNav + expanded (no state, no toggle at all) forced the
   // nav permanently open even on a phone-width viewport, squeezing all page
   // content into a sliver — found during a UI audit, this is the fix.
+  //
+  // isChildOfHeader defaults to `true` and is now left un-set (2026-09-09,
+  // found live-testing ContextPanel's own mobile CSS) — it used to be
+  // hardcoded `false` here for no documented reason, which silently opted
+  // this SideNav out of Carbon's own `--side-nav--ux` class and, with it,
+  // the built-in breakpoint-down('lg') rule that shrinks the nav to 0 width
+  // below `lg`. Without that, `.cds--side-nav` stayed a persistent 48px
+  // rail at every viewport, including phone widths. `.cds--content`'s own
+  // margin-inline-start reservation for that rail (and the further bump to
+  // 256px whenever `--side-nav--expanded`) isn't tied to the nav's actual
+  // collapsed width either way — see globals.scss's own `@media (max-width:
+  // 65.9375rem)` override right below the ContextPanel mobile rules, which
+  // resets it to 0 since this app never uses Carbon's separate `isRail`
+  // persistent-icon-rail mode the unconditional 48px assumes.
   const [sideNavExpanded, setSideNavExpanded] = useState(true);
 
   return (
@@ -216,7 +230,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         expanded={sideNavExpanded}
         onOverlayClick={() => setSideNavExpanded(false)}
         onSideNavBlur={() => setSideNavExpanded(false)}
-        isChildOfHeader={false}
       >
         <SideNavItems>
           {TOP_LEVEL.map((item) => (

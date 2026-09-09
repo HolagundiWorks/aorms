@@ -2507,6 +2507,48 @@ the live DOM node (not just a class-name check) — the ref eyebrow's real
 the font actually renders, not just that the right class is present.
 Test project deleted afterward.
 
+**AppShell mobile content-margin bug fixed (2026-09-09), same day — the
+finding flagged while live-testing the ContextPanel's own mobile CSS
+above, on explicit "start the AppShell mobile fix task" direction.**
+Root-caused with Carbon's own source rather than trial and error:
+`@carbon/styles`' `ui-shell/content/_content.scss` reserves
+`margin-inline-start` on `.cds--content` for *any* preceding
+`.cds--side-nav` sibling — 48px unconditionally (the "icon rail" width),
+256px whenever the nav also carries `--side-nav--expanded` — neither
+variant tied to the nav's own collapsed *width*. `AppShell.tsx`'s
+`SideNav` had `isChildOfHeader={false}` set with no explanatory comment,
+which silently opted the nav out of Carbon's own `--side-nav--ux` class
+and, with it, the built-in `breakpoint-down('lg')` rule (`lg` = 66rem)
+that shrinks the nav to 0 width below that breakpoint — so
+`.cds--side-nav` stayed a persistent 48px rail at every viewport,
+phone widths included, even though this app never uses Carbon's
+separate `isRail` persistent-icon-rail mode the unconditional reservation
+assumes.
+
+Two-part fix: (1) removed the unexplained `isChildOfHeader={false}`
+override (default is `true`), restoring Carbon's own responsive
+nav-width collapse; (2) added `.cds--content { margin-inline-start: 0
+!important; }` under the same `@media (max-width: 65.9375rem)` threshold
+in `globals.scss`, right below the ContextPanel's own mobile rules —
+`!important` is required because Carbon's `--side-nav--expanded` rule is
+a more specific compound selector, so a same-specificity override would
+only win while the nav was closed, not while a mobile user has it open
+(where it's a full-screen overlay with its own backdrop already, so
+content underneath shouldn't be pushed over regardless of nav state).
+
+Verified via `getComputedStyle` at both viewports, not just visual
+inspection: mobile (375px) now reads `marginLeft: "0px"`, full
+`contentWidth: 375` in both the nav-open and nav-closed state; desktop
+(1920px) is byte-for-byte unchanged at `marginLeft: "256px"`. Screenshots
+confirm the mobile nav now renders as the intended full-screen overlay
+drawer (not a permanent squeeze), and the KPI-strip grid correctly
+reflows to one column at full width once closed. Also re-verified the
+ContextPanel pattern together with this fix — opening "Create client" on
+`/clients` at 375px stacks the panel full-width above the (now
+full-width) page content exactly as `§29` of the composition standard
+specifies. `tsc --noEmit`, `eslint components/aorms/AppShell.tsx`, and a
+full `next build --webpack` all clean across all 90+ routes.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

@@ -163,3 +163,29 @@ body {
     border-block-end: 1px solid var(--cds-border-subtle);
   }
 }
+
+// AppShell mobile content-margin fix (found live-testing the ContextPanel's
+// own mobile CSS above, 2026-09-09) — Carbon's `.cds--content` reserves
+// margin-inline-start for *any* preceding `.cds--side-nav` sibling: 48px
+// unconditionally (the "icon rail" width, per @carbon/styles' own
+// ui-shell/content/_content.scss), bumped to 256px whenever the nav also
+// carries `--side-nav--expanded` — neither variant is tied to the nav's own
+// collapsed *width*. AppShell.tsx's `SideNav` now uses Carbon's
+// `--side-nav--ux` class (the default `isChildOfHeader` behavior — AppShell
+// used to opt out of it with an unexplained `isChildOfHeader={false}`,
+// which also silently disabled Carbon's own breakpoint-down('lg') collapse
+// on the nav itself, not just this margin) to correctly shrink the nav to
+// 0 width below the `lg` breakpoint (66rem) when closed. But on a real
+// mobile viewport the (open or closed) nav is always an overlay — Carbon's
+// own `--side-nav__overlay` already covers the content with a backdrop when
+// expanded — so content should never be pushed over at all below `lg`,
+// in either state; this app never uses Carbon's separate `isRail`
+// persistent-icon-rail mode that the unconditional 48px is really for.
+// `!important` is required: Carbon's own `--side-nav--expanded` rule is a
+// more specific compound selector than a plain `.cds--content` class rule,
+// so a same-specificity override would only win in the closed state.
+@media (max-width: 65.9375rem) {
+  .cds--content {
+    margin-inline-start: 0 !important;
+  }
+}
