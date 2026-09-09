@@ -1,21 +1,9 @@
 import { Grid, Column, Tile, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
+import { KpiTile as Kpi } from "../../../components/aorms/KpiTile";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
-}
-
-function Kpi({ label, value }: { label: string; value: string | number }) {
-  return (
-    <Tile style={{ minHeight: "6rem" }}>
-      <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
-        {label}
-      </p>
-      <p className="cds--type-heading-04" style={{ marginTop: "0.5rem" }}>
-        {value}
-      </p>
-    </Tile>
-  );
 }
 
 /**

@@ -1867,6 +1867,54 @@ than deleted (both triggered `audit_log` writes this time — the staff
 account via `write_audit` on create/transition, the client account via
 `respond_to_decision`'s own direct insert).
 
+**Layout pattern piloted on the Decisions page (2026-09-09), on explicit
+design request — "keep it Carbon" but tweak page structure.** Three
+moves, prototyped on `/projects/[id]/decisions` only (not yet rolled out
+to other project sub-pages, pending feedback on this first pass):
+
+1. **Page-title hierarchy tightened** — the H1 dropped from
+   `heading-05` (32px) to `heading-04` (28px) with tighter margins
+   around the caption above and description below it; at heading-05 the
+   title read as disconnected from its own subtext rather than part of
+   one hierarchy. Same construct (`cds--type-heading-05` directly above
+   14px body text) exists on every other project sub-page and on
+   `/dashboard` — worth the same tightening once this pass is confirmed,
+   not done repo-wide yet.
+2. **Page-overview-in-numbers row** — a KPI strip (Total decisions /
+   Awaiting client / High impact / Locked) directly under the title,
+   computed from the already-fetched `decisions` rows, no new query.
+   Extracted the tile itself into a shared `KpiTile.tsx` — it was a
+   verbatim-duplicated local function on `/dashboard` before this
+   (`dashboard/page.tsx` now imports the same component; zero visual
+   change there, confirmed live).
+3. **Forms move into a slide-in side panel** — `NewDecisionForm` no
+   longer sits permanently inline above the table; an "Add decision"
+   button opens it in a right-docked panel (`SidePanel.tsx`) instead.
+   Carbon has no stock side-panel/drawer component (checked against the
+   installed `@carbon/react` 1.115.0 — no `SidePanel`/`Drawer` export —
+   and `@carbon/ibm-products` isn't a dependency), so this follows
+   CLAUDE.md's own governing rule for that exact case ("if Carbon omits
+   a component, use the nearest Carbon pattern"): a stock `ComposedModal`
+   positioned via its real `containerClassName` prop (a new
+   `.aorms-side-panel__container` rule in `globals.scss`, `@media
+   (min-width: 42rem)` only — below that, Carbon's own existing
+   full-screen mobile modal is already the right call, left untouched).
+   Every control inside the panel is unmodified stock Carbon; only the
+   container's position/size moved. `NewDecisionForm` gained an optional
+   `onSuccess` callback (pending → not-pending transition with no error)
+   so the panel closes itself on a real successful submit, not on mount.
+
+`tsc --noEmit`, `eslint .`, and `next build --webpack` (full app, not
+just the touched files) all clean. Live-verified: real staff test
+account, 4 seeded decisions across every state/impact combination —
+KPI counts read 4/1/2/1, matching hand-computed expectations; opened
+the panel, filled and submitted a 5th decision, watched it auto-close
+and the new row + updated KPI count (5/1/2/1) appear without a page
+reload; `/dashboard` re-checked after the `KpiTile` extraction, renders
+identically. Test project/decisions deleted; test account disabled
+(`write_audit` on create, same FK situation as every other audited
+account this session).
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

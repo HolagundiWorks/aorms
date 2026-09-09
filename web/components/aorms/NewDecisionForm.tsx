@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { createDecision } from "../../lib/actions/decisions";
 import { FormGrid } from "./FormGrid";
@@ -8,10 +8,26 @@ import { FormGrid } from "./FormGrid";
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
 
-/** New CRIF decision — created in DRAFT, moved on via DecisionStateSelect. */
-export function NewDecisionForm({ projectId }: { projectId: string }) {
+/**
+ * New CRIF decision — created in DRAFT, moved on via DecisionStateSelect.
+ * `onSuccess` is optional so this keeps working unchanged for any caller
+ * that doesn't need it; `AddDecisionButton` uses it to close the side
+ * panel this form now opens inside.
+ */
+export function NewDecisionForm({ projectId, onSuccess }: { projectId: string; onSuccess?: () => void }) {
   const boundAction = createDecision.bind(null, projectId);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
+
+  // Fires only on a real pending -> not-pending transition with no error —
+  // i.e. an actual successful submit, not the initial mount (prevPending
+  // starts false, same as pending, so the guard below can't fire then).
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction} style={{ marginBottom: "2rem" }}>

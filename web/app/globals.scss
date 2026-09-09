@@ -35,6 +35,7 @@
 @use "@carbon/react/scss/components/radio-button";
 @use "@carbon/react/scss/components/slider";
 @use "@carbon/react/scss/components/checkbox";
+@use "@carbon/react/scss/components/modal";
 @use "@carbon/react/scss/grid";
 
 :root {
@@ -77,4 +78,26 @@ body {
   overflow-y: hidden;
   overscroll-behavior-x: contain;
   min-width: 0;
+}
+
+// Side panel (SidePanel.tsx, 2026-09-09) — structural positioning only,
+// docking the stock ComposedModal's own container to the right edge, full
+// height, in place of Carbon's default centered dialog. Every control
+// rendered inside a panel is untouched stock Carbon; this rule only moves
+// and sizes the container chrome, same "colourless, layout/sizing only"
+// scope as every other structural helper in this file. Left alone below
+// Carbon's own `md` breakpoint (42rem / 672px) — Carbon's existing
+// full-screen mobile modal behavior is already the right call for a panel
+// at that width, nothing to override there.
+@media (min-width: 42rem) {
+  .aorms-side-panel .aorms-side-panel__container {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    inset-inline-start: auto;
+    inline-size: min(28rem, 100vw);
+    max-block-size: 100vh;
+    block-size: 100vh;
+    transform-origin: right center;
+  }
 }
