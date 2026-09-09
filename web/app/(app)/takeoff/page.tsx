@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 /**
  * Project take-off — project picker. See lib/takeoff/formulas.ts and
@@ -24,14 +25,10 @@ export default async function TakeoffPage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Take-off</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          IS 1200 wall measurement — masonry, plaster, and painting quantities computed from
-          length/height and linked door/window openings, not typed in directly. Pick a project.
-        </p>
+        <PageHeader
+          title="Take-off"
+          description="IS 1200 wall measurement — masonry, plaster, and painting quantities computed from length/height and linked door/window openings, not typed in directly. Pick a project."
+        />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

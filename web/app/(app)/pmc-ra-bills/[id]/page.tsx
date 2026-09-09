@@ -4,6 +4,7 @@ import { createClient } from "../../../../lib/supabase/server";
 import { NewRaLineForm } from "../../../../components/aorms/NewRaLineForm";
 import { RaBillStatusSelect } from "../../../../components/aorms/RaBillStatusSelect";
 import { GeneratePdfButton } from "../../../../components/aorms/GeneratePdfButton";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { generateRaBillPdf } from "../../../../lib/actions/pmc-ra-bills";
 
 function formatInr(paise: number): string {
@@ -39,11 +40,8 @@ export default async function PmcRaBillDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {bill.ref} · {bill.period_start} – {bill.period_end}
-        </p>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
-          <h1 className="cds--type-heading-05">Bill {bill.bill_no}</h1>
+        <PageHeader eyebrow={`${bill.ref} · ${bill.period_start} – ${bill.period_end}`} title={`Bill ${bill.bill_no}`} />
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem", marginTop: "-1rem" }}>
           <RaBillStatusSelect billId={bill.id} status={bill.status} />
           <GeneratePdfButton action={generateRaBillPdf.bind(null, bill.id)} pdfStatus={bill.pdf_status} />
         </div>

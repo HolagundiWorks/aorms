@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewTenderInviteForm } from "../../../../components/aorms/NewTenderInviteForm";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { CloseTenderButton, AwardTenderButton } from "../../../../components/aorms/TenderBidActions";
 
 function formatInr(paise: number): string {
@@ -67,15 +68,15 @@ export default async function TenderDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project?.title ?? "—"} {tender.category ? `· ${tender.category}` : ""}
-        </p>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
-          <h1 className="cds--type-heading-05">{tender.title}</h1>
-          <Tag type={tender.status === "AWARDED" ? "green" : tender.status === "CLOSED" ? "purple" : "blue"} size="sm">
-            {tender.status}
-          </Tag>
-        </div>
+        <PageHeader
+          eyebrow={`${project?.title ?? "—"} ${tender.category ? `· ${tender.category}` : ""}`}
+          title={tender.title}
+          actions={
+            <Tag type={tender.status === "AWARDED" ? "green" : tender.status === "CLOSED" ? "purple" : "blue"} size="sm">
+              {tender.status}
+            </Tag>
+          }
+        />
 
         <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
           Invited contractors

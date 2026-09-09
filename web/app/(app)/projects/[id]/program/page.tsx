@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag, Tile } from "@carbon/react";
 import { createClient } from "../../../../../lib/supabase/server";
 import { NewProgramSpaceForm } from "../../../../../components/aorms/NewProgramSpaceForm";
+import { PageHeader } from "../../../../../components/aorms/PageHeader";
 import { CreateProgramButton, FreezeProgramButton, NewProgramVersionButton } from "../../../../../components/aorms/ProgramActions";
 
 export default async function ProgramPage({
@@ -53,16 +54,11 @@ export default async function ProgramPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project.title}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "1rem" }}>
-          Program / Space Schedule
-        </h1>
-        <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}>
-          Formulated within the feasibility envelope — over-allocation is an advisory warning,
-          never a hard block.
-        </p>
+        <PageHeader
+          eyebrow={project.title}
+          title="Program / Space Schedule"
+          description="Formulated within the feasibility envelope — over-allocation is an advisory warning, never a hard block."
+        />
 
         {!program ? (
           <CreateProgramButton projectId={project.id} />

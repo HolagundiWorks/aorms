@@ -3,6 +3,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../../lib/supabase/server";
 import { NewEngagementForm } from "../../../../components/aorms/NewEngagementForm";
 import { EngagementStatusSelect } from "../../../../components/aorms/EngagementStatusSelect";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { RecordEngagementPaymentForm } from "../../../../components/aorms/RecordEngagementPaymentForm";
 
 function formatInr(paise: number): string {
@@ -40,12 +41,10 @@ export default async function ConsultantDetailPage({ params }: { params: Promise
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {consultant.name}
-        </h1>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "2rem" }}>
-          {consultant.discipline} · {consultant.firm ?? "—"} · {consultant.email ?? "—"} · {consultant.phone ?? "—"}
-        </p>
+        <PageHeader
+          title={consultant.name}
+          description={`${consultant.discipline} · ${consultant.firm ?? "—"} · ${consultant.email ?? "—"} · ${consultant.phone ?? "—"}`}
+        />
 
         <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
           Engagements

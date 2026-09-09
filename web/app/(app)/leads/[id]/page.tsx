@@ -4,6 +4,7 @@ import { Column, Grid, Tag } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { LeadStatusSelect } from "../../../../components/aorms/LeadStatusSelect";
 import { ConvertLeadForm } from "../../../../components/aorms/ConvertLeadForm";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 
 export default async function LeadDetailPage({
   params,
@@ -34,19 +35,19 @@ export default async function LeadDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {lead.ref} · {lead.lead_source}
-        </p>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
-          <h1 className="cds--type-heading-05">{lead.client_name}</h1>
-          {lead.converted_project_id ? (
-            <Tag type="green" size="sm">
-              QUALIFIED
-            </Tag>
-          ) : (
-            <LeadStatusSelect leadId={lead.id} status={lead.status} />
-          )}
-        </div>
+        <PageHeader
+          eyebrow={`${lead.ref} · ${lead.lead_source}`}
+          title={lead.client_name}
+          actions={
+            lead.converted_project_id ? (
+              <Tag type="green" size="sm">
+                QUALIFIED
+              </Tag>
+            ) : (
+              <LeadStatusSelect leadId={lead.id} status={lead.status} />
+            )
+          }
+        />
 
         <dl style={{ marginBottom: "2rem" }}>
           <dt className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>

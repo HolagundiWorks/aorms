@@ -12,6 +12,7 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { NewDraftLinkButton } from "../../../components/aorms/esti/NewDraftLinkButton";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 /**
  * Viewer + entry point over ai_runs (migration 0010). Two writers now:
@@ -37,15 +38,11 @@ export default async function AiRunsPage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.5rem" }}>
-          <div>
-            <h1 className="cds--type-heading-05">AI Runs</h1>
-            <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
-              Provenance for every ESTI generation — most recent 200, newest first.
-            </p>
-          </div>
-          <NewDraftLinkButton />
-        </div>
+        <PageHeader
+          title="AI Runs"
+          description="Provenance for every ESTI generation — most recent 200, newest first."
+          actions={<NewDraftLinkButton />}
+        />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

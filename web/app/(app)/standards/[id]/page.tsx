@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewStandardFileForm } from "../../../../components/aorms/NewStandardFileForm";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 
 export default async function StandardDetailPage({
   params,
@@ -37,17 +38,7 @@ export default async function StandardDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {standard.discipline}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {standard.title}
-        </h1>
-        {standard.notes && (
-          <p className="cds--type-body-01" style={{ marginBottom: "2rem", color: "var(--cds-text-secondary)" }}>
-            {standard.notes}
-          </p>
-        )}
+        <PageHeader eyebrow={standard.discipline} title={standard.title} description={standard.notes ?? undefined} />
 
         <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
           Files

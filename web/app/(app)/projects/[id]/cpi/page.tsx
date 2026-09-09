@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Column, Grid } from "@carbon/react";
 import { createClient } from "../../../../../lib/supabase/server";
 import { CpiEditor } from "../../../../../components/aorms/cpi/CpiEditor";
+import { PageHeader } from "../../../../../components/aorms/PageHeader";
 import type { CpiReportShape } from "../../../../../lib/cpi-sections";
 
 export default async function ProjectCpiPage({
@@ -41,12 +42,7 @@ export default async function ProjectCpiPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project.title}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "1.5rem" }}>
-          Client–Project Intelligence (CPI)
-        </h1>
+        <PageHeader eyebrow={project.title} title="Client–Project Intelligence (CPI)" />
 
         <CpiEditor
           projectId={project.id}

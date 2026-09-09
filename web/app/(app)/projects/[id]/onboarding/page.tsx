@@ -3,6 +3,7 @@ import { Column, Grid, Tag } from "@carbon/react";
 import { createClient } from "../../../../../lib/supabase/server";
 import { OnboardingForm } from "../../../../../components/aorms/OnboardingForm";
 import { OnboardingStatusActions } from "../../../../../components/aorms/OnboardingStatusActions";
+import { PageHeader } from "../../../../../components/aorms/PageHeader";
 
 export default async function OnboardingPage({
   params,
@@ -36,19 +37,16 @@ export default async function OnboardingPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project.title}
-        </p>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-          <h1 className="cds--type-heading-05">Client Onboarding</h1>
-          <Tag type={status === "COMPLETE" ? "green" : "blue"} size="sm">
-            {status}
-          </Tag>
-        </div>
-        <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}>
-          Formal onboarding — gates project activation (Client onboarding complete). Document
-          upload isn&apos;t wired up yet (register-only pattern, no upload Route Handler).
-        </p>
+        <PageHeader
+          eyebrow={project.title}
+          title="Client Onboarding"
+          description="Formal onboarding — gates project activation (Client onboarding complete). Document upload isn't wired up yet (register-only pattern, no upload Route Handler)."
+          actions={
+            <Tag type={status === "COMPLETE" ? "green" : "blue"} size="sm">
+              {status}
+            </Tag>
+          }
+        />
 
         <OnboardingStatusActions projectId={project.id} status={status} />
 

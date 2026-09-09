@@ -3,6 +3,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../../lib/supabase/server";
 import { NewPackageInviteForm } from "../../../../components/aorms/NewPackageInviteForm";
 import { OpenBidsButton, AwardBidButton } from "../../../../components/aorms/PackageBidActions";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 
 /**
  * Bids are read from pmc_package_bids_sealed (migration 0014), NOT the
@@ -61,12 +62,7 @@ export default async function PmcPackageDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {pkg.ref} · {project?.title ?? "—"}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "1.5rem" }}>
-          {pkg.title}
-        </h1>
+        <PageHeader eyebrow={`${pkg.ref} · ${project?.title ?? "—"}`} title={pkg.title} />
 
         <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
           Invited contractors

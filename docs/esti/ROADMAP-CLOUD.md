@@ -2339,12 +2339,68 @@ no-data latest-conversion format both confirmed rendering correctly
 against real (empty) data, not just typechecking. Test project deleted
 afterward.
 
-The Carbon typography guide's rollout beyond its current handful of
-pages (Dashboard, Project Overview, Decisions, Users) remains the one
-piece of the broader UI/UX migration still not started — every other
-piece the user asked to complete (Tabs/Accordion/ProgressIndicator/
-Dropdown, the ContextPanel form pattern, and the KPI strip) is now
-live across the app.
+**Typography guide rollout completed (2026-09-09) — the last piece of
+the broader UI/UX migration, on explicit "roll out the typography guide
+to the remaining pages" direction.** Found via
+`grep -rl 'cds--type-heading-05">\|cds--type-heading-04">' app/(app) --include=page.tsx`
+— the authoritative remaining-work query, same audit technique the
+composition-standard rollout settled on: 35 hand-rolled `<h1
+className="cds--type-heading-05">` page titles across 34 files, every
+one a page `PageHeader` hadn't reached yet. Converting them to
+`<PageHeader>` isn't just a class-name swap — it fixes the real defect
+this doc's own 2026-09-09 "type-classes root-cause fix" entry already
+flagged: `heading-05` alone renders 32px/400-weight
+(Carbon's real KPI-number size), while a Page Title is supposed to be
+`heading-03` + `semibold` (20px/600) per the guide. Every one of these
+pages had its title rendering nearly 60% larger than the guide intends,
+silently, since Phase 1 — a second wave of the exact bug the September
+9 type-classes fix corrected the CSS layer for, this time at the
+component layer.
+
+Batches, by shape:
+- **Plain list/settings pages** (8): Reports, Workload, Compliance,
+  Audit Log (2 occurrences — the owner-gate early-return and the main
+  render), AI Runs list/detail/new, Take-off project-picker.
+- **`[id]` detail pages with an eyebrow line** (19): BBS, Estimates
+  (+its measurement drill-down), Consultants, Office Templates, MoMs,
+  PMC RA Bills, PMC Packages, Standards, Rate Books, Purchase Orders,
+  Team Members, Spec Catalog version, Spec Sheets, Transmittals, Teams,
+  Tenders, Leads, Knowledge Bank source, Take-off project detail — each
+  converted from a hand-rolled `<p>` eyebrow + `<h1>` to
+  `<PageHeader eyebrow=… title=…>`, folding in whatever sat beside the
+  old title (a status Tag, a PDF button, an inline action) into
+  `PageHeader`'s own `actions` slot rather than leaving it as a sibling
+  `<div>`.
+- **`/projects/[id]/*` sub-pages** (7): Assessment, Brief, CPI, DNA,
+  Feasibility, Onboarding, Program — same `eyebrow={project.title}`
+  pattern Negotiation/Precon already established in the composition-
+  standard batches, now applied to the remaining seven sub-pages that
+  still had a hand-rolled header.
+
+A few pages' optional secondary text (Standards' `notes`, Teams'
+`description`) moved into `PageHeader`'s own `description` prop instead
+of a separate conditional `<p>`, since that's exactly what the prop is
+for — one line changed, not a new pattern invented.
+
+**Every list/detail page in the app that has a title now uses
+`PageHeader`** — no remaining `<h1 className="cds--type-heading-05">`
+or `heading-04` anywhere in `app/(app)`, confirmed by re-running the
+same grep with zero hits. This closes out the Carbon typography guide's
+rollout and, with it, every piece of the broader UI/UX migration the
+user asked to complete: Tabs/Accordion/ProgressIndicator/Dropdown, the
+ContextPanel form pattern, the KPI strip, and now the typography guide,
+are all live across the entire app — no known remaining follow-up work
+from that original direction.
+
+Verified: `tsc --noEmit` and `eslint .` (whole package, not just touched
+files) both clean; a full `next build --webpack` (`rm -rf .next` first)
+clean across all 90+ routes. Live-verified on a disposable test project:
+Workload and Compliance's plain `PageHeader` render at the correct
+Page Title size (visibly smaller than the old `heading-05`, matching
+KpiTile's own number size instead of exceeding it); DNA's
+`eyebrow={project.title}` pattern; Onboarding's status-Tag `actions`
+slot; Brief's "Export brief" button `actions` slot — all rendering
+correctly against real (if empty) data. Test project deleted afterward.
 
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —

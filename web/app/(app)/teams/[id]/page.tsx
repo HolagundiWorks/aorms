@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewTeamMembershipForm } from "../../../../components/aorms/NewTeamMembershipForm";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 
 export default async function TeamDetailPage({
   params,
@@ -33,14 +34,7 @@ export default async function TeamDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {team.name}
-        </h1>
-        {team.description && (
-          <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}>
-            {team.description}
-          </p>
-        )}
+        <PageHeader title={team.name} description={team.description ?? undefined} />
 
         <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
           Members

@@ -3,6 +3,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../../lib/supabase/server";
 import { NewMomActionForm } from "../../../../components/aorms/NewMomActionForm";
 import { MomActionStatusSelect } from "../../../../components/aorms/MomActionStatusSelect";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { RemoveLineItemButton } from "../../../../components/aorms/RemoveLineItemButton";
 import { IssueMomButton } from "../../../../components/aorms/IssueMomButton";
 import { removeMomAction } from "../../../../lib/actions/moms";
@@ -41,13 +42,8 @@ export default async function MomDetailPage({ params }: { params: Promise<{ id: 
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {mom.ref}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {mom.title}
-        </h1>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem" }}>
+        <PageHeader eyebrow={mom.ref} title={mom.title} />
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem", marginTop: "-1rem" }}>
           <Tag type={mom.status === "DRAFT" ? "cool-gray" : "green"} size="sm">
             {mom.status}
           </Tag>

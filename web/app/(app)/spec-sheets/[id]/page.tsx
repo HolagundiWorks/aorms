@@ -12,6 +12,7 @@ import {
 import { createClient } from "../../../../lib/supabase/server";
 import { NewSpecItemForm } from "../../../../components/aorms/NewSpecItemForm";
 import { GeneratePdfButton } from "../../../../components/aorms/GeneratePdfButton";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { generateSpecSheetPdf } from "../../../../lib/actions/spec-sheets";
 
 export default async function SpecSheetDetailPage({
@@ -48,16 +49,11 @@ export default async function SpecSheetDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p
-          className="cds--type-body-01"
-          style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}
-        >
-          {sheet.ref}
-        </p>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }}>
-          <h1 className="cds--type-heading-05">{sheet.title}</h1>
-          <GeneratePdfButton action={generateSpecSheetPdf.bind(null, sheet.id)} pdfStatus={sheet.pdf_status} />
-        </div>
+        <PageHeader
+          eyebrow={sheet.ref}
+          title={sheet.title}
+          actions={<GeneratePdfButton action={generateSpecSheetPdf.bind(null, sheet.id)} pdfStatus={sheet.pdf_status} />}
+        />
 
         <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
           Items

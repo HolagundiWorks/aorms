@@ -14,6 +14,7 @@ import {
   Tile,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 import { resolvePeriodRange, type PeriodFilterInput } from "../../../lib/tax/fy";
 
 function formatInr(paise: number): string {
@@ -105,7 +106,7 @@ export default async function ReportsPage({
     return (
       <Grid>
         <Column sm={4} md={8} lg={16}>
-          <h1 className="cds--type-heading-05">Financial Reports</h1>
+          <PageHeader title="Financial Reports" />
           <InlineNotification
             kind="error"
             title="Restricted"
@@ -179,13 +180,10 @@ export default async function ReportsPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Financial Reports</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          GST/TDS filing abstract, by month — {label}. Only ISSUED/PAID invoices with an invoice date are included.
-        </p>
+        <PageHeader
+          title="Financial Reports"
+          description={`GST/TDS filing abstract, by month — ${label}. Only ISSUED/PAID invoices with an invoice date are included.`}
+        />
 
         <form method="get" style={{ display: "flex", gap: "1rem", alignItems: "flex-end", marginBottom: "2rem", flexWrap: "wrap" }}>
           <Select id="preset" name="preset" labelText="Period" defaultValue={periodInput.preset}>

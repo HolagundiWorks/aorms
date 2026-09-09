@@ -15,6 +15,7 @@ import { NewBbsMemberForms } from "../../../../components/aorms/NewBbsMemberForm
 import { NewBbsItemForm } from "../../../../components/aorms/NewBbsItemForm";
 import { BbsMemberActions } from "../../../../components/aorms/BbsMemberActions";
 import { BbsStatusSelect } from "../../../../components/aorms/BbsStatusSelect";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { bbsDiameterSummary } from "../../../../lib/bbs/formulas";
 import { computeMember, type BbsMemberStored } from "../../../../lib/bbs/engine";
 
@@ -92,13 +93,8 @@ export default async function BbsDetailPage({ params }: { params: Promise<{ id: 
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {schedule.ref}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {schedule.title}
-        </h1>
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "0.5rem" }}>
+        <PageHeader eyebrow={schedule.ref} title={schedule.title} />
+        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "0.5rem", marginTop: "-1rem" }}>
           <BbsStatusSelect bbsId={schedule.id} status={schedule.status} />
           <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
             {project?.title ?? "—"}

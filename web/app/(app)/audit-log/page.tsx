@@ -11,6 +11,7 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 /**
  * Page-level OWNER-only gate — the current backend's audit.list procedure is
@@ -35,7 +36,7 @@ export default async function AuditLogPage() {
     return (
       <Grid>
         <Column sm={4} md={8} lg={16}>
-          <h1 className="cds--type-heading-05">Audit Log</h1>
+          <PageHeader title="Audit Log" />
           <InlineNotification
             kind="error"
             title="Owner access required"
@@ -57,13 +58,7 @@ export default async function AuditLogPage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Audit Log</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Most recent 100 mutations, newest first.
-        </p>
+        <PageHeader title="Audit Log" description="Most recent 100 mutations, newest first." />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewTransmittalItemForm } from "../../../../components/aorms/NewTransmittalItemForm";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { RemoveLineItemButton } from "../../../../components/aorms/RemoveLineItemButton";
 import { GeneratePdfButton } from "../../../../components/aorms/GeneratePdfButton";
 import { generateTransmittalPdf, removeTransmittalItem } from "../../../../lib/actions/transmittals";
@@ -47,13 +48,8 @@ export default async function TransmittalDetailPage({ params }: { params: Promis
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {transmittal.ref}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {transmittal.purpose}
-        </h1>
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "2rem" }}>
+        <PageHeader eyebrow={transmittal.ref} title={transmittal.purpose} />
+        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "2rem", marginTop: "-1rem" }}>
           <Tag type={transmittal.acknowledged_at ? "green" : "cool-gray"} size="sm">
             {transmittal.acknowledged_at ? `Acknowledged by ${transmittal.acknowledged_by}` : "Pending"}
           </Tag>

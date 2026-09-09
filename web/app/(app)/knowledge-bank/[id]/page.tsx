@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { RepoSourceActions } from "../../../../components/aorms/RepoSourceActions";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red" | "purple"> = {
@@ -44,16 +45,15 @@ export default async function KnowledgeBankSourceDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {source.category}
-          {source.author ? ` · ${source.author}` : ""}
-        </p>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-          <h1 className="cds--type-heading-05">{source.title}</h1>
-          <Tag type={STATUS_TAG[source.status] ?? "gray"} size="sm">
-            {source.status}
-          </Tag>
-        </div>
+        <PageHeader
+          eyebrow={`${source.category}${source.author ? ` · ${source.author}` : ""}`}
+          title={source.title}
+          actions={
+            <Tag type={STATUS_TAG[source.status] ?? "gray"} size="sm">
+              {source.status}
+            </Tag>
+          }
+        />
 
         <RepoSourceActions sourceId={source.id} status={source.status} />
 

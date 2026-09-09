@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../../../../lib/supabase/server";
 import { NewEstimateMeasurementForm } from "../../../../../../components/aorms/NewEstimateMeasurementForm";
+import { PageHeader } from "../../../../../../components/aorms/PageHeader";
 import { RemoveLineItemButton } from "../../../../../../components/aorms/RemoveLineItemButton";
 import { removeEstimateMeasurementRecord } from "../../../../../../lib/actions/estimates";
 
@@ -71,13 +72,11 @@ export default async function EstimateItemMeasurementsPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
+        <p className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
           <Link href={`/estimates/${estimateId}`}>← {estimate?.ref ?? "Estimate"}</Link>
         </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {item.description}
-        </h1>
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap", marginBottom: "0.5rem" }}>
+        <PageHeader title={item.description} />
+        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap", marginBottom: "0.5rem", marginTop: "-1rem" }}>
           <Tag type="outline" size="sm">
             {item.unit}
           </Tag>

@@ -3,6 +3,7 @@ import { Column, Grid, Tag } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { updateAiRunApproval } from "../../../../lib/actions/ai";
 import { AiRunApprovalActions } from "../../../../components/aorms/esti/AiRunApprovalActions";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 
 const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
 
@@ -52,15 +53,10 @@ export default async function AiRunDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p
-          className="cds--type-body-01"
-          style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}
-        >
-          {run.kind} · {new Date(run.created_at).toLocaleString("en-IN")}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "1rem" }}>
-          {run.provider} / {run.model}
-        </h1>
+        <PageHeader
+          eyebrow={`${run.kind} · ${new Date(run.created_at).toLocaleString("en-IN")}`}
+          title={`${run.provider} / ${run.model}`}
+        />
 
         <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
           <Tag

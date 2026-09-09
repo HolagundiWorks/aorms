@@ -15,6 +15,7 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { ComplianceForm } from "../../../components/aorms/ComplianceForm";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 import { complianceFields, type ComplianceTable } from "../../../lib/compliance-fields";
 
 const SECTIONS: { table: ComplianceTable; label: string; columns: string[] }[] = [
@@ -40,13 +41,7 @@ export default async function CompliancePage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Compliance Library</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          FAR, setbacks, NBC clauses, fire code, and regulatory references.
-        </p>
+        <PageHeader title="Compliance Library" description="FAR, setbacks, NBC clauses, fire code, and regulatory references." />
 
         <Tabs>
           <TabList aria-label="Compliance sections">

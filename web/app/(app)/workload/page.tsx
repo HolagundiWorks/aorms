@@ -1,5 +1,6 @@
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag, Tile } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 /**
  * Task counts by assignee — a slice of the current backend's workload
@@ -33,13 +34,7 @@ export default async function WorkloadPage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Workload</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Open task counts by assignee.
-        </p>
+        <PageHeader title="Workload" description="Open task counts by assignee." />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Column, Grid, Tile } from "@carbon/react";
 import { createClient } from "../../../../../lib/supabase/server";
 import { AssessmentForm } from "../../../../../components/aorms/AssessmentForm";
+import { PageHeader } from "../../../../../components/aorms/PageHeader";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -36,17 +37,11 @@ export default async function AssessmentPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project.title}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "1rem" }}>
-          Pre-Project Assessment
-        </h1>
-        <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}>
-          Deterministic build-feasibility maths. Every derived figure is recomputed server-side
-          from these inputs on every save — gates project activation (Pre-project assessment
-          recorded) and bounds Feasibility + Program below.
-        </p>
+        <PageHeader
+          eyebrow={project.title}
+          title="Pre-Project Assessment"
+          description="Deterministic build-feasibility maths. Every derived figure is recomputed server-side from these inputs on every save — gates project activation (Pre-project assessment recorded) and bounds Feasibility + Program below."
+        />
 
         {assessment && (
           <Tile style={{ marginBottom: "1.5rem" }}>

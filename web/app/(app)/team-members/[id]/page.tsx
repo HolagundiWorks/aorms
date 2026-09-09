@@ -23,6 +23,7 @@ import { NewAttendanceForm } from "../../../../components/aorms/hr/NewAttendance
 import { NewRewardPointsForm } from "../../../../components/aorms/hr/NewRewardPointsForm";
 import { HrProfileForm } from "../../../../components/aorms/hr/HrProfileForm";
 import { NewHrDocumentForm } from "../../../../components/aorms/hr/NewHrDocumentForm";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 
 export default async function TeamMemberDetailPage({
   params,
@@ -79,13 +80,10 @@ export default async function TeamMemberDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {member.role}
-          {member.job_title ? ` · ${member.job_title}` : ""} · {member.employment_type}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "1.5rem" }}>
-          {member.name}
-        </h1>
+        <PageHeader
+          eyebrow={`${member.role}${member.job_title ? ` · ${member.job_title}` : ""} · ${member.employment_type}`}
+          title={member.name}
+        />
 
         <Tabs>
           <TabList aria-label="Team member sections">

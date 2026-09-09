@@ -5,6 +5,7 @@ import { NewTakeoffItemForms } from "../../../../components/aorms/NewTakeoffItem
 import { DeleteTakeoffItemButton } from "../../../../components/aorms/DeleteTakeoffItemButton";
 import { SendTakeoffToEstimateButton } from "../../../../components/aorms/SendTakeoffToEstimateButton";
 import { DeriveWallFinishesButton } from "../../../../components/aorms/DeriveWallFinishesButton";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import {
   computeMasonry,
   computePlaster,
@@ -295,12 +296,7 @@ export default async function TakeoffProjectPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project.ref}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "1.5rem" }}>
-          {project.title} — Take-off
-        </h1>
+        <PageHeader eyebrow={project.ref} title={`${project.title} — Take-off`} />
 
         <NewTakeoffItemForms projectId={project.id} />
 

@@ -1,6 +1,7 @@
 import { Column, Grid, InlineNotification } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewAiDraftForm } from "../../../../components/aorms/esti/NewAiDraftForm";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 
 const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
 
@@ -26,14 +27,10 @@ export default async function NewAiDraftPage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={12}>
-        <h1 className="cds--type-heading-05">New AI Draft</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          ESTI drafts a document from live project context. Every draft starts as a review-required record — nothing is
-          issued automatically.
-        </p>
+        <PageHeader
+          title="New AI Draft"
+          description="ESTI drafts a document from live project context. Every draft starts as a review-required record — nothing is issued automatically."
+        />
 
         {!canDraft ? (
           <InlineNotification

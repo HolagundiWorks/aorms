@@ -4,6 +4,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../../../lib/supabase/server";
 import { GenerateFeasibilityButton } from "../../../../../components/aorms/GenerateFeasibilityButton";
 import { GeneratePdfButton } from "../../../../../components/aorms/GeneratePdfButton";
+import { PageHeader } from "../../../../../components/aorms/PageHeader";
 import { generateFeasibilityReportPdf } from "../../../../../lib/actions/feasibility";
 
 export default async function FeasibilityPage({
@@ -41,17 +42,11 @@ export default async function FeasibilityPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project.title}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "1rem" }}>
-          Feasibility Reports
-        </h1>
-        <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}>
-          A frozen snapshot of the pre-project assessment at generation time — later assessment
-          edits don&apos;t change a report already shared. Each report gets an anonymous share
-          link (no login required) that serves the snapshot read-only.
-        </p>
+        <PageHeader
+          eyebrow={project.title}
+          title="Feasibility Reports"
+          description="A frozen snapshot of the pre-project assessment at generation time — later assessment edits don't change a report already shared. Each report gets an anonymous share link (no login required) that serves the snapshot read-only."
+        />
 
         <GenerateFeasibilityButton projectId={project.id} />
 

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewPoItemForm } from "../../../../components/aorms/NewPoItemForm";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { RemoveLineItemButton } from "../../../../components/aorms/RemoveLineItemButton";
 import { removePoItem } from "../../../../lib/actions/purchase-orders";
 
@@ -51,13 +52,8 @@ export default async function PurchaseOrderDetailPage({ params }: { params: Prom
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {po.ref}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {po.title ?? po.vendor ?? "Purchase order"}
-        </h1>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem" }}>
+        <PageHeader eyebrow={po.ref} title={po.title ?? po.vendor ?? "Purchase order"} />
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem", marginTop: "-1rem" }}>
           <Tag type={STATUS_TAG[po.status] ?? "gray"} size="sm">
             {po.status}
           </Tag>

@@ -11,6 +11,7 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewRateBookItemForm } from "../../../../components/aorms/NewRateBookItemForm";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 
 function formatInr(paise: number | null): string {
   if (paise == null) return "—";
@@ -51,15 +52,10 @@ export default async function RateBookDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {rateBook.name}
-        </h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginBottom: "2rem", color: "var(--cds-text-secondary)" }}
-        >
-          {rateBook.version_label ?? "—"} {rateBook.description ? `· ${rateBook.description}` : ""}
-        </p>
+        <PageHeader
+          title={rateBook.name}
+          description={`${rateBook.version_label ?? "—"} ${rateBook.description ? `· ${rateBook.description}` : ""}`}
+        />
 
         <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
           Items

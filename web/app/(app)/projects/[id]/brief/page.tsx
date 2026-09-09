@@ -11,6 +11,7 @@ import { RoomDetailsTable } from "../../../../../components/aorms/brief/RoomDeta
 import { AssumptionsForm } from "../../../../../components/aorms/brief/AssumptionsForm";
 import { ApprovalSection } from "../../../../../components/aorms/brief/ApprovalSection";
 import { ExportBriefButton } from "../../../../../components/aorms/brief/ExportBriefButton";
+import { PageHeader } from "../../../../../components/aorms/PageHeader";
 
 /**
  * The router's own `getByProject` also returns an `aggregates` bundle
@@ -64,16 +65,12 @@ export default async function ProjectBriefPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project.ref}
-        </p>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-          <h1 className="cds--type-heading-05">{project.title} — Project Brief</h1>
-          <ExportBriefButton projectId={project.id} />
-        </div>
-        <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}>
-          Questionnaire answers and site context — the single source for project briefing data.
-        </p>
+        <PageHeader
+          eyebrow={project.ref}
+          title={`${project.title} — Project Brief`}
+          description="Questionnaire answers and site context — the single source for project briefing data."
+          actions={<ExportBriefButton projectId={project.id} />}
+        />
 
         {readOnly && (
           <div style={{ marginBottom: "1.5rem" }}>

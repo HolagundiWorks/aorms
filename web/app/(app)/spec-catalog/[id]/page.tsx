@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewSpecCatalogItemForm } from "../../../../components/aorms/NewSpecCatalogItemForm";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { RemoveLineItemButton } from "../../../../components/aorms/RemoveLineItemButton";
 import { removeSpecCatalogItem } from "../../../../lib/actions/spec-catalog";
 
@@ -37,10 +38,8 @@ export default async function SpecCatalogVersionDetailPage({ params }: { params:
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {version.label}
-        </h1>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem" }}>
+        <PageHeader title={version.label} />
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem", marginTop: "-1rem" }}>
           <Tag type={version.active ? "green" : "cool-gray"} size="sm">
             {version.active ? "Active" : "Inactive"}
           </Tag>

@@ -13,6 +13,7 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewEstimateItemForm } from "../../../../components/aorms/NewEstimateItemForm";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { computeEstimateMarkups } from "../../../../lib/tax/estimate-markups";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
@@ -123,16 +124,8 @@ export default async function EstimateDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p
-          className="cds--type-body-01"
-          style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}
-        >
-          {estimate.ref}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {estimate.title}
-        </h1>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem" }}>
+        <PageHeader eyebrow={estimate.ref} title={estimate.title} />
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem", marginTop: "-1rem" }}>
           <Tag type={STATUS_TAG[estimate.status] ?? "gray"} size="sm">
             {estimate.status}
           </Tag>

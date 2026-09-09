@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Column, Grid, Tag, Tile } from "@carbon/react";
 import { createClient } from "../../../../../lib/supabase/server";
+import { PageHeader } from "../../../../../components/aorms/PageHeader";
 import { ProjectDnaForm } from "../../../../../components/aorms/ProjectDnaForm";
 import {
   computeRiskScore,
@@ -57,16 +58,11 @@ export default async function ProjectDnaPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}>
-          {project.title}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "1rem" }}>
-          Project DNA
-        </h1>
-        <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}>
-          Pre-sales commercial constraints — feeds the deterministic risk score below and gates
-          project activation (Project DNA captured).
-        </p>
+        <PageHeader
+          eyebrow={project.title}
+          title="Project DNA"
+          description="Pre-sales commercial constraints — feeds the deterministic risk score below and gates project activation (Project DNA captured)."
+        />
 
         {riskScore && (
           <Tile style={{ marginBottom: "1.5rem" }}>
