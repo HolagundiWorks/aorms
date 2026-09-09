@@ -86,6 +86,7 @@ export default async function ProjectDetailPage({
           <Link href={`/projects/${project.id}/feasibility`}>Feasibility Reports →</Link>
           <Link href={`/projects/${project.id}/negotiation`}>Negotiation →</Link>
           <Link href={`/projects/${project.id}/program`}>Program →</Link>
+          <Link href={`/projects/${project.id}/decisions`}>Decisions (CRIF) →</Link>
           <Link href={`/projects/${project.id}/onboarding`}>Client Onboarding →</Link>
           <Link href={`/projects/${project.id}/precon`}>Pre-Construction R&amp;O →</Link>
         </div>

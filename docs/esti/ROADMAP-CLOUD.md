@@ -1795,6 +1795,78 @@ deleted; test account deleted cleanly with no `audit_log` FK issue
 `write_audit`, unlike several other test accounts this session) —
 confirmed empty afterward.
 
+**CRIF decision register shipped (2026-09-09) — closes another Phase 7
+flagged gap.** `AI_DRAFT_KINDS`' own header comment had flagged
+CRIF_SUMMARY/CRIF_IMPACT/CRIF_RISK as unbuildable "since no `decisions`
+table exists" — this migration gives `web/` that table for the first
+time, ported from `backend/src/modules/decision/router.ts` +
+`packages/contracts/src/schemas.ts`'s `DecisionState`/
+`DECISION_TRANSITIONS`/`RevisionCategory` (also documented, until now
+undercut, in CLAUDE.md's own "Domain conventions" section).
+
+- **Migration `0034`** — `decisions` table (state machine DRAFT → OPEN →
+  CLIENT_REVIEW → ACCEPTED/REJECTED → LOCKED, `revision_category`/
+  `revision_source`/`impact` matching the old schema exactly) plus
+  `respond_to_decision()`, a `security definer` RPC the same shape as
+  migration 0032's `respond_to_approval` — the CLIENT_REVIEW →
+  ACCEPTED/REJECTED leg is the one a CLIENT caller can reach, so it needs
+  the same re-verify-role-and-ownership door rather than a bare RLS
+  UPDATE policy. Legacy `approval`/`status` compat columns the old table
+  kept aren't ported — `state` is the only status column here, nothing
+  to stay backwards-compatible with in a fresh table. Every other
+  transition (including staff sending a decision to CLIENT_REVIEW in the
+  first place) goes through plain RLS-gated UPDATEs, validated
+  app-side against the same `DECISION_TRANSITIONS` map so staff can't
+  skip straight from DRAFT to LOCKED.
+- **`/projects/[id]/decisions`** — new project sub-page (register CRUD +
+  state-transition select), linked from the project detail page
+  alongside Program/Onboarding/Precon.
+- **Client Portal** grew a "Decisions for your review" section (own
+  `PortalDecisionResponse` component, mirrors `PortalApprovalResponse`
+  exactly) — a decision only becomes visible to the client once it's
+  past OPEN, and only CLIENT_REVIEW rows get Accept/Reject buttons.
+- **CRIF_SUMMARY/CRIF_IMPACT/CRIF_RISK** added to `AI_DRAFT_KINDS` — each
+  reads the project's own decisions and asks ESTI to synthesize a
+  summary/impact statement/risk-flag note, same draft-then-approve flow
+  as every other AI Studio kind. `MOM_REVISIONS` and `CPI_REPORT` stay
+  out (disclosed in `draft-kinds.ts`'s own header comment) — both are
+  strict-JSON-output kinds needing a real review UI for the parsed
+  result that doesn't exist yet (CPI already has a *manual* report editor,
+  `CpiReportPanel.tsx`, but no auto-draft wiring), each a separable
+  follow-up rather than built half-way here.
+
+`tsc --noEmit`, `eslint .`, and `next build --webpack` all clean;
+migration applied to `aorms-web` (`201`), table/function/all three RLS
+policies confirmed live via the Management API. Live-verified end to end
+through the real signed-in UI: a real staff test account created a
+decision (MAJOR/CLIENT_DRIVEN/HIGH), confirmed an out-of-order jump
+straight to CLIENT_REVIEW was correctly rejected server-side (state
+stayed DRAFT), then walked it DRAFT → OPEN → CLIENT_REVIEW correctly;
+generated a real CRIF_SUMMARY draft against it — genuine Ollama output
+(not the template fallback), correctly grounded in the actual decision's
+title/rationale; a real CLIENT test account then saw it on the portal
+and clicked Accept — state flipped to ACCEPTED, the RPC's own
+`audit_log` insert landed correctly (`CLIENT_RESPOND`, correct actor,
+before/after), and a second respond attempt was correctly refused
+("this item is accepted and cannot be responded to"); staff then locked
+it (`locked_at` stamped). **A real click-tooling miss caught mid-
+verification, not just the general pattern already documented
+elsewhere in this file**: the first two sign-in attempts silently failed
+— the login form's fields were genuinely filled (confirmed via direct
+DOM read) but the "Sign in" button click, aimed at a stale coordinate
+carried over from an earlier ref, missed the actual button entirely, so
+the browser kept running on a *previous, already-deleted* test account's
+session cookie (whose JWT hadn't expired yet — Supabase access tokens
+stay cryptographically valid past their subject's deletion until natural
+expiry), producing a confusing but consistent "Not found"/RLS-empty
+symptom on every subsequent page rather than an obvious auth error;
+resolved by taking a fresh screenshot before every submit click instead
+of trusting a carried-over coordinate. All test data (decisions, ai_runs,
+project, client) deleted cleanly; both test accounts disabled rather
+than deleted (both triggered `audit_log` writes this time — the staff
+account via `write_audit` on create/transition, the client account via
+`respond_to_decision`'s own direct insert).
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

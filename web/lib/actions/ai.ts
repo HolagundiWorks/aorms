@@ -163,9 +163,30 @@ export async function generateAiDraft(_prev: GenerateAiDraftState, formData: For
     billing = { outstanding };
   }
 
+  let decisions: { decisions: { title: string; rationale: string; state: string; impact: string; revisionCategory: string | null; revisionSource: string | null; reviewDeadline: string | null }[] } | undefined;
+  if ((kind === "CRIF_SUMMARY" || kind === "CRIF_IMPACT" || kind === "CRIF_RISK") && projectId) {
+    const { data: rows } = await supabase
+      .from("decisions")
+      .select("title, rationale, state, impact, revision_category, revision_source, review_deadline")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false })
+      .limit(30);
+    decisions = {
+      decisions: (rows ?? []).map((d) => ({
+        title: d.title,
+        rationale: d.rationale,
+        state: d.state,
+        impact: d.impact,
+        revisionCategory: d.revision_category,
+        revisionSource: d.revision_source,
+        reviewDeadline: d.review_deadline,
+      })),
+    };
+  }
+
   const { data: firm } = await supabase.from("firm").select("company_name").limit(1).maybeSingle();
 
-  const built = buildDraftPrompt(kind, { project, billing, userPrompt, firmName: firm?.company_name || undefined });
+  const built = buildDraftPrompt(kind, { project, billing, decisions, userPrompt, firmName: firm?.company_name || undefined });
 
   const baseUrl = ollamaBaseUrlFromEnv();
   const model = ollamaModelFromEnv();

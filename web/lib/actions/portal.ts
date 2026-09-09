@@ -193,3 +193,26 @@ export async function respondToApproval(
   revalidatePath(`/portal/${projectId}`);
   return {};
 }
+
+const DECISION_RESPONSES = ["ACCEPTED", "REJECTED"];
+
+/**
+ * Client Portal write path for `decisions` (the CRIF register) — same
+ * shape as `respondToApproval` above. Migration 0034's
+ * `respond_to_decision()` is the real gate (re-checks CLIENT role, project
+ * ownership, and the CLIENT_REVIEW-only transition); this is a thin
+ * wrapper.
+ */
+export async function respondToDecision(decisionId: string, response: string, projectId: string): Promise<{ error?: string }> {
+  if (!DECISION_RESPONSES.includes(response)) return { error: "Pick Accept or Reject." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("respond_to_decision", {
+    p_decision_id: decisionId,
+    p_response: response,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/portal/${projectId}`);
+  return {};
+}

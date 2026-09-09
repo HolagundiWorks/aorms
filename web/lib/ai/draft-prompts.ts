@@ -23,6 +23,20 @@ export type DraftBillingCtx = {
   outstanding: { ref: string; projectRef: string; daysSinceIssue: number; outstandingPaise: number }[];
 };
 
+/** The project's own decisions/CRIF register rows — feeds the three
+ * CRIF_* draft kinds (migration 0034). */
+export type DraftDecisionsCtx = {
+  decisions: {
+    title: string;
+    rationale: string;
+    state: string;
+    impact: string;
+    revisionCategory: string | null;
+    revisionSource: string | null;
+    reviewDeadline: string | null;
+  }[];
+};
+
 export type DraftPromptResult = {
   system: string;
   user: string;
@@ -50,6 +64,12 @@ const KIND_INSTRUCTION: Record<AiDraftKind, string> = {
     "Draft a concise project summary: client, current stage, and a short narrative of design/coordination progress and key risks, suitable for internal or client circulation.",
   BILLING_ASSISTANT:
     "Draft an office-wide billing assistant note: list the outstanding (issued, not fully paid) invoices given, oldest first, then 2-3 suggested next steps (reminders, GST/TDS treatment check before month-end filing). This is advisory only — never claim an invoice was sent or an action taken.",
+  CRIF_SUMMARY:
+    "Draft a CRIF (Critical Revision Information Flow) revision summary: group the decisions given by state, and for each one give a one-line plain-language summary of what changed and why. Markdown, grouped headings.",
+  CRIF_IMPACT:
+    "Draft a CRIF impact statement: for each decision given, state its impact level (Low/Medium/High) and a short paragraph on what that impact means for cost, schedule, or scope — grounded strictly in the rationale/category/source given, never invented.",
+  CRIF_RISK:
+    "Draft a CRIF risk-flags note: flag decisions that are CRITICAL category, HIGH impact, or past their review deadline (if a deadline is given) as needing urgent attention, then list the rest as routine. This is advisory only.",
 };
 
 function projectHeader(project?: DraftProjectCtx): string {
@@ -62,7 +82,13 @@ function formatInr(paise: number): string {
 
 export function buildDraftPrompt(
   kind: AiDraftKind,
-  ctx: { project?: DraftProjectCtx; billing?: DraftBillingCtx; userPrompt?: string; firmName?: string },
+  ctx: {
+    project?: DraftProjectCtx;
+    billing?: DraftBillingCtx;
+    decisions?: DraftDecisionsCtx;
+    userPrompt?: string;
+    firmName?: string;
+  },
 ): DraftPromptResult {
   const firm = ctx.firmName?.trim() || "the firm";
   const header = projectHeader(ctx.project);
@@ -112,6 +138,34 @@ export function buildDraftPrompt(
         : "- No outstanding invoices right now";
       contextBlock = `Firm: ${firm}\nOutstanding invoices:\n${lines}`;
       fallback = `# Billing assistant (draft)\n\n## Outstanding invoices\n${lines}\n\n## Suggested next steps\n1. Send payment reminders on the oldest outstanding invoices with a ledger statement\n2. Confirm GST/TDS treatment before month-end filing\n3. Follow up directly on any invoice outstanding beyond 30 days\n\n*Advisory draft only — no reminder sent automatically.*${extraFallback}`;
+      break;
+    }
+    case "CRIF_SUMMARY": {
+      const rows = ctx.decisions?.decisions ?? [];
+      const lines = rows.length
+        ? rows.map((d) => `- [${d.state}] ${d.title}${d.revisionCategory ? ` (${d.revisionCategory})` : ""}: ${d.rationale}`).join("\n")
+        : "- No decisions logged for this project yet";
+      contextBlock = `${header}\nDecisions:\n${lines}`;
+      fallback = `# CRIF revision summary (draft)\n\n${header}\n\n${lines}\n\n*Draft — review before circulating.*${extraFallback}`;
+      break;
+    }
+    case "CRIF_IMPACT": {
+      const rows = ctx.decisions?.decisions ?? [];
+      const lines = rows.length
+        ? rows.map((d) => `- ${d.title} — Impact: ${d.impact}. ${d.rationale}`).join("\n")
+        : "- No decisions logged for this project yet";
+      contextBlock = `${header}\nDecisions and impact:\n${lines}`;
+      fallback = `# CRIF impact statement (draft)\n\n${header}\n\n${lines}\n\n*Draft — impact assessment for internal review.*${extraFallback}`;
+      break;
+    }
+    case "CRIF_RISK": {
+      const rows = ctx.decisions?.decisions ?? [];
+      const urgent = rows.filter((d) => d.revisionCategory === "CRITICAL" || d.impact === "HIGH");
+      const routine = rows.filter((d) => !(d.revisionCategory === "CRITICAL" || d.impact === "HIGH"));
+      const urgentLines = urgent.length ? urgent.map((d) => `- ${d.title} (${d.state}) — needs urgent attention`).join("\n") : "- None";
+      const routineLines = routine.length ? routine.map((d) => `- ${d.title} (${d.state})`).join("\n") : "- None";
+      contextBlock = `${header}\nDecisions:\n${rows.map((d) => `- ${d.title}: category ${d.revisionCategory ?? "—"}, impact ${d.impact}, deadline ${d.reviewDeadline ?? "—"}`).join("\n") || "- None logged yet"}`;
+      fallback = `# CRIF risk flags (draft)\n\n${header}\n\n## Needs urgent attention\n${urgentLines}\n\n## Routine\n${routineLines}\n\n*Advisory draft only.*${extraFallback}`;
       break;
     }
   }

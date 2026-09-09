@@ -3,6 +3,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../../lib/supabase/server";
 import { PortalAcknowledgeButton } from "../../../../components/aorms/PortalAcknowledgeButton";
 import { PortalApprovalResponse } from "../../../../components/aorms/PortalApprovalResponse";
+import { PortalDecisionResponse } from "../../../../components/aorms/PortalDecisionResponse";
 import { PortalSubmissionForms } from "../../../../components/aorms/PortalSubmissionForms";
 
 function formatInr(paise: number | null): string {
@@ -54,6 +55,7 @@ export default async function PortalProjectDetailPage({
     { data: transmittals },
     { data: moms },
     { data: submissions },
+    { data: decisions },
   ] = await Promise.all([
     supabase
       .from("phases")
@@ -88,6 +90,11 @@ export default async function PortalProjectDetailPage({
     supabase
       .from("portal_submissions")
       .select("id, kind, subject, status, response_note, created_at")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("decisions")
+      .select("id, title, rationale, state, impact")
       .eq("project_id", projectId)
       .order("created_at", { ascending: false }),
   ]);
@@ -225,6 +232,61 @@ export default async function PortalProjectDetailPage({
                 <TableCell colSpan={5}>
                   <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                     Nothing sent for your approval yet.
+                  </p>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+
+        <h2 className="cds--type-heading-03" style={{ margin: "2rem 0 1rem" }}>
+          Decisions for your review
+        </h2>
+        <Table aria-label="Decisions" className="aorms-table-spaced" size="sm">
+          <TableHead>
+            <TableRow>
+              <TableHeader>Title</TableHeader>
+              <TableHeader>Impact</TableHeader>
+              <TableHeader>Status</TableHeader>
+              <TableHeader>Your response</TableHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {(decisions ?? []).map((d) => (
+              <TableRow key={d.id}>
+                <TableCell>
+                  <div>{d.title}</div>
+                  <div className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>
+                    {d.rationale}
+                  </div>
+                </TableCell>
+                <TableCell>{d.impact}</TableCell>
+                <TableCell>
+                  <Tag
+                    type={d.state === "ACCEPTED" ? "green" : d.state === "REJECTED" ? "red" : d.state === "LOCKED" ? "purple" : "teal"}
+                    size="sm"
+                  >
+                    {d.state}
+                  </Tag>
+                </TableCell>
+                <TableCell>
+                  {d.state === "CLIENT_REVIEW" ? (
+                    <PortalDecisionResponse decisionId={d.id} projectId={project.id} />
+                  ) : d.state === "ACCEPTED" || d.state === "REJECTED" || d.state === "LOCKED" ? (
+                    <span className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>
+                      Responded
+                    </span>
+                  ) : (
+                    "—"
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+            {(decisions ?? []).length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4}>
+                  <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                    Nothing sent for your review yet.
                   </p>
                 </TableCell>
               </TableRow>
