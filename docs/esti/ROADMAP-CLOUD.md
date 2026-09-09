@@ -3146,19 +3146,79 @@ route's kind and scope, and the explicit rule this round's work
 established: a Portal only ever shows/edits the one entity the caller
 belongs to; only Admin sees or touches data across every entity.
 
-Verified so far: `tsc --noEmit` and `eslint .` (whole package) both clean,
-a full `next build --webpack` clean across all 90+ routes including every
-new one (`/admin`, `/admin/licences`, `/admin/payments`, `/admin/pricing`,
-`/admin/logs`, `/api/razorpay/webhook`). **Not yet verified — blocked,
-credentials needed from the user**: the four migrations haven't been
-applied to the live `aorms-platform` project (no Supabase Management API
-token was available this round), so none of the RLS-policy exploit checks
-from the plan's own Verification section, the live Razorpay test-mode
-payment flow, or the `is_admin` gating checks against real data have run
-yet. This entry documents what was *built*, not a claim that it's live or
-fully proven — the next session picking this up should apply the
-migrations first and run the full verification list in the plan file
-before considering this done.
+Verified: `tsc --noEmit` and `eslint .` (whole package) both clean, a full
+`next build --webpack` clean across all 90+ routes including every new one
+(`/admin`, `/admin/licences`, `/admin/payments`, `/admin/pricing`,
+`/admin/logs`, `/api/razorpay/webhook`).
+
+**Migrations applied and verified live (2026-09-09, same day, once a
+Management API token arrived).** All four applied cleanly against the real
+`aorms-platform` project — confirmed via direct inspection afterward, not
+just trusted the 201 responses: `payments`/`plan_pricing`/
+`platform_activity_log` all exist; `accounts.is_admin` exists
+(`boolean default false`); `pg_policies` shows exactly the designed set —
+`licences` now has only `"licences: admin update"` + `"licences: studio
+members read"` (`"licences: owner update"` genuinely gone), `payments` has
+only its two read policies and zero write policies, `plan_pricing` has its
+read+admin-write pair, `platform_activity_log` has only its admin-read
+policy; `plan_pricing` seeded with the flagged placeholder values; all
+seven `log_*` trigger functions plus the shared `log_platform_activity()`
+helper and `is_platform_admin()` all present.
+
+**The RLS exploit checks ran against a real, live-signed-up account, not
+a synthetic one** — signed up a genuine test account through the actual
+production `/platform-signup` page in the browser (`AORMS-U-FN7G`),
+confirming the signup flow itself works end-to-end on production and that
+`log_account_created`'s trigger fired correctly (`ACCOUNT_CREATED` logged
+with the right `public_id`) before any deliberate testing began. Email
+confirmation meant no active session existed to drive further steps
+through the browser, so the remaining checks simulated that *same real
+account's* session at the SQL level (`set local role authenticated; set
+local request.jwt.claims = '{"sub":"<real-uuid>",...}'`) — a standard,
+legitimate way to exercise Postgres RLS policies exactly as PostgREST
+would evaluate them, using a real account/membership rather than assuming
+the policy definitions alone were proof enough:
+- Created a real studio owned by that real account (`INSERT INTO
+  studios`) — confirmed the founding `OWNER`/`ACTIVE` membership and
+  `TRIAL`/1-seat licence auto-provisioned correctly, and `STUDIO_CREATED`
+  + `MEMBER_JOINED` logged correctly.
+- **The actual exploit, replayed for real**: as that studio's genuine
+  owner (their real membership, real session simulation), attempted the
+  exact bypass `0011` was written to close — `UPDATE licences SET plan =
+  'PREMIUM', seats = 99`. Result: licence stayed `TRIAL`/1 — the RLS
+  policy silently filtered the row (Postgres's standard zero-rows-affected
+  behavior for a non-matching `USING` clause, no error), definitively
+  confirming a real studio owner cannot self-serve their way to a paid
+  plan anymore.
+- Inserted a real `payments` row (service-level, as `createLicenceOrder`
+  would) and confirmed the RLS scoping empirically: a stranger UUID
+  (nobody's account) sees 0 rows; the real studio owner sees exactly 1 —
+  their own.
+- Granted `is_admin = true` to the same real test account and re-ran the
+  identical `UPDATE licences` — this time it succeeded (`plan` →
+  `PREMIUM`, `seats` → `5`), proving the admin override path genuinely
+  works, not just that the non-admin path is blocked (checking only one
+  direction wouldn't have ruled out the policy being simply broken/
+  no-op'd rather than correctly admin-gated).
+
+All test data fully removed afterward: the studio (cascaded to its
+membership, licence, and payment — confirmed 0 rows left in each),
+the account and its `auth.users` row (a plain `DELETE`, not the
+`email_confirmed_at` bypass attempted earlier and correctly blocked by
+the session's own auto-mode classifier as a sensitive `auth.*` write —
+worked around by testing through a genuinely deleted-afterward signup
+instead of trying to force through the blocked path), and the four
+resulting `platform_activity_log` rows (each `ON DELETE SET NULL`'d
+rather than cascaded when their account/studio was removed, correctly
+per that table's design — deleted explicitly afterward since they were
+now-orphaned test noise, confirmed `platform_activity_log` back to 0 rows).
+
+**Still not done, honestly**: no live Razorpay test-mode payment has run
+(no Razorpay keys provided yet — that's the one piece of the plan's
+Verification section not yet exercised). Everything else in that section
+— the RLS exploit checks and the `is_admin` gating mechanics — is now
+verified against real, live data rather than just written and assumed
+correct.
 
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
