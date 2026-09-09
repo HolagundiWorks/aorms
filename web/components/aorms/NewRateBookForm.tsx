@@ -1,14 +1,22 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Stack, TextArea, TextInput } from "@carbon/react";
 import { createRateBookRecord, type RateBookActionState } from "../../lib/actions/rate-books";
 import { FormGrid } from "./FormGrid";
 
 const initialState: RateBookActionState = null;
 
-export function NewRateBookForm() {
+export function NewRateBookForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [state, formAction, pending] = useActionState(createRateBookRecord, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

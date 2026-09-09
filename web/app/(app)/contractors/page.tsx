@@ -10,7 +10,9 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewContractorForm } from "../../../components/aorms/NewContractorForm";
+import { AddContractorForm } from "../../../components/aorms/AddContractorForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 import { ProvisionPortalLoginForm } from "../../../components/aorms/ProvisionPortalLoginForm";
 import { inviteContractorLogin } from "../../../lib/actions/portal-invites";
 
@@ -29,74 +31,82 @@ export default async function ContractorsPage() {
   const loginedIds = new Set((withLogin ?? []).map((p) => p.contractor_id));
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Contractors</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Directory of empanelled contractors, by trade category. {isOwner ? "Invite a contractor to a tender-bidding portal login below." : "Only the firm owner can provision portal logins."}
-        </p>
+    <ContextPanelLayout>
+      <ContextPanel title="New contractor" description="Add an empanelled contractor to the directory.">
+        <AddContractorForm />
+      </ContextPanel>
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Contractors"
+              description={
+                <>
+                  Directory of empanelled contractors, by trade category.{" "}
+                  {isOwner ? "Invite a contractor to a tender-bidding portal login below." : "Only the firm owner can provision portal logins."}
+                </>
+              }
+              actions={<ContextPanelTrigger size="sm">Add contractor</ContextPanelTrigger>}
+            />
 
-        <NewContractorForm />
-
-        {error ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Couldn&apos;t load contractors: {error.message}
-          </p>
-        ) : (
-          <Table aria-label="Contractors" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Name</TableHeader>
-                <TableHeader>Category</TableHeader>
-                <TableHeader>Company</TableHeader>
-                <TableHeader>Contact</TableHeader>
-                <TableHeader>Phone</TableHeader>
-                <TableHeader>City</TableHeader>
-                <TableHeader>Status</TableHeader>
-                <TableHeader>Portal login</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(contractors ?? []).map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell>{c.name}</TableCell>
-                  <TableCell>{c.category}</TableCell>
-                  <TableCell>{c.company_name ?? "—"}</TableCell>
-                  <TableCell>{c.contact_person ?? "—"}</TableCell>
-                  <TableCell>{c.phone ?? "—"}</TableCell>
-                  <TableCell>{c.city ?? "—"}</TableCell>
-                  <TableCell>
-                    <Tag type={c.active ? "green" : "gray"} size="sm">
-                      {c.active ? "Active" : "Inactive"}
-                    </Tag>
-                  </TableCell>
-                  <TableCell>
-                    {loginedIds.has(c.id) ? (
-                      <Tag type="blue" size="sm">Provisioned</Tag>
-                    ) : isOwner ? (
-                      <ProvisionPortalLoginForm action={inviteContractorLogin.bind(null, c.id)} />
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-              {(contractors ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No contractors yet.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Column>
-    </Grid>
+            {error ? (
+              <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                Couldn&apos;t load contractors: {error.message}
+              </p>
+            ) : (
+              <Table aria-label="Contractors" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Name</TableHeader>
+                    <TableHeader>Category</TableHeader>
+                    <TableHeader>Company</TableHeader>
+                    <TableHeader>Contact</TableHeader>
+                    <TableHeader>Phone</TableHeader>
+                    <TableHeader>City</TableHeader>
+                    <TableHeader>Status</TableHeader>
+                    <TableHeader>Portal login</TableHeader>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(contractors ?? []).map((c) => (
+                    <TableRow key={c.id}>
+                      <TableCell>{c.name}</TableCell>
+                      <TableCell>{c.category}</TableCell>
+                      <TableCell>{c.company_name ?? "—"}</TableCell>
+                      <TableCell>{c.contact_person ?? "—"}</TableCell>
+                      <TableCell>{c.phone ?? "—"}</TableCell>
+                      <TableCell>{c.city ?? "—"}</TableCell>
+                      <TableCell>
+                        <Tag type={c.active ? "green" : "gray"} size="sm">
+                          {c.active ? "Active" : "Inactive"}
+                        </Tag>
+                      </TableCell>
+                      <TableCell>
+                        {loginedIds.has(c.id) ? (
+                          <Tag type="blue" size="sm">Provisioned</Tag>
+                        ) : isOwner ? (
+                          <ProvisionPortalLoginForm action={inviteContractorLogin.bind(null, c.id)} />
+                        ) : (
+                          "—"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {(contractors ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={8}>
+                        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          No contractors yet.
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

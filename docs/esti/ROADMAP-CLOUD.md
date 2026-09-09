@@ -2130,16 +2130,38 @@ clean after each sub-batch; a third independent live end-to-end check
 main content never dimmed) confirms the pattern holds consistently, not
 just on the first couple of pages it was built against.
 
-**~34 pages remain** on the identical, now-proven pattern — Tenders,
-Purchase Orders, Rate Books, Office Templates, Consultants,
-Contractors, Approvals, BBS, Users, and the remaining `/projects/[id]/*`
-sub-pages (negotiation/precon/program/brief/cpi/dna/assessment/
-feasibility/onboarding) not yet touched. The KPI-strip half of the
-standard (mandatory 3–6 metrics below every major page's H1) is also
-still only on Dashboard/Project Overview/Decisions — each other page
-needs its own bespoke count queries, a separate pass. Continuing the
-same mechanical rollout is the direct next step, not a new design
-question.
+**Batch 3 (2026-09-09), same "autopilot" pass — 9 more pages:** Tenders,
+Purchase Orders, Rate Books, Office Templates, Consultants, Contractors,
+Approvals, BBS, and Users. **35 pages total now on the corrected
+pattern.** Users is the second page needing a conditional panel (after
+Team Members) — both `<ContextPanel>` and its `<ContextPanelTrigger>`
+are wrapped in the same `isOwner` check the page already used to gate
+"Invite a staff member"; the page's two genuinely different, self-service
+own-row features (`MyNameEditor`, `MyCalendarFeedButton`) were left
+untouched since they aren't create/edit-entity forms and don't fit the
+panel pattern. Consultants and Contractors each keep their pre-existing
+`isOwner`-gated portal-login provisioning UI inside the table untouched
+too — only the top-level "new record" form moved into the panel. BBS's
+conversion is scoped to the top-level "New BBS schedule" list-page form
+only; the more complex per-member Column/Beam/Slab/Wall forms on the
+`/bbs/[id]` detail page are a separate, not-yet-touched surface. Same
+verification discipline: `tsc`/`eslint`/full `next build --webpack`
+(`rm -rf .next` first) all clean; live-verified end-to-end on the most
+structurally distinct page in the batch (Users, dual `isOwner`-gated
+trigger + panel: signed in as a fresh OWNER test account, panel opened
+left-docked beside the still-fully-visible/interactive user table,
+closed cleanly) — real browser session, not a mock. Test account
+disabled afterward (audit-FK discipline, not hard-deleted).
+
+**~25 pages remain** on the identical, now-proven pattern — the
+`/projects/[id]/*` sub-pages (negotiation/precon/program/brief/cpi/dna/
+assessment/feasibility/onboarding) not yet touched, plus any other
+list/detail pages with an inline `NewXForm` not yet surveyed. The
+KPI-strip half of the standard (mandatory 3–6 metrics below every major
+page's H1) is also still only on Dashboard/Project Overview/Decisions —
+each other page needs its own bespoke count queries, a separate pass.
+Continuing the same mechanical rollout is the direct next step, not a
+new design question.
 
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —

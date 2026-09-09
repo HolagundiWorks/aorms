@@ -11,7 +11,9 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewBbsScheduleForm } from "../../../components/aorms/NewBbsScheduleForm";
+import { AddBbsScheduleForm } from "../../../components/aorms/AddBbsScheduleForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "cool-gray" | "green"> = {
   DRAFT: "cool-gray",
@@ -30,65 +32,68 @@ export default async function BbsPage() {
   ]);
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Bar Bending Schedules</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          IS 456 / IS 2502 cutting-length schedules — column, beam, slab and footing members.
-        </p>
+    <ContextPanelLayout>
+      <ContextPanel title="New BBS schedule" description="Start a new bar bending schedule.">
+        <AddBbsScheduleForm projects={projects ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Bar Bending Schedules"
+              description="IS 456 / IS 2502 cutting-length schedules — column, beam, slab and footing members."
+              actions={<ContextPanelTrigger size="sm">New schedule</ContextPanelTrigger>}
+            />
 
-        <NewBbsScheduleForm projects={projects ?? []} />
-
-        {error ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Couldn&apos;t load BBS schedules: {error.message}
-          </p>
-        ) : (
-          <Table aria-label="BBS schedules" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Ref</TableHeader>
-                <TableHeader>Title</TableHeader>
-                <TableHeader>Project</TableHeader>
-                <TableHeader>Status</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(schedules ?? []).map((s) => {
-                const project = Array.isArray(s.project_offices)
-                  ? s.project_offices[0]
-                  : (s.project_offices as { title: string } | null);
-                return (
-                  <TableRow key={s.id}>
-                    <TableCell>
-                      <Link href={`/bbs/${s.id}`}>{s.ref}</Link>
-                    </TableCell>
-                    <TableCell>{s.title}</TableCell>
-                    <TableCell>{project?.title ?? "—"}</TableCell>
-                    <TableCell>
-                      <Tag type={STATUS_TAG[s.status] ?? "cool-gray"} size="sm">
-                        {s.status}
-                      </Tag>
-                    </TableCell>
+            {error ? (
+              <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                Couldn&apos;t load BBS schedules: {error.message}
+              </p>
+            ) : (
+              <Table aria-label="BBS schedules" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Ref</TableHeader>
+                    <TableHeader>Title</TableHeader>
+                    <TableHeader>Project</TableHeader>
+                    <TableHeader>Status</TableHeader>
                   </TableRow>
-                );
-              })}
-              {(schedules ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No BBS schedules yet.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Column>
-    </Grid>
+                </TableHead>
+                <TableBody>
+                  {(schedules ?? []).map((s) => {
+                    const project = Array.isArray(s.project_offices)
+                      ? s.project_offices[0]
+                      : (s.project_offices as { title: string } | null);
+                    return (
+                      <TableRow key={s.id}>
+                        <TableCell>
+                          <Link href={`/bbs/${s.id}`}>{s.ref}</Link>
+                        </TableCell>
+                        <TableCell>{s.title}</TableCell>
+                        <TableCell>{project?.title ?? "—"}</TableCell>
+                        <TableCell>
+                          <Tag type={STATUS_TAG[s.status] ?? "cool-gray"} size="sm">
+                            {s.status}
+                          </Tag>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {(schedules ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4}>
+                        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          No BBS schedules yet.
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

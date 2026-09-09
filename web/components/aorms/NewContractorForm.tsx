@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { createContractor, type ContractorActionState } from "../../lib/actions/contractors";
 import { FormGrid } from "./FormGrid";
@@ -24,8 +24,16 @@ const CATEGORIES: Record<string, string> = {
   OTHER: "Other",
 };
 
-export function NewContractorForm() {
+export function NewContractorForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [state, formAction, pending] = useActionState(createContractor, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { createBbsSchedule, type BbsActionState } from "../../lib/actions/bbs";
 import { FormGrid } from "./FormGrid";
@@ -9,8 +9,16 @@ type ProjectOption = { id: string; title: string };
 
 const initialState: BbsActionState = null;
 
-export function NewBbsScheduleForm({ projects }: { projects: ProjectOption[] }) {
+export function NewBbsScheduleForm({ projects, onSuccess }: { projects: ProjectOption[]; onSuccess?: () => void }) {
   const [state, formAction, pending] = useActionState(createBbsSchedule, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

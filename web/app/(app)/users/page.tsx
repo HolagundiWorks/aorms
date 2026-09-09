@@ -1,10 +1,12 @@
 import { Column, Grid, InlineNotification, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
+import { AddStaffInviteForm } from "../../../components/aorms/AddStaffInviteForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 import { UserRoleSelect } from "../../../components/aorms/UserRoleSelect";
 import { UserDisabledToggle } from "../../../components/aorms/UserDisabledToggle";
 import { MyNameEditor } from "../../../components/aorms/MyNameEditor";
 import { MyCalendarFeedButton } from "../../../components/aorms/MyCalendarFeedButton";
-import { NewStaffInviteForm } from "../../../components/aorms/NewStaffInviteForm";
 
 /**
  * Staff user management — this repo's own module map calls out
@@ -44,6 +46,9 @@ import { NewStaffInviteForm } from "../../../components/aorms/NewStaffInviteForm
  * flagged gap — the `.ics` workload subscription Route Handler
  * (`/api/calendar/[token]`) was deliberately deferred when the dashboard
  * shipped. Same self-service-on-my-own-row placement as MyNameEditor.
+ *
+ * "Invite a staff member" moved into the AORMS left context-panel pattern
+ * (2026-09-09) — was a permanently inline form above the table before.
  */
 const STAFF_ROLES = ["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE", "VIEWER", "SITE_SUPERVISOR"];
 export default async function UsersPage() {
@@ -65,84 +70,82 @@ export default async function UsersPage() {
     .order("full_name");
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Users</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Staff directory — role and access.
-        </p>
+    <ContextPanelLayout>
+      {isOwner && (
+        <ContextPanel title="Invite staff member" description="Send a staff sign-in invitation by email.">
+          <AddStaffInviteForm />
+        </ContextPanel>
+      )}
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Users"
+              description="Staff directory — role and access."
+              actions={isOwner ? <ContextPanelTrigger size="sm">Invite staff member</ContextPanelTrigger> : undefined}
+            />
 
-        {isOwner && (
-          <div style={{ marginBottom: "2rem" }}>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
-              Invite a staff member
-            </h2>
-            <NewStaffInviteForm />
-          </div>
-        )}
+            {!isOwner && (
+              <InlineNotification
+                kind="info"
+                title="Read-only"
+                subtitle="Only the firm owner can change roles or disable accounts — you can still see the directory."
+                hideCloseButton
+                lowContrast
+                style={{ marginBottom: "1.5rem" }}
+              />
+            )}
 
-        {!isOwner && (
-          <InlineNotification
-            kind="info"
-            title="Read-only"
-            subtitle="Only the firm owner can change roles or disable accounts — you can still see the directory."
-            hideCloseButton
-            lowContrast
-            style={{ marginBottom: "1.5rem" }}
-          />
-        )}
-
-        {error ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Couldn&apos;t load users: {error.message}
-          </p>
-        ) : (
-          <Table aria-label="Users" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Name</TableHeader>
-                <TableHeader>Role</TableHeader>
-                <TableHeader>Status</TableHeader>
-                <TableHeader>My calendar feed</TableHeader>
-                {isOwner && <TableHeader>Actions</TableHeader>}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(profiles ?? []).map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell>{p.id === user?.id ? <MyNameEditor initialName={p.full_name} /> : p.full_name || "—"}</TableCell>
-                  <TableCell>
-                    {isOwner ? <UserRoleSelect userId={p.id} role={p.role} /> : p.role}
-                  </TableCell>
-                  <TableCell>
-                    <Tag type={p.disabled ? "red" : "green"} size="sm">
-                      {p.disabled ? "Disabled" : "Active"}
-                    </Tag>
-                  </TableCell>
-                  <TableCell>{p.id === user?.id ? <MyCalendarFeedButton /> : "—"}</TableCell>
-                  {isOwner && (
-                    <TableCell>
-                      <UserDisabledToggle userId={p.id} disabled={p.disabled} />
-                    </TableCell>
+            {error ? (
+              <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                Couldn&apos;t load users: {error.message}
+              </p>
+            ) : (
+              <Table aria-label="Users" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Name</TableHeader>
+                    <TableHeader>Role</TableHeader>
+                    <TableHeader>Status</TableHeader>
+                    <TableHeader>My calendar feed</TableHeader>
+                    {isOwner && <TableHeader>Actions</TableHeader>}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(profiles ?? []).map((p) => (
+                    <TableRow key={p.id}>
+                      <TableCell>{p.id === user?.id ? <MyNameEditor initialName={p.full_name} /> : p.full_name || "—"}</TableCell>
+                      <TableCell>
+                        {isOwner ? <UserRoleSelect userId={p.id} role={p.role} /> : p.role}
+                      </TableCell>
+                      <TableCell>
+                        <Tag type={p.disabled ? "red" : "green"} size="sm">
+                          {p.disabled ? "Disabled" : "Active"}
+                        </Tag>
+                      </TableCell>
+                      <TableCell>{p.id === user?.id ? <MyCalendarFeedButton /> : "—"}</TableCell>
+                      {isOwner && (
+                        <TableCell>
+                          <UserDisabledToggle userId={p.id} disabled={p.disabled} />
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                  {(profiles ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={isOwner ? 5 : 4}>
+                        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          No users found.
+                        </p>
+                      </TableCell>
+                    </TableRow>
                   )}
-                </TableRow>
-              ))}
-              {(profiles ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={isOwner ? 5 : 4}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No users found.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Column>
-    </Grid>
+                </TableBody>
+              </Table>
+            )}
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { createApproval, type ApprovalActionState } from "../../lib/actions/approvals";
 import { FormGrid } from "./FormGrid";
@@ -24,8 +24,16 @@ const CHANNELS: Record<string, string> = {
   IN_PERSON: "In person",
 };
 
-export function NewApprovalForm({ projects }: { projects: ProjectOption[] }) {
+export function NewApprovalForm({ projects, onSuccess }: { projects: ProjectOption[]; onSuccess?: () => void }) {
   const [state, formAction, pending] = useActionState(createApproval, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

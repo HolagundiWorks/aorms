@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { inviteStaffMember } from "../../lib/actions/portal-invites";
 import { FormGrid } from "./FormGrid";
@@ -11,8 +11,16 @@ const initialState: { error: string } | null = null;
  * gap. OWNER not selectable (an owner account is provisioned outside this
  * flow, matching the assignable-roles convention UserRoleSelect already
  * follows for changing an existing user's role). */
-export function NewStaffInviteForm() {
+export function NewStaffInviteForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [state, formAction, pending] = useActionState(inviteStaffMember, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

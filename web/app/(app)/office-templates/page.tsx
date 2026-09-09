@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewOfficeTemplateForm } from "../../../components/aorms/NewOfficeTemplateForm";
+import { AddOfficeTemplateForm } from "../../../components/aorms/AddOfficeTemplateForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const KIND_LABEL: Record<string, string> = {
   LETTER: "Letter",
@@ -25,58 +27,61 @@ export default async function OfficeTemplatesPage() {
     .order("updated_at", { ascending: false });
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Office Templates</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Reusable boilerplate for letters, scope of work, COA fee proposals, contracts, and meeting minutes.
-        </p>
+    <ContextPanelLayout>
+      <ContextPanel title="New template" description="Add reusable office document boilerplate.">
+        <AddOfficeTemplateForm />
+      </ContextPanel>
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Office Templates"
+              description="Reusable boilerplate for letters, scope of work, COA fee proposals, contracts, and meeting minutes."
+              actions={<ContextPanelTrigger size="sm">Add template</ContextPanelTrigger>}
+            />
 
-        <NewOfficeTemplateForm />
-
-        {error ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Couldn&apos;t load templates: {error.message}
-          </p>
-        ) : (
-          <Table aria-label="Office templates" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Kind</TableHeader>
-                <TableHeader>Title</TableHeader>
-                <TableHeader>Tags</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(templates ?? []).map((t) => (
-                <TableRow key={t.id}>
-                  <TableCell>
-                    <Tag type="outline" size="sm">
-                      {KIND_LABEL[t.kind] ?? t.kind}
-                    </Tag>
-                  </TableCell>
-                  <TableCell>
-                    <Link href={`/office-templates/${t.id}`}>{t.title}</Link>
-                  </TableCell>
-                  <TableCell>{t.tags ?? "—"}</TableCell>
-                </TableRow>
-              ))}
-              {(templates ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={3}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No templates yet.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Column>
-    </Grid>
+            {error ? (
+              <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                Couldn&apos;t load templates: {error.message}
+              </p>
+            ) : (
+              <Table aria-label="Office templates" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Kind</TableHeader>
+                    <TableHeader>Title</TableHeader>
+                    <TableHeader>Tags</TableHeader>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(templates ?? []).map((t) => (
+                    <TableRow key={t.id}>
+                      <TableCell>
+                        <Tag type="outline" size="sm">
+                          {KIND_LABEL[t.kind] ?? t.kind}
+                        </Tag>
+                      </TableCell>
+                      <TableCell>
+                        <Link href={`/office-templates/${t.id}`}>{t.title}</Link>
+                      </TableCell>
+                      <TableCell>{t.tags ?? "—"}</TableCell>
+                    </TableRow>
+                  ))}
+                  {(templates ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={3}>
+                        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          No templates yet.
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

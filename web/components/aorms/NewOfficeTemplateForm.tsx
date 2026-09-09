@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { createOfficeTemplate, type OfficeTemplateActionState } from "../../lib/actions/office-templates";
 import { FormGrid } from "./FormGrid";
@@ -15,8 +15,16 @@ const KIND_LABEL: Record<string, string> = {
 
 const initialState: OfficeTemplateActionState = null;
 
-export function NewOfficeTemplateForm() {
+export function NewOfficeTemplateForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [state, formAction, pending] = useActionState(createOfficeTemplate, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>
