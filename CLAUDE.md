@@ -392,7 +392,17 @@ branch before starting anything that could overlap — not just at hand-off.
 - `backend/drizzle/` (the old raw-Postgres migration history) and
   `backend`'s `pg`/`drizzle-orm`/`drizzle-kit`/`postgres` dependencies are
   gone (2026-09-05, see the callout above) — all schema work happens in
-  `web/supabase/migrations/` against the live Supabase project now.
+  `web/supabase/migrations/` against a live Supabase project — **but as
+  of 2026-09-09, `web/`'s own cloud project (`yrpholqbsbvcwzyrhvew`) has
+  been deleted** (confirmed: its REST endpoint now returns `410 Project
+  removed`); the only Supabase project still live on the user's account
+  is `aorms-platform` (`qbgbnhthchhbammzeebg`, the separate identity/
+  licensing schema). `web/supabase/migrations/0001`–`0032` themselves are
+  unaffected and remain correct — there is simply nowhere to apply them
+  to right now. See [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md)'s
+  own top-of-file callout for the full account; rebuilding this (and
+  deciding the project topology/naming to rebuild it under) is the
+  current top priority, not yet resolved as of this note.
 - **Supabase migrations**: write a new numbered `.sql` file under
   `web/supabase/migrations/`, then apply it via the Supabase Management API
   (`POST https://api.supabase.com/v1/projects/{ref}/database/query`, authed

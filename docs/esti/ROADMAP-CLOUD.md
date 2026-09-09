@@ -1,5 +1,23 @@
 # AORMS Cloud Roadmap (aorms.in / production)
 
+**🔴 2026-09-09 — the `web/` Supabase project has been deleted.** The
+cloud project this entire document's "live-verified against the cloud
+project" language refers to (`yrpholqbsbvcwzyrhvew`) was removed outside
+this session (confirmed: `GET /rest/v1/` now returns `410 Project
+removed`). Every migration, every RLS policy, every row of real data
+this roadmap describes as applied/verified there is **gone** — that
+verification was real and accurate *at the time*, but the environment it
+happened in no longer exists. `web/`'s own codebase (this repo's
+`web/supabase/migrations/0001`–`0032`) is unaffected and remains the
+correct, complete source of truth for what the schema should be — this
+is a database-hosting problem, not a lost-code problem. **Only
+`aorms-platform` (`qbgbnhthchhbammzeebg`) still exists**, holding the
+separate AORMS Platform/Identity schema (`platform/supabase/migrations/`
+— Studio/Company/licensing) — confirmed alive and unaffected. Nothing in
+`web/`'s own app schema is currently deployed anywhere. Rebuilding this
+is the current top priority — see the bottom of this file for where that
+stands.
+
 **Status:** ACTIVE — soft launch, sign-in now live on the landing page;
 Next.js/Supabase stack migration **in progress** (Phases 1–5 and 7–10
 schema+UI complete, Project Brief also schema+UI complete; **Phase 4 is
@@ -1086,6 +1104,50 @@ walked it through Approve same as before. Both test rows and the test
 account deleted afterward. No code changes needed — the fallback path
 this session repeatedly exercised was always correct; the model simply
 wasn't running.
+
+**🔴 The `web/` cloud Supabase project has been deleted (discovered
+2026-09-09).** On explicit user report: `yrpholqbsbvcwzyrhvew` (the
+project every "live-verified against the cloud project" account in this
+entire document refers to — every migration `0001`–`0032`, every RLS
+policy, every piece of live data) is gone, deleted outside this session.
+Confirmed directly: `GET https://yrpholqbsbvcwzyrhvew.supabase.co/rest/v1/`
+now returns `410 Project removed` rather than a schema response. The
+user's own Supabase account now holds only one project —
+`aorms-platform` (`qbgbnhthchhbammzeebg`, `platform/supabase/
+migrations/`, the separate Studio/Company/licensing identity schema
+documented in `docs/esti/AORMS-IDENTITY.md`) — confirmed still alive and
+unaffected (`GET /rest/v1/` returns a real OpenAPI schema listing
+`studio_contacts` and the rest of that schema, via its `service_role`
+key; its `anon` key in `web/.env` currently returns "Invalid API key" —
+untested further, may just be stale and need regenerating alongside
+everything else here).
+
+**What this does and doesn't mean:** the *code* is completely fine — all
+32 numbered migrations under `web/supabase/migrations/` are still here,
+still correct, still the real source of truth for what the schema should
+be. This is a hosting/infrastructure loss, not a lost-work loss: nothing
+in this repository needs to be reconstructed from memory, only
+re-applied. What's actually gone: the live database itself (any real
+data it held — this repo's own standing note has been "dev-only, no
+production data yet" throughout, so this is very unlikely to be a real
+data-loss incident, but hasn't been separately confirmed one way or the
+other with the user) and every downstream consequence of that — `web/`
+currently has no cloud database to connect to at all, so nothing in the
+app works right now, not even sign-in.
+
+**Not yet resolved, needs the user's own decision before proceeding —
+see the live conversation for the actual questions asked and the
+user's answers**, since this is a real infrastructure topology choice
+(one consolidated project vs. the original two-project split
+`web/`+`aorms-platform` this repo's CLAUDE.md documents a specific
+reason for — `web/`'s schema is single-tenant per deployment, deliberately
+incompatible with `aorms-platform`'s many-companies-per-person model)
+and a naming decision, not something to guess at. Also blocked
+regardless of that decision on the same standing requirement every
+migration-apply this session has needed: a fresh Supabase Management API
+personal access token, not carried over between sessions (creating a new
+project, if that's the direction, needs one too — project creation is
+not something this session can do without one either).
 
 **Autopilot pass — polish bundle, portal login provisioning,
 `document_issues` auto-wiring (2026-09-08).** On explicit request to work
