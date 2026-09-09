@@ -9,8 +9,10 @@ import {
   TableRow,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewMilestoneForm } from "../../../components/aorms/NewMilestoneForm";
+import { AddMilestoneForm } from "../../../components/aorms/AddMilestoneForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { MilestoneStatusSelect } from "../../../components/aorms/MilestoneStatusSelect";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function PmcMilestonesPage() {
   const supabase = await createClient();
@@ -24,17 +26,18 @@ export default async function PmcMilestonesPage() {
   ]);
 
   return (
-    <Grid>
+    <ContextPanelLayout>
+      <ContextPanel title="New milestone" description="Add a project delivery milestone.">
+        <AddMilestoneForm projects={projects ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+      <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Programme Milestones</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Owner-side project delivery milestones. CSV/P6 XER import isn&apos;t wired up.
-        </p>
-
-        <NewMilestoneForm projects={projects ?? []} />
+        <PageHeader
+          title="Programme Milestones"
+          description="Owner-side project delivery milestones. CSV/P6 XER import isn't wired up."
+          actions={<ContextPanelTrigger size="sm">New milestone</ContextPanelTrigger>}
+        />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
@@ -81,6 +84,8 @@ export default async function PmcMilestonesPage() {
           </Table>
         )}
       </Column>
-    </Grid>
+      </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

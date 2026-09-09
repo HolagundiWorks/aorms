@@ -11,7 +11,9 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewPackageForm } from "../../../components/aorms/NewPackageForm";
+import { AddPackageForm } from "../../../components/aorms/AddPackageForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "purple" | "green" | "red"> = {
   DRAFT: "gray",
@@ -34,18 +36,18 @@ export default async function PmcPackagesPage() {
   ]);
 
   return (
-    <Grid>
+    <ContextPanelLayout>
+      <ContextPanel title="New work package" description="Start a new tendered work package.">
+        <AddPackageForm projects={projects ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+      <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Work Packages</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Package-level tendering — a second sealed-bid system alongside the firm-issued Tenders
-          module (Phase 9), ported as the distinct system it is today, not merged.
-        </p>
-
-        <NewPackageForm projects={projects ?? []} />
+        <PageHeader
+          title="Work Packages"
+          description="Package-level tendering — a second sealed-bid system alongside the firm-issued Tenders module (Phase 9), ported as the distinct system it is today, not merged."
+          actions={<ContextPanelTrigger size="sm">New package</ContextPanelTrigger>}
+        />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
@@ -94,6 +96,8 @@ export default async function PmcPackagesPage() {
           </Table>
         )}
       </Column>
-    </Grid>
+      </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

@@ -2180,16 +2180,45 @@ two panel scopes don't cross-talk; Negotiation: panel opened left-docked
 beside the still-visible round table. Test project (and its cascaded
 risk row) deleted afterward via the Management API.
 
-**~23 pages remain** on the identical, now-proven pattern — any other
-list/detail pages with an inline `NewXForm` not yet surveyed (e.g.
-`/estimates`, `/pmc-*`, `/spec-catalog/[id]`, `/spec-sheets/[id]`,
-`/standards/[id]`, `/teams/[id]`, `/transmittals/[id]`,
-`/team-members/[id]`, `/tenders/[id]`, `/purchase-orders/[id]`,
-`/firm-settings`). The KPI-strip half of the standard (mandatory 3–6
-metrics below every major page's H1) is also still only on Dashboard/
-Project Overview/Decisions — each other page needs its own bespoke count
-queries, a separate pass. Continuing the same mechanical rollout is the
-direct next step, not a new design question.
+**Batch 5 (2026-09-09) — 7 more pages, including a significant gap
+caught mid-survey:** `/projects` itself — the single most-used list page
+in the app — had never been converted in any prior batch; the earlier
+sweeps worked outward from `/projects/[id]/*` and Batch 1–3's own list,
+and this top-level list slipped through. Found and fixed while grepping
+the whole `app/(app)` tree for `New\w+Form` imports outside an `AddXForm`
+wrapper, the same audit technique now used to confirm what's actually
+left (see below). Converted: Projects, Estimates, and the four `pmc-*`
+programme-management pages (Milestones, Work Packages, RA Bills, Steel
+Certification) — all the plain single-form list-page transform. Firm
+Settings is a different shape: a singleton settings screen, not a list —
+its main `FirmSettingsForm` (edit-in-place on the one `firm` row) is left
+untouched, matching the precedent of not forcing self-service/settings
+forms into a create-panel; only its "Reference Numbering" sub-section,
+which *is* a genuine add-a-record list, got an `AddNumberingPatternForm`
+panel with `isOwner`-gated trigger and panel, third occurrence of the
+conditional-panel pattern (after Team Members and Users). All 7 pages
+also picked up `PageHeader`. Verified: `tsc --noEmit`, `eslint`, full
+`next build --webpack` (`rm -rf .next` first) all clean; live
+end-to-end on Projects (create → panel closes → row appears, real
+submit) and Firm Settings (owner-gated panel opens left-docked beside
+the still-editable settings form). Test project cleaned up afterward.
+
+**A systematic audit replaces ad hoc survey from here on:** every
+remaining page from `grep -rl 'from ".*New\w\+Form"' app/(app) --include=page.tsx`
+whose import isn't already going through an `AddXForm` wrapper is the
+authoritative remaining list, not a hand-maintained page inventory —
+closes the gap that let `/projects` slip through once already.
+
+**~17 pages remain** by that audit — `/spec-catalog`, `/spec-sheets`,
+`/standards`, `/teams`, `/team-members`, `/transmittals`, `/tenders`,
+`/purchase-orders` (each has both a list page, already converted in
+Batch 2/3, **and** a `[id]` detail page with its own inline forms not
+yet surveyed), plus any other `[id]` detail page with inline create
+forms not yet checked. The KPI-strip half of the standard (mandatory
+3–6 metrics below every major page's H1) is also still only on
+Dashboard/Project Overview/Decisions — each other page needs its own
+bespoke count queries, a separate pass. Continuing the same mechanical
+rollout is the direct next step, not a new design question.
 
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —

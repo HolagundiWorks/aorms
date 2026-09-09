@@ -11,7 +11,9 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewProjectForm } from "../../../components/aorms/NewProjectForm";
+import { AddProjectForm } from "../../../components/aorms/AddProjectForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "green" | "blue" | "gray" | "purple" | "teal"> = {
   ENQUIRY: "gray",
@@ -34,17 +36,18 @@ export default async function ProjectsPage() {
   ]);
 
   return (
-    <Grid>
+    <ContextPanelLayout>
+      <ContextPanel title="Create project" description="Start a new project office.">
+        <AddProjectForm clients={clients ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+      <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Projects</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Project offices — phases, tasks, and delivery live under each project.
-        </p>
-
-        <NewProjectForm clients={clients ?? []} />
+        <PageHeader
+          title="Projects"
+          description="Project offices — phases, tasks, and delivery live under each project."
+          actions={<ContextPanelTrigger size="sm">Create project</ContextPanelTrigger>}
+        />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
@@ -96,6 +99,8 @@ export default async function ProjectsPage() {
           </Table>
         )}
       </Column>
-    </Grid>
+      </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

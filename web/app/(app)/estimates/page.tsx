@@ -11,7 +11,9 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewEstimateForm } from "../../../components/aorms/NewEstimateForm";
+import { AddEstimateForm } from "../../../components/aorms/AddEstimateForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -33,17 +35,18 @@ export default async function EstimatesPage() {
   ]);
 
   return (
-    <Grid>
+    <ContextPanelLayout>
+      <ContextPanel title="New estimate" description="Price a project's BOQ against a rate book.">
+        <AddEstimateForm projects={projects ?? []} rateBooks={rateBooks ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+      <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Estimates</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Priced BOQ against a rate book, with contingency + GST rollup.
-        </p>
-
-        <NewEstimateForm projects={projects ?? []} rateBooks={rateBooks ?? []} />
+        <PageHeader
+          title="Estimates"
+          description="Priced BOQ against a rate book, with contingency + GST rollup."
+          actions={<ContextPanelTrigger size="sm">New estimate</ContextPanelTrigger>}
+        />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
@@ -97,6 +100,8 @@ export default async function EstimatesPage() {
           </Table>
         )}
       </Column>
-    </Grid>
+      </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

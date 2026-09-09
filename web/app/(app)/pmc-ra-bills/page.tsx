@@ -10,7 +10,9 @@ import {
   TableRow,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewRaBillForm } from "../../../components/aorms/NewRaBillForm";
+import { AddRaBillForm } from "../../../components/aorms/AddRaBillForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RaBillStatusSelect } from "../../../components/aorms/RaBillStatusSelect";
 
 function formatInr(paise: number): string {
@@ -29,18 +31,18 @@ export default async function PmcRaBillsPage() {
   ]);
 
   return (
-    <Grid>
+    <ContextPanelLayout>
+      <ContextPanel title="New RA bill" description="Start a new contractor running-account bill.">
+        <AddRaBillForm projects={projects ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+      <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Running Account Bills</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Contractor RA bills for AProc work packages — distinct from the Estimation module&apos;s
-          own running_bills. CERTIFIED additionally requires cost:approve (database trigger).
-        </p>
-
-        <NewRaBillForm projects={projects ?? []} />
+        <PageHeader
+          title="Running Account Bills"
+          description="Contractor RA bills for AProc work packages — distinct from the Estimation module's own running_bills. CERTIFIED additionally requires cost:approve (database trigger)."
+          actions={<ContextPanelTrigger size="sm">New RA bill</ContextPanelTrigger>}
+        />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
@@ -91,6 +93,8 @@ export default async function PmcRaBillsPage() {
           </Table>
         )}
       </Column>
-    </Grid>
+      </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

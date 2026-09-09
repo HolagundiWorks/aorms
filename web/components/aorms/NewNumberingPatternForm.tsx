@@ -1,14 +1,22 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { addNumberingPatternRecord, type NumberingPatternActionState } from "../../lib/actions/numbering";
 import { FormGrid } from "./FormGrid";
 
 const initialState: NumberingPatternActionState = null;
 
-export function NewNumberingPatternForm() {
+export function NewNumberingPatternForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [state, formAction, pending] = useActionState(addNumberingPatternRecord, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

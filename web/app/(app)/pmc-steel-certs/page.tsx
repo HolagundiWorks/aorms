@@ -9,7 +9,9 @@ import {
   TableRow,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewSteelCertForm } from "../../../components/aorms/NewSteelCertForm";
+import { AddSteelCertForm } from "../../../components/aorms/AddSteelCertForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SteelCertStatusSelect } from "../../../components/aorms/SteelCertStatusSelect";
 
 export default async function PmcSteelCertsPage() {
@@ -24,19 +26,18 @@ export default async function PmcSteelCertsPage() {
   ]);
 
   return (
-    <Grid>
+    <ContextPanelLayout>
+      <ContextPanel title="New steel certificate" description="Log a new issued-vs-consumed steel period.">
+        <AddSteelCertForm projects={projects ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+      <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Steel Certification</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Issued vs consumed steel by period, with wastage. The CERTIFIED status additionally
-          requires the cost:approve capability — enforced by a database trigger, not just this
-          page, so a user without it sees the trigger&apos;s own rejection.
-        </p>
-
-        <NewSteelCertForm projects={projects ?? []} />
+        <PageHeader
+          title="Steel Certification"
+          description="Issued vs consumed steel by period, with wastage. The CERTIFIED status additionally requires the cost:approve capability — enforced by a database trigger, not just this page, so a user without it sees the trigger's own rejection."
+          actions={<ContextPanelTrigger size="sm">New certificate</ContextPanelTrigger>}
+        />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
@@ -87,6 +88,8 @@ export default async function PmcSteelCertsPage() {
           </Table>
         )}
       </Column>
-    </Grid>
+      </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

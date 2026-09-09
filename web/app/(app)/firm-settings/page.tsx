@@ -10,8 +10,10 @@ import {
   TableRow,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
+import { AddNumberingPatternForm } from "../../../components/aorms/AddNumberingPatternForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { FirmSettingsForm } from "../../../components/aorms/FirmSettingsForm";
-import { NewNumberingPatternForm } from "../../../components/aorms/NewNumberingPatternForm";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RemoveLineItemButton } from "../../../components/aorms/RemoveLineItemButton";
 import { removeNumberingPatternRecord } from "../../../lib/actions/numbering";
 
@@ -54,15 +56,19 @@ export default async function FirmSettingsPage() {
   const canEditFirm = isOwner || myProfile?.role === "PARTNER";
 
   return (
-    <Grid>
+    <ContextPanelLayout>
+      {isOwner && (
+        <ContextPanel title="Add numbering override" description="Override the prefix and/or digit-padding for a document scope.">
+          <AddNumberingPatternForm />
+        </ContextPanel>
+      )}
+      <ContextPanelContent>
+      <Grid>
       <Column sm={4} md={8} lg={12}>
-        <h1 className="cds--type-heading-05">Firm Settings</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Company profile, GST/tax defaults, and address — used across invoices, PDFs, and portal branding.
-        </p>
+        <PageHeader
+          title="Firm Settings"
+          description="Company profile, GST/tax defaults, and address — used across invoices, PDFs, and portal branding."
+        />
 
         {!canEditFirm && (
           <InlineNotification
@@ -87,9 +93,12 @@ export default async function FirmSettingsPage() {
           <FirmSettingsForm key={JSON.stringify(firm)} firm={firm} canEdit={canEditFirm} />
         )}
 
-        <h2 className="cds--type-heading-03" style={{ marginTop: "3rem", marginBottom: "0.5rem" }}>
-          Reference Numbering
-        </h2>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginTop: "3rem" }}>
+          <h2 className="cds--type-heading-03" style={{ marginBottom: "0.5rem" }}>
+            Reference Numbering
+          </h2>
+          {isOwner && <ContextPanelTrigger size="sm">Add override</ContextPanelTrigger>}
+        </div>
         <p
           className="cds--type-body-01"
           style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
@@ -148,15 +157,11 @@ export default async function FirmSettingsPage() {
                 )}
               </TableBody>
             </Table>
-
-            {isOwner && (
-              <div style={{ marginTop: "1.5rem" }}>
-                <NewNumberingPatternForm />
-              </div>
-            )}
           </>
         )}
       </Column>
-    </Grid>
+      </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { createSteelCert } from "../../lib/actions/pmc-steel-certs";
 import { FormGrid } from "./FormGrid";
@@ -9,8 +9,16 @@ type ProjectOption = { id: string; title: string };
 type ActionState = { error: string } | null;
 const initialState: ActionState = null;
 
-export function NewSteelCertForm({ projects }: { projects: ProjectOption[] }) {
+export function NewSteelCertForm({ projects, onSuccess }: { projects: ProjectOption[]; onSuccess?: () => void }) {
   const [state, formAction, pending] = useActionState(createSteelCert, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>
