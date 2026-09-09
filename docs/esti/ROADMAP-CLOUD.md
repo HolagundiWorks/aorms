@@ -2815,6 +2815,69 @@ build agent runs **Node.js v22.18.0**, which satisfies `web/package.json`'s
 Hostinger Node runtime version against that constraint, not just an
 assumption.
 
+**Same day, second Hostinger failure — the real bug was in the lockfile
+itself, not just auto-detection (2026-09-09).** The user applied the fix
+above (explicit Install/Build/Start commands) and the install step
+genuinely ran npm this time — but logged `added 14 packages`, implausibly
+low for this app, and the build step then failed with `Cannot find
+module '.../web/node_modules/next/dist/bin/next'`. This is a **second,
+independent bug** in `web/package-lock.json` itself, only exposed once
+the first bug (auto-detect choosing pnpm) was fixed — the earlier
+same-day roadmap entry's claim that "the lockfile itself is not stale"
+was wrong: the sync check that passed (`npm ci`'s package.json/lockfile
+version-string comparison) only confirms the *specifiers* match, not that
+the lockfile's package entries are real resolutions. They weren't.
+
+Root cause: `1b918bb9`'s lockfile (2026-09-08) was generated via `npm
+install --package-lock-only` while `web/node_modules` still held live
+pnpm symlinks (this repo's normal local-dev state). npm recorded every
+dependency as a `"link": true` pointer to a **relative path** into the
+monorepo's pnpm store (e.g. `../node_modules/.pnpm/next@16.3.4.../
+node_modules/next`) instead of a real npm-registry resolution — valid
+only inside this exact checkout, pointing at nothing on Hostinger's
+isolated `web/` deploy, and capturing **zero transitive dependencies**
+in the process (no `next/dist/bin/next`, no `@next/swc-*`, nothing).
+`npm ci` reported success (14 dead symlinks created, no error) — the
+failure only surfaced later, at the build step trying to run a binary
+that was never actually installed.
+
+Fixed by regenerating the lockfile from complete isolation: copied only
+`web/package.json` into an empty scratch directory (no `node_modules`, no
+reachable pnpm store) and ran a genuine `npm install` there, forcing real
+npm-registry resolution for every direct and transitive dependency.
+Verified rigorously before replacing the committed file, not just trusted:
+zero `"link": true` entries across 152 package entries (was 14, all
+links); a clean `npm ci` from the regenerated lockfile in a separate
+isolated directory produces a real, non-empty, executable `next/dist/
+bin/next` (`next --version` → `16.3.4`, confirmed running); and — the
+step that actually matters, since the freshly-resolved versions aren't
+byte-identical to what pnpm has pinned for local dev (`@carbon/react`
+1.116.0 vs. dev's 1.115.0, `react` 19.2.8 vs. 19.2.7 — same caret ranges
+in `package.json`, npm just resolved "latest matching" at generation
+time) — copied the real `web/` app source (`app/`, `components/`, `lib/`,
+etc., not just the dependency tree) alongside the freshly-installed
+`node_modules` and ran both `next build --webpack` and `tsc --noEmit`
+against it: **both clean, zero errors**, confirming the version drift
+doesn't break anything before shipping it. Confirmed the local
+pnpm-managed `web/node_modules` used for day-to-day dev was untouched —
+only the committed `package-lock.json` changed; pnpm ignores a sibling
+`package-lock.json` inside a workspace member.
+
+Documented both bugs together, in sequence, in
+[WEB-DEPLOY-HOSTINGER.md](./WEB-DEPLOY-HOSTINGER.md)'s "Build & start"
+section — including the general lesson: an npm lockfile generated inside
+a pnpm-managed `node_modules` directory cannot be trusted even when `npm
+ci` reports success, since it can silently capture local symlinks instead
+of real resolutions; always regenerate in a directory with no local
+`node_modules` and no reachable pnpm store, and verify the result
+actually contains resolved packages (no `"link": true` entries, a real
+binary present after a fresh install) before committing, rather than
+trusting an install step's exit code alone. This is a real code fix
+(the lockfile file itself), unlike the first bug — committed and pushed,
+no further dashboard action needed for this half; the explicit Install/
+Build/Start command override from the first bug still needs to be
+applied in Hostinger's panel if it hasn't been already.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

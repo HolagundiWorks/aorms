@@ -106,9 +106,13 @@ These map straight to `web/package.json`'s own scripts (`next build
 --webpack` / `next start` — see `next.config.ts`'s comment for why
 `--webpack`, not Turbopack).
 
-**Known incident (2026-09-08, recurred 2026-09-09):** with Root directory
-set to `web` but Install command left on auto-detect, the build failed at
-the install step with:
+**Known incident, two layered bugs (2026-09-08 → 2026-09-09), both now
+fixed — read this if the install or build step ever fails again on this
+app, before re-diagnosing from scratch.**
+
+**Bug 1 — auto-detect chose pnpm/corepack over npm (install step).** With
+Root directory set to `web` but Install/Build/Start left on auto-detect,
+the build failed at the install step:
 
 ```text
 Error: Cannot find module '.../corepack/v1/pnpm/12.3.4/bin/pnpm.cjs'
@@ -119,26 +123,73 @@ code: 'MODULE_NOT_FOUND'
 The root `package.json` pins `"packageManager": "pnpm@9.7.0"` (this repo's
 normal pnpm-workspace tooling), which triggers Node's Corepack to fetch
 pnpm at install time; Corepack's shim was broken/incomplete on Hostinger's
-build agent. `web/package-lock.json` was added (2026-09-08,
-[`1b918bb9`](https://github.com/HolagundiWorks/aorms/commit/1b918bb9)) —
-confirmed npm-installable standalone (`web`'s dependencies are all plain
-semver ranges, no `workspace:` protocol, no dependency on
-`packages/contracts` or anything else in the monorepo) — specifically so
-Hostinger could detect npm instead of pnpm/corepack for this deploy
-target. **That lockfile alone was not sufficient**: even with Root
-directory correctly set to `web` and the npm lockfile present there, the
-platform's auto-detection still chose pnpm/corepack on a later redeploy —
-most likely because it clones the full monorepo and its detection scans
-from the repository root (finds `pnpm-lock.yaml` +
-`"packageManager": "pnpm@9.7.0"` there) rather than confining detection to
-the configured subdirectory. Re-verified 2026-09-09: a clean `npm ci`
-against `web/package.json` + `web/package-lock.json` in an isolated
-directory passes the package.json/lockfile sync check (the check `npm ci`
-runs before attempting any download) — the lockfile itself is not stale,
-so the fix is the explicit command override above, not another lockfile
-regeneration. **Auto-detection cannot be trusted for this app while
-Hostinger's scan reaches the repo root; setting Install/Build/Start
-commands explicitly is the actual fix, not optional polish.**
+build agent. `web/package-lock.json` was added
+([`1b918bb9`](https://github.com/HolagundiWorks/aorms/commit/1b918bb9),
+2026-09-08) specifically so Hostinger would detect npm instead. That alone
+didn't stop the recurrence — most likely because Hostinger clones the
+full monorepo and its package-manager auto-detection scans from the
+**repository root** (finds `pnpm-lock.yaml` + the `packageManager` pin
+there), not the configured subdirectory. Fixed by setting Install/Build/
+Start commands **explicitly** (the table above) rather than trusting
+auto-detection at all.
+
+**Bug 2 — the npm lockfile itself was broken (build step), found only
+after Bug 1's fix let the install step "succeed" too easily.** With
+Install command forced to `npm ci`, the install step logged `added 14
+packages` — implausibly low for a Next.js + Carbon app — and the build
+step then failed with:
+
+```text
+Error: Cannot find module '.../web/node_modules/next/dist/bin/next'
+code: 'MODULE_NOT_FOUND'
+```
+
+Root cause: `1b918bb9`'s lockfile was generated via `npm install
+--package-lock-only` while `web/node_modules` still held live pnpm
+symlinks (this repo's normal local-dev state — see CLAUDE.md § Dev/verify
+loop). npm recorded every dependency as it found it locally: a `"link":
+true` pointer to a **relative path** like
+`../node_modules/.pnpm/next@16.3.4.../node_modules/next` — i.e. "this is
+a symlink to a sibling directory" — instead of a real npm-registry
+resolution with a tarball URL and integrity hash. That relative path
+only resolves inside this exact pnpm-managed monorepo checkout; on
+Hostinger's isolated `web/` deploy it points at nothing, so `npm ci`
+created 14 dead symlinks and captured **zero transitive dependencies**
+(no `next/dist/bin/next`, no `@next/swc-*`, nothing) — silently, with no
+error at install time, only surfacing once the build step tried to run
+the (nonexistent) binary.
+
+Fixed 2026-09-09 by regenerating `web/package-lock.json` from complete
+isolation: copied only `web/package.json` (no `node_modules`, no
+reachable pnpm store) into a scratch directory and ran a genuine `npm
+install` there, forcing npm to resolve every package — direct and
+transitive — from the real npm registry. Verified before replacing the
+committed lockfile: the regenerated file has zero `"link": true` entries
+across 152 package entries; a clean `npm ci` from it in a separate
+isolated directory produces a real, non-empty `next/dist/bin/next`
+(confirmed running, `next --version` → `16.3.4`); and a full `next build
+--webpack` plus `tsc --noEmit`, run against the real `web/` app source
+copied alongside that freshly-installed `node_modules`, both pass clean
+with **zero errors** — confirming the slightly newer semver-compatible
+versions npm resolved (e.g. `@carbon/react` 1.116.0 vs. the 1.115.0
+pnpm has pinned for local dev, `react` 19.2.8 vs. 19.2.7 — both caret
+ranges in `package.json` unchanged, npm simply resolved "latest
+matching" at generation time) don't break anything. Confirmed the local,
+pnpm-managed `web/node_modules` used for day-to-day dev was untouched by
+this — only the committed `package-lock.json` file changed; pnpm ignores
+a sibling `package-lock.json` in a workspace member.
+
+**Lesson for next time:** an npm lockfile generated with `--package-lock-
+only` (or any invocation) inside a directory whose `node_modules` is
+pnpm-managed cannot be trusted, even if `npm ci` "succeeds" — it may
+silently capture local symlinks instead of real resolutions, with the
+failure only surfacing at the *build* step, several minutes and a whole
+install-step "success" later. Always regenerate this repo's npm lockfiles
+in a directory with no local `node_modules` and no reachable pnpm store,
+and verify the result actually contains resolved packages (check for
+`"link": true` entries, and confirm a real binary like `next/dist/bin/
+next` exists after a fresh `npm ci`) before committing it — don't trust
+the install step's exit code alone.
 
 `web/package.json` declares `"engines": {"node": ">=20.9.0"}` (Next.js's
 own minimum) — confirm Hostinger's Node runtime selection matches or
