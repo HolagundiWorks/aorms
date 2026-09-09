@@ -24,6 +24,40 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "25mb",
     },
   },
+  // Baseline security headers (2026-09-09 hosting-prep audit — none existed
+  // before this). Applied to every response. Deliberately NOT including a
+  // Content-Security-Policy here: this app renders six distinct route
+  // groups (office hub, three external portals, the platform identity app,
+  // marketing) with dynamic Supabase Storage asset URLs and Server-Action
+  // form submissions throughout, and a hand-authored CSP wrong in any one
+  // of those surfaces fails silently (a blocked resource, not a build
+  // error) — shipping one untested is worse than shipping none. Add a CSP
+  // as its own follow-up, page-by-page verified in the browser, not bundled
+  // into this pass.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          // This app is never meant to be framed by another site.
+          { key: "X-Frame-Options", value: "DENY" },
+          // Stop browsers from MIME-sniffing served content as something
+          // other than its declared Content-Type.
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          // Send the referring page's origin only, and not at all on a
+          // downgrade (https → http) — avoids leaking full internal URLs
+          // (e.g. a signed token in a path) to third-party link targets.
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // Hostinger Managed App Hosting terminates TLS in front of the
+          // Node app (docs/esti/NEXTJS-SUPABASE-MIGRATION.md § Hosting) —
+          // safe to force HTTPS for a year including subdomains once live.
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          // Lock off browser features this app never uses.
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

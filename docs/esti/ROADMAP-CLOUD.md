@@ -2690,6 +2690,90 @@ A genuinely unmatched top-level path (`/this-page-does-not-exist`,
 the same URL that showed Next's raw black default earlier this
 session) now shows the new branded root 404 instead.
 
+**Hosting-readiness pass (2026-09-09), on explicit "prepare the app for
+hosting" direction.** An audit-first pass against the deployment target
+already specified in `NEXTJS-SUPABASE-MIGRATION.md` §23–25 (Hostinger
+Managed App Hosting, `GitHub → Hostinger → Next.js`, Supabase for data/
+auth/storage, ~100-user design target) — read that doc, `next.config.ts`,
+`package.json`, and diffed the key sets of `.env`/`.env.example`/
+`.env.local` before changing anything, rather than guessing what a
+production deploy would need.
+
+Found and fixed:
+- **`.env.example` was missing three keys present in the real `.env`:**
+  `OLLAMA_BASE_URL`/`OLLAMA_MODEL` (silently fine in local dev, where
+  `web/lib/ai/ollama.ts` defaults to `127.0.0.1:11434` — a real
+  production risk if carried unset onto Hostinger, since there's no
+  Ollama process on that host; every "Ask ESTI" call would fail with a
+  connection refused) and `SUPABASE_JWKS_URL` (grepped the entire `web/`
+  tree — zero code references, a genuinely dead variable). Rather than
+  silently dropping the dead one or silently propagating it as if it did
+  something, documented both: added the two Ollama vars with a comment
+  explaining the production requirement, and added `SUPABASE_JWKS_URL`
+  with a comment stating plainly it's unused, so a future deployer who
+  spots it in an existing `.env` doesn't wonder if they missed a wiring
+  step.
+- **No security headers anywhere** — `next.config.ts` had no `headers()`
+  function at all. Added X-Frame-Options (`DENY`), X-Content-Type-Options
+  (`nosniff`), Referrer-Policy (`strict-origin-when-cross-origin`),
+  Strict-Transport-Security (1 year + subdomains), and a Permissions-
+  Policy locking off camera/microphone/geolocation (none used anywhere in
+  the app). Deliberately **excluded a Content-Security-Policy** — this
+  app spans six route groups (office hub, three external portals, the
+  platform identity app, marketing) with dynamic Supabase Storage asset
+  URLs and Server-Action form submissions throughout; a CSP wrong in any
+  one surface fails silently (a blocked resource, not a build error), so
+  shipping one untested was judged worse than shipping none. Flagged as
+  a follow-up in the new deployment doc (below), to be verified page-by-
+  page in the browser, not assumed correct from reading the code.
+- **No health-check endpoint** — added `GET /api/health`
+  (`app/api/health/route.ts`), a pure liveness check (process is up and
+  serving) deliberately not touching Supabase/Ollama, so a transient
+  dependency blip doesn't get Hostinger's monitoring to restart an
+  otherwise-healthy process. A readiness check is a distinct future need,
+  not built speculatively since nothing calls for it yet.
+- **No `robots.txt`** — added `app/robots.ts` (Next's metadata-route
+  convention), disallowing every top-level authenticated route segment
+  (enumerated straight from the `app/` directory listing — route groups
+  add no path prefix of their own, so there's no single wildcard to
+  disallow) while leaving the public marketing surface crawlable. Written
+  host-agnostically (no hardcoded `aorms.in`) since `web/` isn't yet the
+  live production site and may first serve from a staging/preview host.
+- **`web/package.json` had no `engines` field of its own** — added
+  `"node": ">=20.9.0"`, matching Next.js's own declared minimum (checked
+  `node_modules/next/package.json` rather than guessing), tighter than
+  the monorepo root's looser `">=20"` since `web/` may deploy as its own
+  standalone unit on Hostinger rather than through the pnpm workspace
+  root.
+- **No Hostinger-specific deployment doc existed** — wrote
+  [WEB-DEPLOY-HOSTINGER.md](./WEB-DEPLOY-HOSTINGER.md): required env vars
+  (cross-referencing the now-complete `.env.example`), both Supabase
+  project refs (`aorms-web` `fyedovpqjwbslrughwdv`, `aorms-platform`
+  `qbgbnhthchhbammzeebg`), build/start commands, the Ollama production
+  requirement spelled out again at the deploy-doc level (not just the
+  env-var comment), and an explicit "known gaps" section (no CSP, no
+  readiness check, `output: "standalone"` deliberately not added since
+  Hostinger's documented flow isn't a self-built Docker image, and the
+  doc itself flagged as unverified against a real Hostinger account until
+  a first real deploy happens).
+
+Checked and deliberately left alone: `web/proxy.ts` (Next 16's renamed
+`middleware.ts` convention) was read in full and confirmed production-safe
+with no dev-only bypasses; the one `localhost:3000` string in the codebase
+(`projects/[id]/feasibility/page.tsx`) is a documented fallback for an
+`x-forwarded-host` header lookup, not a hardcoded production URL, and is
+correct as written; `web/app/page.tsx`'s marketing landing page is
+confirmed still a Carbon-only rebuild, not yet the live aorms.in site (that
+cutover is a separate, later decision, not part of this pass).
+
+Verified: `tsc --noEmit` and `eslint .` (whole package) both clean, a full
+`next build --webpack` clean across all 90+ routes plus the two new routes
+(`/api/health`, `/robots.txt`). Live-verified `/api/health` returns
+`{"status":"ok",...}` with a 200, `/robots.txt` renders the expected
+disallow list, and the new response headers are present on a real page
+load via the dev server — checked in the browser, not assumed from the
+config alone.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
