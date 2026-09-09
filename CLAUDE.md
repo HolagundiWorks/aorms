@@ -60,14 +60,43 @@ agent, Pomodoro/Calculator/Wellness modules, and more). Target architecture
 is specified in [`docs/esti/NEXTJS-SUPABASE-MIGRATION.md`](docs/esti/NEXTJS-SUPABASE-MIGRATION.md):
 **Next.js + TypeScript + Carbon Design System + Supabase**, replacing the
 current React SPA + tRPC + Fastify + raw PostgreSQL + Python worker stack,
-deploying to Hostinger Managed App Hosting instead of the VPS. What's still
-true from the old wording: **the current production stack (`frontend`/
-`backend` on the VPS) stays live and unchanged** until a given migration
-phase is merged and verified — `web/` is new, additive code, not a rewrite
-of `frontend`/`backend` in place. The tables below (Architecture, Module
-map, Frontend routes) describe the **VPS-deployed, currently-live** stack —
-`web/`'s own routes/modules are documented in its own files and in
-[ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md), not duplicated here.
+deploying to Hostinger Managed App Hosting instead of the VPS.
+
+**Second stale-doc correction (2026-09-09): `web/` deployed to production
+at aorms.in this date — the "still true from the old wording" claim below
+(frontend/backend on the VPS stays live and unchanged) no longer holds.**
+`web/` shipped to Hostinger Managed App Hosting and Hostinger's build path
+was already `domains/aorms.in/hbuilds/...`, so the deploy landed directly
+on the live **aorms.in** domain, not a staging host. Confirmed live via
+direct browser checks immediately after deploy, not just trusted the
+"deployment complete" report: `GET https://aorms.in/api/health` → `200
+{"status":"ok",...}`; response headers on `/` show every header
+`next.config.mjs` sets (X-Frame-Options, X-Content-Type-Options,
+Referrer-Policy, Strict-Transport-Security, Permissions-Policy) plus
+Hostinger's own `hcdn` platform headers; `/robots.txt` renders correctly;
+the landing page, `/login`, and a genuinely unmatched URL (branded root
+404) all screenshotted rendering live Carbon-styled pages. **Not yet
+verified in this pass:** a full authenticated flow (sign-in against the
+real `aorms-web` Supabase project through to a real page like
+`/dashboard`), and whether the old VPS `frontend`/`backend` deployment
+was formally decommissioned or is still running unreferenced — this
+correction only confirms `web/` is now what aorms.in serves, not the full
+state of the old stack. The Launch status and Product naming sections
+below (`VITE_MARKETING_ONLY` gate, the `aorms.in`/`app.aorms.in` split)
+describe the **old frontend's** launch mechanics and have not been
+re-verified against this cutover — treat them as likely stale too until
+someone checks, rather than assuming they still apply. Full incident
+history (three separate deploy-blocking bugs fixed same-day before this
+succeeded) is in
+[ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) § Stack migration and
+[WEB-DEPLOY-HOSTINGER.md](docs/esti/WEB-DEPLOY-HOSTINGER.md).
+
+What's still true from the old wording, everywhere it hasn't been
+superseded by the correction above: the tables below (Architecture,
+Module map, Frontend routes) describe the **VPS-deployed** stack as it
+existed before this cutover — `web/`'s own routes/modules are documented
+in its own files and in [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md),
+not duplicated here.
 
 Migration sequencing and full phase-by-phase status lives in
 [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) § Stack migration; see also

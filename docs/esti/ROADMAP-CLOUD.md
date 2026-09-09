@@ -2938,6 +2938,45 @@ Hostinger-specific incident history for all three now lives together in
 WEB-DEPLOY-HOSTINGER.md's Build & start section, in order, for whoever
 hits the next one.
 
+**`web/` is live on Hostinger (2026-09-09) — first successful production
+deploy, all three bugs above confirmed fixed.** After the `next.config.mjs`
+fix, the build ran to completion (WASM SWC is slower than the native
+binary but got there) and the app deployed successfully to **aorms.in
+itself** — Hostinger's build path was already `domains/aorms.in/hbuilds/
+...`, so this cutover happened as part of the same deploy, not a separate
+decision made in this session. Smoke-tested live in the browser
+immediately after, not just trusted the "deployment complete" message:
+
+- `GET https://aorms.in/api/health` → `200 {"status":"ok",...}`.
+- `GET https://aorms.in/` → real response headers confirmed live,
+  including all five added in the hosting-readiness pass
+  (`x-frame-options: DENY`, `x-content-type-options: nosniff`,
+  `referrer-policy: strict-origin-when-cross-origin`,
+  `strict-transport-security: max-age=31536000; includeSubDomains`,
+  `permissions-policy: camera=(), microphone=(), geolocation=()`) —
+  plus a bonus not set by this repo: Hostinger's own edge (`hcdn`) adds
+  `content-security-policy: upgrade-insecure-requests` at the CDN layer,
+  a minimal but free partial CSP on top of what `next.config.mjs`
+  configures.
+- `GET https://aorms.in/robots.txt` → renders the full disallow list
+  exactly as built.
+- Landing page (`/`), the sign-in page (`/login`), and a genuinely
+  unmatched URL (`/this-page-does-not-exist` → the branded root 404 with
+  the AORMS logo and a link home) all screenshotted correctly rendering
+  live Carbon-styled pages, not a fallback/error state.
+
+**This is `web/` becoming the live production site at aorms.in** — a
+change from every earlier note in this doc and CLAUDE.md's § Launch
+status stating `web/` "is not yet the live production site" / that's
+still `frontend/`'s job. That framing is now stale as of this date;
+CLAUDE.md's Stack migration section should be updated to reflect the
+cutover next time it's touched, rather than left silently outdated.
+Full authenticated-flow verification (sign-in against the real
+`aorms-web` Supabase project, a real page behind auth like `/dashboard`)
+has not been done in this pass — the checks above cover routing,
+headers, and the public surface, not a signed-in session end-to-end;
+worth a follow-up pass before treating the cutover as fully proven.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
