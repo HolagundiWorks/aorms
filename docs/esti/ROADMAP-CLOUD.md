@@ -2599,6 +2599,97 @@ reading stale or mismatched data. All seed rows deleted afterward
 (children first, then the project, since `moms`/`progress_reports`/
 `decisions` have no `on delete cascade` from `project_offices`).
 
+**Every route group now has its own error/not-found/loading screens
+(2026-09-09), on explicit "default/error screens not been developed?"
+question.** Only `(app)` had Next's `error.tsx`/`not-found.tsx`/
+`loading.tsx` route-level conventions — the five other route groups
+((auth), (portal), (collab-portal), (contractor-portal), (platform))
+had none, and neither did the root. Meant: a crash in any portal or the
+platform surface fell through to Next's raw dev overlay / blank prod
+error, an invalid URL under any of them showed Next's bare, unbranded
+default 404 (confirmed live: solid black background, "404 — This page
+could not be found", zero AORMS branding), and every one of them showed
+a blank flash instead of a loading skeleton while a Server Component
+page fetched its data.
+
+Extracted three shared, parameterized components
+(`components/aorms/Route{NotFound,Error,Loading}.tsx`) instead of
+copy-pasting six near-identical trios, then a thin per-group file at
+each of the required Next.js paths:
+- `RouteNotFound` — a `PageHeader` ("Not found" title + description) +
+  a "Back to <home>" button, `homeHref`/`homeLabel` props so each group
+  points at its own real home (`/dashboard`, `/portal`, `/collab-portal`,
+  `/contractor-portal`, `/identity`, `/login`). Must be a Client
+  Component (the RSC-boundary `renderIcon` bug this session already hit
+  and fixed once for `ContextPanelTrigger` — same shape, `Button`'s
+  `renderIcon` here) — each group's own `not-found.tsx` file stays a
+  plain Server Component wrapper passing only strings, since the client
+  boundary is established inside `RouteNotFound` itself, not at the
+  re-exporting file.
+- `RouteError` — the existing `(app)/error.tsx` body (InlineNotification
+  + "Try again" `reset()` button), extracted verbatim. Next requires the
+  file *at* each group's own `error.tsx` path to carry its own `"use
+  client"` (unlike `not-found.tsx`, a re-export-only wrapper isn't
+  enough here), so each group's file is two lines longer than
+  `not-found.tsx`'s — both facts confirmed by actually triggering a real
+  exception through the whole chain (see Verified below), not just
+  reasoned from the Next.js docs.
+- `RouteLoading` — the existing `(app)/loading.tsx` skeleton
+  (SkeletonText + SkeletonPlaceholder), extracted verbatim, no client
+  directive needed.
+
+`(app)`'s own three files were refactored onto the same shared
+components (no behavior change) rather than left as the one-off
+original, closing the drift risk of "the pattern exists once and every
+copy silently diverges from it."
+
+Two more root-level files, deliberately **not** built on the shared
+components since the root has no header/nav shell of its own for them
+to render inside and can't assume which "world" (marketing, office hub,
+or a portal) a broken URL was even trying to reach:
+- `app/not-found.tsx` — the catch-all for a URL matching *no* route
+  file anywhere (verified: this is genuinely a different code path from
+  a `notFound()` call inside an existing, matched page — the latter is
+  caught by that page's own nearest `not-found.tsx`, preserving its
+  layout's header; a truly unmatched path skips every group's layout
+  entirely and lands here instead). Plain centered markup with the
+  AORMS logo and a link back to `/` — no Carbon component dependency,
+  matching the same reasoning that kept the marketing landing page out
+  of the Carbon typography rollout earlier this session.
+- `app/global-error.tsx` — the one failure mode nothing else can catch:
+  an exception in the root `layout.tsx` itself. Must render its own
+  `<html>`/`<body>` (Next's requirement — this file substitutes for the
+  root layout that failed) and can't depend on `globals.scss`/Carbon
+  for the same reason a failed root layout can't be trusted to have
+  gotten that far; plain inline styles only. Vanishingly unlikely to
+  ever fire (root layout here is just a `globals.scss` import), but its
+  total absence meant that one path had zero handling, not even Next's
+  own default.
+
+`(auth)` got `not-found.tsx`/`error.tsx` too (skipped `loading.tsx` —
+the login form has no server-side data fetch to skeleton) for full,
+uniform coverage rather than leaving the smallest group as the one
+disclosed exception.
+
+Verified: `tsc --noEmit` and `eslint .` (whole package) both clean, a
+full `next build --webpack` clean across all 90+ routes. Live-verified
+three genuinely different code paths, not just one: (1) an unmatched
+URL under `(platform)` (`/identity/nonexistent`) correctly fell through
+to the *root* `not-found.tsx`, confirming that's a real, distinct case
+from (2) a `notFound()` call inside an existing page with a bad id
+(`/studios/<bad-uuid>`), which correctly rendered `(platform)`'s own
+`not-found.tsx` *inside* the Platform header (Identity/Materials/
+Licences/Sign out nav still visible) — proving the layout-preservation
+claim rather than assuming it; (3) `error.tsx` was verified by actually
+throwing — a temporary `throw new Error(...)` added to the top of
+`leads/page.tsx`, hit via a real navigation, screenshotted showing the
+exact thrown message inside a real `InlineNotification` with AppShell's
+sidebar still intact, then the file reverted with `git checkout --`
+(confirmed clean afterward) rather than left as a permanent test hook.
+A genuinely unmatched top-level path (`/this-page-does-not-exist`,
+the same URL that showed Next's raw black default earlier this
+session) now shows the new branded root 404 instead.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

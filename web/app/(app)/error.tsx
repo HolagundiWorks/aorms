@@ -1,37 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
-import { Button, Column, Grid, InlineNotification } from "@carbon/react";
+import { RouteError } from "../../components/aorms/RouteError";
 
 /**
  * Route-level error boundary (Next.js error.tsx convention) for every page
- * under the authenticated app shell — catches an unhandled exception in a
- * Server or Client Component render (not a Supabase query error handled
- * inline, which every page already surfaces as its own <InlineNotification>)
- * and shows a recoverable Carbon error state instead of Next's raw dev
- * overlay / a blank prod page. Must be a Client Component per Next's
- * convention (error.tsx boundaries render below the point of failure, so
- * they can't be server-rendered themselves).
+ * under the authenticated app shell. See RouteError.tsx's own comment for
+ * why the actual body lives there, shared with every other route group's
+ * layout shell. This file still needs its own "use client" directive —
+ * Next requires the file at this exact path to carry it, a re-export alone
+ * isn't enough for error.tsx specifically (unlike not-found.tsx/loading.tsx,
+ * which are fine as plain Server Component wrappers around a client body).
  */
 export default function AppError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
-
-  return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <InlineNotification
-          kind="error"
-          title="Something went wrong"
-          subtitle={error.message || "An unexpected error occurred."}
-          hideCloseButton
-          lowContrast
-        />
-        <div style={{ marginTop: "1rem" }}>
-          <Button onClick={() => reset()}>Try again</Button>
-        </div>
-      </Column>
-    </Grid>
-  );
+  return <RouteError error={error} reset={reset} />;
 }
