@@ -2774,6 +2774,47 @@ disallow list, and the new response headers are present on a real page
 load via the dev server — checked in the browser, not assumed from the
 config alone.
 
+**Hostinger install-step failure recurred (2026-09-09), diagnosed and
+documented (dashboard-config fix, not a repo fix).** The user reported a
+real Hostinger deploy attempt failing at the install step:
+`Error: Cannot find module '.../corepack/v1/pnpm/12.3.4/bin/pnpm.cjs'`,
+`code: 'MODULE_NOT_FOUND'`. This is the *same* failure a prior session
+already diagnosed and partially fixed on 2026-09-08
+([`1b918bb9`](https://github.com/HolagundiWorks/aorms/commit/1b918bb9) —
+added `web/package-lock.json` so Hostinger would detect npm instead of
+pnpm/corepack for this deploy target). First re-verified the fix hadn't
+regressed: a clean `npm ci` against `web/package.json` +
+`web/package-lock.json` in an isolated scratch directory passes npm's
+package.json/lockfile sync check (the check `npm ci` runs *before*
+attempting any download) — confirming this session's own `package.json`
+edit earlier today (adding `engines`) didn't drift the lockfile out of
+sync, and the lockfile itself isn't stale.
+
+Asked the user for their actual Hostinger app settings rather than
+guessing: Root directory is correctly `web`, but Install/Build/Start
+commands are left on auto-detect. Diagnosis: with Root directory
+correctly scoped to `web`, auto-detect *still* chose pnpm/corepack over
+the npm lockfile sitting right there — most likely because Hostinger
+clones the full monorepo and its package-manager detection scans from the
+**repository root** (finds `pnpm-lock.yaml` +
+`"packageManager": "pnpm@9.7.0"` there) rather than confining itself to
+the configured subdirectory. A lockfile alone can't out-compete that;
+auto-detection has to be bypassed outright. Documented the concrete fix —
+set Install/Build/Start commands explicitly (`npm ci` / `npm run build` /
+`npm run start`) in Hostinger's dashboard, not left to auto-detect — in
+[WEB-DEPLOY-HOSTINGER.md](./WEB-DEPLOY-HOSTINGER.md)'s Build & start
+section, including the full incident writeup so a future redeploy attempt
+doesn't silently rediscover the same failure a third time. This is a
+Hostinger dashboard setting, not a code change — no commit touches
+deploy behavior here beyond the doc update; the user still needs to apply
+it in their Hostinger panel and redeploy.
+
+Also confirmed, incidentally, from the real failure log: Hostinger's
+build agent runs **Node.js v22.18.0**, which satisfies `web/package.json`'s
+`"engines": ">=20.9.0"` — the first real confirmation of an actual
+Hostinger Node runtime version against that constraint, not just an
+assumption.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

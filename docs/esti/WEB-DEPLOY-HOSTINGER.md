@@ -88,25 +88,63 @@ wanted later, would be a distinct future decision, not assumed here).
 
 ## Build & start
 
-Hostinger Node.js app hosting runs a build step then a start command. From
-`web/package.json`:
+Hostinger Node.js app hosting runs an install step, a build step, then a
+start command. Point the app's **Root directory** at `web/` — this is a
+monorepo (pnpm workspace) and `web/` is one package in it, not the repo
+root.
 
-```bash
-npm run build   # next build --webpack (see next.config.ts's comment for why --webpack, not Turbopack)
-npm run start   # next start
+**Do not leave Install/Build/Start commands on auto-detect.** Set them
+explicitly:
+
+| Setting | Value |
+| --- | --- |
+| Install command | `npm ci` |
+| Build command | `npm run build` |
+| Start command | `npm run start` |
+
+These map straight to `web/package.json`'s own scripts (`next build
+--webpack` / `next start` — see `next.config.ts`'s comment for why
+`--webpack`, not Turbopack).
+
+**Known incident (2026-09-08, recurred 2026-09-09):** with Root directory
+set to `web` but Install command left on auto-detect, the build failed at
+the install step with:
+
+```text
+Error: Cannot find module '.../corepack/v1/pnpm/12.3.4/bin/pnpm.cjs'
+    ...
+code: 'MODULE_NOT_FOUND'
 ```
+
+The root `package.json` pins `"packageManager": "pnpm@9.7.0"` (this repo's
+normal pnpm-workspace tooling), which triggers Node's Corepack to fetch
+pnpm at install time; Corepack's shim was broken/incomplete on Hostinger's
+build agent. `web/package-lock.json` was added (2026-09-08,
+[`1b918bb9`](https://github.com/HolagundiWorks/aorms/commit/1b918bb9)) —
+confirmed npm-installable standalone (`web`'s dependencies are all plain
+semver ranges, no `workspace:` protocol, no dependency on
+`packages/contracts` or anything else in the monorepo) — specifically so
+Hostinger could detect npm instead of pnpm/corepack for this deploy
+target. **That lockfile alone was not sufficient**: even with Root
+directory correctly set to `web` and the npm lockfile present there, the
+platform's auto-detection still chose pnpm/corepack on a later redeploy —
+most likely because it clones the full monorepo and its detection scans
+from the repository root (finds `pnpm-lock.yaml` +
+`"packageManager": "pnpm@9.7.0"` there) rather than confining detection to
+the configured subdirectory. Re-verified 2026-09-09: a clean `npm ci`
+against `web/package.json` + `web/package-lock.json` in an isolated
+directory passes the package.json/lockfile sync check (the check `npm ci`
+runs before attempting any download) — the lockfile itself is not stale,
+so the fix is the explicit command override above, not another lockfile
+regeneration. **Auto-detection cannot be trusted for this app while
+Hostinger's scan reaches the repo root; setting Install/Build/Start
+commands explicitly is the actual fix, not optional polish.**
 
 `web/package.json` declares `"engines": {"node": ">=20.9.0"}` (Next.js's
 own minimum) — confirm Hostinger's Node runtime selection matches or
-exceeds this. Local dev has been on Node 24; nothing in the codebase is
-known to require newer than 20.9, but that combination (20.9 specifically)
-hasn't been exercised — treat it as the floor to test against, not a
-guarantee.
-
-If Hostinger's app-hosting product expects the app root at the repository
-root rather than a subdirectory, point its build root at `web/` specifically
-— this is a monorepo (pnpm workspace) and `web/` is one package in it, not
-the repo root.
+exceeds this. Observed on a real Hostinger build agent: Node.js v22.18.0,
+which satisfies it. Local dev has been on Node 24; nothing in the codebase
+is known to require newer than 20.9.
 
 ## Health check
 
