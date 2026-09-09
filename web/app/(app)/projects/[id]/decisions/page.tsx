@@ -94,7 +94,7 @@ export default async function ProjectDecisionsPage({
                 key={d.id}
                 title={
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", width: "100%" }}>
-                    <span style={{ fontWeight: 500 }}>{d.title}</span>
+                    <span className="cds--type-body-01">{d.title}</span>
                     <span style={{ display: "flex", gap: "0.4rem", flexShrink: 0 }}>
                       <Tag type={d.impact === "HIGH" ? "red" : d.impact === "MEDIUM" ? "purple" : "gray"} size="sm">
                         {d.impact}

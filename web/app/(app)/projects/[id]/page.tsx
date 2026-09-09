@@ -71,6 +71,7 @@ export default async function ProjectDetailPage({
       <Column sm={4} md={8} lg={16}>
         <PageHeader
           eyebrow={project.ref}
+          eyebrowMono
           title={project.title}
           description={
             <>
@@ -97,7 +98,7 @@ export default async function ProjectDetailPage({
 
         {project.status !== "ACTIVE" && project.status !== "COMPLETED" && project.status !== "CANCELLED" && (
           <>
-            <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Activation gate
             </h2>
             <div style={{ marginBottom: "2rem" }}>
@@ -106,7 +107,7 @@ export default async function ProjectDetailPage({
           </>
         )}
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Phases
         </h2>
 

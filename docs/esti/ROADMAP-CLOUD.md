@@ -1984,6 +1984,91 @@ typing above, and `Dropdown`'s `items` prop wanting a mutable array
 where `DECISION_STATES`'s `as const` tuple is readonly) were both
 genuine and fixed before the clean build ran.
 
+**Root-cause fix: `cds--type-*` classes had never actually rendered
+anything, anywhere in `web/`, since Phase 1 (2026-09-09) — found while
+applying a user-supplied ERP typography/sizing guide.** Asked to bring
+the app's text hierarchy in line with a detailed spec (page-title vs.
+section vs. body vs. label sizing, IBM Plex Mono for technical IDs,
+KPI-number layout, weight discipline), the first step was reading
+Carbon's *real* type-scale values to map the guide's roles onto actual
+tokens rather than inventing sizes — which is when `getComputedStyle()`
+on a live, already-rendered `h1.cds--type-heading-05` returned numbers
+that didn't match any Carbon token at all (42px/300-weight, not
+32px/400). Direct `document.styleSheets` inspection settled it: **zero
+CSS rules existed anywhere for any `cds--type-*` selector.** Root
+cause: `globals.scss`'s `@use "@carbon/react/scss/type";` only forwards
+the token *values* and mixins — it never itself emits the utility
+classes. That requires an explicit `@include type.type-classes;`, which
+had never been added. Every `className="cds--type-*"` in this entire
+codebase — hundreds of instances, in essentially every screen shipped
+this session and before — had been a silent no-op the whole time, each
+element instead fell through to the browser's raw tag default. This is
+the same shape as the `--cds-layout-density-*` gap `globals.scss`'s own
+older comment already documents (import a module, but the CSS doesn't
+exist until you explicitly `@include` it) — same lesson, a second,
+much larger-blast-radius instance of it.
+
+Fixed with one line, `@include type.type-classes;`, placed after every
+`@use` (Sass requires all `@use` statements before any other rule — hit
+and fixed a `webpack`/`sass-loader` build error from an initial
+misplaced attempt). Confirmed via the same `getComputedStyle()`/
+`document.styleSheets` methods afterward: `heading-05` now genuinely
+computes to 32px/40px/400, `heading-03` to 20px/28px/400, `body-01` to
+14px/20px/400, etc. — real Carbon v11 values (verified independently
+against `@carbon/type`'s own JS token export, `require("@carbon/type").heading05`
+and siblings), not guesses.
+
+**Guide → real-token mapping applied** (the guide's own §37/§44 prefer
+Carbon's actual values over its listed px approximations where they
+differ):
+
+| Guide role | Guide spec | Real Carbon token used |
+|---|---|---|
+| Page title | 20/26/600 | `heading-03` + `semibold` (20/28/600 — `heading-03` is 400 by default) |
+| Section | 16–18/22–24/600 | `heading-02` (16/24/**600 natively**, no extra class needed) |
+| Body | 14/20/400 | `body-01` (exact match) |
+| Label / metadata | 12/16/400 | `label-01` (exact match) |
+| Breadcrumb | 12/16/400 | `caption-01` (exact match) |
+| KPI number | 32/40/600 | `heading-05` + `semibold` (`heading-05` is also 400 by default) |
+| Technical ID | 12–14/mono/400 | `caption-01`/`body-01` + `.cds--type-mono` (new `PageHeader` `eyebrowMono` prop) |
+
+Applied to every component this session actually built: `PageHeader.tsx`
+(title moved from an earlier, now-understood-to-be-miscalibrated
+`heading-04` guess down to the guide's real `heading-03`+`semibold`;
+breadcrumb `body-01`→`caption-01`; new `eyebrowMono` prop for project
+refs), `KpiTile.tsx` (flipped to the guide's own number-first/label-
+below order — `heading-05`+`semibold` then `body-01`, not the previous
+label-above/`heading-04` layout), the Decisions accordion row title
+(dropped an inline `fontWeight: 500` for plain `body-01` — the guide's
+own table example keeps row titles at regular weight, only status gets
+600), and every subsection `<h2>` this session added (Project Overview's
+"Activation gate"/"Phases", Dashboard's "Recent activity") moved from
+`heading-03` to `heading-02`. `Dashboard` also migrated onto `PageHeader`
+for the first time (previously hand-rolled, now consistent with every
+other page using it).
+
+**Scope, disclosed plainly:** the root-cause fix alone already
+retroactively corrects typography on *every* page in the app — a page
+like `/clients`, untouched this pass, now renders its own `heading-05`
+H1 at a real, consistent 32px/400 instead of a random browser default,
+confirmed via live screenshot with no layout breakage. What's *not*
+done yet: per-page semantic-role review (does `/clients`' H1 deserve
+`heading-03`+`semibold` "Page Title" treatment, or is `heading-05` the
+right call there specifically?) across the ~35 pages `PageHeader` hasn't
+reached. That's the natural next slice, not attempted here.
+
+`tsc --noEmit`, `eslint .`, and a full `next build --webpack` (`rm -rf
+.next` first) all clean. Live-verified: real token values confirmed via
+`getComputedStyle` before and after the fix on the same live element;
+a project ref (`PRJ-2026-0042`, the guide's own example code) confirmed
+rendering in genuine IBM Plex Mono at 12px/400 via `eyebrowMono`;
+Dashboard/Project Overview/Decisions pages screenshotted showing the
+corrected hierarchy (page title clearly distinct from section headings,
+KPI numbers reading number-first); `/clients` (untouched) screenshotted
+to confirm the global fix doesn't break an unmigrated page's layout.
+Test project/decisions/account cleaned up per this session's usual
+discipline.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

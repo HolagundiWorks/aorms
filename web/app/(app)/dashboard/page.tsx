@@ -1,6 +1,7 @@
 import { Grid, Column, Tile, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { KpiTile as Kpi } from "../../../components/aorms/KpiTile";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -77,13 +78,7 @@ export default async function DashboardPage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Dashboard</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Office-wide snapshot.
-        </p>
+        <PageHeader title="Dashboard" description="Office-wide snapshot." />
 
         <div
           style={{
@@ -100,7 +95,7 @@ export default async function DashboardPage() {
           <FinancialSummary />
         </div>
 
-        <h2 className="cds--type-heading-03" style={{ marginBottom: "1rem" }}>
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Recent activity
         </h2>
         <Tile>

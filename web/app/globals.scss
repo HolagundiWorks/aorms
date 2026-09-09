@@ -38,6 +38,27 @@
 @use "@carbon/react/scss/components/modal";
 @use "@carbon/react/scss/grid";
 
+// Emits every `.cds--type-*` utility class (heading-01..07, body-01/02,
+// label-01, caption-01, helper-text-01, code-01/02, plus the font-family/
+// font-weight/italic classes) — found missing 2026-09-09 while applying a
+// typography-hierarchy pass: `@use "@carbon/react/scss/type"` above only
+// forwards the token *values* and mixins, it does not itself emit any CSS.
+// Confirmed via `document.styleSheets`: zero rules existed anywhere for
+// any `cds--type-*` selector, on a live page, despite the classes being
+// used in essentially every component in this codebase since Phase 1 —
+// every `className="cds--type-*"` had silently been a no-op the whole
+// time, each element instead falling through to the browser's own raw
+// tag default (explains long-standing, hard-to-pin-down sizing oddities
+// like an unstyled `<h1>` rendering at heading-06's size via UA defaults
+// rather than the heading-05/heading-04 the class name actually named).
+// The same "imported the module but the CSS still doesn't exist until
+// you explicitly `@include` it" shape as the `--cds-layout-density-*`
+// gap the comment above already documents — same lesson, different
+// module. Must come after every `@use` above (Sass requires all `@use`
+// before any other rule) — this is deliberately the first non-`@use`
+// statement in the file.
+@include type.type-classes;
+
 :root {
   @include theme.theme(themes.$white);
 }
