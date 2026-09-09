@@ -2977,6 +2977,189 @@ has not been done in this pass — the checks above cover routing,
 headers, and the public surface, not a signed-in session end-to-end;
 worth a follow-up pass before treating the cutover as fully proven.
 
+**AORMS Platform admin back office — licences, Razorpay payments, activity
+log (2026-09-09, code written and locally verified; not yet applied to the
+live `aorms-platform` project — blocked on credentials, see below).** On
+explicit "need an admin page[s] for managing license[s], payments, keeping
+logs, all the admin stuff" direction, planned (see the approved plan —
+`C:\Users\holag\.claude\plans\staged-purring-blum.md` on the machine this
+was built on) and built a genuine platform-staff admin surface — nothing
+like it existed before this: every RLS policy on the Platform database was
+previously scoped to "is the caller a member/owner of this one studio"
+(`is_studio_owner()`), with zero notion of platform staff at all.
+Confirmed with the user before building: **AORMS Platform admin** (not
+per-firm — `/firm-settings`/`/users`/`/audit-log` already cover that),
+**real Razorpay payment processing** (not just viewing usage tiers), **a
+new platform-wide activity log**, admin access via **a new `is_admin`
+column on the platform `accounts` table, settable only via direct DB
+access** (no self-service grant UI in this pass).
+
+**The real consequence flagged before building, then acted on**: the
+existing `"licences: owner update"` RLS policy let any studio owner set
+their own `plan` to `PREMIUM` directly, no payment involved at all — an
+explicit trust model `0004_licences.sql`'s own header comment already
+disclosed ("No billing/payment integration exists in this stack — the
+owner self-serves ... directly"). Leaving that in place after adding
+Razorpay would make it decorative — an owner could just `PATCH` their own
+row for free. Closed via `0011_licence_payment_gate.sql` (see below).
+
+Four new platform migrations (`platform/supabase/migrations/`), written
+and reviewed, **not yet applied** — every earlier migration this session
+was applied via the Supabase Management API with a personal access token
+provided fresh each time; none was available this round, so these are
+staged, not live, as of this entry:
+- `0009_admin_role.sql` — `accounts.is_admin boolean default false` +
+  `is_platform_admin()` (`security definer`, same shape as the existing
+  `is_studio_owner()`), documented plainly as settable only via direct DB
+  access.
+- `0010_payments.sql` — `plan_pricing` (admin-editable per-seat price,
+  read by any authenticated account so checkout can show a price, write
+  admin-only; seeded with clearly-flagged PLACEHOLDER values — real
+  pricing must be set on the new `/admin/pricing` page before this goes
+  live with real money, a business decision this migration deliberately
+  didn't make unilaterally) and `payments` (one row per Razorpay order —
+  `studio_id`, `account_id`, `plan`, `seats`, `amount_paise` matching this
+  codebase's existing money convention, `razorpay_order_id`/
+  `razorpay_payment_id`, `status`. RLS: studio members read their own
+  studio's rows, admins read every row, **zero authenticated insert/update
+  policy at all** — every write goes through the platform service-role
+  client from a Server Action or the webhook, matching the same
+  "no-policy-means-service-role-only" pattern `accounts.total_active_
+  seconds`/`level` already established in `0001_core.sql`).
+- `0011_licence_payment_gate.sql` — drops `"licences: owner update"`,
+  adds `"licences: admin update"` (`is_platform_admin()`). Deliberately no
+  narrower "owner can still reduce seats" carve-out in this pass — v1
+  closes self-service licence editing completely rather than trying to
+  safely subset it; a studio owner wanting to downgrade contacts support
+  for now, relaxable later since a downgrade doesn't move money.
+- `0012_activity_log.sql` — `platform_activity_log`
+  (`account_id`/`studio_id` nullable, `event_type`, `detail jsonb`),
+  admin-read-only, populated **exclusively by `security definer` trigger
+  functions** on `accounts`/`studios`/`studio_memberships`/`licences`/
+  `payments` inserts and status-changing updates — a deliberate choice
+  over an app-level `logActivity()` helper sprinkled through Server
+  Actions (a trigger fires regardless of which code path performed the
+  write, including one nobody remembers to instrument later; an app-level
+  call can be forgotten). One shared `log_platform_activity()` helper
+  function does the actual insert so each of the five trigger functions
+  stays focused on deciding *what* happened.
+
+Payment integration (`web/lib/platform/razorpay.ts`) is **hand-rolled**
+(`fetch` + `node:crypto`), not the official `razorpay` npm SDK — matches
+this codebase's established preference for a small, well-documented HTTP
+surface over a new dependency (`web/lib/ai/ollama.ts`'s own "plain HTTP
+API directly, no [SDK] dependency" precedent), for what's really just
+three operations: create an order, verify a client-side payment signature
+(HMAC-SHA256 of `order_id|payment_id`), verify a webhook signature
+(HMAC-SHA256 of the raw request body, a *different* secret from the one
+above). **The webhook (`app/api/razorpay/webhook/route.ts`) is the durable
+source of truth; the client-side post-payment callback
+(`confirmPaymentClientSide`) is a fast-path UX optimization only** —
+idempotent against each other (whichever applies the update first wins,
+the second is a no-op via a `payments.status !== 'CAPTURED'` check), never
+trusting the browser alone to confirm a payment happened. Payment model is
+**one-time purchase extending `expires_at` by 30 days** (`greatest(now,
+current expires_at) + 30 days`, so a renewal before expiry extends rather
+than resets the clock), not a recurring subscription — matches the
+existing schema exactly (`licences` has no `status` column; active/expired
+is computed from `expires_at` alone, per `0004`'s own design) — Razorpay
+Subscriptions (mandates, auto-debit, dunning) is a materially bigger scope
+and explicitly not attempted here.
+
+**Extracted a shared helper found duplicated three times already** before
+this round added several more call sites needing it:
+`getCurrentPlatformAccount()` (`web/lib/platform/account.ts`) resolves the
+Platform account linked to the current Office Hub session (the
+`profiles.platform_public_id` → platform `accounts` two-step every
+Platform-touching page/action needs) — previously copy-pasted in
+`licences/page.tsx` and `lib/actions/platform.ts`'s `recordHeartbeat`,
+now used by both of those (unchanged behavior) plus every new admin page's
+gate and the payment Server Actions.
+
+**Server Actions** — new `web/lib/actions/platform-payments.ts` (split out
+from `platform.ts`, already 500+ lines, rather than grown in place):
+`createLicenceOrder` (studio-owner-facing — verifies ACTIVE OWNER
+membership via the RLS-scoped client since `payments` grants no
+owner-insert policy to lean on instead, reads `plan_pricing`, creates the
+Razorpay order, inserts the `payments` row via service-role),
+`confirmPaymentClientSide` (the fast-path described above),
+`adminUpdateLicence`/`adminSetPricing` (each gated by an explicit
+`is_admin` check — `requirePlatformAdmin()` — *in addition to* the RLS
+admin policy, defense in depth, matching how every other owner-gated
+mutation in this codebase already leans on its RLS policy as the real
+enforcement while the app-level check exists only to return a clean error
+message instead of a raw Postgres RLS-denial). The old self-serve
+`updateLicence` was removed from `platform.ts` outright (not deprecated in
+place) since `0011`'s RLS change means it can no longer succeed for a
+non-admin caller anyway.
+
+One function, `applyCapturedPayment` (marks a payment `CAPTURED`, extends
+the matching licence), is shared between `confirmPaymentClientSide` and
+the webhook handler — deliberately placed in a **plain module with no
+`"use server"` directive** (`web/lib/platform/licence-payment.ts`), not
+inside `platform-payments.ts` itself despite being used there too: its
+first parameter is a Supabase client instance, not serializable, and
+keeping it out of the `"use server"` file avoids any ambiguity about
+whether Next's Server Actions bundling would try to treat it as
+client-callable just because it shares a file with functions that are.
+
+**UI**: `UpgradeLicenceButton` (new, client component, loads Razorpay's
+Checkout.js via `next/script`) replaces the old direct-edit
+`UpdateLicenceForm` on the owner-facing `/licences` page for the purchase
+flow; `UpdateLicenceForm` itself wasn't deleted — repurposed as the admin
+override control on the new `/admin/licences`, now calling
+`adminUpdateLicence` instead of the removed `updateLicence`. Five new
+pages under `app/(platform)/admin/`: `/admin` (dashboard — studio/account
+counts, licence-plan breakdown, recent payments/activity, cheap `head:
+true` counts not full-row fetches), `/admin/licences` (every studio,
+override form), `/admin/payments` (every payment, read-only, links out to
+Razorpay's own dashboard by order/payment id rather than building
+refund-processing UI — `REFUNDED` status exists in the schema for when a
+refund is issued externally and reflected back, no in-app "issue a
+refund" button in this pass), `/admin/pricing` (edit `plan_pricing`, with
+an explicit "these are placeholders, confirm before relying on this for
+real revenue" warning banner), `/admin/logs` (the activity log, paginated
+to the last 200 rows, no filter UI yet — left for a follow-up once real
+usage shows what filters matter). Every admin page gates with the same
+`AdminAccessDenied` shared component — an `InlineNotification`
+("Admin access required"), matching the existing role-gate convention
+`app/(app)/audit-log/page.tsx` already established (an inline denial
+message, not a `notFound()`/404 — verified this was the real existing
+pattern before building a new one, rather than assuming `notFound()` was
+right as the original plan draft had guessed).
+
+**Small bundled fix, root-caused live in the previous conversation**: the
+`(platform)/layout.tsx` header rendered "Sign out" unconditionally
+regardless of whether a session actually existed — confirmed live on
+production aorms.in with zero cookies present. Fixed alongside adding the
+"Admin" nav link (both needed the layout to resolve its own session
+server-side anyway): "Sign out" now only renders when a real platform
+session exists, "Sign in" otherwise; "Admin" only renders for an
+`is_admin` account.
+
+New canonical doc written to keep the Admin/Portal boundary from drifting
+back into ambiguity as more pages get added:
+[AORMS-PLATFORM-ARCHITECTURE.md](./AORMS-PLATFORM-ARCHITECTURE.md) — the
+Office Hub vs. Platform distinction, precise nomenclature (Studio/Company/
+Account/Portal/Admin/Directory), a full current route map with each
+route's kind and scope, and the explicit rule this round's work
+established: a Portal only ever shows/edits the one entity the caller
+belongs to; only Admin sees or touches data across every entity.
+
+Verified so far: `tsc --noEmit` and `eslint .` (whole package) both clean,
+a full `next build --webpack` clean across all 90+ routes including every
+new one (`/admin`, `/admin/licences`, `/admin/payments`, `/admin/pricing`,
+`/admin/logs`, `/api/razorpay/webhook`). **Not yet verified — blocked,
+credentials needed from the user**: the four migrations haven't been
+applied to the live `aorms-platform` project (no Supabase Management API
+token was available this round), so none of the RLS-policy exploit checks
+from the plan's own Verification section, the live Razorpay test-mode
+payment flow, or the `is_admin` gating checks against real data have run
+yet. This entry documents what was *built*, not a claim that it's live or
+fully proven — the next session picking this up should apply the
+migrations first and run the full verification list in the plan file
+before considering this done.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

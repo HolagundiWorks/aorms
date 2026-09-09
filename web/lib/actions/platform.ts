@@ -456,33 +456,13 @@ export async function removeStudioContact(contactId: string, studioId: string): 
  * plan/seats/expiry directly, same trust model as every other owner-only
  * mutation in this system so far.
  */
-export async function updateLicence(
-  _prev: PlatformActionState,
-  formData: FormData,
-): Promise<PlatformActionState> {
-  const studioId = String(formData.get("studioId") ?? "");
-  const plan = String(formData.get("plan") ?? "");
-  const seatsRaw = String(formData.get("seats") ?? "");
-  const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
-  if (!studioId) return { error: "Missing studio." };
-  if (!["TRIAL", "STANDARD", "PREMIUM"].includes(plan)) return { error: "Invalid plan." };
-  const seats = Number(seatsRaw);
-  if (!Number.isInteger(seats) || seats < 1) return { error: "Seats must be a positive whole number." };
-
-  const supabase = await createPlatformClient();
-  const { error } = await supabase
-    .from("licences")
-    .update({
-      plan,
-      seats,
-      expires_at: expiresAtRaw ? new Date(expiresAtRaw).toISOString() : null,
-    })
-    .eq("studio_id", studioId);
-  if (error) return { error: error.message };
-
-  revalidatePath("/licences");
-  return null;
-}
+// Self-serve licence editing (owner could set plan/seats/expires_at
+// directly, no payment involved) was removed here 2026-09-09 when real
+// Razorpay payments landed — platform/supabase/migrations/
+// 0011_licence_payment_gate.sql dropped the RLS policy this action relied
+// on. Replaced by lib/actions/platform-payments.ts's createLicenceOrder
+// (owner-facing, via Razorpay Checkout) and adminUpdateLicence
+// (platform-admin override) — see that file's header comment.
 
 // ── Usage heartbeat ──────────────────────────────────────────────────────
 

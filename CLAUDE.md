@@ -98,6 +98,17 @@ existed before this cutover — `web/`'s own routes/modules are documented
 in its own files and in [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md),
 not duplicated here.
 
+**`web/` is two separate systems, not one** — the AORMS Office Hub
+(`app/(app)/*`, the product) and the AORMS Platform (`app/(platform)/*`,
+a separate Supabase project — portable identity, Studios/Companies,
+licensing, and, as of 2026-09-09, a platform-staff admin back office).
+Before adding anything under `app/(platform)/*`, or if "what's Admin vs.
+Portal vs. Directory" or the Studio/Company/Account nomenclature is ever
+unclear, read
+[AORMS-PLATFORM-ARCHITECTURE.md](docs/esti/AORMS-PLATFORM-ARCHITECTURE.md)
+first — it's the canonical reference for that boundary, written
+specifically so it doesn't have to be re-decided ad hoc per page.
+
 Migration sequencing and full phase-by-phase status lives in
 [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) § Stack migration; see also
 § Branch & environment split below for where this work happens.

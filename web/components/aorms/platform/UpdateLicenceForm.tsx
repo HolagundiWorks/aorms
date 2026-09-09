@@ -2,22 +2,30 @@
 
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
-import { updateLicence, type PlatformActionState } from "../../../lib/actions/platform";
+import { adminUpdateLicence, type PaymentActionState } from "../../../lib/actions/platform-payments";
 import { FormGrid } from "../FormGrid";
 
 type Licence = { plan: string; seats: number; expires_at: string | null };
 
 /**
+ * Platform-admin override only (see app/(platform)/admin/licences/page.tsx)
+ * — studio owners lost self-serve licence editing 2026-09-09 when real
+ * Razorpay payments landed (platform/supabase/migrations/
+ * 0011_licence_payment_gate.sql). adminUpdateLicence itself is gated by
+ * both an app-level is_admin check and the "licences: admin update" RLS
+ * policy — a non-admin caller can't reach this successfully regardless of
+ * how this component is used.
+ *
  * The caller MUST pass a `key` derived from `licence`'s own fields (see
- * app/(platform)/licences/page.tsx) — every field here is an uncontrolled
- * input (`defaultValue`), which React only applies on mount. Found live:
+ * the admin licences page) — every field here is an uncontrolled input
+ * (`defaultValue`), which React only applies on mount. Found live:
  * without a changing key, saving once (e.g. plan -> PREMIUM) then saving
  * again with only `seats` touched silently reverted plan back to its
  * value from the page's first load, because the already-mounted <select>
  * never picked up the new defaultValue on re-render.
  */
 export function UpdateLicenceForm({ studioId, licence }: { studioId: string; licence: Licence }) {
-  const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(updateLicence, null);
+  const [state, formAction, pending] = useActionState<PaymentActionState, FormData>(adminUpdateLicence, null);
 
   return (
     <Form action={formAction}>

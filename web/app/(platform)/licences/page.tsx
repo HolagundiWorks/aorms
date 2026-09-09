@@ -2,7 +2,7 @@ import NextLink from "next/link";
 import { Column, Grid, Stack, Tag, Tile } from "@carbon/react";
 import { createClient as createWebClient } from "../../../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
-import { UpdateLicenceForm } from "../../../components/aorms/platform/UpdateLicenceForm";
+import { UpgradeLicenceButton } from "../../../components/aorms/platform/UpgradeLicenceButton";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 type StudioEmbed = { id: string; name: string; public_id: string } | null;
@@ -17,9 +17,15 @@ function isLicenceActive(expiresAt: string | null): boolean {
  * licence for every Studio the linked account belongs to. Studio-scoped
  * only in this pass — Companies/suppliers don't get licence management
  * here, an explicit, disclosed scope boundary (see the Studio/Company
- * split + Material Catalogue plan). Plan/seats/expiry are owner-editable
- * self-serve — no billing/payment integration exists in this stack (see
- * platform/supabase/migrations/0004_licences.sql).
+ * split + Material Catalogue plan).
+ *
+ * Plan/seats/expiry are no longer owner-editable self-serve as of
+ * 2026-09-09 — real Razorpay payments landed
+ * (platform/supabase/migrations/0010_payments.sql,
+ * 0011_licence_payment_gate.sql) and closed that direct-edit RLS policy.
+ * The owner now sees an "Upgrade" button (UpgradeLicenceButton, opens
+ * Razorpay Checkout) instead of a free-edit form; a platform admin can
+ * still override any studio's licence directly from /admin/licences.
  */
 export default async function LicencesPage() {
   const webSupabase = await createWebClient();
@@ -106,13 +112,7 @@ export default async function LicencesPage() {
                         {licence.seats} seat{licence.seats === 1 ? "" : "s"}
                         {licence.expires_at ? ` · expires ${new Date(licence.expires_at).toLocaleDateString()}` : " · no expiry"}
                       </p>
-                      {isOwner && (
-                        <UpdateLicenceForm
-                          key={`${licence.plan}-${licence.seats}-${licence.expires_at}`}
-                          studioId={studio.id}
-                          licence={licence}
-                        />
-                      )}
+                      {isOwner && <UpgradeLicenceButton studioId={studio.id} studioName={studio.name} />}
                     </>
                   ) : (
                     <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
