@@ -1,7 +1,21 @@
-import type { NextConfig } from "next";
-
 /**
  * AORMS Next.js config. See docs/esti/NEXTJS-SUPABASE-MIGRATION.md.
+ *
+ * Plain .mjs, not .ts (2026-09-09 — was next.config.ts until this date; see
+ * docs/esti/WEB-DEPLOY-HOSTINGER.md's Build & start section for the full
+ * incident). Next.js has to transform a TypeScript config file through SWC
+ * before it can load it, and Hostinger's build host's glibc is too old for
+ * @next/swc's native binary (`GLIBC_2.29' not found`) — its musl fallback
+ * isn't installed either, since the host genuinely uses glibc, just an old
+ * version, not musl. Next falls back to a WASM SWC for regular app
+ * compilation, but that fallback doesn't cover config-file loading, which
+ * failed outright (`Cannot find module '.../<hash>.next.config'` — the
+ * transformed temp file was never produced). A plain .mjs file needs no
+ * transformation at all — Node imports it directly — which sidesteps this
+ * whole class of failure regardless of the host's glibc version. Keep this
+ * file syntax-plain (no TypeScript) for exactly that reason; add `// @ts-
+ * check` + a `@type {import('next').NextConfig}` JSDoc annotation instead
+ * of real TS if editor type-checking on this file is ever wanted back.
  *
  * package.json's dev/build scripts force `--webpack`: Turbopack's sass
  * resolution can't follow @carbon/styles' internal relative `@use` imports
@@ -10,7 +24,7 @@ import type { NextConfig } from "next";
  * Next 16.3. webpack's sass-loader resolves the same imports without issue.
  * Retry Turbopack (drop --webpack) next time Next.js/Turbopack is bumped.
  */
-const nextConfig: NextConfig = {
+const nextConfig = {
   reactStrictMode: true,
   sassOptions: {
     includePaths: ["./styles"],

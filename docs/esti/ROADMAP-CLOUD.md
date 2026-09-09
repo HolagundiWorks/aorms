@@ -2878,6 +2878,66 @@ no further dashboard action needed for this half; the explicit Install/
 Build/Start command override from the first bug still needs to be
 applied in Hostinger's panel if it hasn't been already.
 
+**Same day, third Hostinger failure — `next.config.ts` renamed to
+`next.config.mjs`, an actual glibc/native-binary incompatibility on
+Hostinger's build host (2026-09-09).** With both bugs above fixed, the
+install step finally ran clean — `added 110 packages`, a real dependency
+count this time, confirming Bug 2's fix — and the build step got
+meaningfully further before failing on something new:
+
+```text
+▲ Next.js 16.3.4 (webpack)
+  Using cached swc package @next/swc-wasm-nodejs...
+⚠ Attempted to load @next/swc-linux-x64-gnu, but an error occurred: /lib64/libm.so.6: version `GLIBC_2.29' not found
+⚠ Attempted to load @next/swc-linux-x64-musl, but it was not installed
+⨯ Failed to load next.config.ts
+Error: Cannot find module '.../web/<hash>.next.config' imported from '.../web/next.config.compiled.js'
+```
+
+Root cause: `@next/swc`'s prebuilt native binary requires a newer glibc
+(`GLIBC_2.29`) than Hostinger's build host ships — an OS-level constraint
+of their shared hosting image, not anything fixable from this repo. The
+musl variant (`@next/swc-linux-x64-musl`) isn't installed because npm's
+optional-dependency platform filtering correctly determined the host uses
+glibc, not musl, just an old version of it — installing the musl build
+wouldn't have helped even if present. Next.js falls back to a WASM SWC
+build for ordinary app-file compilation (the `Using cached swc package
+@next/swc-wasm-nodejs` line shows that fallback engaging successfully),
+but that fallback doesn't cover **loading the config file itself** when
+it's TypeScript — `next.config.ts` needs its own SWC-based transform
+before Next can `import()` it, and that transform's temp output file was
+never produced, silently, on this host.
+
+Fixed by eliminating the need for any config-file transformation at all:
+renamed `web/next.config.ts` → `web/next.config.mjs`, converting it to
+plain ESM JavaScript (dropped the `import type { NextConfig }` and the
+`: NextConfig` annotation — everything else was already valid JS syntax).
+A `.mjs` file is `import()`-able by Node directly, with zero dependency on
+native or WASM SWC, sidestepping this whole class of failure regardless
+of the build host's glibc version. Verified: `tsc --noEmit` and `eslint .`
+(whole package) both clean, a full `next build --webpack` clean across
+all 90+ routes with `✓ Running next.config.mjs took 16ms` in the log
+(confirming it's the file actually being loaded, not a stale reference),
+and live-verified via the dev server after a restart (config changes need
+one — Next reads config once at startup) that `headers()` still applies
+correctly: `fetch('/dashboard')` shows `x-frame-options: DENY` and
+`strict-transport-security: max-age=31536000; includeSubDomains` exactly
+as before the rename. Updated every doc reference to the old filename in
+[WEB-DEPLOY-HOSTINGER.md](./WEB-DEPLOY-HOSTINGER.md) and this file's own
+earlier Turbopack/Sass gotcha entry (§ above) to point at `.mjs`, except
+where an entry narrates history from a point in time when the file was
+genuinely still `.ts` — left those as they were, accurate to when they
+were written, rather than retroactively rewritten.
+
+Three Hostinger deploy-blocking bugs found and fixed in one day, each
+only surfacing after the previous one was resolved — auto-detect choosing
+pnpm/corepack (install step), a broken symlink-only npm lockfile (install
+step "succeeding" while installing nothing real), and a TypeScript-config
+transform failure tied to the build host's glibc (build step). The
+Hostinger-specific incident history for all three now lives together in
+WEB-DEPLOY-HOSTINGER.md's Build & start section, in order, for whoever
+hits the next one.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
@@ -2936,7 +2996,8 @@ applied in Hostinger's panel if it hasn't been already.
   Verified: `tsc --noEmit` clean, live `esti-backend` container (bind-mounted,
   hot-reloaded) kept serving real requests with 200s throughout.
 
-**Known gotcha (documented in `web/next.config.ts`):** Next 16's default
+**Known gotcha (documented in `web/next.config.mjs`, renamed from `.ts`
+2026-09-09 — see the Hostinger SWC/glibc entry below):** Next 16's default
 Turbopack can't resolve `@carbon/styles`' internal Sass `@use` imports
 through pnpm's symlinked `node_modules` — `web/package.json`'s dev/build
 scripts force `--webpack` until that's fixed upstream.

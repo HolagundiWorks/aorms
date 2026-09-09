@@ -103,7 +103,7 @@ explicitly:
 | Start command | `npm run start` |
 
 These map straight to `web/package.json`'s own scripts (`next build
---webpack` / `next start` — see `next.config.ts`'s comment for why
+--webpack` / `next start` — see `next.config.mjs`'s comment for why
 `--webpack`, not Turbopack).
 
 **Known incident, two layered bugs (2026-09-08 → 2026-09-09), both now
@@ -191,6 +191,57 @@ and verify the result actually contains resolved packages (check for
 next` exists after a fresh `npm ci`) before committing it — don't trust
 the install step's exit code alone.
 
+**Bug 3 — `next.config.ts` couldn't load on Hostinger's build host (build
+step), only reachable once Bug 2 was also fixed.** With a genuine install
+succeeding (`added 110 packages`), the build step got further before
+failing on something new:
+
+```text
+▲ Next.js 16.3.4 (webpack)
+  Using cached swc package @next/swc-wasm-nodejs...
+⚠ Attempted to load @next/swc-linux-x64-gnu, but an error occurred: /lib64/libm.so.6: version `GLIBC_2.29' not found
+⚠ Attempted to load @next/swc-linux-x64-musl, but it was not installed
+⨯ Failed to load next.config.ts
+Error: Cannot find module '.../web/<hash>.next.config' imported from '.../web/next.config.compiled.js'
+```
+
+Root cause: `@next/swc`'s prebuilt native binary needs a newer glibc
+(`GLIBC_2.29`) than Hostinger's build host has — an OS-level constraint of
+their shared hosting image, not fixable from this repo. The musl variant
+isn't installed because npm correctly detected the host uses glibc (just
+an old version), not musl — it wouldn't have helped anyway. Next falls
+back to a WASM SWC build for ordinary app-file compilation (that's what
+the `Using cached swc package @next/swc-wasm-nodejs` line confirms
+succeeding), but that fallback doesn't cover **loading the config file
+itself** when it's TypeScript — `next.config.ts` needs its own SWC
+transform before Next can `import()` it, and on this host that transform
+silently failed to produce its output file.
+
+Fixed 2026-09-09 by removing the need for any config-file transformation:
+renamed `web/next.config.ts` → **`web/next.config.mjs`** (plain ESM
+JavaScript — dropped the `import type { NextConfig }` and `: NextConfig`
+annotation; everything else was already valid JS). A `.mjs` file is
+`import()`-able by Node directly, no native or WASM SWC involved at all,
+so this class of failure can't recur regardless of the build host's
+glibc version. Verified: `tsc --noEmit` and `eslint .` clean, a full
+`next build --webpack` clean across all 90+ routes with `✓ Running
+next.config.mjs took 16ms` in the log, and — since config changes need a
+dev-server restart to take effect — live-verified after restarting that
+`headers()` still applies: `fetch('/dashboard')` shows `x-frame-options:
+DENY` and the HSTS header exactly as before the rename. Every doc
+reference to `next.config.ts` in this file was updated to `.mjs`
+accordingly.
+
+**Summary — three Hostinger deploy-blocking bugs, one per layer, each
+only surfacing once the previous one was fixed:** auto-detect choosing
+pnpm/corepack over npm (install step), a broken symlink-only lockfile
+that let `npm ci` "succeed" while installing nothing real (also install
+step, but a different failure mode), and a glibc-incompatible native SWC
+binary breaking TypeScript config-file loading specifically (build step).
+If a fourth ever surfaces, add it here in the same format — this section
+is meant to be the standing incident log for this deploy target, not a
+one-time note.
+
 `web/package.json` declares `"engines": {"node": ">=20.9.0"}` (Next.js's
 own minimum) — confirm Hostinger's Node runtime selection matches or
 exceeds this. Observed on a real Hostinger build agent: Node.js v22.18.0,
@@ -207,7 +258,7 @@ distinction matters.
 
 ## Security headers
 
-`next.config.ts`'s `headers()` sets baseline headers (X-Frame-Options,
+`next.config.mjs`'s `headers()` sets baseline headers (X-Frame-Options,
 X-Content-Type-Options, Referrer-Policy, Strict-Transport-Security,
 Permissions-Policy) on every response as of 2026-09-09. **No
 Content-Security-Policy yet** — deliberately deferred rather than shipped
@@ -229,7 +280,7 @@ any DNS cutover to aorms.in.
 - **No readiness/dependency health check** — only liveness. Add one if
   Hostinger's monitoring ever needs to distinguish "process is up" from
   "Supabase is reachable."
-- **`output: "standalone"` not set** in `next.config.ts`. That option
+- **`output: "standalone"` not set** in `next.config.mjs`. That option
   trims the build output for a self-contained Docker image — Hostinger's
   documented flow here is a plain `GitHub → Hostinger → Next.js` deploy,
   not a container `web/` builds itself, so it wasn't added speculatively.
