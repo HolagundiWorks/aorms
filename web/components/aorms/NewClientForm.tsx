@@ -1,21 +1,28 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { Add } from "@carbon/icons-react";
 import { createClientRecord, type ClientActionState } from "../../lib/actions/clients";
 import { FormGrid } from "./FormGrid";
 
-export function NewClientForm() {
+export function NewClientForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [state, formAction, pending] = useActionState<ClientActionState, FormData>(
     createClientRecord,
     null,
   );
 
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
+
   return (
-    <Form action={formAction} style={{ marginBottom: "2rem" }}>
+    <Form action={formAction}>
       <Stack gap={5}>
-        <h2 className="cds--type-heading-03">New client</h2>
         <FormGrid>
           <TextInput id="name" name="name" labelText="Name" required />
           <Select id="kind" name="kind" labelText="Type" defaultValue="INDIVIDUAL">

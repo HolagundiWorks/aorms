@@ -1,14 +1,24 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { createPhaseRecord, type PhaseActionState } from "../../lib/actions/phases";
 import { FormGrid } from "./FormGrid";
 
 const initialState: PhaseActionState = null;
 
-export function NewPhaseForm({ projectId }: { projectId: string }) {
+export function NewPhaseForm({ projectId, onSuccess }: { projectId: string; onSuccess?: () => void }) {
   const [state, formAction, pending] = useActionState(createPhaseRecord, initialState);
+
+  // Same pending -> not-pending-with-no-error transition detection as
+  // NewDecisionForm — fires only on a real successful submit, not on mount.
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

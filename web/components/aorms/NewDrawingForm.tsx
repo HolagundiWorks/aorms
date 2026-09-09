@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, FileUploader, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { uploadDrawing, type DrawingActionState } from "../../lib/actions/drawings";
 import { FormGrid } from "./FormGrid";
@@ -9,8 +9,16 @@ type ProjectOption = { id: string; title: string };
 
 const initialState: DrawingActionState = null;
 
-export function NewDrawingForm({ projects }: { projects: ProjectOption[] }) {
+export function NewDrawingForm({ projects, onSuccess }: { projects: ProjectOption[]; onSuccess?: () => void }) {
   const [state, formAction, pending] = useActionState(uploadDrawing, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

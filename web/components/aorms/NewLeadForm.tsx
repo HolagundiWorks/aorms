@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { createLead } from "../../lib/actions/leads";
 import { FormGrid } from "./FormGrid";
@@ -18,8 +18,16 @@ const LEAD_SOURCES: Record<string, string> = {
   SOCIAL_MEDIA: "Social media",
 };
 
-export function NewLeadForm() {
+export function NewLeadForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [state, formAction, pending] = useActionState(createLead, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

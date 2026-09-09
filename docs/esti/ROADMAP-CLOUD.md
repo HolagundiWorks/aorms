@@ -2069,6 +2069,67 @@ to confirm the global fix doesn't break an unmigrated page's layout.
 Test project/decisions/account cleaned up per this session's usual
 discipline.
 
+**AORMS Custom Carbon Page & Form Composition Standard — rollout begun
+(2026-09-09), same day, on explicit "autopilot" direction to complete
+the migration.** A second design document, this one specifying two
+AORMS-specific composition patterns on top of Carbon: a mandatory KPI
+strip below every major page's H1, and — the one this pass actually
+corrects — create/edit forms opening in a **left-docked, non-modal
+split pane** beside the page's own content (which stays fully visible
+and interactive throughout), not a centered or right-docked overlay.
+
+**A real correction, not just a new feature:** the pilot's own
+`SidePanel.tsx` (this same day, earlier) docked a Carbon `ComposedModal`
+to the *right* edge — a genuine modal: backdrop, focus trap, main
+content blocked. The new standard explicitly requires the opposite
+(§28: "the underlying page should remain visible... whenever
+practical") and the opposite side (§15). `SidePanel.tsx` is deleted;
+`ContextPanel.tsx` replaces it with a real split layout — plain `<div>`s
+in a flex row, no modal semantics at all, `ContextPanelLayout` owning
+open/close state via React context so a Server Component page can place
+the trigger button, the panel, and the main content wherever they
+naturally belong in its own JSX without prop-drilling state it can't
+hold itself.
+
+**A real bug hit and fixed en route:** the first live test threw
+"Functions cannot be passed directly to Client Components" —
+`<ContextPanelTrigger renderIcon={Add}>` in a Server Component page
+passes a bare component reference across the RSC boundary as a prop
+value, which isn't serializable (distinct from passing pre-rendered
+JSX, which is fine). Fixed by dropping the icon (matches the standard's
+own plain-text button examples) and excluding `renderIcon` from
+`ContextPanelTrigger`'s own prop type entirely, with a comment
+explaining why, so the mistake can't quietly resurface at a new call
+site.
+
+**Rolled out to 17 pages this pass** (all `tsc`/`eslint` clean, full
+`next build --webpack` clean): the Decisions page (rebuilt from the
+pilot's wrong-side version) and project Overview (phases), plus Clients,
+Leads, Tasks, Invoices, Proposals, Letters, Contracts, Drawings,
+Document Issues, MoMs, Transmittals, Snags, Site Instructions, Progress
+Reports, and Master Plans — each following the identical mechanical
+transform: the page's inline `<NewXForm/>` moves into a
+`<ContextPanel>`, a small `AddXForm` client wrapper wires the form's
+`onSuccess` to the panel's own close handler via `useClosePanel()`, and
+`PageHeader` replaces the old hand-rolled `h1.cds--type-heading-05`.
+Live-verified twice end-to-end (Decisions: open → fill → submit →
+panel auto-closes → new row + KPI count appear with no reload, main
+content never dimmed; Clients: same, independently, on a page with no
+extra props) — both real submits, not a mock.
+
+**~43 pages remain** on the identical, now-proven pattern — Snags/Site
+Instructions/Progress Reports/Master Plans done, Standards/Spec
+Catalog/Spec Sheets/Lessons/Knowledge Bank/Job Applications/Payslips/
+Team Members/Teams/Tenders/Purchase Orders/Rate Books/Office Templates/
+Consultants/Contractors/Approvals/BBS/Users and the remaining
+`/projects/[id]/*` sub-pages (negotiation/precon/program/brief/cpi/dna/
+assessment/feasibility/onboarding) not yet touched. The KPI-strip half
+of the standard (mandatory 3–6 metrics below every major page's H1) is
+also still only on Dashboard/Project Overview/Decisions — each other
+page needs its own bespoke count queries, a separate pass. Continuing
+the same mechanical rollout is the direct next step, not a new design
+question.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

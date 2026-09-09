@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import {
   Button,
   Checkbox,
@@ -24,11 +24,21 @@ const initialState: InvoiceActionState = null;
 export function NewInvoiceForm({
   projects,
   clients,
+  onSuccess,
 }: {
   projects: ProjectOption[];
   clients: ClientOption[];
+  onSuccess?: () => void;
 }) {
   const [state, formAction, pending] = useActionState(createInvoiceRecord, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

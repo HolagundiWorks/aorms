@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import {
   Button,
   Form,
@@ -18,8 +18,16 @@ type ProjectOption = { id: string; title: string };
 
 const initialState: TransmittalActionState = null;
 
-export function NewTransmittalForm({ projects }: { projects: ProjectOption[] }) {
+export function NewTransmittalForm({ projects, onSuccess }: { projects: ProjectOption[]; onSuccess?: () => void }) {
   const [state, formAction, pending] = useActionState(createTransmittalRecord, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

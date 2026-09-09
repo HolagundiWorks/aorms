@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { logDocumentIssue, type DocumentIssueActionState } from "../../lib/actions/document-issues";
 import { FormGrid } from "./FormGrid";
@@ -29,8 +29,16 @@ const ENTITY_TYPES = [
   "FEE_PROPOSAL",
 ];
 
-export function NewDocumentIssueForm({ projects }: { projects: ProjectOption[] }) {
+export function NewDocumentIssueForm({ projects, onSuccess }: { projects: ProjectOption[]; onSuccess?: () => void }) {
   const [state, formAction, pending] = useActionState(logDocumentIssue, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

@@ -10,7 +10,9 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewTaskForm } from "../../../components/aorms/NewTaskForm";
+import { AddTaskForm } from "../../../components/aorms/AddTaskForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "red" | "green"> = {
   TODO: "gray",
@@ -45,74 +47,77 @@ export default async function TasksPage() {
   ]);
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Tasks</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Office-wide task list across all projects.
-        </p>
+    <ContextPanelLayout>
+      <ContextPanel title="New task" description="Add a task to the office-wide list.">
+        <AddTaskForm projects={projects ?? []} assignees={assignees ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Tasks"
+              description="Office-wide task list across all projects."
+              actions={<ContextPanelTrigger size="sm">Add task</ContextPanelTrigger>}
+            />
 
-        <NewTaskForm projects={projects ?? []} assignees={assignees ?? []} />
-
-        {error ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Couldn&apos;t load tasks: {error.message}
-          </p>
-        ) : (
-          <Table aria-label="Tasks" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Title</TableHeader>
-                <TableHeader>Project</TableHeader>
-                <TableHeader>Assignee</TableHeader>
-                <TableHeader>Status</TableHeader>
-                <TableHeader>Priority</TableHeader>
-                <TableHeader>Due</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(tasks ?? []).map((t) => {
-                const project = Array.isArray(t.project_offices)
-                  ? t.project_offices[0]
-                  : (t.project_offices as { title: string } | null);
-                const assignee = Array.isArray(t.profiles)
-                  ? t.profiles[0]
-                  : (t.profiles as { full_name: string | null } | null);
-                return (
-                  <TableRow key={t.id}>
-                    <TableCell>{t.title}</TableCell>
-                    <TableCell>{project?.title ?? "—"}</TableCell>
-                    <TableCell>{assignee?.full_name ?? "—"}</TableCell>
-                    <TableCell>
-                      <Tag type={STATUS_TAG[t.status] ?? "gray"} size="sm">
-                        {t.status}
-                      </Tag>
-                    </TableCell>
-                    <TableCell>
-                      <Tag type={PRIORITY_TAG[t.priority] ?? "gray"} size="sm">
-                        {t.priority}
-                      </Tag>
-                    </TableCell>
-                    <TableCell>{t.due_date ?? "—"}</TableCell>
+            {error ? (
+              <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                Couldn&apos;t load tasks: {error.message}
+              </p>
+            ) : (
+              <Table aria-label="Tasks" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Title</TableHeader>
+                    <TableHeader>Project</TableHeader>
+                    <TableHeader>Assignee</TableHeader>
+                    <TableHeader>Status</TableHeader>
+                    <TableHeader>Priority</TableHeader>
+                    <TableHeader>Due</TableHeader>
                   </TableRow>
-                );
-              })}
-              {(tasks ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No tasks yet.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Column>
-    </Grid>
+                </TableHead>
+                <TableBody>
+                  {(tasks ?? []).map((t) => {
+                    const project = Array.isArray(t.project_offices)
+                      ? t.project_offices[0]
+                      : (t.project_offices as { title: string } | null);
+                    const assignee = Array.isArray(t.profiles)
+                      ? t.profiles[0]
+                      : (t.profiles as { full_name: string | null } | null);
+                    return (
+                      <TableRow key={t.id}>
+                        <TableCell>{t.title}</TableCell>
+                        <TableCell>{project?.title ?? "—"}</TableCell>
+                        <TableCell>{assignee?.full_name ?? "—"}</TableCell>
+                        <TableCell>
+                          <Tag type={STATUS_TAG[t.status] ?? "gray"} size="sm">
+                            {t.status}
+                          </Tag>
+                        </TableCell>
+                        <TableCell>
+                          <Tag type={PRIORITY_TAG[t.priority] ?? "gray"} size="sm">
+                            {t.priority}
+                          </Tag>
+                        </TableCell>
+                        <TableCell>{t.due_date ?? "—"}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {(tasks ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6}>
+                        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          No tasks yet.
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

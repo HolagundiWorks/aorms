@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { createSiteInstruction } from "../../lib/actions/site-instructions";
 import { FormGrid } from "./FormGrid";
@@ -13,11 +13,21 @@ const initialState: ActionState = null;
 export function NewSiteInstructionForm({
   projects,
   contractors,
+  onSuccess,
 }: {
   projects: ProjectOption[];
   contractors: ContractorOption[];
+  onSuccess?: () => void;
 }) {
   const [state, formAction, pending] = useActionState(createSiteInstruction, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

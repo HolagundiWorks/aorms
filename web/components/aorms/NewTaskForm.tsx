@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import {
   Button,
   Form,
@@ -22,11 +22,21 @@ const initialState: TaskActionState = null;
 export function NewTaskForm({
   projects,
   assignees,
+  onSuccess,
 }: {
   projects: ProjectOption[];
   assignees: AssigneeOption[];
+  onSuccess?: () => void;
 }) {
   const [state, formAction, pending] = useActionState(createTaskRecord, initialState);
+
+  const prevPending = useRef(pending);
+  useEffect(() => {
+    if (prevPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    prevPending.current = pending;
+  }, [pending, state, onSuccess]);
 
   return (
     <Form action={formAction}>

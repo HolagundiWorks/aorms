@@ -11,7 +11,9 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewMomForm } from "../../../components/aorms/NewMomForm";
+import { AddMomForm } from "../../../components/aorms/AddMomForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function MomsPage() {
   const supabase = await createClient();
@@ -25,69 +27,72 @@ export default async function MomsPage() {
   ]);
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Meeting Minutes</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          MOMs — minutes of meeting, per project.
-        </p>
+    <ContextPanelLayout>
+      <ContextPanel title="New minutes" description="Add meeting minutes for a project.">
+        <AddMomForm projects={projects ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Meeting Minutes"
+              description="MOMs — minutes of meeting, per project."
+              actions={<ContextPanelTrigger size="sm">Add minutes</ContextPanelTrigger>}
+            />
 
-        <NewMomForm projects={projects ?? []} />
-
-        {error ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Couldn&apos;t load minutes: {error.message}
-          </p>
-        ) : (
-          <Table aria-label="Meeting Minutes" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Ref</TableHeader>
-                <TableHeader>Title</TableHeader>
-                <TableHeader>Project</TableHeader>
-                <TableHeader>Date</TableHeader>
-                <TableHeader>Venue</TableHeader>
-                <TableHeader>Status</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(moms ?? []).map((m) => {
-                const project = Array.isArray(m.project_offices)
-                  ? m.project_offices[0]
-                  : (m.project_offices as { title: string } | null);
-                return (
-                  <TableRow key={m.id}>
-                    <TableCell>
-                      <Link href={`/moms/${m.id}`}>{m.ref}</Link>
-                    </TableCell>
-                    <TableCell>{m.title}</TableCell>
-                    <TableCell>{project?.title ?? "—"}</TableCell>
-                    <TableCell>{m.meeting_date ?? "—"}</TableCell>
-                    <TableCell>{m.venue ?? "—"}</TableCell>
-                    <TableCell>
-                      <Tag type={m.status === "DRAFT" ? "gray" : "green"} size="sm">
-                        {m.status}
-                      </Tag>
-                    </TableCell>
+            {error ? (
+              <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                Couldn&apos;t load minutes: {error.message}
+              </p>
+            ) : (
+              <Table aria-label="Meeting Minutes" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Ref</TableHeader>
+                    <TableHeader>Title</TableHeader>
+                    <TableHeader>Project</TableHeader>
+                    <TableHeader>Date</TableHeader>
+                    <TableHeader>Venue</TableHeader>
+                    <TableHeader>Status</TableHeader>
                   </TableRow>
-                );
-              })}
-              {(moms ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No minutes yet.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Column>
-    </Grid>
+                </TableHead>
+                <TableBody>
+                  {(moms ?? []).map((m) => {
+                    const project = Array.isArray(m.project_offices)
+                      ? m.project_offices[0]
+                      : (m.project_offices as { title: string } | null);
+                    return (
+                      <TableRow key={m.id}>
+                        <TableCell>
+                          <Link href={`/moms/${m.id}`}>{m.ref}</Link>
+                        </TableCell>
+                        <TableCell>{m.title}</TableCell>
+                        <TableCell>{project?.title ?? "—"}</TableCell>
+                        <TableCell>{m.meeting_date ?? "—"}</TableCell>
+                        <TableCell>{m.venue ?? "—"}</TableCell>
+                        <TableCell>
+                          <Tag type={m.status === "DRAFT" ? "gray" : "green"} size="sm">
+                            {m.status}
+                          </Tag>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {(moms ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6}>
+                        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          No minutes yet.
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

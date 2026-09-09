@@ -9,8 +9,10 @@ import {
   TableRow,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewSiteInstructionForm } from "../../../components/aorms/NewSiteInstructionForm";
+import { AddSiteInstructionForm } from "../../../components/aorms/AddSiteInstructionForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateSiteInstructionPdf } from "../../../lib/actions/site-instructions";
 
 export default async function SiteInstructionsPage() {
@@ -26,69 +28,72 @@ export default async function SiteInstructionsPage() {
   ]);
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Site Instructions</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Formal instructions issued to contractors on site.
-        </p>
+    <ContextPanelLayout>
+      <ContextPanel title="New site instruction" description="Issue a formal instruction to a contractor.">
+        <AddSiteInstructionForm projects={projects ?? []} contractors={contractors ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Site Instructions"
+              description="Formal instructions issued to contractors on site."
+              actions={<ContextPanelTrigger size="sm">Issue instruction</ContextPanelTrigger>}
+            />
 
-        <NewSiteInstructionForm projects={projects ?? []} contractors={contractors ?? []} />
-
-        {error ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Couldn&apos;t load instructions: {error.message}
-          </p>
-        ) : (
-          <Table aria-label="Site instructions" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Ref</TableHeader>
-                <TableHeader>Project</TableHeader>
-                <TableHeader>Contractor</TableHeader>
-                <TableHeader>Subject</TableHeader>
-                <TableHeader>Issued</TableHeader>
-                <TableHeader>Acknowledged</TableHeader>
-                <TableHeader>PDF</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(instructions ?? []).map((s) => {
-                const project = Array.isArray(s.project_offices) ? s.project_offices[0] : (s.project_offices as { title: string } | null);
-                const contractor = Array.isArray(s.contractors) ? s.contractors[0] : (s.contractors as { name: string } | null);
-                return (
-                  <TableRow key={s.id}>
-                    <TableCell>{s.ref}</TableCell>
-                    <TableCell>{project?.title ?? "—"}</TableCell>
-                    <TableCell>{contractor?.name ?? "—"}</TableCell>
-                    <TableCell>{s.subject}</TableCell>
-                    <TableCell>{s.issued_at ?? "—"}</TableCell>
-                    <TableCell>{s.acknowledged_at ? new Date(s.acknowledged_at).toLocaleDateString("en-IN") : "—"}</TableCell>
-                    <TableCell>
-                      <GeneratePdfButton
-                        action={generateSiteInstructionPdf.bind(null, s.id)}
-                        pdfStatus={s.pdf_status}
-                      />
-                    </TableCell>
+            {error ? (
+              <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                Couldn&apos;t load instructions: {error.message}
+              </p>
+            ) : (
+              <Table aria-label="Site instructions" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Ref</TableHeader>
+                    <TableHeader>Project</TableHeader>
+                    <TableHeader>Contractor</TableHeader>
+                    <TableHeader>Subject</TableHeader>
+                    <TableHeader>Issued</TableHeader>
+                    <TableHeader>Acknowledged</TableHeader>
+                    <TableHeader>PDF</TableHeader>
                   </TableRow>
-                );
-              })}
-              {(instructions ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No instructions issued yet.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Column>
-    </Grid>
+                </TableHead>
+                <TableBody>
+                  {(instructions ?? []).map((s) => {
+                    const project = Array.isArray(s.project_offices) ? s.project_offices[0] : (s.project_offices as { title: string } | null);
+                    const contractor = Array.isArray(s.contractors) ? s.contractors[0] : (s.contractors as { name: string } | null);
+                    return (
+                      <TableRow key={s.id}>
+                        <TableCell>{s.ref}</TableCell>
+                        <TableCell>{project?.title ?? "—"}</TableCell>
+                        <TableCell>{contractor?.name ?? "—"}</TableCell>
+                        <TableCell>{s.subject}</TableCell>
+                        <TableCell>{s.issued_at ?? "—"}</TableCell>
+                        <TableCell>{s.acknowledged_at ? new Date(s.acknowledged_at).toLocaleDateString("en-IN") : "—"}</TableCell>
+                        <TableCell>
+                          <GeneratePdfButton
+                            action={generateSiteInstructionPdf.bind(null, s.id)}
+                            pdfStatus={s.pdf_status}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {(instructions ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={7}>
+                        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          No instructions issued yet.
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

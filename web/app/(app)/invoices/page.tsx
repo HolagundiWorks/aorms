@@ -10,8 +10,10 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewInvoiceForm } from "../../../components/aorms/NewInvoiceForm";
+import { AddInvoiceForm } from "../../../components/aorms/AddInvoiceForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateInvoicePdf } from "../../../lib/actions/invoices";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
@@ -41,17 +43,18 @@ export default async function InvoicesPage() {
   ]);
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Invoices</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          GST invoicing — CGST/SGST/IGST, place of supply, and s.194J TDS computed automatically.
-        </p>
-
-        <NewInvoiceForm projects={projects ?? []} clients={clients ?? []} />
+    <ContextPanelLayout>
+      <ContextPanel title="New invoice" description="Create a GST invoice.">
+        <AddInvoiceForm projects={projects ?? []} clients={clients ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Invoices"
+              description="GST invoicing — CGST/SGST/IGST, place of supply, and s.194J TDS computed automatically."
+              actions={<ContextPanelTrigger size="sm">Create invoice</ContextPanelTrigger>}
+            />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
@@ -121,7 +124,9 @@ export default async function InvoicesPage() {
             </TableBody>
           </Table>
         )}
-      </Column>
-    </Grid>
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }

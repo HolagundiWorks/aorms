@@ -10,7 +10,9 @@ import {
   Tag,
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
-import { NewContractForm } from "../../../components/aorms/NewContractForm";
+import { AddContractForm } from "../../../components/aorms/AddContractForm";
+import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -36,69 +38,72 @@ export default async function ContractsPage() {
   ]);
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        <h1 className="cds--type-heading-05">Contracts</h1>
-        <p
-          className="cds--type-body-01"
-          style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
-        >
-          Contract / agreement register — clients, consultants, vendors.
-        </p>
+    <ContextPanelLayout>
+      <ContextPanel title="New contract" description="Add a contract or agreement record.">
+        <AddContractForm projects={projects ?? []} />
+      </ContextPanel>
+      <ContextPanelContent>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader
+              title="Contracts"
+              description="Contract / agreement register — clients, consultants, vendors."
+              actions={<ContextPanelTrigger size="sm">Add contract</ContextPanelTrigger>}
+            />
 
-        <NewContractForm projects={projects ?? []} />
-
-        {error ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-            Couldn&apos;t load contracts: {error.message}
-          </p>
-        ) : (
-          <Table aria-label="Contracts" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Ref</TableHeader>
-                <TableHeader>Title</TableHeader>
-                <TableHeader>Party</TableHeader>
-                <TableHeader>Type</TableHeader>
-                <TableHeader>Project</TableHeader>
-                <TableHeader>Value</TableHeader>
-                <TableHeader>Status</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(contracts ?? []).map((c) => {
-                const project = Array.isArray(c.project_offices)
-                  ? c.project_offices[0]
-                  : (c.project_offices as { title: string } | null);
-                return (
-                  <TableRow key={c.id}>
-                    <TableCell>{c.ref}</TableCell>
-                    <TableCell>{c.title}</TableCell>
-                    <TableCell>{c.party}</TableCell>
-                    <TableCell>{c.contract_type}</TableCell>
-                    <TableCell>{project?.title ?? "—"}</TableCell>
-                    <TableCell>{formatInr(c.value_paise)}</TableCell>
-                    <TableCell>
-                      <Tag type={STATUS_TAG[c.status] ?? "gray"} size="sm">
-                        {c.status}
-                      </Tag>
-                    </TableCell>
+            {error ? (
+              <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                Couldn&apos;t load contracts: {error.message}
+              </p>
+            ) : (
+              <Table aria-label="Contracts" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Ref</TableHeader>
+                    <TableHeader>Title</TableHeader>
+                    <TableHeader>Party</TableHeader>
+                    <TableHeader>Type</TableHeader>
+                    <TableHeader>Project</TableHeader>
+                    <TableHeader>Value</TableHeader>
+                    <TableHeader>Status</TableHeader>
                   </TableRow>
-                );
-              })}
-              {(contracts ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No contracts yet.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Column>
-    </Grid>
+                </TableHead>
+                <TableBody>
+                  {(contracts ?? []).map((c) => {
+                    const project = Array.isArray(c.project_offices)
+                      ? c.project_offices[0]
+                      : (c.project_offices as { title: string } | null);
+                    return (
+                      <TableRow key={c.id}>
+                        <TableCell>{c.ref}</TableCell>
+                        <TableCell>{c.title}</TableCell>
+                        <TableCell>{c.party}</TableCell>
+                        <TableCell>{c.contract_type}</TableCell>
+                        <TableCell>{project?.title ?? "—"}</TableCell>
+                        <TableCell>{formatInr(c.value_paise)}</TableCell>
+                        <TableCell>
+                          <Tag type={STATUS_TAG[c.status] ?? "gray"} size="sm">
+                            {c.status}
+                          </Tag>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {(contracts ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={7}>
+                        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                          No contracts yet.
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Column>
+        </Grid>
+      </ContextPanelContent>
+    </ContextPanelLayout>
   );
 }
