@@ -2209,16 +2209,61 @@ whose import isn't already going through an `AddXForm` wrapper is the
 authoritative remaining list, not a hand-maintained page inventory —
 closes the gap that let `/projects` slip through once already.
 
-**~17 pages remain** by that audit — `/spec-catalog`, `/spec-sheets`,
-`/standards`, `/teams`, `/team-members`, `/transmittals`, `/tenders`,
-`/purchase-orders` (each has both a list page, already converted in
-Batch 2/3, **and** a `[id]` detail page with its own inline forms not
-yet surveyed), plus any other `[id]` detail page with inline create
-forms not yet checked. The KPI-strip half of the standard (mandatory
-3–6 metrics below every major page's H1) is also still only on
-Dashboard/Project Overview/Decisions — each other page needs its own
-bespoke count queries, a separate pass. Continuing the same mechanical
-rollout is the direct next step, not a new design question.
+**Audit completed (2026-09-09) — the panel-conversion half of the
+composition standard is done, on a deliberate boundary, not a stall.**
+Ran the audit through every one of the ~17 remaining hits: `bbs/[id]`
+(already known — `NewBbsMemberForms`), `projects/[id]/program` (already
+known — `NewProgramSpaceForm`), plus `moms/[id]`, `estimates/[id]`,
+`estimates/[id]/items/[itemId]`, `transmittals/[id]`, `tenders/[id]`,
+`teams/[id]`, `team-members/[id]` (its 5 HR sub-forms), `standards/[id]`,
+`spec-sheets/[id]`, `spec-catalog/[id]`, `rate-books/[id]`,
+`purchase-orders/[id]`, `pmc-ra-bills/[id]`, `pmc-packages/[id]`,
+`consultants/[id]`, `takeoff/[projectId]`, and `ai-runs/new`.
+
+Every one of them is one of two shapes that don't fit the panel
+pattern, and both got a name so future surveys can classify a new hit
+in one lookup instead of re-deriving the call each time:
+
+1. **"Build a related list" forms** (all `[id]` detail-page hits except
+   `ai-runs/new`) — `NewMomActionForm`, `NewEstimateItemForm`,
+   `NewEstimateMeasurementForm`, `NewTransmittalItemForm`,
+   `NewTenderInviteForm`, `NewTeamMembershipForm`, the 5 HR forms on
+   Team Members, `NewStandardFileForm`, `NewSpecItemForm`,
+   `NewSpecCatalogItemForm`, `NewRateBookItemForm`, `NewPoItemForm`,
+   `NewRaLineForm`, `NewPackageInviteForm`, `NewEngagementForm`,
+   `NewTakeoffItemForms`, plus the two already-known ones — all sit
+   permanently inline above a sub-table on a page that's *about* that
+   sub-list (a BOQ, a spec sheet, a bill's line items, a team's roster),
+   where the real workflow is adding several rows back-to-back. An
+   auto-closing panel would force a reopen per row — a regression, not
+   an improvement — the same reasoning `projects/[id]/program` already
+   established for `NewProgramSpaceForm` two batches ago, now confirmed
+   as the general rule rather than a one-off exception.
+2. **Standalone full-page create forms** (`ai-runs/new` only) — the
+   entire page *is* the form (no list to keep visible beside it), so
+   there's nothing for a split pane to sit next to; this shape was never
+   in scope for the standard, which exists to keep a list's main content
+   visible while creating a *new top-level record* alongside it.
+
+No further pages are pending under this half of the standard. What's
+converted stands at every top-level list page and every `/projects/[id]/*`
+sub-page that has one: Decisions, project Overview, Clients, Leads,
+Tasks, Invoices, Proposals, Letters, Contracts, Drawings, Document
+Issues, MoMs, Transmittals, Snags, Site Instructions, Progress Reports,
+Master Plans, Standards, Spec Catalog, Spec Sheets, Lessons, Knowledge
+Bank, Job Applications, Payslips, Team Members, Teams, Tenders, Purchase
+Orders, Rate Books, Office Templates, Consultants, Contractors,
+Approvals, BBS, Users, Negotiation, Pre-Construction R&O, Projects,
+Estimates, the four `pmc-*` pages, and Firm Settings's numbering
+overrides — 42 pages total across 5 batches.
+
+The KPI-strip half of the standard (mandatory 3–6 metrics below every
+major page's H1) remains its own, not-yet-started pass — Dashboard,
+Project Overview, and Decisions are the only pages that have it so far,
+each needing its own bespoke count queries rather than a mechanical
+transform. That, and the Carbon typography guide's rollout beyond the
+handful of pages it's already reached, are what's left of the broader
+UI/UX migration the user asked to complete.
 
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
