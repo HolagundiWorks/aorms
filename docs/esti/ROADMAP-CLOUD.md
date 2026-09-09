@@ -1067,6 +1067,26 @@ deleted cleanly this time (no `write_audit` calls from this feature, so
 none of the FK-blocks-delete situation the numbering-patterns test
 account hit above).
 
+**Re-verified with real Ollama generation (2026-09-09)** — every
+verification above ran against the mock/template fallback because
+Ollama wasn't running on this machine at the time; native Windows
+Ollama (`winget install Ollama.Ollama`, per this file's own Dev/verify
+loop section) turned out to already be installed and `llama3.2` already
+pulled, just not started. Confirmed reachable directly (`/api/tags`,
+`/api/chat`) and end-to-end through the real app: asked ESTI a real
+question via the header popover first (`ai_runs` row confirmed
+`provider: "ollama"`, `model: "llama3.2"`, a genuine generated reply,
+not the read-only agent's own apology fallback), then re-generated a
+PROPOSAL draft against the same real "Sharma Residence Extension"
+project — this time a real ~475-token model-authored fee-proposal
+narrative came back (correctly grounded in the real project ref and
+client name given in context, no fabricated fee figures — the model
+used a `₹[insert amount]` placeholder rather than inventing one),
+walked it through Approve same as before. Both test rows and the test
+account deleted afterward. No code changes needed — the fallback path
+this session repeatedly exercised was always correct; the model simply
+wasn't running.
+
 **Autopilot pass — polish bundle, portal login provisioning,
 `document_issues` auto-wiring (2026-09-08).** On explicit request to work
 through the rest of the standing follow-up list without a check-in after
