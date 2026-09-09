@@ -1915,6 +1915,75 @@ identically. Test project/decisions deleted; test account disabled
 (`write_audit` on create, same FK situation as every other audited
 account this session).
 
+**Wave 2 (2026-09-09), same day, on explicit direction to keep going —
+Tabs, ProgressIndicator, Accordion, Dropdown.** The pilot above was
+confirmed; this pass deepens it with four more stock-Carbon patterns,
+scoped to the project workspace (all 10 `/projects/[id]/*` sub-pages)
+and the Decisions page specifically, not yet the rest of the app.
+
+1. **Project workspace tabs** — the flat 9-link list at the top of
+   `/projects/[id]` is gone, replaced by a real Carbon `Tabs`/`TabList`
+   strip (`ProjectTabs.tsx`) covering Overview + all 9 sub-pages +
+   Decisions. Each tab is a genuine route change, not a client-side
+   panel swap — Carbon's own documented pattern for this (`Tab`'s `as`
+   prop rendering a router `Link`, named in `Tab.d.ts`'s own JSDoc:
+   "useful for using Tab along with react-router or other client side
+   router libraries"). `selectedIndex` is derived from `usePathname()`
+   on every render, so the active tab always matches the real URL —
+   direct links and browser back/forward both land correctly, not just
+   in-app clicks. One real TS friction point: `Tab.as`'s declared type
+   (`ComponentType<{}>`) can't express Next's `Link` requiring `href`,
+   so TS can't verify the pattern structurally even though it's the
+   documented one — resolved with one typed local alias
+   (`Omit<TabProps, "as"> & { as: typeof Link; href: string }`) rather
+   than scattering `any`/untyped casts at each call site. Lives in a new
+   `projects/[id]/layout.tsx` — one file, so it now covers every
+   existing sub-page and any future one automatically, not 10 separate
+   page edits.
+2. **`PageHeader.tsx` extracted** — the eyebrow/heading-04/description
+   block from the pilot, formalized into one shared component and
+   adopted on the Decisions page and the project Overview page (which
+   also gained its own KPI row: Phases / Open tasks / Decisions logged /
+   Awaiting client, the last two computed from a `decisions` query the
+   page didn't run before). The other 9 sub-pages still hand-roll their
+   own header — same disclosed scope as the pilot, next to tighten once
+   this pass is confirmed too.
+3. **Decisions table → Accordion** — replaces the flat table with one
+   `AccordionItem` per decision: a compact always-visible summary row
+   (title + Impact/State tags) that expands to the full detail
+   (rationale, category/source, owner, deadline) plus the two items
+   below. Directly answers "make items cleaner" — a register with this
+   many optional fields (`revision_category`/`revision_source`/
+   `owner_name`/`review_deadline` are all nullable) no longer forces
+   every row to show empty "—" cells across six fixed columns.
+4. **CRIF state as a `ProgressIndicator`** — a genuinely branching state
+   machine (`DECISION_TRANSITIONS`: OPEN can skip straight to
+   ACCEPTED/REJECTED without CLIENT_REVIEW; LOCKED can reopen to OPEN)
+   doesn't fit a linear stepper honestly, so `decisionProgressSteps()`
+   (new, in `lib/decisions.ts`) renders one canonical happy path (Draft
+   → Open → Client review → Accepted → Locked) and marks REJECTED as an
+   `invalid` step at the "Client review" position regardless of which
+   real state it was rejected from — a disclosed simplification for
+   the visual, not a new source of truth; `DECISION_TRANSITIONS` still
+   governs what the Dropdown below it actually allows.
+5. **`DecisionStateSelect` → `DecisionStateDropdown`** — same idiom
+   (shows every state, the server action rejects a disallowed jump),
+   rebuilt on Carbon's `Dropdown` instead of a native `<select>` wrapper
+   — richer listbox, no functional change. Old file deleted, nothing
+   else referenced it.
+
+`tsc --noEmit`, `eslint .`, and a full `next build --webpack` (`rm -rf
+.next` first, ruling out a stale-cache false pass) all clean. One real
+gotcha hit and resolved along the way: `tsc --noEmit` run standalone
+against a stale `.next/dev/types/validator.ts` (left over from before
+the new `layout.tsx` existed) reported two route-typing errors that a
+clean `next build` — which regenerates that file from scratch —
+confirmed were dev-artifact staleness, not real errors; the same two
+component-level TS errors the standalone run also caught (the `Tab.as`
+typing above, and `Dropdown`'s `items` prop wanting a mutable array
+where `DECISION_STATES`'s `as const` tuple is readonly) were both
+genuine and fixed before the clean build ran.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

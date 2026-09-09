@@ -47,3 +47,32 @@ export type RevisionSource = (typeof REVISION_SOURCES)[number];
 
 export const IMPACT_LEVELS = ["LOW", "MEDIUM", "HIGH"] as const;
 export type ImpactLevel = (typeof IMPACT_LEVELS)[number];
+
+/**
+ * Steps for a `ProgressIndicator` visualizing a decision's place in the
+ * CRIF state machine. The real machine branches (OPEN can go straight to
+ * ACCEPTED/REJECTED without CLIENT_REVIEW; LOCKED can reopen to OPEN) —
+ * a linear progress bar can't represent that faithfully, so this shows
+ * one canonical happy path (Draft → Open → Client review → Accepted →
+ * Locked) and renders REJECTED as an `invalid` marker at the "Client
+ * review" position regardless of which state it was actually rejected
+ * from, rather than trying to model every real transition. A
+ * simplification, not the source of truth — DECISION_TRANSITIONS above
+ * still governs what the Dropdown actually allows.
+ */
+export type DecisionProgressStep = { label: string; complete: boolean; current: boolean; invalid: boolean };
+
+const PROGRESS_LABELS = ["Draft", "Open", "Client review", "Accepted", "Locked"];
+const PROGRESS_ORDER: DecisionState[] = ["DRAFT", "OPEN", "CLIENT_REVIEW", "ACCEPTED", "LOCKED"];
+const REJECTED_AT = 2;
+
+export function decisionProgressSteps(state: DecisionState): DecisionProgressStep[] {
+  const currentIndex = state === "REJECTED" ? REJECTED_AT : PROGRESS_ORDER.indexOf(state);
+
+  return PROGRESS_LABELS.map((label, i) => {
+    if (state === "REJECTED" && i === REJECTED_AT) {
+      return { label, complete: false, current: false, invalid: true };
+    }
+    return { label, complete: i < currentIndex, current: i === currentIndex, invalid: false };
+  });
+}

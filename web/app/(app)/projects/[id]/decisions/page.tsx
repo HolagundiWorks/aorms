@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
-import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
+import { Accordion, AccordionItem, Column, Grid, Tag } from "@carbon/react";
 import { createClient } from "../../../../../lib/supabase/server";
 import { AddDecisionButton } from "../../../../../components/aorms/AddDecisionButton";
-import { DecisionStateSelect } from "../../../../../components/aorms/DecisionStateSelect";
+import { DecisionProgress } from "../../../../../components/aorms/DecisionProgress";
+import { DecisionStateDropdown } from "../../../../../components/aorms/DecisionStateDropdown";
 import { KpiTile } from "../../../../../components/aorms/KpiTile";
-import { DECISION_STATE_TAG, type DecisionState } from "../../../../../lib/decisions";
+import { PageHeader } from "../../../../../components/aorms/PageHeader";
+import type { DecisionState } from "../../../../../lib/decisions";
 
 export default async function ProjectDecisionsPage({
   params,
@@ -44,26 +46,21 @@ export default async function ProjectDecisionsPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.2rem" }}>
-          {project.title}
-        </p>
-        {/* Page title one step down from heading-05 (32px) to heading-04
-            (28px) and tighter margins — the previous scale read as
-            disconnected from the caption above and the description below
-            it rather than as one hierarchy (2026-09-09 layout pass). */}
-        <h1 className="cds--type-heading-04" style={{ marginBottom: "0.5rem" }}>
-          Decisions (CRIF)
-        </h1>
-        <p className="cds--type-body-01" style={{ marginBottom: "1.5rem", color: "var(--cds-text-secondary)", maxWidth: "42rem" }}>
-          The Critical Revision Information Flow register — every design decision and revision
-          worth tracking, moved through Draft → Open → Client review → Accepted/Rejected → Locked.
-          Sending a decision to &quot;Client review&quot; makes it visible on the client&apos;s
-          portal, where they respond directly.
-        </p>
+        <PageHeader
+          eyebrow={project.title}
+          title="Decisions (CRIF)"
+          description={
+            <>
+              The Critical Revision Information Flow register — every design decision and revision worth
+              tracking, moved through Draft → Open → Client review → Accepted/Rejected → Locked. Sending a
+              decision to &quot;Client review&quot; makes it visible on the client&apos;s portal, where they
+              respond directly.
+            </>
+          }
+        />
 
         {/* Page-overview-in-numbers row, directly under the title/description
-            rather than buried at the bottom of a table — same KpiTile used
-            on /dashboard. */}
+            rather than buried at the bottom of a table. */}
         <div
           style={{
             display: "grid",
@@ -86,59 +83,70 @@ export default async function ProjectDecisionsPage({
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load decisions: {decisionsError.message}
           </p>
+        ) : rows.length === 0 ? (
+          <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+            No decisions logged yet.
+          </p>
         ) : (
-          <Table aria-label="Decisions" className="aorms-table-spaced">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Title</TableHeader>
-                <TableHeader>Category / Source</TableHeader>
-                <TableHeader>Impact</TableHeader>
-                <TableHeader>Owner</TableHeader>
-                <TableHeader>Deadline</TableHeader>
-                <TableHeader>State</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((d) => (
-                <TableRow key={d.id}>
-                  <TableCell>
-                    <div>{d.title}</div>
-                    <div className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      {d.rationale}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {d.revision_category ? `${d.revision_category}` : "—"}
-                    {d.revision_source ? ` / ${d.revision_source.replace(/_/g, " ")}` : ""}
-                  </TableCell>
-                  <TableCell>
-                    <Tag type={d.impact === "HIGH" ? "red" : d.impact === "MEDIUM" ? "purple" : "gray"} size="sm">
-                      {d.impact}
-                    </Tag>
-                  </TableCell>
-                  <TableCell>{d.owner_name ?? "—"}</TableCell>
-                  <TableCell>{d.review_deadline ?? "—"}</TableCell>
-                  <TableCell>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <Tag type={DECISION_STATE_TAG[d.state as DecisionState]} size="sm">
+          <Accordion align="start">
+            {rows.map((d) => (
+              <AccordionItem
+                key={d.id}
+                title={
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", width: "100%" }}>
+                    <span style={{ fontWeight: 500 }}>{d.title}</span>
+                    <span style={{ display: "flex", gap: "0.4rem", flexShrink: 0 }}>
+                      <Tag type={d.impact === "HIGH" ? "red" : d.impact === "MEDIUM" ? "purple" : "gray"} size="sm">
+                        {d.impact}
+                      </Tag>
+                      <Tag type="cool-gray" size="sm">
                         {d.state}
                       </Tag>
-                      <DecisionStateSelect projectId={project.id} decisionId={d.id} state={d.state} />
+                    </span>
+                  </div>
+                }
+              >
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", maxWidth: "40rem" }}>
+                  <p className="cds--type-body-01">{d.rationale}</p>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(10rem, 1fr))", gap: "1rem" }}>
+                    <div>
+                      <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        Category / source
+                      </p>
+                      <p className="cds--type-body-01">
+                        {d.revision_category ?? "—"}
+                        {d.revision_source ? ` / ${d.revision_source.replace(/_/g, " ")}` : ""}
+                      </p>
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {rows.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No decisions logged yet.
+                    <div>
+                      <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        Owner
+                      </p>
+                      <p className="cds--type-body-01">{d.owner_name ?? "—"}</p>
+                    </div>
+                    <div>
+                      <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        Review deadline
+                      </p>
+                      <p className="cds--type-body-01">{d.review_deadline ?? "—"}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.75rem" }}>
+                      Progress
                     </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                    <DecisionProgress state={d.state as DecisionState} />
+                  </div>
+
+                  <div style={{ maxWidth: "16rem" }}>
+                    <DecisionStateDropdown projectId={project.id} decisionId={d.id} state={d.state} />
+                  </div>
+                </div>
+              </AccordionItem>
+            ))}
+          </Accordion>
         )}
       </Column>
     </Grid>

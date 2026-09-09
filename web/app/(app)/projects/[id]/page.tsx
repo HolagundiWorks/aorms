@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   Column,
@@ -14,6 +13,8 @@ import { createClient } from "../../../../lib/supabase/server";
 import { NewPhaseForm } from "../../../../components/aorms/NewPhaseForm";
 import { ProjectStatusSelect } from "../../../../components/aorms/ProjectStatusSelect";
 import { ActivationGate } from "../../../../components/aorms/ActivationGate";
+import { PageHeader } from "../../../../components/aorms/PageHeader";
+import { KpiTile } from "../../../../components/aorms/KpiTile";
 import { getActivationGate } from "../../../../lib/actions/activation";
 
 export default async function ProjectDetailPage({
@@ -24,19 +25,25 @@ export default async function ProjectDetailPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: project, error: projectError }, { data: phases, error: phasesError }] =
-    await Promise.all([
-      supabase
-        .from("project_offices")
-        .select("id, ref, title, project_type, work_type, status, city, clients(name)")
-        .eq("id", id)
-        .maybeSingle(),
-      supabase
-        .from("phases")
-        .select("id, code, label, billing_pct, sort_order, revision_budget")
-        .eq("project_id", id)
-        .order("sort_order"),
-    ]);
+  const [
+    { data: project, error: projectError },
+    { data: phases, error: phasesError },
+    { count: openTaskCount },
+    { data: decisionStates },
+  ] = await Promise.all([
+    supabase
+      .from("project_offices")
+      .select("id, ref, title, project_type, work_type, status, city, clients(name)")
+      .eq("id", id)
+      .maybeSingle(),
+    supabase
+      .from("phases")
+      .select("id, code, label, billing_pct, sort_order, revision_budget")
+      .eq("project_id", id)
+      .order("sort_order"),
+    supabase.from("tasks").select("id", { count: "exact", head: true }).eq("project_id", id).neq("status", "DONE"),
+    supabase.from("decisions").select("state").eq("project_id", id),
+  ]);
 
   if (projectError) {
     return (
@@ -57,38 +64,35 @@ export default async function ProjectDetailPage({
     : (project.clients as { name: string } | null)?.name;
 
   const gate = await getActivationGate(project.id);
+  const decisionsAwaitingClient = (decisionStates ?? []).filter((d) => d.state === "CLIENT_REVIEW").length;
 
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <p
-          className="cds--type-body-01"
-          style={{ color: "var(--cds-text-secondary)", marginBottom: "0.25rem" }}
-        >
-          {project.ref}
-        </p>
-        <h1 className="cds--type-heading-05" style={{ marginBottom: "0.5rem" }}>
-          {project.title}
-        </h1>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "2rem" }}>
-          <ProjectStatusSelect projectId={project.id} status={project.status} />
-          <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-            {clientName ?? "No client"} · {project.project_type} · {project.work_type}
-            {project.city ? ` · ${project.city}` : ""}
-          </span>
-        </div>
+        <PageHeader
+          eyebrow={project.ref}
+          title={project.title}
+          description={
+            <>
+              {clientName ?? "No client"} · {project.project_type} · {project.work_type}
+              {project.city ? ` · ${project.city}` : ""}
+            </>
+          }
+          actions={<ProjectStatusSelect projectId={project.id} status={project.status} />}
+        />
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: "2rem" }}>
-          <Link href={`/projects/${project.id}/brief`}>Project Brief →</Link>
-          <Link href={`/projects/${project.id}/cpi`}>Client–Project Intelligence (CPI) →</Link>
-          <Link href={`/projects/${project.id}/dna`}>Project DNA →</Link>
-          <Link href={`/projects/${project.id}/assessment`}>Pre-Project Assessment →</Link>
-          <Link href={`/projects/${project.id}/feasibility`}>Feasibility Reports →</Link>
-          <Link href={`/projects/${project.id}/negotiation`}>Negotiation →</Link>
-          <Link href={`/projects/${project.id}/program`}>Program →</Link>
-          <Link href={`/projects/${project.id}/decisions`}>Decisions (CRIF) →</Link>
-          <Link href={`/projects/${project.id}/onboarding`}>Client Onboarding →</Link>
-          <Link href={`/projects/${project.id}/precon`}>Pre-Construction R&amp;O →</Link>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <KpiTile label="Phases" value={(phases ?? []).length} />
+          <KpiTile label="Open tasks" value={openTaskCount ?? 0} />
+          <KpiTile label="Decisions logged" value={(decisionStates ?? []).length} />
+          <KpiTile label="Awaiting client" value={decisionsAwaitingClient} />
         </div>
 
         {project.status !== "ACTIVE" && project.status !== "COMPLETED" && project.status !== "CANCELLED" && (

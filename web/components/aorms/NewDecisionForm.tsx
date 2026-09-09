@@ -9,7 +9,7 @@ type ActionState = { error: string } | null;
 const initialState: ActionState = null;
 
 /**
- * New CRIF decision — created in DRAFT, moved on via DecisionStateSelect.
+ * New CRIF decision — created in DRAFT, moved on via DecisionStateDropdown.
  * `onSuccess` is optional so this keeps working unchanged for any caller
  * that doesn't need it; `AddDecisionButton` uses it to close the side
  * panel this form now opens inside.
