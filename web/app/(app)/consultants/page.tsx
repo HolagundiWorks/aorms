@@ -3,6 +3,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../lib/supabase/server";
 import { AddConsultantForm } from "../../../components/aorms/AddConsultantForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { ProvisionPortalLoginForm } from "../../../components/aorms/ProvisionPortalLoginForm";
 import { inviteConsultantLogin } from "../../../lib/actions/portal-invites";
@@ -28,6 +29,10 @@ export default async function ConsultantsPage() {
   const isOwner = myProfile?.role === "OWNER";
   const loginedIds = new Set((withLogin ?? []).map((p) => p.consultant_id));
 
+  const rows = consultants ?? [];
+  const disciplineCount = new Set(rows.map((c) => c.discipline).filter(Boolean)).size;
+  const provisionedCount = rows.filter((c) => loginedIds.has(c.id)).length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New consultant" description="Add an external consultant to the directory.">
@@ -46,6 +51,19 @@ export default async function ConsultantsPage() {
               }
               actions={<ContextPanelTrigger size="sm">Add consultant</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total consultants" value={rows.length} />
+              <KpiTile label="Disciplines" value={disciplineCount} />
+              <KpiTile label="Portal logins" value={provisionedCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

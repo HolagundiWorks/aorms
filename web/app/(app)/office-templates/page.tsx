@@ -3,6 +3,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../lib/supabase/server";
 import { AddOfficeTemplateForm } from "../../../components/aorms/AddOfficeTemplateForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const KIND_LABEL: Record<string, string> = {
@@ -26,6 +27,9 @@ export default async function OfficeTemplatesPage() {
     .select("id, kind, title, tags")
     .order("updated_at", { ascending: false });
 
+  const rows = templates ?? [];
+  const kindCount = new Set(rows.map((t) => t.kind)).size;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New template" description="Add reusable office document boilerplate.">
@@ -39,6 +43,18 @@ export default async function OfficeTemplatesPage() {
               description="Reusable boilerplate for letters, scope of work, COA fee proposals, contracts, and meeting minutes."
               actions={<ContextPanelTrigger size="sm">Add template</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total templates" value={rows.length} />
+              <KpiTile label="Document kinds" value={kindCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

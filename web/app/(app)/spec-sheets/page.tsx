@@ -13,6 +13,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddSpecSheetForm } from "../../../components/aorms/AddSpecSheetForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function SpecSheetsPage() {
@@ -25,6 +26,9 @@ export default async function SpecSheetsPage() {
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
+
+  const rows = sheets ?? [];
+  const draftCount = rows.filter((s) => s.status === "DRAFT").length;
 
   return (
     <ContextPanelLayout>
@@ -39,6 +43,18 @@ export default async function SpecSheetsPage() {
               description="Per-project material specification documents."
               actions={<ContextPanelTrigger size="sm">Add spec sheet</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total spec sheets" value={rows.length} />
+              <KpiTile label="Draft" value={draftCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

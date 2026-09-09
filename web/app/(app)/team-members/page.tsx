@@ -14,6 +14,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddTeamMemberForm } from "../../../components/aorms/AddTeamMemberForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 function formatInr(paise: number): string {
@@ -35,6 +36,10 @@ export default async function TeamMembersPage() {
     .from("team_members")
     .select("id, name, role, job_title, employment_type, monthly_salary_paise, active")
     .order("name");
+
+  const rows = members ?? [];
+  const activeCount = rows.filter((m) => m.active).length;
+  const monthlyPayrollPaise = rows.filter((m) => m.active).reduce((sum, m) => sum + (m.monthly_salary_paise ?? 0), 0);
 
   return (
     <ContextPanelLayout>
@@ -63,6 +68,19 @@ export default async function TeamMembersPage() {
                 />
               </div>
             )}
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total members" value={rows.length} />
+              <KpiTile label="Active" value={activeCount} />
+              <KpiTile label="Monthly payroll" value={formatInr(monthlyPayrollPaise)} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

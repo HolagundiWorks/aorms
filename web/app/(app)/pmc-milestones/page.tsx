@@ -11,6 +11,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddMilestoneForm } from "../../../components/aorms/AddMilestoneForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { MilestoneStatusSelect } from "../../../components/aorms/MilestoneStatusSelect";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
@@ -25,6 +26,10 @@ export default async function PmcMilestonesPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = milestones ?? [];
+  const atRiskCount = rows.filter((m) => m.status === "AT_RISK" || m.status === "DELAYED").length;
+  const completeCount = rows.filter((m) => m.status === "COMPLETE").length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New milestone" description="Add a project delivery milestone.">
@@ -38,6 +43,19 @@ export default async function PmcMilestonesPage() {
           description="Owner-side project delivery milestones. CSV/P6 XER import isn't wired up."
           actions={<ContextPanelTrigger size="sm">New milestone</ContextPanelTrigger>}
         />
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <KpiTile label="Total milestones" value={rows.length} />
+          <KpiTile label="At risk / delayed" value={atRiskCount} />
+          <KpiTile label="Complete" value={completeCount} />
+        </div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

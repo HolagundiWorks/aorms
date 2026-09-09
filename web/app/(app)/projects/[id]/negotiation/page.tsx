@@ -3,6 +3,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../../../lib/supabase/server";
 import { AddNegotiationRoundForm } from "../../../../../components/aorms/AddNegotiationRoundForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../../../components/aorms/KpiTile";
 import { NegotiationOutcomeSelect } from "../../../../../components/aorms/NegotiationOutcomeSelect";
 import { PageHeader } from "../../../../../components/aorms/PageHeader";
 
@@ -41,6 +42,10 @@ export default async function NegotiationPage({
   }
   if (!project) notFound();
 
+  const rows = rounds ?? [];
+  const agreedCount = rows.filter((r) => r.outcome === "AGREED").length;
+  const latestConversion = rows.length ? rows[rows.length - 1].conversion_probability : null;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="Add negotiation round" description="Log a commercial negotiation round.">
@@ -55,6 +60,19 @@ export default async function NegotiationPage({
           description="Commercial negotiation rounds. Conversion probability is computed automatically — confidence erodes with each extra round and cumulative discount conceded, advisory only."
           actions={<ContextPanelTrigger size="sm">Add round</ContextPanelTrigger>}
         />
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <KpiTile label="Total rounds" value={rows.length} />
+          <KpiTile label="Agreed" value={agreedCount} />
+          <KpiTile label="Latest conversion" value={latestConversion != null ? `${latestConversion}%` : "—"} />
+        </div>
 
         {roundsError ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

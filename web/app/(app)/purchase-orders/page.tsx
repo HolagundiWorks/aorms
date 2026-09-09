@@ -13,6 +13,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddPurchaseOrderForm } from "../../../components/aorms/AddPurchaseOrderForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
@@ -38,6 +39,10 @@ export default async function PurchaseOrdersPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = pos ?? [];
+  const issuedCount = rows.filter((po) => po.status === "ISSUED").length;
+  const totalValuePaise = rows.reduce((sum, po) => sum + (po.total_paise ?? 0), 0);
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New purchase order" description="Create a project purchase order.">
@@ -51,6 +56,19 @@ export default async function PurchaseOrdersPage() {
               description="Simple quantity × rate procurement, per project."
               actions={<ContextPanelTrigger size="sm">Create PO</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total POs" value={rows.length} />
+              <KpiTile label="Issued" value={issuedCount} />
+              <KpiTile label="Total value" value={formatInr(totalValuePaise)} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

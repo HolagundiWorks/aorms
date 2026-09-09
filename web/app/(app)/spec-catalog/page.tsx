@@ -3,6 +3,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../lib/supabase/server";
 import { AddSpecCatalogVersionForm } from "../../../components/aorms/AddSpecCatalogVersionForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SetActiveVersionButton } from "../../../components/aorms/SetActiveVersionButton";
 
@@ -21,6 +22,9 @@ export default async function SpecCatalogPage() {
     .select("id, label, description, active")
     .order("label", { ascending: false });
 
+  const rows = versions ?? [];
+  const activeCount = rows.filter((v) => v.active).length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New catalogue version" description="Start a new spec catalogue version.">
@@ -34,6 +38,18 @@ export default async function SpecCatalogPage() {
               description="Versioned material specification catalogue — category/item/make/specification/finish rows that project spec sheets pick from. Only one version is active at a time."
               actions={<ContextPanelTrigger size="sm">New version</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total versions" value={rows.length} />
+              <KpiTile label="Active" value={activeCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

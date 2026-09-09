@@ -19,6 +19,7 @@ import { createClient } from "../../../../../lib/supabase/server";
 import { AddRiskForm } from "../../../../../components/aorms/AddRiskForm";
 import { AddOpportunityForm } from "../../../../../components/aorms/AddOpportunityForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../../../components/aorms/KpiTile";
 import { RiskStatusSelect } from "../../../../../components/aorms/RiskStatusSelect";
 import { OpportunityStatusSelect } from "../../../../../components/aorms/OpportunityStatusSelect";
 import { PageHeader } from "../../../../../components/aorms/PageHeader";
@@ -60,6 +61,13 @@ export default async function ProjectPreconPage({
   }
   if (!project) notFound();
 
+  const riskRows = risks ?? [];
+  const opportunityRows = opportunities ?? [];
+  const gateRows = gates ?? [];
+  const criticalRiskCount = riskRows.filter((r) => r.likelihood * r.impact >= 16).length;
+  const gatesPassedCount = gateRows.filter((g) => g.decision === "GO").length;
+  const TOTAL_GATE_KEYS = 4; // CONCEPT/SCHEMATIC/DETAILED/ISSUE_READINESS — see PhaseGateChecklist.tsx's own GATE_KEYS
+
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
@@ -68,6 +76,20 @@ export default async function ProjectPreconPage({
           title="Pre-Construction R&O"
           description="Studio design-stage risk and opportunity registers, plus phase gates — not construction readiness (that's AProc's own delivery-side tracking)."
         />
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <KpiTile label="Total risks" value={riskRows.length} />
+          <KpiTile label="Critical risks" value={criticalRiskCount} />
+          <KpiTile label="Total opportunities" value={opportunityRows.length} />
+          <KpiTile label="Gates passed" value={`${gatesPassedCount}/${TOTAL_GATE_KEYS}`} />
+        </div>
 
         <Tabs>
           <TabList aria-label="Precon sections">

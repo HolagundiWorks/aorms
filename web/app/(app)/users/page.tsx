@@ -2,6 +2,7 @@ import { Column, Grid, InlineNotification, Table, TableBody, TableCell, TableHea
 import { createClient } from "../../../lib/supabase/server";
 import { AddStaffInviteForm } from "../../../components/aorms/AddStaffInviteForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { UserRoleSelect } from "../../../components/aorms/UserRoleSelect";
 import { UserDisabledToggle } from "../../../components/aorms/UserDisabledToggle";
@@ -69,6 +70,10 @@ export default async function UsersPage() {
     .in("role", STAFF_ROLES)
     .order("full_name");
 
+  const rows = profiles ?? [];
+  const activeCount = rows.filter((p) => !p.disabled).length;
+  const ownerCount = rows.filter((p) => p.role === "OWNER").length;
+
   return (
     <ContextPanelLayout>
       {isOwner && (
@@ -84,6 +89,19 @@ export default async function UsersPage() {
               description="Staff directory — role and access."
               actions={isOwner ? <ContextPanelTrigger size="sm">Invite staff member</ContextPanelTrigger> : undefined}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total staff" value={rows.length} />
+              <KpiTile label="Active" value={activeCount} />
+              <KpiTile label="Owners" value={ownerCount} />
+            </div>
 
             {!isOwner && (
               <InlineNotification

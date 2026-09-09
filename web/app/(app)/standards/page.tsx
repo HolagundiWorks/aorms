@@ -13,6 +13,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddStandardForm } from "../../../components/aorms/AddStandardForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function StandardsPage() {
@@ -22,6 +23,9 @@ export default async function StandardsPage() {
     .from("standards")
     .select("id, discipline, title, notes, created_at")
     .order("created_at", { ascending: false });
+
+  const rows = standards ?? [];
+  const disciplineCount = new Set(rows.map((s) => s.discipline).filter(Boolean)).size;
 
   return (
     <ContextPanelLayout>
@@ -36,6 +40,18 @@ export default async function StandardsPage() {
               description="Design standards by discipline, with attached reference files."
               actions={<ContextPanelTrigger size="sm">Add standard</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total standards" value={rows.length} />
+              <KpiTile label="Disciplines" value={disciplineCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

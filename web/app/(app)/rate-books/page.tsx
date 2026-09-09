@@ -13,6 +13,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddRateBookForm } from "../../../components/aorms/AddRateBookForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function RateBooksPage() {
@@ -21,6 +22,9 @@ export default async function RateBooksPage() {
     .from("rate_books")
     .select("id, name, version_label, effective_date, locked")
     .order("created_at", { ascending: false });
+
+  const rows = rateBooks ?? [];
+  const openCount = rows.filter((rb) => !rb.locked).length;
 
   return (
     <ContextPanelLayout>
@@ -35,6 +39,18 @@ export default async function RateBooksPage() {
               description="Firm-level, versioned item-code/unit/rate sets that price project estimates."
               actions={<ContextPanelTrigger size="sm">New rate book</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total rate books" value={rows.length} />
+              <KpiTile label="Open" value={openCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

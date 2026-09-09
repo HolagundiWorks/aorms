@@ -12,6 +12,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddRaBillForm } from "../../../components/aorms/AddRaBillForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RaBillStatusSelect } from "../../../components/aorms/RaBillStatusSelect";
 
@@ -30,6 +31,9 @@ export default async function PmcRaBillsPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = bills ?? [];
+  const totalGrossPaise = rows.reduce((sum, b) => sum + (b.gross_paise ?? 0), 0);
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New RA bill" description="Start a new contractor running-account bill.">
@@ -43,6 +47,18 @@ export default async function PmcRaBillsPage() {
           description="Contractor RA bills for AProc work packages — distinct from the Estimation module's own running_bills. CERTIFIED additionally requires cost:approve (database trigger)."
           actions={<ContextPanelTrigger size="sm">New RA bill</ContextPanelTrigger>}
         />
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <KpiTile label="Total bills" value={rows.length} />
+          <KpiTile label="Total gross" value={formatInr(totalGrossPaise)} />
+        </div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

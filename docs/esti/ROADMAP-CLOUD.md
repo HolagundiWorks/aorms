@@ -2293,16 +2293,58 @@ end-to-end on Clients and Invoices (KPI tiles render correctly against
 the real, currently-empty tables — ₹0/0 as expected, confirming the
 formatting path works, not just the zero-state).
 
-**~23 pages remain** for the KPI-strip pass — the rest of the 42
-ContextPanel-converted list pages (Standards, Spec Catalog, Spec Sheets,
-Team Members, Teams, Tenders, Purchase Orders, Rate Books, Office
-Templates, Consultants, Contractors, Approvals, BBS, Users, Negotiation,
-Pre-Construction R&O, Projects, Estimates, the four `pmc-*` pages) plus
-Firm Settings's numbering overrides (likely skipped — a settings
-sub-section, not a metrics-bearing register, matching why it never got
-one on Dashboard-style pages either). The Carbon typography guide's
-rollout beyond its current handful of pages remains a separate,
-not-yet-started pass.
+**KPI-strip rollout completed (2026-09-09), same "autopilot" pass — the
+remaining 22 pages.** Standards (total/disciplines), Spec Catalog
+(total/active), Spec Sheets (total/draft), Team Members (total/active/
+monthly payroll ₹), Teams (total only — no other breakdown available
+without a join query, and one metric is still a valid strip), Tenders
+(total/open/awarded), Purchase Orders (total/issued/total value ₹),
+Rate Books (total/open), Office Templates (total/document kinds),
+Consultants (total/disciplines/portal logins), Contractors (total/
+active/portal logins), Approvals (total/pending/approved), BBS (total/
+issued), Users (total/active/owners), Projects (total/active/enquiry —
+the same top-level list Batch 5 found missing the panel; same principle
+applies here), Estimates (total/draft/approved), the four `pmc-*` pages
+(Milestones: total/at-risk-or-delayed/complete; Work Packages: total/
+tendering/awarded; RA Bills: total/total gross ₹; Steel Certs: total/
+issued kg/consumed kg).
+
+**Negotiation and Pre-Construction R&O** (the two `/projects/[id]/*`
+sub-pages from Batch 4) close out the set: Negotiation adds total
+rounds/agreed/latest conversion probability; Precon adds total risks/
+critical risks (`likelihood × impact ≥ 16`)/total opportunities/gates
+passed — the first KPI strip fed by a **fixed enumeration** rather than
+a live count (`GATE_KEYS` in `PhaseGateChecklist.tsx` is always exactly
+4 — Concept/Schematic/Detailed/Issue-Readiness — so "gates passed" reads
+`N/4`, not `N/(however many gate rows happen to exist)`, since a gate
+row is only created once someone actually records a decision on it).
+
+**Two more wrong-assumed-enum catches, same discipline as Drawings in
+the first batch:** Phase gate "passed" first assumed `PASS`/`APPROVED`;
+the real values (`PhaseGateChecklist.tsx`'s own `GateCard`) are
+`GO`/`NO_GO`/`PENDING` — fixed before shipping. Firm Settings's
+numbering overrides was surveyed and deliberately **skipped** — a
+settings sub-section within a page that already has its own
+`FirmSettingsForm`, not a metrics-bearing register, same reasoning that
+kept it out of the panel pattern's KPI treatment on Dashboard-style
+pages too.
+
+**KPI-strip rollout is now complete — all 44 list/register pages that
+got the panel conversion also have their KPI strip**, closing out the
+composition standard's second half. Verified: `tsc --noEmit` and
+`eslint` clean across the full batch; a full `next build --webpack`
+(`rm -rf .next` first) clean. Live end-to-end on a disposable test
+project: Precon's "0/4" gates-passed format and Negotiation's "—"
+no-data latest-conversion format both confirmed rendering correctly
+against real (empty) data, not just typechecking. Test project deleted
+afterward.
+
+The Carbon typography guide's rollout beyond its current handful of
+pages (Dashboard, Project Overview, Decisions, Users) remains the one
+piece of the broader UI/UX migration still not started — every other
+piece the user asked to complete (Tabs/Accordion/ProgressIndicator/
+Dropdown, the ContextPanel form pattern, and the KPI strip) is now
+live across the app.
 
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —

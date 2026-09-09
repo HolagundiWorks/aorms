@@ -13,6 +13,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { AddApprovalForm } from "../../../components/aorms/AddApprovalForm";
 import { ApprovalStatusSelect } from "../../../components/aorms/ApprovalStatusSelect";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function ApprovalsPage() {
@@ -25,6 +26,10 @@ export default async function ApprovalsPage() {
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
+
+  const rows = approvals ?? [];
+  const pendingCount = rows.filter((a) => a.status === "SENT").length;
+  const approvedCount = rows.filter((a) => a.status === "APPROVED").length;
 
   return (
     <ContextPanelLayout>
@@ -39,6 +44,19 @@ export default async function ApprovalsPage() {
               description="What was issued to a client or authority for sign-off, with channel and response status."
               actions={<ContextPanelTrigger size="sm">Log approval</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total approvals" value={rows.length} />
+              <KpiTile label="Pending" value={pendingCount} />
+              <KpiTile label="Approved" value={approvedCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

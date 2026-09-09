@@ -13,6 +13,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddBbsScheduleForm } from "../../../components/aorms/AddBbsScheduleForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "cool-gray" | "green"> = {
@@ -31,6 +32,9 @@ export default async function BbsPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = schedules ?? [];
+  const issuedCount = rows.filter((s) => s.status === "ISSUED").length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New BBS schedule" description="Start a new bar bending schedule.">
@@ -44,6 +48,18 @@ export default async function BbsPage() {
               description="IS 456 / IS 2502 cutting-length schedules — column, beam, slab and footing members."
               actions={<ContextPanelTrigger size="sm">New schedule</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total schedules" value={rows.length} />
+              <KpiTile label="Issued" value={issuedCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

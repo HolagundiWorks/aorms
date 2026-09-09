@@ -13,6 +13,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddEstimateForm } from "../../../components/aorms/AddEstimateForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
@@ -34,6 +35,10 @@ export default async function EstimatesPage() {
     supabase.from("rate_books").select("id, name").order("name"),
   ]);
 
+  const rows = estimates ?? [];
+  const approvedCount = rows.filter((e) => e.status === "APPROVED").length;
+  const draftCount = rows.filter((e) => e.status === "DRAFT").length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New estimate" description="Price a project's BOQ against a rate book.">
@@ -47,6 +52,19 @@ export default async function EstimatesPage() {
           description="Priced BOQ against a rate book, with contingency + GST rollup."
           actions={<ContextPanelTrigger size="sm">New estimate</ContextPanelTrigger>}
         />
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <KpiTile label="Total estimates" value={rows.length} />
+          <KpiTile label="Draft" value={draftCount} />
+          <KpiTile label="Approved" value={approvedCount} />
+        </div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

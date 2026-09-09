@@ -11,6 +11,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddSteelCertForm } from "../../../components/aorms/AddSteelCertForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SteelCertStatusSelect } from "../../../components/aorms/SteelCertStatusSelect";
 
@@ -25,6 +26,10 @@ export default async function PmcSteelCertsPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = certs ?? [];
+  const totalIssuedKg = rows.reduce((sum, c) => sum + (c.issued_kg ?? 0), 0);
+  const totalConsumedKg = rows.reduce((sum, c) => sum + (c.consumed_kg ?? 0), 0);
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New steel certificate" description="Log a new issued-vs-consumed steel period.">
@@ -38,6 +43,19 @@ export default async function PmcSteelCertsPage() {
           description="Issued vs consumed steel by period, with wastage. The CERTIFIED status additionally requires the cost:approve capability — enforced by a database trigger, not just this page, so a user without it sees the trigger's own rejection."
           actions={<ContextPanelTrigger size="sm">New certificate</ContextPanelTrigger>}
         />
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <KpiTile label="Total certificates" value={rows.length} />
+          <KpiTile label="Issued (kg)" value={totalIssuedKg.toLocaleString("en-IN")} />
+          <KpiTile label="Consumed (kg)" value={totalConsumedKg.toLocaleString("en-IN")} />
+        </div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

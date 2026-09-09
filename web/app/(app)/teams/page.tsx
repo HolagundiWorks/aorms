@@ -3,12 +3,15 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../lib/supabase/server";
 import { AddTeamForm } from "../../../components/aorms/AddTeamForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 export default async function TeamsPage() {
   const supabase = await createClient();
 
   const { data: teams, error } = await supabase.from("teams").select("id, name, description").order("name");
+
+  const rows = teams ?? [];
 
   return (
     <ContextPanelLayout>
@@ -23,6 +26,17 @@ export default async function TeamsPage() {
               description="Groupings of team members — creation is owner-only, matching the current backend."
               actions={<ContextPanelTrigger size="sm">Add team</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total teams" value={rows.length} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

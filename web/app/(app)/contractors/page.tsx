@@ -12,6 +12,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddContractorForm } from "../../../components/aorms/AddContractorForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { ProvisionPortalLoginForm } from "../../../components/aorms/ProvisionPortalLoginForm";
 import { inviteContractorLogin } from "../../../lib/actions/portal-invites";
@@ -29,6 +30,10 @@ export default async function ContractorsPage() {
   ]);
   const isOwner = myProfile?.role === "OWNER";
   const loginedIds = new Set((withLogin ?? []).map((p) => p.contractor_id));
+
+  const rows = contractors ?? [];
+  const activeCount = rows.filter((c) => c.active).length;
+  const provisionedCount = rows.filter((c) => loginedIds.has(c.id)).length;
 
   return (
     <ContextPanelLayout>
@@ -48,6 +53,19 @@ export default async function ContractorsPage() {
               }
               actions={<ContextPanelTrigger size="sm">Add contractor</ContextPanelTrigger>}
             />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Total contractors" value={rows.length} />
+              <KpiTile label="Active" value={activeCount} />
+              <KpiTile label="Portal logins" value={provisionedCount} />
+            </div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

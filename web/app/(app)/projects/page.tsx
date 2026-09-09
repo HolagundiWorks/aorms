@@ -13,6 +13,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddProjectForm } from "../../../components/aorms/AddProjectForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "green" | "blue" | "gray" | "purple" | "teal"> = {
@@ -35,6 +36,10 @@ export default async function ProjectsPage() {
     supabase.from("clients").select("id, name").order("name"),
   ]);
 
+  const rows = projects ?? [];
+  const activeCount = rows.filter((p) => p.status === "ACTIVE").length;
+  const enquiryCount = rows.filter((p) => p.status === "ENQUIRY").length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="Create project" description="Start a new project office.">
@@ -48,6 +53,19 @@ export default async function ProjectsPage() {
           description="Project offices — phases, tasks, and delivery live under each project."
           actions={<ContextPanelTrigger size="sm">Create project</ContextPanelTrigger>}
         />
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <KpiTile label="Total projects" value={rows.length} />
+          <KpiTile label="Active" value={activeCount} />
+          <KpiTile label="Enquiry" value={enquiryCount} />
+        </div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

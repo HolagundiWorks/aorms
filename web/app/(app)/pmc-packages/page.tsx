@@ -13,6 +13,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddPackageForm } from "../../../components/aorms/AddPackageForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "purple" | "green" | "red"> = {
@@ -35,6 +36,10 @@ export default async function PmcPackagesPage() {
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
+  const rows = packages ?? [];
+  const tenderingCount = rows.filter((p) => p.status === "TENDERING").length;
+  const awardedCount = rows.filter((p) => p.status === "AWARDED").length;
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="New work package" description="Start a new tendered work package.">
@@ -48,6 +53,19 @@ export default async function PmcPackagesPage() {
           description="Package-level tendering — a second sealed-bid system alongside the firm-issued Tenders module (Phase 9), ported as the distinct system it is today, not merged."
           actions={<ContextPanelTrigger size="sm">New package</ContextPanelTrigger>}
         />
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <KpiTile label="Total packages" value={rows.length} />
+          <KpiTile label="Tendering" value={tenderingCount} />
+          <KpiTile label="Awarded" value={awardedCount} />
+        </div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
