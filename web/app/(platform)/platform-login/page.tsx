@@ -15,6 +15,12 @@ export default function PlatformLoginPage() {
         <Form action={formAction}>
           <Stack gap={6}>
             <div>
+              {/* Link back to the landing page (2026-09-10) — this page had
+                  no way back to / at all, confirmed live as a real gap. */}
+              <NextLink href="/" aria-label="AORMS home" style={{ display: "inline-block", marginBottom: "1.5rem" }}>
+                {/* Plain <img>, not next/image — a fixed brand asset. */}
+                <img src="/aorms-logo.png" alt="AORMS" style={{ height: "28px", width: "auto" }} />
+              </NextLink>
               <h1 className="cds--type-heading-04">Sign in to AORMS Identity</h1>
               <p className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
                 Your personal, portable account — separate from any one company&apos;s login.

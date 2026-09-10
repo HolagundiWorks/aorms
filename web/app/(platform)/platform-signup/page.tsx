@@ -15,6 +15,12 @@ export default function PlatformSignUpPage() {
         <Form action={formAction}>
           <Stack gap={6}>
             <div>
+              {/* Link back to the landing page (2026-09-10) — same gap fixed
+                  on /login and /platform-login, for consistency. */}
+              <NextLink href="/" aria-label="AORMS home" style={{ display: "inline-block", marginBottom: "1.5rem" }}>
+                {/* Plain <img>, not next/image — a fixed brand asset. */}
+                <img src="/aorms-logo.png" alt="AORMS" style={{ height: "28px", width: "auto" }} />
+              </NextLink>
               <h1 className="cds--type-heading-04">Create your AORMS Identity</h1>
               <p className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
                 A portable personal account — one AORMS-U- handle across every company you work with.

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, PasswordInput, Stack, TextInput } from "@carbon/react";
 import { ArrowRight } from "@carbon/icons-react";
@@ -12,8 +13,13 @@ export default function LoginPage() {
     <Form action={formAction}>
       <Stack gap={6}>
         <div>
-          {/* Plain <img>, not next/image — a fixed brand asset, not user content. */}
-          <img src="/aorms-logo.png" alt="AORMS" style={{ height: "28px", width: "auto", marginBottom: "1.5rem" }} />
+          {/* Wrapped in a Link back to the landing page (2026-09-10) — was a
+              dead end before this: nothing on this page linked anywhere but
+              itself, confirmed live as a real gap, not assumed. */}
+          <Link href="/" aria-label="AORMS home">
+            {/* Plain <img>, not next/image — a fixed brand asset, not user content. */}
+            <img src="/aorms-logo.png" alt="AORMS" style={{ height: "28px", width: "auto", marginBottom: "1.5rem" }} />
+          </Link>
           <h1 className="cds--type-heading-04">Sign in to AORMS</h1>
           <p className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
             Office management for architecture practices.

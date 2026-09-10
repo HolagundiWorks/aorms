@@ -3264,6 +3264,87 @@ hidden pane.) Not yet redeployed to production — this is a `web/`
 source change, picked up on the next Hostinger build the same way every
 other change since the initial deploy has been.
 
+**Login-page home links, SEO metadata, and a minimal markdown blog
+(2026-09-10), completing the rest of the earlier "demo account / landing
+page / login pages / SEO / blog" bundle** (the demo-account piece is its
+own entry below — real production data risk, handled separately and more
+carefully).
+
+**Login pages had no way back to `/` at all** — confirmed live as a real
+gap, not assumed: `/login`'s logo was a plain `<img>`, not a link;
+`/platform-login` and `/platform-signup` had no brand element whatsoever.
+Fixed on all three — logo wrapped in a `Link`/`NextLink` to `/`. Left
+`/login` **without** a "create account" link on purpose: the Office Hub
+(`(app)/*`) has no self-service signup at all (single-tenant per
+deployment, staff added by the firm owner via `/users` — see CLAUDE.md §
+Conventions), so a "create account" link there would either need to point
+at something that doesn't actually grant Office Hub access (misleading)
+or require building real multi-tenant firm signup (a materially larger,
+unrequested architectural change — the earlier clarifying question on
+this exact point went unanswered, so this defaults to the smaller,
+already-real capability rather than guessing at the bigger one).
+`/platform-login` already had its own "Create one" link to
+`/platform-signup` — untouched, already correct.
+
+**SEO**: root `layout.tsx` previously had only a bare title/description,
+no OpenGraph/Twitter/robots/canonical/`metadataBase` at all. Added all of
+that, plus a title template (`%s — AORMS`) every other page now inherits.
+`app/page.tsx` gets its own `metadata` export (title/description sourced
+from the same `AORMS_PLATFORM` constants already driving its visible
+copy, so the two can't drift independently) plus a `SoftwareApplication`
+JSON-LD block — deliberately no `aggregateRating`/`review` (nothing
+public to cite) and no `offers.price` (same placeholder-pricing reasoning
+as the licensing copy fix, § above). New `app/sitemap.ts` pairs with the
+existing `app/robots.ts` (2026-09-09) — initially shipped without the
+blog URLs in it, caught and fixed the same pass before committing (a
+sitemap that omits the one new content type it was built partly *for*
+would have been a real, if minor, own-goal).
+
+**Blog**: `content/blog/*.md` (three posts written this pass — generic
+project software vs. architecture-specific billing, what AORMS Identity
+solves, GST/TDS on professional fees — each tying back to the domain
+expertise the landing page's own BRIEF section already claims, not
+generic filler) + `lib/blog.ts` (hand-rolled frontmatter parsing — three
+flat `key: value` lines don't need a library — but real markdown-to-HTML
+conversion uses `marked`, a genuine new dependency: unlike the Ollama/
+Razorpay cases where hand-rolling a small HTTP+crypto surface was the
+right call, safely converting arbitrary markdown to HTML is a
+meaningfully bigger and more error-prone thing to hand-roll, so a real
+library was the correct choice here, not a deviation from that
+preference) + two pages (`/blog` index, `/blog/[slug]`, both statically
+generated via `generateStaticParams` — confirmed in the build output,
+`●` not `ƒ`) + prose CSS scoped to `.aorms-blog-content` in
+`globals.scss` (Carbon's `cds--type-*` classes aren't applied to raw
+`marked`-rendered HTML automatically, so headings/paragraphs/lists needed
+explicit styling via `@extend`, verified it actually resolves — Carbon's
+type-classes mixin is `@include`d earlier in the same `globals.scss`
+file, so the `@extend` target exists in the same compilation unit, not
+assumed). `getBlogPost()` rejects any slug that isn't a plain
+`[a-z0-9-]+` before it touches the filesystem — a path-traversal guard,
+since the slug comes straight from a URL param.
+
+**Added `marked` as a real dependency** — caught and fixed the exact
+lockfile trap this session already diagnosed once before (Hostinger
+deploy-blocking Bug 2, § above): `pnpm add` updates `package.json` +
+`pnpm-lock.yaml` but does nothing to `web/package-lock.json`, the
+separate npm lockfile Hostinger's build actually uses. Regenerated it the
+now-established safe way — a fresh `npm install` in a directory with no
+local `node_modules` and no reachable pnpm store — and verified before
+committing: zero `"link": true` entries, `marked` present with a real
+resolved version, not just a name.
+
+Verified: `tsc --noEmit` and `eslint .` (whole package) clean, a full
+`next build --webpack` clean across all 90+ routes plus every new one
+(`/blog`, all three `/blog/[slug]` posts pre-rendered, `/sitemap.xml`).
+Live-verified via the local dev server, pane visible this time (unlike
+the previous pass) — real screenshots, not just text/DOM checks: the
+Identity section renders correctly, a full blog post renders with
+correct markdown → HTML conversion and prose styling (headings, bold
+text, spacing all correct), `/platform-login`'s logo-as-home-link works,
+`/login`'s does too, and `/sitemap.xml` lists all three blog posts with
+their real frontmatter dates as `lastmod` after the initial omission was
+caught and fixed.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

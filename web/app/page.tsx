@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Accordion, AccordionItem, Column, Grid, Tag, Tile } from "@carbon/react";
 import { createClient } from "../lib/supabase/server";
 import { roleHome } from "../lib/auth/role-home";
@@ -18,18 +19,57 @@ import {
 const PAGE_MAX = 1200;
 const SECTION_PAD = "clamp(3rem, 6vw, 6rem) 0";
 
+export const metadata: Metadata = {
+  title: AORMS_PLATFORM.heroHeadline,
+  description: AORMS_PLATFORM.heroSupport,
+  alternates: { canonical: "https://aorms.in/" },
+  openGraph: { title: AORMS_PLATFORM.heroHeadline, description: AORMS_PLATFORM.heroSupport, url: "https://aorms.in/" },
+};
+
+/**
+ * JSON-LD structured data (2026-09-10) — SoftwareApplication, the schema.org
+ * type that fits an office-management SaaS product better than the more
+ * generic Organization type alone. Kept to fields actually true today: no
+ * `aggregateRating`/`review` (no public reviews exist to cite) and no
+ * `offers.price` (the per-seat rates are still unconfirmed placeholders
+ * pending review on /admin/pricing — see lib/marketing-content.ts's own
+ * header comment on why no price appears anywhere on this page yet).
+ */
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: AORMS_PLATFORM.name,
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web",
+  description: AORMS_PLATFORM.heroSupport,
+  url: "https://aorms.in/",
+  offers: { "@type": "Offer", availability: "https://schema.org/InStock" },
+  publisher: {
+    "@type": "Organization",
+    name: HUMAN_CENTRIC_WORKS.legalName,
+    email: HUMAN_CENTRIC_WORKS.email,
+  },
+};
+
 /**
  * web/'s public marketing landing page — this route was a bare auth
- * redirect until now (see the "not part of the migration spec" cross-
- * cutting rows in ROADMAP-CLOUD.md: nothing in `web/` ever served a
- * marketing surface). Content is a trimmed port of frontend/src/routes/
- * Landing.tsx's copy (that page stays live on aorms.in today, still on
- * the old React/MUI+hcw-ui-kit stack) — rebuilt here in stock
- * `@carbon/react` only, matching CLAUDE.md's Pure Carbon rule that
+ * redirect until Phase-8-era work first built it out (see the "not part
+ * of the migration spec" cross-cutting rows in ROADMAP-CLOUD.md: nothing
+ * in `web/` ever served a marketing surface before that). Content was a
+ * trimmed port of frontend/src/routes/Landing.tsx's copy, rebuilt here in
+ * stock `@carbon/react` only, matching CLAUDE.md's Pure Carbon rule
  * `web/` already follows everywhere else, rather than porting the old
  * page's MUI/`@hcw/ui-kit` marketing chrome (`MarketingNeuFrame` etc.)
- * verbatim. Signed-in visitors land on their role's home (`/dashboard` for
- * staff, `/portal` for a client — see `lib/auth/role-home.ts`); signed-out
+ * verbatim.
+ *
+ * Stale-doc correction (2026-09-10): this comment used to say the old
+ * `frontend/` landing page "stays live on aorms.in today" — no longer
+ * true. This page became the live aorms.in landing page 2026-09-09 (see
+ * ROADMAP-CLOUD.md's dated entry) — `frontend/`'s Landing.tsx is no
+ * longer what the public domain actually serves.
+ *
+ * Signed-in visitors land on their role's home (`/dashboard` for staff,
+ * `/portal` for a client — see `lib/auth/role-home.ts`); signed-out
  * visitors get this page with a "Sign in" link to the existing
  * `(auth)/login` route, not an embedded auth form.
  */
@@ -51,6 +91,7 @@ export default async function LandingPage() {
 
   return (
     <div style={{ maxWidth: PAGE_MAX, margin: "0 auto", padding: "0 1rem" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
       {/* Cover */}
       <section id="top" style={{ padding: SECTION_PAD }}>
         <Grid>
