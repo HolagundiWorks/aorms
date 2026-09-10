@@ -41,6 +41,24 @@ export const ESTI = {
 } as const;
 
 /**
+ * "ConnectDeX Partners" (2026-09-10) — a landing-page product name for the
+ * material/interior-supplier side of the Platform, same pattern as ESTI
+ * being a product name for the AI feature: a marketing brand layered on
+ * top, not a rename of the underlying system. The database entity, its
+ * migrations, and every internal reference stay "Company"/`AORMS-C-`
+ * (docs/esti/AORMS-PLATFORM-ARCHITECTURE.md's nomenclature table is still
+ * correct) — only this page's copy and its `/#connectdex` anchor use the
+ * new name. Do not rename `platform/supabase/migrations/
+ * 0007_supplier_companies.sql`'s tables or any Server Action/component
+ * over this — that would be the kind of full system rename the Studio/
+ * Company split actually was, and nothing this round asked for that.
+ */
+export const CONNECTDEX = {
+  name: "ConnectDeX Partners",
+  tagline: "Where material and interior suppliers connect with the practices specifying them",
+} as const;
+
+/**
  * Public demo credentials (2026-09-10) — deliberately displayed in plain
  * text on the landing page, not hidden behind a magic-link auto-login:
  * standard practice for a public SaaS demo, and simpler than building a
@@ -173,15 +191,15 @@ export const IDENTITY = [
  * A second, distinct entity type from Studio above — material/interior
  * suppliers, not architecture practices. Real and live
  * (platform/supabase/migrations/0007_supplier_companies.sql,
- * 0008_material_catalogue.sql) but previously absent from this landing
- * page entirely — every visitor so far only ever saw the architect-facing
- * side of the Platform.
+ * 0008_material_catalogue.sql), branded on this page as "ConnectDeX
+ * Partners" (see CONNECTDEX above) as of 2026-09-10 — previously had no
+ * product name of its own and no presence on this landing page at all.
  */
 export const COMPANY_IDENTITY = [
   {
     eyebrow: "Your own catalogue",
     title: "Products, specs, test results",
-    body: "List what you make or supply — product name, specifications, lab test results, SKU, MRP — under your Company's own AORMS-C- identity, separate from any architecture Studio's account.",
+    body: "List what you make or supply — product name, specifications, lab test results, SKU, MRP — under your own ConnectDeX Partners identity, separate from any architecture Studio's account.",
   },
   {
     eyebrow: "Found by location",

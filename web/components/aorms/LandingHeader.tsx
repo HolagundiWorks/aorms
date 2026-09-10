@@ -54,30 +54,41 @@ export function LandingHeader() {
             for Architecture Practices
           </span>
         </Link>
+        {/* Simplified to 4 items with literal "|" separators (2026-09-10,
+            explicit direction: "Architect | ConnectDeX | Blog | Signin")
+            — was 6 separate links (Brief/Specification/Identity/For
+            Suppliers/Blog/Sign in). "Architect" points at #identity (the
+            architect-facing Individual/Studio explanation) and
+            "ConnectDeX" at #connectdex (renamed from #company/"For
+            Suppliers" — see marketing-content.ts's CONNECTDEX constant) —
+            the two now read as a deliberate pair: one link per audience
+            this Platform actually serves. Brief/Specification are still
+            real sections on the page, just no longer linked directly from
+            the header; a visitor reaches them by scrolling or via
+            #identity's own surrounding content. */}
         <nav
           aria-label="Landing page sections"
           className="landing-nav-desktop"
-          style={{ display: "flex", alignItems: "center", gap: "1.5rem", flexWrap: "wrap" }}
+          style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}
         >
-          {/* No underlines (2026-09-10, explicit direction) — plain
-              next/link anchors default to the browser's underline and
-              `cds--link` (used below for Sign in) adds Carbon's own;
-              textDecoration: "none" overrides both. */}
-          <Link href="#brief" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
-            Brief
-          </Link>
-          <Link href="#specification" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
-            Specification
-          </Link>
           <Link href="#identity" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
-            Identity
+            Architect
           </Link>
-          <Link href="#company" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
-            For Suppliers
+          <span aria-hidden className="cds--type-body-01" style={{ color: "var(--cds-border-subtle)" }}>
+            |
+          </span>
+          <Link href="#connectdex" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
+            ConnectDeX
           </Link>
+          <span aria-hidden className="cds--type-body-01" style={{ color: "var(--cds-border-subtle)" }}>
+            |
+          </span>
           <Link href="/blog" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             Blog
           </Link>
+          <span aria-hidden className="cds--type-body-01" style={{ color: "var(--cds-border-subtle)" }}>
+            |
+          </span>
           <Link href="/login" className="cds--type-body-01" style={{ textDecoration: "none", color: "var(--cds-link-primary)" }}>
             Sign in
           </Link>

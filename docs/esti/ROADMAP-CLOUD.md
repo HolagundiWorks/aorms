@@ -3605,6 +3605,50 @@ via both a direct DOM dispatch and a real click; the trust strip renders
 between hero and Brief; `/opengraph-image` renders a correct 1200×630
 branded card.
 
+**"ConnectDeX Partners" — a landing-page-only marketing rebrand for the
+Company/supplier side, plus header nav simplified to 4 items
+(2026-09-10).** Explicit direction: rebrand the material-supplier section
+as "ConnectDeX Partners," and simplify the header to "Architect |
+ConnectDeX | Blog | Sign in."
+
+**Deliberately scoped as marketing copy only, not a system rename** — new
+`CONNECTDEX` constant in `marketing-content.ts`, with a header comment
+spelling out the boundary explicitly: this is the same pattern as ESTI
+being a product name for the AI feature without renaming anything
+underneath it. The database entity, `platform/supabase/migrations/
+0007_supplier_companies.sql`'s tables, `AORMS-C-` handles, and every
+Server Action/component name stay exactly "Company" — only this page's
+copy and its section anchor (`#company` → `#connectdex`) use the new
+name. `docs/esti/AORMS-PLATFORM-ARCHITECTURE.md`'s nomenclature table is
+still accurate and wasn't touched — a full rename (the way Studio/Company
+itself was actually renamed, 2026-09-07) is a materially bigger,
+different-in-kind change nothing this round asked for, and conflating
+"give it a product name on the landing page" with "rename the entity
+everywhere" would have been a real overreach.
+
+**Header simplified from 6 links to 4, with literal `|` separators** (a
+deliberate, literal reading of the exact format given — "Architect |
+ConnectDeX | Blog | Signin"). Dropped Brief and Specification as direct
+header links; "Identity" retargeted and relabeled "Architect" (still
+points at `#identity`, the same Individual/Studio explanation), "For
+Suppliers" relabeled "ConnectDeX" (now points at `#connectdex`). Brief/
+Specification remain real, unchanged sections on the page — just no
+longer directly linked from the header. `MobileNavToggle.tsx`'s own link
+list updated to match, so the mobile menu doesn't silently drift out of
+sync with the desktop nav it mirrors.
+
+Verified: `tsc --noEmit` and `eslint` clean, a full `next build --webpack`
+clean. Live-verified: header renders literally as "Architect | ConnectDeX
+| Blog | Sign in"; the ConnectDeX Partners section's eyebrow, heading,
+and body copy all render correctly; clicking the header's "ConnectDeX"
+link (the real click path, not a URL load) scrolls precisely to the
+renamed section, correctly positioned below the sticky header. Also
+swept the rest of `page.tsx` for any remaining `#company`/"For Suppliers"
+references and updated one leftover doc-comment (the footer's own
+"Company"→"Site" rename note from the previous pass, which referenced
+the old anchor name) so it stays accurate rather than pointing at a
+section id that no longer exists.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

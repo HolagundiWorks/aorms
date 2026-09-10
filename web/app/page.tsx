@@ -11,6 +11,7 @@ import {
   AORMS_PLATFORM,
   BRIEF,
   COMPANY_IDENTITY,
+  CONNECTDEX,
   DEMO,
   ESTI,
   FAQ,
@@ -390,23 +391,26 @@ export default async function LandingPage() {
         </Grid>
       </section>
 
-      {/* Company — material/interior suppliers, a distinct entity type
-          from Studio above. Added 2026-09-10 — previously absent from
-          this landing page entirely, despite being real and live. */}
-      <section id="company" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+      {/* ConnectDeX Partners — material/interior suppliers, a distinct
+          entity type from Studio above, rebranded 2026-09-10 (was "For
+          Suppliers"/"Company"). Landing-page branding only — see
+          marketing-content.ts's CONNECTDEX header comment for why the
+          underlying "Company"/AORMS-C- naming in code and the database
+          is unchanged. */}
+      <section id="connectdex" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
         <Grid>
           <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
             <p
               className="cds--type-productive-heading-01"
               style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
             >
-              For Suppliers
+              {CONNECTDEX.name}
             </p>
             <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
               Building materials? List your catalogue.
             </h2>
             <p className="cds--type-body-02" style={{ marginTop: "0.75rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
-              A Company account is a separate identity type from a Studio — for material and interior suppliers, not
+              {CONNECTDEX.tagline}. A separate identity type from a Studio — for material and interior suppliers, not
               architecture practices. Every Studio on AORMS can discover your catalogue through the Materials directory.
             </p>
           </Column>
@@ -507,9 +511,9 @@ export default async function LandingPage() {
           </Column>
           <Column sm={4} md={4} lg={6}>
             {/* Was labeled "Company" — renamed 2026-09-10 to avoid colliding
-                with the new #company section above (material suppliers,
-                a real, distinct entity type — this is just the site's own
-                "About/links" block, unrelated). */}
+                with the new ConnectDeX Partners section above (#connectdex,
+                material suppliers, a real, distinct entity type — this is
+                just the site's own "About/links" block, unrelated). */}
             <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-text-secondary)" }}>
               Site
             </p>
