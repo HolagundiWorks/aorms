@@ -272,7 +272,10 @@ body {
 // Hero floating notice cards (components/aorms/HeroFloatingNotices.tsx,
 // 2026-09-10) — hidden below Carbon's `lg` breakpoint, where the hero
 // text column (lg=12 of 16) no longer leaves room beside it without
-// overlapping the copy.
+// overlapping the copy. The component's own root div sets no `display`
+// inline (an inline style would silently override this media-query
+// toggle, since inline styles beat a class selector without
+// `!important`) — only this class controls show/hide.
 .landing-hero-floats {
   display: none;
 }
@@ -280,5 +283,38 @@ body {
 @media (min-width: 66rem) {
   .landing-hero-floats {
     display: block;
+  }
+}
+
+// Animated card-stack cycle for the hero floats — four nearly-identical
+// keyframes (one per card, `heroCardCycle0`–`3`), each just a fanned
+// "receded" rotation/offset baked in per card plus a shared "front" peak
+// state, all sharing one timing shape: 0%→6% pop to front, 6%→19% hold,
+// 19%→25% settle back, 25%→100% hold receded (== the 0% value, so the
+// loop point is seamless). Each card's `animation-delay` in the
+// component (a negative offset of a quarter-cycle × its index) phase-
+// shifts the same shape so exactly one card is "front" at a time,
+// cycling through all four. `z-index` isn't smoothly interpolable — it
+// just flips near the scale/opacity transition, which reads fine here.
+@keyframes heroCardCycle0 {
+  0%, 25%, 100% { transform: rotate(-6deg) translate(-0.6rem, 0.3rem) scale(0.92); opacity: 0.65; z-index: 1; }
+  6%, 19% { transform: rotate(0deg) translate(0, -0.4rem) scale(1.05); opacity: 1; z-index: 10; }
+}
+@keyframes heroCardCycle1 {
+  0%, 25%, 100% { transform: rotate(-2deg) translate(-0.2rem, 0.15rem) scale(0.92); opacity: 0.65; z-index: 2; }
+  6%, 19% { transform: rotate(0deg) translate(0, -0.4rem) scale(1.05); opacity: 1; z-index: 10; }
+}
+@keyframes heroCardCycle2 {
+  0%, 25%, 100% { transform: rotate(2deg) translate(0.2rem, 0.05rem) scale(0.92); opacity: 0.65; z-index: 3; }
+  6%, 19% { transform: rotate(0deg) translate(0, -0.4rem) scale(1.05); opacity: 1; z-index: 10; }
+}
+@keyframes heroCardCycle3 {
+  0%, 25%, 100% { transform: rotate(6deg) translate(0.6rem, -0.05rem) scale(0.92); opacity: 0.65; z-index: 4; }
+  6%, 19% { transform: rotate(0deg) translate(0, -0.4rem) scale(1.05); opacity: 1; z-index: 10; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-hero-card {
+    animation: none !important;
   }
 }
