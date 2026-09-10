@@ -42,33 +42,36 @@ export const ESTI = {
 
 /**
  * Illustrative examples of what ESTI surfaces on a real studio's
- * dashboard — shown in a preview modal on the Intelligence section
- * (2026-09-10). Placeholder content, not real data from any studio: a
- * round billing figure, a generic staff name, and the same demo project
- * name ("Sharma Residence Extension") used throughout this repo's own
- * QA/test history — chosen deliberately over inventing a new one, same
- * "don't fabricate specifics" posture as TRUST_STRIP above.
+ * dashboard — shown as floating notice cards around the hero (2026-09-10,
+ * moved there from a preview modal on the Intelligence section per
+ * feedback: separate floating elements, not one grouped dialog).
+ * Placeholder content, not real data from any studio: a round billing
+ * figure, a generic staff name, and the same demo project name ("Sharma
+ * Residence Extension") used throughout this repo's own QA/test history
+ * — chosen deliberately over inventing a new one, same "don't fabricate
+ * specifics" posture as TRUST_STRIP above. `kind` picks both the icon
+ * (HeroFloatingNotices.tsx) and the Carbon semantic color.
  */
-export const ESTI_PREVIEW_ITEMS = [
+export const HERO_FLOATING_NOTICES = [
   {
-    kind: "info",
+    kind: "billing",
     title: "Billing",
-    subtitle: "₹1,56,000 across pending invoices is ready to be billed this month.",
+    text: "₹1,56,000 ready to be billed this month",
   },
   {
-    kind: "warning",
+    kind: "workload",
     title: "Workload",
-    subtitle: "Team workload needs balancing — two members are over capacity this week.",
+    text: "Team workload needs balancing",
   },
   {
-    kind: "info",
+    kind: "leave",
     title: "Team",
-    subtitle: "Ar. Akash is on leave today — reassign anything due from him.",
+    text: "Ar. Akash is on leave today",
   },
   {
-    kind: "success",
+    kind: "inspection",
     title: "Site Inspection",
-    subtitle: "Scheduled for Sharma Residence Extension — 18 Sep 2026, 10:00 AM.",
+    text: "Sharma Residence Extension — 18 Sep, 10:00 AM",
   },
 ] as const;
 

@@ -268,3 +268,17 @@ body {
     display: block;
   }
 }
+
+// Hero floating notice cards (components/aorms/HeroFloatingNotices.tsx,
+// 2026-09-10) — hidden below Carbon's `lg` breakpoint, where the hero
+// text column (lg=12 of 16) no longer leaves room beside it without
+// overlapping the copy.
+.landing-hero-floats {
+  display: none;
+}
+
+@media (min-width: 66rem) {
+  .landing-hero-floats {
+    display: block;
+  }
+}

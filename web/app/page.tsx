@@ -7,7 +7,7 @@ import { roleHome } from "../lib/auth/role-home";
 import { listBlogPosts } from "../lib/blog";
 import { BandCtas, ConnectDexCtas, HeroCtas, IdentityCtas } from "../components/aorms/LandingButtons";
 import { LandingHeader } from "../components/aorms/LandingHeader";
-import { EstiPreviewModal } from "../components/aorms/EstiPreviewModal";
+import { HeroFloatingNotices } from "../components/aorms/HeroFloatingNotices";
 import {
   AORMS_PLATFORM,
   BRIEF,
@@ -106,7 +106,7 @@ export default async function LandingPage() {
       <div style={{ maxWidth: PAGE_MAX, margin: "0 auto", padding: "0 1rem" }}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
         {/* Cover */}
-        <section id="top" style={{ padding: SECTION_PAD }}>
+        <section id="top" style={{ padding: SECTION_PAD, position: "relative", minHeight: "30rem" }}>
           <Grid>
             <Column sm={4} md={8} lg={12}>
               {/* "Live" alone gave no context (live since when, meaning
@@ -132,6 +132,7 @@ export default async function LandingPage() {
               </p>
             </Column>
           </Grid>
+          <HeroFloatingNotices />
         </section>
 
         {/* Trust strip — a generic, honest set of claims already made
@@ -247,9 +248,6 @@ export default async function LandingPage() {
               <p className="cds--type-body-01" style={{ marginTop: "0.5rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
                 {ESTI.summary}
               </p>
-              <div style={{ marginTop: "1.5rem" }}>
-                <EstiPreviewModal />
-              </div>
             </Tile>
           </Column>
         </Grid>
