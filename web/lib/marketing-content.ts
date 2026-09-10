@@ -38,6 +38,23 @@ export const ESTI = {
     "Built-in office automation — answers only from validated firm repositories; recommendations, insights, task automation, document generation.",
 } as const;
 
+/**
+ * Public demo credentials (2026-09-10) — deliberately displayed in plain
+ * text on the landing page, not hidden behind a magic-link auto-login:
+ * standard practice for a public SaaS demo, and simpler than building a
+ * dedicated sign-in Server Action that would need to store this same
+ * password server-side anyway. The account itself is VIEWER-role
+ * (read-only, RLS-enforced — see web/supabase/migrations/
+ * 0035_demo_account.sql) and its data resets nightly via pg_cron, also in
+ * that migration. The account is created manually via /users, not by any
+ * code path — these values must match exactly what was actually created
+ * there, or sign-in fails with nothing on this page explaining why.
+ */
+export const DEMO = {
+  email: "demo@aorms.in",
+  password: "DemoAORMS2026!",
+} as const;
+
 export const HUMAN_CENTRIC_WORKS = {
   legalName: "Human Centric Works",
   attribution: "Developed by Human Centric Works",

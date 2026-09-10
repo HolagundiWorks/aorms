@@ -8,6 +8,7 @@ import { BandCtas, HeroCtas, IdentityCtas } from "../components/aorms/LandingBut
 import {
   AORMS_PLATFORM,
   BRIEF,
+  DEMO,
   ESTI,
   FAQ,
   FEE_PROPOSAL,
@@ -296,6 +297,29 @@ export default async function LandingPage() {
               Architecture studios — sign in and start managing the office on one hub.
             </p>
             <BandCtas />
+          </Column>
+          <Column sm={4} md={8} lg={4}>
+            <Tile>
+              <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-support-info)" }}>
+                No account yet?
+              </p>
+              <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.5rem" }}>
+                Explore a live demo
+              </h3>
+              <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
+                Read-only access to a sample studio — clients, projects, tasks, and invoices, reset nightly.
+              </p>
+              <p className="cds--type-code-01" style={{ marginTop: "0.75rem" }}>
+                {DEMO.email}
+                <br />
+                {DEMO.password}
+              </p>
+              <div style={{ marginTop: "1rem" }}>
+                <Link href="/login" className="cds--link">
+                  Go to sign in →
+                </Link>
+              </div>
+            </Tile>
           </Column>
         </Grid>
       </section>

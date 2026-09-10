@@ -3345,6 +3345,97 @@ text, spacing all correct), `/platform-login`'s logo-as-home-link works,
 their real frontmatter dates as `lastmod` after the initial omission was
 caught and fixed.
 
+**Public read-only demo account, seeded and reset nightly via `pg_cron`
+(2026-09-10), the last piece of the earlier bundle — handled separately
+and more carefully than the rest, since it's the one piece that touches
+real production data on a schedule.** Confirmed with the user before
+building: Office Hub scope (clients/projects/tasks/invoices, not the
+Platform side), reset on a schedule (not on-demand-only).
+
+**Checked the actual state of `aorms-web` before designing anything, not
+assumed:** zero real `clients`/`project_offices`/`tasks`/`invoices` exist
+yet (confirmed via the Management API) — this is a fresh instance, not
+one with real customer data to accidentally endanger. Designed the
+mechanism to be safe regardless, since "prepare for deployment" means it
+has to hold once real customer data exists too, not just today by
+coincidence of emptiness.
+
+**Role choice is the real safety mechanism, not the reset job.**
+`profiles.role` has an existing `VIEWER` option, confirmed via
+`supabase/migrations/0002_capability_helper.sql`'s `capability_rank()` to
+be genuinely RLS-enforced read-only — rank 20, below the `'write'`
+capability's threshold of 40. A VIEWER-role demo account cannot create,
+edit, or delete anything, enforced by the database itself, not hidden
+buttons — meaning even if the nightly reset job's schedule ever has a
+gap, a public demo visitor still can't cause real damage. The reset job's
+actual job is undoing visual clutter (e.g. an already-DONE demo task
+toggled back to TODO by a curious clicker — though VIEWER can't even do
+that), not preventing harm the role already prevents by construction.
+
+**The demo login itself was deliberately NOT created via SQL.** Creating
+an `auth.users` row directly is the same class of sensitive write this
+session's own auto-mode classifier already blocked once (a different
+`auth.users` edit, during the Platform admin/payments verification round,
+§ above) — asked the user how to proceed rather than trying to force it
+through; they created the account themselves via the existing `/users`
+invite flow (`demo@aorms.in`, role `VIEWER`), which isn't a sensitive
+write at all — it's exactly what that flow is for. Everything downstream
+(seeding, reset) looks the account up by email at execution time
+(`join auth.users u on u.id = p.id where u.email = 'demo@aorms.in'`), not
+a hardcoded id — works correctly regardless of exactly when the account
+gets created relative to this migration landing.
+
+**`web/supabase/migrations/0035_demo_account.sql`**: `reset_demo_data()`
+(`security definer`) — no-ops safely if the demo account doesn't exist
+yet (confirmed: applying this migration before asking the user to create
+the account doesn't error), otherwise deletes existing demo-tagged rows
+(children before parents — invoices/tasks → project_offices → clients;
+leads independent — respecting FK constraints with no cascade from these
+tables) and re-seeds a fixed dataset: two clients, two projects (one
+`ACTIVE`, one `ENQUIRY` — deliberately different states, more useful to
+look at than two identical rows), five tasks spanning all four statuses
+(`TODO`/`IN_PROGRESS`/`BLOCKED`/`DONE`), one lead, one `ISSUED` invoice
+with deliberately simple GST math (intra-state, no TDS, no advance —
+demo content, not a worked compliance example; the GST/TDS blog post
+covers that complexity in prose instead). Demo rows are tagged with a
+fixed marker (`'DEMO-'`-prefixed `ref` where a table has one, `'Demo — '`-
+prefixed human-readable names elsewhere) so the reset can find, and only
+ever touch, its own data. Scheduled via `pg_cron` (newly enabled —
+confirmed available but not installed before this) at 21:30 UTC = 03:00
+IST nightly, wrapped in a `do $$ ... $$` block that unschedules any
+existing job of the same name first rather than a bare
+`select cron.unschedule(...) where exists(...)` — that pattern's
+evaluation order for a side-effecting function in a FROM-less `SELECT`
+isn't something to rely on; an explicit conditional block removes the
+ambiguity.
+
+Landing page gained a **"No account yet? Explore a live demo"** tile in
+the CTA band — credentials shown in plain text
+(`demo@aorms.in` / `DemoAORMS2026!`, new `DEMO` constant in
+`marketing-content.ts`), deliberately not hidden behind a magic-link
+auto-login: standard practice for a public SaaS demo, and it avoids
+building (and having to secure) a dedicated sign-in Server Action that
+would need to store this same password server-side anyway.
+
+Verified: `tsc --noEmit` and `eslint` clean, a full `next build --webpack`
+clean. Applied the migration to the live `aorms-web` project via the
+Management API and verified afterward, not just trusted the 201:
+`select public.reset_demo_data();` run directly — returned successfully,
+confirmed the no-op-when-account-doesn't-exist-yet path actually works,
+not just reasoned about; `select * from cron.job where jobname =
+'reset-demo-data'` confirmed the job is genuinely scheduled with the
+correct cron expression and command. Live-verified the landing page's new
+tile renders the exact credentials correctly. **Not yet verified: the
+seed data itself** — the demo account doesn't exist yet (the user was
+asked to create it via `/users`; this session doesn't have the
+credentials to do that itself, by design — see above). Once it exists,
+either wait for the 03:00 IST run or call
+`select public.reset_demo_data();` manually via the Management API to
+seed immediately, then click through `/dashboard`/`/clients`/`/projects`/
+`/tasks`/`/invoices`/`/leads` signed in as the demo account to confirm
+the seeded rows render correctly and that the VIEWER role genuinely blocks
+every write action in the UI, not just hides the buttons for it.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
