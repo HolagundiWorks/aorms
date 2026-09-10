@@ -26,9 +26,11 @@ export const AORMS_PLATFORM = {
   name: "AORMS",
   expansion: "Architecture Operations & Resource Management System",
   tagline: "The practice management system, run the way architects think",
-  heroHeadline: "Run your practice the way you run a drawing set.",
+  // 2026-09-10, explicit direction: was "Run your practice the way you
+  // run a drawing set."
+  heroHeadline: "The Command Center for Architecture Practice.",
   heroSupport:
-    "Built for architects, not adapted from generic project software. Every client, project, fee, and drawing lives on one record — precise, cross-referenced, and always current. Web-based, cloud-only.",
+    "Built for architects, not adapted from generic project software. Every client, project, fee, and drawing lives on one record — precise, cross-referenced, and always current. Web-based, cloud-only. Developed for architecture practices in India.",
 } as const;
 
 export const ESTI = {

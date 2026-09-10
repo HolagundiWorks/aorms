@@ -42,22 +42,26 @@ export function LandingHeader() {
           aria-label="Landing page sections"
           style={{ display: "flex", alignItems: "center", gap: "1.5rem", flexWrap: "wrap" }}
         >
-          <Link href="#brief" className="cds--type-body-01" style={{ color: "inherit" }}>
+          {/* No underlines (2026-09-10, explicit direction) — plain
+              next/link anchors default to the browser's underline and
+              `cds--link` (used below for Sign in) adds Carbon's own;
+              textDecoration: "none" overrides both. */}
+          <Link href="#brief" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             Brief
           </Link>
-          <Link href="#specification" className="cds--type-body-01" style={{ color: "inherit" }}>
+          <Link href="#specification" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             Specification
           </Link>
-          <Link href="#identity" className="cds--type-body-01" style={{ color: "inherit" }}>
+          <Link href="#identity" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             Identity
           </Link>
-          <Link href="#company" className="cds--type-body-01" style={{ color: "inherit" }}>
+          <Link href="#company" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             For Suppliers
           </Link>
-          <Link href="/blog" className="cds--type-body-01" style={{ color: "inherit" }}>
+          <Link href="/blog" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             Blog
           </Link>
-          <Link href="/login" className="cds--link">
+          <Link href="/login" className="cds--type-body-01" style={{ textDecoration: "none", color: "var(--cds-link-primary)" }}>
             Sign in
           </Link>
         </nav>
