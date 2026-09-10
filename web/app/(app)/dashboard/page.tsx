@@ -1,8 +1,22 @@
-import Link from "next/link";
 import { Grid, Column, Tile, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
+import { hasRank } from "../../../lib/auth/rank";
 import { KpiTile as Kpi } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { DashboardWidget, EmptyRow, WidgetRow } from "../../../components/aorms/dashboard/DashboardWidget";
+import { TodaysBrief } from "../../../components/aorms/dashboard/TodaysBrief";
+import { TopPriorities } from "../../../components/aorms/dashboard/TopPriorities";
+import { getTopPriorities } from "../../../lib/dashboard/priority";
+import {
+  getAbsencesToday,
+  getApprovalsSummary,
+  getAwaitingPayment,
+  getOpenClientRequests,
+  getOpenConsultantRequests,
+  getOpenContractorSubmissions,
+  getOpenTenders,
+  getReadyToBill,
+} from "../../../lib/dashboard/queries";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -19,6 +33,16 @@ const IMPACT_TAG: Record<string, "gray" | "purple" | "red"> = {
   LOW: "gray",
   MEDIUM: "purple",
   HIGH: "red",
+};
+
+const REQUEST_KIND_LABEL: Record<string, string> = {
+  CHANGE_REQUEST: "Change request",
+  FEEDBACK: "Feedback",
+  MEETING_REQUEST: "Meeting request",
+  RFI: "RFI",
+  DELIVERABLE: "Deliverable",
+  NOTE: "Note",
+  TASK: "Task",
 };
 
 /**
@@ -38,21 +62,9 @@ async function FinancialSummary() {
   if (!user) return null;
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  const rank: Record<string, number> = {
-    OWNER: 100,
-    PARTNER: 80,
-    ACCOUNTANT: 80,
-    HR_MANAGER: 80,
-    SENIOR: 60,
-    ASSOCIATE: 40,
-    VIEWER: 20,
-  };
-  const hasInvoiceManage = (rank[profile?.role ?? ""] ?? 0) >= 80;
-  if (!hasInvoiceManage) return null;
+  if (!hasRank(profile?.role, 80)) return null;
 
-  const { data: invoices } = await supabase
-    .from("invoices")
-    .select("grand_total_paise, paid_paise, status");
+  const { data: invoices } = await supabase.from("invoices").select("grand_total_paise, paid_paise, status");
 
   const rows = invoices ?? [];
   const totalBilled = rows.reduce((sum, r) => sum + (r.grand_total_paise ?? 0), 0);
@@ -65,87 +77,6 @@ async function FinancialSummary() {
       <Kpi label="Total received" value={formatInr(totalPaid)} />
       <Kpi label="Outstanding receivables" value={formatInr(outstanding)} />
     </>
-  );
-}
-
-/** One "office-wide snapshot" list widget — a Tile with a Section heading,
- * an optional "View all" link to the record's own full register page, and
- * up to a handful of WidgetRow entries. Kept as one shared shell (matching
- * KpiTile/PageHeader's own extract-don't-repeat precedent) since all four
- * widgets below share the identical title-bar + empty-state + row shape. */
-function DashboardWidget({
-  title,
-  viewAllHref,
-  children,
-}: {
-  title: string;
-  viewAllHref?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Tile>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "1rem" }}>
-        <h2 className="cds--type-heading-02">{title}</h2>
-        {viewAllHref && (
-          <Link href={viewAllHref} className="cds--type-body-01">
-            View all
-          </Link>
-        )}
-      </div>
-      {children}
-    </Tile>
-  );
-}
-
-function EmptyRow({ text }: { text: string }) {
-  return (
-    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-      {text}
-    </p>
-  );
-}
-
-function WidgetRow({
-  href,
-  primary,
-  secondary,
-  right,
-}: {
-  href?: string;
-  primary: React.ReactNode;
-  secondary?: React.ReactNode;
-  right?: React.ReactNode;
-}) {
-  const row = (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: "0.75rem",
-        padding: "0.5rem 0",
-        borderBottom: "1px solid var(--cds-border-subtle)",
-      }}
-    >
-      <div style={{ minWidth: 0 }}>
-        <p className="cds--type-body-01" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {primary}
-        </p>
-        {secondary && (
-          <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-            {secondary}
-          </p>
-        )}
-      </div>
-      {right && <div style={{ flexShrink: 0, textAlign: "right" }}>{right}</div>}
-    </div>
-  );
-  return href ? (
-    <Link href={href} style={{ color: "inherit", textDecoration: "none", display: "block" }}>
-      {row}
-    </Link>
-  ) : (
-    row
   );
 }
 
@@ -167,18 +98,21 @@ export default async function DashboardPage() {
     { data: upcomingMeetings },
     { data: siteUpdates },
     { data: pendingDecisions },
+    topPriorities,
+    absences,
+    readyToBill,
+    awaitingPayment,
+    approvals,
+    clientRequests,
+    consultantRequests,
+    openTenders,
+    contractorSubmissions,
   ] = await Promise.all([
     supabase.from("clients").select("id", { count: "exact", head: true }),
     supabase.from("project_offices").select("id", { count: "exact", head: true }),
     supabase.from("tasks").select("id", { count: "exact", head: true }).neq("status", "DONE"),
     supabase.from("proposals").select("id", { count: "exact", head: true }),
-    supabase
-      .from("audit_log")
-      .select("id, entity, action, created_at")
-      .order("created_at", { ascending: false })
-      .limit(8),
-    // My Tasks — open tasks assigned to the signed-in user, soonest due
-    // first (nulls — no due date set — pushed to the end, not the front).
+    supabase.from("audit_log").select("id, entity, action, created_at").order("created_at", { ascending: false }).limit(8),
     user
       ? supabase
           .from("tasks")
@@ -188,41 +122,52 @@ export default async function DashboardPage() {
           .order("due_date", { ascending: true, nullsFirst: false })
           .limit(6)
       : Promise.resolve({ data: [] as never[] }),
-    // Scheduled Meetings — moms is "minutes of meeting" (a record of what
-    // was discussed), but meeting_date carries no constraint against being
-    // in the future, so a MoM logged ahead of time doubles as the
-    // schedule entry for that meeting — no separate calendar/events table
-    // exists in this schema to build a truer "upcoming meetings" feature
-    // against.
     supabase
       .from("moms")
       .select("id, title, meeting_date, venue, project_offices(title)")
       .gte("meeting_date", today)
       .order("meeting_date", { ascending: true })
       .limit(6),
-    // Site Updates — most recently logged progress_reports across every
-    // project, newest first (the closest real "site update" concept this
-    // schema has: period narrative + physical/schedule progress %).
     supabase
       .from("progress_reports")
       .select("id, period_start, period_end, physical_progress_pct, project_offices(title)")
       .order("created_at", { ascending: false })
       .limit(6),
-    // Decisions Awaiting Client — CRIF decisions currently sent to the
-    // client portal for response, soonest review_deadline first.
     supabase
       .from("decisions")
       .select("id, title, impact, review_deadline, project_id, project_offices(title)")
       .eq("state", "CLIENT_REVIEW")
       .order("review_deadline", { ascending: true, nullsFirst: false })
       .limit(6),
+    getTopPriorities(supabase, today),
+    getAbsencesToday(supabase, today),
+    getReadyToBill(supabase),
+    getAwaitingPayment(supabase, today),
+    getApprovalsSummary(supabase, today),
+    getOpenClientRequests(supabase),
+    getOpenConsultantRequests(supabase),
+    getOpenTenders(supabase),
+    getOpenContractorSubmissions(supabase),
   ]);
+
+  const { data: profile } = user ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : { data: null };
+  const showFinancials = hasRank(profile?.role, 80);
+  const openRequestCount = clientRequests.length + consultantRequests.length + openTenders.length;
 
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader title="Dashboard" description="Office-wide snapshot." />
+        <PageHeader title="Dashboard" description="What needs your attention today." />
 
+        {/* Today's Brief — ESTI's grounded phraser, first thing on the
+            page (2026-09-10 redesign). */}
+        <TodaysBrief />
+
+        {/* Top 3 Priorities — ranked across tasks/approvals/requests,
+            see lib/dashboard/priority.ts for the scoring formula. */}
+        <TopPriorities items={topPriorities} />
+
+        {/* Headline numbers */}
         <div
           style={{
             display: "grid",
@@ -235,9 +180,172 @@ export default async function DashboardPage() {
           <Kpi label="Projects" value={projectCount ?? 0} />
           <Kpi label="Open tasks" value={openTaskCount ?? 0} />
           <Kpi label="Proposals" value={proposalCount ?? 0} />
+          <Kpi label="Absent today" value={absences.length} />
+          <Kpi label="Open requests" value={openRequestCount} />
+          {showFinancials && <Kpi label="Ready to bill" value={formatInr(readyToBill.total)} />}
+          {showFinancials && <Kpi label="Awaiting payment" value={formatInr(awaitingPayment.total)} />}
           <FinancialSummary />
         </div>
 
+        {/* What needs attention — the new widgets this redesign adds */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <DashboardWidget title="Team Availability Today">
+            {absences.length === 0 ? (
+              <EmptyRow text="Everyone's in — no one is on approved leave." />
+            ) : (
+              absences.map((a) => (
+                <WidgetRow
+                  key={a.id}
+                  primary={a.teamMemberName}
+                  secondary={`${a.type} · back ${a.toDate}`}
+                />
+              ))
+            )}
+          </DashboardWidget>
+
+          {showFinancials && (
+            <DashboardWidget title="Ready to Bill" viewAllHref="/invoices">
+              {readyToBill.rows.length === 0 ? (
+                <EmptyRow text="Nothing drafted right now." />
+              ) : (
+                readyToBill.rows.map((r) => (
+                  <WidgetRow
+                    key={r.id}
+                    href={`/invoices/${r.id}`}
+                    primary={r.ref}
+                    secondary={r.projectTitle ?? "—"}
+                    right={<span className="cds--type-body-01">{formatInr(r.netReceivablePaise)}</span>}
+                  />
+                ))
+              )}
+            </DashboardWidget>
+          )}
+
+          {showFinancials && (
+            <DashboardWidget title="Awaiting Payment" viewAllHref="/invoices">
+              {awaitingPayment.rows.length === 0 ? (
+                <EmptyRow text="Nothing issued and unpaid right now." />
+              ) : (
+                awaitingPayment.rows.map((r) => (
+                  <WidgetRow
+                    key={r.id}
+                    href={`/invoices/${r.id}`}
+                    primary={r.ref}
+                    secondary={r.projectTitle ?? "—"}
+                    right={
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}>
+                        <span className="cds--type-body-01">{formatInr(r.outstandingPaise)}</span>
+                        {r.daysSinceIssue !== null && (
+                          <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                            {r.daysSinceIssue}d since issued
+                          </span>
+                        )}
+                      </div>
+                    }
+                  />
+                ))
+              )}
+            </DashboardWidget>
+          )}
+
+          <DashboardWidget title="Client Approvals" viewAllHref="/approvals">
+            {approvals.pending.length === 0 ? (
+              <EmptyRow text="Nothing awaiting client response." />
+            ) : (
+              approvals.pending.map((a) => (
+                <WidgetRow
+                  key={a.id}
+                  primary={a.title}
+                  secondary={a.projectTitle ?? "—"}
+                  right={
+                    <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                      sent {a.date ?? "—"}
+                    </span>
+                  }
+                />
+              ))
+            )}
+          </DashboardWidget>
+
+          <DashboardWidget title="Client Requests">
+            {clientRequests.length === 0 ? (
+              <EmptyRow text="No open client requests." />
+            ) : (
+              clientRequests.map((r) => (
+                <WidgetRow
+                  key={r.id}
+                  href={`/projects/${r.projectId}`}
+                  primary={r.subject}
+                  secondary={r.projectTitle ?? "—"}
+                  right={
+                    <Tag type={r.revisionCategory === "CRITICAL" ? "red" : "blue"} size="sm">
+                      {REQUEST_KIND_LABEL[r.kind] ?? r.kind}
+                    </Tag>
+                  }
+                />
+              ))
+            )}
+          </DashboardWidget>
+
+          <DashboardWidget title="Consultant Requests" viewAllHref="/consultants">
+            {consultantRequests.length === 0 ? (
+              <EmptyRow text="No open consultant requests." />
+            ) : (
+              consultantRequests.map((r) => (
+                <WidgetRow
+                  key={r.id}
+                  primary={r.subject}
+                  secondary={`${r.consultantName ?? "—"} · ${r.projectTitle ?? "—"}`}
+                  right={
+                    <Tag type="teal" size="sm">
+                      {REQUEST_KIND_LABEL[r.kind] ?? r.kind}
+                    </Tag>
+                  }
+                />
+              ))
+            )}
+          </DashboardWidget>
+
+          <DashboardWidget title="Open Tenders">
+            {openTenders.length === 0 ? (
+              <EmptyRow text="No tenders currently open." />
+            ) : (
+              openTenders.map((t) => (
+                <WidgetRow
+                  key={t.id}
+                  primary={t.title}
+                  secondary={`${t.projectTitle ?? "—"}${t.dueDate ? ` · due ${t.dueDate}` : ""}`}
+                  right={
+                    <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                      {t.bidCount}/{t.invitationCount} bid{t.invitationCount === 1 ? "" : "s"}
+                    </span>
+                  }
+                />
+              ))
+            )}
+          </DashboardWidget>
+
+          <DashboardWidget title="Contractor Submissions">
+            {contractorSubmissions.length === 0 ? (
+              <EmptyRow text="No contractor submissions yet — this doesn't have a submit path built yet." />
+            ) : (
+              contractorSubmissions.map((c) => (
+                <WidgetRow key={c.id} primary={c.subject} secondary={c.kind} />
+              ))
+            )}
+          </DashboardWidget>
+        </div>
+
+        {/* Existing widgets, kept — repositioned below the new "what
+            needs attention" section since the brief/priorities/headline
+            numbers are now the page's actual lead. */}
         <div
           style={{
             display: "grid",

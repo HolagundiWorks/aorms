@@ -4322,6 +4322,107 @@ part of this check — worked around by reading the server-streamed HTML
 directly via `javascript_tool`, which is a genuine render of what the
 server actually sent, same confidence as a normal page load.)
 
+**Office Hub dashboard redesign — real-data widgets, top-3 priority
+ranking, ESTI as a grounded phraser (2026-09-10).** Explicit direction:
+surface what actually needs attention today (absences, billing
+readiness, unpaid invoices, client/consultant requests, tenders awaiting
+bids) and rank the 3 most urgent items across all of it — plus redefine
+ESTI's header popover from a free-text question box into an
+auto-generated brief grounded only in the studio's own real data
+("we don't need AI, but phraser and RAG... nothing beyond it"
+data in hand). Confirmed via AskUserQuestion: a full redesign (not
+additive-only), all three "contract request" sources (consultant RFIs —
+real data; open tenders; contractor submissions — will render empty,
+disclosed rather than faked, since nothing in the app writes to that
+table yet), and the free-text box replaced outright by the brief.
+**Zero new migrations** — every widget reads existing tables, and
+`ai_runs.kind` has no check constraint so a new `"DAILY_BRIEF"` value
+needed no schema change.
+
+New `lib/dashboard/queries.ts` — one function per widget
+(`getAbsencesToday`, `getReadyToBill`, `getAwaitingPayment`,
+`getApprovalsSummary`, `getOpenClientRequests`,
+`getOpenConsultantRequests`, `getOpenTenders`,
+`getOpenContractorSubmissions`, `getOpenTasksForPriority`), each against
+the caller's own RLS-scoped client — no service-role bypass, RLS stays
+the real gate, same discipline the original dashboard already used.
+**Two disclosed limitations, not silently modeled as something they're
+not**: `invoices` has no payment-due-date column (only the issue date),
+so "Awaiting Payment" is "issued and unpaid, oldest first," a proxy, not
+a contractual due date; "Ready to Bill" means drafted invoices, not
+unbilled time entries — no such table exists in this schema. New
+`lib/dashboard/priority.ts` — a small, transparent, deterministic
+scoring formula (no ML) pooling tasks/approvals/client+consultant
+requests into one ranked list: `score = baseWeight(kind, priority) +
+min(ageDays × 3, 60)`, documented inline and in the new flowsheet doc
+(below) so the weights stay readable/adjustable, not tuned by trial and
+error.
+
+`DashboardWidget`/`EmptyRow`/`WidgetRow` (previously inline in
+`dashboard/page.tsx`) extracted to
+`components/aorms/dashboard/DashboardWidget.tsx`, now reused by 8 new
+widgets alongside the original 4 (My Tasks, Scheduled Meetings, Site
+Updates, Decisions Awaiting Client — kept, unchanged, just repositioned
+below the new "what needs attention" section). The role-rank table
+duplicated in `FinancialSummary` extracted to `lib/auth/rank.ts`
+(`hasRank`), reused by the Daily Brief action for the same "does this
+role see money" gate — financial widgets/KPIs/brief-lines all disappear
+together for a caller under rank 80, exactly like `FinancialSummary`
+already did alone.
+
+**ESTI redefined as a grounded phraser, not a chatbot.** New
+`lib/ai/phraser.ts` — `buildDailyBriefText()`, a pure deterministic
+template (the same "structured row → sentence" pattern
+`draft-prompts.ts`'s existing fallback templates already used,
+extended to a studio-wide brief) — the guaranteed-correct default
+output, zero hallucination risk since it's string interpolation over
+real numbers already fetched, not generation. New
+`lib/actions/daily-brief.ts` — `generateDailyBrief()` runs the same
+queries the dashboard renders, builds the deterministic text, and *if*
+Ollama is reachable sends that exact text to be bounded-rephrased
+("reword only, add no fact not already present" — verified this
+constraint actually held, see below) via a new narrow system prompt;
+falls back to the deterministic text as-is if Ollama's unreachable,
+same "always return something honest" resilience `askEsti` already
+established. Logs to `ai_runs` with `kind: "DAILY_BRIEF"` and real
+`sources` (an array of `{type, count}` grounding entries — unlike
+`askEsti`, which always logged an empty `sources: []`). The header's
+free-text "Ask ESTI" box (`HeaderEsti.tsx`) now opens straight to this
+same brief — no question input at all; the old free-text `askEsti`
+action (`lib/actions/ai.ts`) is untouched, just no longer linked from
+the header.
+
+New `docs/esti/DASHBOARD-AND-ESTI-PHRASER.md` — the flowsheet: a
+Mermaid diagram of both pipelines (tables → queries → priority scoring
+→ page; and tables → queries → deterministic template → optional
+bounded Ollama rephrase → redaction → brief), the scoring formula
+written out, the disclosed gaps, and an explicit statement that a full
+document-level RAG layer (pgvector + embeddings over MoMs/transmittals/
+site notes) stays the separate, already-documented backlog item
+(`docs/esti/ROADMAP.md` § "Module 7 — RAG Layer," P-4) — this feature
+is the narrower, achievable "grounded retrieval + phrasing" version
+using structured data the app already has, not that.
+
+Verified: `tsc --noEmit`, `eslint .`, full `next build --webpack` —
+zero error/fail/warn lines. **Full live browser verification with a
+real, disposable test account** (created via the Auth Admin API on
+`aorms-web`, `role='OWNER'` set directly, deleted afterward): dashboard
+loaded with Today's Brief showing real, accurate, Ollama-rephrased prose
+("no one on approved leave... no outstanding tasks on the billing
+side"), Top 3 Priorities correctly showed its empty state, every new
+widget rendered its correct empty state including Contractor
+Submissions' disclosed-gap copy, and all money figures (headline KPIs,
+two new widgets, the brief's own billing sentences) rendered correctly
+for `OWNER`. **Re-tested the exact same load with the account flipped to
+`VIEWER`** (rank 20, below the 80 threshold): confirmed every financial
+widget/KPI/brief-line disappeared together, every non-financial section
+still rendered normally, and the header ESTI popover independently
+generated its own correctly-scoped (no `₹`) brief on click. Confirmed a
+real `ai_runs` row landed per generation with `provider: "ollama"`,
+`model: "llama3.2"`, and a non-empty `sources` array. All test data
+(auth user, profile, `ai_runs` rows) deleted afterward, confirmed zero
+remain.
+
 ---
 
 ## Support & questions

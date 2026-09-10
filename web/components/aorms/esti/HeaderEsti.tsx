@@ -1,46 +1,70 @@
 "use client";
 
 /**
- * Header trigger for the ESTI AI agent — read-only Q&A against Ollama (see
- * lib/actions/ai.ts). Pure stock Carbon (Popover/TextArea/Button/
- * InlineLoading) — no custom-UI exception here (only Pomodoro has one).
+ * Header trigger for ESTI's Daily Brief (2026-09-10 dashboard redesign)
+ * — replaces the earlier free-text "Ask ESTI" question box. ESTI is now
+ * a grounded phraser, not a general chatbot: no question to type, it
+ * opens straight to a brief built from the studio's own real data (see
+ * lib/actions/daily-brief.ts and docs/esti/DASHBOARD-AND-ESTI-PHRASER.md).
+ * The old free-text `askEsti` Server Action (lib/actions/ai.ts) is left
+ * in place, just no longer surfaced here. Pure stock Carbon (Popover/
+ * Button/InlineLoading) — no custom-UI exception.
  */
 
-import { useActionState, useState } from "react";
-import { Button, HeaderGlobalAction, InlineLoading, Popover, PopoverContent, TextArea } from "@carbon/react";
-import { ChatBot } from "@carbon/icons-react";
-import { askEsti, type AskEstiState } from "../../../lib/actions/ai";
-
-const initialState: AskEstiState = null;
+import { useState, useTransition } from "react";
+import { Button, HeaderGlobalAction, InlineLoading, Popover, PopoverContent } from "@carbon/react";
+import { ChatBot, Renew } from "@carbon/icons-react";
+import { generateDailyBrief } from "../../../lib/actions/daily-brief";
 
 export function HeaderEsti() {
   const [open, setOpen] = useState(false);
-  const [state, formAction, pending] = useActionState(askEsti, initialState);
+  const [output, setOutput] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  function loadBrief() {
+    setError(null);
+    startTransition(async () => {
+      const res = await generateDailyBrief();
+      setHasLoaded(true);
+      if (res.error) setError(res.error);
+      else setOutput(res.output);
+    });
+  }
 
   return (
-    <Popover open={open} onRequestClose={() => setOpen(false)} align="bottom-end" caret highContrast>
-      <HeaderGlobalAction aria-label="Ask ESTI" isActive={open} onClick={() => setOpen((o) => !o)}>
+    <Popover
+      open={open}
+      onRequestClose={() => setOpen(false)}
+      align="bottom-end"
+      caret
+      highContrast
+    >
+      <HeaderGlobalAction
+        aria-label="Today's Brief"
+        isActive={open}
+        onClick={() => {
+          const next = !open;
+          setOpen(next);
+          if (next && !hasLoaded) loadBrief();
+        }}
+      >
         <ChatBot size={20} />
       </HeaderGlobalAction>
       <PopoverContent>
-        <form
-          action={formAction}
-          style={{ padding: "1rem", width: "22rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}
-        >
-          <span className="cds--type-heading-compact-01">Ask ESTI</span>
+        <div style={{ padding: "1rem", width: "22rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          <span className="cds--type-heading-compact-01">ESTI — Today's Brief</span>
           <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-            Read-only — answers from a live office snapshot. Won&apos;t create, issue, or change anything.
+            Grounded only in your studio's own data — no open-ended questions, nothing beyond what's already here.
           </p>
-          <TextArea id="esti-question" name="question" labelText="Question" hideLabel rows={2} placeholder="e.g. How many invoices are still unpaid?" />
-          <Button type="submit" size="sm" disabled={pending} style={{ alignSelf: "flex-start" }}>
-            {pending ? <InlineLoading description="Asking…" /> : "Ask"}
-          </Button>
-          {state?.error ? (
+          {isPending && !output ? (
+            <InlineLoading description="Building your brief…" />
+          ) : error ? (
             <p className="cds--type-helper-text-01" style={{ color: "var(--cds-support-error)" }}>
-              {state.error}
+              {error}
             </p>
-          ) : null}
-          {state?.output ? (
+          ) : output ? (
             <div
               style={{
                 whiteSpace: "pre-wrap",
@@ -51,10 +75,13 @@ export function HeaderEsti() {
               }}
               className="cds--type-body-01"
             >
-              {state.output}
+              {output}
             </div>
           ) : null}
-        </form>
+          <Button kind="ghost" size="sm" renderIcon={Renew} disabled={isPending} onClick={loadBrief} style={{ alignSelf: "flex-start" }}>
+            {isPending ? "Refreshing…" : "Refresh"}
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );
