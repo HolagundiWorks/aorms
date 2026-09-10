@@ -4,17 +4,22 @@ import type { Metadata } from "next";
 import { Accordion, AccordionItem, Column, Grid, Tag, Tile } from "@carbon/react";
 import { createClient } from "../lib/supabase/server";
 import { roleHome } from "../lib/auth/role-home";
+import { listBlogPosts } from "../lib/blog";
 import { BandCtas, HeroCtas, IdentityCtas } from "../components/aorms/LandingButtons";
+import { LandingHeader } from "../components/aorms/LandingHeader";
 import {
   AORMS_PLATFORM,
   BRIEF,
+  COMPANY_IDENTITY,
   DEMO,
   ESTI,
   FAQ,
   FEE_PROPOSAL,
   HUMAN_CENTRIC_WORKS,
   IDENTITY,
+  INDIVIDUAL_IDENTITY,
   SPECIFICATION,
+  STUDIO_IDENTITY,
 } from "../lib/marketing-content";
 
 const PAGE_MAX = 1200;
@@ -90,43 +95,41 @@ export default async function LandingPage() {
   }
   if (data?.claims) redirect("/dashboard");
 
+  const latestPosts = listBlogPosts().slice(0, 3);
+
   return (
-    <div style={{ maxWidth: PAGE_MAX, margin: "0 auto", padding: "0 1rem" }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
-      {/* Cover */}
-      <section id="top" style={{ padding: SECTION_PAD }}>
-        <Grid>
-          <Column sm={4} md={8} lg={12}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+    <>
+      <LandingHeader />
+      <div style={{ maxWidth: PAGE_MAX, margin: "0 auto", padding: "0 1rem" }}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
+        {/* Cover */}
+        <section id="top" style={{ padding: SECTION_PAD }}>
+          <Grid>
+            <Column sm={4} md={8} lg={12}>
               <Tag type="green" size="sm">
                 Live
               </Tag>
-            </div>
-            <div style={{ marginTop: "1.5rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-              {/* Plain <img>, not next/image — a static marketing asset, no optimization needed */}
-              <img src="/aorms-logo.png" alt="AORMS" style={{ height: "40px", width: "auto" }} />
-            </div>
-            <p
-              className="cds--type-productive-heading-01"
-              style={{ marginTop: "1.5rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-            >
-              {AORMS_PLATFORM.expansion}
-            </p>
-            <h1 className="cds--type-display-02" style={{ marginTop: "0.75rem", maxWidth: 760 }}>
-              {AORMS_PLATFORM.heroHeadline}
-            </h1>
-            <p className="cds--type-body-02" style={{ marginTop: "1rem", maxWidth: 560, color: "var(--cds-text-secondary)" }}>
-              {AORMS_PLATFORM.heroSupport}
-            </p>
-            <HeroCtas />
-            <p className="cds--type-caption-01" style={{ marginTop: "2rem", color: "var(--cds-text-secondary)" }}>
-              One web hub · cloud-hosted · AI runs on your own data, unmetered
-            </p>
-          </Column>
-        </Grid>
-      </section>
+              <p
+                className="cds--type-productive-heading-01"
+                style={{ marginTop: "1.5rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
+              >
+                {AORMS_PLATFORM.expansion}
+              </p>
+              <h1 className="cds--type-display-02" style={{ marginTop: "0.75rem", maxWidth: 760 }}>
+                {AORMS_PLATFORM.heroHeadline}
+              </h1>
+              <p className="cds--type-body-02" style={{ marginTop: "1rem", maxWidth: 560, color: "var(--cds-text-secondary)" }}>
+                {AORMS_PLATFORM.heroSupport}
+              </p>
+              <HeroCtas />
+              <p className="cds--type-caption-01" style={{ marginTop: "2rem", color: "var(--cds-text-secondary)" }}>
+                One web hub · cloud-hosted · AI runs on your own data, unmetered
+              </p>
+            </Column>
+          </Grid>
+        </section>
 
-      {/* Brief */}
+        {/* Brief */}
       <section id="brief" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
         <Grid>
           <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
@@ -252,10 +255,12 @@ export default async function LandingPage() {
         </Grid>
       </section>
 
-      {/* Identity — the portable AORMS-U- account underneath licensing */}
+      {/* Identity — two distinct identity types: a person's own account,
+          and an architecture Studio's own account. Rewritten 2026-09-10 —
+          previously explained only the individual side. */}
       <section id="identity" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
         <Grid>
-          <Column sm={4} md={8} lg={12} style={{ marginBottom: "2rem" }}>
+          <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
             <p
               className="cds--type-productive-heading-01"
               style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
@@ -263,12 +268,36 @@ export default async function LandingPage() {
               Identity
             </p>
             <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
-              Your account, not your studio's.
+              Two identities, one platform.
             </h2>
-            <p className="cds--type-body-02" style={{ marginTop: "0.75rem", maxWidth: 560, color: "var(--cds-text-secondary)" }}>
-              A portable AORMS Identity carries you between studios — and grows on its own the more you use it.
+          </Column>
+          <Column sm={4} md={4} lg={8} style={{ marginBottom: "2rem" }}>
+            <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-support-info)" }}>
+              {INDIVIDUAL_IDENTITY.eyebrow}
             </p>
+            <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.5rem" }}>
+              {INDIVIDUAL_IDENTITY.title}
+            </h3>
+            <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
+              {INDIVIDUAL_IDENTITY.body}
+            </p>
+          </Column>
+          <Column sm={4} md={4} lg={8} style={{ marginBottom: "2rem" }}>
+            <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-support-info)" }}>
+              {STUDIO_IDENTITY.eyebrow}
+            </p>
+            <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.5rem" }}>
+              {STUDIO_IDENTITY.title}
+            </h3>
+            <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
+              {STUDIO_IDENTITY.body}
+            </p>
+          </Column>
+          <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
             <IdentityCtas />
+            <p className="cds--type-caption-01" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
+              One signup either way — create or join your Studio from your Identity once you're signed in.
+            </p>
           </Column>
           {IDENTITY.map((f) => (
             <Column key={f.title} sm={4} md={4} lg={4} style={{ marginBottom: "1rem" }}>
@@ -287,6 +316,89 @@ export default async function LandingPage() {
           ))}
         </Grid>
       </section>
+
+      {/* Company — material/interior suppliers, a distinct entity type
+          from Studio above. Added 2026-09-10 — previously absent from
+          this landing page entirely, despite being real and live. */}
+      <section id="company" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+        <Grid>
+          <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
+            <p
+              className="cds--type-productive-heading-01"
+              style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
+            >
+              For Suppliers
+            </p>
+            <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
+              Building materials? List your catalogue.
+            </h2>
+            <p className="cds--type-body-02" style={{ marginTop: "0.75rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
+              A Company account is a separate identity type from a Studio — for material and interior suppliers, not
+              architecture practices. Every Studio on AORMS can discover your catalogue through the Materials directory.
+            </p>
+          </Column>
+          {COMPANY_IDENTITY.map((f) => (
+            <Column key={f.title} sm={4} md={4} lg={5} style={{ marginBottom: "1rem" }}>
+              <Tile style={{ height: "100%" }}>
+                <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-support-info)" }}>
+                  {f.eyebrow}
+                </p>
+                <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.5rem" }}>
+                  {f.title}
+                </h3>
+                <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
+                  {f.body}
+                </p>
+              </Tile>
+            </Column>
+          ))}
+          <Column sm={4} md={8} lg={16} style={{ marginTop: "0.5rem" }}>
+            <IdentityCtas />
+          </Column>
+        </Grid>
+      </section>
+
+      {/* Blog — latest posts, added 2026-09-10 (the /blog route already
+          existed but was never linked from the landing page itself). */}
+      {latestPosts.length > 0 && (
+        <section id="blog" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <Grid>
+            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
+              <p
+                className="cds--type-productive-heading-01"
+                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
+              >
+                From the Blog
+              </p>
+              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
+                Notes on running an architecture practice.
+              </h2>
+            </Column>
+            {latestPosts.map((post) => (
+              <Column key={post.slug} sm={4} md={4} lg={5} style={{ marginBottom: "1rem" }}>
+                <Tile style={{ height: "100%" }}>
+                  <p className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>
+                    {post.date}
+                  </p>
+                  <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.25rem" }}>
+                    <Link href={`/blog/${post.slug}`} className="cds--link">
+                      {post.title}
+                    </Link>
+                  </h3>
+                  <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
+                    {post.description}
+                  </p>
+                </Tile>
+              </Column>
+            ))}
+            <Column sm={4} md={8} lg={16} style={{ marginTop: "0.5rem" }}>
+              <Link href="/blog" className="cds--link">
+                View all posts →
+              </Link>
+            </Column>
+          </Grid>
+        </section>
+      )}
 
       {/* CTA band */}
       <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)", borderBottom: "1px solid var(--cds-border-subtle)" }}>
@@ -363,10 +475,14 @@ export default async function LandingPage() {
             </p>
           </Column>
           <Column sm={4} md={4} lg={6}>
+            {/* Was labeled "Company" — renamed 2026-09-10 to avoid colliding
+                with the new #company section above (material suppliers,
+                a real, distinct entity type — this is just the site's own
+                "About/links" block, unrelated). */}
             <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-text-secondary)" }}>
-              Company
+              Site
             </p>
-            <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }} aria-label="Company">
+            <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }} aria-label="Site">
               <Link href="/login" className="cds--link">
                 Sign in
               </Link>
@@ -382,6 +498,8 @@ export default async function LandingPage() {
           </Column>
         </Grid>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }
+

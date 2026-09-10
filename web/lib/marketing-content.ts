@@ -107,6 +107,31 @@ export const FEE_PROPOSAL = [
   },
 ] as const;
 
+/**
+ * Two distinct identity types on the AORMS Platform (2026-09-10 rewrite —
+ * the section used to explain only the individual side). "Individual" =
+ * a person's own AORMS-U- account. "Studio" = an architecture practice's
+ * own AORMS-S- account — colloquially "your company," but named Studio
+ * throughout the actual product (see docs/esti/AORMS-PLATFORM-
+ * ARCHITECTURE.md's nomenclature table: "Company" is reserved for the
+ * separate material-supplier entity type, COMPANY_IDENTITY below).
+ * Deliberately not two separate signup flows: a Studio is created *from*
+ * an Individual identity once signed in, not a parallel account type you
+ * choose instead of one — both sub-sections share IdentityCtas for
+ * exactly that reason.
+ */
+export const INDIVIDUAL_IDENTITY = {
+  eyebrow: "Individual Identity",
+  title: "You, not your employer.",
+  body: "A portable personal account — one AORMS-U- handle that's yours alone, independent of who currently employs you. Link it once, carry it into every practice you work at, present or future. Every identity starts Basic and promotes to Pro automatically at 100 hours of active use — no form, no approval step, nothing to apply for.",
+} as const;
+
+export const STUDIO_IDENTITY = {
+  eyebrow: "Studio Identity",
+  title: "Your practice's own account.",
+  body: "Your architecture practice gets its own identity too — an AORMS-S- handle, separate from any one person's login. Invite your team, manage who's an owner versus a member, and hold the Studio's own Trial/Standard/Premium licence — all under the Studio itself, not scattered across individual accounts.",
+} as const;
+
 export const IDENTITY = [
   {
     eyebrow: "Portable",
@@ -122,6 +147,32 @@ export const IDENTITY = [
     eyebrow: "Licensing lives here",
     title: "Your studio's plan, in one place",
     body: "A studio's Trial/Standard/Premium licence, seats, and renewal all sit under the same Identity sign-in that manages the account itself.",
+  },
+] as const;
+
+/**
+ * A second, distinct entity type from Studio above — material/interior
+ * suppliers, not architecture practices. Real and live
+ * (platform/supabase/migrations/0007_supplier_companies.sql,
+ * 0008_material_catalogue.sql) but previously absent from this landing
+ * page entirely — every visitor so far only ever saw the architect-facing
+ * side of the Platform.
+ */
+export const COMPANY_IDENTITY = [
+  {
+    eyebrow: "Your own catalogue",
+    title: "Products, specs, test results",
+    body: "List what you make or supply — product name, specifications, lab test results, SKU, MRP — under your Company's own AORMS-C- identity, separate from any architecture Studio's account.",
+  },
+  {
+    eyebrow: "Found by location",
+    title: "Nearest-first discovery",
+    body: "Every Studio browsing the Materials directory sees your products ranked by proximity — same city first, then same state — not buried under listings from the other side of the country.",
+  },
+  {
+    eyebrow: "One identity, real reach",
+    title: "Every Studio can find you",
+    body: "No separate sales portal to maintain — the same Materials directory every architecture practice on AORMS already has access to is where your catalogue shows up.",
   },
 ] as const;
 

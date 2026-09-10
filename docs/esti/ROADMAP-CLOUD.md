@@ -3436,6 +3436,87 @@ seed immediately, then click through `/dashboard`/`/clients`/`/projects`/
 the seeded rows render correctly and that the VIEWER role genuinely blocks
 every write action in the UI, not just hides the buttons for it.
 
+**Landing page: header bar introduced, Identity rewritten as two entity
+types, a new Company (supplier) section, and a Blog section (2026-09-10).**
+On explicit direction — "rewrite identity section and explain what's
+individual identity and what's company identity, add blog section to
+landing page, introduce the header bar," clarified mid-task (the user's
+own follow-up) to also cover the previously-absent material-supplier
+Company section entirely.
+
+**Resolved a real naming ambiguity before writing anything, not guessed
+past it**: "company identity" could have meant the Platform's actual,
+newer `Company` entity type (material/interior suppliers, `AORMS-C-` —
+see `docs/esti/AORMS-PLATFORM-ARCHITECTURE.md`'s nomenclature table) or
+colloquially "your organization" (i.e. Studio, `AORMS-S-`, the
+architecture-firm entity this landing page's whole audience actually is).
+Asked; confirmed Studio. The user's same-turn follow-up ("we missing out
+on company (material company) section") then confirmed the *actual*
+Company entity needed its own separate section too — both were real gaps,
+not either/or.
+
+**Header bar** (`components/aorms/LandingHeader.tsx`, new) — the landing
+page had no persistent navigation at all before this; the wordmark only
+ever appeared once, inline in the hero. Sticky, plain `next/link`
+throughout (no Carbon `Button`/`renderIcon` — that needs a Client
+Component wrapper per this codebase's established RSC-boundary rule; a
+header of text links doesn't), linking to every major section
+(`#brief`/`#specification`/`#identity`/`#company`/`/blog`) plus `/login`.
+Removed the hero's own standalone logo now that the header carries it —
+was redundant to show the wordmark twice in the first screenful. No
+mobile hamburger/collapse menu in this pass — links wrap on narrow
+viewports instead; flagged as a possible follow-up, not built speculatively.
+
+**Identity rewritten as two explicit sub-sections** — previously a single
+explanation of only the personal side. New `INDIVIDUAL_IDENTITY`/
+`STUDIO_IDENTITY` constants (`lib/marketing-content.ts`), rendered as two
+side-by-side columns under one shared heading ("Two identities, one
+platform"), with **one shared `IdentityCtas` row below both**, not two
+separate CTAs — deliberate, since a Studio is created *from* a personal
+Identity once signed in, not a parallel account type chosen instead of
+one; a caption under the shared CTA says so explicitly ("One signup
+either way — create or join your Studio from your Identity once you're
+signed in") so this isn't left implicit.
+
+**New Company section** (`id="company"`, new `COMPANY_IDENTITY` content
+array) — material/interior suppliers are a real, live, previously-
+undocumented-on-this-page entity type (`platform/supabase/migrations/
+0007_supplier_companies.sql`, `0008_material_catalogue.sql`): their own
+catalogue (product/specs/test results/SKU/MRP), nearest-first discovery
+through the Materials directory, reach into every Studio already using
+AORMS. Explicitly frames Company as "a separate identity type from a
+Studio," not a variant of one — the exact distinction the whole
+nomenclature exercise this session has been protecting.
+
+**Caught and fixed a real naming collision this same pass**: the
+footer's own "Company" heading (a generic "About/links" block —
+Sign in, contact email) predates this page's new, specific meaning of
+"Company." Left as-is it would sit two sections above a heading using the
+same word for something else entirely — renamed to "Site."
+
+**Blog section** — the `/blog` route already existed (previous session)
+but was never linked from the landing page itself. Added a "From the
+Blog" section pulling the 3 latest posts via the existing
+`listBlogPosts()` (no new data layer — reused directly, `page.tsx` is
+already an async Server Component), each linking to its own `/blog/[slug]`
+page, plus a "View all posts →" link to `/blog`. Conditionally rendered
+(`latestPosts.length > 0 &&`) rather than assuming posts will always exist.
+
+Verified: `tsc --noEmit` and `eslint` clean, a full `next build --webpack`
+clean across all 90+ routes. Live-verified every new/changed piece with
+real screenshots (pane visible): header renders with all nav links and
+no duplicate logo; the two-column Individual/Studio Identity explanation;
+the new Company section with its three detail tiles; the Blog section
+showing all three real posts newest-first. **Verified the real user path,
+not just a URL load**: clicking the header's "For Suppliers" link
+scrolled precisely to the Company section correctly positioned below the
+sticky header — a direct hash-fragment URL load right after `navigate`
+initially looked like it landed short of the target, but that was a
+transient pre-render timing artifact of loading a URL with a fragment
+before the page had finished its first paint, not a real bug in the
+actual click path a visitor would use; confirmed by testing the click
+itself separately rather than assuming the first result was correct.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
