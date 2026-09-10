@@ -88,14 +88,14 @@ re-verified against this cutover — treat them as likely stale too until
 someone checks, rather than assuming they still apply. Full incident
 history (three separate deploy-blocking bugs fixed same-day before this
 succeeded) is in
-[ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) § Stack migration and
+[ROADMAP.md](docs/esti/ROADMAP.md) § History and
 [WEB-DEPLOY-HOSTINGER.md](docs/esti/WEB-DEPLOY-HOSTINGER.md).
 
 What's still true from the old wording, everywhere it hasn't been
 superseded by the correction above: the tables below (Architecture,
 Module map, Frontend routes) describe the **VPS-deployed** stack as it
 existed before this cutover — `web/`'s own routes/modules are documented
-in its own files and in [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md),
+in its own files and in [ROADMAP.md](docs/esti/ROADMAP.md),
 not duplicated here.
 
 **`web/` is two separate systems, not one** — the AORMS Office Hub
@@ -110,7 +110,7 @@ first — it's the canonical reference for that boundary, written
 specifically so it doesn't have to be re-decided ad hoc per page.
 
 Migration sequencing and full phase-by-phase status lives in
-[ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) § Stack migration; see also
+[ROADMAP.md](docs/esti/ROADMAP.md) § History; see also
 § Branch & environment split below for where this work happens.
 
 ## Launch status (2026-09-04)
@@ -171,8 +171,11 @@ VPS: [`docs/esti/VPS-INSTALL.md`](docs/esti/VPS-INSTALL.md) ·
 - ❌ `admin.aorms.in` — licence manager (not applicable to web-only model)
 
 **Web-first platform:** AORMS hub + portals now **web-only** with **IBM Carbon Design System**.
-- [`docs/esti/ROADMAP-CLOUD.md`](docs/esti/ROADMAP-CLOUD.md) — what's live on `aorms.in`; next milestone **S8** (reopen `/login`)
-- [`docs/esti/ROADMAP-LOCAL.md`](docs/esti/ROADMAP-LOCAL.md) — codebase cleanup + Carbon migration (local dev)
+- [`docs/esti/ROADMAP.md`](docs/esti/ROADMAP.md) — the single roadmap
+  (merged 2026-09-10 from three separate files): current status, what's
+  live, open items, and the full dated build history. "S8 (reopen
+  `/login`)" is stale — `/login` is `web/`'s own real sign-in page and
+  has been live since the 2026-09-09 cutover, not something still gated.
 - [`docs/esti/MARKET-FIT.md`](docs/esti/MARKET-FIT.md)
 - Carbon migration active: [`docs/esti/CARBON-MIGRATION.md`](docs/esti/CARBON-MIGRATION.md)
 
@@ -360,9 +363,9 @@ version:
 | `main` | — | Integration branch. Cloud work lands here only after local verifies it. |
 | (local checkout, this machine) | Local (Podman/Docker compose, this repo) | **Verification + merge gate** for cloud-agent branches, plus the general testing/verification role below. **Not** net-new cloud-roadmap feature work while a cloud-agent session is actively assigned — see the note below. |
 
-**Local stays on ROADMAP-LOCAL.md's scope now that cloud-agent is actively
+**Local stays on ROADMAP.md's scope now that cloud-agent is actively
 working (decided 2026-09-04, after a same-day collision — see
-ROADMAP-CLOUD.md's "Phase 2 finished twice in parallel" note and
+ROADMAP.md's "Phase 2 finished twice in parallel" note and
 CLOUD-AGENT-WORKFLOW.md § Current assignment for the full account):** local
 sessions build Phase 1 and the start of Phase 2 of the Next.js/Supabase
 migration directly on `main` were a one-time exception while no cloud-agent
@@ -383,17 +386,19 @@ branch before starting anything that could overlap — not just at hand-off.
 - Otherwise: run the app, `tsc`/`eslint`/`vitest`/`pytest`, Playwright/e2e,
   manual click-through verification, filing/fixing bugs found while testing —
   the local dev/test loop, not the next cloud-roadmap feature slice.
-- Roadmap docs: [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) tracks what's
-  live/in-progress on the cloud roadmap (read-only from here now, incl. the
-  Next.js/Supabase migration — see § Stack migration above);
-  [ROADMAP-LOCAL.md](docs/esti/ROADMAP-LOCAL.md) is local's own scope — the
-  local dev/test loop, plus verifying and merging cloud-agent branches.
+- Roadmap doc: [ROADMAP.md](docs/esti/ROADMAP.md) — the single merged
+  roadmap (2026-09-10) tracks current status, what's live, open items,
+  and the full dated build history (incl. the Next.js/Supabase
+  migration — see § History). It no longer splits cloud vs. local scope
+  into separate files; the local dev/test loop and cloud-agent branch
+  verification/merge responsibilities described in this section still
+  apply exactly as written above.
 
 ## Dev / verify loop
 
 > **Local Postgres removed (2026-09-04).** `compose.yaml`'s `db` service is
 > gone — the full current schema (70 tables as of this date, still growing)
-> now lives on Supabase; see [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md).
+> now lives on Supabase; see [ROADMAP.md](docs/esti/ROADMAP.md).
 > This means **`backend`/`worker` no longer run locally out of the box** —
 > both require an externally-supplied `DATABASE_URL` (compose fails fast
 > with a clear message if it's unset, rather than silently trying to reach
@@ -441,7 +446,7 @@ branch before starting anything that could overlap — not just at hand-off.
   real signed-in app. `web/.env` already points at it. `aorms-platform`
   (`qbgbnhthchhbammzeebg`) is the separate identity/licensing project —
   unaffected throughout, still the two-project split this repo has used
-  since 2026-09-07. See [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md)'s
+  since 2026-09-07. See [ROADMAP.md](docs/esti/ROADMAP.md)'s
   own dated entry for the full account.
 - **Supabase migrations**: write a new numbered `.sql` file under
   `web/supabase/migrations/`, then apply it via the Supabase Management API
@@ -452,7 +457,7 @@ branch before starting anything that could overlap — not just at hand-off.
   provided fresh each session, never committed. Verify every migration
   against the live project afterward (table + RLS-policy existence, and any
   non-trivial logic smoke-tested with real inserted rows) — see
-  [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) for the established pattern
+  [ROADMAP.md](docs/esti/ROADMAP.md) for the established pattern
   across migrations `0001`–`0015`.
 - **Local Supabase stacks + Podman removed entirely (2026-09-08).** Both
   local stacks below (`web/supabase/` and `platform/supabase/`) were
@@ -466,7 +471,7 @@ branch before starting anything that could overlap — not just at hand-off.
   lines removed (kept only the unrelated `OLLAMA_MODEL` line) so `next
   dev` now falls through to `.env`'s cloud values for **both** projects,
   same as production. Both cloud projects are fully schema-current as of
-  this date — see [ROADMAP-CLOUD.md](docs/esti/ROADMAP-CLOUD.md) and the
+  this date — see [ROADMAP.md](docs/esti/ROADMAP.md) and the
   Supabase migrations bullet above, which is the standing discipline that
   didn't change: still write a migration → verify against the live cloud
   project via the Management API (no local stack to verify against
@@ -524,7 +529,7 @@ branch before starting anything that could overlap — not just at hand-off.
   many-companies-per-person membership, usage-hour tracking, automatic
   Basic→Pro at 100h) lives in its **own** Supabase CLI project,
   `platform/supabase/`, deliberately separate from `web/supabase/` — see
-  `docs/esti/AORMS-IDENTITY.md` and `docs/esti/ROADMAP-CLOUD.md` for why
+  `docs/esti/AORMS-IDENTITY.md` and `docs/esti/ROADMAP.md` for why
   (short version: `web/`'s schema is single-tenant per deployment, so
   "one person, many companies" needs a genuinely separate database).
   Start/stop the same way as `web/`'s own stack, from `platform/`:

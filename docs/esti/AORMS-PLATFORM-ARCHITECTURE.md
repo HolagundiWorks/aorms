@@ -104,7 +104,7 @@ UI:** a Portal can only ever *purchase* a licence change (via Razorpay,
 verified by the webhook — `app/api/razorpay/webhook/route.ts` — or the
 client-side fast-path confirmation, `confirmPaymentClientSide`) or
 *request* one; only Admin can *directly set* a licence's plan/seats/expiry
-with no payment attached. `docs/esti/ROADMAP-CLOUD.md`'s dated entry for
+with no payment attached. `docs/esti/ROADMAP.md`'s dated History entry for
 this work has the full incident/design account; this doc only states the
 resulting boundary.
 
@@ -132,7 +132,6 @@ resulting boundary.
   doc this system was built from (predates the Studio/Company rename and
   the admin/payments work; historical, not fully current — this doc is
   the one to trust for current nomenclature and boundaries).
-- [`docs/esti/ROADMAP-CLOUD.md`](ROADMAP-CLOUD.md) § Stack migration — the
-  dated, narrative build history (what was built when, why, what was
-  verified) for every Platform feature including this admin/payments
-  round.
+- [`docs/esti/ROADMAP.md`](ROADMAP.md) § History — the dated, narrative
+  build history (what was built when, why, what was verified) for every
+  Platform feature including this admin/payments round.
