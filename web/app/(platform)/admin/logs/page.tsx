@@ -1,5 +1,5 @@
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@carbon/react";
-import { getCurrentPlatformSessionAccount } from "../../../../lib/platform/account";
+import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
@@ -17,7 +17,7 @@ import { SysDexPortalHeader } from "../../../../components/aorms/platform/Portal
  */
 export default async function AdminLogsPage() {
   const account = await getCurrentPlatformSessionAccount();
-  if (!account?.is_admin) return <AdminAccessDenied title="Activity Log" />;
+  if (!isSuperAdmin(account)) return <AdminAccessDenied title="Activity Log" />;
 
   const platformService = createPlatformServiceRoleClient();
   const { data: log } = await platformService

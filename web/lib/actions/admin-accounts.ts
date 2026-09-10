@@ -15,7 +15,7 @@
  */
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { getCurrentPlatformSessionAccount } from "../platform/account";
+import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 
 export type AdminAccountActionState = { error: string } | { success: string } | null;
@@ -23,7 +23,7 @@ export type AdminAccountActionState = { error: string } | { success: string } | 
 async function requirePlatformAdmin(): Promise<{ accountId: string } | { error: string }> {
   const account = await getCurrentPlatformSessionAccount();
   if (!account) return { error: "Sign in to the AORMS Platform first." };
-  if (!account.is_admin) return { error: "Admin access required." };
+  if (!isSuperAdmin(account)) return { error: "Admin access required." };
   return { accountId: account.id };
 }
 

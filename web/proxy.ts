@@ -22,8 +22,21 @@ import { ROOT_DOMAIN, PORTAL_HOME, isSharedPath, ownerOf, portalFromHost } from 
  * `aorms.in/identity`, already live in production before this date)
  * redirects to that portal's subdomain — keeps old bookmarks/indexed
  * links working.
+ *
+ * Production only. A real browser (unlike curl, which can fake a Host
+ * header while still connecting to 127.0.0.1) has to actually resolve
+ * `identity.aorms.in` etc. via DNS to navigate there — which it can't,
+ * locally — so without this gate, local dev would 404/hang on every
+ * single portal path the moment this redirect fires. Local dev keeps
+ * serving `/identity`, `/connectdex`, `/admin` etc. directly at their
+ * real path, exactly as before this feature existed. The redirect logic
+ * itself is unchanged and was verified via `curl -H "Host: ..."`
+ * against this same dev server with this gate temporarily lifted — see
+ * docs/esti/ROADMAP.md's dated entry for that account.
  */
 function routePortalSubdomains(request: NextRequest): NextResponse | null {
+  if (process.env.NODE_ENV !== "production") return null;
+
   const currentPortal = portalFromHost(request.headers.get("host"));
   const { pathname } = request.nextUrl;
 

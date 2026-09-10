@@ -97,9 +97,24 @@ actually replying to the submitter is manual/out of band for now.
 every account and can send a Supabase Auth recovery email
 (`resetPasswordForEmail`, the same "Supabase's own email delivery only"
 convention as `inviteUserByEmail` elsewhere), logging a
-`password_reset_requests` row for the activity trail. `is_admin` itself
-stays DB-only — no grant/revoke toggle was added; that boundary (see
-`platform/supabase/migrations/0009_admin_role.sql`) is unchanged.
+`password_reset_requests` row for the activity trail. `admin_role`
+itself stays DB-only — no grant/revoke toggle was added; that boundary
+(see `platform/supabase/migrations/0009_admin_role.sql`) is unchanged.
+
+**SysDeX has two staff roles (2026-09-10)** — `accounts.admin_role`
+(`platform/supabase/migrations/0016_admin_role.sql`): **SUPER_ADMIN**
+sees every `/admin/*` page (Accounts, Licences, Payments, Pricing,
+ConnectDeX review, Logs) and can perform every admin write action;
+**SUPPORT_STAFF** is scoped to the dashboard and `/admin/helpdesk` only
+— everything else renders `AdminAccessDenied`. `accounts.is_admin`
+(the older column) keeps meaning "any platform staff at all" and every
+RLS "admin read" policy still keys off it unchanged — the role split is
+enforced at the page/Server-Action layer (`isSuperAdmin()` in
+`lib/platform/account.ts`), not at the RLS layer. See
+`docs/esti/ROADMAP.md`'s dated entry for the full account, including the
+disclosed scope boundary (support staff can still technically *read*,
+not write, Licence/Payment/Account data via a direct API call — same as
+before this split, unchanged, not newly introduced).
 
 **Admin-auth fix — SysDeX signs in with its own Platform session.**
 Every admin gate used to resolve via `getCurrentPlatformAccount()` — the

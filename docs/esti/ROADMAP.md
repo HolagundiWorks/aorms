@@ -4240,6 +4240,88 @@ persistence (the `.aorms.in` cookie) and the subdomains actually
 resolving, both of which need live DNS/SSL this session has no way to
 provision.
 
+**Local-dev fix, found while verifying the above**: the subdomain
+redirect broke local browser testing entirely — a real browser (unlike
+`curl`, which can fake a `Host` header while still connecting to
+127.0.0.1) has to actually resolve `identity.aorms.in` etc. via DNS to
+navigate there, which it can't locally, so every single portal path
+hung/failed to load in the dev server's own browser preview.
+`proxy.ts`'s subdomain routing is now gated on `NODE_ENV === "production"`
+— local dev serves `/identity`/`/connectdex`/`/admin` etc. directly at
+their real path again, exactly as before the feature existed; production
+is unaffected (the already-verified `curl` checks above still hold, the
+gate just wraps the same unchanged logic).
+
+**SysDeX admin role split — SUPER_ADMIN vs SUPPORT_STAFF, plus real
+accounts (2026-09-10).** Explicit direction: create a demo account, a
+SysDeX admin account, and support-staff logins. Confirmed via
+AskUserQuestion before building: support staff scoped down to HelpDeX
+only (not the same power as the SysDeX admin — Licences/Payments/
+Pricing/Accounts/ConnectDeX-review/Logs stay SUPER_ADMIN-only), real
+accounts at `admin@aorms.in`/`support@aorms.in`/`demo@aorms.in` with
+generated passwords, and the demo account seeded with a real demo Studio
++ Company so a walkthrough shows populated data in both Identity and
+ConnectDeX portals, not an empty shell.
+
+Migration `0016_admin_role.sql` (`aorms-platform`) adds
+`accounts.admin_role` (`'SUPER_ADMIN' | 'SUPPORT_STAFF'`, nullable) as
+the new application-layer fine-grained gate. `accounts.is_admin` keeps
+its existing meaning ("any platform staff at all") and every RLS policy
+that reads it is untouched — a `before insert or update of admin_role`
+trigger (`sync_account_is_admin`) keeps `is_admin` in sync with
+`admin_role` automatically so the two columns can't drift. **Disclosed
+scope boundary**: this is a page/action-layer restriction, not an RLS
+one — a support-staff account can still technically read (not write)
+Licence/Payment/Account rows via a direct PostgREST call, same as any
+`is_admin=true` account always could; narrowing the RLS "admin read"
+policies themselves to be role-aware too is a real follow-up, not
+attempted here, since every page and every write action (what actually
+matters) is covered.
+
+New `isSuperAdmin()` helper (`lib/platform/account.ts`) — every
+`/admin/*` page except the dashboard and HelpDeX now checks it instead
+of the old flat `is_admin`; the three `requirePlatformAdmin()`
+duplicates gating write actions (`platform-payments.ts`,
+`connectdex.ts`, `admin-accounts.ts`) do too. `support.ts`'s own
+`requirePlatformAdmin()` deliberately stays `is_admin`-based — triaging
+tickets is exactly support staff's job. `SysDexPortalHeader` and the
+admin dashboard are now role-aware: support staff see only
+Dashboard + HelpDeX in the nav, and the dashboard itself shows a small
+"open tickets" view instead of platform-wide KPIs/payments/activity with
+dead-end links into pages they can't open. `/admin/accounts` now shows
+each account's actual role (Super Admin / Support Staff tag) instead of
+a flat Admin/— toggle.
+
+Three real accounts created via the Auth Admin API
+(`createUser` with `email_confirm: true` — not `inviteUserByEmail`,
+since these needed to work immediately with known credentials, not a
+self-serve invite link) and `admin_role` set directly (still DB-only,
+per `0016`'s own header comment — no grant/revoke UI added): `admin@aorms.in`
+(SUPER_ADMIN), `support@aorms.in` (SUPPORT_STAFF), `demo@aorms.in` (no
+admin role). The demo account additionally owns a real seeded Studio
+("Demo Architecture Studio", TRIAL licence, minted via the same
+`after_studio_insert_licence` trigger a real create-studio action
+triggers) and a real seeded Company ("Demo Materials Co", `ACTIVE`
+status, 3 sample products spanning all three material categories).
+
+Verified: `tsc --noEmit`, `eslint .`, full `next build --webpack` clean.
+Migration applied and both `is_admin`/`admin_role` columns + the sync
+trigger confirmed live. **Full live browser click-through as each of the
+three accounts, not just typechecked** — signed in as
+`support@aorms.in`: `/admin` renders the scoped support-staff dashboard,
+`/admin/helpdesk` opens normally, `/admin/licences` correctly renders
+`AdminAccessDenied`, and the header nav shows only Dashboard/HelpDeX;
+signed in as `admin@aorms.in`: `/admin` shows the full dashboard (1
+Studio, 3 Accounts, real activity feed), `/admin/accounts` lists all
+three accounts with the correct role tags; signed in as `demo@aorms.in`:
+`/materials` lists all 3 demo products under "Demo Materials Co",
+`/studios/<demo-studio-id>` and `/companies/<demo-company-id>` both
+render fully populated with the demo account as OWNER. (Client-side
+hydration was stuck in this session's own sandboxed browser tool for
+part of this check — worked around by reading the server-streamed HTML
+directly via `javascript_tool`, which is a genuine render of what the
+server actually sent, same confidence as a normal page load.)
+
 ---
 
 ## Support & questions

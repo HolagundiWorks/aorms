@@ -2,11 +2,22 @@ import { createClient as createWebClient } from "../supabase/server";
 import { createClient as createPlatformClient } from "./server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "./service";
 
+export type AdminRole = "SUPER_ADMIN" | "SUPPORT_STAFF" | null;
+
 export type CurrentPlatformAccount = {
   id: string;
   public_id: string;
   is_admin: boolean;
+  admin_role: AdminRole;
 };
+
+/** Every /admin/* page except the dashboard and HelpDeX is SUPER_ADMIN-
+ * only (2026-09-10, platform/supabase/migrations/0016_admin_role.sql) —
+ * Licences/Payments/Pricing/Accounts(password reset)/ConnectDeX-review/
+ * Logs. Support staff are scoped to /admin (dashboard) + /admin/helpdesk. */
+export function isSuperAdmin(account: CurrentPlatformAccount | null): boolean {
+  return account?.admin_role === "SUPER_ADMIN";
+}
 
 /**
  * Resolves the AORMS Platform account linked to the current web/ session,
@@ -37,7 +48,7 @@ export async function getCurrentPlatformAccount(): Promise<CurrentPlatformAccoun
   const platformService = createPlatformServiceRoleClient();
   const { data: account } = await platformService
     .from("accounts")
-    .select("id, public_id, is_admin")
+    .select("id, public_id, is_admin, admin_role")
     .eq("public_id", profile.platform_public_id)
     .maybeSingle();
 
@@ -67,15 +78,21 @@ export async function getCurrentPlatformSessionAccount(): Promise<CurrentPlatfor
   if (!user) return null;
 
   const platformService = createPlatformServiceRoleClient();
-  const { data: account } = await platformService.from("accounts").select("id, public_id, is_admin").eq("id", user.id).maybeSingle();
+  const { data: account } = await platformService
+    .from("accounts")
+    .select("id, public_id, is_admin, admin_role")
+    .eq("id", user.id)
+    .maybeSingle();
 
   return account ?? null;
 }
 
 /** Nav-bar status shared by all three portal headers (PortalHeaders.tsx) —
- * signed in (Platform's own session) and, if so, whether they're a
- * platform admin (for the cross-portal "SysDeX" link). */
-export async function getPlatformNavStatus(): Promise<{ signedIn: boolean; isAdmin: boolean }> {
+ * signed in (Platform's own session), whether they're any kind of
+ * platform staff (for the cross-portal "SysDeX" link), and whether
+ * they're specifically a SUPER_ADMIN (for which SysDeX nav items to
+ * show — support staff only ever see Dashboard + HelpDeX). */
+export async function getPlatformNavStatus(): Promise<{ signedIn: boolean; isAdmin: boolean; isSuperAdmin: boolean }> {
   const account = await getCurrentPlatformSessionAccount();
-  return { signedIn: !!account, isAdmin: !!account?.is_admin };
+  return { signedIn: !!account, isAdmin: !!account?.is_admin, isSuperAdmin: isSuperAdmin(account) };
 }

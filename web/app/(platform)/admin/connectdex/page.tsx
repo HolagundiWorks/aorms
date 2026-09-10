@@ -1,5 +1,5 @@
 import { Column, Grid, Stack, Tag, Tile } from "@carbon/react";
-import { getCurrentPlatformSessionAccount } from "../../../../lib/platform/account";
+import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { adminInviteConnectDexApplication, adminRejectConnectDexApplication, adminVerifyConnectDexCompany } from "../../../../lib/actions/connectdex";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
@@ -18,7 +18,7 @@ import { SysDexPortalHeader } from "../../../../components/aorms/platform/Portal
  */
 export default async function AdminConnectDexPage() {
   const account = await getCurrentPlatformSessionAccount();
-  if (!account?.is_admin) return <AdminAccessDenied title="ConnectDeX Partners" />;
+  if (!isSuperAdmin(account)) return <AdminAccessDenied title="ConnectDeX Partners" />;
 
   const platformService = createPlatformServiceRoleClient();
   const [{ data: applications }, { data: pendingVerification }, { data: pendingPayment }, { data: settings }] = await Promise.all([

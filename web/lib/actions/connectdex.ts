@@ -21,7 +21,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
-import { getCurrentPlatformSessionAccount } from "../platform/account";
+import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
 import { createOrder, verifyPaymentSignature } from "../platform/razorpay";
 import { applyCapturedConnectDexPayment } from "../platform/connectdex-payment";
 
@@ -75,7 +75,7 @@ export async function submitConnectDexApplication(_prev: ConnectDexActionState, 
 async function requirePlatformAdmin(): Promise<{ error: string } | null> {
   const account = await getCurrentPlatformSessionAccount();
   if (!account) return { error: "Sign in to the AORMS Platform first." };
-  if (!account.is_admin) return { error: "Admin access required." };
+  if (!isSuperAdmin(account)) return { error: "Admin access required." };
   return null;
 }
 

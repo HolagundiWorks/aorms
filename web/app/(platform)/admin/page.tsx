@@ -1,6 +1,6 @@
 import NextLink from "next/link";
 import { Column, Grid, Stack } from "@carbon/react";
-import { getCurrentPlatformSessionAccount } from "../../../lib/platform/account";
+import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
 import { AdminAccessDenied } from "../../../components/aorms/platform/AdminAccessDenied";
 import { KpiTile } from "../../../components/aorms/KpiTile";
@@ -9,17 +9,45 @@ import { SysDexPortalHeader } from "../../../components/aorms/platform/PortalHea
 
 /**
  * AORMS Platform admin back office — dashboard. Gated behind
- * accounts.is_admin (platform/supabase/migrations/0009_admin_role.sql), a
- * column settable only via direct DB access, no self-service grant UI in
- * this pass (see docs/esti/ROADMAP-CLOUD.md's dated entry for the full
- * design). Every count below is a cheap `head: true` row count, not a full
- * row fetch — same KPI-strip pattern used throughout app/(app)/*.
+ * accounts.is_admin (any platform staff, SUPER_ADMIN or SUPPORT_STAFF —
+ * platform/supabase/migrations/0016_admin_role.sql), a column settable
+ * only via direct DB access, no self-service grant UI in this pass. The
+ * full platform-wide KPIs/payments/activity below are SUPER_ADMIN only —
+ * support staff get a smaller, HelpDeX-focused view instead of dead-end
+ * links into pages they can't open. Every count below is a cheap
+ * `head: true` row count, not a full row fetch — same KPI-strip pattern
+ * used throughout app/(app)/*.
  */
 export default async function AdminDashboardPage() {
   const account = await getCurrentPlatformSessionAccount();
   if (!account?.is_admin) return <AdminAccessDenied title="Admin" />;
 
   const platformService = createPlatformServiceRoleClient();
+
+  if (!isSuperAdmin(account)) {
+    const { count: openTicketCount } = await platformService
+      .from("support_tickets")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["OPEN", "IN_PROGRESS"]);
+
+    return (
+      <>
+        <SysDexPortalHeader />
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <PageHeader title="Admin" description="SysDeX — support staff view." />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+              <KpiTile label="Open HelpDeX tickets" value={openTicketCount ?? 0} />
+            </div>
+            <NextLink href="/admin/helpdesk" className="cds--type-body-01">
+              Go to HelpDeX →
+            </NextLink>
+          </Column>
+        </Grid>
+      </>
+    );
+  }
+
   const [{ count: studioCount }, { count: accountCount }, { data: licences }, { data: recentPayments }, { data: recentActivity }] =
     await Promise.all([
       platformService.from("studios").select("id", { count: "exact", head: true }),

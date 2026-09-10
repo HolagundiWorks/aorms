@@ -112,7 +112,7 @@ export async function ConnectDexPortalHeader() {
 }
 
 export async function SysDexPortalHeader() {
-  const { signedIn } = await getPlatformNavStatus();
+  const { signedIn, isSuperAdmin } = await getPlatformNavStatus();
   return (
     <header style={barStyle}>
       <Brand href="/admin" name="SysDeX" tagline="Platform administration" />
@@ -120,27 +120,33 @@ export async function SysDexPortalHeader() {
         <NextLink href="/admin" className="cds--type-body-01">
           Dashboard
         </NextLink>
-        <NextLink href="/admin/accounts" className="cds--type-body-01">
-          Accounts
-        </NextLink>
-        <NextLink href="/admin/licences" className="cds--type-body-01">
-          Licences
-        </NextLink>
-        <NextLink href="/admin/payments" className="cds--type-body-01">
-          Payments
-        </NextLink>
-        <NextLink href="/admin/pricing" className="cds--type-body-01">
-          Pricing
-        </NextLink>
-        <NextLink href="/admin/connectdex" className="cds--type-body-01">
-          ConnectDeX
-        </NextLink>
+        {isSuperAdmin && (
+          <>
+            <NextLink href="/admin/accounts" className="cds--type-body-01">
+              Accounts
+            </NextLink>
+            <NextLink href="/admin/licences" className="cds--type-body-01">
+              Licences
+            </NextLink>
+            <NextLink href="/admin/payments" className="cds--type-body-01">
+              Payments
+            </NextLink>
+            <NextLink href="/admin/pricing" className="cds--type-body-01">
+              Pricing
+            </NextLink>
+            <NextLink href="/admin/connectdex" className="cds--type-body-01">
+              ConnectDeX
+            </NextLink>
+          </>
+        )}
         <NextLink href="/admin/helpdesk" className="cds--type-body-01">
           HelpDeX
         </NextLink>
-        <NextLink href="/admin/logs" className="cds--type-body-01">
-          Logs
-        </NextLink>
+        {isSuperAdmin && (
+          <NextLink href="/admin/logs" className="cds--type-body-01">
+            Logs
+          </NextLink>
+        )}
         <SignInOut signedIn={signedIn} />
       </nav>
     </header>

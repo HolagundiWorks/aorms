@@ -1,5 +1,5 @@
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
-import { getCurrentPlatformSessionAccount } from "../../../../lib/platform/account";
+import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
@@ -23,7 +23,7 @@ const STATUS_TAG: Record<string, "gray" | "cyan" | "green" | "red" | "magenta"> 
  */
 export default async function AdminPaymentsPage() {
   const account = await getCurrentPlatformSessionAccount();
-  if (!account?.is_admin) return <AdminAccessDenied title="Payments" />;
+  if (!isSuperAdmin(account)) return <AdminAccessDenied title="Payments" />;
 
   const platformService = createPlatformServiceRoleClient();
   const { data: payments } = await platformService

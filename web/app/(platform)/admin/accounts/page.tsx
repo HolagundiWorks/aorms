@@ -1,5 +1,5 @@
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
-import { getCurrentPlatformSessionAccount } from "../../../../lib/platform/account";
+import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { SendPasswordResetButton } from "../../../../components/aorms/platform/SendPasswordResetButton";
@@ -7,21 +7,22 @@ import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 
 /**
- * SysDeX — Accounts (2026-09-10). Every AORMS-U- personal account,
- * platform-wide — the list a password reset needs (there was previously
- * no page showing individual accounts at all, only membership rows joined
- * through a Studio/Company). `is_admin` itself stays DB-only here — no
- * grant/revoke toggle added (see platform/supabase/migrations/
- * 0009_admin_role.sql's own header comment) — that boundary is unchanged.
+ * SysDeX — Accounts, SUPER_ADMIN only (2026-09-10). Every AORMS-U-
+ * personal account, platform-wide — the list a password reset needs
+ * (there was previously no page showing individual accounts at all, only
+ * membership rows joined through a Studio/Company). `admin_role` itself
+ * stays DB-only here — no grant/revoke toggle added (see
+ * platform/supabase/migrations/0016_admin_role.sql's own header comment)
+ * — that boundary is unchanged.
  */
 export default async function AdminAccountsPage() {
   const account = await getCurrentPlatformSessionAccount();
-  if (!account?.is_admin) return <AdminAccessDenied title="Accounts" />;
+  if (!isSuperAdmin(account)) return <AdminAccessDenied title="Accounts" />;
 
   const platformService = createPlatformServiceRoleClient();
   const { data: accounts } = await platformService
     .from("accounts")
-    .select("id, public_id, full_name, level, is_admin, created_at")
+    .select("id, public_id, full_name, level, admin_role, created_at")
     .order("created_at", { ascending: false })
     .limit(200);
 
@@ -53,7 +54,19 @@ export default async function AdminAccountsPage() {
                       {a.level}
                     </Tag>
                   </TableCell>
-                  <TableCell>{a.is_admin ? <Tag type="purple" size="sm">Admin</Tag> : "—"}</TableCell>
+                  <TableCell>
+                    {a.admin_role === "SUPER_ADMIN" ? (
+                      <Tag type="purple" size="sm">
+                        Super Admin
+                      </Tag>
+                    ) : a.admin_role === "SUPPORT_STAFF" ? (
+                      <Tag type="teal" size="sm">
+                        Support Staff
+                      </Tag>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
                   <TableCell>{new Date(a.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <SendPasswordResetButton accountId={a.id} accountLabel={`${a.full_name || a.public_id} (${a.public_id})`} />

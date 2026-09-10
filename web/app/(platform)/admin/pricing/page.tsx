@@ -1,5 +1,5 @@
 import { Column, Grid, InlineNotification, Stack, Tile } from "@carbon/react";
-import { getCurrentPlatformSessionAccount } from "../../../../lib/platform/account";
+import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { SetPricingForm } from "../../../../components/aorms/platform/SetPricingForm";
@@ -14,7 +14,7 @@ import { SysDexPortalHeader } from "../../../../components/aorms/platform/Portal
  */
 export default async function AdminPricingPage() {
   const account = await getCurrentPlatformSessionAccount();
-  if (!account?.is_admin) return <AdminAccessDenied title="Pricing" />;
+  if (!isSuperAdmin(account)) return <AdminAccessDenied title="Pricing" />;
 
   const platformService = createPlatformServiceRoleClient();
   const { data: pricing } = await platformService.from("plan_pricing").select("plan, price_per_seat_paise").order("plan");

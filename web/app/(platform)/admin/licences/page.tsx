@@ -1,5 +1,5 @@
 import { Column, Grid, Stack, Tag, Tile } from "@carbon/react";
-import { getCurrentPlatformSessionAccount } from "../../../../lib/platform/account";
+import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { UpdateLicenceForm } from "../../../../components/aorms/platform/UpdateLicenceForm";
@@ -19,7 +19,7 @@ function isLicenceActive(expiresAt: string | null): boolean {
  */
 export default async function AdminLicencesPage() {
   const account = await getCurrentPlatformSessionAccount();
-  if (!account?.is_admin) return <AdminAccessDenied title="Licences" />;
+  if (!isSuperAdmin(account)) return <AdminAccessDenied title="Licences" />;
 
   const platformService = createPlatformServiceRoleClient();
   const { data: licences } = await platformService
