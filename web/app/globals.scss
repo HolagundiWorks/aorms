@@ -247,3 +247,24 @@ body {
     border-radius: 2px;
   }
 }
+
+// Landing header responsive nav (components/aorms/LandingHeader.tsx +
+// MobileNavToggle.tsx, 2026-09-10) — the desktop text-link nav and the
+// mobile hamburger toggle both render unconditionally in the header's
+// markup; this media query is what actually decides which one is
+// visible, so there's no server/client viewport-detection mismatch.
+// Breakpoint matches Carbon's own `md` (42rem) rather than inventing a
+// new one.
+.landing-nav-mobile-toggle {
+  display: none;
+}
+
+@media (max-width: 42rem) {
+  .landing-nav-desktop {
+    display: none !important;
+  }
+
+  .landing-nav-mobile-toggle {
+    display: block;
+  }
+}

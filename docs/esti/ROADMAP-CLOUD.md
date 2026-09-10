@@ -3517,6 +3517,94 @@ before the page had finished its first paint, not a real bug in the
 actual click path a visitor would use; confirmed by testing the click
 itself separately rather than assuming the first result was correct.
 
+**Landing page — acted on 6 of my own review suggestions, same day
+(2026-09-10).** Asked the user for feedback on the landing page as a
+whole; gave 7 prioritized suggestions (product screenshots; Identity/
+Company sections placed too early, ahead of the product pitch; the
+"Live" tag with no context; a thin FAQ; no mobile nav menu; no social
+proof; no real OG image). Directed to act on section reorder, the Live
+tag, FAQ, and the mobile menu directly, and to use generic/placeholder
+content — not fabricated — for social proof and the OG image. (Product
+screenshots, suggestion #1, weren't requested this round — still open.)
+
+- **Reordered sections**: Identity and Company (account/platform
+  mechanics) moved to sit directly ahead of the CTA band, after Blog,
+  instead of sandwiched between Fee Proposal and Blog in the middle of
+  the product pitch — new order is Brief → Specification → Intelligence
+  → Fee Proposal → Blog → Identity → Company → CTA band → FAQ. A first-
+  time visitor now finishes hearing what the product does and what it
+  costs before being asked to absorb `AORMS-U-`/`AORMS-S-`/`AORMS-C-`
+  account mechanics.
+- **"Live" tag** now reads "Live in production" instead of the bare,
+  context-free "Live."
+- **FAQ expanded** from 3 to 6 questions — added Trial-expiry behavior
+  (30 days, no auto-charge, nothing deleted — matches the real licence
+  mechanics in `platform/supabase/migrations/0004_licences.sql`/
+  `0011_licence_payment_gate.sql`), team-size limits (per-seat, no fixed
+  cap), and data migration (honest answer: no bulk-import wizard exists
+  yet — didn't claim a feature that isn't built). Also folded the AWS
+  Mumbai (`ap-south-1`) hosting region into the existing "where does our
+  data live" answer, a real, specific, already-true detail that wasn't
+  stated before.
+- **Mobile nav menu** — new `components/aorms/MobileNavToggle.tsx`
+  (Client Component, `useState` for open/closed) + two CSS classes in
+  `globals.scss` (`.landing-nav-desktop`/`.landing-nav-mobile-toggle`,
+  flipped by a `42rem` media query matching Carbon's own `md` breakpoint)
+  so `LandingHeader.tsx` itself stays a Server Component — both navs
+  render unconditionally in the markup, CSS decides which is visible, no
+  server/client viewport-detection mismatch to worry about. **Found and
+  fixed a real bug while wiring this in**: adding the `landing-nav-desktop`
+  className accidentally dropped the inline `display: "flex"` the nav
+  needed for its `gap` to apply at all — the desktop nav rendered with
+  zero spacing between links, all six run together, caught immediately
+  via a live screenshot before committing, not shipped.
+- **Social proof** (suggestion #5) — a `TRUST_STRIP` band between the
+  hero and Brief, four short lines, deliberately not fabricated
+  testimonials, invented client names/logos, or a made-up customer
+  count: every line restates a claim already made and true elsewhere on
+  this same page (India hosting, GST/TDS compliance, no metered AI). A
+  genuine placeholder for real social proof once there's a real customer
+  base to feature, not a placeholder standing in for something false.
+- **OG/share image** (suggestion #7) — new `app/opengraph-image.tsx`
+  using Next's `next/og` (`ImageResponse`/Satori) to generate a real
+  1200×630 branded card (wordmark + headline + India tagline on a solid
+  dark background), replacing the previous fallback of just reusing the
+  816×216 wordmark PNG at the wrong aspect ratio. Deliberately text/
+  brand-only, not a mocked-up product screenshot — a generic placeholder
+  card is honest; a fake "screenshot" that isn't a real capture of the
+  app wouldn't be.
+
+**A genuine environment issue hit and correctly diagnosed while verifying
+the mobile menu, not mistaken for a code bug**: clicking the hamburger
+button repeatedly timed out with "Claude's window may be covered by
+another window, which can stop the page from drawing" — a real
+OS-level input-simulation limitation of this session's browser tooling,
+not a React bug. Confirmed by dispatching the click programmatically via
+`javascript_tool` instead (`document.querySelector(...).click()`) — the
+toggle fired correctly (`aria-label` flipped to "Close menu", the nav
+panel appeared in the DOM), then reproduced visually with a screenshot
+once mouse-simulation started working again on a retry. Separately, also
+hit and correctly diagnosed the same **stale console-buffer noise**
+already documented earlier this session (hours-old dev-server session,
+10+ hours and hundreds of hot-reloads deep) — a wall of old `TEMP
+error.tsx`/`DEMO is not defined`/stale-syntax-error console entries that
+looked alarming out of context; resolved by restarting the dev server
+fresh (`preview_stop` + `rm -rf .next` + `preview_start`) rather than
+chasing phantom errors, confirmed the fresh server's own logs and a full
+`get_page_text` dump showed the actual current page rendering correctly.
+
+Verified: `tsc --noEmit` and `eslint .` (whole package) clean, a full
+`next build --webpack` clean across all 90+ routes plus the new
+`/opengraph-image` route. Live-verified every piece with real
+screenshots on a freshly-restarted dev server: reordered sections
+confirmed via a full `get_page_text` dump (Fee Proposal → Blog →
+Identity → Company → CTA band, in that order); the "Live in production"
+tag and expanded FAQ (all 6 questions) both present; the mobile menu
+opens/closes correctly at a 375px viewport with all six links, verified
+via both a direct DOM dispatch and a real click; the trust strip renders
+between hero and Brief; `/opengraph-image` renders a correct 1200×630
+branded card.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus

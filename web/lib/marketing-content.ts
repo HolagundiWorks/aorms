@@ -64,6 +64,23 @@ export const HUMAN_CENTRIC_WORKS = {
   email: "hi@aorms.in",
 } as const;
 
+/**
+ * A generic trust strip, not fabricated social proof (2026-09-10,
+ * explicit direction: "for 5 [social proof]... use placeholder/generic").
+ * Deliberately NOT fake testimonials, invented client names/logos, or a
+ * made-up customer count — every line here is a claim already made
+ * elsewhere on this page and independently true (India hosting: the
+ * blog/FAQ; GST/TDS: BRIEF/FEE_PROPOSAL; no metered AI: FEE_PROPOSAL).
+ * This is a placeholder in the sense of "no real customer quotes exist
+ * yet to feature" — not a placeholder standing in for something false.
+ */
+export const TRUST_STRIP = [
+  "Built for Indian architecture practices",
+  "GST & TDS compliant by design",
+  "Data hosted in Mumbai (AWS ap-south-1)",
+  "No metered AI billing",
+] as const;
+
 export const BRIEF = [
   {
     n: "01",
@@ -187,11 +204,26 @@ export const FAQ = [
   {
     question: "Where does our data live?",
     answer:
-      "In your own firm's cloud workspace. ESTI, the built-in AI agent, answers only from your firm's own validated records — it never trains a third-party model and never guesses from public data.",
+      "In your own firm's cloud workspace, hosted on AWS in Mumbai (ap-south-1). ESTI, the built-in AI agent, answers only from your firm's own validated records — it never trains a third-party model and never guesses from public data.",
   },
   {
     question: "Is there a desktop app?",
     answer:
       "No — AORMS is web-only, single sign-on into one office hub. No installers, no per-app logins, no separate desktop shell to maintain.",
+  },
+  {
+    question: "What happens when our Trial ends?",
+    answer:
+      "Every Studio starts on a 30-day Trial, no card required. If it lapses before you upgrade, the licence shows as inactive until a Standard or Premium plan is purchased — nothing is auto-charged, and nothing is deleted.",
+  },
+  {
+    question: "Is there a limit on team size?",
+    answer:
+      "No fixed cap — licensing is per seat, so you add exactly as many staff logins as your team needs on your plan, and adjust as the practice grows.",
+  },
+  {
+    question: "Can we bring in our existing client and project data?",
+    answer:
+      "There's no automated bulk-import wizard yet — most practices start clean and add active clients and projects directly. If you're migrating a large existing dataset, get in touch and we'll help plan it.",
   },
 ] as const;

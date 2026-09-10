@@ -20,6 +20,7 @@ import {
   INDIVIDUAL_IDENTITY,
   SPECIFICATION,
   STUDIO_IDENTITY,
+  TRUST_STRIP,
 } from "../lib/marketing-content";
 
 const PAGE_MAX = 1200;
@@ -106,8 +107,10 @@ export default async function LandingPage() {
         <section id="top" style={{ padding: SECTION_PAD }}>
           <Grid>
             <Column sm={4} md={8} lg={12}>
+              {/* "Live" alone gave no context (live since when, meaning
+                  what) — 2026-09-10 feedback. */}
               <Tag type="green" size="sm">
-                Live
+                Live in production
               </Tag>
               <p
                 className="cds--type-productive-heading-01"
@@ -128,6 +131,30 @@ export default async function LandingPage() {
             </Column>
           </Grid>
         </section>
+
+        {/* Trust strip — a generic, honest set of claims already made
+            elsewhere on this page (India hosting, GST/TDS, no metered AI),
+            not fabricated testimonials or a made-up customer count. Added
+            2026-09-10 as a placeholder for real social proof once there's
+            a real customer base to feature — see marketing-content.ts's
+            own header comment on TRUST_STRIP for why it's built this way. */}
+        <div style={{ padding: "1.5rem 0", borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <Grid>
+            <Column sm={4} md={8} lg={16}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem 2rem", justifyContent: "center" }}>
+                {TRUST_STRIP.map((line) => (
+                  <p
+                    key={line}
+                    className="cds--type-caption-01"
+                    style={{ color: "var(--cds-text-secondary)", letterSpacing: "0.02em" }}
+                  >
+                    {line}
+                  </p>
+                ))}
+              </div>
+            </Column>
+          </Grid>
+        </div>
 
         {/* Brief */}
       <section id="brief" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
@@ -255,6 +282,52 @@ export default async function LandingPage() {
         </Grid>
       </section>
 
+      {/* Blog — latest posts (moved here 2026-09-10, ahead of Identity/
+          Company: those two are account/platform mechanics, better placed
+          right before the final CTA than in the middle of the product
+          pitch — feedback after reviewing the page as a whole). The /blog
+          route already existed but was never linked from this page until
+          it was first added, further down, in an earlier pass. */}
+      {latestPosts.length > 0 && (
+        <section id="blog" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <Grid>
+            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
+              <p
+                className="cds--type-productive-heading-01"
+                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
+              >
+                From the Blog
+              </p>
+              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
+                Notes on running an architecture practice.
+              </h2>
+            </Column>
+            {latestPosts.map((post) => (
+              <Column key={post.slug} sm={4} md={4} lg={5} style={{ marginBottom: "1rem" }}>
+                <Tile style={{ height: "100%" }}>
+                  <p className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>
+                    {post.date}
+                  </p>
+                  <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.25rem" }}>
+                    <Link href={`/blog/${post.slug}`} className="cds--link">
+                      {post.title}
+                    </Link>
+                  </h3>
+                  <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
+                    {post.description}
+                  </p>
+                </Tile>
+              </Column>
+            ))}
+            <Column sm={4} md={8} lg={16} style={{ marginTop: "0.5rem" }}>
+              <Link href="/blog" className="cds--link">
+                View all posts →
+              </Link>
+            </Column>
+          </Grid>
+        </section>
+      )}
+
       {/* Identity — two distinct identity types: a person's own account,
           and an architecture Studio's own account. Rewritten 2026-09-10 —
           previously explained only the individual side. */}
@@ -357,48 +430,6 @@ export default async function LandingPage() {
           </Column>
         </Grid>
       </section>
-
-      {/* Blog — latest posts, added 2026-09-10 (the /blog route already
-          existed but was never linked from the landing page itself). */}
-      {latestPosts.length > 0 && (
-        <section id="blog" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <Grid>
-            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
-              <p
-                className="cds--type-productive-heading-01"
-                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-              >
-                From the Blog
-              </p>
-              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
-                Notes on running an architecture practice.
-              </h2>
-            </Column>
-            {latestPosts.map((post) => (
-              <Column key={post.slug} sm={4} md={4} lg={5} style={{ marginBottom: "1rem" }}>
-                <Tile style={{ height: "100%" }}>
-                  <p className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>
-                    {post.date}
-                  </p>
-                  <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.25rem" }}>
-                    <Link href={`/blog/${post.slug}`} className="cds--link">
-                      {post.title}
-                    </Link>
-                  </h3>
-                  <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
-                    {post.description}
-                  </p>
-                </Tile>
-              </Column>
-            ))}
-            <Column sm={4} md={8} lg={16} style={{ marginTop: "0.5rem" }}>
-              <Link href="/blog" className="cds--link">
-                View all posts →
-              </Link>
-            </Column>
-          </Grid>
-        </section>
-      )}
 
       {/* CTA band */}
       <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)", borderBottom: "1px solid var(--cds-border-subtle)" }}>
