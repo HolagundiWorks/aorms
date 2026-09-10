@@ -4150,6 +4150,96 @@ confirmed live; `tsc --noEmit`, `eslint .`, and a full `next build
 --webpack` — zero error/fail/warn lines, every new route (`/connectdex`,
 `/support`, `/admin/accounts`, `/admin/helpdesk`) present.
 
+**Platform subdomains — identity/connectdex/sysdex.aorms.in, routing-level
+split within the existing single deployment (2026-09-10).** Explicit
+direction: put the three portals on their own subdomains "so scaling
+becomes easier," then prepare for deployment. Confirmed via
+AskUserQuestion before building: routing-level separation within the
+current single Next.js app/build (not a genuine multi-deployment split —
+Hostinger Managed App Hosting's ability to run multiple independent app
+instances from one repo isn't confirmed this session, so committing to
+that would have been a guess), subdomain names matching the portal
+brands exactly, and "prepare for deployment" meaning code + a precise
+runbook rather than this session touching Hostinger/DNS directly (no
+access, and wouldn't use it even if it did).
+
+New `web/lib/platform/subdomains.ts` — the single routing table every
+other file imports from: which paths each portal owns
+(`/identity`+`/studios`+`/licences` → identity; `/connectdex`+
+`/connectdex-apply`+`/companies`+`/materials` → connectdex; `/admin` →
+sysdex), which paths are shared across all three + the main domain with
+no redirect (`/platform-login`, `/platform-signup`, `/support`), and
+`portalUrl()`/`resolvePortalHomeFromHost()` helpers for building
+cross-portal links. `web/proxy.ts` (Next.js 16's renamed
+`middleware.ts` — this repo's own `AGENTS.md` flags these breaking
+renames) gets a routing pass ahead of the existing session-refresh call:
+on a portal subdomain, only that portal's own paths and the shared paths
+are ever served — a path owned by a *different* portal redirects there,
+and a path owned by *no* portal (an Office Hub or marketing route)
+redirects back to the main domain. **This closes a real isolation gap
+found while designing it, not just a cosmetic routing nicety**: without
+the "owned by no portal → bounce to main domain" rule,
+`identity.aorms.in/dashboard` would have silently served the Office
+Hub's dashboard, since one Next.js route tree answers every hostname
+regardless of which one a request arrived on. On the main domain, a path
+some portal owns (the old in-path URLs already live in production, e.g.
+`aorms.in/identity`) redirects to that portal's subdomain, preserving
+old bookmarks/indexed links.
+
+`lib/platform/server.ts`/`client.ts` add `cookieOptions.domain =
+".aorms.in"`, gated on `NODE_ENV === "production"` — without it, the
+Platform's session cookie would be host-only and a sign-in on one
+subdomain wouldn't be visible on another; the production-only gate keeps
+local dev's `localhost` (which can't set a `.aorms.in`-scoped cookie at
+all) on today's unchanged host-only behavior. Every cross-portal link
+found via a full-codebase inventory now builds an absolute
+`portalUrl(...)` instead of a relative path: `PortalHeaders.tsx`'s two
+`isAdmin` "SysDeX" links, `LandingButtons.tsx`'s `IdentityCtas`/
+`ConnectDexCtas` (the marketing landing page's own CTAs — the clearest
+"outside → platform" case), and `FirmSettingsForm.tsx`'s Office-Hub-to-
+Identity link. `lib/actions/platform.ts`'s three post-auth
+`redirect("/identity")` calls became host-aware
+(`resolvePortalHomeFromHost`) so a ConnectDeX-side sign-in lands back on
+ConnectDeX, not always Identity. `app/(platform)/not-found.tsx` picks
+its "go home" link by which portal actually 404'd. `app/robots.ts`
+(now host-aware) gives every portal subdomain a flat `disallow: "/"` and
+trims the five now-relocated entries from the main domain's list;
+`app/sitemap.ts`'s two platform-login/-signup entries point at
+`identity.aorms.in`. Every *same*-portal link (identity↔studios/
+licences, connectdex↔connectdex-apply/companies/materials,
+admin↔admin/*, platform-login↔platform-signup) needed no change — they
+already stay on the same subdomain under this design.
+
+New `docs/esti/PLATFORM-SUBDOMAINS-DEPLOY.md` — the runbook: DNS records
+to add, Hostinger hPanel steps to attach each subdomain to the *same*
+existing app (flagged as best-effort, not independently verified against
+the current panel UI), SSL confirmation, the `NEXT_PUBLIC_ROOT_DOMAIN`
+environment check, a post-deploy `curl`-based verification checklist,
+and a rollback note (DNS-level only — the code is a complete no-op for
+any hostname it doesn't recognize, so `aorms.in`'s existing traffic was
+never at risk from this change).
+
+Verified: `tsc --noEmit`, `eslint .`, and a full `next build --webpack`
+clean (zero error/fail/warn lines; `Proxy (Middleware)` compiled).
+**The actual routing logic itself was exercised, not just typechecked** —
+against the running local dev server via `curl -H "Host: ..."` (Next.js
+dispatches purely off the Host header it's given, so this is a genuine
+test of the logic without needing real DNS): confirmed all three portal
+subdomains' root redirects to the right home (`identity`→`/identity`,
+`connectdex`→`/connectdex`, `sysdex`→`/admin`); confirmed a legacy
+in-path URL on the main domain redirects to the owning subdomain;
+confirmed a cross-portal path (`/identity` requested with Host
+`sysdex.aorms.in`) redirects to the correct subdomain; confirmed an
+Office-Hub-only path (`/dashboard`) requested on `identity.aorms.in`
+correctly bounces back to the main domain rather than being served;
+confirmed a shared path (`/platform-login`) on a portal subdomain
+returns 200 with no redirect; confirmed a plain unrelated request (no
+Host override) is completely unaffected. **Not verifiable this
+session, flagged in the runbook itself**: real cross-subdomain session
+persistence (the `.aorms.in` cookie) and the subdomains actually
+resolving, both of which need live DNS/SSL this session has no way to
+provision.
+
 ---
 
 ## Support & questions

@@ -5,6 +5,7 @@ import NextLink from "next/link";
 import { Button, Checkbox, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { updateFirmSettings, type FirmSettingsActionState } from "../../lib/actions/firm";
 import { GST_STATE_CODES } from "../../lib/tax/place-of-supply";
+import { portalUrl } from "../../lib/platform/subdomains";
 import { FormGrid } from "./FormGrid";
 
 const STATE_NAMES = Object.keys(GST_STATE_CODES).sort();
@@ -68,7 +69,9 @@ export function FirmSettingsForm({ firm, canEdit = true }: { firm: FirmSettings;
           subtitle="The fields below are a read-only copy (invoices and PDFs still read them from here). Edit them at the company's profile in the Identity portal instead."
         />
         <p className="cds--type-body-01">
-          <NextLink href="/identity">Manage GST, tax, COA, board, and contacts in the AORMS Identity portal →</NextLink>
+          <NextLink href={portalUrl("identity", "/identity")}>
+            Manage GST, tax, COA, board, and contacts in the AORMS Identity portal →
+          </NextLink>
         </p>
 
         <FormGrid>

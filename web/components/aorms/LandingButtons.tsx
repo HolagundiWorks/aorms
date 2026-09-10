@@ -13,6 +13,7 @@
 import Link from "next/link";
 import { Button } from "@carbon/react";
 import { ArrowRight } from "@carbon/icons-react";
+import { portalUrl } from "../../lib/platform/subdomains";
 
 export function HeroCtas() {
   return (
@@ -49,10 +50,10 @@ export function BandCtas() {
 export function IdentityCtas() {
   return (
     <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
-      <Button as={Link} href="/platform-signup" renderIcon={ArrowRight}>
+      <Button as={Link} href={portalUrl("identity", "/platform-signup")} renderIcon={ArrowRight}>
         Create your AORMS Identity
       </Button>
-      <Button kind="tertiary" as={Link} href="/platform-login">
+      <Button kind="tertiary" as={Link} href={portalUrl("identity", "/platform-login")}>
         Already have one? Sign in
       </Button>
     </div>
@@ -70,10 +71,10 @@ export function IdentityCtas() {
 export function ConnectDexCtas() {
   return (
     <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
-      <Button as={Link} href="/connectdex-apply" renderIcon={ArrowRight}>
+      <Button as={Link} href={portalUrl("connectdex", "/connectdex-apply")} renderIcon={ArrowRight}>
         Apply to become a Partner
       </Button>
-      <Button kind="tertiary" as={Link} href="/platform-login">
+      <Button kind="tertiary" as={Link} href={portalUrl("connectdex", "/platform-login")}>
         Already a partner? Sign in
       </Button>
     </div>

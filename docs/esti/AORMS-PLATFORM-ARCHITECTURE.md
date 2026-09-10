@@ -45,11 +45,25 @@ header, and the Admin back office had no name of its own. Three explicit,
 audience-scoped portals now exist, matching how ESTI and ConnectDeX
 Partners are already named sub-brands elsewhere in this codebase:
 
-| Portal | Audience | Pages | Header component |
-| --- | --- | --- | --- |
-| **Identity Portal** | Architects & Studios | `/identity`, `/studios/[studioId]`, `/licences` | `IdentityPortalHeader` |
-| **ConnectDeX Portal** | Material/interior suppliers (Companies) | `/connectdex`, `/connectdex-apply`, `/companies/[companyId]`, `/materials` | `ConnectDexPortalHeader` |
-| **SysDeX** | Platform staff (`accounts.is_admin`) | every `/admin/*` page | `SysDexPortalHeader` |
+| Portal | Audience | Subdomain | Pages | Header component |
+| --- | --- | --- | --- | --- |
+| **Identity Portal** | Architects & Studios | `identity.aorms.in` | `/identity`, `/studios/[studioId]`, `/licences` | `IdentityPortalHeader` |
+| **ConnectDeX Portal** | Material/interior suppliers (Companies) | `connectdex.aorms.in` | `/connectdex`, `/connectdex-apply`, `/companies/[companyId]`, `/materials` | `ConnectDexPortalHeader` |
+| **SysDeX** | Platform staff (`accounts.is_admin`) | `sysdex.aorms.in` | every `/admin/*` page | `SysDexPortalHeader` |
+
+**Subdomains (2026-09-10)** — each portal's canonical URL is now its own
+subdomain, not a path prefix on the main domain. This is routing-level
+separation within the existing single Next.js deployment, not a genuine
+multi-app split: `web/proxy.ts` reads the incoming `Host` header and
+redirects to the owning portal's subdomain (or, on a portal subdomain,
+back to the main domain for anything that isn't that portal's own path
+or one of the shared `/platform-login`/`/platform-signup`/`/support`
+paths — closing a real gap where `identity.aorms.in/dashboard` would
+otherwise have silently served the Office Hub). The full routing table
+lives in `web/lib/platform/subdomains.ts`; the deploy runbook is
+`docs/esti/PLATFORM-SUBDOMAINS-DEPLOY.md`. The Platform session cookie
+is scoped to `.aorms.in` in production so one sign-in follows a visitor
+across all three subdomains.
 
 All three headers live in one file,
 `components/aorms/platform/PortalHeaders.tsx` — each page renders its own

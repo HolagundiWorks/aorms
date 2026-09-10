@@ -1,18 +1,28 @@
 import type { MetadataRoute } from "next";
+import { headers } from "next/headers";
+import { portalFromHost } from "../lib/platform/subdomains";
 
 /**
  * Next.js metadata-route convention — generates /robots.txt (2026-09-09
  * hosting-prep audit — neither robots.txt nor this existed before). Blocks
  * every authenticated surface (office hub, all three external portals, the
  * platform identity app) and leaves the public marketing pages (`/`,
- * `/blog` if/when it ships here) crawlable. Written host-agnostically — no
- * hardcoded aorms.in — since as of this date `web/`'s landing page is not
- * yet the live production site (see CLAUDE.md § Stack migration; that's
- * still the `frontend/` package's job), so this may first serve from a
- * staging/preview host before any DNS cutover. The disallow list stays
- * correct either way.
+ * `/blog` if/when it ships here) crawlable.
+ *
+ * Host-aware since 2026-09-10: identity/connectdex/sysdex.aorms.in each
+ * get a flat `disallow: "/"` — no SEO value on any of the three portal
+ * subdomains, same posture as the rest of the authenticated app — while
+ * the main domain keeps the list below (now minus the five entries that
+ * moved off it onto their own subdomains: /identity, /companies,
+ * /studios, /licences, /materials — they no longer resolve here at all,
+ * see proxy.ts).
  */
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const portal = portalFromHost((await headers()).get("host"));
+  if (portal) {
+    return { rules: { userAgent: "*", disallow: "/" } };
+  }
+
   return {
     rules: {
       userAgent: "*",
@@ -75,11 +85,6 @@ export default function robots(): MetadataRoute.Robots {
         "/portal",
         "/collab-portal",
         "/contractor-portal",
-        "/identity",
-        "/companies",
-        "/studios",
-        "/licences",
-        "/materials",
         "/api",
       ],
     },

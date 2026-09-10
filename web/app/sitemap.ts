@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { listBlogPosts } from "../lib/blog";
+import { portalUrl } from "../lib/platform/subdomains";
 
 /**
  * Next.js metadata-route convention — generates /sitemap.xml (2026-09-10,
@@ -27,7 +28,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     })),
     { url: `${base}/login`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${base}/platform-login`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${base}/platform-signup`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    // Moved off the main domain onto their own subdomain (2026-09-10, see
+    // lib/platform/subdomains.ts) — identity.aorms.in is the canonical
+    // host these render at now, even though platform-login/-signup are
+    // reachable from any of the three portal subdomains without a
+    // redirect (see proxy.ts's SHARED_PREFIXES).
+    { url: portalUrl("identity", "/platform-login"), lastModified: now, changeFrequency: "yearly", priority: 0.2 },
+    { url: portalUrl("identity", "/platform-signup"), lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
 }

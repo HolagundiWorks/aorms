@@ -25,12 +25,21 @@
  */
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient as createWebClient } from "../supabase/server";
 import { createServiceRoleClient as createWebServiceRoleClient } from "../supabase/service";
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
+import { resolvePortalHomeFromHost } from "../platform/subdomains";
 
 export type PlatformActionState = { error: string } | null;
+
+/** Where sign-up/sign-in/sign-out should land — the current portal
+ * subdomain's own home (see lib/platform/subdomains.ts), so a
+ * ConnectDeX-side sign-in doesn't bounce someone over to Identity. */
+async function currentPortalHome(): Promise<string> {
+  return resolvePortalHomeFromHost((await headers()).get("host"));
+}
 
 // ── Platform auth (separate login from the firm app's own) ────────────────
 
@@ -53,7 +62,7 @@ export async function platformSignUp(
   });
   if (error) return { error: error.message };
 
-  redirect("/identity");
+  redirect(await currentPortalHome());
 }
 
 export async function platformSignIn(
@@ -67,13 +76,13 @@ export async function platformSignIn(
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: error.message };
 
-  redirect("/identity");
+  redirect(await currentPortalHome());
 }
 
 export async function platformSignOut(): Promise<void> {
   const supabase = await createPlatformClient();
   await supabase.auth.signOut();
-  redirect("/identity");
+  redirect(await currentPortalHome());
 }
 
 // ── Linking a firm login to a portable AORMS-U- identity ───────────────────

@@ -1,6 +1,7 @@
 import NextLink from "next/link";
 import { platformSignOut } from "../../../lib/actions/platform";
 import { getPlatformNavStatus } from "../../../lib/platform/account";
+import { portalUrl } from "../../../lib/platform/subdomains";
 
 /**
  * The three AORMS Platform portal headers (2026-09-10) — see
@@ -74,7 +75,7 @@ export async function IdentityPortalHeader() {
           Licences
         </NextLink>
         {isAdmin && (
-          <NextLink href="/admin" className="cds--type-body-01">
+          <NextLink href={portalUrl("sysdex", "/admin")} className="cds--type-body-01">
             SysDeX
           </NextLink>
         )}
@@ -100,7 +101,7 @@ export async function ConnectDexPortalHeader() {
           Apply
         </NextLink>
         {isAdmin && (
-          <NextLink href="/admin" className="cds--type-body-01">
+          <NextLink href={portalUrl("sysdex", "/admin")} className="cds--type-body-01">
             SysDeX
           </NextLink>
         )}
