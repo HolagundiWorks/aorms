@@ -34,9 +34,17 @@ export function LandingHeader() {
           flexWrap: "wrap",
         }}
       >
-        <Link href="/" aria-label="AORMS home" style={{ display: "flex", alignItems: "center" }}>
+        <Link href="/" aria-label="AORMS home" style={{ display: "flex", alignItems: "center", gap: "0.75rem", textDecoration: "none" }}>
           {/* Plain <img>, not next/image — a fixed brand asset. */}
           <img src="/aorms-logo.png" alt="AORMS" style={{ height: "24px", width: "auto" }} />
+          {/* Explicit direction (2026-09-10) — the header previously said
+              nothing about who this is for at all, logo + nav links only. */}
+          <span
+            className="cds--type-caption-01"
+            style={{ color: "var(--cds-text-secondary)", borderLeft: "1px solid var(--cds-border-subtle)", paddingLeft: "0.75rem" }}
+          >
+            for Architecture Practices
+          </span>
         </Link>
         <nav
           aria-label="Landing page sections"
