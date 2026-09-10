@@ -25,19 +25,37 @@ naming/audience rationale.
 
 ## 1. DNS
 
-Add three records, mirroring whatever record type and target `aorms.in`'s
-own A/CNAME already uses (check your DNS provider's existing `aorms.in`
-record first — if it's an A record pointing at an IP, add A records; if
-it's a CNAME, add CNAMEs to the same target):
+**Confirmed 2026-09-10, via `nslookup <host> 8.8.8.8`** (Google's public
+resolver, bypasses any local caching): `aorms.in` is on Hostinger's own
+DNS (`ns1.dns-parking.com`, Hostinger's nameserver brand), plain **A
+records**, no CNAME — `91.108.106.25` and `93.127.173.174`, TTL 600s.
+None of the three subdomains have any DNS record at all yet (`8.8.8.8`
+returns `Non-existent domain` for all three) — that's the exact cause of
+the "check if there is a typo" error Chrome shows for
+`identity.aorms.in` right now; it isn't a code or Hostinger-app problem,
+there is simply nothing for DNS to resolve yet.
 
-| Host | Type | Points to |
-| --- | --- | --- |
-| `identity.aorms.in` | (match `aorms.in`'s own) | (same target `aorms.in` uses) |
-| `connectdex.aorms.in` | (match `aorms.in`'s own) | (same target `aorms.in` uses) |
-| `sysdex.aorms.in` | (match `aorms.in`'s own) | (same target `aorms.in` uses) |
+Since Hostinger is the authoritative nameserver here, add these in
+**hPanel → Domains → aorms.in → DNS / Nameservers → DNS Zone Editor**
+(not a third-party DNS provider):
 
-DNS propagation can take anywhere from a few minutes to a few hours
-depending on your provider and existing TTLs.
+| Host | Type | Points to | TTL |
+| --- | --- | --- | --- |
+| `identity` | A | `91.108.106.25` | 600 (or default) |
+| `identity` | A | `93.127.173.174` | 600 (or default) |
+| `connectdex` | A | `91.108.106.25` | 600 (or default) |
+| `connectdex` | A | `93.127.173.174` | 600 (or default) |
+| `sysdex` | A | `91.108.106.25` | 600 (or default) |
+| `sysdex` | A | `93.127.173.174` | 600 (or default) |
+
+(Enter just the subdomain label — `identity`, not `identity.aorms.in` —
+in hPanel's "Host" field; it appends `.aorms.in` itself. Both A records
+per host, matching `aorms.in`'s own two-address setup.)
+
+With a 600s TTL this should resolve within about 10 minutes — re-check
+with `nslookup identity.aorms.in 8.8.8.8` (swap in `connectdex`/`sysdex`)
+rather than just retrying the browser, since browsers/OS also cache a
+negative DNS result for a while after a failed lookup.
 
 ## 2. Hostinger hPanel
 
