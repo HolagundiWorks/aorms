@@ -41,6 +41,38 @@ export const ESTI = {
 } as const;
 
 /**
+ * Illustrative examples of what ESTI surfaces on a real studio's
+ * dashboard — shown in a preview modal on the Intelligence section
+ * (2026-09-10). Placeholder content, not real data from any studio: a
+ * round billing figure, a generic staff name, and the same demo project
+ * name ("Sharma Residence Extension") used throughout this repo's own
+ * QA/test history — chosen deliberately over inventing a new one, same
+ * "don't fabricate specifics" posture as TRUST_STRIP above.
+ */
+export const ESTI_PREVIEW_ITEMS = [
+  {
+    kind: "info",
+    title: "Billing",
+    subtitle: "₹1,56,000 across pending invoices is ready to be billed this month.",
+  },
+  {
+    kind: "warning",
+    title: "Workload",
+    subtitle: "Team workload needs balancing — two members are over capacity this week.",
+  },
+  {
+    kind: "info",
+    title: "Team",
+    subtitle: "Ar. Akash is on leave today — reassign anything due from him.",
+  },
+  {
+    kind: "success",
+    title: "Site Inspection",
+    subtitle: "Scheduled for Sharma Residence Extension — 18 Sep 2026, 10:00 AM.",
+  },
+] as const;
+
+/**
  * "ConnectDeX Partners" (2026-09-10) — a landing-page product name for the
  * material/interior-supplier side of the Platform, same pattern as ESTI
  * being a product name for the AI feature: a marketing brand layered on

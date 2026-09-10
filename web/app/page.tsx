@@ -7,6 +7,7 @@ import { roleHome } from "../lib/auth/role-home";
 import { listBlogPosts } from "../lib/blog";
 import { BandCtas, ConnectDexCtas, HeroCtas, IdentityCtas } from "../components/aorms/LandingButtons";
 import { LandingHeader } from "../components/aorms/LandingHeader";
+import { EstiPreviewModal } from "../components/aorms/EstiPreviewModal";
 import {
   AORMS_PLATFORM,
   BRIEF,
@@ -243,9 +244,12 @@ export default async function LandingPage() {
               <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.5rem" }}>
                 {ESTI.name}
               </h3>
-              <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
+              <p className="cds--type-body-01" style={{ marginTop: "0.5rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
                 {ESTI.summary}
               </p>
+              <div style={{ marginTop: "1.5rem" }}>
+                <EstiPreviewModal />
+              </div>
             </Tile>
           </Column>
         </Grid>
