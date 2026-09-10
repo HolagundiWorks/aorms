@@ -5,7 +5,7 @@ import { Accordion, AccordionItem, Column, Grid, Tag, Tile } from "@carbon/react
 import { createClient } from "../lib/supabase/server";
 import { roleHome } from "../lib/auth/role-home";
 import { listBlogPosts } from "../lib/blog";
-import { BandCtas, HeroCtas, IdentityCtas } from "../components/aorms/LandingButtons";
+import { BandCtas, ConnectDexCtas, HeroCtas, IdentityCtas } from "../components/aorms/LandingButtons";
 import { LandingHeader } from "../components/aorms/LandingHeader";
 import {
   AORMS_PLATFORM,
@@ -430,7 +430,7 @@ export default async function LandingPage() {
             </Column>
           ))}
           <Column sm={4} md={8} lg={16} style={{ marginTop: "0.5rem" }}>
-            <IdentityCtas />
+            <ConnectDexCtas />
           </Column>
         </Grid>
       </section>

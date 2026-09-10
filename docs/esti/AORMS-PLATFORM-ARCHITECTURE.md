@@ -36,6 +36,76 @@ see `lib/platform/account.ts`'s `getCurrentPlatformAccount()` for the
 canonical two-step resolution every Platform-touching Server Action/page
 needs.
 
+## Three portals (2026-09-10)
+
+The boundary rules below (Admin / Portal / Directory) haven't changed —
+this section is a **branding layer on top of them**, not a replacement.
+Before this date every `(platform)/*` page shared one undifferentiated
+header, and the Admin back office had no name of its own. Three explicit,
+audience-scoped portals now exist, matching how ESTI and ConnectDeX
+Partners are already named sub-brands elsewhere in this codebase:
+
+| Portal | Audience | Pages | Header component |
+| --- | --- | --- | --- |
+| **Identity Portal** | Architects & Studios | `/identity`, `/studios/[studioId]`, `/licences` | `IdentityPortalHeader` |
+| **ConnectDeX Portal** | Material/interior suppliers (Companies) | `/connectdex`, `/connectdex-apply`, `/companies/[companyId]`, `/materials` | `ConnectDexPortalHeader` |
+| **SysDeX** | Platform staff (`accounts.is_admin`) | every `/admin/*` page | `SysDexPortalHeader` |
+
+All three headers live in one file,
+`components/aorms/platform/PortalHeaders.tsx` — each page renders its own
+matching header directly (not a shared layout-level header; the three
+portals have genuinely distinct nav, not just a different title).
+`/platform-login`, `/platform-signup`, and `/support` are portal-neutral
+(a person may not yet belong to any one portal, or may need help from
+any of them) and render their own minimal standalone heading instead,
+same as before this split.
+
+**Identity/ConnectDeX split** — before this date, `/identity` showed both
+Studio *and* Company memberships in one page. Company membership moved
+out entirely to its own page, `/connectdex` — Identity is now
+Studio-only, matching the "architects & Studios" / "material & interior
+suppliers" audience split precisely. Creating a brand-new Company still
+only ever happens through the gated onboarding pipeline
+(`platform/supabase/migrations/0013_connectdex_onboarding.sql`); joining
+an already-active Company as a team member is unaffected.
+
+**HelpDeX** — the support-ticket area, nested inside SysDeX the same way
+ESTI is nested inside AORMS: `/support` (public submit form, portal-
+neutral) → `support_tickets` (`platform/supabase/migrations/
+0015_helpdesk_and_password_reset.sql`) → `/admin/helpdesk` (SysDeX,
+triage/status/internal note). **Disclosed scope boundary**: there is no
+outbound "reply to the submitter" email — that needs new email infra
+beyond Supabase Auth's fixed-template emails (invite/recovery), which is
+all this codebase has. An admin triages and resolves a ticket's status;
+actually replying to the submitter is manual/out of band for now.
+
+**Admin-triggered password reset** — `/admin/accounts` (SysDeX) lists
+every account and can send a Supabase Auth recovery email
+(`resetPasswordForEmail`, the same "Supabase's own email delivery only"
+convention as `inviteUserByEmail` elsewhere), logging a
+`password_reset_requests` row for the activity trail. `is_admin` itself
+stays DB-only — no grant/revoke toggle was added; that boundary (see
+`platform/supabase/migrations/0009_admin_role.sql`) is unchanged.
+
+**Admin-auth fix — SysDeX signs in with its own Platform session.**
+Every admin gate used to resolve via `getCurrentPlatformAccount()` — the
+Office-Hub-link-based resolver (Office Hub session → `profiles.
+platform_public_id` → Platform account). That's the right mechanism for
+`/identity`'s own read-only display (deliberately lets a person view
+their linked identity from an Office Hub session alone), but it was a
+real inconsistency for **admin** gating specifically: it required a
+platform admin to also hold an `aorms-web` Office Hub account with a
+linked identity, even though "platform staff" is supposed to be
+independent of any one Office Hub deployment (`aorms-web` is one tenant
+among many — see the Tenancy row above). Fixed 2026-09-10:
+`getCurrentPlatformSessionAccount()` (`lib/platform/account.ts`) resolves
+purely via the Platform's own session (`sb-platform-auth-token`) — no
+Office Hub account needed. Every admin gate (`admin/*` pages, both
+`requirePlatformAdmin()` duplicates, the new `admin-accounts.ts`/
+`support.ts` actions) now uses this resolver.
+`getCurrentPlatformAccount()` itself is untouched — it still exists for
+`/identity`'s own use case, a distinct concern from admin gating.
+
 ## Nomenclature, precisely
 
 | Term | Meaning | Do NOT use it to mean |
@@ -65,7 +135,7 @@ in Admin, gated behind `accounts.is_admin`, and nowhere else.
 
 | Route | Kind | Audience / scope |
 | --- | --- | --- |
-| `/identity` | Personal | The signed-in account's own profile + every Studio/Company they belong to (list, not detail) |
+| `/identity` | Personal (Identity) | The signed-in account's own profile + every Studio they belong to (list, not detail) — Studio-only since the 2026-09-10 Identity/ConnectDeX split, see § Three portals above |
 | `/studios/[studioId]` | **Portal** (Studio) | That one Studio's profile, board, contacts, membership management — only reachable/actionable for a member of that specific studio (RLS-enforced, not just hidden in the UI) |
 | `/companies/[companyId]` | **Portal** (Company) | Same shape, for one Company (material supplier) — profile, board, contacts, and that company's own product catalogue |
 | `/licences` | **Portal** (Studio) | **Licence management for studios the caller belongs to, and only those** — current plan/seats/expiry, and the Razorpay "Upgrade" flow (`UpgradeLicenceButton`). This is the page the user's "company/user portals will have only licence management related to them" instruction is about: it must never show another studio's licence, and as of 2026-09-09 it can no longer even self-edit a plan for free (see § Licensing & payments below) |
@@ -75,6 +145,10 @@ in Admin, gated behind `accounts.is_admin`, and nowhere else.
 | `/admin/payments` | **Admin** | Every payment, every studio — a Studio's own Portal never shows another studio's payment history (RLS: `"payments: studio members read"` scopes a member to their own studio's rows only; `"payments: admin read"` is the only cross-studio read path) |
 | `/admin/pricing` | **Admin** | The one global `plan_pricing` table — per-seat prices apply platform-wide, so this is inherently Admin-only, never something a Studio Portal could reasonably expose |
 | `/admin/logs` | **Admin** | `platform_activity_log` — every event, every entity. No Portal-level "my studio's activity log" exists yet (see § Open questions) |
+| `/admin/accounts` | **Admin** | Every `accounts` row, platform-wide — admin-triggered password reset (see § Three portals above) |
+| `/admin/helpdesk` | **Admin** | HelpDeX — every `support_tickets` row, status/internal-note triage (see § Three portals above) |
+| `/connectdex` | Personal (ConnectDeX) | The signed-in account's own Company memberships (list, not detail) — the ConnectDeX Portal's counterpart to `/identity` |
+| `/support` | Auth-neutral | Public HelpDeX ticket submit form — no account required |
 | `/platform-login`, `/platform-signup` | Auth | Sign in/up for a personal Platform Account — not entity-scoped at all, this is what creates the `AORMS-U-` identity everything else hangs off of |
 
 **Currently NOT true, flagged rather than silently assumed:** Companies

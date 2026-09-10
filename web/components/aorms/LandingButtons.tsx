@@ -58,3 +58,24 @@ export function IdentityCtas() {
     </div>
   );
 }
+
+/**
+ * The ConnectDeX Partners section's own CTA (2026-09-10) — points at the
+ * gated connect form (/connectdex-apply), not IdentityCtas' signup/sign-in
+ * pair: creating a Company is no longer instant self-serve (see
+ * platform/supabase/migrations/0013_connectdex_onboarding.sql) — a
+ * prospective partner applies and waits on admin review, they don't sign
+ * up directly.
+ */
+export function ConnectDexCtas() {
+  return (
+    <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
+      <Button as={Link} href="/connectdex-apply" renderIcon={ArrowRight}>
+        Apply to become a Partner
+      </Button>
+      <Button kind="tertiary" as={Link} href="/platform-login">
+        Already a partner? Sign in
+      </Button>
+    </div>
+  );
+}

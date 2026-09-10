@@ -1,10 +1,11 @@
 import NextLink from "next/link";
 import { Column, Grid, Stack } from "@carbon/react";
-import { getCurrentPlatformAccount } from "../../../lib/platform/account";
+import { getCurrentPlatformSessionAccount } from "../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
 import { AdminAccessDenied } from "../../../components/aorms/platform/AdminAccessDenied";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { SysDexPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
 
 /**
  * AORMS Platform admin back office — dashboard. Gated behind
@@ -15,7 +16,7 @@ import { PageHeader } from "../../../components/aorms/PageHeader";
  * row fetch — same KPI-strip pattern used throughout app/(app)/*.
  */
 export default async function AdminDashboardPage() {
-  const account = await getCurrentPlatformAccount();
+  const account = await getCurrentPlatformSessionAccount();
   if (!account?.is_admin) return <AdminAccessDenied title="Admin" />;
 
   const platformService = createPlatformServiceRoleClient();
@@ -38,7 +39,9 @@ export default async function AdminDashboardPage() {
   }
 
   return (
-    <Grid>
+    <>
+      <SysDexPortalHeader />
+      <Grid>
       <Column sm={4} md={8} lg={16}>
         <PageHeader title="Admin" description="AORMS Platform back office — licences, payments, and activity across every studio." />
 
@@ -97,5 +100,6 @@ export default async function AdminDashboardPage() {
         </div>
       </Column>
     </Grid>
+    </>
   );
 }

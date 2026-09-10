@@ -4,6 +4,7 @@ import { createClient as createWebClient } from "../../../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
 import { UpgradeLicenceButton } from "../../../components/aorms/platform/UpgradeLicenceButton";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { IdentityPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
 
 type StudioEmbed = { id: string; name: string; public_id: string } | null;
 
@@ -46,15 +47,18 @@ export default async function LicencesPage() {
 
   if (!account) {
     return (
-      <Grid>
-        <Column sm={4} md={8} lg={8}>
-          <PageHeader
-            title="Licence Management"
-            description="Link your AORMS Identity first — licences belong to studios you're a member of."
-          />
-          <NextLink href="/identity">Go to My AORMS Identity →</NextLink>
-        </Column>
-      </Grid>
+      <>
+        <IdentityPortalHeader />
+        <Grid>
+          <Column sm={4} md={8} lg={8}>
+            <PageHeader
+              title="Licence Management"
+              description="Link your AORMS Identity first — licences belong to studios you're a member of."
+            />
+            <NextLink href="/identity">Go to My AORMS Identity →</NextLink>
+          </Column>
+        </Grid>
+      </>
     );
   }
 
@@ -77,7 +81,9 @@ export default async function LicencesPage() {
     : { data: [] };
 
   return (
-    <Grid>
+    <>
+      <IdentityPortalHeader />
+      <Grid>
       <Column sm={4} md={8} lg={10}>
         <PageHeader title="Licence Management" description="Plan, seats, and expiry for every studio you belong to." />
 
@@ -130,6 +136,7 @@ export default async function LicencesPage() {
           )}
         </Stack>
       </Column>
-    </Grid>
+      </Grid>
+    </>
   );
 }

@@ -4006,6 +4006,150 @@ each seam; confirmed via `grep` that no stale `ROADMAP-CLOUD.md`/
 `next build` or any code-verification step — this is a documentation-only
 change, nothing in `web/`'s own source was touched.
 
+**ConnectDeX Partners — gated onboarding pipeline, replacing instant
+self-serve Company creation entirely (2026-09-10).** Explicit direction:
+a public connect form → admin reviews and invites (login details emailed
+via Supabase's own `inviteUserByEmail`, already used for contractor/
+consultant/staff portal logins) → the invitee fills a fuller onboarding
+form → an admin manually verifies it → the company pays a flat Razorpay
+onboarding fee → active, listed in the Materials directory. Confirmed via
+AskUserQuestion: replaces the old instant-create path entirely, admin
+approval gates the invite, verification is manual admin judgment (not
+automated checks), the fee is one flat one-time charge (not tiered).
+
+Migration `0013_connectdex_onboarding.sql` (`aorms-platform`): dropped
+`"companies: self insert"` (the old instant-create RLS policy — same
+precedent as `0011_licence_payment_gate.sql` closing the licence
+self-serve bypass); added `companies.status` (`PENDING_ONBOARDING` →
+`PENDING_VERIFICATION` → `PENDING_PAYMENT` → `ACTIVE`) +
+`verified_at`/`verified_by_id`; new tables `connectdex_applications`
+(public pre-account submissions, admin-read-only + zero write policies —
+service-role only, matching `payments`' own precedent),
+`connectdex_payments` (mirrors Studio `payments` exactly, `company_id`
+instead of `studio_id`), `connectdex_settings` (singleton flat-fee row,
+seeded ₹4,999 **placeholder** — same "confirm the real number before
+relying on it for revenue" posture as Studio pricing); extended
+`platform_activity_log` with `company_id` + five new trigger functions.
+New `web/lib/actions/connectdex.ts` (submit/invite/reject/verify/pay
+Server Actions, `requirePlatformAdmin()` duplicated per this codebase's
+existing per-file convention), `web/lib/platform/connectdex-payment.ts`
+(`applyCapturedConnectDexPayment`), and the Razorpay webhook
+(`app/api/razorpay/webhook/route.ts`) extended to check both `payments`
+and `connectdex_payments` on `payment.captured`/`payment.failed`. New UI:
+`/connectdex-apply` (public form), `/admin/connectdex` (admin review —
+Invite/Reject/Verify + fee edit), status-branching on
+`/companies/[companyId]` (onboarding form / under-review notice / pay
+button, gated to the actual pending owner — a non-owner sees a generic
+"onboarding in progress" notice regardless of real status). `/identity`'s
+old instant "Create a company" form removed; `createCompany`
+(`lib/actions/company.ts`) deleted outright, replaced with a comment
+pointing at this pipeline.
+
+**A real bug was found and fixed during verification, not just
+typechecked**: `0013`'s own `create or replace function
+log_platform_activity(text, uuid, uuid, jsonb, uuid default null)` did
+not replace the original 4-arg function from `0012_activity_log.sql` —
+Postgres identifies a function by its declared parameter list, not by
+defaults, so the two coexisted as separate overloads. Any 4-arg caller
+(every existing trigger — `log_licence_update`, `log_payment_insert`, and
+the new ConnectDeX triggers alike) became ambiguous between them,
+confirmed live: a real `/connectdex-apply` submission failed with
+`function public.log_platform_activity(unknown, unknown, unknown, jsonb)
+is not unique`. Fixed via `0014_fix_log_platform_activity_overload.sql`
+(drops the original 4-arg signature); confirmed only one overload remains
+(`pg_proc` query), then re-submitted the same real application
+successfully, confirmed the `connectdex_applications` row and its
+activity-log entry both landed correctly.
+
+Verified: `tsc --noEmit`, `eslint .`, and a full `next build --webpack` —
+zero error/fail/warn lines, both new routes present. RLS exploit-check
+replayed (same technique as the licence self-serve closure): a real
+signed-up test account attempting the old direct `INSERT INTO companies`
+bypass now fails with `42501 — new row violates row-level security
+policy` (confirmed via the `set local role authenticated; set local
+request.jwt.claims` simulation against the Management API). Live-verified
+the actual reachable flow in the browser against the local dev server:
+filled and submitted a real application via `/connectdex-apply`,
+confirmed the row and activity log directly. **Left open at this point,
+picked up by the very next entry below**: the admin-invite/verify
+half of the flow couldn't be exercised yet — granting `is_admin` to a
+test account for this purpose surfaced the admin-auth inconsistency the
+next entry fixes.
+
+**Three AORMS Platform portals — Identity, ConnectDeX, SysDeX (+ HelpDeX,
+support tickets, admin-triggered password reset) (2026-09-10).** Explicit
+direction: the Platform's one undifferentiated header/nav across every
+`(platform)/*` page gets split into three genuinely branded portals with
+distinct audiences — **Identity Portal** (architects & Studios only),
+**ConnectDeX Portal** (material/interior suppliers), and **SysDeX**
+(platform staff — licence/account administration, password reset, and
+support operations, itself sub-branding a **HelpDeX** ticket area, same
+nesting pattern as ESTI-inside-AORMS). Confirmed via AskUserQuestion:
+build password reset and HelpDeX for real this pass (not just document
+them as future scope), split Companies fully out of `/identity` into
+their own portal, keep every existing URL as-is (rebrand headers/nav/
+copy, not routes).
+
+**A real architectural inconsistency was found and fixed, not just
+rebranded around**: every admin gate (`/admin/*`, `requirePlatformAdmin()`
+in `platform-payments.ts`/`connectdex.ts`) resolved via
+`getCurrentPlatformAccount()` — the Office-Hub-link-based resolver
+(`aorms-web` session → `profiles.platform_public_id` → Platform account).
+Correct for `/identity`'s own read-only display (deliberately lets a
+person view their linked identity from an Office Hub session alone), but
+wrong for **admin** gating specifically: it required a platform admin to
+also hold an `aorms-web` Office Hub account with a linked identity, even
+though platform staff is supposed to be independent of any one Office Hub
+deployment (`aorms-web` is one tenant among many, per
+`AORMS-PLATFORM-ARCHITECTURE.md`'s own tenancy row) — this is also
+exactly what blocked the previous entry's admin-invite verification. Fixed
+by adding `getCurrentPlatformSessionAccount()` (`lib/platform/account.ts`)
+— resolves purely via the Platform's own session, no Office Hub link
+needed — and switching every admin gate to it (`getCurrentPlatformAccount()`
+itself untouched, still used by `/identity`). Safe timing for this change:
+zero accounts had `is_admin = true` on the live project at the time, so
+nothing depended on the old behavior.
+
+Migration `0015_helpdesk_and_password_reset.sql` (`aorms-platform`):
+`password_reset_requests` (admin-read-only audit trail for
+`resetPasswordForEmail` calls — the reset itself is a Supabase Auth API
+call, not a table write, so this table exists specifically to keep
+"activity log only ever populated by triggers" true even here) and
+`support_tickets` (`OPEN`/`IN_PROGRESS`/`RESOLVED`/`CLOSED`,
+admin-read-all + submitter-read-own, zero write policies — same
+`connectdex_applications` "service-role only" precedent), plus their
+logging triggers. New `web/lib/actions/admin-accounts.ts`
+(`adminTriggerPasswordReset` — `auth.admin.getUserById` →
+`resetPasswordForEmail`, no new email infra, same "Supabase's own email
+delivery only" convention as `inviteUserByEmail` elsewhere) and
+`web/lib/actions/support.ts` (`submitSupportTicket` public,
+`adminUpdateSupportTicketStatus` admin-gated — **explicit scope
+boundary**: no outbound reply-to-submitter email exists this pass, that
+needs new email infra beyond Supabase Auth's fixed templates, so HelpDeX
+triages/resolves status only). New shared
+`components/aorms/platform/PortalHeaders.tsx` (`IdentityPortalHeader`/
+`ConnectDexPortalHeader`/`SysDexPortalHeader`, each rendered per-page —
+not a layout-level header, since the three portals have genuinely
+distinct nav); `(platform)/layout.tsx` lost its old shared header
+entirely (also fixed a small pre-existing redundancy:
+`/platform-login`/`/platform-signup` used to render their own logo *and*
+the shared header stacked on top). `/identity` dropped its old Companies
+section outright — Studio-only now; that content moved to a new
+`/connectdex` page (My Company memberships + Join/Apply, ConnectDeX
+Portal-branded). New `/support` (public HelpDeX form, portal-neutral),
+`/admin/accounts` (every account, "Send password reset" per row —
+`is_admin` itself stays DB-only, no grant/revoke toggle added), and
+`/admin/helpdesk` (ticket triage — status + internal note, open tickets
+sorted first). `docs/esti/AORMS-PLATFORM-ARCHITECTURE.md` gained a
+"Three portals" section documenting all of the above as a branding layer
+on top of the existing Admin/Portal/Directory boundary rules, which
+themselves are unchanged.
+
+Verified: migration applied and table/column/policy/trigger existence
+confirmed live; `tsc --noEmit`, `eslint .`, and a full `next build
+--webpack` — zero error/fail/warn lines, every new route (`/connectdex`,
+`/support`, `/admin/accounts`, `/admin/helpdesk`) present.
+
 ---
 
 ## Support & questions

@@ -8,15 +8,12 @@ import { CreateStudioForm } from "../../../components/aorms/platform/CreateStudi
 import { JoinStudioForm } from "../../../components/aorms/platform/JoinStudioForm";
 import { LeaveStudioButton } from "../../../components/aorms/platform/LeaveStudioButton";
 import { PlatformAuthCta } from "../../../components/aorms/platform/PlatformAuthCta";
-import { CreateCompanyForm } from "../../../components/aorms/platform/company/CreateCompanyForm";
-import { JoinCompanyForm } from "../../../components/aorms/platform/company/JoinCompanyForm";
-import { LeaveCompanyButton } from "../../../components/aorms/platform/company/LeaveCompanyButton";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { IdentityPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
 
 const HOURS_TO_PRO = 100;
 
 type StudioEmbed = { id: string; name: string; public_id: string } | null;
-type CompanyEmbed = { id: string; name: string; public_id: string } | null;
 
 /**
  * My AORMS Identity — the portable personal account (AORMS-U- handle,
@@ -26,12 +23,16 @@ type CompanyEmbed = { id: string; name: string; public_id: string } | null;
  * from the Office Hub: no AppShell/SideNav, not linked from the Office
  * Hub's nav at all, reached only by its own direct URL (moved here from
  * (app)/identity/ on explicit request — see the AORMS Identity/Licence
- * portal split plan). "Studio" = an architecture firm (renamed from
- * "Company" 2026-09-07, freeing that name for material-supplier
- * businesses — see the Studio/Company split + Material Catalogue plan).
- * "Company" is now a material-supplier business — its own parallel
- * membership model, same underlying account, shown in its own section
- * below alongside Studios.
+ * portal split plan).
+ *
+ * Studio-only (2026-09-10) — the Identity Portal is now explicitly for
+ * architects & Studios; Company (material-supplier) membership moved to
+ * its own page, app/(platform)/connectdex/page.tsx, under the ConnectDeX
+ * Portal's own branding (see docs/esti/AORMS-PLATFORM-ARCHITECTURE.md §
+ * Three portals). Before this date this page also showed Company
+ * memberships in a second section — removed here, not merged, since a
+ * material supplier has no reason to see (or be shown) Studio-branded
+ * chrome and vice versa.
  */
 export default async function IdentityPage() {
   const webSupabase = await createWebClient();
@@ -83,37 +84,40 @@ export default async function IdentityPage() {
     }
 
     return (
-      <Grid>
-        <Column sm={4} md={8} lg={8}>
-          <PageHeader
-            title="AORMS Identity"
-            description={
-              <>
-                A portable personal identity — your own AORMS-U- handle, usage hours, and level, independent of any
-                one studio. {isStaleLink ? "Linked handle no longer resolves." : "Not linked to this login yet."}
-              </>
-            }
-          />
-          <Tile>
-            <Stack gap={5}>
-              {isStaleLink && (
-                <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-                  Previously linked to <strong>{handle}</strong>, which no longer exists on the AORMS Platform.
-                  Link a different (or newly re-created) identity below.
-                </p>
-              )}
-              {knownHandle ? (
-                <p className="cds--type-body-01">
-                  You&apos;re signed in to the AORMS Platform as <strong>{knownHandle}</strong>.
-                </p>
-              ) : (
-                <PlatformAuthCta />
-              )}
-              <LinkIdentityForm knownHandle={knownHandle} />
-            </Stack>
-          </Tile>
-        </Column>
-      </Grid>
+      <>
+        <IdentityPortalHeader />
+        <Grid>
+          <Column sm={4} md={8} lg={8}>
+            <PageHeader
+              title="AORMS Identity"
+              description={
+                <>
+                  A portable personal identity — your own AORMS-U- handle, usage hours, and level, independent of any
+                  one studio. {isStaleLink ? "Linked handle no longer resolves." : "Not linked to this login yet."}
+                </>
+              }
+            />
+            <Tile>
+              <Stack gap={5}>
+                {isStaleLink && (
+                  <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                    Previously linked to <strong>{handle}</strong>, which no longer exists on the AORMS Platform.
+                    Link a different (or newly re-created) identity below.
+                  </p>
+                )}
+                {knownHandle ? (
+                  <p className="cds--type-body-01">
+                    You&apos;re signed in to the AORMS Platform as <strong>{knownHandle}</strong>.
+                  </p>
+                ) : (
+                  <PlatformAuthCta />
+                )}
+                <LinkIdentityForm knownHandle={knownHandle} />
+              </Stack>
+            </Tile>
+          </Column>
+        </Grid>
+      </>
     );
   }
 
@@ -129,145 +133,94 @@ export default async function IdentityPage() {
     .neq("status", "LEFT")
     .order("created_at", { ascending: true });
 
-  const { data: companyMemberships } = await platformService
-    .from("company_memberships")
-    .select("id, role, status, companies(id, name, public_id)")
-    .eq("account_id", account.id)
-    .neq("status", "LEFT")
-    .order("created_at", { ascending: true });
-
   const hours = account.total_active_seconds / 3600;
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={12}>
-        <PageHeader
-          title="AORMS Identity"
-          description="Your portable personal identity — carries across every studio you work with."
-        />
+    <>
+      <IdentityPortalHeader />
+      <Grid>
+        <Column sm={4} md={8} lg={12}>
+          <PageHeader
+            title="AORMS Identity"
+            description="Your portable personal identity — carries across every studio you work with."
+          />
 
-        <Stack gap={6}>
-          <Tile>
-            <Stack gap={4}>
-              <Stack gap={2} orientation="horizontal">
-                <h2 className="cds--type-heading-02">{account.public_id}</h2>
-                <Tag type={account.level === "PRO" ? "green" : "cool-gray"} size="md">
-                  {account.level}
-                </Tag>
+          <Stack gap={6}>
+            <Tile>
+              <Stack gap={4}>
+                <Stack gap={2} orientation="horizontal">
+                  <h2 className="cds--type-heading-02">{account.public_id}</h2>
+                  <Tag type={account.level === "PRO" ? "green" : "cool-gray"} size="md">
+                    {account.level}
+                  </Tag>
+                </Stack>
+                <p className="cds--type-body-01">{account.full_name}</p>
+                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  {hours.toFixed(1)}h of {HOURS_TO_PRO}h logged
+                  {account.level === "BASIC" ? ` — ${Math.max(0, HOURS_TO_PRO - hours).toFixed(1)}h to Pro` : ""}
+                </p>
               </Stack>
-              <p className="cds--type-body-01">{account.full_name}</p>
-              <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                {hours.toFixed(1)}h of {HOURS_TO_PRO}h logged
-                {account.level === "BASIC" ? ` — ${Math.max(0, HOURS_TO_PRO - hours).toFixed(1)}h to Pro` : ""}
-              </p>
-            </Stack>
-          </Tile>
+            </Tile>
 
-          <div>
-            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-              Studios
-            </h2>
-            <Stack gap={4}>
-              {(memberships ?? []).map((m) => {
-                const studio = (Array.isArray(m.studios) ? m.studios[0] : m.studios) as StudioEmbed;
-                if (!studio) return null;
-                return (
-                  <Tile key={m.id}>
-                    <Stack gap={3} orientation="horizontal" style={{ alignItems: "center", justifyContent: "space-between" }}>
-                      <div>
-                        <NextLink href={`/studios/${studio.id}`}>
-                          <strong>{studio.name}</strong>
-                        </NextLink>{" "}
-                        <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                          {studio.public_id}
-                        </span>
+            <div>
+              <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                Studios
+              </h2>
+              <Stack gap={4}>
+                {(memberships ?? []).map((m) => {
+                  const studio = (Array.isArray(m.studios) ? m.studios[0] : m.studios) as StudioEmbed;
+                  if (!studio) return null;
+                  return (
+                    <Tile key={m.id}>
+                      <Stack gap={3} orientation="horizontal" style={{ alignItems: "center", justifyContent: "space-between" }}>
                         <div>
-                          <Tag type={m.role === "OWNER" ? "purple" : "gray"} size="sm">
-                            {m.role}
-                          </Tag>
+                          <NextLink href={`/studios/${studio.id}`}>
+                            <strong>{studio.name}</strong>
+                          </NextLink>{" "}
+                          <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                            {studio.public_id}
+                          </span>
+                          <div>
+                            <Tag type={m.role === "OWNER" ? "purple" : "gray"} size="sm">
+                              {m.role}
+                            </Tag>
+                          </div>
                         </div>
-                      </div>
-                      <LeaveStudioButton membershipId={m.id} studioName={studio.name} />
-                    </Stack>
-                  </Tile>
-                );
-              })}
-              {(memberships ?? []).length === 0 && (
-                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                  Not a member of any studio yet.
-                </p>
-              )}
+                        <LeaveStudioButton membershipId={m.id} studioName={studio.name} />
+                      </Stack>
+                    </Tile>
+                  );
+                })}
+                {(memberships ?? []).length === 0 && (
+                  <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                    Not a member of any studio yet.
+                  </p>
+                )}
+              </Stack>
+            </div>
+
+            <Stack gap={6} orientation="horizontal">
+              <Tile style={{ flex: 1 }}>
+                <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                  Create a studio
+                </h3>
+                <CreateStudioForm />
+              </Tile>
+              <Tile style={{ flex: 1 }}>
+                <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                  Join a studio
+                </h3>
+                <JoinStudioForm />
+              </Tile>
             </Stack>
-          </div>
 
-          <Stack gap={6} orientation="horizontal">
-            <Tile style={{ flex: 1 }}>
-              <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-                Create a studio
-              </h3>
-              <CreateStudioForm />
-            </Tile>
-            <Tile style={{ flex: 1 }}>
-              <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-                Join a studio
-              </h3>
-              <JoinStudioForm />
-            </Tile>
+            <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+              Supply materials or interior finishes instead? That&apos;s the{" "}
+              <NextLink href="/connectdex">ConnectDeX Portal</NextLink>, not this one.
+            </p>
           </Stack>
-
-          <div>
-            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-              Companies
-            </h2>
-            <Stack gap={4}>
-              {(companyMemberships ?? []).map((m) => {
-                const company = (Array.isArray(m.companies) ? m.companies[0] : m.companies) as CompanyEmbed;
-                if (!company) return null;
-                return (
-                  <Tile key={m.id}>
-                    <Stack gap={3} orientation="horizontal" style={{ alignItems: "center", justifyContent: "space-between" }}>
-                      <div>
-                        <NextLink href={`/companies/${company.id}`}>
-                          <strong>{company.name}</strong>
-                        </NextLink>{" "}
-                        <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                          {company.public_id}
-                        </span>
-                        <div>
-                          <Tag type={m.role === "OWNER" ? "purple" : "gray"} size="sm">
-                            {m.role}
-                          </Tag>
-                        </div>
-                      </div>
-                      <LeaveCompanyButton membershipId={m.id} companyName={company.name} />
-                    </Stack>
-                  </Tile>
-                );
-              })}
-              {(companyMemberships ?? []).length === 0 && (
-                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                  Not a member of any company yet.
-                </p>
-              )}
-            </Stack>
-          </div>
-
-          <Stack gap={6} orientation="horizontal">
-            <Tile style={{ flex: 1 }}>
-              <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-                Create a company
-              </h3>
-              <CreateCompanyForm />
-            </Tile>
-            <Tile style={{ flex: 1 }}>
-              <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-                Join a company
-              </h3>
-              <JoinCompanyForm />
-            </Tile>
-          </Stack>
-        </Stack>
-      </Column>
-    </Grid>
+        </Column>
+      </Grid>
+    </>
   );
 }

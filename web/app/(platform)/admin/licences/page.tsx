@@ -1,9 +1,10 @@
 import { Column, Grid, Stack, Tag, Tile } from "@carbon/react";
-import { getCurrentPlatformAccount } from "../../../../lib/platform/account";
+import { getCurrentPlatformSessionAccount } from "../../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { UpdateLicenceForm } from "../../../../components/aorms/platform/UpdateLicenceForm";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
+import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 
 function isLicenceActive(expiresAt: string | null): boolean {
   return !expiresAt || new Date(expiresAt) > new Date();
@@ -17,7 +18,7 @@ function isLicenceActive(expiresAt: string | null): boolean {
  * check and the "licences: admin update" RLS policy.
  */
 export default async function AdminLicencesPage() {
-  const account = await getCurrentPlatformAccount();
+  const account = await getCurrentPlatformSessionAccount();
   if (!account?.is_admin) return <AdminAccessDenied title="Licences" />;
 
   const platformService = createPlatformServiceRoleClient();
@@ -27,7 +28,9 @@ export default async function AdminLicencesPage() {
     .order("expires_at", { ascending: true, nullsFirst: false });
 
   return (
-    <Grid>
+    <>
+      <SysDexPortalHeader />
+      <Grid>
       <Column sm={4} md={8} lg={10}>
         <PageHeader title="Licences" description="Every studio's licence — override plan, seats, or expiry directly." />
 
@@ -69,5 +72,6 @@ export default async function AdminLicencesPage() {
         </Stack>
       </Column>
     </Grid>
+    </>
   );
 }

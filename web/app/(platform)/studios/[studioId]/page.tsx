@@ -12,6 +12,7 @@ import { BoardMemberRow } from "../../../../components/aorms/platform/BoardMembe
 import { AddContactForm } from "../../../../components/aorms/platform/AddContactForm";
 import { ContactRow } from "../../../../components/aorms/platform/ContactRow";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
+import { IdentityPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 
 type AccountEmbed = { id: string; full_name: string; public_id: string } | null;
 
@@ -92,7 +93,9 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
   );
 
   return (
-    <Grid>
+    <>
+      <IdentityPortalHeader />
+      <Grid>
       <Column sm={4} md={8} lg={12}>
         <PageHeader
           title={studio.name}
@@ -263,6 +266,7 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
           </div>
         </Stack>
       </Column>
-    </Grid>
+      </Grid>
+    </>
   );
 }

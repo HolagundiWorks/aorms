@@ -19,28 +19,14 @@ import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 import type { PlatformActionState } from "./platform";
 
-export async function createCompany(
-  _prev: PlatformActionState,
-  formData: FormData,
-): Promise<PlatformActionState> {
-  const name = String(formData.get("name") ?? "").trim();
-  if (!name) return { error: "Company name is required." };
-
-  const supabase = await createPlatformClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Sign in to the AORMS Platform first." };
-
-  // owner_id = auth.uid() satisfies "companies: self insert"; the
-  // before_company_insert/after_company_insert triggers mint the AORMS-C-
-  // handle and the founding OWNER membership automatically.
-  const { error } = await supabase.from("companies").insert({ name, owner_id: user.id });
-  if (error) return { error: error.message };
-
-  revalidatePath("/identity");
-  return null;
-}
+// Instant self-serve company creation (createCompany) was removed here
+// 2026-09-10 when the ConnectDeX Partners gated onboarding pipeline
+// replaced it entirely — platform/supabase/migrations/
+// 0013_connectdex_onboarding.sql dropped the RLS policy this action
+// relied on ("companies: self insert"). Replaced by
+// web/lib/actions/connectdex.ts's submitConnectDexApplication (public
+// connect form) → adminInviteConnectDexApplication (the only remaining
+// path that creates a companies row).
 
 /**
  * Self-serve join by AORMS-C- handle — same upsert-not-insert reasoning

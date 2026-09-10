@@ -1,0 +1,17 @@
+-- Fix: 0013_connectdex_onboarding.sql's `create or replace function
+-- log_platform_activity(text, uuid, uuid, jsonb, uuid default null)` did
+-- NOT replace the original 4-arg function from 0012_activity_log.sql —
+-- Postgres identifies function identity by the declared parameter list,
+-- not by defaults, so the two now coexist as separate overloads. Any
+-- caller passing exactly 4 arguments (every existing trigger function:
+-- log_licence_update, log_payment_insert, and the new
+-- log_connectdex_application_insert, etc.) is now ambiguous between
+-- "the 4-arg function" and "the 5-arg function using its default" —
+-- confirmed live via a real /connectdex-apply submission failing with
+-- "function public.log_platform_activity(unknown, unknown, unknown,
+-- jsonb) is not unique" (2026-09-10).
+--
+-- Fix: drop the original 4-arg signature. Every existing 4-arg call site
+-- keeps working unchanged, resolving to the 5-arg version with
+-- p_company_id defaulting to null.
+drop function public.log_platform_activity(text, uuid, uuid, jsonb);

@@ -21,9 +21,9 @@ export default function PlatformLoginPage() {
                 {/* Plain <img>, not next/image — a fixed brand asset. */}
                 <img src="/aorms-logo.png" alt="AORMS" style={{ height: "28px", width: "auto" }} />
               </NextLink>
-              <h1 className="cds--type-heading-04">Sign in to AORMS Identity</h1>
+              <h1 className="cds--type-heading-04">Sign in to your AORMS Platform account</h1>
               <p className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
-                Your personal, portable account — separate from any one company&apos;s login.
+                One personal, portable account across the Identity Portal, ConnectDeX Portal, and SysDeX.
               </p>
             </div>
             <TextInput id="email" name="email" labelText="Email" type="email" autoComplete="email" required />

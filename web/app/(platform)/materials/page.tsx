@@ -3,6 +3,7 @@ import { Button, Column, Grid, Select, SelectItem, Stack, Tag, TextInput, Tile }
 import { createClient as createWebClient } from "../../../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { ConnectDexPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
 
 type CompanyEmbed = { id: string; name: string; public_id: string; city: string | null; state: string | null } | null;
 
@@ -114,7 +115,9 @@ export default async function MaterialsPage({
   const sorted = [...rows].sort((a, b) => tier(a) - tier(b));
 
   return (
-    <Grid>
+    <>
+      <ConnectDexPortalHeader />
+      <Grid>
       <Column sm={4} md={8} lg={12}>
         <PageHeader
           title="Material Catalogue"
@@ -189,5 +192,6 @@ export default async function MaterialsPage({
         </Stack>
       </Column>
     </Grid>
+    </>
   );
 }

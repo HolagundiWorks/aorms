@@ -1,12 +1,14 @@
 import NextLink from "next/link";
 import { notFound } from "next/navigation";
-import { Column, Grid, Stack, Tag, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tile } from "@carbon/react";
+import { Column, Grid, InlineNotification, Stack, Tag, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tile } from "@carbon/react";
 import { createClient as createWebClient } from "../../../../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { InviteCompanyMemberForm } from "../../../../components/aorms/platform/company/InviteCompanyMemberForm";
 import { CompanyMembershipRoleSelect } from "../../../../components/aorms/platform/company/CompanyMembershipRoleSelect";
 import { LeaveCompanyButton } from "../../../../components/aorms/platform/company/LeaveCompanyButton";
 import { CompanyProfileForm } from "../../../../components/aorms/platform/company/CompanyProfileForm";
+import { ConnectDexOnboardingForm } from "../../../../components/aorms/platform/company/ConnectDexOnboardingForm";
+import { PayConnectDexFeeButton } from "../../../../components/aorms/platform/company/PayConnectDexFeeButton";
 import { AddCompanyBoardMemberForm } from "../../../../components/aorms/platform/company/AddCompanyBoardMemberForm";
 import { CompanyBoardMemberRow } from "../../../../components/aorms/platform/company/CompanyBoardMemberRow";
 import { AddCompanyContactForm } from "../../../../components/aorms/platform/company/AddCompanyContactForm";
@@ -14,6 +16,7 @@ import { CompanyContactRow } from "../../../../components/aorms/platform/company
 import { ProductCard, type Product } from "../../../../components/aorms/platform/company/ProductCard";
 import { AddProductForm } from "../../../../components/aorms/platform/company/AddProductForm";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
+import { ConnectDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 
 type AccountEmbed = { id: string; full_name: string; public_id: string } | null;
 
@@ -50,12 +53,100 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
   const { data: company, error: companyError } = await platformService
     .from("companies")
     .select(
-      "id, name, public_id, gstin, pan, gst_type, tds_applicable_default, address_line1, address_line2, city, district, state, pincode, email, phone",
+      "id, name, public_id, status, gstin, pan, gst_type, tds_applicable_default, address_line1, address_line2, city, district, state, pincode, email, phone",
     )
     .eq("id", companyId)
     .maybeSingle();
   if (companyError) throw new Error(companyError.message);
   if (!company) notFound();
+
+  // ConnectDeX Partners onboarding pipeline (2026-09-10) — a company
+  // isn't ACTIVE until it's been onboarded, verified, and paid for. Each
+  // pending status shows its own stage instead of the normal profile
+  // view; only ACTIVE reaches the full page below. isOwner is checked
+  // *here*, before this branch, not reused from the full-page section
+  // further down — a non-owner shouldn't see the interactive onboarding
+  // form or pay button at all, even though submitConnectDexOnboardingForm/
+  // createConnectDexOnboardingOrder both already enforce ownership at the
+  // action level regardless (this is UX polish on top of a real gate, not
+  // the gate itself).
+  if (company.status !== "ACTIVE") {
+    let isPendingOwner = false;
+    if (handle) {
+      const { data: account } = await platformService.from("accounts").select("id").eq("public_id", handle).maybeSingle();
+      if (account) {
+        const { data: membership } = await platformService
+          .from("company_memberships")
+          .select("role, status")
+          .eq("company_id", companyId)
+          .eq("account_id", account.id)
+          .maybeSingle();
+        isPendingOwner = membership?.role === "OWNER" && membership?.status === "ACTIVE";
+      }
+    }
+
+    return (
+      <>
+        <ConnectDexPortalHeader />
+        <Grid>
+        <Column sm={4} md={6} lg={8} style={{ margin: "0 auto" }}>
+          <PageHeader
+            title={company.name}
+            actions={
+              <Tag type="cool-gray" size="md">
+                {company.public_id}
+              </Tag>
+            }
+          />
+          {!isPendingOwner && (
+            <InlineNotification
+              kind="info"
+              title="Onboarding in progress"
+              subtitle="This ConnectDeX Partners profile isn't active yet."
+              lowContrast
+              hideCloseButton
+            />
+          )}
+          {isPendingOwner && company.status === "PENDING_ONBOARDING" && (
+            <>
+              <InlineNotification
+                kind="info"
+                title="Complete your onboarding"
+                subtitle="A platform admin has invited you — fill in your business details to move to verification."
+                lowContrast
+                hideCloseButton
+                style={{ marginBottom: "1.5rem" }}
+              />
+              <ConnectDexOnboardingForm companyId={company.id} />
+            </>
+          )}
+          {isPendingOwner && company.status === "PENDING_VERIFICATION" && (
+            <InlineNotification
+              kind="info"
+              title="Under review"
+              subtitle="Your onboarding details are being reviewed by an AORMS admin — you'll be able to pay the onboarding fee once verified."
+              lowContrast
+              hideCloseButton
+            />
+          )}
+          {isPendingOwner && company.status === "PENDING_PAYMENT" && (
+            <>
+              <InlineNotification
+                kind="success"
+                title="Verified"
+                subtitle="One step left — pay the flat onboarding fee to activate your ConnectDeX Partners profile."
+                lowContrast
+                hideCloseButton
+                style={{ marginBottom: "1.5rem" }}
+              />
+              <PayConnectDexFeeButton companyId={company.id} companyName={company.name} />
+            </>
+          )}
+        </Column>
+        </Grid>
+      </>
+    );
+  }
 
   const [{ data: memberships }, { data: boardMembers }, { data: contacts }, { data: products }] = await Promise.all([
     platformService
@@ -98,7 +189,9 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
   );
 
   return (
-    <Grid>
+    <>
+      <ConnectDexPortalHeader />
+      <Grid>
       <Column sm={4} md={8} lg={12}>
         <PageHeader
           title={company.name}
@@ -292,6 +385,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
           </div>
         </Stack>
       </Column>
-    </Grid>
+      </Grid>
+    </>
   );
 }

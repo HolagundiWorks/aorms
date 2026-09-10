@@ -21,9 +21,9 @@ export default function PlatformSignUpPage() {
                 {/* Plain <img>, not next/image — a fixed brand asset. */}
                 <img src="/aorms-logo.png" alt="AORMS" style={{ height: "28px", width: "auto" }} />
               </NextLink>
-              <h1 className="cds--type-heading-04">Create your AORMS Identity</h1>
+              <h1 className="cds--type-heading-04">Create your AORMS Platform account</h1>
               <p className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
-                A portable personal account — one AORMS-U- handle across every company you work with.
+                A portable personal account — one AORMS-U- handle across every studio and company you work with.
               </p>
             </div>
             <TextInput id="fullName" name="fullName" labelText="Full name" required />

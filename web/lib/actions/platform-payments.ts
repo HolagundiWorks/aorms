@@ -20,7 +20,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
-import { getCurrentPlatformAccount } from "../platform/account";
+import { getCurrentPlatformSessionAccount } from "../platform/account";
 import { createOrder, verifyPaymentSignature } from "../platform/razorpay";
 import { applyCapturedPayment } from "../platform/licence-payment";
 
@@ -134,7 +134,7 @@ export async function confirmPaymentClientSide(orderId: string, paymentId: strin
 // ══ Platform-admin-only: override a licence, edit pricing ═════════════════
 
 async function requirePlatformAdmin(): Promise<{ error: string } | null> {
-  const account = await getCurrentPlatformAccount();
+  const account = await getCurrentPlatformSessionAccount();
   if (!account) return { error: "Sign in to the AORMS Platform first." };
   if (!account.is_admin) return { error: "Admin access required." };
   return null;

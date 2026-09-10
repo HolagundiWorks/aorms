@@ -2,12 +2,15 @@ import { NextResponse } from "next/server";
 import { verifyWebhookSignature } from "../../../../lib/platform/razorpay";
 import { createServiceRoleClient } from "../../../../lib/platform/service";
 import { applyCapturedPayment } from "../../../../lib/platform/licence-payment";
+import { applyCapturedConnectDexPayment } from "../../../../lib/platform/connectdex-payment";
 
 /**
- * Razorpay webhook — the durable source of truth for licence payments, per
- * lib/actions/platform-payments.ts's own header comment. Configure this
- * URL (https://aorms.in/api/razorpay/webhook) in Razorpay's dashboard
- * under Settings → Webhooks, select at minimum `payment.captured` and
+ * Razorpay webhook — the durable source of truth for both licence
+ * payments (Studio) and ConnectDeX Partners onboarding fees (Company),
+ * per lib/actions/platform-payments.ts's and lib/actions/connectdex.ts's
+ * own header comments. Configure this URL
+ * (https://aorms.in/api/razorpay/webhook) in Razorpay's dashboard under
+ * Settings → Webhooks, select at minimum `payment.captured` and
  * `payment.failed`, and set RAZORPAY_WEBHOOK_SECRET to the secret Razorpay
  * generates for that specific webhook (a different secret from
  * RAZORPAY_KEY_SECRET — see web/.env.example).
@@ -22,6 +25,14 @@ import { applyCapturedPayment } from "../../../../lib/platform/licence-payment";
  * JSON.parse → JSON.stringify round-trip is not guaranteed byte-identical
  * (key order, whitespace) and would make a genuine request's signature
  * fail to verify.
+ *
+ * One Razorpay order id can only ever belong to one of `payments` /
+ * `connectdex_payments` (each order is created against exactly one of the
+ * two tables, in lib/actions/platform-payments.ts's createLicenceOrder or
+ * lib/actions/connectdex.ts's createConnectDexOnboardingOrder
+ * respectively) — this handler checks `payments` first, and only checks
+ * `connectdex_payments` if nothing matched there, rather than assuming
+ * which one a given order belongs to.
  */
 export async function POST(request: Request) {
   const rawBody = await request.text();
@@ -50,7 +61,7 @@ export async function POST(request: Request) {
 
   if (event.event === "payment.captured" && orderId && paymentId) {
     const platformService = createServiceRoleClient();
-    const { data: row } = await platformService
+    const { data: licenceRow } = await platformService
       .from("payments")
       .select("id, studio_id, plan, seats, status")
       .eq("razorpay_order_id", orderId)
@@ -59,12 +70,33 @@ export async function POST(request: Request) {
     // Idempotent against confirmPaymentClientSide's own fast path — if
     // that already applied this payment, skip re-applying it (would
     // otherwise double-extend expires_at).
-    if (row && row.status !== "CAPTURED") {
-      await applyCapturedPayment(platformService, { ...row, razorpay_payment_id: paymentId });
+    if (licenceRow) {
+      if (licenceRow.status !== "CAPTURED") {
+        await applyCapturedPayment(platformService, { ...licenceRow, razorpay_payment_id: paymentId });
+      }
+    } else {
+      const { data: connectDexRow } = await platformService
+        .from("connectdex_payments")
+        .select("id, company_id, status")
+        .eq("razorpay_order_id", orderId)
+        .maybeSingle();
+      if (connectDexRow && connectDexRow.status !== "CAPTURED") {
+        await applyCapturedConnectDexPayment(platformService, { ...connectDexRow, razorpay_payment_id: paymentId });
+      }
     }
   } else if (event.event === "payment.failed" && orderId) {
     const platformService = createServiceRoleClient();
-    await platformService.from("payments").update({ status: "FAILED", updated_at: new Date().toISOString() }).eq("razorpay_order_id", orderId);
+    const { data: failedLicenceRows } = await platformService
+      .from("payments")
+      .update({ status: "FAILED", updated_at: new Date().toISOString() })
+      .eq("razorpay_order_id", orderId)
+      .select("id");
+    if (!failedLicenceRows || failedLicenceRows.length === 0) {
+      await platformService
+        .from("connectdex_payments")
+        .update({ status: "FAILED", updated_at: new Date().toISOString() })
+        .eq("razorpay_order_id", orderId);
+    }
   }
 
   // Always 200 for a signature-verified, recognized request — Razorpay

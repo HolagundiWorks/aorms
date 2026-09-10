@@ -1,8 +1,9 @@
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
-import { getCurrentPlatformAccount } from "../../../../lib/platform/account";
+import { getCurrentPlatformSessionAccount } from "../../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
+import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 
 const STATUS_TAG: Record<string, "gray" | "cyan" | "green" | "red" | "magenta"> = {
   CREATED: "gray",
@@ -21,7 +22,7 @@ const STATUS_TAG: Record<string, "gray" | "cyan" | "green" | "red" | "magenta"> 
  * can cross-reference Razorpay's own dashboard.
  */
 export default async function AdminPaymentsPage() {
-  const account = await getCurrentPlatformAccount();
+  const account = await getCurrentPlatformSessionAccount();
   if (!account?.is_admin) return <AdminAccessDenied title="Payments" />;
 
   const platformService = createPlatformServiceRoleClient();
@@ -32,7 +33,9 @@ export default async function AdminPaymentsPage() {
     .limit(200);
 
   return (
-    <Grid>
+    <>
+      <SysDexPortalHeader />
+      <Grid>
       <Column sm={4} md={8} lg={16}>
         <PageHeader title="Payments" description="Every Razorpay payment attempt, most recent first." />
 
@@ -82,5 +85,6 @@ export default async function AdminPaymentsPage() {
         </Table>
       </Column>
     </Grid>
+    </>
   );
 }
