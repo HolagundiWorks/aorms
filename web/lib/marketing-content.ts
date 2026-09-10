@@ -3,9 +3,23 @@
  * frontend/src/lib/product-nomenclature.ts's AORMS_PLATFORM/ESTI/
  * HUMAN_CENTRIC_WORKS constants (the "not part of the migration spec"
  * marketing surface `web/` never had — its root route was a bare auth
- * redirect until this file). Only the fields the landing page actually
- * uses — web/ is a single unified hub, not the multi-portal/licensing
- * model the old constants also cover, so that apparatus isn't ported.
+ * redirect until this file).
+ *
+ * Stale-doc correction (2026-09-10): this comment used to say "web/ is a
+ * single unified hub, not the multi-portal/licensing model the old
+ * constants also cover, so that apparatus isn't ported" — no longer true.
+ * The AORMS Platform (portable AORMS-U- identity, per-studio Trial/
+ * Standard/Premium licensing, Razorpay payments — see
+ * docs/esti/AORMS-PLATFORM-ARCHITECTURE.md) is real and live as of
+ * 2026-09-09. LICENSING/IDENTITY below reflect it; FEE_PROPOSAL was
+ * rewritten the same date — it used to describe a flat "one licence,
+ * nothing else to buy, unlimited seats" model that directly contradicted
+ * the real per-seat tiered system once that existed. No specific prices
+ * appear anywhere on this page: the actual per-seat rates
+ * (`plan_pricing`, platform/supabase/migrations/0010_payments.sql) are
+ * still placeholder values pending review on /admin/pricing — stating a
+ * number here before that's confirmed would commit to a price nobody's
+ * decided yet.
  */
 
 export const AORMS_PLATFORM = {
@@ -61,18 +75,36 @@ export const SPECIFICATION = [
 export const FEE_PROPOSAL = [
   {
     eyebrow: "Scope",
-    title: "Full workspace",
-    body: "One licence covers clients, projects, proposals, invoices, team management, knowledge bank, and delivery tracking on one unified office hub. Unlimited staff logins.",
+    title: "Every plan, the same hub",
+    body: "Trial, Standard, and Premium all run the same office hub — clients, projects, proposals, invoices, team, knowledge bank, delivery tracking. Plans differ in seats and support, never in which features you can reach.",
   },
   {
     eyebrow: "Basis of fee",
-    title: "5 GB included",
-    body: "Drawings and firm files. Extra storage billed per GB-month when you grow — no surprise edition upgrades, no per-seat pricing.",
+    title: "Licensed per seat",
+    body: "One licence per studio, priced per staff seat, managed from your own AORMS Identity — start on Trial, upgrade in-app when you're ready. No edition lock-in, no separate module purchases.",
   },
   {
     eyebrow: "Exclusions",
     title: "No metered AI",
-    body: "ESTI runs on the hub against your firm's own data — no per-token billing, no bring-your-own key needed. There is nothing else to buy.",
+    body: "ESTI runs on the hub against your firm's own data — no per-token billing, no bring-your-own key needed, on every plan including Trial.",
+  },
+] as const;
+
+export const IDENTITY = [
+  {
+    eyebrow: "Portable",
+    title: "One handle, every studio",
+    body: "Your AORMS Identity (an AORMS-U- handle) is yours, not your studio's — link it once and carry the same account into every practice you work at, present or future.",
+  },
+  {
+    eyebrow: "Earned, not applied for",
+    title: "Basic to Pro at 100 hours",
+    body: "Every identity starts Basic. Cross 100 hours of active use and it promotes to Pro automatically — no form, no approval step, no application to file.",
+  },
+  {
+    eyebrow: "Licensing lives here",
+    title: "Your studio's plan, in one place",
+    body: "A studio's Trial/Standard/Premium licence, seats, and renewal all sit under the same Identity sign-in that manages the account itself.",
   },
 ] as const;
 

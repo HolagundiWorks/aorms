@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Accordion, AccordionItem, Column, Grid, Tag, Tile } from "@carbon/react";
 import { createClient } from "../lib/supabase/server";
 import { roleHome } from "../lib/auth/role-home";
-import { BandCtas, HeroCtas } from "../components/aorms/LandingButtons";
+import { BandCtas, HeroCtas, IdentityCtas } from "../components/aorms/LandingButtons";
 import {
   AORMS_PLATFORM,
   BRIEF,
@@ -11,6 +11,7 @@ import {
   FAQ,
   FEE_PROPOSAL,
   HUMAN_CENTRIC_WORKS,
+  IDENTITY,
   SPECIFICATION,
 } from "../lib/marketing-content";
 
@@ -177,7 +178,7 @@ export default async function LandingPage() {
         </Grid>
       </section>
 
-      {/* Fee proposal */}
+      {/* Fee proposal — licensing */}
       <section id="fee-proposal" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
         <Grid>
           <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
@@ -188,7 +189,7 @@ export default async function LandingPage() {
               Fee Proposal
             </p>
             <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
-              One Standard licence.
+              Trial, Standard, Premium.
             </h2>
           </Column>
           {FEE_PROPOSAL.map((p) => (
@@ -202,6 +203,42 @@ export default async function LandingPage() {
                 </h3>
                 <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
                   {p.body}
+                </p>
+              </Tile>
+            </Column>
+          ))}
+        </Grid>
+      </section>
+
+      {/* Identity — the portable AORMS-U- account underneath licensing */}
+      <section id="identity" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+        <Grid>
+          <Column sm={4} md={8} lg={12} style={{ marginBottom: "2rem" }}>
+            <p
+              className="cds--type-productive-heading-01"
+              style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
+            >
+              Identity
+            </p>
+            <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
+              Your account, not your studio's.
+            </h2>
+            <p className="cds--type-body-02" style={{ marginTop: "0.75rem", maxWidth: 560, color: "var(--cds-text-secondary)" }}>
+              A portable AORMS Identity carries you between studios — and grows on its own the more you use it.
+            </p>
+            <IdentityCtas />
+          </Column>
+          {IDENTITY.map((f) => (
+            <Column key={f.title} sm={4} md={4} lg={4} style={{ marginBottom: "1rem" }}>
+              <Tile style={{ height: "100%" }}>
+                <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-support-info)" }}>
+                  {f.eyebrow}
+                </p>
+                <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.5rem" }}>
+                  {f.title}
+                </h3>
+                <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
+                  {f.body}
                 </p>
               </Tile>
             </Column>

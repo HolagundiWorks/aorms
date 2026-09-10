@@ -39,3 +39,22 @@ export function BandCtas() {
     </div>
   );
 }
+
+/**
+ * The Identity section's own CTAs — a separate portal/login from the
+ * office hub's own (`/platform-signup`, `/platform-login`; see
+ * docs/esti/AORMS-PLATFORM-ARCHITECTURE.md), so deliberately not reusing
+ * HeroCtas/BandCtas's `/login` target.
+ */
+export function IdentityCtas() {
+  return (
+    <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
+      <Button as={Link} href="/platform-signup" renderIcon={ArrowRight}>
+        Create your AORMS Identity
+      </Button>
+      <Button kind="tertiary" as={Link} href="/platform-login">
+        Already have one? Sign in
+      </Button>
+    </div>
+  );
+}

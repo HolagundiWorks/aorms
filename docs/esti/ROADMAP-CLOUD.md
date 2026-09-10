@@ -3220,6 +3220,50 @@ Verification section not yet exercised). Everything else in that section
 verified against real, live data rather than just written and assumed
 correct.
 
+**Landing page updated: Identity section added, licensing copy corrected
+to match reality (2026-09-10), on explicit "update the landing page"
+direction.** `web/app/page.tsx`'s "Fee Proposal" section previously read
+"One Standard licence... Unlimited staff logins... There is nothing else
+to buy" — a flat, no-tiers pricing story written before the AORMS
+Platform's real Trial/Standard/Premium per-seat licensing existed
+(`lib/marketing-content.ts`'s own header comment already flagged this
+exact gap: "not the multi-portal/licensing model... so that apparatus
+isn't ported"). Left uncorrected, the public landing page would have
+directly contradicted the live product — a real prospect could read
+"unlimited seats, nothing else to buy" days after per-seat paid tiers and
+a real checkout flow shipped. Rewrote the three tiles to describe the
+actual tiered, per-seat model (`FEE_PROPOSAL` in `marketing-content.ts`)
+without stating any rupee figure — the seeded `plan_pricing` values are
+still explicitly flagged placeholders pending review on `/admin/pricing`
+(see the admin back-office entry above), and putting an unconfirmed
+number in public marketing copy is a materially bigger commitment than
+one sitting in an internal admin panel with a warning banner.
+
+Added a new **Identity** section (new `IDENTITY` content array + section
+in `page.tsx`, new `IdentityCtas` component in `LandingButtons.tsx`)
+covering the three things asked for together — portable `AORMS-U-`
+identity ("your account, not your studio's"), the automatic Basic→Pro
+promotion at 100 hours of use ("earned, not applied for" — no
+application/approval step, matching `0002_usage_and_level.sql`'s actual
+mechanics), and that a studio's licence lives under the same Identity
+sign-in. CTAs point at `/platform-signup`/`/platform-login` — the
+AORMS Platform's own real signup flow, deliberately not `/login` (the
+Office Hub's own, unrelated sign-in `HeroCtas`/`BandCtas` already use).
+
+Verified: `tsc --noEmit` and `eslint` (the three changed files) clean.
+Live-verified via the local dev server (cleared session cookies first,
+since a signed-in session redirects the landing page away entirely,
+per its own existing auth-gate logic) — confirmed via `get_page_text`
+that every new/changed section's copy renders correctly and via the
+accessibility tree that "Create your AORMS Identity" resolves to
+`/platform-signup` as a real link, not just text. (Screenshots came back
+blank this pass because the Browser pane was hidden at the time —
+confirmed via `tabs_context`, not a rendering bug — text/DOM inspection
+carried the verification instead, per the tool's own guidance for a
+hidden pane.) Not yet redeployed to production — this is a `web/`
+source change, picked up on the next Hostinger build the same way every
+other change since the initial deploy has been.
+
 **Cleanup backlog — repo-wide stale-doc sweep (2026-09-06), on explicit request:**
 - ✅ **`frontend/public/site.webmanifest` rebranded** — still said `"AORMS —
   AEC consulting suite"` and named AQC/AADT/ShilpiDB (all removed apps) plus
