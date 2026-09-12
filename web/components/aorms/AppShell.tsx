@@ -189,6 +189,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // persistent-icon-rail mode the unconditional 48px assumes.
   const [sideNavExpanded, setSideNavExpanded] = useState(true);
 
+  // Closes the nav after any link click. Above the ~66rem breakpoint the
+  // nav's own CSS ignores `expanded` and stays fixed-open regardless (see
+  // the comment on the state above) — so this call is a no-op on desktop
+  // and only actually does anything below that breakpoint, where the nav
+  // is a dismissible overlay: without it, tapping a link left the overlay
+  // sitting open over the newly-navigated page until the user separately
+  // clicked the overlay backdrop or the menu button. Real bug, not
+  // cosmetic — found live (nav didn't auto-collapse after navigating).
+  function collapseNav() {
+    setSideNavExpanded(false);
+  }
+
   return (
     <PomodoroProvider>
       <Header aria-label="AORMS">
@@ -241,6 +253,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               href={item.href}
               renderIcon={item.icon}
               isActive={isActiveHref(pathname, item.href)}
+              onClick={collapseNav}
             >
               {item.label}
             </SideNavLink>
@@ -250,7 +263,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             return (
               <SideNavMenu key={group.title} title={group.title} renderIcon={group.icon} defaultExpanded={groupIsActive}>
                 {group.items.map((item) => (
-                  <SideNavMenuItem key={item.href} as={NextLink} href={item.href} isActive={isActiveHref(pathname, item.href)}>
+                  <SideNavMenuItem key={item.href} as={NextLink} href={item.href} isActive={isActiveHref(pathname, item.href)} onClick={collapseNav}>
                     {item.label}
                   </SideNavMenuItem>
                 ))}

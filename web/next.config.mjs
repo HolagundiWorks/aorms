@@ -26,6 +26,18 @@
  */
 const nextConfig = {
   reactStrictMode: true,
+  // 2026-09-13: Next 16's dev server only trusts its own "Local:" host
+  // (localhost) for HMR/RSC dev requests by default; opening the app via
+  // the *other* valid loopback name, 127.0.0.1, silently fails that origin
+  // check (a single console warning, easy to miss) and the client bundle
+  // never finishes initializing — page loads and looks server-rendered
+  // (real data, real markup) but zero React event handlers ever attach:
+  // every button, popover, and the sidebar toggle look broken with no
+  // visible error. Traced live: identical page hydrated fine under
+  // http://localhost:3000, 0 hydrated elements under http://127.0.0.1:3000.
+  // Whitelisting 127.0.0.1 explicitly (matching the fix Next's own warning
+  // suggests) makes both hostnames work in local dev.
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   sassOptions: {
     includePaths: ["./styles"],
   },

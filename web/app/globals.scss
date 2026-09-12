@@ -36,6 +36,12 @@
 @use "@carbon/react/scss/components/slider";
 @use "@carbon/react/scss/components/checkbox";
 @use "@carbon/react/scss/components/modal";
+// 2026-09-13: the header Calculator's unit Toggle rendered as a bare
+// unstyled sliver (no switch pill, label text overlapping the "Calculator"
+// heading) — same root cause as the --cds-layout-density-* and
+// cds--type-* gaps documented above: `Toggle` was in use (HeaderCalculator
+// .tsx) with no matching `@use` here, so none of its CSS ever existed.
+@use "@carbon/react/scss/components/toggle";
 @use "@carbon/react/scss/grid";
 
 // Emits every `.cds--type-*` utility class (heading-01..07, body-01/02,
@@ -73,7 +79,8 @@ body {
   margin-top: 1.5rem;
 }
 
-// Header overflow fix (structural only — found in a UI audit, 2026-09-07).
+// Header overflow fix (structural only — found in a UI audit, 2026-09-07;
+// narrowed to mobile-only 2026-09-13, see that dated note below).
 // The header's brand text + 6 global actions (Ask ESTI/Wellbeing/
 // Calculator/Pomodoro/AI Runs/Sign out) don't all fit a phone-width
 // viewport; Carbon's HeaderGlobalBar has no built-in responsive overflow
@@ -85,20 +92,37 @@ body {
   .aorms-header-brand-text {
     display: none;
   }
-}
 
-.cds--header__global {
-  overflow-x: auto;
-  // Explicit, not just "leave it unset": per the CSS Overflow spec, when one
-  // axis is non-visible and the other is left at the initial `visible`, the
-  // `visible` axis is behaviorally treated as `auto` too — so without this,
-  // overflow-y silently computed to `auto` and a stray 1px scrollHeight/
-  // clientHeight mismatch painted an unwanted vertical scrollbar on the
-  // header (found 2026-09-07, user report: "vertical scroll existing on
-  // header"). This bar only ever needs to scroll horizontally.
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
-  min-width: 0;
+  // 2026-09-13: moved inside this media query — it was unconditional
+  // before, which silently broke every Popover/Tooltip anchored inside
+  // the global action bar (Ask ESTI/Wellbeing/Calculator/Pomodoro) at
+  // ALL viewport widths, not just phone width. `overflow-x`/`overflow-y`
+  // other than `visible` makes an element a scroll container, and
+  // Carbon's Popover (in `absolute` positioning strategy, the default)
+  // measures/clips itself against its nearest scroll-container ancestor
+  // — so every one of those popovers rendered as a degenerate
+  // `position: absolute; top: 0; left: 0` panel stretched to the header
+  // bar's own width instead of anchored near its trigger icon, making
+  // every header icon look completely non-functional (found live: real
+  // user report "all top header icons not working", reproduced by
+  // inspecting the rendered `.cds--popover` panel's computed style).
+  // The actions bar only needs to scroll at phone width in the first
+  // place, so scoping the rule here fixes the popovers on every wider
+  // viewport without losing the original mobile-overflow fix.
+  .cds--header__global {
+    overflow-x: auto;
+    // Explicit, not just "leave it unset": per the CSS Overflow spec, when
+    // one axis is non-visible and the other is left at the initial
+    // `visible`, the `visible` axis is behaviorally treated as `auto` too —
+    // so without this, overflow-y silently computed to `auto` and a stray
+    // 1px scrollHeight/clientHeight mismatch painted an unwanted vertical
+    // scrollbar on the header (found 2026-09-07, user report: "vertical
+    // scroll existing on header"). This bar only ever needs to scroll
+    // horizontally.
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    min-width: 0;
+  }
 }
 
 // AORMS context panel (ContextPanel.tsx, 2026-09-09) — the corrected
