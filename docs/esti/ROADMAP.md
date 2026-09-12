@@ -4629,6 +4629,69 @@ with distinct, correct portal content (Identity/Sign in, ConnectDeX/
 Sign in, SysDeX/Admin respectively). Web Apps quota now 4/5 on the
 Unlimited plan (aorms.in + the 3 new subdomain apps).
 
+**Demo data + real bug-fix pass — seeded a realistic firm's worth of data
+then tested against it, per the user's own explicit "inject demo data
+first, then test" sequencing.** Rewrote `reset_demo_data()` (migration
+`0041`, same signature, cron-compatible) to seed a firm of 5 real staff
+(linked to real auth accounts), 10 clients, 12 projects, 6 contractors,
+5 consultants, 30 tasks with dependencies, 8 invoices, 5 proposals, 4
+leads, 5 decisions, 3 MoMs, 2 progress reports, 1 leave — applied and
+verified live, then Dashboard-verified rich and correct. Testing
+surfaced four real, independent bugs (not one bug wearing different
+symptoms), each root-caused rather than guessed at:
+
+1. **The actual cause of "all top header icons not working" and
+   "autocollapse of side bar not working"**: Next.js 16's dev server
+   only trusts the `localhost` origin by default for HMR/RSC dev
+   requests — opening the app via the equally-valid `127.0.0.1`
+   loopback silently failed that check (one easy-to-miss console
+   warning) and the client bundle never finished hydrating. The page
+   looked correct (real server-rendered markup, real data) but *zero*
+   React event handlers attached anywhere in the tree — every button,
+   popover, and the sidebar toggle looked broken with no visible error,
+   which is exactly the bug report's shape. Traced by walking the whole
+   DOM for `__react*`-prefixed keys: 0 hydrated elements under
+   `127.0.0.1`, hundreds under `localhost` on the identical page.
+   Fixed in `next.config.mjs` (`allowedDevOrigins: ["127.0.0.1",
+   "localhost"]`) — this was a **local dev-only** issue, production
+   was never affected (it's served from a real domain, not a loopback
+   address).
+2. A second, narrower, genuinely-shipped bug was found and fixed
+   alongside it once hydration was no longer confounding the diagnosis:
+   `globals.scss`'s `.cds--header__global` overflow rule (added
+   2026-09-07 for phone-width header overflow) was unconditional, which
+   made Carbon's Popover treat it as a clipping ancestor and force
+   every header popover's content to `display: none` at *every*
+   viewport width, not just phone width. Scoped back to the
+   `max-width: 42rem` breakpoint it was meant for.
+3. **Sidebar auto-collapse**: nav links never closed the mobile overlay
+   sidebar after navigating (`AppShell.tsx` — added `onClick=
+   {collapseNav}` to both `SideNavLink`/`SideNavMenuItem` types; a
+   no-op above the ~66rem breakpoint, matching existing behavior
+   there).
+4. **Calculator bugs, found live while re-testing the popover fix**:
+   the unit `Toggle` rendered as an unstyled sliver overlapping the
+   "Calculator" heading — its Sass partial was never `@use`d in
+   `globals.scss` (same class of gap as the previously-fixed
+   `--cds-layout-density-*`/`cds--type-*` omissions); added the `@use`
+   and restacked the row. Separately, the input's own placeholder
+   example (`12'6" + 3.2m2 * 2`) was itself a dimensionally invalid
+   expression (adding a length to an area) that the evaluator correctly
+   rejected as "Invalid expression" — replaced with a valid same-
+   dimension example.
+
+Verified: `tsc --noEmit`, `eslint .`, and full `next build` all clean;
+all six header actions (Today's Brief/Wellbeing/Calculator/Pomodoro/AI
+Runs/Sign out) and the sidebar auto-collapse manually re-tested against
+a fresh dev server post-fix. **Not yet done**: the rest of the
+requested click-through testing pass (Contractors/Consultants/
+Invoices/Proposals/Leads/Decisions/MoMs/Progress Reports/Workload)
+beyond Dashboard; new AORMS Identity/Firm/ConnectDeX pricing figures
+the user separately provided; the landing-page hero animation restyle;
+a new ConnectDeX + company-registration pricing page (deliberately
+deferred — the user flagged their own spec as incomplete, "more
+details will follow").
+
 ---
 
 ## Support & questions
