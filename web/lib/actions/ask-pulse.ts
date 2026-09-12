@@ -1,21 +1,20 @@
 "use server";
 
 /**
- * ESTI Pulse — Ask Pulse (2026-09-12). Runs the constrained NL
+ * ESTI Pulse — Ask Pulse (2026-09-13). Runs the fully deterministic NL
  * interpreter (lib/pulse/interpreter.ts) to classify the question into
  * one of a fixed set of intents, executes the matching deterministic
- * query or RAG retrieval — never the LLM's own free text as the
- * answer's factual content — then phrases the result the same
- * deterministic-template-first, optional-bounded-Ollama-rephrase way
- * lib/ai/phraser.ts already established for the Daily Brief. Lives on
- * its own /pulse page, not the header (the header's Daily Brief popover
- * stays exactly as shipped).
+ * query or RAG retrieval, and returns that text as-is — never a model's
+ * own free text as the answer's factual content. Earlier versions sent
+ * the question and the deterministic answer through Ollama (classify,
+ * then optionally rephrase); both steps were dropped by explicit
+ * direction so Ask Pulse never depends on a self-hosted model being
+ * reachable in production. Lives on its own /pulse page, not the header
+ * (the header's Daily Brief popover — which does still use Ollama,
+ * optionally — stays exactly as shipped).
  */
 import { createClient } from "../supabase/server";
-import { callOllamaChat, checkOllamaHealth, ollamaBaseUrlFromEnv, ollamaModelFromEnv } from "../ai/ollama";
-import { redactPii } from "../ai/redact";
-import { PHRASER_REPHRASE_SYSTEM } from "../ai/phraser";
-import { INTERPRETER_SYSTEM, parsePulseIntent, type PulseIntent } from "../pulse/interpreter";
+import { classifyPulseIntent, type PulseIntent } from "../pulse/interpreter";
 import { bandForScore, PRIORITY_BAND_LABEL } from "../pulse/scoring";
 import { retrieveRelevantContext } from "../rag/retrieve";
 
@@ -130,50 +129,20 @@ export async function askPulse(_prev: AskPulseState, formData: FormData): Promis
   } = await supabase.auth.getUser();
   if (!user) return { output: "", error: "Sign in to ask Pulse." };
 
-  const baseUrl = ollamaBaseUrlFromEnv();
-  const model = ollamaModelFromEnv();
-  const health = await checkOllamaHealth({ baseUrl, model });
-
-  let intent: PulseIntent = { intent: "UNKNOWN" };
-  if (health.ok) {
-    try {
-      const { text } = await callOllamaChat({ baseUrl, model, system: INTERPRETER_SYSTEM, user: question });
-      intent = parsePulseIntent(text);
-    } catch {
-      intent = { intent: "UNKNOWN" };
-    }
-  }
-
-  const { text: deterministicText, sources } = await buildDeterministicAnswer(supabase, intent, projectId);
-
-  let output = deterministicText;
-  let provider = "template";
-  let usedModel = "deterministic";
-  let tokenEstimate: number | null = null;
-
-  if (health.ok && intent.intent !== "UNKNOWN") {
-    try {
-      const { text, tokens } = await callOllamaChat({ baseUrl, model, system: PHRASER_REPHRASE_SYSTEM, user: deterministicText });
-      output = redactPii(text);
-      provider = "ollama";
-      usedModel = model;
-      tokenEstimate = tokens;
-    } catch {
-      // Deterministic text already assigned — keep it.
-    }
-  }
+  const intent: PulseIntent = classifyPulseIntent(question);
+  const { text: output, sources } = await buildDeterministicAnswer(supabase, intent, projectId);
 
   await supabase.from("ai_runs").insert({
     user_id: user.id,
     project_id: projectId,
     kind: "PULSE_QUERY",
-    provider,
-    model: usedModel,
+    provider: "template",
+    model: "deterministic",
     prompt_summary: question.slice(0, 200),
     sources,
     output_text: output,
     used_external_api: "false",
-    token_estimate: tokenEstimate === null ? null : String(tokenEstimate),
+    token_estimate: null,
   });
 
   return { output };

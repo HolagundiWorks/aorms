@@ -18,6 +18,17 @@
 > both need a `notifications` table that doesn't exist in `web/` yet;
 > everything below this banner still describes the original design
 > intent, not the new stack's current file layout.
+>
+> **Ollama dropped from RAG and the NL interpreter (2026-09-13).** The
+> RAG layer (Module 7) now runs on Postgres full-text search
+> (`search_esti_embeddings`, migrations 0039/0040) instead of pgvector
+> cosine similarity over Ollama embeddings; the NL interpreter is a
+> fixed set of deterministic pattern checks (`classifyPulseIntent()`)
+> instead of an Ollama-backed classifier. Neither piece depends on a
+> self-hosted model being reachable in production anymore — see
+> [ROADMAP.md](./ROADMAP.md)'s 2026-09-13 History entry. The
+> pre-existing, unrelated Ollama-backed features elsewhere in the app
+> (Daily Brief rephrase, Ask ESTI, AI Studio drafts) are unaffected.
 
 ESTI Pulse is an **ESTI capability** — part of the Embedded Studio
 Intelligence layer inside the **AORMS office hub** — that periodically reviews

@@ -4554,6 +4554,81 @@ project dropdown). All test rows (tasks, dependency, decision,
 embedding) deleted afterward via cascade + explicit cleanup, confirmed
 zero orphans across every affected table.
 
+**ESTI Pulse — dropped Ollama from RAG and the NL interpreter, made both
+fully deterministic (2026-09-13).** Explicit direction: no self-hosted
+model dependency for these two pieces at all — production never had
+Ollama configured anyway (confirmed `esti_embeddings` held zero real
+rows before this change, so nothing was actually working end-to-end in
+production until now). Migrations `0039`/`0040` drop
+`match_esti_embeddings` and the `embedding vector(768)` column, add a
+generated `search_vector tsvector` column + GIN index, and replace
+retrieval with `search_esti_embeddings` — a Postgres full-text search
+RPC. `lib/rag/ingest.ts` no longer calls an embedding model at all
+(chunks and stores plain text; `search_vector` is computed by Postgres
+itself on insert). `lib/rag/retrieve.ts` calls the new RPC instead of
+computing a query embedding. `lib/pulse/interpreter.ts`'s
+`classifyPulseIntent()` replaces the Ollama-backed classifier with a
+fixed set of ordered regex checks (missing-params → task-list w/
+status or assignee → priority w/ band → RAG-question keywords →
+UNKNOWN) — same zod-validated five-intent output shape, so
+`lib/actions/ask-pulse.ts` didn't need to change its contract, only
+drop the two Ollama calls (classify, then optional rephrase) and log
+`provider: "template"` / `model: "deterministic"` unconditionally now.
+`lib/ai/ollama.ts`'s `callOllamaEmbed`/`OLLAMA_EMBED_MODEL` removed as
+dead code — the pre-existing Ollama-backed features (Daily Brief
+rephrase, Ask ESTI, AI Studio drafts) are untouched and still degrade
+to their own deterministic fallback exactly as before when Ollama is
+unreachable, which is production's actual current state either way.
+
+**A real bug found live-verifying the full-text search RPC before
+calling it done, not just after the function compiled cleanly:**
+`0039`'s first version used `plainto_tsquery` directly, which ANDs
+every lexeme — a natural question like "what did we decide about the
+facade material" became `decid & facad & materi`, and since the actual
+source text said "agreed" rather than "decide," the AND failed
+entirely and returned zero rows even though the document was an
+obvious semantic match. `0040` fixes this by converting the ANDed
+lexemes to an OR'd query (`replace(...'::text, ' & ', ' | ')` fed back
+through `to_tsquery`) so retrieval ranks by term-overlap via `ts_rank`
+instead of requiring every word present — re-verified with the same
+test row: the reworded question now correctly retrieves it, and a
+second, even-more-loosely-worded question ("why did we choose fibre
+cement over brick for the exterior") still retrieves the same chunk
+via partial overlap. `classifyPulseIntent()` also re-verified directly
+(11 sample questions covering all 5 intents plus one deliberately
+off-topic one) — every classification matched expectations, including
+the correct "critical tasks" → LIST_PRIORITIES(band=CRITICAL) resolution
+over a competing LIST_TASKS reading. `tsc --noEmit`, `eslint .`, full
+`next build --webpack` all clean. All test rows deleted afterward,
+zero orphans confirmed.
+
+**Subdomains connected — identity/connectdex/sysdex.aorms.in are now
+real, separate Node.js Web Apps (2026-09-13),** resolving the
+multi-month Hostinger subdomain saga (see the dated History entries
+above and `docs/esti/PLATFORM-SUBDOMAINS-DEPLOY.md`). The user's own
+prior attempt to create these via Hostinger's Subdomains tool (folder-
+based, not connected to any Node process — the exact limitation this
+repo's own research had already confirmed) was deleted; a genuine
+pre-existing, unrelated `sysdex.aorms.in` PHP/HTML site slot on the same
+Unlimited plan (Hostinger's empty default placeholder, confirmed live
+before touching it, not assumed) was also found and removed to free
+that domain for reuse — flagged to the user and confirmed before
+deleting, not assumed safe. Three new Node.js Web Apps deployed from
+the same GitHub repo/branch (`HolagundiWorks/aorms`, `main`), same
+build settings as `aorms.in` itself (Next.js preset, Node 22.x, root
+`web`, `npm run build`/`npm run start` — corrected from the wizard's
+own `pnpm` default guess each time), each connected via Hostinger's
+"Connect domain" to its own subdomain, each with the full 10-entry env
+var set copied over (via `Import .env`, sourced from `aorms.in`'s own
+live panel values, not assumed from a possibly-stale local `.env`) plus
+`PULSE_RECOMPUTE_SECRET`. `web/proxy.ts`'s existing Host-header routing
+needed zero code changes — confirmed live via direct `curl -sL` against
+each subdomain: `identity.aorms.in` → `/identity`, `connectdex.aorms.in`
+→ `/connectdex`, `sysdex.aorms.in` → `/admin`, each returning HTTP 200
+with distinct, correct portal content (Identity/Sign in, ConnectDeX/
+Sign in, SysDeX/Admin respectively). Web Apps quota now 4/5 on the
+Unlimited plan (aorms.in + the 3 new subdomain apps).
+
 ---
 
 ## Support & questions
@@ -4579,4 +4654,4 @@ zero orphans across every affected table.
 
 ---
 
-**Last updated:** 2026-09-12
+**Last updated:** 2026-09-13
