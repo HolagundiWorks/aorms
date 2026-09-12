@@ -14,6 +14,7 @@ import { AddTaskForm } from "../../../components/aorms/AddTaskForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { bandForScore, PRIORITY_BAND_LABEL, type PriorityBand } from "../../../lib/pulse/scoring";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "red" | "green"> = {
   TODO: "gray",
@@ -29,6 +30,14 @@ const PRIORITY_TAG: Record<string, "gray" | "blue" | "magenta" | "red"> = {
   CRITICAL: "red",
 };
 
+const BAND_TAG: Record<PriorityBand, "red" | "magenta" | "purple" | "blue" | "gray"> = {
+  CRITICAL: "red",
+  ACTION_TODAY: "magenta",
+  WATCH: "purple",
+  NORMAL: "blue",
+  BACKLOG: "gray",
+};
+
 export default async function TasksPage() {
   const supabase = await createClient();
 
@@ -40,7 +49,7 @@ export default async function TasksPage() {
     supabase
       .from("tasks")
       .select(
-        "id, title, status, priority, due_date, classification, work_type, project_offices(title), profiles!tasks_assignee_id_fkey(full_name)",
+        "id, title, status, priority, priority_score, due_date, classification, work_type, project_offices(title), profiles!tasks_assignee_id_fkey(full_name)",
       )
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
@@ -93,6 +102,7 @@ export default async function TasksPage() {
                     <TableHeader>Assignee</TableHeader>
                     <TableHeader>Status</TableHeader>
                     <TableHeader>Priority</TableHeader>
+                    <TableHeader>Pulse</TableHeader>
                     <TableHeader>Due</TableHeader>
                   </TableRow>
                 </TableHead>
@@ -119,13 +129,28 @@ export default async function TasksPage() {
                             {t.priority}
                           </Tag>
                         </TableCell>
+                        <TableCell>
+                          {/* Pulse's own computed band (lib/pulse/scoring.ts) —
+                              a task not yet swept by a recompute pass has
+                              priority_score at its column default (0), which
+                              isn't a real BACKLOG verdict, just "not scored
+                              yet"; shown as a dash rather than a misleading
+                              band tag. */}
+                          {t.status !== "DONE" && t.priority_score ? (
+                            <Tag type={BAND_TAG[bandForScore(t.priority_score)]} size="sm">
+                              {PRIORITY_BAND_LABEL[bandForScore(t.priority_score)]}
+                            </Tag>
+                          ) : (
+                            "—"
+                          )}
+                        </TableCell>
                         <TableCell>{t.due_date ?? "—"}</TableCell>
                       </TableRow>
                     );
                   })}
                   {(tasks ?? []).length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6}>
+                      <TableCell colSpan={7}>
                         <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                           No tasks yet.
                         </p>

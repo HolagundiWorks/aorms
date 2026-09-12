@@ -11,6 +11,7 @@
  */
 
 export const DEFAULT_OLLAMA_MODEL = "llama3.2";
+export const DEFAULT_OLLAMA_EMBED_MODEL = "nomic-embed-text";
 
 export function ollamaBaseUrlFromEnv(): string {
   return (
@@ -22,6 +23,13 @@ export function ollamaBaseUrlFromEnv(): string {
 
 export function ollamaModelFromEnv(): string {
   return process.env.OLLAMA_MODEL?.trim() || DEFAULT_OLLAMA_MODEL;
+}
+
+/** ESTI Pulse RAG (2026-09-12) — separate model/env var from the chat
+ * model above, since embeddings and chat are different Ollama models
+ * pulled independently (`ollama pull nomic-embed-text`). */
+export function ollamaEmbedModelFromEnv(): string {
+  return process.env.OLLAMA_EMBED_MODEL?.trim() || DEFAULT_OLLAMA_EMBED_MODEL;
 }
 
 export type OllamaHealth = {
@@ -97,4 +105,28 @@ export async function callOllamaChat(input: OllamaChatInput): Promise<OllamaChat
     throw new Error("Ollama returned empty content — pull the model with `ollama pull`");
   }
   return { text, tokens: data.eval_count ?? null };
+}
+
+export type OllamaEmbedInput = { baseUrl: string; model: string; text: string; timeoutMs?: number };
+
+/** ESTI Pulse Module 7 (RAG). `nomic-embed-text` returns a 768-dim vector
+ * (confirmed live against a local Ollama instance, not assumed — see
+ * migration 0036's `esti_embeddings.embedding vector(768)` column). */
+export async function callOllamaEmbed(input: OllamaEmbedInput): Promise<number[]> {
+  const url = `${input.baseUrl.replace(/\/$/, "")}/api/embeddings`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(input.timeoutMs ?? 30_000),
+    body: JSON.stringify({ model: input.model, prompt: input.text }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Ollama embeddings HTTP ${res.status}: ${body.slice(0, 200)}`);
+  }
+  const data = (await res.json()) as { embedding?: number[] };
+  if (!data.embedding || data.embedding.length === 0) {
+    throw new Error("Ollama returned an empty embedding — pull the model with `ollama pull`");
+  }
+  return data.embedding;
 }

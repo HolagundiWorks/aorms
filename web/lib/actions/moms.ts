@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { logAutoDocumentIssue } from "../document-issues-log";
+import { ingestRecord } from "../rag/ingest";
 
 export type MomActionState = { error: string } | null;
 
@@ -51,6 +52,13 @@ export async function createMomRecord(
     p_before: null,
     p_after: { ref: refData, projectId, title, meetingDate },
   });
+
+  // Best-effort RAG indexing (ESTI Pulse Module 7) — awaited so a slow/
+  // failed embedding call is visible in server logs, but its own result
+  // is never surfaced as this action's error: Ollama being unreachable
+  // means this MoM isn't retrievable via Ask Pulse yet, not that saving
+  // the MoM itself failed.
+  if (minutes) await ingestRecord({ sourceTable: "moms", sourceId: inserted.id, projectId, content: minutes });
 
   revalidatePath("/moms");
   return null;

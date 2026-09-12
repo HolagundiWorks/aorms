@@ -7,6 +7,7 @@ import { DashboardWidget, EmptyRow, WidgetRow } from "../../../components/aorms/
 import { TodaysBrief } from "../../../components/aorms/dashboard/TodaysBrief";
 import { TopPriorities } from "../../../components/aorms/dashboard/TopPriorities";
 import { getTopPriorities } from "../../../lib/dashboard/priority";
+import { getLowConfidenceTasks } from "../../../lib/pulse/queries";
 import {
   getAbsencesToday,
   getApprovalsSummary,
@@ -107,6 +108,7 @@ export default async function DashboardPage() {
     consultantRequests,
     openTenders,
     contractorSubmissions,
+    lowConfidenceTasks,
   ] = await Promise.all([
     supabase.from("clients").select("id", { count: "exact", head: true }),
     supabase.from("project_offices").select("id", { count: "exact", head: true }),
@@ -148,6 +150,7 @@ export default async function DashboardPage() {
     getOpenConsultantRequests(supabase),
     getOpenTenders(supabase),
     getOpenContractorSubmissions(supabase),
+    getLowConfidenceTasks(supabase),
   ]);
 
   const { data: profile } = user ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : { data: null };
@@ -338,6 +341,29 @@ export default async function DashboardPage() {
             ) : (
               contractorSubmissions.map((c) => (
                 <WidgetRow key={c.id} primary={c.subject} secondary={c.kind} />
+              ))
+            )}
+          </DashboardWidget>
+
+          {/* ESTI Pulse (2026-09-12) — deterministic confidence scoring,
+              see lib/pulse/scoring.ts. Links to /pulse for the full
+              Priority/Blocked/Missing-parameter picture. */}
+          <DashboardWidget title="Low Confidence Tasks" viewAllHref="/pulse">
+            {lowConfidenceTasks.length === 0 ? (
+              <EmptyRow text="Nothing flagged low-confidence right now." />
+            ) : (
+              lowConfidenceTasks.map((t) => (
+                <WidgetRow
+                  key={t.id}
+                  href="/pulse"
+                  primary={t.title}
+                  secondary={t.projectTitle ?? "—"}
+                  right={
+                    <span className="cds--type-helper-text-01" style={{ color: "var(--cds-support-warning)" }}>
+                      {t.confidenceScore}% confidence
+                    </span>
+                  }
+                />
               ))
             )}
           </DashboardWidget>

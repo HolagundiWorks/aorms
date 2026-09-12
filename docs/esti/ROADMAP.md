@@ -4423,6 +4423,137 @@ real `ai_runs` row landed per generation with `provider: "ollama"`,
 (auth user, profile, `ai_runs` rows) deleted afterward, confirmed zero
 remain.
 
+**ESTI Pulse — RAG, workflow management, task prediction engine, NL
+interpreter (2026-09-12).** Explicit direction: implement all four. There
+was already a full design for this — `docs/esti/ESTI-PULSE.md` ("Project
+Standup Engine": task dependency graph, missing-parameter detection,
+priority/confidence scoring, RAG) — but it was built and shipped entirely
+against the old Fastify/Drizzle backend, which is dead (see CLAUDE.md's
+Dev/verify loop); none of it existed in `web/`. This ports that design
+onto the live Next.js/Supabase stack, keeping its core principle intact:
+*deterministic systems create business truth; LLMs only explain it* — no
+score, deadline, or fact here is ever invented by a model.
+
+Migration `0036_pulse_and_rag.sql` enables `vector`/`pg_net` and adds
+`task_dependencies` (Module 1), `task_missing_params` (Module 2),
+`task_priority_log` (an audit trail for every score change, Modules 5/6),
+and `esti_embeddings` (`vector(768)`, an ivfflat cosine index — Module
+7). `tasks.priority_score`/`confidence_score` already existed (declared
+since Phase 2, migration 0001, never read or written anywhere in `web/`
+until now) — this migration adds the tables needed to actually compute
+and explain them, not new columns. `lib/pulse/scoring.ts` computes both
+scores as pure, zero-I/O TypeScript (deadline/dependency/impact/
+financial/aging risk factors, confidence penalty inverted so an unclear
+task pulls priority up); `bandForScore()` maps to CRITICAL/ACTION
+TODAY/WATCH/NORMAL/BACKLOG (the UI never shows the raw number).
+`lib/pulse/missing-params.ts` detects an honest subset of gaps this
+schema can actually see (no due date, no assignee, an open BLOCKS
+dependency, >10 days no update) — not `ESTI-PULSE.md`'s full firm-wide
+list, which needs data this app doesn't structurally capture per-task.
+`lib/pulse/recompute.ts` ties both together against real data (open
+tasks + their dependencies, linked decisions' `CLIENT_REVIEW`/impact,
+project outstanding receivables), writes scores only where changed, logs
+a human-readable reason per change, and reconciles missing-params
+(dedup'd against OPEN/CONFIRMED/BLOCKED so a person's manual
+"Confirm"/"Not required" disposition doesn't get silently re-inserted as
+a duplicate next pass). Callable two ways: `app/api/pulse/recompute/
+route.ts` (bearer-secret gated, no session — same external-caller shape
+as the Razorpay webhook) for the `pg_cron`/`pg_net` job migration `0038`
+schedules every 15 minutes, and `lib/actions/pulse.ts`'s `recomputeNow`
+Server Action for immediate on-demand testing/use.
+
+RAG (Module 7) scoped to MoMs (`minutes`), Progress Reports
+(`narrative`), and Decisions (`rationale`) — the three richest free-text
+sources, not every document type in the schema. `lib/ai/ollama.ts`
+gained `callOllamaEmbed()` and a new `OLLAMA_EMBED_MODEL` env var
+(default `nomic-embed-text`, confirmed live against a local Ollama
+instance to actually return 768 dimensions — not assumed from docs —
+which is what's baked into `esti_embeddings.embedding vector(768)`).
+`lib/rag/ingest.ts` chunks (paragraph-based, ~800 chars), embeds, and
+upserts into `esti_embeddings` via the service-role client, always
+clearing old chunks for that source first; wired as an awaited,
+best-effort step (never fails the caller) into `createMomRecord`/
+`createProgressReport`/`createDecision`. `lib/rag/retrieve.ts` embeds a
+query and calls a new RPC, `match_esti_embeddings` (migration `0037` —
+PostgREST can't express pgvector's `<=>` operator through a normal
+`.select()`), scoped to one project, deliberately NOT `security definer`
+so it runs under the caller's own session and `esti_embeddings`'
+existing "staff read" RLS policy — retrieval never needs to bypass RLS
+the way ingestion does.
+
+The NL interpreter (`lib/pulse/interpreter.ts`) is a constrained intent
+parser, not open generation: the model is instructed to emit *only* JSON
+matching one of five fixed intents (LIST_PRIORITIES/LIST_TASKS/
+LIST_MISSING_PARAMS/RAG_QUERY/UNKNOWN), validated against a zod
+discriminated union before anything runs — an unparseable or
+schema-invalid response always falls back to UNKNOWN, so the model can
+never execute an intent it merely claims exists. `lib/actions/
+ask-pulse.ts`'s `askPulse()` runs the interpreter, executes the matched
+deterministic query or RAG retrieval (never the model's own free text as
+factual content), then phrases the result the same
+deterministic-template-first, optional-bounded-Ollama-rephrase way
+`lib/ai/phraser.ts` already established for the Daily Brief. Logs to
+`ai_runs` with `kind: "PULSE_QUERY"` (no check constraint on that
+column, confirmed same as `DAILY_BRIEF` before it). Lives on its own new
+`/pulse` page (also new: a "Pulse" top-level nav entry, `Activity` icon)
+— deliberately NOT the header, so HeaderEsti's Daily Brief popover stays
+exactly as shipped. `/pulse` itself is the Work-hub view `ESTI-PULSE.md`
+§ 12 describes: Top Priorities, Blocked Tasks, Missing Parameters (with
+inline Confirm/Not-required actions), Low Confidence Tasks, a
+"Recompute now" button, and the Ask Pulse box. `/tasks` gained a
+"Pulse" column showing the computed band alongside the existing raw
+priority tag (shown as "—" until a task's first recompute, since
+`priority_score`'s column default of 0 isn't a real BACKLOG verdict, just
+"not scored yet"). The dashboard gained a "Low Confidence Tasks" widget
+linking into `/pulse`.
+
+**Disclosed, not silently narrowed:** the full "Team Question Loop"
+(Module 4's per-role routing) and "Standup Agent" (Module 3, scheduled
+notification delivery) aren't built — both need a `notifications` table
+that doesn't exist anywhere in `web/` (confirmed via exhaustive grep).
+Their groundwork (dependency graph, missing-parameter detection) ships
+now; a person disposes of a flagged gap directly
+(`resolveMissingParam`) rather than through a routed question. RAG
+covers three document types, not every free-text field in the schema.
+
+Verified: `tsc --noEmit`, `eslint .`, full `next build --webpack` — zero
+error/fail/warn. Migration `0036`–`0038` applied to the live `aorms-web`
+project (Management API — the direct connection stays IPv6-only/
+unreachable from this network) and confirmed live: `vector`/`pg_net`
+installed, all 4 tables + RLS policies present, `match_esti_embeddings`
+callable, both `pg_cron` jobs (`reset_demo_data` from before, plus the
+new `pulse-recompute`) listed active. **Two real bugs found and fixed
+during live verification, not just typechecked:** the financial-impact
+thresholds in `computeTaskPriority` used an Indian-style underscore
+grouping (`50_00_00_00`) that reads like ₹50L but is actually only ₹5L —
+JS underscores are cosmetic digit separators, not lakh/crore place
+markers — caught because a real seeded demo project's invoice total
+crossed the *intended* ₹50L band by coincidence and the observed score
+didn't match hand-computed expectations; fixed to plain three-digit
+grouping (`500_000_000`) with the exact rupee conversion spelled out in
+comment. Separately, the aging-risk factor could go slightly negative
+for a task created earlier the same UTC day, since `today` is a
+date-only string (midnight UTC) compared against a full `created_at`
+timestamp — floored at 0. Both caught by hand-verifying a real inserted
+test task's score against the formula, not just confirming the request
+returned `200`. **Full pipeline live-tested with real inserted data,
+deleted afterward:** two temporary tasks (one blocking, one blocked via
+a real `BLOCKS` dependency, overdue, no assignee) recomputed correctly
+(priority bands, confidence scores, `task_priority_log` reasons, and
+missing-parameter detection/dedup all matched hand-calculated
+expectations); a temporary decision's rationale embedded via a live
+Ollama call and retrieved via `match_esti_embeddings` for a differently
+-worded real question, returning the correct source at 0.75 cosine
+similarity; the NL interpreter correctly classified both a priorities
+question and a project-scoped RAG question into valid, schema-passing
+JSON via a live Ollama call. Signed in as the real `demo@aorms.in`
+account and confirmed `/pulse` renders correctly against live data
+(real demo tasks' bands, a real project's missing-parameter list with
+working Confirm/Not-required actions, the Ask Pulse form with a real
+project dropdown). All test rows (tasks, dependency, decision,
+embedding) deleted afterward via cascade + explicit cleanup, confirmed
+zero orphans across every affected table.
+
 ---
 
 ## Support & questions
@@ -4448,4 +4579,4 @@ remain.
 
 ---
 
-**Last updated:** 2026-09-10
+**Last updated:** 2026-09-12

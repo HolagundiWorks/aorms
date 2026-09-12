@@ -31,6 +31,7 @@ import {
   Group,
   Settings,
   MachineLearning,
+  Activity,
 } from "@carbon/icons-react";
 import { signOut } from "../../lib/actions/auth";
 import { PomodoroProvider } from "./pomodoro/PomodoroContext";
@@ -55,6 +56,7 @@ const TOP_LEVEL: (NavLeaf & { icon: ComponentType })[] = [
   { href: "/clients", label: "Clients", icon: Building },
   { href: "/projects", label: "Projects", icon: FolderDetails },
   { href: "/tasks", label: "Tasks", icon: Task },
+  { href: "/pulse", label: "Pulse", icon: Activity },
 ];
 
 /**

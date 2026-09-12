@@ -2,6 +2,23 @@
 
 **Status:** ◐ P-1 + P-2 + P-3 shipped 2026-07-03, P-4 backlog · **Owner:** Holagundi Consulting Works (HCW) · **Adopted:** 2026-07-02
 
+> **Stale-status correction (2026-09-12):** the "shipped" status above was
+> against the **old Fastify/Drizzle backend** (`esti_task`,
+> `backend/src/db/schema/hr-work.ts`, tRPC `pulse` namespace), which is
+> now dead (see `CLAUDE.md`'s Dev/verify loop) — none of that code exists
+> or runs anymore. This design has been **re-ported onto the current
+> `web/` Next.js/Supabase app** — a real, working first version of
+> Modules 1, 2, 5, 6, and 7 (dependency graph, missing-parameter
+> detection, priority/confidence scoring, RAG), plus a constrained NL
+> interpreter this doc doesn't describe (added directly against the
+> live stack, no equivalent old-backend design to port). See
+> [ROADMAP.md](./ROADMAP.md)'s own 2026-09-12 History entry for the
+> live implementation, file-by-file. Modules 3 and 4 (Standup Agent,
+> Team Question Loop) remain **not built** in the new stack either —
+> both need a `notifications` table that doesn't exist in `web/` yet;
+> everything below this banner still describes the original design
+> intent, not the new stack's current file layout.
+
 ESTI Pulse is an **ESTI capability** — part of the Embedded Studio
 Intelligence layer inside the **AORMS office hub** — that periodically reviews
 project tasks, detects missing dependencies and information, asks the right

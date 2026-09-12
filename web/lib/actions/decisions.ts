@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { DECISION_STATES, DECISION_TRANSITIONS, type DecisionState } from "../decisions";
+import { ingestRecord } from "../rag/ingest";
 
 /**
  * CRIF decision register — port of backend/src/modules/decision/router.ts's
@@ -57,6 +58,10 @@ export async function createDecision(projectId: string, _prev: ActionState, form
     p_before: null,
     p_after: { projectId, title, impact },
   });
+
+  // Best-effort RAG indexing (ESTI Pulse Module 7) — see
+  // lib/actions/moms.ts's createMomRecord for the full rationale.
+  await ingestRecord({ sourceTable: "decisions", sourceId: inserted.id, projectId, content: rationale });
 
   revalidatePath(`/projects/${projectId}/decisions`);
   return null;

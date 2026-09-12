@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
+import { ingestRecord } from "../rag/ingest";
 
 type ActionState = { error: string } | null;
 
@@ -44,6 +45,10 @@ export async function createProgressReport(_prev: ActionState, formData: FormDat
     p_before: null,
     p_after: { projectId, periodStart, periodEnd },
   });
+
+  // Best-effort RAG indexing (ESTI Pulse Module 7) — see moms.ts's
+  // createMomRecord for the same pattern and its full rationale.
+  if (narrative) await ingestRecord({ sourceTable: "progress_reports", sourceId: inserted.id, projectId, content: narrative });
 
   revalidatePath("/progress-reports");
   return null;
