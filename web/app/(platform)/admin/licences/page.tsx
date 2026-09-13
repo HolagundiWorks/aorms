@@ -48,8 +48,8 @@ export default async function AdminLicencesPage() {
                     <Tag type="cool-gray" size="sm">
                       {studio.public_id}
                     </Tag>
-                    <Tag type={l.plan === "PREMIUM" ? "purple" : l.plan === "STANDARD" ? "blue" : "gray"} size="sm">
-                      {l.plan}
+                    <Tag type={l.plan === "AORMS_FIRM" ? "purple" : "gray"} size="sm">
+                      {l.plan === "AORMS_FIRM" ? "AORMS Firm" : l.plan}
                     </Tag>
                     <Tag type={active ? "green" : "red"} size="sm">
                       {active ? "ACTIVE" : "EXPIRED"}

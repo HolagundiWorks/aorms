@@ -80,6 +80,16 @@ export default async function LicencesPage() {
     ? await platformService.from("licences").select("studio_id, plan, seats, expires_at").in("studio_id", studioIds)
     : { data: [] };
 
+  const { data: firmPricingRow } = await platformService
+    .from("plan_pricing")
+    .select("base_price_paise, price_per_seat_monthly_paise")
+    .eq("plan", "AORMS_FIRM")
+    .maybeSingle();
+  const firmPricing = {
+    basePricePaise: firmPricingRow?.base_price_paise ?? 0,
+    pricePerSeatMonthlyPaise: firmPricingRow?.price_per_seat_monthly_paise ?? 0,
+  };
+
   return (
     <>
       <IdentityPortalHeader />
@@ -107,8 +117,8 @@ export default async function LicencesPage() {
                   {licence ? (
                     <>
                       <Stack gap={2} orientation="horizontal">
-                        <Tag type={licence.plan === "PREMIUM" ? "purple" : licence.plan === "STANDARD" ? "blue" : "gray"} size="md">
-                          {licence.plan}
+                        <Tag type={licence.plan === "AORMS_FIRM" ? "purple" : "gray"} size="md">
+                          {licence.plan === "AORMS_FIRM" ? "AORMS Firm" : licence.plan}
                         </Tag>
                         <Tag type={active ? "green" : "red"} size="md">
                           {active ? "ACTIVE" : "EXPIRED"}
@@ -118,7 +128,7 @@ export default async function LicencesPage() {
                         {licence.seats} seat{licence.seats === 1 ? "" : "s"}
                         {licence.expires_at ? ` · expires ${new Date(licence.expires_at).toLocaleDateString()}` : " · no expiry"}
                       </p>
-                      {isOwner && <UpgradeLicenceButton studioId={studio.id} studioName={studio.name} />}
+                      {isOwner && <UpgradeLicenceButton studioId={studio.id} studioName={studio.name} pricing={firmPricing} />}
                     </>
                   ) : (
                     <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

@@ -20,9 +20,10 @@
 import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
-import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
+import { getCurrentPlatformAccount, getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
 import { createOrder, verifyPaymentSignature } from "../platform/razorpay";
 import { applyCapturedPayment } from "../platform/licence-payment";
+import { applyCapturedIdentityPayment } from "../platform/identity-payment";
 
 export type PaymentActionState = { error: string } | null;
 
@@ -40,8 +41,16 @@ export type CreateOrderResult =
  * spoofed by client-supplied data), since the `payments` table itself
  * grants no authenticated insert policy to lean on instead (see
  * 0010_payments.sql's header comment).
+ *
+ * 2026-09-13: dropped the `plan` parameter — AORMS Firm is now the only
+ * paid Studio plan (the placeholder STANDARD/PREMIUM two-tier model is
+ * retired, see 0017_identity_and_firm_plans.sql). Price is
+ * `base_price_paise + price_per_seat_monthly_paise * 12 * seats` — the
+ * ₹199/user/month rate billed as one annual lump sum alongside the ₹1,999
+ * base, not real recurring auto-debit (that stays out of scope, per this
+ * migration's own header comment).
  */
-export async function createLicenceOrder(studioId: string, plan: "STANDARD" | "PREMIUM", seats: number): Promise<CreateOrderResult> {
+export async function createLicenceOrder(studioId: string, seats: number): Promise<CreateOrderResult> {
   if (!Number.isInteger(seats) || seats < 1) return { error: "Seats must be a positive whole number." };
 
   const platform = await createPlatformClient();
@@ -60,15 +69,16 @@ export async function createLicenceOrder(studioId: string, plan: "STANDARD" | "P
     return { error: "Only a studio's owner can purchase a licence for it." };
   }
 
+  const plan = "AORMS_FIRM" as const;
   const { data: pricing, error: pricingError } = await platform
     .from("plan_pricing")
-    .select("price_per_seat_paise")
+    .select("base_price_paise, price_per_seat_monthly_paise")
     .eq("plan", plan)
     .maybeSingle();
   if (pricingError) return { error: pricingError.message };
   if (!pricing) return { error: `No pricing configured for ${plan} yet — contact support.` };
 
-  const amountPaise = pricing.price_per_seat_paise * seats;
+  const amountPaise = pricing.base_price_paise + pricing.price_per_seat_monthly_paise * 12 * seats;
   const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
   if (!keyId) return { error: "Payments aren't configured yet." };
 
@@ -85,6 +95,55 @@ export async function createLicenceOrder(studioId: string, plan: "STANDARD" | "P
     account_id: user.id,
     plan,
     seats,
+    amount_paise: amountPaise,
+    currency: "INR",
+    razorpay_order_id: order.id,
+    status: "CREATED",
+  });
+  if (insertError) return { error: insertError.message };
+
+  return { orderId: order.id, amountPaise, currency: "INR", keyId };
+}
+
+/**
+ * The individual counterpart to createLicenceOrder — AORMS Identity, a
+ * flat ₹599/year, no seats/studio-ownership check at all. Resolves the
+ * caller's platform account via getCurrentPlatformAccount() (the Office
+ * Hub session -> profiles.platform_public_id -> platform accounts
+ * two-step, same one /identity and /licences already use for their own
+ * read-only display) rather than requiring a separate Platform sign-in
+ * the way createLicenceOrder does — there's no studio_memberships RLS
+ * check to satisfy here, so there's no reason to force a second sign-in
+ * just to buy an individual plan the person can already see on /identity.
+ */
+export async function createIdentityOrder(): Promise<CreateOrderResult> {
+  const account = await getCurrentPlatformAccount();
+  if (!account) return { error: "Link your AORMS Identity first." };
+
+  const platformService = createPlatformServiceRoleClient();
+  const plan = "AORMS_IDENTITY" as const;
+  const { data: pricing, error: pricingError } = await platformService
+    .from("plan_pricing")
+    .select("base_price_paise")
+    .eq("plan", plan)
+    .maybeSingle();
+  if (pricingError) return { error: pricingError.message };
+  if (!pricing) return { error: `No pricing configured for ${plan} yet — contact support.` };
+
+  const amountPaise = pricing.base_price_paise;
+  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  if (!keyId) return { error: "Payments aren't configured yet." };
+
+  let order;
+  try {
+    order = await createOrder({ amountPaise, receipt: `identity_${account.id}_${Date.now()}` });
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Couldn't reach the payment gateway." };
+  }
+
+  const { error: insertError } = await platformService.from("identity_payments").insert({
+    account_id: account.id,
+    plan,
     amount_paise: amountPaise,
     currency: "INR",
     razorpay_order_id: order.id,
@@ -131,6 +190,33 @@ export async function confirmPaymentClientSide(orderId: string, paymentId: strin
   return null;
 }
 
+/** Identity counterpart to confirmPaymentClientSide — same fast-path/
+ * idempotent-against-the-webhook reasoning, calling
+ * applyCapturedIdentityPayment instead. */
+export async function confirmIdentityPaymentClientSide(orderId: string, paymentId: string, signature: string): Promise<PaymentActionState> {
+  if (!verifyPaymentSignature({ orderId, paymentId, signature })) {
+    return { error: "Payment signature didn't verify." };
+  }
+
+  const platformService = createPlatformServiceRoleClient();
+  const { data: payment, error: fetchError } = await platformService
+    .from("identity_payments")
+    .select("id, account_id, status")
+    .eq("razorpay_order_id", orderId)
+    .maybeSingle();
+  if (fetchError) return { error: fetchError.message };
+  if (!payment) return { error: "No matching order found." };
+
+  if (payment.status === "CAPTURED") {
+    revalidatePath("/identity");
+    return null;
+  }
+
+  await applyCapturedIdentityPayment(platformService, { ...payment, razorpay_payment_id: paymentId });
+  revalidatePath("/identity");
+  return null;
+}
+
 // ══ Platform-admin-only: override a licence, edit pricing ═════════════════
 
 async function requirePlatformAdmin(): Promise<{ error: string } | null> {
@@ -159,7 +245,7 @@ export async function adminUpdateLicence(_prev: PaymentActionState, formData: Fo
   const seatsRaw = String(formData.get("seats") ?? "");
   const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
   if (!studioId) return { error: "Missing studio." };
-  if (!["TRIAL", "STANDARD", "PREMIUM"].includes(plan)) return { error: "Invalid plan." };
+  if (!["TRIAL", "AORMS_FIRM"].includes(plan)) return { error: "Invalid plan." };
   const seats = Number(seatsRaw);
   if (!Number.isInteger(seats) || seats < 1) return { error: "Seats must be a positive whole number." };
 
@@ -174,20 +260,35 @@ export async function adminUpdateLicence(_prev: PaymentActionState, formData: Fo
   return null;
 }
 
+/**
+ * 2026-09-13: now sets two figures per plan, not one — `basePriceRupees`
+ * (the flat annual fee both plans have) and `pricePerSeatMonthlyRupees`
+ * (AORMS Firm's ₹199/user/month rate; always 0 for AORMS_IDENTITY, which
+ * has no seat concept — the form hides that field for that plan, but the
+ * action still accepts and stores whatever's posted, defaulting to "0" if
+ * the field is blank/absent rather than erroring).
+ */
 export async function adminSetPricing(_prev: PaymentActionState, formData: FormData): Promise<PaymentActionState> {
   const gate = await requirePlatformAdmin();
   if (gate) return gate;
 
   const plan = String(formData.get("plan") ?? "");
-  const priceRaw = String(formData.get("pricePerSeatRupees") ?? "");
-  if (!["STANDARD", "PREMIUM"].includes(plan)) return { error: "Invalid plan." };
-  const priceRupees = Number(priceRaw);
-  if (!Number.isFinite(priceRupees) || priceRupees <= 0) return { error: "Enter a price greater than zero." };
+  const baseRaw = String(formData.get("basePriceRupees") ?? "");
+  const perSeatRaw = String(formData.get("pricePerSeatMonthlyRupees") ?? "0");
+  if (!["AORMS_IDENTITY", "AORMS_FIRM"].includes(plan)) return { error: "Invalid plan." };
+  const baseRupees = Number(baseRaw);
+  if (!Number.isFinite(baseRupees) || baseRupees <= 0) return { error: "Enter a base price greater than zero." };
+  const perSeatRupees = Number(perSeatRaw || "0");
+  if (!Number.isFinite(perSeatRupees) || perSeatRupees < 0) return { error: "Per-seat price can't be negative." };
 
   const platform = await createPlatformClient();
   const { error } = await platform
     .from("plan_pricing")
-    .update({ price_per_seat_paise: Math.round(priceRupees * 100), updated_at: new Date().toISOString() })
+    .update({
+      base_price_paise: Math.round(baseRupees * 100),
+      price_per_seat_monthly_paise: Math.round(perSeatRupees * 100),
+      updated_at: new Date().toISOString(),
+    })
     .eq("plan", plan);
   if (error) return { error: error.message };
 

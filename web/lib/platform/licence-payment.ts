@@ -1,6 +1,13 @@
 import type { createServiceRoleClient } from "./service";
 
-const LICENCE_PERIOD_DAYS = 30;
+// 2026-09-13: 30 -> 365. AORMS Firm is priced and sold as an annual plan
+// (₹1,999/year base + ₹199/user/month, billed as one annual lump sum — see
+// platform/supabase/migrations/0017_identity_and_firm_plans.sql's own
+// header for the full billing-mechanics disclosure) — a purchase now
+// extends the licence by a year, not 30 days. The free `TRIAL` plan's own
+// 30-day auto-provision (handle_new_studio_licence(), 0004_licences.sql)
+// is a separate mechanism, untouched by this constant.
+const LICENCE_PERIOD_DAYS = 365;
 
 /**
  * Shared between lib/actions/platform-payments.ts's confirmPaymentClientSide
@@ -15,7 +22,7 @@ const LICENCE_PERIOD_DAYS = 30;
  * action just because it's exported from the same file as ones that are.
  *
  * `greatest(now, current expires_at)` so a renewal purchased before expiry
- * extends the remaining period rather than resetting the clock to 30 days
+ * extends the remaining period rather than resetting the clock to a year
  * from today.
  */
 export async function applyCapturedPayment(

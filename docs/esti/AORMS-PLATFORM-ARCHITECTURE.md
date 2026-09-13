@@ -211,6 +211,25 @@ with no payment attached. `docs/esti/ROADMAP.md`'s dated History entry for
 this work has the full incident/design account; this doc only states the
 resulting boundary.
 
+**Real pricing, two named plans (2026-09-13)** — the placeholder
+`STANDARD`/`PREMIUM` per-seat plans are retired. `licences.plan` now has
+exactly one paid value, **AORMS_FIRM** (₹1,999/year base + ₹199/user/month,
+billed as one annual Razorpay order — see
+`platform/supabase/migrations/0017_identity_and_firm_plans.sql`'s header
+for the full billing-mechanics disclosure: this is still a one-time
+purchase extending `expires_at`, same as before, just annual instead of
+30-day and base+per-seat instead of pure per-seat — real recurring
+auto-debit remains out of scope). A parallel **AORMS_IDENTITY** plan
+(₹599/year flat) now exists for individual `accounts` for the first
+time — a brand-new `identity_licences`/`identity_payments` table pair,
+account-scoped rather than studio-scoped, following the exact same
+one-time-purchase/webhook/activity-log pattern as the Studio side (and the
+same precedent `connectdex_payments` already established for a second
+non-studio payment target). `plan_pricing` now stores `base_price_paise` +
+`price_per_seat_monthly_paise` per plan instead of a single per-seat
+figure. The "Companies have no licence" open question below is unaffected —
+this only adds Identity (individual) pricing, not Company pricing.
+
 ## Open questions (flagged, not decided here)
 
 - **Should Companies (suppliers) get their own licence eventually?** Not

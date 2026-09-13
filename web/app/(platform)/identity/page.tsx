@@ -8,6 +8,7 @@ import { CreateStudioForm } from "../../../components/aorms/platform/CreateStudi
 import { JoinStudioForm } from "../../../components/aorms/platform/JoinStudioForm";
 import { LeaveStudioButton } from "../../../components/aorms/platform/LeaveStudioButton";
 import { PlatformAuthCta } from "../../../components/aorms/platform/PlatformAuthCta";
+import { PurchaseIdentityButton } from "../../../components/aorms/platform/PurchaseIdentityButton";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { IdentityPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
 
@@ -133,6 +134,20 @@ export default async function IdentityPage() {
     .neq("status", "LEFT")
     .order("created_at", { ascending: true });
 
+  const { data: identityLicence } = await platformService
+    .from("identity_licences")
+    .select("plan, expires_at")
+    .eq("account_id", account.id)
+    .maybeSingle();
+  const { data: identityPricingRow } = await platformService
+    .from("plan_pricing")
+    .select("base_price_paise")
+    .eq("plan", "AORMS_IDENTITY")
+    .maybeSingle();
+  const identityBasePricePaise = identityPricingRow?.base_price_paise ?? 0;
+  const identityActive =
+    identityLicence?.plan === "AORMS_IDENTITY" && (!identityLicence.expires_at || new Date(identityLicence.expires_at) > new Date());
+
   const hours = account.total_active_seconds / 3600;
 
   return (
@@ -159,6 +174,23 @@ export default async function IdentityPage() {
                   {hours.toFixed(1)}h of {HOURS_TO_PRO}h logged
                   {account.level === "BASIC" ? ` — ${Math.max(0, HOURS_TO_PRO - hours).toFixed(1)}h to Pro` : ""}
                 </p>
+              </Stack>
+            </Tile>
+
+            <Tile>
+              <Stack gap={4}>
+                <Stack gap={2} orientation="horizontal" style={{ alignItems: "center" }}>
+                  <h2 className="cds--type-heading-02">AORMS Identity plan</h2>
+                  <Tag type={identityActive ? "purple" : "gray"} size="md">
+                    {identityActive ? "AORMS Identity" : "Free"}
+                  </Tag>
+                </Stack>
+                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  {identityActive && identityLicence?.expires_at
+                    ? `Active — renews or expires ${new Date(identityLicence.expires_at).toLocaleDateString()}.`
+                    : "Not on the paid AORMS Identity plan yet."}
+                </p>
+                <PurchaseIdentityButton basePricePaise={identityBasePricePaise} isRenewal={identityActive} />
               </Stack>
             </Tile>
 

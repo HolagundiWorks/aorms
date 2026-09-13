@@ -3,6 +3,7 @@ import { verifyWebhookSignature } from "../../../../lib/platform/razorpay";
 import { createServiceRoleClient } from "../../../../lib/platform/service";
 import { applyCapturedPayment } from "../../../../lib/platform/licence-payment";
 import { applyCapturedConnectDexPayment } from "../../../../lib/platform/connectdex-payment";
+import { applyCapturedIdentityPayment } from "../../../../lib/platform/identity-payment";
 
 /**
  * Razorpay webhook — the durable source of truth for both licence
@@ -27,12 +28,13 @@ import { applyCapturedConnectDexPayment } from "../../../../lib/platform/connect
  * fail to verify.
  *
  * One Razorpay order id can only ever belong to one of `payments` /
- * `connectdex_payments` (each order is created against exactly one of the
- * two tables, in lib/actions/platform-payments.ts's createLicenceOrder or
- * lib/actions/connectdex.ts's createConnectDexOnboardingOrder
- * respectively) — this handler checks `payments` first, and only checks
- * `connectdex_payments` if nothing matched there, rather than assuming
- * which one a given order belongs to.
+ * `connectdex_payments` / `identity_payments` (each order is created
+ * against exactly one of the three tables, in
+ * lib/actions/platform-payments.ts's createLicenceOrder/
+ * createIdentityOrder or lib/actions/connectdex.ts's
+ * createConnectDexOnboardingOrder respectively) — this handler checks
+ * `payments` first, then `connectdex_payments`, then `identity_payments`,
+ * rather than assuming which one a given order belongs to.
  */
 export async function POST(request: Request) {
   const rawBody = await request.text();
@@ -80,8 +82,19 @@ export async function POST(request: Request) {
         .select("id, company_id, status")
         .eq("razorpay_order_id", orderId)
         .maybeSingle();
-      if (connectDexRow && connectDexRow.status !== "CAPTURED") {
-        await applyCapturedConnectDexPayment(platformService, { ...connectDexRow, razorpay_payment_id: paymentId });
+      if (connectDexRow) {
+        if (connectDexRow.status !== "CAPTURED") {
+          await applyCapturedConnectDexPayment(platformService, { ...connectDexRow, razorpay_payment_id: paymentId });
+        }
+      } else {
+        const { data: identityRow } = await platformService
+          .from("identity_payments")
+          .select("id, account_id, status")
+          .eq("razorpay_order_id", orderId)
+          .maybeSingle();
+        if (identityRow && identityRow.status !== "CAPTURED") {
+          await applyCapturedIdentityPayment(platformService, { ...identityRow, razorpay_payment_id: paymentId });
+        }
       }
     }
   } else if (event.event === "payment.failed" && orderId) {
@@ -92,10 +105,17 @@ export async function POST(request: Request) {
       .eq("razorpay_order_id", orderId)
       .select("id");
     if (!failedLicenceRows || failedLicenceRows.length === 0) {
-      await platformService
+      const { data: failedConnectDexRows } = await platformService
         .from("connectdex_payments")
         .update({ status: "FAILED", updated_at: new Date().toISOString() })
-        .eq("razorpay_order_id", orderId);
+        .eq("razorpay_order_id", orderId)
+        .select("id");
+      if (!failedConnectDexRows || failedConnectDexRows.length === 0) {
+        await platformService
+          .from("identity_payments")
+          .update({ status: "FAILED", updated_at: new Date().toISOString() })
+          .eq("razorpay_order_id", orderId);
+      }
     }
   }
 

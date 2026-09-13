@@ -4692,6 +4692,83 @@ a new ConnectDeX + company-registration pricing page (deliberately
 deferred — the user flagged their own spec as incomplete, "more
 details will follow").
 
+**Real AORMS Identity + AORMS Firm pricing on the Platform (2026-09-13)**
+— the user gave concrete figures: AORMS Identity (individual) ₹599/year,
+AORMS Firm (Studio) ₹1,999/year base + ₹199/user/month billed to the
+firm. Neither existed: the only real pricing was
+`platform/supabase/migrations/0010_payments.sql`'s **placeholder**
+`STANDARD`/`PREMIUM` per-seat model (₹999/₹2,499/seat per 30 days,
+Studio-scoped only), and individual `accounts` had zero plan/billing
+schema at all (`level` BASIC/PRO is a free 100-usage-hour gate, unrelated
+to money). Confirmed with the user up front (chose "Real plan model"
+over marketing-copy-only) and again on the billing mechanics specifically
+(chose "annual lump sum" over building real Razorpay Subscriptions/
+auto-debit, which doesn't exist anywhere in this codebase and would be a
+materially bigger, separate integration).
+
+Migration `platform/supabase/migrations/0017_identity_and_firm_plans.sql`
+(applied and live-verified against `aorms-platform` — confirmed 0
+STANDARD/PREMIUM rows existed to migrate beforehand, only 1 TRIAL licence
+and 0 payments): `plan_pricing` dropped and recreated with `base_price_
+paise`/`price_per_seat_monthly_paise` (replacing the single per-seat
+column), seeded `AORMS_IDENTITY` (₹599/yr, 59900 paise) and `AORMS_FIRM`
+(₹1,999/yr base + ₹199/seat/month, 199900/19900 paise); `licences.plan`/
+`payments.plan` check constraints narrowed from `STANDARD`/`PREMIUM` to
+the single `AORMS_FIRM` (TRIAL untouched — still the free 30-day
+auto-provision trigger); new `identity_licences` (account-scoped, mirrors
+`licences`, FREE/AORMS_IDENTITY, auto-provisioned via a trigger on
+`accounts` insert + backfilled for the 3 existing accounts) and
+`identity_payments` (mirrors `payments`, same "service-role-only write"
+RLS shape) tables — the same precedent `connectdex_payments` already
+established for a second non-Studio payment target. Extended
+`platform_activity_log`'s trigger-based audit pattern
+(`log_identity_licence_update`/`log_identity_payment_insert`/`_update`) to
+both new tables, matching `log_licence_update`/`log_payment_*` exactly.
+
+Application code: `createLicenceOrder` dropped its `plan` parameter (one
+paid Studio plan now) and computes `base_price_paise +
+price_per_seat_monthly_paise * 12 * seats`; `applyCapturedPayment`'s
+`LICENCE_PERIOD_DAYS` bumped 30→365 (the free TRIAL trigger is a separate,
+untouched mechanism). New `createIdentityOrder`/
+`confirmIdentityPaymentClientSide` (in `platform-payments.ts`) and
+`applyCapturedIdentityPayment` (new `lib/platform/identity-payment.ts`,
+mirroring `licence-payment.ts`) — `createIdentityOrder` deliberately
+resolves via `getCurrentPlatformAccount()` (the Office-Hub-session-based
+resolver `/identity` already uses for its own read-only display) rather
+than requiring a separate Platform sign-in the way `createLicenceOrder`
+does, since there's no `studio_memberships` RLS check to satisfy for an
+individual purchase. `app/api/razorpay/webhook/route.ts`'s existing
+`payments` → `connectdex_payments` fallback chain gained a third link,
+`identity_payments`, for both `payment.captured` and `payment.failed`.
+UI: `UpgradeLicenceButton` dropped its plan `Select` and gained a live
+computed annual-total preview (closing a real, pre-existing gap the
+exploration for this found — no rupee amount was shown anywhere before
+Razorpay's own modal opened); new `PurchaseIdentityButton` (same Checkout.js
+flow, no plan/seat inputs); `/identity` gained an "AORMS Identity plan"
+Tile; `/licences`, `/admin/pricing` (`SetPricingForm` now edits two
+figures per plan), and `/admin/licences`/`UpdateLicenceForm` all updated
+for the new plan vocabulary; the admin dashboard's "Paid licences" KPI
+tile updated off the same rename.
+
+Verified: `tsc --noEmit`/`eslint .`/full `next build` all clean. Live
+data round-trip against the real `aorms-platform` project (temporary rows,
+deleted after, real rows restored to their original state): simulated a
+captured AORMS Firm purchase (3 seats) against the one real studio —
+confirmed `payments`/`licences` updated to the exact expected values
+(₹9,163 = ₹1,999 + ₹199×12×3, `expires_at` extended exactly 365 days from
+its existing date) and all three expected `platform_activity_log` rows
+(`PAYMENT_CREATED`/`PAYMENT_CAPTURED`/`LICENCE_CHANGED`) fired correctly;
+same for a captured AORMS Identity purchase against one real account
+(`identity_payments`/`identity_licences` updated correctly,
+`IDENTITY_PAYMENT_CREATED`/`_CAPTURED`/`IDENTITY_LICENCE_CHANGED` all
+fired). Browser-verified live (temporarily linked a real Office Hub
+profile to a real platform account to render the authenticated views,
+unlinked again after): `/identity`'s new Identity-plan Tile renders
+correctly with a working "Purchase — ₹599/year" button; `/licences`
+renders the live-computed "₹1,999 base + ₹199/user/month × N users,
+billed annually — ₹X/year total" preview, updating as the seat count
+changes.
+
 ---
 
 ## Support & questions
