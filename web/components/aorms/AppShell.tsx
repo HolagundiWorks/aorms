@@ -2,7 +2,7 @@
 
 import { useState, type ComponentType } from "react";
 import NextLink from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Header,
   HeaderName,
@@ -30,7 +30,6 @@ import {
   Book,
   Group,
   Settings,
-  MachineLearning,
   RequestQuote,
 } from "@carbon/icons-react";
 import { signOut } from "../../lib/actions/auth";
@@ -226,7 +225,6 @@ function isActiveHref(pathname: string, href: string): boolean {
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
   // isPersistent (Carbon's default, left un-set here) means Carbon's own
   // ui-shell CSS ignores this state above its ~66rem breakpoint — nav stays
   // fixed-open on desktop exactly as before — and respects it below that
@@ -284,13 +282,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <HeaderWellness />
           <HeaderCalculator />
           <HeaderPomodoro />
-          <HeaderGlobalAction
-            aria-label="AI Runs"
-            isActive={isActiveHref(pathname, "/ai-runs")}
-            onClick={() => router.push("/ai-runs")}
-          >
-            <MachineLearning size={20} />
-          </HeaderGlobalAction>
           <form action={signOut}>
             {/* Carbon doesn't forward a `type` prop, but a <button> defaults to
                 type="submit" inside a <form> — this still triggers signOut. */}

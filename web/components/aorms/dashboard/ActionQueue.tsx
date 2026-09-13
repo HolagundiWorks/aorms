@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Tag } from "@carbon/react";
+import { Tag, Tile } from "@carbon/react";
 import type { PriorityItem } from "../../../lib/dashboard/priority";
 import { AcceptDecisionButton, ApproveButton, MarkTaskDoneButton } from "./QueueActions";
 
@@ -46,12 +46,11 @@ function QuickAction({ item }: { item: PriorityItem }) {
 }
 
 /**
- * The bare Action Queue row list (2026-09-14 split) — no Tile, no
- * heading, no scroll container of its own. Extracted out of the old
- * `ActionQueue` (which used to own all three) so the exact same ranked
- * rows can be dropped into TodaysBrief.tsx's side panel — see that
- * file's header comment for why the two merged into one full-width
- * tile. The caller supplies the Tile/heading/scroll chrome.
+ * The bare Action Queue row list (2026-09-14) — no Tile, no heading, no
+ * scroll container of its own; `ActionQueue` below supplies all three.
+ * Kept separate (rather than inlined back into `ActionQueue`) since the
+ * row-rendering is the part worth reusing if another surface ever wants
+ * the same ranked rows in different chrome.
  */
 export function ActionQueueList({ items }: { items: PriorityItem[] }) {
   if (items.length === 0) {
@@ -126,5 +125,33 @@ export function ActionQueueList({ items }: { items: PriorityItem[] }) {
         );
       })}
     </>
+  );
+}
+
+/**
+ * The Action Queue, in its own Tile (2026-09-14) — reverted from a
+ * brief stint as TodaysBrief.tsx's borderless side panel back to a
+ * standalone Tile: nesting Carbon's `Grid` inside a `Tile` for that
+ * layout cancelled the Tile's own edge padding, which is the actual bug
+ * that stint introduced. `app/(app)/pulse/page.tsx` now places this and
+ * `TodaysBrief` side by side as two Tiles inside sibling Carbon Columns
+ * instead — Grid/Column wraps *around* each Tile, not inside it, so
+ * neither Tile's padding is touched.
+ */
+export function ActionQueue({ items }: { items: PriorityItem[] }) {
+  return (
+    <Tile style={{ height: "100%" }}>
+      <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
+        Next up
+      </h2>
+      {/* Bounded height + its own internal scroll, not the page — same
+          "content scrolls inside its own Tile" pattern DashboardTabs.tsx
+          uses (2026-09-13 "single screen" request). 8 rows at this row
+          height comfortably clears 18rem without scrolling on a normal
+          viewport. */}
+      <div style={{ maxHeight: "18rem", overflowY: "auto" }}>
+        <ActionQueueList items={items} />
+      </div>
+    </Tile>
   );
 }

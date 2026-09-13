@@ -5,6 +5,7 @@ import { KpiTile as Kpi, type KpiStatus } from "../../../components/aorms/KpiTil
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { DashboardWidget, EmptyRow, WidgetRow, MASONRY_PANEL_STYLE } from "../../../components/aorms/dashboard/DashboardWidget";
 import { TodaysBrief } from "../../../components/aorms/dashboard/TodaysBrief";
+import { ActionQueue } from "../../../components/aorms/dashboard/ActionQueue";
 import { DashboardTabs } from "../../../components/aorms/dashboard/DashboardTabs";
 import { KpiTabs } from "../../../components/aorms/dashboard/KpiTabs";
 import { RecomputeButton } from "../../../components/aorms/pulse/RecomputeButton";
@@ -614,13 +615,23 @@ export default async function PulsePage() {
           actions={<RecomputeButton />}
         />
 
-        {/* Today's Brief + Action Queue, merged into one full-width tile
-            (2026-09-14 UI-polish request): the brief on the left (~1/3),
-            the ranked "Next up" queue as a side panel on the right
-            (~2/3) — the page's actual "what to do next," not just a
-            highlight reel (see TodaysBrief.tsx/ActionQueue.tsx/
-            QueueActions.tsx). */}
-        <TodaysBrief items={topPriorities} />
+        {/* Today's Brief + Action Queue, as two separate Tiles side by
+            side (2026-09-14 UI-polish request; briefly one merged Tile,
+            reverted same day — nesting Carbon's Grid inside a Tile
+            cancelled the Tile's own padding, see TodaysBrief.tsx's
+            header comment). Grid/Column wraps *around* each Tile here,
+            not inside it, so both Tiles keep their normal padding. ~1/3
+            for the brief (lg={5}), ~2/3 for the ranked "Next up" queue
+            (lg={11}) — the page's actual "what to do next," not just a
+            highlight reel (see ActionQueue.tsx/QueueActions.tsx). */}
+        <Grid narrow style={{ marginBottom: "1rem" }}>
+          <Column sm={4} md={8} lg={5} style={{ marginBottom: "1rem" }}>
+            <TodaysBrief />
+          </Column>
+          <Column sm={4} md={8} lg={11} style={{ marginBottom: "1rem" }}>
+            <ActionQueue items={topPriorities} />
+          </Column>
+        </Grid>
 
         {/* KPI tabs — Pulse / Finance / Team / Others. Three tiles carry a
             green/amber/red health status (KpiTile.tsx's `status` prop);
