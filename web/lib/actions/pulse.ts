@@ -109,7 +109,7 @@ export async function recomputeNow(): Promise<RecomputeNowState> {
     const summary = await recomputeTaskScores(service, today);
     revalidatePath("/pulse");
     revalidatePath("/tasks");
-    revalidatePath("/dashboard");
+    revalidatePath("/pulse");
     return { summary };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Recompute failed" };

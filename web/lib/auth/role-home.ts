@@ -19,7 +19,10 @@ const STAFF_ROLES = new Set([
 ]);
 
 export function roleHome(role: string | null | undefined): string | null {
-  if (role && STAFF_ROLES.has(role)) return "/dashboard";
+  // 2026-09-14 remediation — Pulse is now the office hub's home (merged
+  // with the old /dashboard, see app/(app)/pulse/page.tsx's own header
+  // comment); /dashboard itself is kept as a redirect, not removed.
+  if (role && STAFF_ROLES.has(role)) return "/pulse";
   if (role === "CLIENT") return "/portal";
   if (role === "CONSULTANT") return "/collab-portal";
   if (role === "CONTRACTOR") return "/contractor-portal";

@@ -31,7 +31,7 @@ import {
   Group,
   Settings,
   MachineLearning,
-  Activity,
+  RequestQuote,
 } from "@carbon/icons-react";
 import { signOut } from "../../lib/actions/auth";
 import { PomodoroProvider } from "./pomodoro/PomodoroContext";
@@ -44,31 +44,109 @@ type NavLeaf = { href: string; label: string };
 type NavGroup = { title: string; icon: ComponentType; items: NavLeaf[] };
 
 /**
- * Top-level items (always visible, no group) — the pillars a user reaches
- * for constantly: the office-wide feed, the sales pipeline, the client
- * register, the project list, and the personal work queue. Everything else
- * is a supporting register, grouped below by who reaches for it and how
- * often, not by which Supabase table it happens to read.
+ * Top-level items (always visible, no group) — 2026-09-14 remediation
+ * (attached IA brief §3-4): Pulse is now the office hub's home (merged
+ * with the old Dashboard — see app/(app)/pulse/page.tsx's own header
+ * comment), so "Dashboard" is gone as a separate nav item entirely, not
+ * just renamed. Leads and Tasks stay top-level — real, working pillars
+ * the brief doesn't mention moving, not touched. Clients moved into the
+ * new Third Parties group below (brief §8). Pulse keeps the `Dashboard`
+ * icon (not `Activity`) — it now literally is the dashboard, and
+ * `Activity` was already Wellbeing's own icon (HeaderWellness.tsx);
+ * both using it read as a visual duplicate/collision between two
+ * unrelated features, found live after this restructure.
  */
 const TOP_LEVEL: (NavLeaf & { icon: ComponentType })[] = [
-  { href: "/dashboard", label: "Dashboard", icon: Dashboard },
-  { href: "/leads", label: "Leads", icon: UserFollow },
-  { href: "/clients", label: "Clients", icon: Building },
+  { href: "/pulse", label: "Pulse", icon: Dashboard },
   { href: "/projects", label: "Projects", icon: FolderDetails },
+  { href: "/leads", label: "Leads", icon: UserFollow },
   { href: "/tasks", label: "Tasks", icon: Task },
-  { href: "/pulse", label: "Pulse", icon: Activity },
 ];
 
 /**
- * Grouped by domain, matching this codebase's own module map (CLAUDE.md) —
- * Office (capture + papers), Finance, Estimation/Technical, Delivery
- * (site supervision + AProc), Library, People (HR), and Admin/Ops — rather
- * than NAVIGATION.md's old-frontend IA verbatim, since web/'s actual routes
- * (this rebuild's own page-per-phase naming) don't map 1:1 onto that
- * document's tab/facet structure. See docs/esti/NAVIGATION.md's own header:
- * it documents `frontend/src/App.tsx`'s nav, not this app's.
+ * Grouped by domain. 2026-09-14 remediation (attached IA brief §3-14):
+ * restructured around the brief's own target hierarchy — Site, Third
+ * Parties, Accounts, HR, Tender Management, Knowledge Bank, in that
+ * order, each either a rename of an existing group (Delivery -> Site,
+ * Finance -> Accounts, People -> HR, Library -> Knowledge Bank) or new
+ * (Third Parties pools Clients/Contractors/Consultants under one group
+ * per the brief's own "a third party should be capable of having more
+ * than one role" model — see § 9; genuinely consolidating the *nav*
+ * position, not the underlying data model, which stays three separate
+ * tables per clients/contractors/consultants.sql — a real schema
+ * unification is a bigger, separate change not attempted here. Tender
+ * Management pulls /tenders out of Office, its own group per the brief
+ * even though nothing else in that brief's fuller Tender Management
+ * structure — BOQ, rate analysis, bid comparison — exists as separate
+ * pages yet). Office/Estimation & Technical/Admin keep their existing
+ * shape and move after the brief's own 8 primary groups — every one of
+ * their pages is real, working functionality the brief doesn't address,
+ * not deleted or force-fit into an ill-suited category; "Vendors" from
+ * the brief's own Third Parties structure isn't added here either — no
+ * vendors table/pages exist yet, that's new-entity work, not a nav move
+ * (see docs/esti/ROADMAP.md's own dated entry for this as a disclosed
+ * follow-up).
  */
 const GROUPS: NavGroup[] = [
+  {
+    title: "Site",
+    icon: DeliveryIcon,
+    items: [
+      { href: "/snags", label: "Snags" },
+      { href: "/site-instructions", label: "Site Instructions" },
+      { href: "/progress-reports", label: "Progress Reports" },
+      { href: "/bbs", label: "BBS" },
+      { href: "/pmc-milestones", label: "Milestones" },
+      { href: "/pmc-packages", label: "Work Packages" },
+      { href: "/pmc-steel-certs", label: "Steel Certification" },
+      { href: "/pmc-ra-bills", label: "RA Bills" },
+      { href: "/approvals", label: "Approvals" },
+    ],
+  },
+  {
+    title: "Third Parties",
+    icon: Building,
+    items: [
+      { href: "/clients", label: "Clients" },
+      { href: "/contractors", label: "Contractors" },
+      { href: "/consultants", label: "Consultants" },
+    ],
+  },
+  {
+    title: "Accounts",
+    icon: Currency,
+    items: [
+      { href: "/invoices", label: "Invoices" },
+      { href: "/reports", label: "Financial Reports" },
+    ],
+  },
+  {
+    title: "HR",
+    icon: Group,
+    items: [
+      { href: "/team-members", label: "Team Members" },
+      { href: "/teams", label: "Teams" },
+      { href: "/payslips", label: "Payslips" },
+      { href: "/job-applications", label: "Job Applications" },
+    ],
+  },
+  {
+    title: "Tender Management",
+    icon: RequestQuote,
+    items: [{ href: "/tenders", label: "Tenders" }],
+  },
+  {
+    title: "Knowledge Bank",
+    icon: Book,
+    items: [
+      { href: "/master-plans", label: "Master Plans" },
+      { href: "/standards", label: "Standards" },
+      { href: "/compliance", label: "Compliance" },
+      { href: "/spec-catalog", label: "Spec Catalog" },
+      { href: "/lessons", label: "Lessons Learned" },
+      { href: "/knowledge-bank", label: "Knowledge Bank" },
+    ],
+  },
   {
     title: "Office",
     icon: Document,
@@ -77,17 +155,8 @@ const GROUPS: NavGroup[] = [
       { href: "/letters", label: "Letters" },
       { href: "/contracts", label: "Contracts" },
       { href: "/transmittals", label: "Transmittals" },
-      { href: "/tenders", label: "Tenders" },
       { href: "/purchase-orders", label: "Purchase Orders" },
       { href: "/office-templates", label: "Office Templates" },
-    ],
-  },
-  {
-    title: "Finance",
-    icon: Currency,
-    items: [
-      { href: "/invoices", label: "Invoices" },
-      { href: "/reports", label: "Financial Reports" },
     ],
   },
   {
@@ -101,45 +170,6 @@ const GROUPS: NavGroup[] = [
       { href: "/drawings", label: "Drawings" },
       { href: "/moms", label: "Meeting Minutes" },
       { href: "/document-issues", label: "Document Issues" },
-    ],
-  },
-  {
-    title: "Delivery",
-    icon: DeliveryIcon,
-    items: [
-      { href: "/snags", label: "Snags" },
-      { href: "/site-instructions", label: "Site Instructions" },
-      { href: "/progress-reports", label: "Progress Reports" },
-      { href: "/bbs", label: "BBS" },
-      { href: "/pmc-milestones", label: "Milestones" },
-      { href: "/pmc-packages", label: "Work Packages" },
-      { href: "/pmc-steel-certs", label: "Steel Certification" },
-      { href: "/pmc-ra-bills", label: "RA Bills" },
-      { href: "/contractors", label: "Contractors" },
-      { href: "/consultants", label: "Consultants" },
-      { href: "/approvals", label: "Approvals" },
-    ],
-  },
-  {
-    title: "Library",
-    icon: Book,
-    items: [
-      { href: "/master-plans", label: "Master Plans" },
-      { href: "/standards", label: "Standards" },
-      { href: "/compliance", label: "Compliance" },
-      { href: "/spec-catalog", label: "Spec Catalog" },
-      { href: "/lessons", label: "Lessons Learned" },
-      { href: "/knowledge-bank", label: "Knowledge Bank" },
-    ],
-  },
-  {
-    title: "People",
-    icon: Group,
-    items: [
-      { href: "/team-members", label: "Team Members" },
-      { href: "/teams", label: "Teams" },
-      { href: "/payslips", label: "Payslips" },
-      { href: "/job-applications", label: "Job Applications" },
     ],
   },
   {
@@ -241,7 +271,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           isCollapsible
           onClick={() => setSideNavExpanded((v) => !v)}
         />
-        <HeaderName href="/dashboard" prefix="">
+        <HeaderName href="/pulse" prefix="">
           <span style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
             {/* Plain <img>, not next/image: a fixed 14KB brand asset that
                 never changes doesn't need the Image optimizer. */}

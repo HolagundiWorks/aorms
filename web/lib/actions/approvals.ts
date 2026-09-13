@@ -85,6 +85,6 @@ export async function updateApprovalStatus(
   });
 
   revalidatePath("/approvals");
-  revalidatePath("/dashboard");
+  revalidatePath("/pulse");
   return {};
 }

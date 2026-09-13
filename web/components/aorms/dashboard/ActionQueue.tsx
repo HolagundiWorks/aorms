@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Tag, Tile } from "@carbon/react";
+import { Tag } from "@carbon/react";
 import type { PriorityItem } from "../../../lib/dashboard/priority";
 import { AcceptDecisionButton, ApproveButton, MarkTaskDoneButton } from "./QueueActions";
 
@@ -46,98 +46,85 @@ function QuickAction({ item }: { item: PriorityItem }) {
 }
 
 /**
- * The dashboard's Action Queue (2026-09-13 restructure) — replaces the
- * old "Top 3 Priorities" card grid (TopPriorities.tsx, view-only, 3
- * items) with a denser, wider, genuinely actionable list: still the same
- * ranked pool from lib/dashboard/priority.ts (now also pooling in
- * decisions awaiting client review, not just tasks/approvals/requests),
- * but showing more of it (the page passes n=8) and putting a real
- * one-click resolution inline wherever one honestly exists — the point
- * of "suggest what to do next" is defeated if doing it still means
- * navigating away and finding the same row again on another page.
+ * The bare Action Queue row list (2026-09-14 split) — no Tile, no
+ * heading, no scroll container of its own. Extracted out of the old
+ * `ActionQueue` (which used to own all three) so the exact same ranked
+ * rows can be dropped into TodaysBrief.tsx's side panel — see that
+ * file's header comment for why the two merged into one full-width
+ * tile. The caller supplies the Tile/heading/scroll chrome.
  */
-export function ActionQueue({ items }: { items: PriorityItem[] }) {
+export function ActionQueueList({ items }: { items: PriorityItem[] }) {
+  if (items.length === 0) {
+    return (
+      <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+        Nothing urgent stands out today.
+      </p>
+    );
+  }
+
   return (
-    <div style={{ marginBottom: "1rem" }}>
-      <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
-        Next up
-      </h2>
-      {/* Bounded height + its own internal scroll, not the page — same
-          "content scrolls inside its own Tile" pattern DashboardTabs.tsx
-          now also uses (2026-09-13 "single screen" request); see that
-          file's own comment for the precedent (StudioAbstract.tsx's
-          DataTable). 8 rows at this row height comfortably clears 24rem
-          without scrolling on a normal viewport — the cap only kicks in
-          if the ranked pool is ever asked for more than that. */}
-      <Tile style={{ maxHeight: "18rem", overflowY: "auto" }}>
-        {items.length === 0 ? (
-          <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-            Nothing urgent stands out today.
-          </p>
-        ) : (
-          items.map((item, i) => {
-            const isOverdueKind = OVERDUE_KINDS.includes(item.kind);
-            return (
-              <div
-                key={`${item.kind}:${item.id}`}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "1rem",
-                  padding: "0.75rem 0",
-                  borderBottom: i === items.length - 1 ? "none" : "1px solid var(--cds-border-subtle)",
-                }}
+    <>
+      {items.map((item, i) => {
+        const isOverdueKind = OVERDUE_KINDS.includes(item.kind);
+        return (
+          <div
+            key={`${item.kind}:${item.id}`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "1rem",
+              padding: "0.75rem 0",
+              borderBottom: i === items.length - 1 ? "none" : "1px solid var(--cds-border-subtle)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", minWidth: 0 }}>
+              <span
+                className="cds--type-productive-heading-01"
+                style={{ color: "var(--cds-text-secondary)", flexShrink: 0 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", minWidth: 0 }}>
-                  <span
-                    className="cds--type-productive-heading-01"
-                    style={{ color: "var(--cds-text-secondary)", flexShrink: 0 }}
+                #{i + 1}
+              </span>
+              <div style={{ minWidth: 0 }}>
+                <Link href={item.href} style={{ color: "inherit", textDecoration: "none" }}>
+                  <p
+                    className="cds--type-body-compact-01"
+                    style={{
+                      fontWeight: 600,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
                   >
-                    #{i + 1}
-                  </span>
-                  <div style={{ minWidth: 0 }}>
-                    <Link href={item.href} style={{ color: "inherit", textDecoration: "none" }}>
-                      <p
-                        className="cds--type-body-compact-01"
-                        style={{
-                          fontWeight: 600,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {item.title}
-                      </p>
-                    </Link>
-                    <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.1875rem" }}>
-                      <Tag type={KIND_TAG[item.kind]} size="sm">
-                        {KIND_LABEL[item.kind]}
-                      </Tag>
-                      {item.projectTitle && (
-                        <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-                          {item.projectTitle}
-                        </span>
-                      )}
-                      {item.ageDays > 0 && (
-                        <span
-                          className="cds--type-helper-text-01"
-                          style={{ color: isOverdueKind ? "var(--cds-support-error)" : "var(--cds-text-secondary)" }}
-                        >
-                          {item.ageDays}d {isOverdueKind ? "overdue" : "old"}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div style={{ flexShrink: 0 }}>
-                  <QuickAction item={item} />
+                    {item.title}
+                  </p>
+                </Link>
+                <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.1875rem" }}>
+                  <Tag type={KIND_TAG[item.kind]} size="sm">
+                    {KIND_LABEL[item.kind]}
+                  </Tag>
+                  {item.projectTitle && (
+                    <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                      {item.projectTitle}
+                    </span>
+                  )}
+                  {item.ageDays > 0 && (
+                    <span
+                      className="cds--type-helper-text-01"
+                      style={{ color: isOverdueKind ? "var(--cds-support-error)" : "var(--cds-text-secondary)" }}
+                    >
+                      {item.ageDays}d {isOverdueKind ? "overdue" : "old"}
+                    </span>
+                  )}
                 </div>
               </div>
-            );
-          })
-        )}
-      </Tile>
-    </div>
+            </div>
+            <div style={{ flexShrink: 0 }}>
+              <QuickAction item={item} />
+            </div>
+          </div>
+        );
+      })}
+    </>
   );
 }

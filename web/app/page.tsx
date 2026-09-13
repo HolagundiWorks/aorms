@@ -78,7 +78,7 @@ const STRUCTURED_DATA = {
  * ROADMAP-CLOUD.md's dated entry) — `frontend/`'s Landing.tsx is no
  * longer what the public domain actually serves.
  *
- * Signed-in visitors land on their role's home (`/dashboard` for staff,
+ * Signed-in visitors land on their role's home (`/pulse` for staff,
  * `/portal` for a client — see `lib/auth/role-home.ts`); signed-out
  * visitors get this page with a "Sign in" link to the existing
  * `(auth)/login` route, not an embedded auth form.
@@ -97,7 +97,6 @@ export default async function LandingPage() {
       .maybeSingle();
     redirect(roleHome(profile?.role) ?? "/login");
   }
-  if (data?.claims) redirect("/dashboard");
 
   const latestPosts = listBlogPosts().slice(0, 3);
 

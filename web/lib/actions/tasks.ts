@@ -81,7 +81,7 @@ export async function updateTaskStatus(taskId: string, status: string): Promise<
     p_after: { status },
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/pulse");
   revalidatePath("/tasks");
   revalidatePath("/pulse");
   return {};

@@ -12,5 +12,5 @@ import { RouteNotFound } from "../../components/aorms/RouteNotFound";
  * route group's layout shell.
  */
 export default function AppNotFound() {
-  return <RouteNotFound homeHref="/dashboard" homeLabel="Back to dashboard" />;
+  return <RouteNotFound homeHref="/pulse" homeLabel="Back to Pulse" />;
 }

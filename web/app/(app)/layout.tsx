@@ -21,7 +21,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq("id", user?.id ?? "")
     .maybeSingle();
   const home = roleHome(profile?.role);
-  if (home && home !== "/dashboard") redirect(home);
+  // 2026-09-14: staff's own home is "/pulse" now (roleHome() — the
+  // Pulse/Dashboard merge); "/dashboard" itself still resolves to a page
+  // in this same (app) route group (a redirect to /pulse), so it isn't a
+  // portal bounce case either.
+  if (home && home !== "/pulse") redirect(home);
 
   return (
     <>

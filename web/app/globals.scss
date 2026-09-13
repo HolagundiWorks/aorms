@@ -382,3 +382,20 @@ body {
     animation: none !important;
   }
 }
+
+// 2026-09-14 UI-polish request: "no rounded edges, simple straight
+// geometries" — Carbon's stock Tag ships pill-shaped by default
+// (.cds--tag's own border-radius: 16px, plus a circular close icon on
+// filter tags and a small radius on the sm variant when the v12 flag is
+// on). Carbon has no "square" Tag prop/variant to opt into instead, so
+// this squares every Tag app-wide via its stable BEM classes — a
+// geometry override on the real component, not a bespoke replacement
+// for it (keeps "no bespoke components where Carbon provides one").
+.cds--tag,
+.cds--tag--sm,
+.cds--tag.cds--layout--size-sm,
+.cds--tag__close-icon,
+.cds--tag--sm .cds--tag__close-icon,
+.cds--tag.cds--layout--size-sm .cds--tag__close-icon {
+  border-radius: 0;
+}

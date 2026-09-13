@@ -16,7 +16,7 @@
  *
  * Same shape as pulse/MissingParamActions.tsx: a plain useTransition +
  * direct Server Action call, no client-side optimistic list removal —
- * each action's own `revalidatePath("/dashboard")` (tasks.ts/approvals.ts/
+ * each action's own `revalidatePath("/pulse")` (tasks.ts/approvals.ts/
  * decisions.ts) is what makes the item actually disappear from the queue
  * on the next render, via Next's automatic Server Component refresh after
  * a Server Action resolves.

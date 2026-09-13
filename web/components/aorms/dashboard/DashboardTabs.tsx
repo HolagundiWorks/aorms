@@ -12,27 +12,30 @@ import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@carbon/react";
 const PANEL_SCROLL_STYLE: React.CSSProperties = { maxHeight: "18rem", overflowY: "auto", paddingTop: "0.75rem" };
 
 /**
- * Dashboard widget tabs (2026-09-13 restructure) — replaces two flat,
- * always-all-visible grids of 9 and 4 DashboardWidget tiles (13 registers
- * stacked in one long scroll) with five switchable groups. All panels'
- * data is already fetched server-side in one Promise.all on page.tsx
- * (nothing here triggers a new request on tab switch — this is purely a
- * client-side visibility toggle over already-rendered content), so panel
- * content is passed in as plain children/props rather than fetched again.
- * Grouped by who'd actually reach for each register, not by table name:
- * Finance (money), Team & Site (people/delivery), Pipeline & Partners
- * (things owed to/by clients, consultants, contractors), My Work (the
- * signed-in user's own queue), Activity (the audit feed — moved in from
- * its own always-visible bottom section so the page has one less
- * permanently-rendered block).
+ * Dashboard widget tabs (2026-09-13 restructure, extended 2026-09-14 for
+ * the Pulse/Dashboard merge — see app/(app)/pulse/page.tsx's own header
+ * comment) — replaces flat, always-all-visible grids of DashboardWidget
+ * tiles with switchable groups. All panels' data is already fetched
+ * server-side in one Promise.all on page.tsx (nothing here triggers a
+ * new request on tab switch — this is purely a client-side visibility
+ * toggle over already-rendered content), so panel content is passed in
+ * as plain children/props rather than fetched again. Grouped by who'd
+ * actually reach for each register, not by table name: Task Prediction
+ * (ESTI Pulse's own deterministic scoring — Top priorities/Blocked/
+ * Missing parameters/Low confidence + the Ask Pulse NL box), Finance
+ * (money), Team & Site (people/delivery), Pipeline & Partners (things
+ * owed to/by clients, consultants, contractors), My Work (the signed-in
+ * user's own queue), Activity (the audit feed).
  */
 export function DashboardTabs({
+  taskPrediction,
   finance,
   teamAndSite,
   pipelineAndPartners,
   myWork,
   activity,
 }: {
+  taskPrediction: React.ReactNode;
   finance: React.ReactNode | null;
   teamAndSite: React.ReactNode;
   pipelineAndPartners: React.ReactNode;
@@ -42,6 +45,7 @@ export function DashboardTabs({
   return (
     <Tabs>
       <TabList aria-label="Dashboard sections" contained>
+        <Tab>Task Prediction</Tab>
         {finance && <Tab>Finance</Tab>}
         <Tab>Team &amp; Site</Tab>
         <Tab>Pipeline &amp; Partners</Tab>
@@ -49,6 +53,9 @@ export function DashboardTabs({
         <Tab>Activity</Tab>
       </TabList>
       <TabPanels>
+        <TabPanel>
+          <div style={PANEL_SCROLL_STYLE}>{taskPrediction}</div>
+        </TabPanel>
         {finance && (
           <TabPanel>
             <div style={PANEL_SCROLL_STYLE}>{finance}</div>

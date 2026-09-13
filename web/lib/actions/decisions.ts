@@ -106,6 +106,6 @@ export async function updateDecisionState(projectId: string, decisionId: string,
   });
 
   revalidatePath(`/projects/${projectId}/decisions`);
-  revalidatePath("/dashboard");
+  revalidatePath("/pulse");
   return {};
 }
