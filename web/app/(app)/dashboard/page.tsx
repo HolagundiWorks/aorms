@@ -1,12 +1,13 @@
 import { Grid, Column, Tile, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { hasRank } from "../../../lib/auth/rank";
-import { KpiTile as Kpi } from "../../../components/aorms/KpiTile";
+import { KpiTile as Kpi, type KpiStatus } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { DashboardWidget, EmptyRow, WidgetRow } from "../../../components/aorms/dashboard/DashboardWidget";
 import { TodaysBrief } from "../../../components/aorms/dashboard/TodaysBrief";
 import { ActionQueue } from "../../../components/aorms/dashboard/ActionQueue";
 import { DashboardTabs } from "../../../components/aorms/dashboard/DashboardTabs";
+import { KpiTabs } from "../../../components/aorms/dashboard/KpiTabs";
 import { getTopPriorities } from "../../../lib/dashboard/priority";
 import { getLowConfidenceTasks } from "../../../lib/pulse/queries";
 import {
@@ -49,6 +50,20 @@ const REQUEST_KIND_LABEL: Record<string, string> = {
 };
 
 /**
+ * Per-metric KPI health thresholds (2026-09-13) — deliberately simple,
+ * documented tiers rather than a tuned/ML score, matching this app's
+ * existing "no black box" scoring discipline (see lib/dashboard/
+ * priority.ts's own header comment). Only applied to metrics with a real
+ * bad direction — see KpiTile.tsx's own comment for which ones don't get
+ * a status at all.
+ */
+function countStatus(count: number, intervention: number, critical: number): KpiStatus {
+  if (count >= critical) return "CRITICAL";
+  if (count >= intervention) return "NEEDS_INTERVENTION";
+  return "NORMAL";
+}
+
+/**
  * Financial KPIs gated to invoice:manage, same tier Phase 3 deliberately
  * used for raw invoice reads — closes the RLS gap the Phase 5 audit
  * flagged (the current backend's dashboard.financialHealth runs on bare
@@ -73,12 +88,19 @@ async function FinancialSummary() {
   const totalBilled = rows.reduce((sum, r) => sum + (r.grand_total_paise ?? 0), 0);
   const totalPaid = rows.reduce((sum, r) => sum + (r.paid_paise ?? 0), 0);
   const outstanding = totalBilled - totalPaid;
+  // Ratio, not the raw rupee amount — a bigger firm always has a bigger
+  // outstanding number, so only "how much of everything billed is still
+  // unpaid" is a meaningful health signal. <15% normal / <35% needs
+  // intervention / else critical; nothing billed yet reads as normal
+  // (there's nothing to be behind on).
+  const outstandingPct = totalBilled > 0 ? outstanding / totalBilled : 0;
+  const outstandingStatus: KpiStatus = outstandingPct >= 0.35 ? "CRITICAL" : outstandingPct >= 0.15 ? "NEEDS_INTERVENTION" : "NORMAL";
 
   return (
     <>
       <Kpi label="Total billed" value={formatInr(totalBilled)} />
       <Kpi label="Total received" value={formatInr(totalPaid)} />
-      <Kpi label="Outstanding receivables" value={formatInr(outstanding)} />
+      <Kpi label="Outstanding receivables" value={formatInr(outstanding)} status={outstandingStatus} />
     </>
   );
 }
@@ -153,6 +175,16 @@ export default async function DashboardPage() {
   const { data: profile } = user ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : { data: null };
   const showFinancials = hasRank(profile?.role, 80);
   const openRequestCount = clientRequests.length + consultantRequests.length + openTenders.length;
+
+  // Absent today / Open requests — small-firm-appropriate tiers (this
+  // studio's own demo roster is 5 people); Awaiting payment — the oldest
+  // unpaid invoice's own age, not the bucket's rupee total (a big studio
+  // always has a bigger number outstanding, but a 45-day-old unpaid
+  // invoice is a real problem at any size).
+  const absentStatus = countStatus(absences.length, 1, 2);
+  const openRequestStatus = countStatus(openRequestCount, 1, 4);
+  const oldestUnpaidDays = awaitingPayment.rows.reduce((max, r) => Math.max(max, r.daysSinceIssue ?? 0), 0);
+  const awaitingPaymentStatus = countStatus(oldestUnpaidDays, 15, 31);
 
   const financePanel = showFinancials ? (
     <div
@@ -456,6 +488,67 @@ export default async function DashboardPage() {
     </div>
   );
 
+  // KPI groups (2026-09-13 "single screen" restructure) — a flat 9-tile
+  // grid used to run 2-3 rows deep; grouping into KpiTabs.tsx's Finance/
+  // Team/Others panels gets it down to one row's worth of vertical space
+  // at a time, the same "show one group, not everything at once" idea
+  // DashboardTabs.tsx already applies to the widget registers below.
+  const financeKpis = showFinancials ? (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(9.5rem, 1fr))", gap: "1rem" }}>
+      <Kpi label="Ready to bill" value={formatInr(readyToBill.total)} />
+      <Kpi label="Awaiting payment" value={formatInr(awaitingPayment.total)} status={awaitingPaymentStatus} />
+      <FinancialSummary />
+    </div>
+  ) : null;
+
+  const teamKpis = (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(9.5rem, 1fr))", gap: "1rem" }}>
+      <Kpi label="Absent today" value={absences.length} status={absentStatus} />
+      <Kpi label="Open tasks" value={openTaskCount ?? 0} />
+    </div>
+  );
+
+  const othersKpis = (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(9.5rem, 1fr))", gap: "1rem" }}>
+      <Kpi label="Clients" value={clientCount ?? 0} />
+      <Kpi label="Projects" value={projectCount ?? 0} />
+      <Kpi label="Proposals" value={proposalCount ?? 0} />
+      <Kpi label="Open requests" value={openRequestCount} status={openRequestStatus} />
+    </div>
+  );
+
+  const activityPanel = (
+    <Tile>
+      {(recentActivity ?? []).length === 0 ? (
+        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+          No activity yet.
+        </p>
+      ) : (
+        (recentActivity ?? []).map((a) => (
+          <div
+            key={a.id}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "0.5rem 0",
+              borderBottom: "1px solid var(--cds-border-subtle)",
+            }}
+          >
+            <span className="cds--type-body-01">
+              <Tag type="blue" size="sm">
+                {a.action}
+              </Tag>{" "}
+              {a.entity}
+            </span>
+            <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+              {new Date(a.created_at).toLocaleString("en-IN")}
+            </span>
+          </div>
+        ))
+      )}
+    </Tile>
+  );
+
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
@@ -474,75 +567,29 @@ export default async function DashboardPage() {
             actual "what to do next," not just a highlight reel. */}
         <ActionQueue items={topPriorities} />
 
-        {/* Headline numbers — kept as a compact glance strip, distinct
-            from the Action Queue above (a count, not a thing to act on)
-            and from the Finance tab below (a bucket's own dollar total,
-            not its line-item list). */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))",
-            gap: "1rem",
-            marginBottom: "2rem",
-          }}
-        >
-          <Kpi label="Clients" value={clientCount ?? 0} />
-          <Kpi label="Projects" value={projectCount ?? 0} />
-          <Kpi label="Open tasks" value={openTaskCount ?? 0} />
-          <Kpi label="Proposals" value={proposalCount ?? 0} />
-          <Kpi label="Absent today" value={absences.length} />
-          <Kpi label="Open requests" value={openRequestCount} />
-          {showFinancials && <Kpi label="Ready to bill" value={formatInr(readyToBill.total)} />}
-          {showFinancials && <Kpi label="Awaiting payment" value={formatInr(awaitingPayment.total)} />}
-          <FinancialSummary />
+        {/* KPI tabs — Finance / Team / Others, replacing the old flat
+            multi-row grid (see KpiTabs.tsx). Three of these tiles carry a
+            green/amber/red health status (KpiTile.tsx's `status` prop);
+            the rest stay plain counts, deliberately — see that file's own
+            comment for why not every KPI gets one. */}
+        <div style={{ marginBottom: "1rem" }}>
+          <KpiTabs finance={financeKpis} team={teamKpis} others={othersKpis} />
         </div>
 
         {/* Everything else — organized into switchable tabs instead of
-            two long flat grids of 9 and 4 always-visible tiles stacked in
-            one scroll (2026-09-13 restructure; see DashboardTabs.tsx's
-            own header comment for the grouping rationale). Nothing here
-            was removed, just regrouped by who'd reach for it. */}
-        <div style={{ marginBottom: "2rem" }}>
-          <DashboardTabs
-            finance={financePanel}
-            teamAndSite={teamAndSitePanel}
-            pipelineAndPartners={pipelineAndPartnersPanel}
-            myWork={myWorkPanel}
-          />
-        </div>
-
-        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-          Recent activity
-        </h2>
-        <Tile>
-          {(recentActivity ?? []).length === 0 ? (
-            <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-              No activity yet.
-            </p>
-          ) : (
-            (recentActivity ?? []).map((a) => (
-              <div
-                key={a.id}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "0.5rem 0",
-                  borderBottom: "1px solid var(--cds-border-subtle)",
-                }}
-              >
-                <span className="cds--type-body-01">
-                  <Tag type="blue" size="sm">
-                    {a.action}
-                  </Tag>{" "}
-                  {a.entity}
-                </span>
-                <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                  {new Date(a.created_at).toLocaleString("en-IN")}
-                </span>
-              </div>
-            ))
-          )}
-        </Tile>
+            two long flat grids of 9 and 4 always-visible tiles plus a
+            separate always-visible activity feed (2026-09-13 restructure;
+            see DashboardTabs.tsx's own header comment for the grouping
+            rationale, and its PANEL_SCROLL_STYLE for why each tab scrolls
+            within itself rather than growing the page). Nothing here was
+            removed, just regrouped by who'd reach for it. */}
+        <DashboardTabs
+          finance={financePanel}
+          teamAndSite={teamAndSitePanel}
+          pipelineAndPartners={pipelineAndPartnersPanel}
+          myWork={myWorkPanel}
+          activity={activityPanel}
+        />
       </Column>
     </Grid>
   );

@@ -58,11 +58,18 @@ function QuickAction({ item }: { item: PriorityItem }) {
  */
 export function ActionQueue({ items }: { items: PriorityItem[] }) {
   return (
-    <div style={{ marginBottom: "1.5rem" }}>
-      <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+    <div style={{ marginBottom: "1rem" }}>
+      <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
         Next up
       </h2>
-      <Tile>
+      {/* Bounded height + its own internal scroll, not the page — same
+          "content scrolls inside its own Tile" pattern DashboardTabs.tsx
+          now also uses (2026-09-13 "single screen" request); see that
+          file's own comment for the precedent (StudioAbstract.tsx's
+          DataTable). 8 rows at this row height comfortably clears 24rem
+          without scrolling on a normal viewport — the cap only kicks in
+          if the ranked pool is ever asked for more than that. */}
+      <Tile style={{ maxHeight: "18rem", overflowY: "auto" }}>
         {items.length === 0 ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
             Nothing urgent stands out today.

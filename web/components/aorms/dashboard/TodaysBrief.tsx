@@ -13,7 +13,7 @@ export async function TodaysBrief() {
   const { output, error } = await generateDailyBrief();
 
   return (
-    <Tile style={{ marginBottom: "1.5rem" }}>
+    <Tile style={{ marginBottom: "1rem" }}>
       <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-support-info)", marginBottom: "0.5rem" }}>
         Today's Brief
       </p>

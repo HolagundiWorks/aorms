@@ -2,29 +2,42 @@
 
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@carbon/react";
 
+// Bounded height + internal scroll, not the page itself — same "content
+// scrolls inside its own Tile, the page never scrolls" pattern this
+// repo's own module map already calls out for StudioAbstract.tsx's
+// DataTable (see CLAUDE.md's frontend routes table). Applied here
+// (2026-09-13, "single screen" request) so a tab with a long widget list
+// doesn't push the rest of the page — and Recent Activity below it — off
+// the bottom of a normal laptop viewport.
+const PANEL_SCROLL_STYLE: React.CSSProperties = { maxHeight: "18rem", overflowY: "auto", paddingTop: "0.75rem" };
+
 /**
  * Dashboard widget tabs (2026-09-13 restructure) — replaces two flat,
  * always-all-visible grids of 9 and 4 DashboardWidget tiles (13 registers
- * stacked in one long scroll) with four switchable groups. All four
- * panels' data is already fetched server-side in one Promise.all on
- * page.tsx (nothing here triggers a new request on tab switch — this is
- * purely a client-side visibility toggle over already-rendered content),
- * so panel content is passed in as plain children/props rather than
- * fetched again. Grouped by who'd actually reach for each register, not
- * by table name: Finance (money), Team & Site (people/delivery), Pipeline
- * & Partners (things owed to/by clients, consultants, contractors), My
- * Work (the signed-in user's own queue).
+ * stacked in one long scroll) with five switchable groups. All panels'
+ * data is already fetched server-side in one Promise.all on page.tsx
+ * (nothing here triggers a new request on tab switch — this is purely a
+ * client-side visibility toggle over already-rendered content), so panel
+ * content is passed in as plain children/props rather than fetched again.
+ * Grouped by who'd actually reach for each register, not by table name:
+ * Finance (money), Team & Site (people/delivery), Pipeline & Partners
+ * (things owed to/by clients, consultants, contractors), My Work (the
+ * signed-in user's own queue), Activity (the audit feed — moved in from
+ * its own always-visible bottom section so the page has one less
+ * permanently-rendered block).
  */
 export function DashboardTabs({
   finance,
   teamAndSite,
   pipelineAndPartners,
   myWork,
+  activity,
 }: {
   finance: React.ReactNode | null;
   teamAndSite: React.ReactNode;
   pipelineAndPartners: React.ReactNode;
   myWork: React.ReactNode;
+  activity: React.ReactNode;
 }) {
   return (
     <Tabs>
@@ -33,12 +46,26 @@ export function DashboardTabs({
         <Tab>Team &amp; Site</Tab>
         <Tab>Pipeline &amp; Partners</Tab>
         <Tab>My Work</Tab>
+        <Tab>Activity</Tab>
       </TabList>
       <TabPanels>
-        {finance && <TabPanel>{finance}</TabPanel>}
-        <TabPanel>{teamAndSite}</TabPanel>
-        <TabPanel>{pipelineAndPartners}</TabPanel>
-        <TabPanel>{myWork}</TabPanel>
+        {finance && (
+          <TabPanel>
+            <div style={PANEL_SCROLL_STYLE}>{finance}</div>
+          </TabPanel>
+        )}
+        <TabPanel>
+          <div style={PANEL_SCROLL_STYLE}>{teamAndSite}</div>
+        </TabPanel>
+        <TabPanel>
+          <div style={PANEL_SCROLL_STYLE}>{pipelineAndPartners}</div>
+        </TabPanel>
+        <TabPanel>
+          <div style={PANEL_SCROLL_STYLE}>{myWork}</div>
+        </TabPanel>
+        <TabPanel>
+          <div style={PANEL_SCROLL_STYLE}>{activity}</div>
+        </TabPanel>
       </TabPanels>
     </Tabs>
   );
