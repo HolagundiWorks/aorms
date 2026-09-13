@@ -42,6 +42,31 @@
 // cds--type-* gaps documented above: `Toggle` was in use (HeaderCalculator
 // .tsx) with no matching `@use` here, so none of its CSS ever existed.
 @use "@carbon/react/scss/components/toggle";
+// 2026-09-14 shell audit — same "used the component, forgot its Sass
+// partial" defect as Toggle/--cds-layout-density-*/cds--type-* above,
+// found by cross-checking every `@carbon/react` import in web/ against
+// this file's own @use list. `Stack` is the highest-impact one by far:
+// it's used in ~130 files (nearly every form in this codebase) and, with
+// no @use, every one of them has been rendering with NO gap/grid layout
+// at all — `components/stack` is what actually emits `.cds--stack-*`'s
+// display:grid/gap rules.
+@use "@carbon/react/scss/components/stack";
+@use "@carbon/react/scss/components/dropdown"; // DecisionStateDropdown.tsx
+@use "@carbon/react/scss/components/file-uploader"; // NewDrawingForm.tsx
+@use "@carbon/react/scss/components/inline-loading"; // HeaderEsti.tsx
+@use "@carbon/react/scss/components/content-switcher"; // HeaderWellness.tsx (ContentSwitcher/Switch)
+@use "@carbon/react/scss/components/progress-bar"; // RoutineGuide.tsx
+@use "@carbon/react/scss/components/progress-indicator"; // DecisionProgress.tsx
+@use "@carbon/react/scss/components/skeleton-styles"; // RouteLoading.tsx, app/(app)/loading.tsx
+// Popover/Tooltip style every header utility's popover (HeaderEsti/
+// HeaderWellness/HeaderCalculator/HeaderPomodoro) — confirmed this CSS
+// already renders today, but only by accident: components/button
+// internally @uses '../tooltip', which itself @uses '../popover', so the
+// styles ride in transitively with no @use of their own here. Fragile —
+// a future Carbon version bump or removing the button partial would
+// silently break every header popover with no warning. Made explicit.
+@use "@carbon/react/scss/components/popover";
+@use "@carbon/react/scss/components/tooltip";
 @use "@carbon/react/scss/grid";
 
 // Emits every `.cds--type-*` utility class (heading-01..07, body-01/02,

@@ -163,6 +163,31 @@ function isActiveHref(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+/**
+ * The shell's side nav has exactly one authoritative piece of state
+ * (`sideNavExpanded` below) — never duplicated or tracked separately
+ * anywhere else in the tree. It's a plain boolean at runtime because
+ * that's all Carbon's own `SideNav` prop takes, but it actually means one
+ * of four distinct states once combined with the viewport width (Carbon's
+ * own `lg` = 66rem breakpoint, via `isPersistent`/`--side-nav--ux` below):
+ *
+ *   expanded       — sideNavExpanded=true  above lg  (fixed-open, Carbon
+ *                    ignores the boolean entirely at this width)
+ *   collapsed      — sideNavExpanded=false above lg  (same: ignored, nav
+ *                    stays fixed-open — there is no "icon rail" mode in
+ *                    this app, see the isChildOfHeader note below, so
+ *                    "collapsed" and "expanded" read identically on
+ *                    desktop by design)
+ *   mobile-open    — sideNavExpanded=true  at/below lg (dismissible
+ *                    overlay, backdrop visible)
+ *   mobile-closed  — sideNavExpanded=false at/below lg (nav is 0-width,
+ *                    off-canvas)
+ *
+ * Named here explicitly (2026-09-14 shell audit) so the mapping is
+ * documented in one place rather than left implicit in the interaction
+ * between this boolean and globals.scss's breakpoint CSS — no behavior
+ * change, this mechanism was already the Carbon-correct one.
+ */
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
