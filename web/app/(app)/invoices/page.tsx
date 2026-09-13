@@ -12,10 +12,9 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddInvoiceForm } from "../../../components/aorms/AddInvoiceForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
-import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
+import { DownloadPdfLink } from "../../../components/aorms/DownloadPdfLink";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
-import { generateInvoicePdf } from "../../../lib/actions/invoices";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -36,7 +35,7 @@ export default async function InvoicesPage() {
     supabase
       .from("invoices")
       .select(
-        "id, ref, status, gst_system, document_kind, taxable_paise, gst_total_paise, tds_paise, grand_total_paise, net_receivable_paise, paid_paise, date_invoice, pdf_status, project_offices(title), clients(name)",
+        "id, ref, status, gst_system, document_kind, taxable_paise, gst_total_paise, tds_paise, grand_total_paise, net_receivable_paise, paid_paise, date_invoice, project_offices(title), clients(name)",
       )
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
@@ -127,10 +126,7 @@ export default async function InvoicesPage() {
                       </Tag>
                     </TableCell>
                     <TableCell>
-                      <GeneratePdfButton
-                        action={generateInvoicePdf.bind(null, inv.id)}
-                        pdfStatus={inv.pdf_status}
-                      />
+                      <DownloadPdfLink href={`/api/invoices/${inv.id}/pdf`} />
                     </TableCell>
                   </TableRow>
                 );
