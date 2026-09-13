@@ -1,3 +1,4 @@
+import { Certificate, Scales } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -52,9 +53,9 @@ export default async function PmcSteelCertsPage() {
             marginBottom: "2rem",
           }}
         >
-          <KpiTile label="Total certificates" value={rows.length} />
-          <KpiTile label="Issued (kg)" value={totalIssuedKg.toLocaleString("en-IN")} />
-          <KpiTile label="Consumed (kg)" value={totalConsumedKg.toLocaleString("en-IN")} />
+          <KpiTile label="Total certificates" value={rows.length} icon={Certificate} />
+          <KpiTile label="Issued (kg)" value={totalIssuedKg.toLocaleString("en-IN")} icon={Scales} />
+          <KpiTile label="Consumed (kg)" value={totalConsumedKg.toLocaleString("en-IN")} icon={Scales} />
         </div>
 
         {error ? (

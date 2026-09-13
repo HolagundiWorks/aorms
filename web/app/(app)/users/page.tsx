@@ -1,3 +1,4 @@
+import { CheckmarkFilled, UserAdmin, UserMultiple } from "@carbon/icons-react";
 import { Column, Grid, InlineNotification, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { AddStaffInviteForm } from "../../../components/aorms/AddStaffInviteForm";
@@ -98,9 +99,9 @@ export default async function UsersPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total staff" value={rows.length} />
-              <KpiTile label="Active" value={activeCount} />
-              <KpiTile label="Owners" value={ownerCount} />
+              <KpiTile label="Total staff" value={rows.length} icon={UserMultiple} />
+              <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
+              <KpiTile label="Owners" value={ownerCount} icon={UserAdmin} />
             </div>
 
             {!isOwner && (

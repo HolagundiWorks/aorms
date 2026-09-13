@@ -1,3 +1,4 @@
+import { CurrencyRupee, DocumentExport, ShoppingCart } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -65,9 +66,9 @@ export default async function PurchaseOrdersPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total POs" value={rows.length} />
-              <KpiTile label="Issued" value={issuedCount} />
-              <KpiTile label="Total value" value={formatInr(totalValuePaise)} />
+              <KpiTile label="Total POs" value={rows.length} icon={ShoppingCart} />
+              <KpiTile label="Issued" value={issuedCount} icon={DocumentExport} />
+              <KpiTile label="Total value" value={formatInr(totalValuePaise)} icon={CurrencyRupee} />
             </div>
 
             {error ? (

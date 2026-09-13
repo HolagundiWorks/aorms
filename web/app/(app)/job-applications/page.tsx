@@ -1,3 +1,4 @@
+import { Chat, DocumentRequirements, UserFollow } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -49,9 +50,9 @@ export default async function JobApplicationsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total applications" value={rows.length} />
-              <KpiTile label="In interview" value={interviewCount} />
-              <KpiTile label="Hired" value={hiredCount} />
+              <KpiTile label="Total applications" value={rows.length} icon={DocumentRequirements} />
+              <KpiTile label="In interview" value={interviewCount} icon={Chat} />
+              <KpiTile label="Hired" value={hiredCount} icon={UserFollow} />
             </div>
 
             {error ? (

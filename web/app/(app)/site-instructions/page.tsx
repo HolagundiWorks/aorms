@@ -1,3 +1,4 @@
+import { CheckmarkFilled, Task, Time } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -54,9 +55,9 @@ export default async function SiteInstructionsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total instructions" value={rows.length} />
-              <KpiTile label="Acknowledged" value={acknowledgedCount} />
-              <KpiTile label="Pending" value={pendingCount} />
+              <KpiTile label="Total instructions" value={rows.length} icon={Task} />
+              <KpiTile label="Acknowledged" value={acknowledgedCount} icon={CheckmarkFilled} />
+              <KpiTile label="Pending" value={pendingCount} icon={Time} />
             </div>
 
             {error ? (

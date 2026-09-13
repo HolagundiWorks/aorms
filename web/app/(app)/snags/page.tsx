@@ -1,3 +1,4 @@
+import { Close, FolderOpen, InProgress, WarningAlt } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -53,10 +54,10 @@ export default async function SnagsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total snags" value={rows.length} />
-              <KpiTile label="Open" value={openCount} />
-              <KpiTile label="In progress" value={inProgressCount} />
-              <KpiTile label="Closed" value={closedCount} />
+              <KpiTile label="Total snags" value={rows.length} icon={WarningAlt} />
+              <KpiTile label="Open" value={openCount} icon={FolderOpen} />
+              <KpiTile label="In progress" value={inProgressCount} icon={InProgress} />
+              <KpiTile label="Closed" value={closedCount} icon={Close} />
             </div>
 
             {error ? (

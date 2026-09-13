@@ -1,3 +1,4 @@
+import { ChartLineData, DocumentExport, ReportData } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -58,9 +59,9 @@ export default async function ProgressReportsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total reports" value={rows.length} />
-              <KpiTile label="Issued" value={issuedCount} />
-              <KpiTile label="Avg physical progress" value={avgPhysicalPct != null ? `${avgPhysicalPct}%` : "—"} />
+              <KpiTile label="Total reports" value={rows.length} icon={ReportData} />
+              <KpiTile label="Issued" value={issuedCount} icon={DocumentExport} />
+              <KpiTile label="Avg physical progress" value={avgPhysicalPct != null ? `${avgPhysicalPct}%` : "—"} icon={ChartLineData} />
             </div>
 
             {error ? (

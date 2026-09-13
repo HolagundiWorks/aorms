@@ -1,3 +1,4 @@
+import { DocumentMultiple_02, Template } from "@carbon/icons-react";
 import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
@@ -52,8 +53,8 @@ export default async function OfficeTemplatesPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total templates" value={rows.length} />
-              <KpiTile label="Document kinds" value={kindCount} />
+              <KpiTile label="Total templates" value={rows.length} icon={Template} />
+              <KpiTile label="Document kinds" value={kindCount} icon={DocumentMultiple_02} />
             </div>
 
             {error ? (

@@ -1,3 +1,4 @@
+import { ListChecked, Task, Time } from "@carbon/icons-react";
 import { notFound } from "next/navigation";
 import {
   Column,
@@ -101,10 +102,10 @@ export default async function ProjectDetailPage({
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Phases" value={(phases ?? []).length} />
-              <KpiTile label="Open tasks" value={openTaskCount ?? 0} />
-              <KpiTile label="Decisions logged" value={(decisionStates ?? []).length} />
-              <KpiTile label="Awaiting client" value={decisionsAwaitingClient} />
+              <KpiTile label="Phases" value={(phases ?? []).length} icon={Task} />
+              <KpiTile label="Open tasks" value={openTaskCount ?? 0} icon={ListChecked} />
+              <KpiTile label="Decisions logged" value={(decisionStates ?? []).length} icon={Task} />
+              <KpiTile label="Awaiting client" value={decisionsAwaitingClient} icon={Time} />
             </div>
 
             {/* Client + project contact (migration 0044) — the project

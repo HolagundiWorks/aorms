@@ -1,3 +1,4 @@
+import { DocumentPdf, Email, UserMultiple } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -53,9 +54,9 @@ export default async function LettersPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total letters" value={rows.length} />
-              <KpiTile label="PDF ready" value={readyCount} />
-              <KpiTile label="Recipients" value={recipientCount} />
+              <KpiTile label="Total letters" value={rows.length} icon={Email} />
+              <KpiTile label="PDF ready" value={readyCount} icon={DocumentPdf} />
+              <KpiTile label="Recipients" value={recipientCount} icon={UserMultiple} />
             </div>
 
             {error ? (

@@ -1,3 +1,4 @@
+import { ChartLineData, CheckmarkFilled, Renew } from "@carbon/icons-react";
 import { notFound } from "next/navigation";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@carbon/react";
 import { createClient } from "../../../../../lib/supabase/server";
@@ -69,9 +70,9 @@ export default async function NegotiationPage({
             marginBottom: "2rem",
           }}
         >
-          <KpiTile label="Total rounds" value={rows.length} />
-          <KpiTile label="Agreed" value={agreedCount} />
-          <KpiTile label="Latest conversion" value={latestConversion != null ? `${latestConversion}%` : "—"} />
+          <KpiTile label="Total rounds" value={rows.length} icon={Renew} />
+          <KpiTile label="Agreed" value={agreedCount} icon={CheckmarkFilled} />
+          <KpiTile label="Latest conversion" value={latestConversion != null ? `${latestConversion}%` : "—"} icon={ChartLineData} />
         </div>
 
         {roundsError ? (

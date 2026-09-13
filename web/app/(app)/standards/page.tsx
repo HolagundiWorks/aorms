@@ -1,3 +1,4 @@
+import { Certificate, Ruler } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -49,8 +50,8 @@ export default async function StandardsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total standards" value={rows.length} />
-              <KpiTile label="Disciplines" value={disciplineCount} />
+              <KpiTile label="Total standards" value={rows.length} icon={Ruler} />
+              <KpiTile label="Disciplines" value={disciplineCount} icon={Certificate} />
             </div>
 
             {error ? (

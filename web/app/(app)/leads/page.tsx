@@ -1,3 +1,4 @@
+import { CheckmarkFilled, Close, FolderOpen, UserFollow } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -60,10 +61,10 @@ export default async function LeadsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total leads" value={rows.length} />
-              <KpiTile label="Open" value={openCount} />
-              <KpiTile label="Converted" value={convertedCount} />
-              <KpiTile label="Lost" value={lostCount} />
+              <KpiTile label="Total leads" value={rows.length} icon={UserFollow} />
+              <KpiTile label="Open" value={openCount} icon={FolderOpen} />
+              <KpiTile label="Converted" value={convertedCount} icon={CheckmarkFilled} />
+              <KpiTile label="Lost" value={lostCount} icon={Close} />
             </div>
 
             {error ? (

@@ -1,3 +1,4 @@
+import { CheckmarkFilled, Draw, Time, WarningFilled } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -63,10 +64,10 @@ export default async function DrawingsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total drawings" value={rows.length} />
-              <KpiTile label="Ready" value={readyCount} />
-              <KpiTile label="Failed" value={failedCount} />
-              <KpiTile label="Pending review" value={pendingReviewCount} />
+              <KpiTile label="Total drawings" value={rows.length} icon={Draw} />
+              <KpiTile label="Ready" value={readyCount} icon={CheckmarkFilled} />
+              <KpiTile label="Failed" value={failedCount} icon={WarningFilled} />
+              <KpiTile label="Pending review" value={pendingReviewCount} icon={Time} />
             </div>
 
             {error ? (

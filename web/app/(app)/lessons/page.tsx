@@ -1,3 +1,4 @@
+import { Book, Category } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -51,8 +52,8 @@ export default async function LessonsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total lessons" value={rows.length} />
-              <KpiTile label="Categories" value={categoryCount} />
+              <KpiTile label="Total lessons" value={rows.length} icon={Book} />
+              <KpiTile label="Categories" value={categoryCount} icon={Category} />
             </div>
 
             {error ? (

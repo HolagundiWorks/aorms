@@ -1,3 +1,4 @@
+import { CheckmarkFilled, CurrencyRupee } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -59,9 +60,9 @@ export default async function PayslipsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total payslips" value={rows.length} />
-              <KpiTile label="Paid" value={paidCount} />
-              <KpiTile label="Total net" value={formatInr(totalNetPaise)} />
+              <KpiTile label="Total payslips" value={rows.length} icon={CurrencyRupee} />
+              <KpiTile label="Paid" value={paidCount} icon={CheckmarkFilled} />
+              <KpiTile label="Total net" value={formatInr(totalNetPaise)} icon={CurrencyRupee} />
             </div>
 
             {error ? (

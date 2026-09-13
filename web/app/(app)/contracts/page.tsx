@@ -1,3 +1,4 @@
+import { CheckmarkFilled, CurrencyRupee, DocumentSigned } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -64,9 +65,9 @@ export default async function ContractsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total contracts" value={rows.length} />
-              <KpiTile label="Active" value={activeCount} />
-              <KpiTile label="Total value" value={formatInr(totalValuePaise)} />
+              <KpiTile label="Total contracts" value={rows.length} icon={DocumentSigned} />
+              <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
+              <KpiTile label="Total value" value={formatInr(totalValuePaise)} icon={CurrencyRupee} />
             </div>
 
             {error ? (

@@ -111,9 +111,19 @@ export function KpiTile({
         aspectRatio: "1",
         minWidth: "9rem",
         border: "1px solid var(--cds-border-subtle)",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
+        // Fixed rows (icon / value+label / trend-or-status), not
+        // flex+space-between (2026-09-14 fix, found live: a label that
+        // wraps to 2 lines vs. one that fits on 1 made space-between
+        // redistribute the surrounding gaps differently per tile, so the
+        // icon and bottom row visibly shifted position from one KPI card
+        // to its neighbor in the same row). Every tile now has the exact
+        // same 3-row skeleton regardless of its own content length — see
+        // the fixed-height icon/bottom rows and the 2-line-clamped label
+        // below, all sized so nothing ever depends on this tile's own
+        // text length to determine layout.
+        display: "grid",
+        gridTemplateRows: "1.25rem 1fr 1.25rem",
+        rowGap: "0.375rem",
         position: "relative",
         paddingTop: status ? "1.25rem" : undefined,
         overflow: "hidden",
@@ -133,32 +143,65 @@ export function KpiTile({
           }}
         />
       )}
-      {Icon ? (
-        <div style={{ color: "var(--cds-icon-secondary)" }} aria-hidden>
-          <Icon size={20} />
-        </div>
-      ) : (
-        <span aria-hidden />
-      )}
-      <div>
-        <p className="cds--type-heading-05 cds--type-semibold">{value}</p>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginTop: "0.25rem" }}>
+      <div style={{ color: "var(--cds-icon-secondary)" }} aria-hidden>
+        {Icon && <Icon size={20} />}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", minHeight: 0 }}>
+        {/* heading-04 (2026-09-14, explicit request: "reduce the text
+            height of... the numbers/amount") — was heading-05 (32px),
+            which a longer rupee value ("₹41,87,000") could barely fit on
+            one line inside a ~120px-wide square tile even with the
+            ellipsis fallback below. heading-04 still reads as the
+            card's clear focal number (still the largest text in the
+            tile) while giving long values real room before truncating. */}
+        <p
+          className="cds--type-heading-04 cds--type-semibold"
+          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+          title={String(value)}
+        >
+          {value}
+        </p>
+        {/* Fixed 2-line-tall regardless of actual length — a short label
+            ("Active") and a long one ("Total inferences served") both
+            reserve identical space, so the row above/below never moves. */}
+        <p
+          className="cds--type-body-01"
+          style={{
+            color: "var(--cds-text-secondary)",
+            marginTop: "0.25rem",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+          title={label}
+        >
           {label}
         </p>
       </div>
       {trend ? (
         <p
           className="cds--type-helper-text-01"
-          style={{ color: TREND_COLOR[trend.impact], display: "flex", alignItems: "center", gap: "0.25rem" }}
+          style={{
+            color: TREND_COLOR[trend.impact],
+            display: "flex",
+            alignItems: "center",
+            gap: "0.25rem",
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+          }}
         >
           {TrendIcon ? <TrendIcon size={14} /> : <ArrowRight size={14} />}
-          <span>
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
             {trend.value}
             {trend.label ? ` ${trend.label}` : ""}
           </span>
         </p>
       ) : status ? (
-        <p className="cds--type-helper-text-01" style={{ color: STATUS_COLOR[status] }}>
+        <p
+          className="cds--type-helper-text-01"
+          style={{ color: STATUS_COLOR[status], overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+        >
           {STATUS_LABEL[status]}
         </p>
       ) : (

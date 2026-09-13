@@ -1,3 +1,4 @@
+import { FolderOpen, RequestQuote, TrophyFilled } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -61,9 +62,9 @@ export default async function TendersPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total tenders" value={rows.length} />
-              <KpiTile label="Open" value={openCount} />
-              <KpiTile label="Awarded" value={awardedCount} />
+              <KpiTile label="Total tenders" value={rows.length} icon={RequestQuote} />
+              <KpiTile label="Open" value={openCount} icon={FolderOpen} />
+              <KpiTile label="Awarded" value={awardedCount} icon={TrophyFilled} />
             </div>
 
             {error ? (

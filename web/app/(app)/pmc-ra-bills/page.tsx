@@ -1,3 +1,4 @@
+import { CurrencyRupee, Receipt } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -56,8 +57,8 @@ export default async function PmcRaBillsPage() {
             marginBottom: "2rem",
           }}
         >
-          <KpiTile label="Total bills" value={rows.length} />
-          <KpiTile label="Total gross" value={formatInr(totalGrossPaise)} />
+          <KpiTile label="Total bills" value={rows.length} icon={Receipt} />
+          <KpiTile label="Total gross" value={formatInr(totalGrossPaise)} icon={CurrencyRupee} />
         </div>
 
         {error ? (

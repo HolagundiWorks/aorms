@@ -1,3 +1,4 @@
+import { CheckmarkFilled, CurrencyRupee, Receipt, Wallet } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -72,10 +73,10 @@ export default async function InvoicesPage() {
             marginBottom: "2rem",
           }}
         >
-          <KpiTile label="Total invoices" value={rows.length} />
-          <KpiTile label="Invoiced" value={formatInr(grandTotalPaise)} />
-          <KpiTile label="Outstanding" value={formatInr(outstandingPaise)} />
-          <KpiTile label="Paid" value={paidCount} />
+          <KpiTile label="Total invoices" value={rows.length} icon={Receipt} />
+          <KpiTile label="Invoiced" value={formatInr(grandTotalPaise)} icon={CurrencyRupee} />
+          <KpiTile label="Outstanding" value={formatInr(outstandingPaise)} icon={Wallet} />
+          <KpiTile label="Paid" value={paidCount} icon={CheckmarkFilled} />
         </div>
 
         {error ? (

@@ -1,3 +1,4 @@
+import { CheckmarkOutline, Idea, WarningAlt, WarningFilled } from "@carbon/icons-react";
 import { notFound } from "next/navigation";
 import {
   Column,
@@ -85,10 +86,10 @@ export default async function ProjectPreconPage({
             marginBottom: "2rem",
           }}
         >
-          <KpiTile label="Total risks" value={riskRows.length} />
-          <KpiTile label="Critical risks" value={criticalRiskCount} />
-          <KpiTile label="Total opportunities" value={opportunityRows.length} />
-          <KpiTile label="Gates passed" value={`${gatesPassedCount}/${TOTAL_GATE_KEYS}`} />
+          <KpiTile label="Total risks" value={riskRows.length} icon={WarningAlt} />
+          <KpiTile label="Critical risks" value={criticalRiskCount} icon={WarningFilled} />
+          <KpiTile label="Total opportunities" value={opportunityRows.length} icon={Idea} />
+          <KpiTile label="Gates passed" value={`${gatesPassedCount}/${TOTAL_GATE_KEYS}`} icon={CheckmarkOutline} />
         </div>
 
         <Tabs>

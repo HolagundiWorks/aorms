@@ -1,3 +1,4 @@
+import { CheckmarkFilled, FolderDetails, Help } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -62,9 +63,9 @@ export default async function ProjectsPage() {
             marginBottom: "2rem",
           }}
         >
-          <KpiTile label="Total projects" value={rows.length} />
-          <KpiTile label="Active" value={activeCount} />
-          <KpiTile label="Enquiry" value={enquiryCount} />
+          <KpiTile label="Total projects" value={rows.length} icon={FolderDetails} />
+          <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
+          <KpiTile label="Enquiry" value={enquiryCount} icon={Help} />
         </div>
 
         {error ? (

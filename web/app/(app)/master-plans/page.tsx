@@ -1,3 +1,4 @@
+import { Category, Map } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -48,8 +49,8 @@ export default async function MasterPlansPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total plans" value={rows.length} />
-              <KpiTile label="Categories" value={categoryCount} />
+              <KpiTile label="Total plans" value={rows.length} icon={Map} />
+              <KpiTile label="Categories" value={categoryCount} icon={Category} />
             </div>
 
             {error ? (

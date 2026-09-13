@@ -1,6 +1,7 @@
 import { Grid, Column, Tile, Tag } from "@carbon/react";
 import {
   WarningFilled,
+  CheckmarkFilled,
   LockedAndBlocked,
   Query,
   ChartLineData,
@@ -144,9 +145,9 @@ async function FinancialSummary() {
 
   return (
     <>
-      <Kpi label="Total billed" value={formatInr(totalBilled)} />
-      <Kpi label="Total received" value={formatInr(totalPaid)} />
-      <Kpi label="Outstanding receivables" value={formatInr(outstanding)} status={outstandingStatus} />
+      <Kpi label="Total billed" value={formatInr(totalBilled)} icon={CurrencyRupee} />
+      <Kpi label="Total received" value={formatInr(totalPaid)} icon={CheckmarkFilled} />
+      <Kpi label="Outstanding receivables" value={formatInr(outstanding)} status={outstandingStatus} icon={Wallet} />
     </>
   );
 }

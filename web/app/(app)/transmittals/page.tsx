@@ -1,3 +1,4 @@
+import { CheckmarkFilled, Send, Time } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -55,9 +56,9 @@ export default async function TransmittalsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total transmittals" value={rows.length} />
-              <KpiTile label="Acknowledged" value={acknowledgedCount} />
-              <KpiTile label="Pending" value={pendingCount} />
+              <KpiTile label="Total transmittals" value={rows.length} icon={Send} />
+              <KpiTile label="Acknowledged" value={acknowledgedCount} icon={CheckmarkFilled} />
+              <KpiTile label="Pending" value={pendingCount} icon={Time} />
             </div>
 
             {error ? (

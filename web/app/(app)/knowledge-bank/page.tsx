@@ -1,3 +1,4 @@
+import { Book, CheckmarkFilled, Edit } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -58,9 +59,9 @@ export default async function KnowledgeBankPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total sources" value={rows.length} />
-              <KpiTile label="Published" value={publishedCount} />
-              <KpiTile label="Draft" value={draftCount} />
+              <KpiTile label="Total sources" value={rows.length} icon={Book} />
+              <KpiTile label="Published" value={publishedCount} icon={CheckmarkFilled} />
+              <KpiTile label="Draft" value={draftCount} icon={Edit} />
             </div>
 
             {error ? (

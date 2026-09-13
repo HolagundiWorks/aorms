@@ -1,3 +1,4 @@
+import { CheckmarkFilled, CheckmarkOutline, Time } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -53,9 +54,9 @@ export default async function ApprovalsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total approvals" value={rows.length} />
-              <KpiTile label="Pending" value={pendingCount} />
-              <KpiTile label="Approved" value={approvedCount} />
+              <KpiTile label="Total approvals" value={rows.length} icon={CheckmarkOutline} />
+              <KpiTile label="Pending" value={pendingCount} icon={Time} />
+              <KpiTile label="Approved" value={approvedCount} icon={CheckmarkFilled} />
             </div>
 
             {error ? (

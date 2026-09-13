@@ -1,3 +1,4 @@
+import { Calendar, DocumentMultiple_02, WarningAlt } from "@carbon/icons-react";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { AddDocumentIssueForm } from "../../../components/aorms/AddDocumentIssueForm";
@@ -56,9 +57,9 @@ export default async function DocumentIssuesPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total issues" value={rows.length} />
-              <KpiTile label="This month" value={thisMonthCount} />
-              <KpiTile label="Document types" value={entityTypeCount} />
+              <KpiTile label="Total issues" value={rows.length} icon={WarningAlt} />
+              <KpiTile label="This month" value={thisMonthCount} icon={Calendar} />
+              <KpiTile label="Document types" value={entityTypeCount} icon={DocumentMultiple_02} />
             </div>
 
             {error ? (

@@ -15,7 +15,21 @@ type ProjectOption = { id: string; title: string };
 
 const initialState: AskPulseState = null;
 
-export function AskPulseForm({ projects }: { projects: ProjectOption[] }) {
+export function AskPulseForm({
+  projects,
+  defaultProjectId,
+}: {
+  projects: ProjectOption[];
+  /** Pre-selects the project selector (2026-09-14, explicit request: "the
+   * current screen will give the pulse context") — FloatingAskPulse.tsx
+   * passes the project id parsed from the current URL when the user is
+   * on that project's own pages, so a question asked while looking at a
+   * project is scoped to it by default without an extra click. Still
+   * just the Select's normal default value, not a hidden/forced
+   * scope — the person can always pick "— Not project-specific —" or a
+   * different project instead. */
+  defaultProjectId?: string;
+}) {
   const [state, formAction, pending] = useActionState(askPulse, initialState);
 
   return (
@@ -34,7 +48,7 @@ export function AskPulseForm({ projects }: { projects: ProjectOption[] }) {
           maxCount={500}
           enableCounter
         />
-        <Select id="projectId" name="projectId" labelText="Project (for record lookups)" defaultValue="">
+        <Select id="projectId" name="projectId" labelText="Project (for record lookups)" defaultValue={defaultProjectId ?? ""}>
           <SelectItem value="" text="— Not project-specific —" />
           {projects.map((p) => (
             <SelectItem key={p.id} value={p.id} text={p.title} />

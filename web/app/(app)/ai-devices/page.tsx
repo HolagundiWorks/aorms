@@ -1,3 +1,4 @@
+import { ChartLineData, CheckmarkFilled, Devices, Time, WarningFilled } from "@carbon/icons-react";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { PageHeader } from "../../../components/aorms/PageHeader";
@@ -74,11 +75,11 @@ export default async function AiDevicesPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Registered devices" value={rows.length} />
-              <KpiTile label="Online" value={onlineCount} status={onlineCount > 0 ? "NORMAL" : undefined} />
-              <KpiTile label="Busy" value={busyCount} />
-              <KpiTile label="Error" value={errorCount} status={errorCount > 0 ? "CRITICAL" : "NORMAL"} />
-              <KpiTile label="Total inferences served" value={totalInferences} />
+              <KpiTile label="Registered devices" value={rows.length} icon={Devices} />
+              <KpiTile label="Online" value={onlineCount} status={onlineCount > 0 ? "NORMAL" : undefined} icon={CheckmarkFilled} />
+              <KpiTile label="Busy" value={busyCount} icon={Time} />
+              <KpiTile label="Error" value={errorCount} status={errorCount > 0 ? "CRITICAL" : "NORMAL"} icon={WarningFilled} />
+              <KpiTile label="Total inferences served" value={totalInferences} icon={ChartLineData} />
             </div>
 
             {error ? (

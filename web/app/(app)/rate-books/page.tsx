@@ -1,3 +1,4 @@
+import { Book, FolderOpen } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -48,8 +49,8 @@ export default async function RateBooksPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total rate books" value={rows.length} />
-              <KpiTile label="Open" value={openCount} />
+              <KpiTile label="Total rate books" value={rows.length} icon={Book} />
+              <KpiTile label="Open" value={openCount} icon={FolderOpen} />
             </div>
 
             {error ? (

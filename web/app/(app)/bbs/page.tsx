@@ -1,3 +1,4 @@
+import { Calendar, DocumentExport } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -57,8 +58,8 @@ export default async function BbsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total schedules" value={rows.length} />
-              <KpiTile label="Issued" value={issuedCount} />
+              <KpiTile label="Total schedules" value={rows.length} icon={Calendar} />
+              <KpiTile label="Issued" value={issuedCount} icon={DocumentExport} />
             </div>
 
             {error ? (

@@ -1,3 +1,4 @@
+import { Locked, Task, Time, WarningFilled } from "@carbon/icons-react";
 import { notFound } from "next/navigation";
 import { Accordion, AccordionItem, Column, Grid, Tag } from "@carbon/react";
 import { createClient } from "../../../../../lib/supabase/server";
@@ -78,10 +79,10 @@ export default async function ProjectDecisionsPage({
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total decisions" value={rows.length} />
-              <KpiTile label="Awaiting client" value={inReviewCount} />
-              <KpiTile label="High impact" value={highImpactCount} />
-              <KpiTile label="Locked" value={lockedCount} />
+              <KpiTile label="Total decisions" value={rows.length} icon={Task} />
+              <KpiTile label="Awaiting client" value={inReviewCount} icon={Time} />
+              <KpiTile label="High impact" value={highImpactCount} icon={WarningFilled} />
+              <KpiTile label="Locked" value={lockedCount} icon={Locked} />
             </div>
 
             <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>

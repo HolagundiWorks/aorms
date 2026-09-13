@@ -1,3 +1,4 @@
+import { Group } from "@carbon/icons-react";
 import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
@@ -35,7 +36,7 @@ export default async function TeamsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total teams" value={rows.length} />
+              <KpiTile label="Total teams" value={rows.length} icon={Group} />
             </div>
 
             {error ? (

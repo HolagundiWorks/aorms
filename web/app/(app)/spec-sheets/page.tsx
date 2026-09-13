@@ -1,3 +1,4 @@
+import { Document, Edit } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -52,8 +53,8 @@ export default async function SpecSheetsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total spec sheets" value={rows.length} />
-              <KpiTile label="Draft" value={draftCount} />
+              <KpiTile label="Total spec sheets" value={rows.length} icon={Document} />
+              <KpiTile label="Draft" value={draftCount} icon={Edit} />
             </div>
 
             {error ? (

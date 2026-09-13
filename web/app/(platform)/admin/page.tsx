@@ -1,3 +1,4 @@
+import { Building, Certificate, Chat, CurrencyRupee, UserMultiple } from "@carbon/icons-react";
 import NextLink from "next/link";
 import { Column, Grid, Stack } from "@carbon/react";
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../lib/platform/account";
@@ -37,7 +38,7 @@ export default async function AdminDashboardPage() {
           <Column sm={4} md={8} lg={16}>
             <PageHeader title="Admin" description="SysDeX — support staff view." />
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 11rem)", gap: "1rem", marginBottom: "2rem" }}>
-              <KpiTile label="Open HelpDeX tickets" value={openTicketCount ?? 0} />
+              <KpiTile label="Open HelpDeX tickets" value={openTicketCount ?? 0} icon={Chat} />
             </div>
             <NextLink href="/admin/helpdesk" className="cds--type-body-01">
               Go to HelpDeX →
@@ -81,10 +82,10 @@ export default async function AdminDashboardPage() {
             marginBottom: "2rem",
           }}
         >
-          <KpiTile label="Studios" value={studioCount ?? 0} />
-          <KpiTile label="Accounts" value={accountCount ?? 0} />
-          <KpiTile label="Trial licences" value={planCounts.TRIAL} />
-          <KpiTile label="Paid licences" value={planCounts.PRO + planCounts.ENTERPRISE} />
+          <KpiTile label="Studios" value={studioCount ?? 0} icon={Building} />
+          <KpiTile label="Accounts" value={accountCount ?? 0} icon={UserMultiple} />
+          <KpiTile label="Trial licences" value={planCounts.TRIAL} icon={Certificate} />
+          <KpiTile label="Paid licences" value={planCounts.PRO + planCounts.ENTERPRISE} icon={CurrencyRupee} />
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))", gap: "1.5rem" }}>

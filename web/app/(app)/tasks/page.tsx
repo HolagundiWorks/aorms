@@ -1,3 +1,4 @@
+import { CheckmarkFilled, InProgress, ListChecked, LockedAndBlocked } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -83,10 +84,10 @@ export default async function TasksPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total tasks" value={rows.length} />
-              <KpiTile label="In progress" value={inProgressCount} />
-              <KpiTile label="Blocked" value={blockedCount} />
-              <KpiTile label="Done" value={doneCount} />
+              <KpiTile label="Total tasks" value={rows.length} icon={ListChecked} />
+              <KpiTile label="In progress" value={inProgressCount} icon={InProgress} />
+              <KpiTile label="Blocked" value={blockedCount} icon={LockedAndBlocked} />
+              <KpiTile label="Done" value={doneCount} icon={CheckmarkFilled} />
             </div>
 
             {error ? (

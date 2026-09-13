@@ -1,3 +1,4 @@
+import { CheckmarkFilled, VersionMajor } from "@carbon/icons-react";
 import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
@@ -47,8 +48,8 @@ export default async function SpecCatalogPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total versions" value={rows.length} />
-              <KpiTile label="Active" value={activeCount} />
+              <KpiTile label="Total versions" value={rows.length} icon={VersionMajor} />
+              <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
             </div>
 
             {error ? (

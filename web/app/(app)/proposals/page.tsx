@@ -1,3 +1,4 @@
+import { CheckmarkFilled, CurrencyRupee, DocumentRequirements, Send } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -69,10 +70,10 @@ export default async function ProposalsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total proposals" value={rows.length} />
-              <KpiTile label="Sent" value={sentCount} />
-              <KpiTile label="Approved" value={approvedCount} />
-              <KpiTile label="Fee value" value={formatInr(totalFeePaise)} />
+              <KpiTile label="Total proposals" value={rows.length} icon={DocumentRequirements} />
+              <KpiTile label="Sent" value={sentCount} icon={Send} />
+              <KpiTile label="Approved" value={approvedCount} icon={CheckmarkFilled} />
+              <KpiTile label="Fee value" value={formatInr(totalFeePaise)} icon={CurrencyRupee} />
             </div>
 
             {error ? (

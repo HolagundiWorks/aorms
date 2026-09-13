@@ -1,3 +1,4 @@
+import { Calculator, CheckmarkFilled, Edit } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -61,9 +62,9 @@ export default async function EstimatesPage() {
             marginBottom: "2rem",
           }}
         >
-          <KpiTile label="Total estimates" value={rows.length} />
-          <KpiTile label="Draft" value={draftCount} />
-          <KpiTile label="Approved" value={approvedCount} />
+          <KpiTile label="Total estimates" value={rows.length} icon={Calculator} />
+          <KpiTile label="Draft" value={draftCount} icon={Edit} />
+          <KpiTile label="Approved" value={approvedCount} icon={CheckmarkFilled} />
         </div>
 
         {error ? (

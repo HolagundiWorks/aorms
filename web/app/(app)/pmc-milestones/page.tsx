@@ -1,3 +1,4 @@
+import { CheckmarkFilled, FlagFilled, WarningFilled } from "@carbon/icons-react";
 import {
   Column,
   Grid,
@@ -52,9 +53,9 @@ export default async function PmcMilestonesPage() {
             marginBottom: "2rem",
           }}
         >
-          <KpiTile label="Total milestones" value={rows.length} />
-          <KpiTile label="At risk / delayed" value={atRiskCount} />
-          <KpiTile label="Complete" value={completeCount} />
+          <KpiTile label="Total milestones" value={rows.length} icon={FlagFilled} />
+          <KpiTile label="At risk / delayed" value={atRiskCount} icon={WarningFilled} />
+          <KpiTile label="Complete" value={completeCount} icon={CheckmarkFilled} />
         </div>
 
         {error ? (

@@ -1,3 +1,4 @@
+import { Document, DocumentExport, Edit } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -53,9 +54,9 @@ export default async function MomsPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total minutes" value={rows.length} />
-              <KpiTile label="Draft" value={draftCount} />
-              <KpiTile label="Issued" value={issuedCount} />
+              <KpiTile label="Total minutes" value={rows.length} icon={Document} />
+              <KpiTile label="Draft" value={draftCount} icon={Edit} />
+              <KpiTile label="Issued" value={issuedCount} icon={DocumentExport} />
             </div>
 
             {error ? (

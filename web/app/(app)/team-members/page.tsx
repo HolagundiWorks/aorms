@@ -1,3 +1,4 @@
+import { CheckmarkFilled, CurrencyRupee, UserMultiple } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -77,9 +78,9 @@ export default async function TeamMembersPage() {
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total members" value={rows.length} />
-              <KpiTile label="Active" value={activeCount} />
-              <KpiTile label="Monthly payroll" value={formatInr(monthlyPayrollPaise)} />
+              <KpiTile label="Total members" value={rows.length} icon={UserMultiple} />
+              <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
+              <KpiTile label="Monthly payroll" value={formatInr(monthlyPayrollPaise)} icon={CurrencyRupee} />
             </div>
 
             {error ? (

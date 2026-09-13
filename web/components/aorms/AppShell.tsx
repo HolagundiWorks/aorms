@@ -38,6 +38,7 @@ import { HeaderEsti } from "./esti/HeaderEsti";
 import { OrganisationIdentity } from "./OrganisationIdentity";
 import { HeaderUserMenu } from "./HeaderUserMenu";
 import { BrandWatermark } from "./BrandWatermark";
+import { FloatingAskPulse } from "./pulse/FloatingAskPulse";
 import { getInitials } from "../../lib/shell/identity";
 
 type NavLeaf = { href: string; label: string };
@@ -234,6 +235,7 @@ export function AppShell({
   userName,
   userRole,
   istHour,
+  projects,
 }: {
   children: React.ReactNode;
   /** From firm.company_name (app/(app)/layout.tsx) — see OrganisationIdentity.tsx for the fallback when unset. */
@@ -244,6 +246,8 @@ export function AppShell({
   userRole: string;
   /** IST hour (0-23), computed server-side in app/(app)/layout.tsx via lib/shell/identity.ts's getIstHour() — passed down rather than computed here so a client-side re-render can't drift from the server-rendered greeting. */
   istHour: number;
+  /** For FloatingAskPulse.tsx's own project selector (app/(app)/layout.tsx). */
+  projects: { id: string; title: string }[];
 }) {
   const pathname = usePathname();
   // isPersistent (Carbon's default, left un-set here) means Carbon's own
@@ -348,6 +352,7 @@ export function AppShell({
         </SideNavItems>
       </SideNav>
       <Content>{children}</Content>
+      <FloatingAskPulse projects={projects} />
       <BrandWatermark />
     </PomodoroProvider>
   );

@@ -1,3 +1,4 @@
+import { Package, RequestQuote, TrophyFilled } from "@carbon/icons-react";
 import Link from "next/link";
 import {
   Column,
@@ -62,9 +63,9 @@ export default async function PmcPackagesPage() {
             marginBottom: "2rem",
           }}
         >
-          <KpiTile label="Total packages" value={rows.length} />
-          <KpiTile label="Tendering" value={tenderingCount} />
-          <KpiTile label="Awarded" value={awardedCount} />
+          <KpiTile label="Total packages" value={rows.length} icon={Package} />
+          <KpiTile label="Tendering" value={tenderingCount} icon={RequestQuote} />
+          <KpiTile label="Awarded" value={awardedCount} icon={TrophyFilled} />
         </div>
 
         {error ? (

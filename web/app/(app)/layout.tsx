@@ -19,12 +19,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   } = await supabase.auth.getUser();
   // full_name/role feed the header's identity block (2026-09-14,
   // shell/identity/KPI spec §5) — firm.company_name alongside it for the
-  // organisation block; both fetched here (once, Server Component) and
-  // passed down to AppShell.tsx (a Client Component, can't fetch its own
-  // Supabase data) rather than each page re-fetching its own copy.
-  const [{ data: profile }, { data: firm }] = await Promise.all([
+  // organisation block; the project list feeds the floating Ask Pulse
+  // button's own "for a project's own records" selector
+  // (FloatingAskPulse.tsx / AskPulseForm.tsx). All fetched here (once,
+  // Server Component) and passed down to AppShell.tsx (a Client
+  // Component, can't fetch its own Supabase data) rather than each page
+  // re-fetching its own copy.
+  const [{ data: profile }, { data: firm }, { data: projects }] = await Promise.all([
     supabase.from("profiles").select("full_name, role").eq("id", user?.id ?? "").maybeSingle(),
     supabase.from("firm").select("company_name").eq("singleton", true).maybeSingle(),
+    supabase.from("project_offices").select("id, title").order("title"),
   ]);
   const home = roleHome(profile?.role);
   // 2026-09-14: staff's own home is "/pulse" now (roleHome() — the
@@ -41,6 +45,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         userName={profile?.full_name?.trim() || "there"}
         userRole={ROLE_LABEL[profile?.role ?? ""] ?? "Staff"}
         istHour={getIstHour()}
+        projects={projects ?? []}
       >
         {children}
       </AppShell>
