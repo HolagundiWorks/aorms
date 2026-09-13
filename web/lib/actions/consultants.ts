@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { parseCsvFile } from "../import-export/csv";
 
 /**
  * Consultants — the staff-facing directory + engagement CRUD side of
@@ -46,6 +47,80 @@ export async function createConsultant(
 
   revalidatePath("/consultants");
   return null;
+}
+
+export type ImportConsultantsState =
+  | { error: string }
+  | { imported: number; skipped: { row: number; message: string }[] }
+  | null;
+
+/**
+ * Bulk CSV import (2026-09-14, demo-audit brief's bulk import/export
+ * requirement) — same field rules as `createConsultant` above, applied
+ * per-row; a bad row is skipped and reported rather than failing the
+ * whole file. See components/aorms/ImportExportBar.tsx for the upload UI
+ * and app/api/consultants/{export,import-template}/route.ts for the CSV
+ * this expects back.
+ */
+export async function importConsultantsCsv(
+  _prev: ImportConsultantsState,
+  formData: FormData,
+): Promise<ImportConsultantsState> {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "Choose a CSV file to import." };
+
+  const { rows, errors: parseErrors } = parseCsvFile(await file.text());
+  if (rows.length === 0) return { error: "No rows found in that file." };
+
+  const skipped: { row: number; message: string }[] = [];
+  const toInsert: { name: string; discipline: string; firm: string | null; email: string | null; phone: string | null }[] = [];
+
+  rows.forEach((row, i) => {
+    const rowNumber = i + 2;
+    const name = (row.Name ?? "").trim();
+    const discipline = (row.Discipline ?? "").trim();
+
+    if (!name) {
+      skipped.push({ row: rowNumber, message: "Name is required." });
+      return;
+    }
+    if (!discipline) {
+      skipped.push({ row: rowNumber, message: "Discipline is required." });
+      return;
+    }
+
+    toInsert.push({
+      name,
+      discipline,
+      firm: (row.Firm ?? "").trim() || null,
+      email: (row.Email ?? "").trim() || null,
+      phone: (row.Phone ?? "").trim() || null,
+    });
+  });
+
+  for (const message of parseErrors) skipped.push({ row: 0, message });
+
+  if (toInsert.length === 0) return { imported: 0, skipped };
+
+  const supabase = await createClient();
+  const { data: inserted, error } = await supabase
+    .from("consultants")
+    .insert(toInsert)
+    .select("id, name, discipline");
+  if (error) return { error: error.message };
+
+  for (const row of inserted ?? []) {
+    await supabase.rpc("write_audit", {
+      p_entity: "consultant",
+      p_entity_id: row.id,
+      p_action: "CREATE",
+      p_before: null,
+      p_after: row,
+    });
+  }
+
+  revalidatePath("/consultants");
+  return { imported: inserted?.length ?? 0, skipped };
 }
 
 export type EngagementActionState = { error: string } | null;

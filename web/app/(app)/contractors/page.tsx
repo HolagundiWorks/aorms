@@ -12,10 +12,12 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddContractorForm } from "../../../components/aorms/AddContractorForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { ImportExportBar } from "../../../components/aorms/ImportExportBar";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { ProvisionPortalLoginForm } from "../../../components/aorms/ProvisionPortalLoginForm";
 import { inviteContractorLogin } from "../../../lib/actions/portal-invites";
+import { importContractorsCsv } from "../../../lib/actions/contractors";
 
 export default async function ContractorsPage() {
   const supabase = await createClient();
@@ -52,6 +54,14 @@ export default async function ContractorsPage() {
                 </>
               }
               actions={<ContextPanelTrigger size="sm">Add contractor</ContextPanelTrigger>}
+            />
+
+            <ImportExportBar
+              title="Contractors"
+              exportHref="/api/contractors/export"
+              templateHref="/api/contractors/import-template"
+              importAction={importContractorsCsv}
+              notes="Category must be one of: Civil, Structural steel, MEP, Electrical, Plumbing, HVAC, Interior, Facade, Waterproofing, Flooring, Painting, Landscape, General, Other (blank defaults to General)."
             />
 
             <div

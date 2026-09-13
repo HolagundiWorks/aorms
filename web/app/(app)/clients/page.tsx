@@ -12,8 +12,10 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { AddClientForm } from "../../../components/aorms/AddClientForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { ImportExportBar } from "../../../components/aorms/ImportExportBar";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { importClientsCsv } from "../../../lib/actions/clients";
 
 export default async function ClientsPage() {
   const supabase = await createClient();
@@ -39,6 +41,14 @@ export default async function ClientsPage() {
               title="Clients"
               description="Client CRM — attach projects, invoices, and portal logins."
               actions={<ContextPanelTrigger size="sm">Create client</ContextPanelTrigger>}
+            />
+
+            <ImportExportBar
+              title="Clients"
+              exportHref="/api/clients/export"
+              templateHref="/api/clients/import-template"
+              importAction={importClientsCsv}
+              notes="Type must be Individual, Company, or Architect firm (blank defaults to Individual)."
             />
 
             <div

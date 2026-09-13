@@ -3,10 +3,12 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../lib/supabase/server";
 import { AddConsultantForm } from "../../../components/aorms/AddConsultantForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
+import { ImportExportBar } from "../../../components/aorms/ImportExportBar";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { ProvisionPortalLoginForm } from "../../../components/aorms/ProvisionPortalLoginForm";
 import { inviteConsultantLogin } from "../../../lib/actions/portal-invites";
+import { importConsultantsCsv } from "../../../lib/actions/consultants";
 
 /**
  * Consultants directory — the staff-facing side of migration 0021, which
@@ -50,6 +52,13 @@ export default async function ConsultantsPage() {
                 </>
               }
               actions={<ContextPanelTrigger size="sm">Add consultant</ContextPanelTrigger>}
+            />
+
+            <ImportExportBar
+              title="Consultants"
+              exportHref="/api/consultants/export"
+              templateHref="/api/consultants/import-template"
+              importAction={importConsultantsCsv}
             />
 
             <div
