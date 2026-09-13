@@ -26,9 +26,17 @@ export default async function LeadsPage() {
     .order("created_at", { ascending: false });
 
   const rows = leads ?? [];
-  const qualifiedCount = rows.filter((l) => l.converted_project_id).length;
+  // Distinct from status === "QUALIFIED" (one stage in the pipeline,
+  // LeadStatusSelect's own enum) — this counts leads that have actually
+  // been converted into a real project (converted_project_id set), a
+  // later, separate milestone. Found live: the KPI tile below used to be
+  // labeled "Qualified" too, so a lead sitting at status=QUALIFIED (not
+  // yet converted) made "0 Qualified" read as contradicting its own row
+  // — same word, two different meanings on one page. Renamed the tile to
+  // "Converted" to match what this count actually measures.
+  const convertedCount = rows.filter((l) => l.converted_project_id).length;
   const lostCount = rows.filter((l) => l.status === "DROPPED" || l.status === "LOST").length;
-  const openCount = rows.length - qualifiedCount - lostCount;
+  const openCount = rows.length - convertedCount - lostCount;
 
   return (
     <ContextPanelLayout>
@@ -54,7 +62,7 @@ export default async function LeadsPage() {
             >
               <KpiTile label="Total leads" value={rows.length} />
               <KpiTile label="Open" value={openCount} />
-              <KpiTile label="Qualified" value={qualifiedCount} />
+              <KpiTile label="Converted" value={convertedCount} />
               <KpiTile label="Lost" value={lostCount} />
             </div>
 

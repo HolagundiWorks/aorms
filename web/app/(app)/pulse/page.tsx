@@ -57,7 +57,13 @@ export default async function PulsePage() {
           <KpiTile label="Low confidence" value={lowConfidence.length} />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(22rem, 1fr))", gap: "1.5rem", marginBottom: "1.5rem" }}>
+        {/* alignItems: "start" — without it, CSS Grid's default `stretch`
+            forces every DashboardWidget (a plain Tile, no fixed height) in
+            a row to match its tallest sibling; found live testing this page
+            with real demo data ("Missing parameters" at 12 rows vs "Blocked
+            tasks" at 2), which left large empty grey space under the
+            shorter cards. */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(22rem, 1fr))", gap: "1.5rem", marginBottom: "1.5rem", alignItems: "start" }}>
           <DashboardWidget title="Top priorities">
             {topPriorities.length === 0 ? (
               <EmptyRow text="No open tasks scored yet — run Recompute now." />

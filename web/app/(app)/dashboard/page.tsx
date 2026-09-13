@@ -190,13 +190,18 @@ export default async function DashboardPage() {
           <FinancialSummary />
         </div>
 
-        {/* What needs attention — the new widgets this redesign adds */}
+        {/* What needs attention — the new widgets this redesign adds.
+            alignItems: "start" — CSS Grid defaults to "stretch", which
+            forces every DashboardWidget (a plain Tile, no fixed height) in
+            a row to match its tallest sibling; same defect found and fixed
+            on /pulse's widget grid. */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))",
             gap: "1rem",
             marginBottom: "2rem",
+            alignItems: "start",
           }}
         >
           <DashboardWidget title="Team Availability Today">
@@ -371,13 +376,15 @@ export default async function DashboardPage() {
 
         {/* Existing widgets, kept — repositioned below the new "what
             needs attention" section since the brief/priorities/headline
-            numbers are now the page's actual lead. */}
+            numbers are now the page's actual lead. Same alignItems:
+            "start" stretch fix as the grid above. */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))",
             gap: "1rem",
             marginBottom: "2rem",
+            alignItems: "start",
           }}
         >
           <DashboardWidget title="My Tasks" viewAllHref="/tasks">
