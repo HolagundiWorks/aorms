@@ -142,6 +142,37 @@ export async function linkPlatformIdentity(
   return null;
 }
 
+/**
+ * Links THIS Office Hub deployment (not the caller's own personal
+ * identity — see linkPlatformIdentity above for that) to one AORMS
+ * Platform Studio (2026-09-14, migration 0048's firm.platform_studio_
+ * public_id) — the studio whose free/paid plan then gates the client
+ * and contractor caps (lib/platform/firm-studio.ts). `firm` is a
+ * singleton, so this is deployment-wide, not per-user; the update goes
+ * through the caller's own RLS-scoped client (not service-role) so
+ * "firm: owner/partner update" is the actual authorization check, not
+ * this function deciding who's allowed.
+ */
+export async function linkFirmToStudio(_prev: PlatformActionState, formData: FormData): Promise<PlatformActionState> {
+  const handle = String(formData.get("handle") ?? "").trim().toUpperCase();
+  if (!handle) return { error: "Enter the studio's AORMS-S- handle." };
+
+  const platformService = createPlatformServiceRoleClient();
+  const { data: studio, error: lookupError } = await platformService.from("studios").select("public_id").eq("public_id", handle).maybeSingle();
+  if (lookupError) return { error: lookupError.message };
+  if (!studio) return { error: `No studio found with handle ${handle}.` };
+
+  const webSupabase = await createWebClient();
+  const { error: updateError } = await webSupabase
+    .from("firm")
+    .update({ platform_studio_public_id: studio.public_id })
+    .eq("singleton", true);
+  if (updateError) return { error: updateError.message };
+
+  revalidatePath("/firm-settings");
+  return null;
+}
+
 // ══ STUDIOS (architecture firms) ═══════════════════════════════════════
 
 export async function createStudio(
@@ -182,6 +213,46 @@ export async function createStudio(
  * (leave)" RLS covers the insert and the ON CONFLICT DO UPDATE path
  * respectively.
  */
+const FREE_TIER_MEMBER_CAP = 3;
+
+/**
+ * Free-tier (TRIAL plan — every studio's own real default, see migration
+ * 0006's `handle_new_studio_licence()`) studios cap active membership at
+ * 3 seats (2026-09-14, explicit request: "free studio account will host
+ * 3 users..."). Checked before both ways a studio gains a member —
+ * self-serve join (joinStudio) and owner invite (inviteStudioMember) —
+ * so neither path can silently exceed it. Skips the check for someone
+ * already an ACTIVE member of this studio (re-inviting/rejoining isn't a
+ * net-new seat). PRO/ENTERPRISE studios have no cap here — their own
+ * seat count already gates the separate, unrelated "PRO status" grant
+ * (assignProSeat), not membership itself.
+ */
+async function checkStudioMemberCap(studioId: string, accountId: string): Promise<{ error: string } | null> {
+  const platformService = createPlatformServiceRoleClient();
+
+  const { data: existing } = await platformService
+    .from("studio_memberships")
+    .select("status")
+    .eq("studio_id", studioId)
+    .eq("account_id", accountId)
+    .maybeSingle();
+  if (existing?.status === "ACTIVE") return null;
+
+  const { data: licence } = await platformService.from("licences").select("plan").eq("studio_id", studioId).maybeSingle();
+  if (licence?.plan !== "TRIAL") return null;
+
+  const { count } = await platformService
+    .from("studio_memberships")
+    .select("id", { count: "exact", head: true })
+    .eq("studio_id", studioId)
+    .eq("status", "ACTIVE");
+
+  if ((count ?? 0) >= FREE_TIER_MEMBER_CAP) {
+    return { error: `Free studio accounts are limited to ${FREE_TIER_MEMBER_CAP} members. Upgrade to Pro or Enterprise to add more.` };
+  }
+  return null;
+}
+
 export async function joinStudio(
   _prev: PlatformActionState,
   formData: FormData,
@@ -202,6 +273,9 @@ export async function joinStudio(
     .maybeSingle();
   if (lookupError) return { error: lookupError.message };
   if (!studio) return { error: `No studio found with handle ${handle}.` };
+
+  const capError = await checkStudioMemberCap(studio.id, user.id);
+  if (capError) return capError;
 
   const { error } = await supabase.from("studio_memberships").upsert(
     {
@@ -252,6 +326,9 @@ export async function inviteStudioMember(
     .maybeSingle();
   if (lookupError) return { error: lookupError.message };
   if (!account) return { error: `No AORMS Platform account found with handle ${handle}.` };
+
+  const capError = await checkStudioMemberCap(studioId, account.id);
+  if (capError) return capError;
 
   const supabase = await createPlatformClient();
   const { error } = await supabase.from("studio_memberships").upsert(

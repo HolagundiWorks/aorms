@@ -211,57 +211,91 @@ export default async function IdentityPage() {
               </Stack>
             </Tile>
 
-            <div>
-              <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-                Studios
-              </h2>
-              <Stack gap={4}>
-                {(memberships ?? []).map((m) => {
-                  const studio = (Array.isArray(m.studios) ? m.studios[0] : m.studios) as StudioEmbed;
-                  if (!studio) return null;
-                  return (
-                    <Tile key={m.id}>
-                      <Stack gap={3} orientation="horizontal" style={{ alignItems: "center", justifyContent: "space-between" }}>
-                        <div>
-                          <NextLink href={`/studios/${studio.id}`}>
-                            <strong>{studio.name}</strong>
-                          </NextLink>{" "}
-                          <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                            {studio.public_id}
-                          </span>
-                          <div>
-                            <Tag type={m.role === "OWNER" ? "purple" : "gray"} size="sm">
-                              {m.role}
-                            </Tag>
-                          </div>
-                        </div>
-                        <LeaveStudioButton membershipId={m.id} studioName={studio.name} />
-                      </Stack>
-                    </Tile>
-                  );
-                })}
-                {(memberships ?? []).length === 0 && (
+            {(memberships ?? []).length === 0 ? (
+              // No studio at all yet (2026-09-14, explicit request: "once
+              // the user account is created, user needs to join an
+              // existing studio or create one to use the AORMS
+              // portal") — a real gate, not a quiet aside at the bottom
+              // of the page: everything Studio-related this account
+              // could otherwise do (the AORMS Office Hub deployment
+              // itself, once a studio actually gates that — see this
+              // work's own commit for the scoping decision on that
+              // larger, separate piece) depends on belonging to one, so
+              // this is presented as the required next step, not an
+              // optional card among several.
+              <Tile style={{ borderLeft: "0.25rem solid var(--cds-support-info)" }}>
+                <Stack gap={4}>
+                  <h2 className="cds--type-heading-02">Join or create a studio to continue</h2>
                   <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                    Not a member of any studio yet.
+                    Your AORMS Identity is portable, but it isn&apos;t attached to any studio yet — join one you already
+                    work with, or create your own to get started.
                   </p>
-                )}
-              </Stack>
-            </div>
+                  <Stack gap={6} orientation="horizontal">
+                    <div style={{ flex: 1 }}>
+                      <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                        Create a studio
+                      </h3>
+                      <CreateStudioForm />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                        Join a studio
+                      </h3>
+                      <JoinStudioForm />
+                    </div>
+                  </Stack>
+                </Stack>
+              </Tile>
+            ) : (
+              <>
+                <div>
+                  <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                    Studios
+                  </h2>
+                  <Stack gap={4}>
+                    {(memberships ?? []).map((m) => {
+                      const studio = (Array.isArray(m.studios) ? m.studios[0] : m.studios) as StudioEmbed;
+                      if (!studio) return null;
+                      return (
+                        <Tile key={m.id}>
+                          <Stack gap={3} orientation="horizontal" style={{ alignItems: "center", justifyContent: "space-between" }}>
+                            <div>
+                              <NextLink href={`/studios/${studio.id}`}>
+                                <strong>{studio.name}</strong>
+                              </NextLink>{" "}
+                              <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                                {studio.public_id}
+                              </span>
+                              <div>
+                                <Tag type={m.role === "OWNER" ? "purple" : "gray"} size="sm">
+                                  {m.role}
+                                </Tag>
+                              </div>
+                            </div>
+                            <LeaveStudioButton membershipId={m.id} studioName={studio.name} />
+                          </Stack>
+                        </Tile>
+                      );
+                    })}
+                  </Stack>
+                </div>
 
-            <Stack gap={6} orientation="horizontal">
-              <Tile style={{ flex: 1 }}>
-                <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-                  Create a studio
-                </h3>
-                <CreateStudioForm />
-              </Tile>
-              <Tile style={{ flex: 1 }}>
-                <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-                  Join a studio
-                </h3>
-                <JoinStudioForm />
-              </Tile>
-            </Stack>
+                <Stack gap={6} orientation="horizontal">
+                  <Tile style={{ flex: 1 }}>
+                    <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                      Create another studio
+                    </h3>
+                    <CreateStudioForm />
+                  </Tile>
+                  <Tile style={{ flex: 1 }}>
+                    <h3 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                      Join a studio
+                    </h3>
+                    <JoinStudioForm />
+                  </Tile>
+                </Stack>
+              </>
+            )}
 
             <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
               Supply materials or interior finishes instead? That&apos;s the{" "}

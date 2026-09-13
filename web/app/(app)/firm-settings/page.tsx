@@ -16,6 +16,8 @@ import { FirmSettingsForm } from "../../../components/aorms/FirmSettingsForm";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RemoveLineItemButton } from "../../../components/aorms/RemoveLineItemButton";
 import { removeNumberingPatternRecord } from "../../../lib/actions/numbering";
+import { LinkFirmStudioForm } from "../../../components/aorms/platform/LinkFirmStudioForm";
+import { getFirmStudio } from "../../../lib/platform/firm-studio";
 
 /**
  * Firm Settings — the singleton `firm` row (migration 0024 seeded it after
@@ -54,6 +56,7 @@ export default async function FirmSettingsPage() {
 
   const isOwner = myProfile?.role === "OWNER";
   const canEditFirm = isOwner || myProfile?.role === "PARTNER";
+  const firmStudio = await getFirmStudio();
 
   return (
     <ContextPanelLayout>
@@ -92,6 +95,31 @@ export default async function FirmSettingsPage() {
         ) : (
           <FirmSettingsForm key={JSON.stringify(firm)} firm={firm} canEdit={canEditFirm} />
         )}
+
+        {/* AORMS Platform Studio link (2026-09-14) — which Studio this
+            deployment belongs to, gating the free-tier client/contractor
+            caps (lib/platform/firm-studio.ts). Same OWNER/PARTNER gate as
+            the rest of this page. */}
+        <div style={{ marginTop: "3rem" }}>
+          <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
+            AORMS Platform Studio
+          </h2>
+          <p className="cds--type-body-01" style={{ marginBottom: "1rem", color: "var(--cds-text-secondary)" }}>
+            Links this deployment to one Studio on the AORMS Platform — a free-tier Studio caps this firm at 3
+            clients and 3 contractors; Pro/Enterprise removes the cap.
+          </p>
+          {firmStudio ? (
+            <p className="cds--type-body-01">
+              Linked to <strong>{firmStudio.name}</strong> ({firmStudio.public_id}) — {firmStudio.plan} plan.
+            </p>
+          ) : canEditFirm ? (
+            <LinkFirmStudioForm />
+          ) : (
+            <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+              Not linked to a Studio yet — only the firm owner or a partner can link one.
+            </p>
+          )}
+        </div>
 
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginTop: "3rem" }}>
           <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>

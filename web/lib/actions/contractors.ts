@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { parseCsvFile } from "../import-export/csv";
+import { checkFreeTierRecordCap, getFirmStudio, FREE_TIER_RECORD_CAP } from "../platform/firm-studio";
 
 export type ContractorActionState = { error: string } | null;
 
@@ -97,6 +98,22 @@ export async function importContractorsCsv(
 
   for (const message of parseErrors) skipped.push({ row: 0, message });
 
+  // Free-tier studio cap (2026-09-14) — see lib/platform/firm-studio.ts's
+  // own header comment; trims toInsert to however many slots remain
+  // rather than rejecting the whole file. No cap at all when this
+  // deployment isn't linked to a studio, or the linked studio isn't on
+  // the free (TRIAL) plan.
+  const studio = await getFirmStudio();
+  if (studio?.plan === "TRIAL" && toInsert.length > 0) {
+    const { count: existingCount } = await supabase.from("contractors").select("id", { count: "exact", head: true });
+    const remaining = Math.max(0, FREE_TIER_RECORD_CAP - (existingCount ?? 0));
+    const overflow = toInsert.splice(remaining);
+    if (overflow.length > 0) {
+      const message = `Free studio accounts (${studio.name}) are limited to ${FREE_TIER_RECORD_CAP} contractors — upgrade to Pro or Enterprise on the AORMS Platform to add more.`;
+      for (let i = 0; i < overflow.length; i++) skipped.push({ row: 0, message });
+    }
+  }
+
   if (toInsert.length === 0) return { imported: 0, skipped };
 
   const { data: inserted, error } = await supabase
@@ -145,6 +162,12 @@ export async function createContractor(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Free-tier studio cap (2026-09-14) — see lib/platform/firm-studio.ts;
+  // a no-op when this deployment isn't linked to a studio at all.
+  const { count: existingCount } = await supabase.from("contractors").select("id", { count: "exact", head: true });
+  const capError = await checkFreeTierRecordCap(existingCount ?? 0, "contractor");
+  if (capError) return capError;
 
   const { data: inserted, error } = await supabase
     .from("contractors")

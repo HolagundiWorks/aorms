@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { parseCsvFile } from "../import-export/csv";
+import { checkFreeTierRecordCap, getFirmStudio, FREE_TIER_RECORD_CAP } from "../platform/firm-studio";
 
 export type ClientActionState = { error: string } | null;
 
@@ -69,9 +70,27 @@ export async function importClientsCsv(_prev: ImportClientsState, formData: Form
 
   for (const message of parseErrors) skipped.push({ row: 0, message });
 
+  const supabase = await createClient();
+
+  // Free-tier studio cap (2026-09-14) — trims toInsert to however many
+  // slots remain rather than rejecting the whole file, so a hand-edited
+  // spreadsheet still imports what fits; anything past the cap is
+  // reported the same way an invalid row already is (skipped, with why).
+  // No cap at all when this deployment isn't linked to a studio, or the
+  // linked studio isn't on the free (TRIAL) plan.
+  const studio = await getFirmStudio();
+  if (studio?.plan === "TRIAL" && toInsert.length > 0) {
+    const { count: existingCount } = await supabase.from("clients").select("id", { count: "exact", head: true });
+    const remaining = Math.max(0, FREE_TIER_RECORD_CAP - (existingCount ?? 0));
+    const overflow = toInsert.splice(remaining);
+    if (overflow.length > 0) {
+      const message = `Free studio accounts (${studio.name}) are limited to ${FREE_TIER_RECORD_CAP} clients — upgrade to Pro or Enterprise on the AORMS Platform to add more.`;
+      for (let i = 0; i < overflow.length; i++) skipped.push({ row: 0, message });
+    }
+  }
+
   if (toInsert.length === 0) return { imported: 0, skipped };
 
-  const supabase = await createClient();
   const { data: inserted, error } = await supabase
     .from("clients")
     .insert(toInsert)
@@ -110,6 +129,13 @@ export async function createClientRecord(
   if (!name) return { error: "Name is required." };
 
   const supabase = await createClient();
+
+  // Free-tier studio cap (2026-09-14) — see lib/platform/firm-studio.ts;
+  // a no-op when this deployment isn't linked to a studio at all.
+  const { count: existingCount } = await supabase.from("clients").select("id", { count: "exact", head: true });
+  const capError = await checkFreeTierRecordCap(existingCount ?? 0, "client");
+  if (capError) return capError;
+
   const { data: inserted, error } = await supabase
     .from("clients")
     .insert({ name, kind, city, email, phone, contact_person: contactPerson })

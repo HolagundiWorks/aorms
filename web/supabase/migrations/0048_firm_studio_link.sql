@@ -1,0 +1,25 @@
+-- 2026-09-14 — links this Office Hub deployment to the one AORMS
+-- Platform Studio it belongs to, the same way profiles.platform_
+-- public_id (migration 0029) links one person's Office Hub login to
+-- their portable Platform identity — same pattern, firm-level instead
+-- of profile-level, since `firm` is itself a singleton (one row).
+--
+-- Deliberately NOT a `studio_id` column added to `clients`/`contractors`
+-- (an earlier framing of this feature, revised before building it): this
+-- deployment is genuinely single-tenant (CLAUDE.md's own "web/'s schema
+-- is single-tenant per deployment" — one `firm` row, one set of
+-- clients/contractors, serving one real firm). Every client/contractor
+-- row here already belongs to the SAME one studio implicitly, once this
+-- link is set — a per-row studio_id column would just repeat that one
+-- value on every row, not express anything a per-row column is actually
+-- for. The free-tier client/contractor caps (see lib/platform/
+-- firm-studio.ts) check this one link + a plain row count instead.
+--
+-- Storing the Studio's public_id (text, e.g. "AORMS-S-XXXX"), not its
+-- raw uuid — same convention profiles.platform_public_id already
+-- established: the portable handle is what's meaningful across two
+-- separate Supabase projects with no real cross-database foreign key
+-- possible between them, not an id with no other project to resolve it
+-- against.
+alter table public.firm
+  add column platform_studio_public_id text;
