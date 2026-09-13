@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
+import { UserRole, Certificate, Login } from "@carbon/icons-react";
 import { createClient } from "../../../lib/supabase/server";
 import { AddConsultantForm } from "../../../components/aorms/AddConsultantForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
@@ -64,14 +65,14 @@ export default async function ConsultantsPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, 11rem)",
                 gap: "1rem",
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total consultants" value={rows.length} />
-              <KpiTile label="Disciplines" value={disciplineCount} />
-              <KpiTile label="Portal logins" value={provisionedCount} />
+              <KpiTile label="Total consultants" value={rows.length} icon={UserRole} />
+              <KpiTile label="Disciplines" value={disciplineCount} icon={Certificate} />
+              <KpiTile label="Portal logins" value={provisionedCount} icon={Login} />
             </div>
 
             {error ? (

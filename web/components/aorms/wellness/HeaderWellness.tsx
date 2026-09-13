@@ -11,7 +11,11 @@
 
 import { useState } from "react";
 import { Button, ContentSwitcher, HeaderGlobalAction, Popover, PopoverContent, Switch } from "@carbon/react";
-import { Activity } from "@carbon/icons-react";
+// `Favorite` (2026-09-14, explicit request) — was `Activity`, reassigned
+// to Pulse's own nav icon (AppShell.tsx) once Pulse became the primary
+// dashboard; a heart fits "Wellbeing" at least as well as the zigzag
+// pulse-line glyph did, and the two features no longer share one icon.
+import { Favorite } from "@carbon/icons-react";
 import { BREATHING_PATTERNS, breathingPattern } from "../../../lib/wellness/patterns";
 import { STRETCH_ROUTINE, EYE_ROUTINE, type WellnessSection } from "../../../lib/wellness/exercises";
 import { setWellnessPrefs, useWellnessPrefs } from "../../../lib/wellness/prefs";
@@ -53,7 +57,7 @@ export function HeaderWellness() {
       caret
     >
       <HeaderGlobalAction aria-label="Wellbeing" isActive={open} onClick={() => setOpen((o) => !o)}>
-        <Activity size={20} />
+        <Favorite size={20} />
       </HeaderGlobalAction>
       <PopoverContent>
         <div style={{ padding: "1rem", width: "20rem", display: "flex", flexDirection: "column", gap: "1rem" }}>

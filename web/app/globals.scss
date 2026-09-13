@@ -105,16 +105,31 @@ body {
 }
 
 // Header overflow fix (structural only — found in a UI audit, 2026-09-07;
-// narrowed to mobile-only 2026-09-13, see that dated note below).
-// The header's brand text + 6 global actions (Ask ESTI/Wellbeing/
-// Calculator/Pomodoro/AI Runs/Sign out) don't all fit a phone-width
-// viewport; Carbon's HeaderGlobalBar has no built-in responsive overflow
-// behavior. Two-part fix: below this breakpoint, drop the redundant
-// "Office Hub" text (AppShell.tsx's logo <img> already carries the brand)
-// to reclaim space; and let the actions bar itself scroll horizontally as
-// a safety net so nothing is ever truly unreachable regardless of width.
+// narrowed to mobile-only 2026-09-13, see that dated note below; the
+// action list itself has changed twice since — AI Runs removed, Sign out
+// folded into HeaderUserMenu — but the underlying overflow risk is the
+// same regardless of exactly which actions are in the bar). The header's
+// brand text + global actions (Ask ESTI/Wellbeing/Calculator/Pomodoro/
+// user menu) don't all fit a phone-width viewport; Carbon's
+// HeaderGlobalBar has no built-in responsive overflow behavior. Fix:
+// below this breakpoint, drop the redundant brand text and the
+// organisation/user text blocks (AppShell.tsx's logo <img> and
+// HeaderUserMenu.tsx's avatar carry the same meaning more compactly) to
+// reclaim space; and let the actions bar itself scroll horizontally as a
+// safety net so nothing is ever truly unreachable regardless of width.
 @media (max-width: 42rem) {
   .aorms-header-brand-text {
+    display: none;
+  }
+
+  // Organisation identity + the user's greeting/name/role text drop at
+  // the same phone-width breakpoint (2026-09-14, shell/identity/KPI spec
+  // §37's responsive header table: mobile shows "AORMS | avatar | Menu"
+  // only) — HeaderUserMenu.tsx's avatar + chevron stay visible and
+  // clickable either way, so the menu itself is never actually lost,
+  // just its inline text summary.
+  .aorms-header-org,
+  .aorms-header-user-text {
     display: none;
   }
 

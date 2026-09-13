@@ -9,6 +9,7 @@ import {
   TableRow,
   Tag,
 } from "@carbon/react";
+import { UserMultiple, CheckmarkFilled, User, Location } from "@carbon/icons-react";
 import { createClient } from "../../../lib/supabase/server";
 import { AddClientForm } from "../../../components/aorms/AddClientForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
@@ -54,15 +55,15 @@ export default async function ClientsPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, 11rem)",
                 gap: "1rem",
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total clients" value={rows.length} />
-              <KpiTile label="Active" value={activeCount} />
-              <KpiTile label="Individuals" value={individualCount} />
-              <KpiTile label="Cities" value={cityCount} />
+              <KpiTile label="Total clients" value={rows.length} icon={UserMultiple} />
+              <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
+              <KpiTile label="Individuals" value={individualCount} icon={User} />
+              <KpiTile label="Cities" value={cityCount} icon={Location} />
             </div>
 
             {error ? (

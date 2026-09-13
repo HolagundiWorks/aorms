@@ -55,7 +55,7 @@ export default async function LeadsPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, 11rem)",
                 gap: "1rem",
                 marginBottom: "2rem",
               }}

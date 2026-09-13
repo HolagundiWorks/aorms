@@ -2,11 +2,14 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Service-role client — bypasses RLS entirely. Server-only, never import
- * from a Client Component. Used ONLY for the one legitimately-anonymous
- * read path in this app: GET /api/feasibility/[token] (see that route),
- * which does its own token-based authorization instead of relying on RLS
- * (a share token isn't a Supabase Auth session, so RLS has nothing to key
- * off of for an anonymous visitor).
+ * from a Client Component. Used for routes with no Supabase Auth session
+ * to key RLS off of at all — a share-token read (GET
+ * /api/feasibility/[token], token-based authorization instead of RLS) or
+ * a bearer-secret-gated cron target (app/api/pulse/recompute/route.ts,
+ * app/api/pulse/snapshot-kpis/route.ts) called by pg_cron/pg_net, not a
+ * signed-in browser request. Each of those routes does its own
+ * authorization check before touching data — this client itself enforces
+ * nothing.
  */
 export function createServiceRoleClient() {
   return createSupabaseClient(

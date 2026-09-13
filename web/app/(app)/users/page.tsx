@@ -93,7 +93,7 @@ export default async function UsersPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, 11rem)",
                 gap: "1rem",
                 marginBottom: "2rem",
               }}

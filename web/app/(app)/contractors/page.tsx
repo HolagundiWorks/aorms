@@ -9,6 +9,7 @@ import {
   TableRow,
   Tag,
 } from "@carbon/react";
+import { ToolKit, CheckmarkFilled, Login } from "@carbon/icons-react";
 import { createClient } from "../../../lib/supabase/server";
 import { AddContractorForm } from "../../../components/aorms/AddContractorForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
@@ -67,14 +68,14 @@ export default async function ContractorsPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, 11rem)",
                 gap: "1rem",
                 marginBottom: "2rem",
               }}
             >
-              <KpiTile label="Total contractors" value={rows.length} />
-              <KpiTile label="Active" value={activeCount} />
-              <KpiTile label="Portal logins" value={provisionedCount} />
+              <KpiTile label="Total contractors" value={rows.length} icon={ToolKit} />
+              <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
+              <KpiTile label="Portal logins" value={provisionedCount} icon={Login} />
             </div>
 
             {error ? (

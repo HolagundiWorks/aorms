@@ -7,7 +7,6 @@ import {
   Header,
   HeaderName,
   HeaderGlobalBar,
-  HeaderGlobalAction,
   HeaderMenuButton,
   SideNav,
   SideNavItems,
@@ -17,8 +16,7 @@ import {
   Content,
 } from "@carbon/react";
 import {
-  Logout,
-  Dashboard,
+  Activity,
   UserFollow,
   Building,
   FolderDetails,
@@ -32,12 +30,15 @@ import {
   Settings,
   RequestQuote,
 } from "@carbon/icons-react";
-import { signOut } from "../../lib/actions/auth";
 import { PomodoroProvider } from "./pomodoro/PomodoroContext";
 import { HeaderPomodoro } from "./pomodoro/HeaderPomodoro";
 import { HeaderCalculator } from "./calculator/HeaderCalculator";
 import { HeaderWellness } from "./wellness/HeaderWellness";
 import { HeaderEsti } from "./esti/HeaderEsti";
+import { OrganisationIdentity } from "./OrganisationIdentity";
+import { HeaderUserMenu } from "./HeaderUserMenu";
+import { BrandWatermark } from "./BrandWatermark";
+import { getInitials } from "../../lib/shell/identity";
 
 type NavLeaf = { href: string; label: string };
 type NavGroup = { title: string; icon: ComponentType; items: NavLeaf[] };
@@ -49,14 +50,18 @@ type NavGroup = { title: string; icon: ComponentType; items: NavLeaf[] };
  * comment), so "Dashboard" is gone as a separate nav item entirely, not
  * just renamed. Leads and Tasks stay top-level — real, working pillars
  * the brief doesn't mention moving, not touched. Clients moved into the
- * new Third Parties group below (brief §8). Pulse keeps the `Dashboard`
- * icon (not `Activity`) — it now literally is the dashboard, and
- * `Activity` was already Wellbeing's own icon (HeaderWellness.tsx);
- * both using it read as a visual duplicate/collision between two
- * unrelated features, found live after this restructure.
+ * new Third Parties group below (brief §8).
+ *
+ * Pulse's icon: `Activity` (not `Dashboard`) — reassigned back
+ * (2026-09-14, explicit request) after a same-day detour through
+ * `Dashboard` to resolve a collision with Wellbeing's own icon, which
+ * also used `Activity` at the time. Wellbeing now uses `Favorite`
+ * instead (HeaderWellness.tsx) so `Activity` is Pulse's alone — a
+ * pulse/heartbeat glyph is arguably the more apt icon for a page
+ * literally named Pulse anyway.
  */
 const TOP_LEVEL: (NavLeaf & { icon: ComponentType })[] = [
-  { href: "/pulse", label: "Pulse", icon: Dashboard },
+  { href: "/pulse", label: "Pulse", icon: Activity },
   { href: "/projects", label: "Projects", icon: FolderDetails },
   { href: "/leads", label: "Leads", icon: UserFollow },
   { href: "/tasks", label: "Tasks", icon: Task },
@@ -223,7 +228,23 @@ function isActiveHref(pathname: string, href: string): boolean {
  * its own, unlike `--side-nav--ux`'s, so without that override rail width
  * would also apply on mobile where the nav is meant to be an overlay).
  */
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  companyName,
+  userName,
+  userRole,
+  istHour,
+}: {
+  children: React.ReactNode;
+  /** From firm.company_name (app/(app)/layout.tsx) — see OrganisationIdentity.tsx for the fallback when unset. */
+  companyName: string;
+  /** From profiles.full_name — falls back to "there" (as in "Good evening, there") for the rare profile with no name set yet, rather than showing an empty greeting. */
+  userName: string;
+  /** From profiles.role, human-readable (role-home.ts / rank.ts's own ROLE_LABEL, see app/(app)/layout.tsx). */
+  userRole: string;
+  /** IST hour (0-23), computed server-side in app/(app)/layout.tsx via lib/shell/identity.ts's getIstHour() — passed down rather than computed here so a client-side re-render can't drift from the server-rendered greeting. */
+  istHour: number;
+}) {
   const pathname = usePathname();
   // isPersistent (Carbon's default, left un-set here) means Carbon's own
   // ui-shell CSS ignores this state above its ~66rem breakpoint — nav stays
@@ -269,26 +290,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           isCollapsible
           onClick={() => setSideNavExpanded((v) => !v)}
         />
-        <HeaderName href="/pulse" prefix="">
-          <span style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-            {/* Plain <img>, not next/image: a fixed 14KB brand asset that
-                never changes doesn't need the Image optimizer. */}
-            <img src="/aorms-logo.png" alt="AORMS" style={{ height: "16px", width: "auto" }} />
-            <span className="aorms-header-brand-text">Office Hub</span>
-          </span>
+        {/* AORMS logo/wordmark removed from the header entirely
+            (2026-09-14, explicit request, same day as adding it) — the
+            header now leads with the firm's own name instead
+            (OrganisationIdentity, single line, no tagline); the AORMS
+            mark's new home is BrandWatermark.tsx, a small fixed mark in
+            the page's bottom-right corner, rendered once below. */}
+        <HeaderName href="/pulse" prefix="" className="aorms-header-org">
+          <OrganisationIdentity companyName={companyName} />
         </HeaderName>
         <HeaderGlobalBar>
           <HeaderEsti />
           <HeaderWellness />
           <HeaderCalculator />
           <HeaderPomodoro />
-          <form action={signOut}>
-            {/* Carbon doesn't forward a `type` prop, but a <button> defaults to
-                type="submit" inside a <form> — this still triggers signOut. */}
-            <HeaderGlobalAction aria-label="Sign out">
-              <Logout size={20} />
-            </HeaderGlobalAction>
-          </form>
+          {/* User identity + greeting + avatar + menu (spec §5-8) —
+              replaces the old standalone icon-only Sign-out action;
+              Sign out now lives inside this menu (HeaderUserMenu.tsx).
+              Role text was removed from the always-visible trigger
+              (2026-09-14, explicit request) — it still appears inside
+              the opened dropdown, which isn't visible header clutter. */}
+          <HeaderUserMenu name={userName} role={userRole} initials={getInitials(userName)} hour={istHour} />
         </HeaderGlobalBar>
       </Header>
       <SideNav
@@ -326,6 +348,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </SideNavItems>
       </SideNav>
       <Content>{children}</Content>
+      <BrandWatermark />
     </PomodoroProvider>
   );
 }

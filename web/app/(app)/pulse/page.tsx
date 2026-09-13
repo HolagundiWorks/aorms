@@ -1,7 +1,22 @@
 import { Grid, Column, Tile, Tag } from "@carbon/react";
+import {
+  WarningFilled,
+  LockedAndBlocked,
+  Query,
+  ChartLineData,
+  CurrencyRupee,
+  Wallet,
+  User,
+  ListChecked,
+  UserMultiple,
+  FolderDetails,
+  DocumentRequirements,
+  Chat,
+} from "@carbon/icons-react";
 import { createClient } from "../../../lib/supabase/server";
 import { hasRank } from "../../../lib/auth/rank";
 import { KpiTile as Kpi, type KpiStatus } from "../../../components/aorms/KpiTile";
+import { getKpiTrends } from "../../../lib/pulse/kpi-trend";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { DashboardWidget, EmptyRow, WidgetRow, MASONRY_PANEL_STYLE } from "../../../components/aorms/dashboard/DashboardWidget";
 import { TodaysBrief } from "../../../components/aorms/dashboard/TodaysBrief";
@@ -541,36 +556,74 @@ export default async function PulsePage() {
     </>
   );
 
+  // Real movement vs stored history (2026-09-14, shell/identity/KPI spec
+  // §21-22, migration 0045) — undefined for any metric with no prior
+  // snapshot yet (a fresh metric, or before the daily cron has run even
+  // once); KpiTile just omits the trend row in that case rather than
+  // showing a fabricated "0% change." See lib/pulse/kpi-trend.ts.
+  const kpiTrends = await getKpiTrends(supabase, today, [
+    { key: "pulse_critical", current: criticalPulseCount, higherIsBetter: false },
+    { key: "pulse_blocked_tasks", current: blockedTasks.length, higherIsBetter: false },
+    { key: "pulse_open_gaps", current: missingParams.length, higherIsBetter: false },
+    { key: "pulse_low_confidence", current: lowConfidenceTasks.length, higherIsBetter: false },
+    { key: "finance_ready_to_bill", current: readyToBill.total, higherIsBetter: true, isMoney: true },
+    { key: "finance_awaiting_payment", current: awaitingPayment.total, higherIsBetter: false, isMoney: true },
+    { key: "team_absent_today", current: absences.length, higherIsBetter: false },
+    { key: "team_open_tasks", current: openTaskCount ?? 0, higherIsBetter: null },
+    { key: "others_clients", current: clientCount ?? 0, higherIsBetter: true },
+    { key: "others_projects", current: projectCount ?? 0, higherIsBetter: true },
+    { key: "others_proposals", current: proposalCount ?? 0, higherIsBetter: true },
+    { key: "others_open_requests", current: openRequestCount, higherIsBetter: false },
+  ]);
+
   const pulseKpis = (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(9.5rem, 1fr))", gap: "1rem" }}>
-      <Kpi label="Critical" value={criticalPulseCount} status={criticalPulseCount > 0 ? "CRITICAL" : "NORMAL"} />
-      <Kpi label="Blocked tasks" value={blockedTasks.length} />
-      <Kpi label="Open gaps" value={missingParams.length} />
-      <Kpi label="Low confidence" value={lowConfidenceTasks.length} />
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9.5rem)", gap: "1rem" }}>
+      <Kpi
+        label="Critical"
+        value={criticalPulseCount}
+        status={criticalPulseCount > 0 ? "CRITICAL" : "NORMAL"}
+        icon={WarningFilled}
+        trend={kpiTrends.pulse_critical}
+      />
+      <Kpi label="Blocked tasks" value={blockedTasks.length} icon={LockedAndBlocked} trend={kpiTrends.pulse_blocked_tasks} />
+      <Kpi label="Open gaps" value={missingParams.length} icon={Query} trend={kpiTrends.pulse_open_gaps} />
+      <Kpi label="Low confidence" value={lowConfidenceTasks.length} icon={ChartLineData} trend={kpiTrends.pulse_low_confidence} />
     </div>
   );
 
   const financeKpis = showFinancials ? (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(9.5rem, 1fr))", gap: "1rem" }}>
-      <Kpi label="Ready to bill" value={formatInr(readyToBill.total)} />
-      <Kpi label="Awaiting payment" value={formatInr(awaitingPayment.total)} status={awaitingPaymentStatus} />
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9.5rem)", gap: "1rem" }}>
+      <Kpi label="Ready to bill" value={formatInr(readyToBill.total)} icon={CurrencyRupee} trend={kpiTrends.finance_ready_to_bill} />
+      <Kpi
+        label="Awaiting payment"
+        value={formatInr(awaitingPayment.total)}
+        status={awaitingPaymentStatus}
+        icon={Wallet}
+        trend={kpiTrends.finance_awaiting_payment}
+      />
       <FinancialSummary />
     </div>
   ) : null;
 
   const teamKpis = (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(9.5rem, 1fr))", gap: "1rem" }}>
-      <Kpi label="Absent today" value={absences.length} status={absentStatus} />
-      <Kpi label="Open tasks" value={openTaskCount ?? 0} />
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9.5rem)", gap: "1rem" }}>
+      <Kpi label="Absent today" value={absences.length} status={absentStatus} icon={User} trend={kpiTrends.team_absent_today} />
+      <Kpi label="Open tasks" value={openTaskCount ?? 0} icon={ListChecked} trend={kpiTrends.team_open_tasks} />
     </div>
   );
 
   const othersKpis = (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(9.5rem, 1fr))", gap: "1rem" }}>
-      <Kpi label="Clients" value={clientCount ?? 0} />
-      <Kpi label="Projects" value={projectCount ?? 0} />
-      <Kpi label="Proposals" value={proposalCount ?? 0} />
-      <Kpi label="Open requests" value={openRequestCount} status={openRequestStatus} />
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9.5rem)", gap: "1rem" }}>
+      <Kpi label="Clients" value={clientCount ?? 0} icon={UserMultiple} trend={kpiTrends.others_clients} />
+      <Kpi label="Projects" value={projectCount ?? 0} icon={FolderDetails} trend={kpiTrends.others_projects} />
+      <Kpi label="Proposals" value={proposalCount ?? 0} icon={DocumentRequirements} trend={kpiTrends.others_proposals} />
+      <Kpi
+        label="Open requests"
+        value={openRequestCount}
+        status={openRequestStatus}
+        icon={Chat}
+        trend={kpiTrends.others_open_requests}
+      />
     </div>
   );
 
