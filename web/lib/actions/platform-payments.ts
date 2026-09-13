@@ -305,7 +305,10 @@ export async function adminUpdateLicence(_prev: PaymentActionState, formData: Fo
   if (!studioId) return { error: "Missing studio." };
   if (!["TRIAL", "PRO", "ENTERPRISE"].includes(plan)) return { error: "Invalid plan." };
   const seats = Number(seatsRaw);
-  if (!Number.isInteger(seats) || seats < 1) return { error: "Seats must be a positive whole number." };
+  // >= 0, not < 1 (2026-09-14 SysDeX audit fix) — a free-tier TRIAL
+  // studio legitimately has 0 PRO seats now (platform migration 0021);
+  // the `licences_seats_check` constraint itself was widened to match.
+  if (!Number.isInteger(seats) || seats < 0) return { error: "Seats must be zero or a positive whole number." };
 
   const platform = await createPlatformClient();
   const { error } = await platform

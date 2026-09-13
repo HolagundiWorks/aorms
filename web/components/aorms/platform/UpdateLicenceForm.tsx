@@ -37,7 +37,12 @@ export function UpdateLicenceForm({ studioId, licence }: { studioId: string; lic
             <SelectItem value="PRO" text="Pro" />
             <SelectItem value="ENTERPRISE" text="Enterprise" />
           </Select>
-          <TextInput id="licence-seats" name="seats" labelText="Seats" type="number" min={1} defaultValue={String(licence.seats)} />
+          {/* min={0}, not 1 (2026-09-14 SysDeX audit fix) — a free-tier
+              TRIAL studio legitimately has 0 PRO seats now (see platform
+              migration 0021); min={1} would block the browser's own
+              native validation from ever letting an admin submit that
+              real value. */}
+          <TextInput id="licence-seats" name="seats" labelText="Seats" type="number" min={0} defaultValue={String(licence.seats)} />
           <TextInput
             id="licence-expires-at"
             name="expiresAt"

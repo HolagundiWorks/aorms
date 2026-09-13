@@ -31,6 +31,7 @@ import { createServiceRoleClient as createWebServiceRoleClient } from "../supaba
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 import { resolvePortalHomeFromHost } from "../platform/subdomains";
+import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
 
 export type PlatformActionState = { error: string } | null;
 
@@ -778,4 +779,92 @@ export async function recordHeartbeat(seconds: number = 60): Promise<{ ok: boole
   if (error) return { ok: false, error: error.message };
 
   return { ok: true };
+}
+
+// ══ SysDeX — account-level admin overrides (2026-09-14 audit) ═════════════
+//
+// Two real gaps found live while auditing SysDeX: no way to change an
+// account's BASIC/PRO level directly (the only path was assignProSeat,
+// itself gated behind a studio's own paid seat count — there was no
+// admin override for e.g. a support gesture or correcting a stuck
+// state), and no way to grant/revoke admin_role at all short of a raw
+// SQL statement via direct DB access (migration 0009's own explicit
+// "no self-service grant admin UI in this pass" decision — now revised
+// by explicit request: "audit and implement the missing links").
+//
+// Both gated the same way every other SysDeX admin mutation already is:
+// requirePlatformAdmin()-equivalent check here, PLUS real RLS
+// enforcement server-side (is_platform_admin()) since these go through
+// the RLS-scoped client, not service-role — so a caller who somehow
+// reached this function without being an admin still can't write.
+
+async function requireSuperAdmin(): Promise<{ error: string } | null> {
+  const account = await getCurrentPlatformSessionAccount();
+  if (!account) return { error: "Sign in to the AORMS Platform first." };
+  if (!isSuperAdmin(account)) return { error: "Super Admin access required." };
+  return null;
+}
+
+export type AdminActionResult = { error?: string };
+
+/**
+ * Direct BASIC/PRO override — distinct from assignProSeat/revokeProSeat
+ * (which move a studio's own paid seat and are what normal usage should
+ * go through). This is the "something's stuck, fix it directly" escape
+ * hatch a SysDeX admin needs, not a replacement for the seat-based flow.
+ *
+ * Service-role client, not RLS-scoped — `accounts` has exactly one RLS
+ * policy, "accounts: self read" (SELECT only, own row). There's no
+ * UPDATE policy on this table at all, so an RLS-scoped update here would
+ * silently affect 0 rows with no error (found auditing this, before
+ * shipping it — same reason assignProSeat/revokeProSeat above already
+ * use the service-role client for this exact table).
+ */
+export async function adminSetAccountLevel(accountId: string, level: "BASIC" | "PRO"): Promise<AdminActionResult> {
+  const gate = await requireSuperAdmin();
+  if (gate) return gate;
+
+  const platformService = createPlatformServiceRoleClient();
+  const { error } = await platformService.from("accounts").update({ level }).eq("id", accountId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/accounts");
+  return {};
+}
+
+/**
+ * Grants or revokes platform-staff admin status. `adminRole: null` fully
+ * revokes (sets both is_admin=false and admin_role=null in one write, not
+ * two — an account with is_admin=false but a stale admin_role left over
+ * would be a confusing half-revoked state). Refuses to let a Super Admin
+ * revoke their OWN admin status through this action — not a technical
+ * limitation, a deliberate guard against a solo admin locking themselves
+ * out with no other path back in (migration 0009's own comment: granting
+ * is_admin at all otherwise requires direct DB access).
+ *
+ * Service-role client, not RLS-scoped — same reason as
+ * adminSetAccountLevel above: `accounts` has no UPDATE RLS policy at
+ * all, so this would silently no-op through the normal client.
+ */
+export async function adminSetAccountRole(
+  accountId: string,
+  adminRole: "SUPER_ADMIN" | "SUPPORT_STAFF" | null,
+): Promise<AdminActionResult> {
+  const gate = await requireSuperAdmin();
+  if (gate) return gate;
+
+  const caller = await getCurrentPlatformSessionAccount();
+  if (caller?.id === accountId && adminRole !== "SUPER_ADMIN") {
+    return { error: "You can't revoke or downgrade your own admin access." };
+  }
+
+  const supabase = createPlatformServiceRoleClient();
+  const { error } = await supabase
+    .from("accounts")
+    .update({ admin_role: adminRole, is_admin: adminRole !== null })
+    .eq("id", accountId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/accounts");
+  return {};
 }

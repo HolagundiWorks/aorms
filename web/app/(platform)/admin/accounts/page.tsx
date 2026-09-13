@@ -1,7 +1,8 @@
-import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
+import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@carbon/react";
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
+import { AccountAdminControls } from "../../../../components/aorms/platform/AccountAdminControls";
 import { SendPasswordResetButton } from "../../../../components/aorms/platform/SendPasswordResetButton";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
@@ -10,10 +11,15 @@ import { SysDexPortalHeader } from "../../../../components/aorms/platform/Portal
  * SysDeX — Accounts, SUPER_ADMIN only (2026-09-10). Every AORMS-U-
  * personal account, platform-wide — the list a password reset needs
  * (there was previously no page showing individual accounts at all, only
- * membership rows joined through a Studio/Company). `admin_role` itself
- * stays DB-only here — no grant/revoke toggle added (see
- * platform/supabase/migrations/0016_admin_role.sql's own header comment)
- * — that boundary is unchanged.
+ * membership rows joined through a Studio/Company).
+ *
+ * `admin_role`/`level` direct overrides added 2026-09-14 (audit finding:
+ * "user level basic pro scheme doesn't exist" / "activating user" — the
+ * original migration 0016 decision to keep admin_role DB-only was
+ * revised by explicit request; see AccountAdminControls.tsx and
+ * lib/actions/platform.ts's adminSetAccountLevel/adminSetAccountRole for
+ * the actual gating — both still require SUPER_ADMIN, now via app code +
+ * RLS rather than "requires direct DB access" being the only path).
  */
 export default async function AdminAccountsPage() {
   const account = await getCurrentPlatformSessionAccount();
@@ -38,8 +44,7 @@ export default async function AdminAccountsPage() {
               <TableRow>
                 <TableHeader>Name</TableHeader>
                 <TableHeader>Handle</TableHeader>
-                <TableHeader>Level</TableHeader>
-                <TableHeader>Admin</TableHeader>
+                <TableHeader>Level / Admin role</TableHeader>
                 <TableHeader>Created</TableHeader>
                 <TableHeader>Actions</TableHeader>
               </TableRow>
@@ -50,22 +55,12 @@ export default async function AdminAccountsPage() {
                   <TableCell>{a.full_name || "—"}</TableCell>
                   <TableCell>{a.public_id}</TableCell>
                   <TableCell>
-                    <Tag type={a.level === "PRO" ? "green" : "cool-gray"} size="sm">
-                      {a.level}
-                    </Tag>
-                  </TableCell>
-                  <TableCell>
-                    {a.admin_role === "SUPER_ADMIN" ? (
-                      <Tag type="purple" size="sm">
-                        Super Admin
-                      </Tag>
-                    ) : a.admin_role === "SUPPORT_STAFF" ? (
-                      <Tag type="teal" size="sm">
-                        Support Staff
-                      </Tag>
-                    ) : (
-                      "—"
-                    )}
+                    <AccountAdminControls
+                      accountId={a.id}
+                      level={a.level}
+                      adminRole={a.admin_role as "SUPER_ADMIN" | "SUPPORT_STAFF" | null}
+                      isSelf={a.id === account?.id}
+                    />
                   </TableCell>
                   <TableCell>{new Date(a.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
@@ -75,7 +70,7 @@ export default async function AdminAccountsPage() {
               ))}
               {(accounts ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6}>No accounts yet.</TableCell>
+                  <TableCell colSpan={5}>No accounts yet.</TableCell>
                 </TableRow>
               )}
             </TableBody>
