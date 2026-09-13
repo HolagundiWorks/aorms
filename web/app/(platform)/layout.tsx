@@ -14,6 +14,17 @@
  * logo/heading — under the old shared header they got that AND the
  * layout's bar stacked on top; now they render just their own.
  */
+import { BrandWatermark } from "../../components/aorms/BrandWatermark";
+
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
-  return <div style={{ minHeight: "100vh" }}>{children}</div>;
+  return (
+    <div style={{ minHeight: "100vh" }}>
+      {children}
+      {/* Same small, non-interactive AORMS mark Office Hub's own shell
+          uses (2026-09-14 branding consistency pass) — rendered once
+          here rather than per-portal-header, so it's identical across
+          every platform surface including /platform-login/-signup. */}
+      <BrandWatermark />
+    </div>
+  );
 }

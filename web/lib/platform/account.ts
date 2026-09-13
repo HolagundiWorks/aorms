@@ -9,6 +9,11 @@ export type CurrentPlatformAccount = {
   public_id: string;
   is_admin: boolean;
   admin_role: AdminRole;
+  /** For the portal header's own greeting (PlatformShellHeader.tsx,
+   * 2026-09-14) — accounts.full_name (platform/supabase/migrations/
+   * 0001_core.sql) already existed but wasn't selected by either query
+   * below until this greeting needed it. */
+  full_name: string;
 };
 
 /** Every /admin/* page except the dashboard and HelpDeX is SUPER_ADMIN-
@@ -48,7 +53,7 @@ export async function getCurrentPlatformAccount(): Promise<CurrentPlatformAccoun
   const platformService = createPlatformServiceRoleClient();
   const { data: account } = await platformService
     .from("accounts")
-    .select("id, public_id, is_admin, admin_role")
+    .select("id, public_id, is_admin, admin_role, full_name")
     .eq("public_id", profile.platform_public_id)
     .maybeSingle();
 
@@ -80,19 +85,32 @@ export async function getCurrentPlatformSessionAccount(): Promise<CurrentPlatfor
   const platformService = createPlatformServiceRoleClient();
   const { data: account } = await platformService
     .from("accounts")
-    .select("id, public_id, is_admin, admin_role")
+    .select("id, public_id, is_admin, admin_role, full_name")
     .eq("id", user.id)
     .maybeSingle();
 
   return account ?? null;
 }
 
-/** Nav-bar status shared by all three portal headers (PortalHeaders.tsx) —
- * signed in (Platform's own session), whether they're any kind of
- * platform staff (for the cross-portal "SysDeX" link), and whether
- * they're specifically a SUPER_ADMIN (for which SysDeX nav items to
- * show — support staff only ever see Dashboard + HelpDeX). */
-export async function getPlatformNavStatus(): Promise<{ signedIn: boolean; isAdmin: boolean; isSuperAdmin: boolean }> {
+/** Nav-bar status shared by all three portal headers
+ * (PlatformShellHeader.tsx) — signed in (Platform's own session),
+ * whether they're any kind of platform staff (for the cross-portal
+ * "SysDeX" link), whether they're specifically a SUPER_ADMIN (for which
+ * SysDeX nav items to show — support staff only ever see Dashboard +
+ * HelpDeX), and their display name for the header's own greeting
+ * (2026-09-14 shell remediation — falls back to "there" same as Office
+ * Hub's own greeting does for a name-less profile). */
+export async function getPlatformNavStatus(): Promise<{
+  signedIn: boolean;
+  isAdmin: boolean;
+  isSuperAdmin: boolean;
+  displayName: string;
+}> {
   const account = await getCurrentPlatformSessionAccount();
-  return { signedIn: !!account, isAdmin: !!account?.is_admin, isSuperAdmin: isSuperAdmin(account) };
+  return {
+    signedIn: !!account,
+    isAdmin: !!account?.is_admin,
+    isSuperAdmin: isSuperAdmin(account),
+    displayName: account?.full_name?.trim() || "there",
+  };
 }
