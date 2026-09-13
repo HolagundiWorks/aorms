@@ -137,6 +137,9 @@ export async function SysDexPortalHeader() {
             <NextLink href="/admin/connectdex" className="cds--type-body-01">
               ConnectDeX
             </NextLink>
+            <NextLink href="/admin/ai-connectors" className="cds--type-body-01">
+              AI Connectors
+            </NextLink>
           </>
         )}
         <NextLink href="/admin/helpdesk" className="cds--type-body-01">

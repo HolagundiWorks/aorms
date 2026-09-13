@@ -1,0 +1,21 @@
+{
+  "name": "@esti/device-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WSS boundary for Esti mobile/edge inference devices — see docs/esti/AORMS-ESTI-MOBILE-INFERENCE (attached development guide) §6 Device Gateway, §9-11 connection lifecycle/protocol.",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/ws": "^8.5.12",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
