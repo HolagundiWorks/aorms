@@ -4,6 +4,16 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { createServiceRoleClient } from "../supabase/service";
 
+// 2026-09-14 remediation — all three inviteUserByEmail calls below used to
+// omit `redirectTo` entirely, falling back to whatever Supabase's
+// project-level default Site URL happens to be, landing on a page this
+// app never actually built to receive it. Every invite now points at
+// /auth/callback (which exchanges the emailed code for a real session)
+// then on to /reset-password?mode=invite (set-a-password copy — see that
+// page's own header comment).
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aorms.in";
+const INVITE_REDIRECT_TO = `${SITE_URL}/auth/callback?next=${encodeURIComponent("/reset-password?mode=invite")}`;
+
 /**
  * Portal login provisioning — the "createLogin" gap flagged on /contractors
  * and /consultants when each first shipped ("Supabase Auth admin operation,
@@ -51,6 +61,7 @@ export async function inviteContractorLogin(contractorId: string, email: string)
   const admin = createServiceRoleClient();
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(trimmedEmail, {
     data: { full_name: contractor.name },
+    redirectTo: INVITE_REDIRECT_TO,
   });
   if (inviteError) return { error: inviteError.message };
 
@@ -86,6 +97,7 @@ export async function inviteConsultantLogin(consultantId: string, email: string)
   const admin = createServiceRoleClient();
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(trimmedEmail, {
     data: { full_name: consultant.name },
+    redirectTo: INVITE_REDIRECT_TO,
   });
   if (inviteError) return { error: inviteError.message };
 
@@ -128,6 +140,7 @@ export async function inviteStaffMember(_prev: { error: string } | null, formDat
   const admin = createServiceRoleClient();
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
     data: { full_name: fullName },
+    redirectTo: INVITE_REDIRECT_TO,
   });
   if (inviteError) return { error: inviteError.message };
 
