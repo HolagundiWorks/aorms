@@ -6,6 +6,7 @@ import { createServiceRoleClient as createPlatformServiceRoleClient } from "../.
 import { InviteMemberForm } from "../../../../components/aorms/platform/InviteMemberForm";
 import { MembershipRoleSelect } from "../../../../components/aorms/platform/MembershipRoleSelect";
 import { LeaveStudioButton } from "../../../../components/aorms/platform/LeaveStudioButton";
+import { ProSeatToggle, ProSeatTag } from "../../../../components/aorms/platform/ProSeatToggle";
 import { StudioProfileForm } from "../../../../components/aorms/platform/StudioProfileForm";
 import { AddBoardMemberForm } from "../../../../components/aorms/platform/AddBoardMemberForm";
 import { BoardMemberRow } from "../../../../components/aorms/platform/BoardMemberRow";
@@ -59,10 +60,13 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
   if (studioError) throw new Error(studioError.message);
   if (!studio) notFound();
 
+  const { data: licence } = await platformService.from("licences").select("seats").eq("studio_id", studioId).maybeSingle();
+  const seats = licence?.seats ?? 0;
+
   const [{ data: memberships }, { data: boardMembers }, { data: contacts }] = await Promise.all([
     platformService
       .from("studio_memberships")
-      .select("id, account_id, role, status, accounts(full_name, public_id)")
+      .select("id, account_id, role, status, pro_assigned_at, accounts(full_name, public_id)")
       .eq("studio_id", studioId)
       .neq("status", "LEFT")
       .order("created_at", { ascending: true }),
@@ -77,6 +81,8 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
       .eq("studio_id", studioId)
       .order("created_at", { ascending: true }),
   ]);
+
+  const proAssignedCount = (memberships ?? []).filter((m) => !!m.pro_assigned_at).length;
 
   let currentAccountId: string | null = null;
   if (handle) {
@@ -114,15 +120,26 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
 
         <Stack gap={6}>
           <div>
-            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
-              Members
-            </h2>
+            <Stack gap={2} orientation="horizontal" style={{ alignItems: "center", marginBottom: "1rem" }}>
+              <h2 className="cds--type-heading-02" style={{ margin: 0 }}>
+                Members
+              </h2>
+              {/* PRO is granted from this studio's own paid AORMS_FIRM seats
+                  (2026-09-13) — no longer a free automatic flip at 100
+                  usage-hours. Seats come from /licences' own Upgrade flow,
+                  already built — this is just the first thing that count
+                  actually does. */}
+              <Tag type="cool-gray" size="sm">
+                {proAssignedCount} of {seats} PRO seat{seats === 1 ? "" : "s"} used
+              </Tag>
+            </Stack>
             <Table aria-label="Studio members" className="aorms-table-spaced">
               <TableHead>
                 <TableRow>
                   <TableHeader>Member</TableHeader>
                   <TableHeader>Handle</TableHeader>
                   <TableHeader>Role</TableHeader>
+                  <TableHeader>Level</TableHeader>
                   <TableHeader>Status</TableHeader>
                   {isOwner && <TableHeader>Actions</TableHeader>}
                 </TableRow>
@@ -130,6 +147,7 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
               <TableBody>
                 {(memberships ?? []).map((m) => {
                   const acc = (Array.isArray(m.accounts) ? m.accounts[0] : m.accounts) as AccountEmbed;
+                  const isProAssigned = !!m.pro_assigned_at;
                   return (
                     <TableRow key={m.id}>
                       <TableCell>{acc?.full_name ?? "—"}</TableCell>
@@ -141,6 +159,19 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
                           <Tag type={m.role === "OWNER" ? "purple" : "gray"} size="sm">
                             {m.role}
                           </Tag>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {isOwner ? (
+                          <ProSeatToggle
+                            studioId={studio.id}
+                            membershipId={m.id}
+                            accountId={m.account_id}
+                            isProAssigned={isProAssigned}
+                            disableAssign={proAssignedCount >= seats}
+                          />
+                        ) : (
+                          <ProSeatTag isProAssigned={isProAssigned} />
                         )}
                       </TableCell>
                       <TableCell>{m.status}</TableCell>

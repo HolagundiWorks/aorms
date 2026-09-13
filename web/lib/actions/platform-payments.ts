@@ -105,22 +105,57 @@ export async function createLicenceOrder(studioId: string, seats: number): Promi
   return { orderId: order.id, amountPaise, currency: "INR", keyId };
 }
 
+/** 100 hours = 360000 seconds — matches the same threshold
+ * apply_heartbeat() used to auto-flip level at (0002_usage_and_level.sql)
+ * before 2026-09-13's correction removed that free flip; the number
+ * itself is unchanged, only what it gates is different now. */
+const IDENTITY_VERIFICATION_HOURS_REQUIRED = 100;
+const IDENTITY_VERIFICATION_SECONDS_REQUIRED = IDENTITY_VERIFICATION_HOURS_REQUIRED * 60 * 60;
+
 /**
  * The individual counterpart to createLicenceOrder — AORMS Identity, a
- * flat ₹599/year, no seats/studio-ownership check at all. Resolves the
- * caller's platform account via getCurrentPlatformAccount() (the Office
- * Hub session -> profiles.platform_public_id -> platform accounts
- * two-step, same one /identity and /licences already use for their own
- * read-only display) rather than requiring a separate Platform sign-in
- * the way createLicenceOrder does — there's no studio_memberships RLS
- * check to satisfy here, so there's no reason to force a second sign-in
- * just to buy an individual plan the person can already see on /identity.
+ * ONE-TIME ₹199 fee (2026-09-13: was a ₹599/year subscription; corrected
+ * per the user's own "user accounts remain free" direction — see
+ * platform/supabase/migrations/0018_identity_verification_pro_seats_
+ * connectdex_tiers.sql's header for the full account), available only
+ * once the account has logged 100 usage-hours, buying a PERMANENT
+ * verified identity — never renews, never re-charges. No seats/studio-
+ * ownership check at all. Resolves the caller's platform account via
+ * getCurrentPlatformAccount() (the Office Hub session ->
+ * profiles.platform_public_id -> platform accounts two-step, same one
+ * /identity and /licences already use for their own read-only display)
+ * rather than requiring a separate Platform sign-in the way
+ * createLicenceOrder does — there's no studio_memberships RLS check to
+ * satisfy here, so there's no reason to force a second sign-in just to
+ * buy an individual plan the person can already see on /identity.
  */
 export async function createIdentityOrder(): Promise<CreateOrderResult> {
   const account = await getCurrentPlatformAccount();
   if (!account) return { error: "Link your AORMS Identity first." };
 
   const platformService = createPlatformServiceRoleClient();
+
+  const { data: accountUsage, error: usageError } = await platformService
+    .from("accounts")
+    .select("total_active_seconds")
+    .eq("id", account.id)
+    .maybeSingle();
+  if (usageError) return { error: usageError.message };
+  if (!accountUsage || accountUsage.total_active_seconds < IDENTITY_VERIFICATION_SECONDS_REQUIRED) {
+    const hoursLogged = (accountUsage?.total_active_seconds ?? 0) / 3600;
+    return {
+      error: `Available once you've logged ${IDENTITY_VERIFICATION_HOURS_REQUIRED} hours — you're at ${hoursLogged.toFixed(1)}h.`,
+    };
+  }
+
+  const { data: existingLicence, error: licenceError } = await platformService
+    .from("identity_licences")
+    .select("plan")
+    .eq("account_id", account.id)
+    .maybeSingle();
+  if (licenceError) return { error: licenceError.message };
+  if (existingLicence?.plan === "AORMS_IDENTITY") return { error: "Already verified — this is a one-time purchase." };
+
   const plan = "AORMS_IDENTITY" as const;
   const { data: pricing, error: pricingError } = await platformService
     .from("plan_pricing")

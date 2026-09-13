@@ -110,7 +110,11 @@ export async function adminInviteConnectDexApplication(applicationId: string): P
 
   const { data: company, error: companyError } = await platformService
     .from("companies")
-    .insert({ name: application.company_name, owner_id: invited.user.id, status: "PENDING_ONBOARDING" })
+    // tier: "BASE_LINE" is also the column default (migration 0018) — set
+    // explicitly here anyway, matching this file's own style of not
+    // relying on a default for a business-meaningful field (status is
+    // set explicitly right next to it for the same reason).
+    .insert({ name: application.company_name, owner_id: invited.user.id, status: "PENDING_ONBOARDING", tier: "BASE_LINE" })
     .select("id")
     .single();
   if (companyError) return { error: companyError.message };
@@ -158,6 +162,30 @@ export async function adminVerifyConnectDexCompany(companyId: string): Promise<C
     .update({ verified_at: new Date().toISOString(), verified_by_id: account?.id, status: "PENDING_PAYMENT" })
     .eq("id", companyId)
     .eq("status", "PENDING_VERIFICATION");
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/connectdex");
+  return null;
+}
+
+/**
+ * SysDeX-only manual tier assignment (2026-09-13) — Base Line/Pro/Pro
+ * Plus (see migration 0018's header) have no self-serve upgrade purchase
+ * flow yet, since none of the three has a price attached (explicit user
+ * direction: "don't provide any prices" for these). Mirrors
+ * adminUpdateLicence's shape exactly.
+ */
+export async function adminSetCompanyTier(_prev: ConnectDexActionState, formData: FormData): Promise<ConnectDexActionState> {
+  const gate = await requirePlatformAdmin();
+  if (gate) return gate;
+
+  const companyId = String(formData.get("companyId") ?? "");
+  const tier = String(formData.get("tier") ?? "");
+  if (!companyId) return { error: "Missing company." };
+  if (!["BASE_LINE", "PRO", "PRO_PLUS"].includes(tier)) return { error: "Invalid tier." };
+
+  const platformService = createPlatformServiceRoleClient();
+  const { error } = await platformService.from("companies").update({ tier }).eq("id", companyId);
   if (error) return { error: error.message };
 
   revalidatePath("/admin/connectdex");

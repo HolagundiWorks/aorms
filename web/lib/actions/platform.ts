@@ -297,6 +297,75 @@ export async function leaveStudio(membershipId: string): Promise<{ error?: strin
   return {};
 }
 
+/**
+ * PRO seat assignment (2026-09-13) — see platform/supabase/migrations/
+ * 0018_identity_verification_pro_seats_connectdex_tiers.sql's header:
+ * `level` no longer flips to PRO for free/automatically at 100 hours. A
+ * Studio's own paid AORMS_FIRM licence seats are what a member's PRO
+ * status is now capped by — this is the first thing `licences.seats`
+ * actually does; it was previously just a billing number.
+ *
+ * `studio_memberships.pro_assigned_at` is written through the RLS-scoped
+ * client — "studio_memberships: owner update" (is_studio_owner(studio_id),
+ * no with_check) already covers it, same reliance-on-RLS pattern
+ * updateStudioMembershipRole above uses. But `accounts.level` has no
+ * self-serve/owner-update RLS policy at all (accounts only grants "self
+ * read") — a studio owner setting a *different* account's level
+ * necessarily goes through the service-role client, since there's no
+ * "owner of a studio this account belongs to" RLS policy on `accounts`
+ * itself. The seat-cap check below is an app-level guard for a clean
+ * error message, not the real authorization boundary (that's still
+ * is_studio_owner(studio_id) on the studio_memberships write which must
+ * succeed first) — but it IS the only thing standing between "assign" and
+ * silently exceeding a Studio's paid seat count, so it's checked before
+ * either write, not just for cosmetics.
+ */
+export async function assignProSeat(studioId: string, membershipId: string, accountId: string): Promise<{ error?: string }> {
+  const supabase = await createPlatformClient();
+
+  const [{ data: licence }, { count: assignedCount }] = await Promise.all([
+    supabase.from("licences").select("seats").eq("studio_id", studioId).maybeSingle(),
+    supabase
+      .from("studio_memberships")
+      .select("id", { count: "exact", head: true })
+      .eq("studio_id", studioId)
+      .not("pro_assigned_at", "is", null),
+  ]);
+  const seats = licence?.seats ?? 0;
+  if ((assignedCount ?? 0) >= seats) {
+    return { error: `All ${seats} PRO seat${seats === 1 ? "" : "s"} on this studio's licence are already assigned.` };
+  }
+
+  const { error: membershipError } = await supabase
+    .from("studio_memberships")
+    .update({ pro_assigned_at: new Date().toISOString() })
+    .eq("id", membershipId);
+  if (membershipError) return { error: membershipError.message };
+
+  const platformService = createPlatformServiceRoleClient();
+  const { error: levelError } = await platformService.from("accounts").update({ level: "PRO" }).eq("id", accountId);
+  if (levelError) return { error: levelError.message };
+
+  revalidatePath(`/studios/${studioId}`);
+  return {};
+}
+
+/** Reverses assignProSeat — frees the seat back up and drops the member
+ * back to BASIC ("basic will be free" is the true fallback state, not an
+ * edge case). */
+export async function revokeProSeat(studioId: string, membershipId: string, accountId: string): Promise<{ error?: string }> {
+  const supabase = await createPlatformClient();
+  const { error: membershipError } = await supabase.from("studio_memberships").update({ pro_assigned_at: null }).eq("id", membershipId);
+  if (membershipError) return { error: membershipError.message };
+
+  const platformService = createPlatformServiceRoleClient();
+  const { error: levelError } = await platformService.from("accounts").update({ level: "BASIC" }).eq("id", accountId);
+  if (levelError) return { error: levelError.message };
+
+  revalidatePath(`/studios/${studioId}`);
+  return {};
+}
+
 // ── Studio profile (COA/GST/tax/address) ────────────────────────────────
 
 /**

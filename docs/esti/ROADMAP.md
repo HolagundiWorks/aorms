@@ -4769,6 +4769,96 @@ renders the live-computed "₹1,999 base + ₹199/user/month × N users,
 billed annually — ₹X/year total" preview, updating as the seat count
 changes.
 
+**Same-day correction: AORMS Identity isn't a subscription; PRO isn't
+free; ConnectDeX gets a real fee + renamed tiers (2026-09-13).** The
+user's fuller pricing spec, given right after the above shipped, corrected
+two of its own assumptions and added real ConnectDeX numbers:
+
+- **Individual accounts stay free, always** ("user accounts remain free
+  for every[one]") — the ₹599/year AORMS_IDENTITY subscription above was
+  wrong. Corrected in place (same tables, not replaced) to a **one-time
+  ₹199 fee**, available only after **100 usage-hours**, buying a
+  **permanent** verified identity — never renews, never re-charges.
+- **PRO is no longer free/automatic** — it's granted by a Studio to one of
+  its own members, capped at that Studio's paid `licences.seats`.
+- **ConnectDeX onboarding fee → real ₹5,999** (was a ₹4,999 placeholder).
+- **ConnectDeX Company tiers, renamed, unpriced**: Silver → Base Line
+  (catalogue capped at 5 product *categories* — confirmed with the user,
+  not 5 products), Gold/Platinum → Pro/Pro Plus (unlimited catalogue;
+  interactive catalogue/SKU detail/direct PO generation/lead generation
+  named as the eventual differentiators, explicitly not built yet since
+  none of the three tiers has a price).
+
+**Two real architectural findings changed the design from the user's
+first phrasing, both confirmed with the user before building — full
+account in the plan file, short version here:**
+
+1. `accounts.public_id` (the AORMS-U- handle) mints via an `AFTER INSERT
+   ON auth.users` trigger the instant the account exists, and is the only
+   join key linking an Office Hub login to its Platform account —
+   heartbeat recording itself (what counts the 100 hours) depends on that
+   link already existing. Gating the handle behind the 100hr/₹199 step
+   would be circular and would touch ~10 call sites. **The handle keeps
+   minting free and immediate, unchanged** — the fee buys a separate,
+   additive "verified" flag on top of it.
+2. **Zero existing "entity pays for a different member's benefit"
+   pattern** existed anywhere in this codebase before this — every
+   payment table's buyer is the same account whose own row changes. Built
+   the first one, but tied it to AORMS_FIRM's own already-priced seats
+   rather than inventing a second, unpriced payment flow — a Studio's paid
+   seat count is now literally the number of members it can flag PRO (the
+   first actual function `licences.seats` has ever had).
+
+Migration `platform/supabase/migrations/0018_identity_verification_pro_
+seats_connectdex_tiers.sql` (applied and live-verified against
+`aorms-platform`; confirmed live beforehand: 0 accounts at `level='PRO'`,
+no retroactive-demotion concern): repriced `plan_pricing`'s
+`AORMS_IDENTITY` row 59900→19900 paise (no new table); `apply_heartbeat()`
+rewritten to only accumulate `total_active_seconds`, no more `level`
+case-when; new `studio_memberships.pro_assigned_at timestamptz`, with
+`log_studio_membership_update()` extended with a third branch
+(`MEMBER_PRO_SEAT_ASSIGNED`/`_REVOKED`) rather than a new trigger;
+`connectdex_settings.onboarding_fee_paise` → 599900; new `companies.tier`
+(`BASE_LINE`/`PRO`/`PRO_PLUS`, default `BASE_LINE`).
+
+Application code: `createIdentityOrder` gained a 100-hour gate (reads
+`accounts.total_active_seconds`, clear error with hours-so-far if short)
+and an already-verified guard; `applyCapturedIdentityPayment` dropped all
+renewal math — a captured payment now just sets `plan='AORMS_IDENTITY',
+expires_at=null` permanently. New `assignProSeat`/`revokeProSeat`
+(`lib/actions/platform.ts`) — studio-owner-scoped (same reliance on
+`studio_memberships`' RLS `owner update` policy `updateStudioMembershipRole`
+already uses), seat-cap-checked before writing, service-role for the
+`accounts.level` write (accounts has no owner-update RLS policy at all);
+new `ProSeatToggle`/`ProSeatTag` components and a "PRO seats" section on
+`/studios/[studioId]`. `adminInviteConnectDexApplication`'s company-insert
+gained an explicit `tier: "BASE_LINE"`; `materials.ts`'s `addProduct`
+gained a Base-Line-only distinct-category cap (flagged non-binding today
+— the fixed 4-value category list can't reach 5 yet); new
+`adminSetCompanyTier` + `SetCompanyTierForm` and an "Active companies —
+tier" section on `/admin/connectdex`. `/identity`'s copy reworked
+throughout (hour-progress before eligible, "Verified"/permanent framing
+after, PRO framed as studio-granted not automatic); `SetPricingForm`'s
+AORMS_IDENTITY label switched from "per year" to "one-time fee".
+
+Verified: `tsc --noEmit`/`eslint .`/full `next build` all clean. Live
+data round-trip against the real `aorms-platform` project, all temporary
+state reverted after: confirmed the identity-verification button
+correctly disabled at 0 hours and enabled past 360000 seconds (browser,
+real account temporarily bumped), confirmed a simulated captured payment
+permanently set `plan='AORMS_IDENTITY'`/`expires_at=null` with zero
+renewal math (browser-rendered as "Verified" afterward); confirmed PRO
+seat assignment end-to-end against the one real studio — the RLS-scoped
+write correctly failed with no real Platform sign-in in this test
+browser (expected, not a bug — same as every other studio-owner mutation
+in this codebase), so verified the actual data effect via the same
+service-role REST path the app's own service-role write uses instead:
+seat cap enforced, `studio_memberships.pro_assigned_at`/`accounts.level`
+both flip correctly on assign, `MEMBER_PRO_SEAT_ASSIGNED` fired, browser
+confirmed "1 of 1 PRO seat used" and the Revoke button rendering
+correctly. All test rows/state reverted to exactly their original values
+afterward (re-verified with a final zero-residue sweep).
+
 ---
 
 ## Support & questions

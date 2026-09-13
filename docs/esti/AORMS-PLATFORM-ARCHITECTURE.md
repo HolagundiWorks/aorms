@@ -190,7 +190,18 @@ changes, it needs its own `company_licences`-shaped table (or a
 generalization of `licences` to reference either a studio or a company) —
 not a quiet extension of the existing Studio-only table, since RLS,
 Razorpay order metadata, and the activity-log triggers all currently
-assume `studio_id`.
+assume `studio_id`. **Companies do now carry a `tier`** (`companies.tier`
+— BASE_LINE/PRO/PRO_PLUS, migration `0018`, renamed from Silver/Gold/
+Platinum) — admin-settable only (`/admin/connectdex`'s `SetCompanyTierForm`),
+no self-serve upgrade purchase and no price attached to any of the three
+yet. This is a bare classification field, not a licence — it doesn't
+change the "no licence of their own" fact above. Base Line's only
+enforced consequence so far is a 5-distinct-product-category catalogue
+cap (`materials.ts`'s `addProduct`) — non-binding today, since `products.
+category` is a fixed 4-value platform-wide list. Pro/Pro Plus's named
+differentiators (interactive catalogue, SKU-level detail, direct PO
+generation, lead generation) have zero schema yet — disclosed as a real
+follow-up once they're actually priced, not built alongside the rename.
 
 ## Licensing & payments — the part that made the boundary matter
 
@@ -211,24 +222,46 @@ with no payment attached. `docs/esti/ROADMAP.md`'s dated History entry for
 this work has the full incident/design account; this doc only states the
 resulting boundary.
 
-**Real pricing, two named plans (2026-09-13)** — the placeholder
-`STANDARD`/`PREMIUM` per-seat plans are retired. `licences.plan` now has
-exactly one paid value, **AORMS_FIRM** (₹1,999/year base + ₹199/user/month,
-billed as one annual Razorpay order — see
-`platform/supabase/migrations/0017_identity_and_firm_plans.sql`'s header
-for the full billing-mechanics disclosure: this is still a one-time
-purchase extending `expires_at`, same as before, just annual instead of
-30-day and base+per-seat instead of pure per-seat — real recurring
-auto-debit remains out of scope). A parallel **AORMS_IDENTITY** plan
-(₹599/year flat) now exists for individual `accounts` for the first
-time — a brand-new `identity_licences`/`identity_payments` table pair,
-account-scoped rather than studio-scoped, following the exact same
-one-time-purchase/webhook/activity-log pattern as the Studio side (and the
-same precedent `connectdex_payments` already established for a second
-non-studio payment target). `plan_pricing` now stores `base_price_paise` +
-`price_per_seat_monthly_paise` per plan instead of a single per-seat
-figure. The "Companies have no licence" open question below is unaffected —
-this only adds Identity (individual) pricing, not Company pricing.
+**Real pricing, two named plans (2026-09-13, corrected same day — see the
+next entry)** — the placeholder `STANDARD`/`PREMIUM` per-seat plans are
+retired. `licences.plan` now has exactly one paid value, **AORMS_FIRM**
+(₹1,999/year base + ₹199/user/month, billed as one annual Razorpay order
+— see `platform/supabase/migrations/0017_identity_and_firm_plans.sql`'s
+header for the full billing-mechanics disclosure: this is still a
+one-time purchase extending `expires_at`, same as before, just annual
+instead of 30-day and base+per-seat instead of pure per-seat — real
+recurring auto-debit remains out of scope). `plan_pricing` now stores
+`base_price_paise` + `price_per_seat_monthly_paise` per plan instead of a
+single per-seat figure.
+
+**Correction, same day: AORMS Identity is NOT a subscription — individual
+accounts stay free, always.** The paragraph this replaces described
+AORMS_IDENTITY as a ₹599/year individual plan; the user's fuller spec
+clarified this was wrong ("user accounts remain free for every[one]") —
+see `platform/supabase/migrations/0018_identity_verification_pro_seats_
+connectdex_tiers.sql`'s header for the full account. What actually ships:
+`identity_licences`/`identity_payments` (account-scoped, same table
+shapes as before, same precedent `connectdex_payments` established for a
+non-studio payment target) now back a **one-time ₹199 fee**, available
+only after **100 usage-hours**, that permanently verifies an account's
+identity — never renews, never re-charges (`expires_at` is set once and
+stays `null` forever). `accounts.public_id` (the handle itself) is
+**untouched** — it kept minting free and immediate at signup exactly as
+before; gating the handle itself was considered and rejected as circular,
+since heartbeat recording (the very mechanism that counts the 100 hours)
+depends on that handle already existing as the Office-Hub-session join
+key. Separately, **PRO is no longer free/automatic** — the heartbeat
+trigger (`apply_heartbeat()`) no longer touches `level` at all (it still
+accumulates `total_active_seconds`, just for the 100hr gate above now, not
+a free PRO flip). PRO is granted by a Studio to one of its own members,
+capped at that Studio's own paid `licences.seats` — the first real use
+for `seats`, previously a pure billing number. No new price for this: it
+reuses AORMS_FIRM's already-built seat purchase rather than inventing a
+second "pay for a different account's benefit" flow (confirmed none
+existed anywhere in this codebase before this correction).
+
+The "Companies have no licence" open question below is unaffected by any
+of this — it only touches Studio/individual pricing, not Company.
 
 ## Open questions (flagged, not decided here)
 

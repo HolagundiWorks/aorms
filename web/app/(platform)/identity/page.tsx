@@ -12,7 +12,15 @@ import { PurchaseIdentityButton } from "../../../components/aorms/platform/Purch
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { IdentityPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
 
-const HOURS_TO_PRO = 100;
+// 2026-09-13: PRO is no longer free/automatic at 100 hours — see
+// migration 0018's header. It's now something a Studio grants to one of
+// its own members (capped at that Studio's paid AORMS_FIRM seat count).
+// 100 hours now gates something else entirely: the one-time ₹199
+// "verified identity" purchase below (IDENTITY_VERIFICATION_HOURS_
+// REQUIRED in lib/actions/platform-payments.ts — kept as a separate
+// constant there since these two 100-hour thresholds are conceptually
+// unrelated even though the number happens to match).
+const HOURS_FOR_IDENTITY_VERIFICATION = 100;
 
 type StudioEmbed = { id: string; name: string; public_id: string } | null;
 
@@ -136,7 +144,7 @@ export default async function IdentityPage() {
 
   const { data: identityLicence } = await platformService
     .from("identity_licences")
-    .select("plan, expires_at")
+    .select("plan")
     .eq("account_id", account.id)
     .maybeSingle();
   const { data: identityPricingRow } = await platformService
@@ -145,8 +153,10 @@ export default async function IdentityPage() {
     .eq("plan", "AORMS_IDENTITY")
     .maybeSingle();
   const identityBasePricePaise = identityPricingRow?.base_price_paise ?? 0;
-  const identityActive =
-    identityLicence?.plan === "AORMS_IDENTITY" && (!identityLicence.expires_at || new Date(identityLicence.expires_at) > new Date());
+  // Permanent once purchased — no expiry to check anymore (see migration
+  // 0018's header: this was an annually-renewing plan before, corrected
+  // to a one-time fee).
+  const identityVerified = identityLicence?.plan === "AORMS_IDENTITY";
 
   const hours = account.total_active_seconds / 3600;
 
@@ -171,8 +181,10 @@ export default async function IdentityPage() {
                 </Stack>
                 <p className="cds--type-body-01">{account.full_name}</p>
                 <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                  {hours.toFixed(1)}h of {HOURS_TO_PRO}h logged
-                  {account.level === "BASIC" ? ` — ${Math.max(0, HOURS_TO_PRO - hours).toFixed(1)}h to Pro` : ""}
+                  {hours.toFixed(1)}h logged
+                  {account.level === "BASIC"
+                    ? " — PRO is granted by a studio you belong to (from its own paid seats), not automatic."
+                    : ""}
                 </p>
               </Stack>
             </Tile>
@@ -180,17 +192,21 @@ export default async function IdentityPage() {
             <Tile>
               <Stack gap={4}>
                 <Stack gap={2} orientation="horizontal" style={{ alignItems: "center" }}>
-                  <h2 className="cds--type-heading-02">AORMS Identity plan</h2>
-                  <Tag type={identityActive ? "purple" : "gray"} size="md">
-                    {identityActive ? "AORMS Identity" : "Free"}
+                  <h2 className="cds--type-heading-02">AORMS Identity — verified</h2>
+                  <Tag type={identityVerified ? "purple" : "gray"} size="md">
+                    {identityVerified ? "Verified" : "Unverified"}
                   </Tag>
                 </Stack>
                 <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                  {identityActive && identityLicence?.expires_at
-                    ? `Active — renews or expires ${new Date(identityLicence.expires_at).toLocaleDateString()}.`
-                    : "Not on the paid AORMS Identity plan yet."}
+                  {identityVerified
+                    ? "One-time verification purchased — permanent, nothing more to pay, ever."
+                    : hours >= HOURS_FOR_IDENTITY_VERIFICATION
+                      ? "You've logged enough hours — a one-time payment permanently verifies your AORMS identity."
+                      : `Available once you've logged ${HOURS_FOR_IDENTITY_VERIFICATION} hours — ${hours.toFixed(1)}h so far (${Math.max(0, HOURS_FOR_IDENTITY_VERIFICATION - hours).toFixed(1)}h to go). Free until then, and your handle (${account.public_id}) already works either way.`}
                 </p>
-                <PurchaseIdentityButton basePricePaise={identityBasePricePaise} isRenewal={identityActive} />
+                {!identityVerified && (
+                  <PurchaseIdentityButton basePricePaise={identityBasePricePaise} eligible={hours >= HOURS_FOR_IDENTITY_VERIFICATION} />
+                )}
               </Stack>
             </Tile>
 

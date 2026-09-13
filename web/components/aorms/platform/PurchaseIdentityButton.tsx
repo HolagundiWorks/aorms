@@ -16,15 +16,17 @@ function formatRupees(paise: number): string {
 }
 
 /**
- * The individual counterpart to UpgradeLicenceButton — AORMS Identity, a
- * flat annual fee, no seats/plan choice at all (see
- * lib/actions/platform-payments.ts's createIdentityOrder). Same Razorpay
- * Checkout.js flow, `label` swaps between "Purchase" (never bought before,
- * or lapsed) and "Renew" (currently active) purely for copy — the checkout
- * mechanics are identical either way (extends expires_at by a year from
- * `now` or the current expiry, whichever is later).
+ * The individual counterpart to UpgradeLicenceButton — AORMS Identity
+ * verification, a flat ONE-TIME fee (2026-09-13: was an annual plan,
+ * corrected — see lib/actions/platform-payments.ts's createIdentityOrder
+ * header). `eligible` (hours >= the 100h threshold, computed by the
+ * caller) just controls whether the button is enabled — the real gate is
+ * still server-side in createIdentityOrder, this is only so the button
+ * doesn't invite a doomed click before that threshold. Once purchased,
+ * this component isn't rendered at all (see identity/page.tsx) — nothing
+ * to renew, ever.
  */
-export function PurchaseIdentityButton({ basePricePaise, isRenewal }: { basePricePaise: number; isRenewal: boolean }) {
+export function PurchaseIdentityButton({ basePricePaise, eligible }: { basePricePaise: number; eligible: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "creating" | "paying" | "activated">("idle");
 
@@ -45,7 +47,7 @@ export function PurchaseIdentityButton({ basePricePaise, isRenewal }: { basePric
       currency: result.currency,
       order_id: result.orderId,
       name: "AORMS",
-      description: "AORMS Identity — annual plan",
+      description: "AORMS Identity — verification (one-time)",
       handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
         const confirmResult = await confirmIdentityPaymentClientSide(
           response.razorpay_order_id,
@@ -70,8 +72,8 @@ export function PurchaseIdentityButton({ basePricePaise, isRenewal }: { basePric
     return (
       <InlineNotification
         kind="success"
-        title="AORMS Identity activated"
-        subtitle="Refresh to see the new plan — the page will also update shortly."
+        title="AORMS Identity verified"
+        subtitle="Permanent — refresh to see it reflected here."
         lowContrast
         hideCloseButton
       />
@@ -82,12 +84,12 @@ export function PurchaseIdentityButton({ basePricePaise, isRenewal }: { basePric
     <Stack gap={4}>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
       {error ? <InlineNotification kind="error" title="Couldn't start checkout" subtitle={error} lowContrast hideCloseButton /> : null}
-      <Button kind="primary" size="sm" onClick={handlePurchase} disabled={status !== "idle"}>
+      <Button kind="primary" size="sm" onClick={handlePurchase} disabled={!eligible || status !== "idle"}>
         {status === "creating"
           ? "Preparing…"
           : status === "paying"
             ? "Waiting for payment…"
-            : `${isRenewal ? "Renew" : "Purchase"} — ${formatRupees(basePricePaise)}/year`}
+            : `Verify — ${formatRupees(basePricePaise)} one-time`}
       </Button>
     </Stack>
   );

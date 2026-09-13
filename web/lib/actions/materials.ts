@@ -25,6 +25,35 @@ import type { PlatformActionState } from "./platform";
 
 // ── Products ─────────────────────────────────────────────────────────────
 
+/**
+ * Base Line tier cap (2026-09-13, migration 0018's header) — a Base Line
+ * company's catalogue is limited to 5 *distinct product categories*, not
+ * 5 products (confirmed with the user). Non-binding today: `category` is
+ * a fixed platform-wide 4-value list (BUILDING_MATERIAL/
+ * INTERIOR_MATERIAL/FINISH/OTHER — see 0008_material_catalogue.sql), so 5
+ * distinct values can never actually be reached yet — this is forward-
+ * compatible scaffolding for whenever more category values get added, not
+ * a limit anyone hits with today's 4. Pro/Pro Plus have no cap at all.
+ */
+const BASE_LINE_MAX_CATEGORIES = 5;
+
+async function checkBaseLineCategoryCap(
+  supabase: Awaited<ReturnType<typeof createPlatformClient>>,
+  companyId: string,
+  newCategory: string,
+): Promise<string | null> {
+  const { data: company } = await supabase.from("companies").select("tier").eq("id", companyId).maybeSingle();
+  if (company?.tier !== "BASE_LINE") return null;
+
+  const { data: existingProducts } = await supabase.from("products").select("category").eq("company_id", companyId);
+  const distinctCategories = new Set((existingProducts ?? []).map((p) => p.category));
+  if (distinctCategories.has(newCategory)) return null;
+  if (distinctCategories.size >= BASE_LINE_MAX_CATEGORIES) {
+    return `Base Line is limited to ${BASE_LINE_MAX_CATEGORIES} product categories — upgrade to Pro for an unlimited catalogue.`;
+  }
+  return null;
+}
+
 export async function addProduct(
   _prev: PlatformActionState,
   formData: FormData,
@@ -42,6 +71,10 @@ export async function addProduct(
   if (mrpRaw && !Number.isFinite(mrpPaise)) return { error: "MRP must be a number." };
 
   const supabase = await createPlatformClient();
+
+  const capError = await checkBaseLineCategoryCap(supabase, companyId, category);
+  if (capError) return { error: capError };
+
   const { error } = await supabase.from("products").insert({
     company_id: companyId,
     name,

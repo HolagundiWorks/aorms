@@ -5,6 +5,7 @@ import { adminInviteConnectDexApplication, adminRejectConnectDexApplication, adm
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { ConnectDexActionButton } from "../../../../components/aorms/platform/company/ConnectDexActionButton";
 import { SetConnectDexFeeForm } from "../../../../components/aorms/platform/company/SetConnectDexFeeForm";
+import { SetCompanyTierForm } from "../../../../components/aorms/platform/company/SetCompanyTierForm";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 
@@ -21,19 +22,21 @@ export default async function AdminConnectDexPage() {
   if (!isSuperAdmin(account)) return <AdminAccessDenied title="ConnectDeX Partners" />;
 
   const platformService = createPlatformServiceRoleClient();
-  const [{ data: applications }, { data: pendingVerification }, { data: pendingPayment }, { data: settings }] = await Promise.all([
-    platformService
-      .from("connectdex_applications")
-      .select("id, company_name, contact_name, email, phone, city, state, category, message, created_at")
-      .eq("status", "PENDING")
-      .order("created_at", { ascending: true }),
-    platformService
-      .from("companies")
-      .select("id, name, public_id, gstin, pan, address_line1, city, state, email, phone")
-      .eq("status", "PENDING_VERIFICATION"),
-    platformService.from("companies").select("id, name, public_id").eq("status", "PENDING_PAYMENT"),
-    platformService.from("connectdex_settings").select("onboarding_fee_paise").eq("id", true).maybeSingle(),
-  ]);
+  const [{ data: applications }, { data: pendingVerification }, { data: pendingPayment }, { data: settings }, { data: activeCompanies }] =
+    await Promise.all([
+      platformService
+        .from("connectdex_applications")
+        .select("id, company_name, contact_name, email, phone, city, state, category, message, created_at")
+        .eq("status", "PENDING")
+        .order("created_at", { ascending: true }),
+      platformService
+        .from("companies")
+        .select("id, name, public_id, gstin, pan, address_line1, city, state, email, phone")
+        .eq("status", "PENDING_VERIFICATION"),
+      platformService.from("companies").select("id, name, public_id").eq("status", "PENDING_PAYMENT"),
+      platformService.from("connectdex_settings").select("onboarding_fee_paise").eq("id", true).maybeSingle(),
+      platformService.from("companies").select("id, name, public_id, tier").eq("status", "ACTIVE").order("name"),
+    ]);
 
   return (
     <>
@@ -146,6 +149,38 @@ export default async function AdminConnectDexPage() {
               {(pendingPayment ?? []).length === 0 && (
                 <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                   Nothing awaiting payment.
+                </p>
+              )}
+            </Stack>
+          </div>
+
+          <div>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+              Active companies — tier
+            </h2>
+            <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "1rem" }}>
+              Base Line / Pro / Pro Plus (renamed from Silver/Gold/Platinum) have no self-serve upgrade purchase yet
+              — none of the three is priced. Assign a tier manually here until that lands.
+            </p>
+            <Stack gap={4}>
+              {(activeCompanies ?? []).map((company) => (
+                <Tile key={company.id}>
+                  <Stack gap={2} orientation="horizontal" style={{ alignItems: "center", justifyContent: "space-between" }}>
+                    <Stack gap={2} orientation="horizontal" style={{ alignItems: "center" }}>
+                      <span className="cds--type-body-01">
+                        <strong>{company.name}</strong>
+                      </span>
+                      <Tag type="cool-gray" size="sm">
+                        {company.public_id}
+                      </Tag>
+                    </Stack>
+                    <SetCompanyTierForm companyId={company.id} tier={company.tier} />
+                  </Stack>
+                </Tile>
+              ))}
+              {(activeCompanies ?? []).length === 0 && (
+                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  No active companies yet.
                 </p>
               )}
             </Stack>

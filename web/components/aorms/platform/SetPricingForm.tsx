@@ -11,12 +11,13 @@ import { adminSetPricing, type PaymentActionState } from "../../../lib/actions/p
  * page.tsx), same reason UpdateLicenceForm needs one: without it, saving
  * once wouldn't refresh the displayed value from the next server read.
  *
- * 2026-09-13: two figures per plan now, not one — `basePriceRupees` (the
- * flat annual fee both AORMS_IDENTITY and AORMS_FIRM have) and
- * `pricePerSeatMonthlyRupees` (AORMS_FIRM's ₹199/user/month rate; hidden
- * for AORMS_IDENTITY, which has no seat concept at all — the field simply
- * isn't rendered, so the action's own "default to 0 if absent" handles it,
- * see platform-payments.ts's adminSetPricing).
+ * 2026-09-13: two figures per plan now, not one — `basePriceRupees` (a
+ * one-time fee for AORMS_IDENTITY — corrected from an annual figure, see
+ * createIdentityOrder's header — and an annual base fee for AORMS_FIRM)
+ * and `pricePerSeatMonthlyRupees` (AORMS_FIRM's ₹199/user/month rate;
+ * hidden for AORMS_IDENTITY, which has no seat concept at all — the field
+ * simply isn't rendered, so the action's own "default to 0 if absent"
+ * handles it, see platform-payments.ts's adminSetPricing).
  */
 export function SetPricingForm({
   plan,
@@ -37,7 +38,7 @@ export function SetPricingForm({
         <TextInput
           id={`pricing-base-${plan}`}
           name="basePriceRupees"
-          labelText={`${planLabel} — base price per year (₹)`}
+          labelText={plan === "AORMS_IDENTITY" ? `${planLabel} — one-time fee (₹)` : `${planLabel} — base price per year (₹)`}
           type="number"
           min={1}
           step="0.01"
