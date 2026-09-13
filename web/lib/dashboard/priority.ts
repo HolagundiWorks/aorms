@@ -8,27 +8,39 @@
  * docs/esti/DASHBOARD-AND-ESTI-PHRASER.md for the written-out account.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getApprovalsSummary, getOpenClientRequests, getOpenConsultantRequests, getOpenTasksForPriority } from "./queries";
+import {
+  getApprovalsSummary,
+  getOpenClientRequests,
+  getOpenConsultantRequests,
+  getOpenTasksForPriority,
+  getPendingClientReviewDecisions,
+} from "./queries";
 
-export type PriorityKind = "TASK" | "APPROVAL" | "CLIENT_REQUEST" | "CONSULTANT_REQUEST";
+export type PriorityKind = "TASK" | "APPROVAL" | "CLIENT_REQUEST" | "CONSULTANT_REQUEST" | "DECISION";
 
 export type PriorityItem = {
   kind: PriorityKind;
   id: string;
   title: string;
   projectTitle: string | null;
+  // Only populated where a quick action needs it (DECISION, so
+  // AcceptDecisionButton can call updateDecisionState); null elsewhere
+  // rather than plumbing it through every query just to fill the field.
+  projectId: string | null;
   href: string;
   ageDays: number;
   score: number;
 };
 
 // Base weight per item — a task's own priority enum drives its weight;
-// the other three kinds each get one fixed base weight, reflecting that
-// a CRITICAL task should usually outrank a routine open request.
+// the other kinds each get one fixed base weight (a decision's own
+// `impact` scales it the same way a task's `priority` does), reflecting
+// that a CRITICAL task should usually outrank a routine open request.
 const TASK_BASE: Record<string, number> = { CRITICAL: 100, HIGH: 70, MEDIUM: 40, LOW: 20 };
 const APPROVAL_BASE = 60;
 const CLIENT_REQUEST_BASE = 55;
 const CONSULTANT_REQUEST_BASE = 35;
+const DECISION_BASE: Record<string, number> = { HIGH: 80, MEDIUM: 62, LOW: 45 };
 
 const AGE_BONUS_PER_DAY = 3;
 const AGE_BONUS_CAP = 60;
@@ -43,11 +55,12 @@ function score(base: number, ageDays: number): number {
 }
 
 export async function getTopPriorities(supabase: SupabaseClient, today: string, n = 3): Promise<PriorityItem[]> {
-  const [tasks, approvals, clientRequests, consultantRequests] = await Promise.all([
+  const [tasks, approvals, clientRequests, consultantRequests, decisions] = await Promise.all([
     getOpenTasksForPriority(supabase),
     getApprovalsSummary(supabase, today),
     getOpenClientRequests(supabase),
     getOpenConsultantRequests(supabase),
+    getPendingClientReviewDecisions(supabase),
   ]);
 
   const items: PriorityItem[] = [];
@@ -59,6 +72,7 @@ export async function getTopPriorities(supabase: SupabaseClient, today: string, 
       id: t.id,
       title: t.title,
       projectTitle: t.projectTitle,
+      projectId: t.projectId,
       href: "/tasks",
       ageDays: overdueDays,
       score: score(TASK_BASE[t.priority] ?? TASK_BASE.MEDIUM, overdueDays),
@@ -72,6 +86,7 @@ export async function getTopPriorities(supabase: SupabaseClient, today: string, 
       id: a.id,
       title: a.title,
       projectTitle: a.projectTitle,
+      projectId: null,
       href: "/approvals",
       ageDays,
       score: score(APPROVAL_BASE, ageDays),
@@ -85,6 +100,7 @@ export async function getTopPriorities(supabase: SupabaseClient, today: string, 
       id: r.id,
       title: r.subject,
       projectTitle: r.projectTitle,
+      projectId: r.projectId,
       href: `/projects/${r.projectId}`,
       ageDays,
       // A client-flagged CRITICAL/MAJOR revision outranks a routine request.
@@ -99,9 +115,29 @@ export async function getTopPriorities(supabase: SupabaseClient, today: string, 
       id: c.id,
       title: c.subject,
       projectTitle: c.projectTitle,
+      projectId: null,
       href: "/consultants",
       ageDays,
       score: score(CONSULTANT_REQUEST_BASE, ageDays),
+    });
+  }
+
+  for (const d of decisions) {
+    // "Age" here is overdue-against-review-deadline, not time-since-
+    // creation — a decision can sit in DRAFT/OPEN for a while before ever
+    // reaching CLIENT_REVIEW, so days-since-creation would overstate how
+    // long the client has actually had it; days-past-deadline mirrors how
+    // a task's own overdue bonus works.
+    const overdueDays = d.reviewDeadline ? ageDaysSince(d.reviewDeadline, today) : 0;
+    items.push({
+      kind: "DECISION",
+      id: d.id,
+      title: d.title,
+      projectTitle: d.projectTitle,
+      projectId: d.projectId,
+      href: `/projects/${d.projectId}/decisions`,
+      ageDays: overdueDays,
+      score: score(DECISION_BASE[d.impact] ?? DECISION_BASE.MEDIUM, overdueDays),
     });
   }
 

@@ -245,6 +245,38 @@ export async function getOpenContractorSubmissions(supabase: Client): Promise<Co
   return (data ?? []).map((r) => ({ id: r.id, kind: r.kind, subject: r.subject, createdAt: r.created_at }));
 }
 
+export type PendingDecision = {
+  id: string;
+  title: string;
+  projectId: string;
+  projectTitle: string | null;
+  impact: string;
+  reviewDeadline: string | null;
+};
+
+/** Decisions sent to the client for review (CRIF state CLIENT_REVIEW) —
+ * awaiting an ACCEPTED/REJECTED response (see lib/decisions.ts's
+ * DECISION_TRANSITIONS), the decision-register equivalent of `approvals`'
+ * own pending bucket above. Moved here from an inline query in
+ * dashboard/page.tsx (2026-09-13 restructure) so lib/dashboard/priority.ts
+ * can pool it into the ranked Action Queue alongside tasks/approvals/
+ * requests, not just display it in its own separate widget. */
+export async function getPendingClientReviewDecisions(supabase: Client): Promise<PendingDecision[]> {
+  const { data } = await supabase
+    .from("decisions")
+    .select("id, title, impact, review_deadline, project_id, project_offices(title)")
+    .eq("state", "CLIENT_REVIEW")
+    .order("review_deadline", { ascending: true, nullsFirst: false });
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    title: r.title,
+    projectId: r.project_id,
+    projectTitle: embedOne<{ title: string }>(r.project_offices)?.title ?? null,
+    impact: r.impact,
+    reviewDeadline: r.review_deadline,
+  }));
+}
+
 export type OpenTask = {
   id: string;
   title: string;

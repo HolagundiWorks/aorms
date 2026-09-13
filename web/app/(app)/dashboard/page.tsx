@@ -5,7 +5,8 @@ import { KpiTile as Kpi } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { DashboardWidget, EmptyRow, WidgetRow } from "../../../components/aorms/dashboard/DashboardWidget";
 import { TodaysBrief } from "../../../components/aorms/dashboard/TodaysBrief";
-import { TopPriorities } from "../../../components/aorms/dashboard/TopPriorities";
+import { ActionQueue } from "../../../components/aorms/dashboard/ActionQueue";
+import { DashboardTabs } from "../../../components/aorms/dashboard/DashboardTabs";
 import { getTopPriorities } from "../../../lib/dashboard/priority";
 import { getLowConfidenceTasks } from "../../../lib/pulse/queries";
 import {
@@ -16,6 +17,7 @@ import {
   getOpenConsultantRequests,
   getOpenContractorSubmissions,
   getOpenTenders,
+  getPendingClientReviewDecisions,
   getReadyToBill,
 } from "../../../lib/dashboard/queries";
 
@@ -98,7 +100,7 @@ export default async function DashboardPage() {
     { data: myTasks },
     { data: upcomingMeetings },
     { data: siteUpdates },
-    { data: pendingDecisions },
+    pendingDecisions,
     topPriorities,
     absences,
     readyToBill,
@@ -135,13 +137,8 @@ export default async function DashboardPage() {
       .select("id, period_start, period_end, physical_progress_pct, project_offices(title)")
       .order("created_at", { ascending: false })
       .limit(6),
-    supabase
-      .from("decisions")
-      .select("id, title, impact, review_deadline, project_id, project_offices(title)")
-      .eq("state", "CLIENT_REVIEW")
-      .order("review_deadline", { ascending: true, nullsFirst: false })
-      .limit(6),
-    getTopPriorities(supabase, today),
+    getPendingClientReviewDecisions(supabase),
+    getTopPriorities(supabase, today, 8),
     getAbsencesToday(supabase, today),
     getReadyToBill(supabase),
     getAwaitingPayment(supabase, today),
@@ -157,6 +154,308 @@ export default async function DashboardPage() {
   const showFinancials = hasRank(profile?.role, 80);
   const openRequestCount = clientRequests.length + consultantRequests.length + openTenders.length;
 
+  const financePanel = showFinancials ? (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))",
+        gap: "1rem",
+        alignItems: "start",
+      }}
+    >
+      <DashboardWidget title="Ready to Bill" viewAllHref="/invoices">
+        {readyToBill.rows.length === 0 ? (
+          <EmptyRow text="Nothing drafted right now." />
+        ) : (
+          readyToBill.rows.map((r) => (
+            <WidgetRow
+              key={r.id}
+              href={`/invoices/${r.id}`}
+              primary={r.ref}
+              secondary={r.projectTitle ?? "—"}
+              right={<span className="cds--type-body-01">{formatInr(r.netReceivablePaise)}</span>}
+            />
+          ))
+        )}
+      </DashboardWidget>
+
+      <DashboardWidget title="Awaiting Payment" viewAllHref="/invoices">
+        {awaitingPayment.rows.length === 0 ? (
+          <EmptyRow text="Nothing issued and unpaid right now." />
+        ) : (
+          awaitingPayment.rows.map((r) => (
+            <WidgetRow
+              key={r.id}
+              href={`/invoices/${r.id}`}
+              primary={r.ref}
+              secondary={r.projectTitle ?? "—"}
+              right={
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}>
+                  <span className="cds--type-body-01">{formatInr(r.outstandingPaise)}</span>
+                  {r.daysSinceIssue !== null && (
+                    <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                      {r.daysSinceIssue}d since issued
+                    </span>
+                  )}
+                </div>
+              }
+            />
+          ))
+        )}
+      </DashboardWidget>
+    </div>
+  ) : null;
+
+  const teamAndSitePanel = (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))",
+        gap: "1rem",
+        alignItems: "start",
+      }}
+    >
+      <DashboardWidget title="Team Availability Today">
+        {absences.length === 0 ? (
+          <EmptyRow text="Everyone's in — no one is on approved leave." />
+        ) : (
+          absences.map((a) => <WidgetRow key={a.id} primary={a.teamMemberName} secondary={`${a.type} · back ${a.toDate}`} />)
+        )}
+      </DashboardWidget>
+
+      <DashboardWidget title="Site Updates" viewAllHref="/progress-reports">
+        {(siteUpdates ?? []).length === 0 ? (
+          <EmptyRow text="No progress reports yet." />
+        ) : (
+          (siteUpdates ?? []).map((r) => {
+            const project = Array.isArray(r.project_offices) ? r.project_offices[0] : (r.project_offices as { title: string } | null);
+            return (
+              <WidgetRow
+                key={r.id}
+                primary={project?.title ?? "—"}
+                secondary={`${r.period_start} – ${r.period_end}`}
+                right={
+                  r.physical_progress_pct != null ? (
+                    <Tag type="blue" size="sm">
+                      {r.physical_progress_pct}% built
+                    </Tag>
+                  ) : undefined
+                }
+              />
+            );
+          })
+        )}
+      </DashboardWidget>
+
+      <DashboardWidget title="Scheduled Meetings" viewAllHref="/moms">
+        {(upcomingMeetings ?? []).length === 0 ? (
+          <EmptyRow text="No meetings scheduled." />
+        ) : (
+          (upcomingMeetings ?? []).map((m) => {
+            const project = Array.isArray(m.project_offices) ? m.project_offices[0] : (m.project_offices as { title: string } | null);
+            return (
+              <WidgetRow
+                key={m.id}
+                href={`/moms/${m.id}`}
+                primary={m.title}
+                secondary={`${project?.title ?? "—"}${m.venue ? ` · ${m.venue}` : ""}`}
+                right={
+                  <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                    {m.meeting_date}
+                  </span>
+                }
+              />
+            );
+          })
+        )}
+      </DashboardWidget>
+
+      <DashboardWidget title="Contractor Submissions">
+        {contractorSubmissions.length === 0 ? (
+          <EmptyRow text="No contractor submissions yet — this doesn't have a submit path built yet." />
+        ) : (
+          contractorSubmissions.map((c) => <WidgetRow key={c.id} primary={c.subject} secondary={c.kind} />)
+        )}
+      </DashboardWidget>
+    </div>
+  );
+
+  const pipelineAndPartnersPanel = (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))",
+        gap: "1rem",
+        alignItems: "start",
+      }}
+    >
+      <DashboardWidget title="Client Approvals" viewAllHref="/approvals">
+        {approvals.pending.length === 0 ? (
+          <EmptyRow text="Nothing awaiting client response." />
+        ) : (
+          approvals.pending.map((a) => (
+            <WidgetRow
+              key={a.id}
+              primary={a.title}
+              secondary={a.projectTitle ?? "—"}
+              right={
+                <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  sent {a.date ?? "—"}
+                </span>
+              }
+            />
+          ))
+        )}
+      </DashboardWidget>
+
+      <DashboardWidget title="Decisions Awaiting Client">
+        {pendingDecisions.length === 0 ? (
+          <EmptyRow text="No decisions awaiting client response." />
+        ) : (
+          pendingDecisions.map((d) => (
+            <WidgetRow
+              key={d.id}
+              href={`/projects/${d.projectId}/decisions`}
+              primary={d.title}
+              secondary={d.reviewDeadline ? `${d.projectTitle ?? "—"} · due ${d.reviewDeadline}` : (d.projectTitle ?? "—")}
+              right={
+                <Tag type={IMPACT_TAG[d.impact] ?? "gray"} size="sm">
+                  {d.impact}
+                </Tag>
+              }
+            />
+          ))
+        )}
+      </DashboardWidget>
+
+      <DashboardWidget title="Client Requests">
+        {clientRequests.length === 0 ? (
+          <EmptyRow text="No open client requests." />
+        ) : (
+          clientRequests.map((r) => (
+            <WidgetRow
+              key={r.id}
+              href={`/projects/${r.projectId}`}
+              primary={r.subject}
+              secondary={r.projectTitle ?? "—"}
+              right={
+                <Tag type={r.revisionCategory === "CRITICAL" ? "red" : "blue"} size="sm">
+                  {REQUEST_KIND_LABEL[r.kind] ?? r.kind}
+                </Tag>
+              }
+            />
+          ))
+        )}
+      </DashboardWidget>
+
+      <DashboardWidget title="Consultant Requests" viewAllHref="/consultants">
+        {consultantRequests.length === 0 ? (
+          <EmptyRow text="No open consultant requests." />
+        ) : (
+          consultantRequests.map((r) => (
+            <WidgetRow
+              key={r.id}
+              primary={r.subject}
+              secondary={`${r.consultantName ?? "—"} · ${r.projectTitle ?? "—"}`}
+              right={
+                <Tag type="teal" size="sm">
+                  {REQUEST_KIND_LABEL[r.kind] ?? r.kind}
+                </Tag>
+              }
+            />
+          ))
+        )}
+      </DashboardWidget>
+
+      <DashboardWidget title="Open Tenders">
+        {openTenders.length === 0 ? (
+          <EmptyRow text="No tenders currently open." />
+        ) : (
+          openTenders.map((t) => (
+            <WidgetRow
+              key={t.id}
+              primary={t.title}
+              secondary={`${t.projectTitle ?? "—"}${t.dueDate ? ` · due ${t.dueDate}` : ""}`}
+              right={
+                <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  {t.bidCount}/{t.invitationCount} bid{t.invitationCount === 1 ? "" : "s"}
+                </span>
+              }
+            />
+          ))
+        )}
+      </DashboardWidget>
+    </div>
+  );
+
+  const myWorkPanel = (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))",
+        gap: "1rem",
+        alignItems: "start",
+      }}
+    >
+      <DashboardWidget title="My Tasks" viewAllHref="/tasks">
+        {!user || (myTasks ?? []).length === 0 ? (
+          <EmptyRow text="No open tasks assigned to you." />
+        ) : (
+          (myTasks ?? []).map((t) => {
+            const project = Array.isArray(t.project_offices) ? t.project_offices[0] : (t.project_offices as { title: string } | null);
+            const overdue = !!t.due_date && t.due_date < today;
+            return (
+              <WidgetRow
+                key={t.id}
+                primary={t.title}
+                secondary={project?.title ?? "—"}
+                right={
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}>
+                    {t.due_date && (
+                      <span
+                        className="cds--type-helper-text-01"
+                        style={{ color: overdue ? "var(--cds-support-error)" : "var(--cds-text-secondary)" }}
+                      >
+                        {overdue ? "Overdue " : "Due "}
+                        {t.due_date}
+                      </span>
+                    )}
+                    <Tag type={PRIORITY_TAG[t.priority] ?? "gray"} size="sm">
+                      {t.priority}
+                    </Tag>
+                  </div>
+                }
+              />
+            );
+          })
+        )}
+      </DashboardWidget>
+
+      {/* ESTI Pulse (2026-09-12) — deterministic confidence scoring, see
+          lib/pulse/scoring.ts. Links to /pulse for the full Priority/
+          Blocked/Missing-parameter picture. */}
+      <DashboardWidget title="Low Confidence Tasks" viewAllHref="/pulse">
+        {lowConfidenceTasks.length === 0 ? (
+          <EmptyRow text="Nothing flagged low-confidence right now." />
+        ) : (
+          lowConfidenceTasks.map((t) => (
+            <WidgetRow
+              key={t.id}
+              href="/pulse"
+              primary={t.title}
+              secondary={t.projectTitle ?? "—"}
+              right={
+                <span className="cds--type-helper-text-01" style={{ color: "var(--cds-support-warning)" }}>
+                  {t.confidenceScore}% confidence
+                </span>
+              }
+            />
+          ))
+        )}
+      </DashboardWidget>
+    </div>
+  );
+
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
@@ -166,11 +465,19 @@ export default async function DashboardPage() {
             page (2026-09-10 redesign). */}
         <TodaysBrief />
 
-        {/* Top 3 Priorities — ranked across tasks/approvals/requests,
-            see lib/dashboard/priority.ts for the scoring formula. */}
-        <TopPriorities items={topPriorities} />
+        {/* Action Queue — replaces the old view-only "Top 3 Priorities"
+            card grid (2026-09-13 restructure): same ranked pool from
+            lib/dashboard/priority.ts, now also pooling in decisions
+            awaiting client review, shown 8-deep instead of 3, and with a
+            real one-click resolution inline wherever one honestly exists
+            (see ActionQueue.tsx/QueueActions.tsx). This is the page's
+            actual "what to do next," not just a highlight reel. */}
+        <ActionQueue items={topPriorities} />
 
-        {/* Headline numbers */}
+        {/* Headline numbers — kept as a compact glance strip, distinct
+            from the Action Queue above (a count, not a thing to act on)
+            and from the Finance tab below (a bucket's own dollar total,
+            not its line-item list). */}
         <div
           style={{
             display: "grid",
@@ -190,316 +497,18 @@ export default async function DashboardPage() {
           <FinancialSummary />
         </div>
 
-        {/* What needs attention — the new widgets this redesign adds.
-            alignItems: "start" — CSS Grid defaults to "stretch", which
-            forces every DashboardWidget (a plain Tile, no fixed height) in
-            a row to match its tallest sibling; same defect found and fixed
-            on /pulse's widget grid. */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))",
-            gap: "1rem",
-            marginBottom: "2rem",
-            alignItems: "start",
-          }}
-        >
-          <DashboardWidget title="Team Availability Today">
-            {absences.length === 0 ? (
-              <EmptyRow text="Everyone's in — no one is on approved leave." />
-            ) : (
-              absences.map((a) => (
-                <WidgetRow
-                  key={a.id}
-                  primary={a.teamMemberName}
-                  secondary={`${a.type} · back ${a.toDate}`}
-                />
-              ))
-            )}
-          </DashboardWidget>
-
-          {showFinancials && (
-            <DashboardWidget title="Ready to Bill" viewAllHref="/invoices">
-              {readyToBill.rows.length === 0 ? (
-                <EmptyRow text="Nothing drafted right now." />
-              ) : (
-                readyToBill.rows.map((r) => (
-                  <WidgetRow
-                    key={r.id}
-                    href={`/invoices/${r.id}`}
-                    primary={r.ref}
-                    secondary={r.projectTitle ?? "—"}
-                    right={<span className="cds--type-body-01">{formatInr(r.netReceivablePaise)}</span>}
-                  />
-                ))
-              )}
-            </DashboardWidget>
-          )}
-
-          {showFinancials && (
-            <DashboardWidget title="Awaiting Payment" viewAllHref="/invoices">
-              {awaitingPayment.rows.length === 0 ? (
-                <EmptyRow text="Nothing issued and unpaid right now." />
-              ) : (
-                awaitingPayment.rows.map((r) => (
-                  <WidgetRow
-                    key={r.id}
-                    href={`/invoices/${r.id}`}
-                    primary={r.ref}
-                    secondary={r.projectTitle ?? "—"}
-                    right={
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}>
-                        <span className="cds--type-body-01">{formatInr(r.outstandingPaise)}</span>
-                        {r.daysSinceIssue !== null && (
-                          <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-                            {r.daysSinceIssue}d since issued
-                          </span>
-                        )}
-                      </div>
-                    }
-                  />
-                ))
-              )}
-            </DashboardWidget>
-          )}
-
-          <DashboardWidget title="Client Approvals" viewAllHref="/approvals">
-            {approvals.pending.length === 0 ? (
-              <EmptyRow text="Nothing awaiting client response." />
-            ) : (
-              approvals.pending.map((a) => (
-                <WidgetRow
-                  key={a.id}
-                  primary={a.title}
-                  secondary={a.projectTitle ?? "—"}
-                  right={
-                    <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      sent {a.date ?? "—"}
-                    </span>
-                  }
-                />
-              ))
-            )}
-          </DashboardWidget>
-
-          <DashboardWidget title="Client Requests">
-            {clientRequests.length === 0 ? (
-              <EmptyRow text="No open client requests." />
-            ) : (
-              clientRequests.map((r) => (
-                <WidgetRow
-                  key={r.id}
-                  href={`/projects/${r.projectId}`}
-                  primary={r.subject}
-                  secondary={r.projectTitle ?? "—"}
-                  right={
-                    <Tag type={r.revisionCategory === "CRITICAL" ? "red" : "blue"} size="sm">
-                      {REQUEST_KIND_LABEL[r.kind] ?? r.kind}
-                    </Tag>
-                  }
-                />
-              ))
-            )}
-          </DashboardWidget>
-
-          <DashboardWidget title="Consultant Requests" viewAllHref="/consultants">
-            {consultantRequests.length === 0 ? (
-              <EmptyRow text="No open consultant requests." />
-            ) : (
-              consultantRequests.map((r) => (
-                <WidgetRow
-                  key={r.id}
-                  primary={r.subject}
-                  secondary={`${r.consultantName ?? "—"} · ${r.projectTitle ?? "—"}`}
-                  right={
-                    <Tag type="teal" size="sm">
-                      {REQUEST_KIND_LABEL[r.kind] ?? r.kind}
-                    </Tag>
-                  }
-                />
-              ))
-            )}
-          </DashboardWidget>
-
-          <DashboardWidget title="Open Tenders">
-            {openTenders.length === 0 ? (
-              <EmptyRow text="No tenders currently open." />
-            ) : (
-              openTenders.map((t) => (
-                <WidgetRow
-                  key={t.id}
-                  primary={t.title}
-                  secondary={`${t.projectTitle ?? "—"}${t.dueDate ? ` · due ${t.dueDate}` : ""}`}
-                  right={
-                    <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      {t.bidCount}/{t.invitationCount} bid{t.invitationCount === 1 ? "" : "s"}
-                    </span>
-                  }
-                />
-              ))
-            )}
-          </DashboardWidget>
-
-          <DashboardWidget title="Contractor Submissions">
-            {contractorSubmissions.length === 0 ? (
-              <EmptyRow text="No contractor submissions yet — this doesn't have a submit path built yet." />
-            ) : (
-              contractorSubmissions.map((c) => (
-                <WidgetRow key={c.id} primary={c.subject} secondary={c.kind} />
-              ))
-            )}
-          </DashboardWidget>
-
-          {/* ESTI Pulse (2026-09-12) — deterministic confidence scoring,
-              see lib/pulse/scoring.ts. Links to /pulse for the full
-              Priority/Blocked/Missing-parameter picture. */}
-          <DashboardWidget title="Low Confidence Tasks" viewAllHref="/pulse">
-            {lowConfidenceTasks.length === 0 ? (
-              <EmptyRow text="Nothing flagged low-confidence right now." />
-            ) : (
-              lowConfidenceTasks.map((t) => (
-                <WidgetRow
-                  key={t.id}
-                  href="/pulse"
-                  primary={t.title}
-                  secondary={t.projectTitle ?? "—"}
-                  right={
-                    <span className="cds--type-helper-text-01" style={{ color: "var(--cds-support-warning)" }}>
-                      {t.confidenceScore}% confidence
-                    </span>
-                  }
-                />
-              ))
-            )}
-          </DashboardWidget>
-        </div>
-
-        {/* Existing widgets, kept — repositioned below the new "what
-            needs attention" section since the brief/priorities/headline
-            numbers are now the page's actual lead. Same alignItems:
-            "start" stretch fix as the grid above. */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))",
-            gap: "1rem",
-            marginBottom: "2rem",
-            alignItems: "start",
-          }}
-        >
-          <DashboardWidget title="My Tasks" viewAllHref="/tasks">
-            {!user || (myTasks ?? []).length === 0 ? (
-              <EmptyRow text="No open tasks assigned to you." />
-            ) : (
-              (myTasks ?? []).map((t) => {
-                const project = Array.isArray(t.project_offices)
-                  ? t.project_offices[0]
-                  : (t.project_offices as { title: string } | null);
-                const overdue = !!t.due_date && t.due_date < today;
-                return (
-                  <WidgetRow
-                    key={t.id}
-                    primary={t.title}
-                    secondary={project?.title ?? "—"}
-                    right={
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}>
-                        {t.due_date && (
-                          <span
-                            className="cds--type-helper-text-01"
-                            style={{ color: overdue ? "var(--cds-support-error)" : "var(--cds-text-secondary)" }}
-                          >
-                            {overdue ? "Overdue " : "Due "}
-                            {t.due_date}
-                          </span>
-                        )}
-                        <Tag type={PRIORITY_TAG[t.priority] ?? "gray"} size="sm">
-                          {t.priority}
-                        </Tag>
-                      </div>
-                    }
-                  />
-                );
-              })
-            )}
-          </DashboardWidget>
-
-          <DashboardWidget title="Scheduled Meetings" viewAllHref="/moms">
-            {(upcomingMeetings ?? []).length === 0 ? (
-              <EmptyRow text="No meetings scheduled." />
-            ) : (
-              (upcomingMeetings ?? []).map((m) => {
-                const project = Array.isArray(m.project_offices)
-                  ? m.project_offices[0]
-                  : (m.project_offices as { title: string } | null);
-                return (
-                  <WidgetRow
-                    key={m.id}
-                    href={`/moms/${m.id}`}
-                    primary={m.title}
-                    secondary={`${project?.title ?? "—"}${m.venue ? ` · ${m.venue}` : ""}`}
-                    right={
-                      <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-                        {m.meeting_date}
-                      </span>
-                    }
-                  />
-                );
-              })
-            )}
-          </DashboardWidget>
-
-          <DashboardWidget title="Site Updates" viewAllHref="/progress-reports">
-            {(siteUpdates ?? []).length === 0 ? (
-              <EmptyRow text="No progress reports yet." />
-            ) : (
-              (siteUpdates ?? []).map((r) => {
-                const project = Array.isArray(r.project_offices)
-                  ? r.project_offices[0]
-                  : (r.project_offices as { title: string } | null);
-                return (
-                  <WidgetRow
-                    key={r.id}
-                    primary={project?.title ?? "—"}
-                    secondary={`${r.period_start} – ${r.period_end}`}
-                    right={
-                      r.physical_progress_pct != null ? (
-                        <Tag type="blue" size="sm">
-                          {r.physical_progress_pct}% built
-                        </Tag>
-                      ) : undefined
-                    }
-                  />
-                );
-              })
-            )}
-          </DashboardWidget>
-
-          <DashboardWidget title="Decisions Awaiting Client">
-            {(pendingDecisions ?? []).length === 0 ? (
-              <EmptyRow text="No decisions awaiting client response." />
-            ) : (
-              (pendingDecisions ?? []).map((d) => {
-                const project = Array.isArray(d.project_offices)
-                  ? d.project_offices[0]
-                  : (d.project_offices as { title: string } | null);
-                return (
-                  <WidgetRow
-                    key={d.id}
-                    href={`/projects/${d.project_id}/decisions`}
-                    primary={d.title}
-                    secondary={
-                      d.review_deadline ? `${project?.title ?? "—"} · due ${d.review_deadline}` : project?.title ?? "—"
-                    }
-                    right={
-                      <Tag type={IMPACT_TAG[d.impact] ?? "gray"} size="sm">
-                        {d.impact}
-                      </Tag>
-                    }
-                  />
-                );
-              })
-            )}
-          </DashboardWidget>
+        {/* Everything else — organized into switchable tabs instead of
+            two long flat grids of 9 and 4 always-visible tiles stacked in
+            one scroll (2026-09-13 restructure; see DashboardTabs.tsx's
+            own header comment for the grouping rationale). Nothing here
+            was removed, just regrouped by who'd reach for it. */}
+        <div style={{ marginBottom: "2rem" }}>
+          <DashboardTabs
+            finance={financePanel}
+            teamAndSite={teamAndSitePanel}
+            pipelineAndPartners={pipelineAndPartnersPanel}
+            myWork={myWorkPanel}
+          />
         </div>
 
         <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>

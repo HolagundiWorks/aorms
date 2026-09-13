@@ -54,3 +54,35 @@ export async function createTaskRecord(
   revalidatePath("/tasks");
   return null;
 }
+
+const TASK_STATUSES = ["TODO", "IN_PROGRESS", "BLOCKED", "DONE"];
+
+/**
+ * Status-only update — genuinely didn't exist anywhere in this app before
+ * (confirmed via a full search: `createTaskRecord` above was the only
+ * write path `tasks` had at all). Added for the dashboard's Action Queue
+ * "Mark done" button (2026-09-13 restructure), but deliberately generic
+ * over the full status enum, not a one-off "mark done" mutation, so any
+ * future status control (a Kanban drag, a status Select on `/tasks`) can
+ * reuse it instead of writing a second one.
+ */
+export async function updateTaskStatus(taskId: string, status: string): Promise<{ error?: string }> {
+  if (!TASK_STATUSES.includes(status)) return { error: "Invalid status." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("tasks").update({ status }).eq("id", taskId);
+  if (error) return { error: error.message };
+
+  await supabase.rpc("write_audit", {
+    p_entity: "task",
+    p_entity_id: taskId,
+    p_action: "UPDATE",
+    p_before: null,
+    p_after: { status },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/tasks");
+  revalidatePath("/pulse");
+  return {};
+}

@@ -39,6 +39,7 @@ const KIND_LABEL: Record<PriorityItem["kind"], string> = {
   APPROVAL: "approval awaiting response",
   CLIENT_REQUEST: "client request",
   CONSULTANT_REQUEST: "consultant request",
+  DECISION: "decision awaiting client review",
 };
 
 export function buildDailyBriefText(data: DailyBriefData): string {
