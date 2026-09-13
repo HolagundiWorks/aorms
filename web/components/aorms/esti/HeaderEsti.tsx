@@ -39,7 +39,6 @@ export function HeaderEsti() {
       onRequestClose={() => setOpen(false)}
       align="bottom-end"
       caret
-      highContrast
     >
       <HeaderGlobalAction
         aria-label="Today's Brief"

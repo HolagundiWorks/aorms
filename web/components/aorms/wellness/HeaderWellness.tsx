@@ -51,7 +51,6 @@ export function HeaderWellness() {
       }}
       align="bottom-end"
       caret
-      highContrast
     >
       <HeaderGlobalAction aria-label="Wellbeing" isActive={open} onClick={() => setOpen((o) => !o)}>
         <Activity size={20} />

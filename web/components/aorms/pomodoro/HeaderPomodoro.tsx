@@ -18,7 +18,7 @@ export function HeaderPomodoro() {
   const pom = usePomodoro();
 
   return (
-    <Popover open={open} onRequestClose={() => setOpen(false)} align="bottom-end" caret highContrast>
+    <Popover open={open} onRequestClose={() => setOpen(false)} align="bottom-end" caret>
       <HeaderGlobalAction
         aria-label={pom.running ? `Pomodoro timer — ${fmtPomTime(pom.timeLeft)} remaining` : "Pomodoro timer"}
         isActive={open}
