@@ -237,6 +237,21 @@ body {
   .cds--content {
     margin-inline-start: 0 !important;
   }
+
+  // AppShell rail-mode disabled below `lg` (2026-09-13) — AppShell.tsx's
+  // SideNav now sets `isRail` (fixing "side panel isn't collapsing into
+  // icons" — the shell audit above had wrongly treated collapsed/expanded
+  // as reading identically on desktop as a deliberate choice). Carbon's own
+  // `.cds--side-nav--rail` rule sets a flat 48px width with no breakpoint
+  // gate of its own — unlike `.cds--side-nav--ux`'s, which does collapse to
+  // 0 below `lg` but loses that fight on cascade order alone, since Carbon
+  // declares `--rail`/`--expanded` later in its own stylesheet than `--ux`'s
+  // breakpoint-down rule. Below `lg` the nav is always a dismissible overlay
+  // (backdrop via `--side-nav__overlay`), so the icon-rail concept doesn't
+  // apply there — force back to the existing 0-width-closed behavior.
+  .cds--side-nav--rail:not(.cds--side-nav--expanded) {
+    inline-size: 0 !important;
+  }
 }
 
 // Blog post prose (app/blog/[slug]/page.tsx, 2026-09-10) — `marked`-rendered

@@ -171,22 +171,27 @@ function isActiveHref(pathname: string, href: string): boolean {
  * of four distinct states once combined with the viewport width (Carbon's
  * own `lg` = 66rem breakpoint, via `isPersistent`/`--side-nav--ux` below):
  *
- *   expanded       — sideNavExpanded=true  above lg  (fixed-open, Carbon
- *                    ignores the boolean entirely at this width)
- *   collapsed      — sideNavExpanded=false above lg  (same: ignored, nav
- *                    stays fixed-open — there is no "icon rail" mode in
- *                    this app, see the isChildOfHeader note below, so
- *                    "collapsed" and "expanded" read identically on
- *                    desktop by design)
+ *   expanded       — sideNavExpanded=true  above lg  (full 256px width,
+ *                    labels + icons)
+ *   collapsed      — sideNavExpanded=false above lg  (icon rail, 48px —
+ *                    `isRail` below; temporarily re-expands on hover/
+ *                    focus via Carbon's own internal hover state, then
+ *                    collapses back on mouse-leave/blur)
  *   mobile-open    — sideNavExpanded=true  at/below lg (dismissible
- *                    overlay, backdrop visible)
+ *                    overlay, backdrop visible, full width — rail is
+ *                    disabled below lg, see globals.scss)
  *   mobile-closed  — sideNavExpanded=false at/below lg (nav is 0-width,
  *                    off-canvas)
  *
- * Named here explicitly (2026-09-14 shell audit) so the mapping is
- * documented in one place rather than left implicit in the interaction
- * between this boolean and globals.scss's breakpoint CSS — no behavior
- * change, this mechanism was already the Carbon-correct one.
+ * 2026-09-13 correction: this used to say "there is no icon rail mode in
+ * this app" and treated collapsed/expanded as reading identically on
+ * desktop by design — reported back live as "side panel is not collapsing
+ * into icons," i.e. that reading was wrong, not a deliberate choice the
+ * user wanted. `isRail` (Carbon's own prop for exactly this) is now set
+ * below; see globals.scss's own comment for why it needs an explicit
+ * below-`lg` override (`--side-nav--rail`'s 48px has no breakpoint gate of
+ * its own, unlike `--side-nav--ux`'s, so without that override rail width
+ * would also apply on mobile where the nav is meant to be an overlay).
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -267,6 +272,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SideNav
         aria-label="Side navigation"
         expanded={sideNavExpanded}
+        isRail
         onOverlayClick={() => setSideNavExpanded(false)}
         onSideNavBlur={() => setSideNavExpanded(false)}
       >
