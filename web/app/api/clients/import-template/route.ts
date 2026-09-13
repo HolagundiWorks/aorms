@@ -13,7 +13,7 @@
 import { NextResponse } from "next/server";
 import { toCsv, csvResponseInit } from "../../../../lib/import-export/csv";
 
-const COLUMNS = ["Name", "Type", "City", "Email", "Phone"];
+const COLUMNS = ["Name", "Type", "City", "Email", "Phone", "Contact person"];
 
 export async function GET(): Promise<NextResponse> {
   const csv = toCsv(
@@ -24,6 +24,7 @@ export async function GET(): Promise<NextResponse> {
         City: "Bengaluru",
         Email: "contact@aurelia.example",
         Phone: "9876543210",
+        "Contact person": "Aditi Rao",
       },
     ],
     COLUMNS,

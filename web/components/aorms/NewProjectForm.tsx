@@ -62,6 +62,23 @@ export function NewProjectForm({ clients, onSuccess }: { clients: ClientOption[]
             ))}
           </Select>
           <TextInput id="city" name="city" labelText="City" />
+          {/* Project-specific communication contact — independent of the
+              selected client's own email/phone above (migration 0044).
+              The project still shows the client's own info via clientId;
+              this is who to actually reach for THIS project. */}
+          <TextInput
+            id="contactEmail"
+            name="contactEmail"
+            labelText="Contact email"
+            type="email"
+            placeholder="Project-specific, if different from the client's own"
+          />
+          <TextInput
+            id="contactPhone"
+            name="contactPhone"
+            labelText="Contact phone"
+            placeholder="Project-specific, if different from the client's own"
+          />
         </FormGrid>
         <Button type="submit" disabled={pending}>
           {pending ? "Creating…" : "Create project"}

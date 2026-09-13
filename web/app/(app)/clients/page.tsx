@@ -21,7 +21,7 @@ export default async function ClientsPage() {
   const supabase = await createClient();
   const { data: clients, error } = await supabase
     .from("clients")
-    .select("id, name, kind, city, email, phone, disabled")
+    .select("id, name, kind, city, email, phone, contact_person, disabled")
     .order("name");
 
   const rows = clients ?? [];
@@ -78,6 +78,7 @@ export default async function ClientsPage() {
                     <TableHeader>City</TableHeader>
                     <TableHeader>Email</TableHeader>
                     <TableHeader>Phone</TableHeader>
+                    <TableHeader>Contact person</TableHeader>
                     <TableHeader>Status</TableHeader>
                   </TableRow>
                 </TableHead>
@@ -89,6 +90,7 @@ export default async function ClientsPage() {
                       <TableCell>{c.city ?? "—"}</TableCell>
                       <TableCell>{c.email ?? "—"}</TableCell>
                       <TableCell>{c.phone ?? "—"}</TableCell>
+                      <TableCell>{c.contact_person ?? "—"}</TableCell>
                       <TableCell>
                         <Tag type={c.disabled ? "gray" : "green"} size="sm">
                           {c.disabled ? "Disabled" : "Active"}
@@ -98,7 +100,7 @@ export default async function ClientsPage() {
                   ))}
                   {(clients ?? []).length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6}>
+                      <TableCell colSpan={7}>
                         <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                           No clients yet.
                         </p>

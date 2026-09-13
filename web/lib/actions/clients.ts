@@ -33,7 +33,14 @@ export async function importClientsCsv(_prev: ImportClientsState, formData: Form
   if (rows.length === 0) return { error: "No rows found in that file." };
 
   const skipped: { row: number; message: string }[] = [];
-  const toInsert: { name: string; kind: string; city: string | null; email: string | null; phone: string | null }[] = [];
+  const toInsert: {
+    name: string;
+    kind: string;
+    city: string | null;
+    email: string | null;
+    phone: string | null;
+    contact_person: string | null;
+  }[] = [];
 
   rows.forEach((row, i) => {
     const rowNumber = i + 2; // +1 for 1-indexing, +1 for the header row
@@ -56,6 +63,7 @@ export async function importClientsCsv(_prev: ImportClientsState, formData: Form
       city: (row.City ?? "").trim() || null,
       email: (row.Email ?? "").trim() || null,
       phone: (row.Phone ?? "").trim() || null,
+      contact_person: (row["Contact person"] ?? "").trim() || null,
     });
   });
 
@@ -64,7 +72,10 @@ export async function importClientsCsv(_prev: ImportClientsState, formData: Form
   if (toInsert.length === 0) return { imported: 0, skipped };
 
   const supabase = await createClient();
-  const { data: inserted, error } = await supabase.from("clients").insert(toInsert).select("id, name, kind, city, email, phone");
+  const { data: inserted, error } = await supabase
+    .from("clients")
+    .insert(toInsert)
+    .select("id, name, kind, city, email, phone, contact_person");
   if (error) return { error: error.message };
 
   for (const row of inserted ?? []) {
@@ -90,13 +101,18 @@ export async function createClientRecord(
   const city = String(formData.get("city") ?? "").trim() || null;
   const email = String(formData.get("email") ?? "").trim() || null;
   const phone = String(formData.get("phone") ?? "").trim() || null;
+  // Who to actually call at a COMPANY/ARCHITECT_FIRM client — the record's
+  // own name/email/phone are the organization's, not a named person's (an
+  // INDIVIDUAL client doesn't need this: the client IS the contact). See
+  // migration 0044's own header comment.
+  const contactPerson = String(formData.get("contactPerson") ?? "").trim() || null;
 
   if (!name) return { error: "Name is required." };
 
   const supabase = await createClient();
   const { data: inserted, error } = await supabase
     .from("clients")
-    .insert({ name, kind, city, email, phone })
+    .insert({ name, kind, city, email, phone, contact_person: contactPerson })
     .select("id")
     .single();
 
@@ -107,7 +123,7 @@ export async function createClientRecord(
     p_entity_id: inserted.id,
     p_action: "CREATE",
     p_before: null,
-    p_after: { name, kind, city, email, phone },
+    p_after: { name, kind, city, email, phone, contactPerson },
   });
 
   revalidatePath("/clients");

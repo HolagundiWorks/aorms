@@ -14,6 +14,14 @@ export async function createProjectRecord(
   const workType = String(formData.get("workType") ?? "ARCHITECTURE");
   const clientId = String(formData.get("clientId") ?? "").trim() || null;
   const city = String(formData.get("city") ?? "").trim() || null;
+  // Project-specific communication contact (migration 0044) — deliberately
+  // independent of the selected client's own email/phone: the project
+  // still reads the client's name/other info via clientId as before, but
+  // day-to-day project communication often goes to a different address
+  // (site coordination, a specific point of contact for this job) than
+  // the client record's own default.
+  const contactEmail = String(formData.get("contactEmail") ?? "").trim() || null;
+  const contactPhone = String(formData.get("contactPhone") ?? "").trim() || null;
 
   if (!title) return { error: "Title is required." };
   if (!projectType) return { error: "Project type is required." };
@@ -42,6 +50,8 @@ export async function createProjectRecord(
       work_type: workType,
       client_id: clientId,
       city,
+      contact_email: contactEmail,
+      contact_phone: contactPhone,
       created_by_id: user?.id ?? null,
     })
     .select("id")
@@ -54,7 +64,7 @@ export async function createProjectRecord(
     p_entity_id: inserted.id,
     p_action: "CREATE",
     p_before: null,
-    p_after: { title, projectType, workType, clientId, city },
+    p_after: { title, projectType, workType, clientId, city, contactEmail, contactPhone },
   });
 
   revalidatePath("/projects");

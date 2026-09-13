@@ -8,6 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  Tile,
 } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { AddPhaseForm } from "../../../../components/aorms/AddPhaseForm";
@@ -34,7 +35,9 @@ export default async function ProjectDetailPage({
   ] = await Promise.all([
     supabase
       .from("project_offices")
-      .select("id, ref, title, project_type, work_type, status, city, clients(name)")
+      .select(
+        "id, ref, title, project_type, work_type, status, city, contact_email, contact_phone, clients(name, email, phone, contact_person)",
+      )
       .eq("id", id)
       .maybeSingle(),
     supabase
@@ -60,9 +63,11 @@ export default async function ProjectDetailPage({
 
   if (!project) notFound();
 
-  const clientName = Array.isArray(project.clients)
-    ? project.clients[0]?.name
-    : (project.clients as { name: string } | null)?.name;
+  type ClientInfo = { name: string; email: string | null; phone: string | null; contact_person: string | null };
+  const client: ClientInfo | null = Array.isArray(project.clients)
+    ? (project.clients[0] ?? null)
+    : (project.clients as ClientInfo | null);
+  const clientName = client?.name;
 
   const gate = await getActivationGate(project.id);
   const decisionsAwaitingClient = (decisionStates ?? []).filter((d) => d.state === "CLIENT_REVIEW").length;
@@ -101,6 +106,42 @@ export default async function ProjectDetailPage({
               <KpiTile label="Decisions logged" value={(decisionStates ?? []).length} />
               <KpiTile label="Awaiting client" value={decisionsAwaitingClient} />
             </div>
+
+            {/* Client + project contact (migration 0044) — the project
+                reads the selected client's own info as before (name here,
+                email/phone/contact_person below), but contact_email/
+                contact_phone are the project's OWN, independent fields:
+                day-to-day communication on this specific job may go to a
+                different address than the client record's own default.
+                Shown only when there's something to show at all. */}
+            {(client || project.contact_email || project.contact_phone) && (
+              <Tile style={{ marginBottom: "2rem" }}>
+                <p className="cds--type-heading-compact-02" style={{ marginBottom: "0.75rem" }}>
+                  Contact
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(14rem, 1fr))", gap: "1rem" }}>
+                  {client && (
+                    <div>
+                      <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        Client — {client.name}
+                        {client.contact_person ? ` (c/o ${client.contact_person})` : ""}
+                      </p>
+                      <p className="cds--type-body-01">{client.email ?? "—"}</p>
+                      <p className="cds--type-body-01">{client.phone ?? "—"}</p>
+                    </div>
+                  )}
+                  {(project.contact_email || project.contact_phone) && (
+                    <div>
+                      <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        This project (if different from the client&apos;s own)
+                      </p>
+                      <p className="cds--type-body-01">{project.contact_email ?? "—"}</p>
+                      <p className="cds--type-body-01">{project.contact_phone ?? "—"}</p>
+                    </div>
+                  )}
+                </div>
+              </Tile>
+            )}
 
             {project.status !== "ACTIVE" && project.status !== "COMPLETED" && project.status !== "CANCELLED" && (
               <>
