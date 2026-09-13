@@ -183,7 +183,6 @@ export default async function PulsePage() {
     pulsePriorities,
     blockedTasks,
     missingParams,
-    { data: projects },
   ] = await Promise.all([
     supabase.from("clients").select("id", { count: "exact", head: true }),
     supabase.from("project_offices").select("id", { count: "exact", head: true }),
@@ -224,7 +223,6 @@ export default async function PulsePage() {
     getTopPriorityTasks(supabase),
     getBlockedTasks(supabase),
     getOpenMissingParams(supabase),
-    supabase.from("project_offices").select("id, title").order("title"),
   ]);
 
   const { data: profile } = user ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : { data: null };
@@ -551,7 +549,7 @@ export default async function PulsePage() {
 
       <div style={{ maxWidth: "36rem" }}>
         <DashboardWidget title="Ask Pulse">
-          <AskPulseForm projects={projects ?? []} />
+          <AskPulseForm />
         </DashboardWidget>
       </div>
     </>

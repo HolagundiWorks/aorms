@@ -6,28 +6,27 @@
  * comment). NL interaction gets this dedicated home instead, matching
  * the plan's explicit "own home rather than re-litigating the header
  * again" decision.
+ *
+ * 2026-09-14 simplification (explicit request): dropped the intro
+ * helper paragraph and the manual "Project" selector — project scoping
+ * is now entirely automatic from screen context (FloatingAskPulse.tsx
+ * parses the current URL), carried here as a plain hidden field rather
+ * than a visible dropdown. `projects` is no longer needed by this
+ * component at all (nothing left renders from it); callers stopped
+ * passing it in the same change.
  */
 import { useActionState } from "react";
-import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea } from "@carbon/react";
+import { Button, Form, InlineNotification, Stack, TextArea } from "@carbon/react";
 import { askPulse, type AskPulseState } from "../../../lib/actions/ask-pulse";
-
-type ProjectOption = { id: string; title: string };
 
 const initialState: AskPulseState = null;
 
 export function AskPulseForm({
-  projects,
   defaultProjectId,
 }: {
-  projects: ProjectOption[];
-  /** Pre-selects the project selector (2026-09-14, explicit request: "the
-   * current screen will give the pulse context") — FloatingAskPulse.tsx
-   * passes the project id parsed from the current URL when the user is
-   * on that project's own pages, so a question asked while looking at a
-   * project is scoped to it by default without an extra click. Still
-   * just the Select's normal default value, not a hidden/forced
-   * scope — the person can always pick "— Not project-specific —" or a
-   * different project instead. */
+  /** Set by FloatingAskPulse.tsx from the current URL when the screen is
+   * a project's own page — submitted as a hidden field so the question
+   * is scoped to that project without any visible control for it. */
   defaultProjectId?: string;
 }) {
   const [state, formAction, pending] = useActionState(askPulse, initialState);
@@ -35,25 +34,21 @@ export function AskPulseForm({
   return (
     <Form action={formAction}>
       <Stack gap={4}>
-        <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-          Ask about priorities, open tasks, or gaps — or, for a project&apos;s own meeting minutes, progress
-          reports, and decisions, pick that project below first.
-        </p>
+        {/* readOnly: a plain reactive `value` (not `defaultValue`) so this
+            actually updates if `defaultProjectId` changes without a
+            remount — React just warns about a controlled field with no
+            onChange otherwise, which `readOnly` cleanly states is
+            intentional for a field the user never edits directly. */}
+        <input type="hidden" name="projectId" value={defaultProjectId ?? ""} readOnly />
         <TextArea
           id="question"
           name="question"
-          labelText="Ask Pulse"
+          labelText="Ask ESTI"
           placeholder="e.g. What's most urgent today? / What did we decide about the facade?"
           rows={2}
           maxCount={500}
           enableCounter
         />
-        <Select id="projectId" name="projectId" labelText="Project (for record lookups)" defaultValue={defaultProjectId ?? ""}>
-          <SelectItem value="" text="— Not project-specific —" />
-          {projects.map((p) => (
-            <SelectItem key={p.id} value={p.id} text={p.title} />
-          ))}
-        </Select>
         <Button type="submit" disabled={pending} style={{ alignSelf: "flex-start" }}>
           {pending ? "Asking…" : "Ask"}
         </Button>
