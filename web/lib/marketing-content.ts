@@ -165,12 +165,12 @@ export const FEE_PROPOSAL = [
   {
     eyebrow: "Scope",
     title: "Every plan, the same hub",
-    body: "Trial, Standard, and Premium all run the same office hub — clients, projects, proposals, invoices, team, knowledge bank, delivery tracking. Plans differ in seats and support, never in which features you can reach.",
+    body: "Trial, Pro, and Enterprise all run the same office hub — clients, projects, proposals, invoices, team, knowledge bank, delivery tracking. Plans differ in team size and support, never in which features you can reach.",
   },
   {
     eyebrow: "Basis of fee",
-    title: "Licensed per seat",
-    body: "One licence per studio, priced per staff seat, managed from your own AORMS Identity — start on Trial, upgrade in-app when you're ready. No edition lock-in, no separate module purchases.",
+    title: "One flat fee, no per-seat billing",
+    body: "One licence per studio, a flat annual fee — managed from your own AORMS Identity — start on Trial, upgrade in-app when you're ready. No edition lock-in, no separate module purchases, no per-seat math.",
   },
   {
     eyebrow: "Exclusions",
@@ -178,6 +178,45 @@ export const FEE_PROPOSAL = [
     body: "ESTI runs on the hub against your firm's own data — no per-token billing, no bring-your-own key needed, on every plan including Trial.",
   },
 ] as const;
+
+/**
+ * Real prices (2026-09-14) — plan_pricing on the AORMS Platform
+ * (platform/supabase/migrations/0018_identity_verification_pro_seats_
+ * connectdex_tiers.sql, 0019_studio_pro_enterprise_tiers.sql). AORMS
+ * Identity is free; its ₹199 is a one-time, 100-usage-hour-gated
+ * verification fee, not a subscription — worded accordingly below, not
+ * as "199/year" the way Pro/Enterprise's own annual fees are. ConnectDeX
+ * Partners' Base Line/Pro/Pro Plus tiers (renamed from Silver/Gold/
+ * Platinum) are deliberately unpriced here — explicit user direction —
+ * described by feature only.
+ */
+export const PRICING = {
+  identity: {
+    name: "AORMS Identity",
+    price: "Free",
+    detail: "₹199 one-time — after 100 hours of active use, to permanently verify your identity. Never required, never recurring.",
+  },
+  studioPro: {
+    name: "Studio Pro",
+    price: "₹1,999/year",
+    detail: "Up to 20 team members on PRO status, the full office hub, everything in Trial plus ongoing support.",
+  },
+  studioEnterprise: {
+    name: "Studio Enterprise",
+    price: "₹14,999/year",
+    detail: "For studios with 20+ team members — effectively unlimited PRO seats, plus your own address: yourstudio.aorms.in.",
+  },
+  connectDexOnboarding: {
+    name: "ConnectDeX Partners onboarding",
+    price: "₹5,999 one-time",
+    detail: "A single onboarding fee to list your catalogue — no recurring platform fee to be found.",
+  },
+  connectDexTiers: [
+    { name: "Base Line", detail: "Company listing, up to 5 product categories." },
+    { name: "Pro", detail: "Unlimited catalogue, interactive browsing for buyers." },
+    { name: "Pro Plus", detail: "Everything in Pro, plus direct purchase-order generation and lead delivery." },
+  ],
+} as const;
 
 /**
  * Two distinct identity types on the AORMS Platform (2026-09-10 rewrite —
@@ -195,13 +234,13 @@ export const FEE_PROPOSAL = [
 export const INDIVIDUAL_IDENTITY = {
   eyebrow: "Individual Identity",
   title: "You, not your employer.",
-  body: "A portable personal account — one AORMS-U- handle that's yours alone, independent of who currently employs you. Link it once, carry it into every practice you work at, present or future. Every identity starts Basic and promotes to Pro automatically at 100 hours of active use — no form, no approval step, nothing to apply for.",
+  body: "A portable personal account — one AORMS-U- handle that's yours alone, independent of who currently employs you, and free for as long as you use it. Link it once, carry it into every practice you work at, present or future. PRO status is something your studio grants you from its own plan — not automatic, and never something you pay for yourself. After 100 hours of use, a one-time ₹199 fee permanently verifies your identity, entirely optional.",
 } as const;
 
 export const STUDIO_IDENTITY = {
   eyebrow: "Studio Identity",
   title: "Your practice's own account.",
-  body: "Your architecture practice gets its own identity too — an AORMS-S- handle, separate from any one person's login. Invite your team, manage who's an owner versus a member, and hold the Studio's own Trial/Standard/Premium licence — all under the Studio itself, not scattered across individual accounts.",
+  body: "Your architecture practice gets its own identity too — an AORMS-S- handle, separate from any one person's login. Invite your team, manage who's an owner versus a member, and hold the Studio's own Trial/Pro/Enterprise licence — all under the Studio itself, not scattered across individual accounts. Ownership can be handed off to another member any time, in-app.",
 } as const;
 
 export const IDENTITY = [
@@ -211,14 +250,14 @@ export const IDENTITY = [
     body: "Your AORMS Identity (an AORMS-U- handle) is yours, not your studio's — link it once and carry the same account into every practice you work at, present or future.",
   },
   {
-    eyebrow: "Earned, not applied for",
-    title: "Basic to Pro at 100 hours",
-    body: "Every identity starts Basic. Cross 100 hours of active use and it promotes to Pro automatically — no form, no approval step, no application to file.",
+    eyebrow: "Granted, not automatic",
+    title: "PRO status comes from your studio",
+    body: "Every identity starts Basic and stays free either way. PRO status is something your studio grants from its own Pro/Enterprise plan — never something an individual applies for or pays for directly.",
   },
   {
     eyebrow: "Licensing lives here",
     title: "Your studio's plan, in one place",
-    body: "A studio's Trial/Standard/Premium licence, seats, and renewal all sit under the same Identity sign-in that manages the account itself.",
+    body: "A studio's Trial/Pro/Enterprise licence and renewal all sit under the same Identity sign-in that manages the account itself.",
   },
 ] as const;
 
@@ -267,12 +306,12 @@ export const FAQ = [
   {
     question: "What happens when our Trial ends?",
     answer:
-      "Every Studio starts on a 30-day Trial, no card required. If it lapses before you upgrade, the licence shows as inactive until a Standard or Premium plan is purchased — nothing is auto-charged, and nothing is deleted.",
+      "Every Studio starts on a 30-day Trial, no card required. If it lapses before you upgrade, the licence shows as inactive until Pro or Enterprise is purchased — nothing is auto-charged, and nothing is deleted.",
   },
   {
     question: "Is there a limit on team size?",
     answer:
-      "No fixed cap — licensing is per seat, so you add exactly as many staff logins as your team needs on your plan, and adjust as the practice grows.",
+      "Pro includes up to 20 team members on PRO status; Enterprise (for studios past that size) is effectively unlimited. Either way there's no fixed cap on staff logins themselves — just on how many can hold PRO status at once, which your studio assigns from its own plan.",
   },
   {
     question: "Can we bring in our existing client and project data?",

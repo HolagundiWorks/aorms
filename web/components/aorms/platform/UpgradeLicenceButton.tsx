@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Script from "next/script";
-import { Button, InlineNotification, Stack, TextInput } from "@carbon/react";
+import { Button, InlineNotification, RadioButton, RadioButtonGroup, Stack } from "@carbon/react";
 import { createLicenceOrder, confirmPaymentClientSide } from "../../../lib/actions/platform-payments";
 
 declare global {
@@ -16,6 +16,8 @@ function formatRupees(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 }
 
+const ENTERPRISE_MIN_MEMBERS = 20;
+
 /**
  * Studio-owner-facing licence purchase — replaces the old self-serve
  * direct-edit form (UpdateLicenceForm is admin-only now, see
@@ -24,12 +26,13 @@ function formatRupees(paise: number): string {
  * renders on the licences page, not app-wide) and opens the payment sheet
  * on click.
  *
- * 2026-09-13: dropped the plan Select — AORMS Firm is the only paid Studio
- * plan now (see platform-payments.ts's createLicenceOrder). Added a live
- * price preview from `pricing` (read by the server-rendered /licences page
- * and passed down) — the exploration for this change found there was
- * previously no rupee amount shown anywhere before Razorpay's own modal
- * opened; this closes that real, pre-existing gap.
+ * 2026-09-14: back to a plan choice (Pro vs Enterprise, migration 0019
+ * split AORMS Firm into these two named tiers) — but both flat annual
+ * fees now, no seats input or per-seat formula at all (that entire
+ * concept was retired the same migration). Enterprise is disabled with
+ * an inline hint below 20 active members, mirroring the same gate
+ * createLicenceOrder enforces server-side (this is just a clean-UX
+ * short-circuit, not the real check).
  *
  * The `handler` callback below fires only after Razorpay itself confirms
  * the payment succeeded client-side — confirmPaymentClientSide is the
@@ -41,22 +44,23 @@ function formatRupees(paise: number): string {
 export function UpgradeLicenceButton({
   studioId,
   studioName,
+  activeMemberCount,
   pricing,
 }: {
   studioId: string;
   studioName: string;
-  pricing: { basePricePaise: number; pricePerSeatMonthlyPaise: number };
+  activeMemberCount: number;
+  pricing: { proPricePaise: number; enterprisePricePaise: number };
 }) {
-  const [seats, setSeats] = useState(1);
+  const enterpriseEligible = activeMemberCount >= ENTERPRISE_MIN_MEMBERS;
+  const [plan, setPlan] = useState<"PRO" | "ENTERPRISE">("PRO");
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "creating" | "paying" | "activated">("idle");
-
-  const estimatedTotalPaise = pricing.basePricePaise + pricing.pricePerSeatMonthlyPaise * 12 * seats;
 
   async function handleUpgrade() {
     setError(null);
     setStatus("creating");
-    const result = await createLicenceOrder(studioId, seats);
+    const result = await createLicenceOrder(studioId, plan);
     if ("error" in result) {
       setError(result.error);
       setStatus("idle");
@@ -70,7 +74,7 @@ export function UpgradeLicenceButton({
       currency: result.currency,
       order_id: result.orderId,
       name: "AORMS",
-      description: `AORMS Firm licence — ${studioName}`,
+      description: `Studio ${plan === "PRO" ? "Pro" : "Enterprise"} licence — ${studioName}`,
       handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
         const confirmResult = await confirmPaymentClientSide(
           response.razorpay_order_id,
@@ -106,18 +110,26 @@ export function UpgradeLicenceButton({
   return (
     <Stack gap={4}>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
-      <TextInput
-        id={`upgrade-seats-${studioId}`}
-        labelText="Seats"
-        type="number"
-        min={1}
-        value={String(seats)}
-        onChange={(e) => setSeats(Math.max(1, Number(e.target.value) || 1))}
-      />
-      <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-        {formatRupees(pricing.basePricePaise)} base + {formatRupees(pricing.pricePerSeatMonthlyPaise)}/user/month × {seats} user
-        {seats === 1 ? "" : "s"}, billed annually — <strong>{formatRupees(estimatedTotalPaise)}/year total</strong>
-      </p>
+      <RadioButtonGroup
+        legendText="Plan"
+        name={`upgrade-plan-${studioId}`}
+        valueSelected={plan}
+        onChange={(value) => setPlan(value as "PRO" | "ENTERPRISE")}
+        orientation="vertical"
+      >
+        <RadioButton id={`plan-pro-${studioId}`} labelText={`Pro — ${formatRupees(pricing.proPricePaise)}/year`} value="PRO" />
+        <RadioButton
+          id={`plan-enterprise-${studioId}`}
+          labelText={`Enterprise — ${formatRupees(pricing.enterprisePricePaise)}/year`}
+          value="ENTERPRISE"
+          disabled={!enterpriseEligible}
+        />
+      </RadioButtonGroup>
+      {!enterpriseEligible && (
+        <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+          Enterprise needs {ENTERPRISE_MIN_MEMBERS}+ active team members — this studio has {activeMemberCount}.
+        </p>
+      )}
       {error ? <InlineNotification kind="error" title="Couldn't start checkout" subtitle={error} lowContrast hideCloseButton /> : null}
       <Button kind="primary" size="sm" onClick={handleUpgrade} disabled={status !== "idle"}>
         {status === "creating" ? "Preparing…" : status === "paying" ? "Waiting for payment…" : "Upgrade"}

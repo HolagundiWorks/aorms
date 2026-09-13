@@ -5,31 +5,30 @@ import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/reac
 import { adminSetPricing, type PaymentActionState } from "../../../lib/actions/platform-payments";
 
 /**
- * One plan's price, in rupees for the inputs (friendlier than asking an
+ * One plan's price, in rupees for the input (friendlier than asking an
  * admin to type paise) — adminSetPricing converts to paise server-side.
- * Uncontrolled inputs with a `key` from the caller (see admin/pricing/
+ * Uncontrolled input with a `key` from the caller (see admin/pricing/
  * page.tsx), same reason UpdateLicenceForm needs one: without it, saving
  * once wouldn't refresh the displayed value from the next server read.
  *
- * 2026-09-13: two figures per plan now, not one — `basePriceRupees` (a
- * one-time fee for AORMS_IDENTITY — corrected from an annual figure, see
- * createIdentityOrder's header — and an annual base fee for AORMS_FIRM)
- * and `pricePerSeatMonthlyRupees` (AORMS_FIRM's ₹199/user/month rate;
- * hidden for AORMS_IDENTITY, which has no seat concept at all — the field
- * simply isn't rendered, so the action's own "default to 0 if absent"
- * handles it, see platform-payments.ts's adminSetPricing).
+ * 2026-09-14: dropped the per-seat-monthly field entirely — Pro/
+ * Enterprise's ₹199/user/month component (added 2026-09-13, migration
+ * 0017) was fully retired the same day (migration 0019, confirmed with
+ * the user: both Studio plans are flat annual fees, no per-seat billing
+ * at all). `adminSetPricing` still accepts and stores
+ * `pricePerSeatMonthlyRupees` (defaulting to 0 when absent, exactly what
+ * this form no longer sends) rather than being narrowed itself, so a
+ * future per-seat plan wouldn't need to re-litigate that action's shape.
  */
 export function SetPricingForm({
   plan,
   basePricePaise,
-  pricePerSeatMonthlyPaise,
 }: {
-  plan: "AORMS_IDENTITY" | "AORMS_FIRM";
+  plan: "AORMS_IDENTITY" | "PRO" | "ENTERPRISE";
   basePricePaise: number;
-  pricePerSeatMonthlyPaise: number;
 }) {
   const [state, formAction, pending] = useActionState<PaymentActionState, FormData>(adminSetPricing, null);
-  const planLabel = plan === "AORMS_FIRM" ? "AORMS Firm" : "AORMS Identity";
+  const planLabel = plan === "PRO" ? "Studio Pro" : plan === "ENTERPRISE" ? "Studio Enterprise" : "AORMS Identity";
 
   return (
     <Form action={formAction}>
@@ -38,23 +37,12 @@ export function SetPricingForm({
         <TextInput
           id={`pricing-base-${plan}`}
           name="basePriceRupees"
-          labelText={plan === "AORMS_IDENTITY" ? `${planLabel} — one-time fee (₹)` : `${planLabel} — base price per year (₹)`}
+          labelText={plan === "AORMS_IDENTITY" ? `${planLabel} — one-time fee (₹)` : `${planLabel} — price per year (₹)`}
           type="number"
           min={1}
           step="0.01"
           defaultValue={String(basePricePaise / 100)}
         />
-        {plan === "AORMS_FIRM" && (
-          <TextInput
-            id={`pricing-seat-${plan}`}
-            name="pricePerSeatMonthlyRupees"
-            labelText="Price per seat per month (₹)"
-            type="number"
-            min={0}
-            step="0.01"
-            defaultValue={String(pricePerSeatMonthlyPaise / 100)}
-          />
-        )}
         {state?.error ? <InlineNotification kind="error" title="Couldn't save" subtitle={state.error} lowContrast hideCloseButton /> : null}
         <Button type="submit" kind="tertiary" size="sm" disabled={pending}>
           {pending ? "Saving…" : "Save price"}

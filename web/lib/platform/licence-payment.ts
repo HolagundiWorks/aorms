@@ -1,12 +1,15 @@
 import type { createServiceRoleClient } from "./service";
 
-// 2026-09-13: 30 -> 365. AORMS Firm is priced and sold as an annual plan
-// (₹1,999/year base + ₹199/user/month, billed as one annual lump sum — see
-// platform/supabase/migrations/0017_identity_and_firm_plans.sql's own
-// header for the full billing-mechanics disclosure) — a purchase now
-// extends the licence by a year, not 30 days. The free `TRIAL` plan's own
-// 30-day auto-provision (handle_new_studio_licence(), 0004_licences.sql)
-// is a separate mechanism, untouched by this constant.
+// 2026-09-13: 30 -> 365. Both Studio plans (Pro/Enterprise, renamed from
+// the single AORMS_FIRM tier by migration 0019 — see its header for the
+// full account) are sold as flat annual fees — a purchase extends the
+// licence by a year, not 30 days. The free `TRIAL` plan's own 30-day
+// auto-provision (handle_new_studio_licence(), 0004_licences.sql) is a
+// separate mechanism, untouched by this constant. `payment.seats` here is
+// already the plan's own fixed allotment (PLAN_SEAT_ALLOTMENT in
+// platform-payments.ts's createLicenceOrder — 20 for Pro, 9999 for
+// Enterprise), not a buyer-chosen number — this function just propagates
+// whatever the payments row already carries through to `licences`.
 const LICENCE_PERIOD_DAYS = 365;
 
 /**

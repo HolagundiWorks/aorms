@@ -19,7 +19,7 @@ type Licence = { plan: string; seats: number; expires_at: string | null };
  * The caller MUST pass a `key` derived from `licence`'s own fields (see
  * the admin licences page) — every field here is an uncontrolled input
  * (`defaultValue`), which React only applies on mount. Found live:
- * without a changing key, saving once (e.g. plan -> AORMS_FIRM) then saving
+ * without a changing key, saving once (e.g. plan -> PRO) then saving
  * again with only `seats` touched silently reverted plan back to its
  * value from the page's first load, because the already-mounted <select>
  * never picked up the new defaultValue on re-render.
@@ -34,7 +34,8 @@ export function UpdateLicenceForm({ studioId, licence }: { studioId: string; lic
         <FormGrid>
           <Select id="licence-plan" name="plan" labelText="Plan" defaultValue={licence.plan}>
             <SelectItem value="TRIAL" text="Trial" />
-            <SelectItem value="AORMS_FIRM" text="AORMS Firm" />
+            <SelectItem value="PRO" text="Pro" />
+            <SelectItem value="ENTERPRISE" text="Enterprise" />
           </Select>
           <TextInput id="licence-seats" name="seats" labelText="Seats" type="number" min={1} defaultValue={String(licence.seats)} />
           <TextInput

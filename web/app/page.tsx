@@ -20,6 +20,7 @@ import {
   HUMAN_CENTRIC_WORKS,
   IDENTITY,
   INDIVIDUAL_IDENTITY,
+  PRICING,
   SPECIFICATION,
   STUDIO_IDENTITY,
   TRUST_STRIP,
@@ -264,7 +265,7 @@ export default async function LandingPage() {
               Fee Proposal
             </p>
             <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
-              Trial, Standard, Premium.
+              Trial, Pro, Enterprise.
             </h2>
           </Column>
           {FEE_PROPOSAL.map((p) => (
@@ -282,6 +283,65 @@ export default async function LandingPage() {
               </Tile>
             </Column>
           ))}
+        </Grid>
+      </section>
+
+      {/* Pricing — real figures (2026-09-14). Four real prices exist now
+          (platform/supabase/migrations/0018/0019): AORMS Identity (free +
+          one-time ₹199 verification), Studio Pro (₹1,999/yr), Studio
+          Enterprise (₹14,999/yr, 20+ members, custom subdomain), and
+          ConnectDeX Partners' ₹5,999 onboarding fee. ConnectDeX's own
+          Base Line/Pro/Pro Plus tiers are deliberately unpriced — explicit
+          user direction — shown by feature only, not with a "—" or "TBD"
+          placeholder that would read as an oversight. */}
+      <section id="pricing" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+        <Grid>
+          <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
+            <p
+              className="cds--type-productive-heading-01"
+              style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
+            >
+              Pricing
+            </p>
+            <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
+              One flat fee per plan. No per-seat math.
+            </h2>
+          </Column>
+
+          {[PRICING.identity, PRICING.studioPro, PRICING.studioEnterprise, PRICING.connectDexOnboarding].map((p) => (
+            <Column key={p.name} sm={4} md={4} lg={4} style={{ marginBottom: "1rem" }}>
+              <Tile style={{ height: "100%" }}>
+                <h3 className="cds--type-productive-heading-03">{p.name}</h3>
+                <p className="cds--type-heading-04" style={{ marginTop: "0.75rem", color: "var(--cds-support-info)" }}>
+                  {p.price}
+                </p>
+                <p className="cds--type-body-01" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
+                  {p.detail}
+                </p>
+              </Tile>
+            </Column>
+          ))}
+
+          <Column sm={4} md={8} lg={16} style={{ marginTop: "1rem" }}>
+            <Tile>
+              <h3 className="cds--type-productive-heading-03">ConnectDeX Partners tiers</h3>
+              <p className="cds--type-body-01" style={{ marginTop: "0.5rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}>
+                Beyond the onboarding fee above — pricing for these three tiers isn&apos;t set yet, so here&apos;s what each includes.
+              </p>
+              <Grid narrow>
+                {PRICING.connectDexTiers.map((tier) => (
+                  <Column key={tier.name} sm={4} md={2} lg={5} style={{ marginBottom: "1rem" }}>
+                    <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-text-primary)" }}>
+                      {tier.name}
+                    </p>
+                    <p className="cds--type-body-01" style={{ marginTop: "0.375rem", color: "var(--cds-text-secondary)" }}>
+                      {tier.detail}
+                    </p>
+                  </Column>
+                ))}
+              </Grid>
+            </Tile>
+          </Column>
         </Grid>
       </section>
 

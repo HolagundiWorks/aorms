@@ -6,8 +6,8 @@ import { assignProSeat, revokeProSeat } from "../../../lib/actions/platform";
 
 /**
  * Owner-only PRO seat control on /studios/[studioId] — a member is either
- * on one of the studio's paid AORMS_FIRM seats (PRO) or not (BASIC, the
- * free default). `disableAssign` (no free seats left) just disables the
+ * on one of the studio's paid Pro/Enterprise seats (PRO) or not (BASIC,
+ * the free default). `disableAssign` (no free seats left) just disables the
  * button for a clean UX — the real cap check is server-side in
  * assignProSeat, this can't be bypassed by re-enabling the button in
  * devtools.

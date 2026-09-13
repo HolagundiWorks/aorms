@@ -33,6 +33,21 @@ export type CreateOrderResult =
   | { error: string }
   | { orderId: string; amountPaise: number; currency: string; keyId: string };
 
+/** Both Studio plans are flat annual fees now (2026-09-14, see migration
+ * 0019's header — retires AORMS_FIRM's ₹199/user/month component
+ * entirely, confirmed with the user), so `licences.seats`/`payments.seats`
+ * (still `not null check (seats > 0)` columns — kept, not migrated away,
+ * since assignProSeat/revokeProSeat still cap PRO-level grants against
+ * this exact number) are now a fixed allotment baked into the plan a
+ * Studio buys, not a buyer-chosen quantity: Pro includes 20 (Enterprise's
+ * own defining line is "20+ employees," so that's the natural boundary),
+ * Enterprise a high sentinel standing in for "effectively unlimited." */
+const PLAN_SEAT_ALLOTMENT: Record<"PRO" | "ENTERPRISE", number> = { PRO: 20, ENTERPRISE: 9999 };
+/** Enterprise is gated to studios with 20+ ACTIVE team members — the same
+ * number that sets its own seat allotment above, not a coincidence: it's
+ * the tier's actual defining criterion. */
+const ENTERPRISE_MIN_MEMBERS = 20;
+
 /**
  * Called from the client (UpgradeLicenceButton) before opening Razorpay
  * Checkout. Verifies the caller is really an ACTIVE OWNER of `studioId`
@@ -42,17 +57,12 @@ export type CreateOrderResult =
  * grants no authenticated insert policy to lean on instead (see
  * 0010_payments.sql's header comment).
  *
- * 2026-09-13: dropped the `plan` parameter — AORMS Firm is now the only
- * paid Studio plan (the placeholder STANDARD/PREMIUM two-tier model is
- * retired, see 0017_identity_and_firm_plans.sql). Price is
- * `base_price_paise + price_per_seat_monthly_paise * 12 * seats` — the
- * ₹199/user/month rate billed as one annual lump sum alongside the ₹1,999
- * base, not real recurring auto-debit (that stays out of scope, per this
- * migration's own header comment).
+ * 2026-09-14: `plan` is a real choice again — AORMS Firm split into two
+ * named tiers, Pro (₹1,999/yr) and Enterprise (₹14,999/yr, 20+ members) —
+ * but both flat, no seats parameter at all anymore (see
+ * PLAN_SEAT_ALLOTMENT above for what `seats` now means instead).
  */
-export async function createLicenceOrder(studioId: string, seats: number): Promise<CreateOrderResult> {
-  if (!Number.isInteger(seats) || seats < 1) return { error: "Seats must be a positive whole number." };
-
+export async function createLicenceOrder(studioId: string, plan: "PRO" | "ENTERPRISE"): Promise<CreateOrderResult> {
   const platform = await createPlatformClient();
   const {
     data: { user },
@@ -69,16 +79,29 @@ export async function createLicenceOrder(studioId: string, seats: number): Promi
     return { error: "Only a studio's owner can purchase a licence for it." };
   }
 
-  const plan = "AORMS_FIRM" as const;
+  if (plan === "ENTERPRISE") {
+    const { count: activeMemberCount } = await platform
+      .from("studio_memberships")
+      .select("id", { count: "exact", head: true })
+      .eq("studio_id", studioId)
+      .eq("status", "ACTIVE");
+    if ((activeMemberCount ?? 0) < ENTERPRISE_MIN_MEMBERS) {
+      return {
+        error: `Enterprise is for studios with ${ENTERPRISE_MIN_MEMBERS}+ team members — you have ${activeMemberCount ?? 0}.`,
+      };
+    }
+  }
+
   const { data: pricing, error: pricingError } = await platform
     .from("plan_pricing")
-    .select("base_price_paise, price_per_seat_monthly_paise")
+    .select("base_price_paise")
     .eq("plan", plan)
     .maybeSingle();
   if (pricingError) return { error: pricingError.message };
   if (!pricing) return { error: `No pricing configured for ${plan} yet — contact support.` };
 
-  const amountPaise = pricing.base_price_paise + pricing.price_per_seat_monthly_paise * 12 * seats;
+  const amountPaise = pricing.base_price_paise;
+  const seats = PLAN_SEAT_ALLOTMENT[plan];
   const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
   if (!keyId) return { error: "Payments aren't configured yet." };
 
@@ -280,7 +303,7 @@ export async function adminUpdateLicence(_prev: PaymentActionState, formData: Fo
   const seatsRaw = String(formData.get("seats") ?? "");
   const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
   if (!studioId) return { error: "Missing studio." };
-  if (!["TRIAL", "AORMS_FIRM"].includes(plan)) return { error: "Invalid plan." };
+  if (!["TRIAL", "PRO", "ENTERPRISE"].includes(plan)) return { error: "Invalid plan." };
   const seats = Number(seatsRaw);
   if (!Number.isInteger(seats) || seats < 1) return { error: "Seats must be a positive whole number." };
 
@@ -296,12 +319,13 @@ export async function adminUpdateLicence(_prev: PaymentActionState, formData: Fo
 }
 
 /**
- * 2026-09-13: now sets two figures per plan, not one — `basePriceRupees`
- * (the flat annual fee both plans have) and `pricePerSeatMonthlyRupees`
- * (AORMS Firm's ₹199/user/month rate; always 0 for AORMS_IDENTITY, which
- * has no seat concept — the form hides that field for that plan, but the
- * action still accepts and stores whatever's posted, defaulting to "0" if
- * the field is blank/absent rather than erroring).
+ * 2026-09-13: sets two figures per plan — `basePriceRupees` (the flat
+ * fee every plan has: annual for Pro/Enterprise/Identity, one-time for
+ * Identity specifically) and `pricePerSeatMonthlyRupees` (retained as a
+ * field but always 0 for every plan as of 2026-09-14 — Pro/Enterprise's
+ * per-seat-monthly component was fully retired, migration 0019 — kept
+ * rather than removed so a future per-seat plan doesn't need to
+ * re-litigate this exact field).
  */
 export async function adminSetPricing(_prev: PaymentActionState, formData: FormData): Promise<PaymentActionState> {
   const gate = await requirePlatformAdmin();
@@ -310,7 +334,7 @@ export async function adminSetPricing(_prev: PaymentActionState, formData: FormD
   const plan = String(formData.get("plan") ?? "");
   const baseRaw = String(formData.get("basePriceRupees") ?? "");
   const perSeatRaw = String(formData.get("pricePerSeatMonthlyRupees") ?? "0");
-  if (!["AORMS_IDENTITY", "AORMS_FIRM"].includes(plan)) return { error: "Invalid plan." };
+  if (!["AORMS_IDENTITY", "PRO", "ENTERPRISE"].includes(plan)) return { error: "Invalid plan." };
   const baseRupees = Number(baseRaw);
   if (!Number.isFinite(baseRupees) || baseRupees <= 0) return { error: "Enter a base price greater than zero." };
   const perSeatRupees = Number(perSeatRaw || "0");

@@ -61,7 +61,7 @@ export default async function AdminDashboardPage() {
       platformService.from("platform_activity_log").select("id, event_type, created_at").order("created_at", { ascending: false }).limit(5),
     ]);
 
-  const planCounts = { TRIAL: 0, AORMS_FIRM: 0 };
+  const planCounts = { TRIAL: 0, PRO: 0, ENTERPRISE: 0 };
   for (const l of licences ?? []) {
     if (l.plan in planCounts) planCounts[l.plan as keyof typeof planCounts]++;
   }
@@ -84,7 +84,7 @@ export default async function AdminDashboardPage() {
           <KpiTile label="Studios" value={studioCount ?? 0} />
           <KpiTile label="Accounts" value={accountCount ?? 0} />
           <KpiTile label="Trial licences" value={planCounts.TRIAL} />
-          <KpiTile label="Paid licences" value={planCounts.AORMS_FIRM} />
+          <KpiTile label="Paid licences" value={planCounts.PRO + planCounts.ENTERPRISE} />
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))", gap: "1.5rem" }}>

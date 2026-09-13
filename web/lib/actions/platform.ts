@@ -301,7 +301,9 @@ export async function leaveStudio(membershipId: string): Promise<{ error?: strin
  * PRO seat assignment (2026-09-13) — see platform/supabase/migrations/
  * 0018_identity_verification_pro_seats_connectdex_tiers.sql's header:
  * `level` no longer flips to PRO for free/automatically at 100 hours. A
- * Studio's own paid AORMS_FIRM licence seats are what a member's PRO
+ * Studio's own paid licence seats (Pro/Enterprise — renamed from the
+ * single AORMS_FIRM tier by migration 0019, seats now a fixed allotment
+ * per plan rather than a purchased quantity) are what a member's PRO
  * status is now capped by — this is the first thing `licences.seats`
  * actually does; it was previously just a billing number.
  *
@@ -361,6 +363,121 @@ export async function revokeProSeat(studioId: string, membershipId: string, acco
   const platformService = createPlatformServiceRoleClient();
   const { error: levelError } = await platformService.from("accounts").update({ level: "BASIC" }).eq("id", accountId);
   if (levelError) return { error: levelError.message };
+
+  revalidatePath(`/studios/${studioId}`);
+  return {};
+}
+
+/**
+ * Studio ownership transfer (2026-09-14) — a real, validated write path
+ * for `studios.owner_id`, which today has none at all: "studios: owner
+ * update" RLS lets any current owner PATCH `owner_id` to literally any
+ * UUID (it's never been touched by anything since studio creation, and
+ * `is_studio_owner()` itself checks `studio_memberships.role`, not this
+ * column — found while exploring for this feature). A clean single-owner
+ * handoff, not just adding a co-owner: the target becomes OWNER, the
+ * caller steps down to MEMBER, `owner_id` moves to the target.
+ */
+export async function transferStudioOwnership(studioId: string, newOwnerAccountId: string): Promise<{ error?: string }> {
+  const platform = await createPlatformClient();
+  const {
+    data: { user },
+  } = await platform.auth.getUser();
+  if (!user) return { error: "Sign in to the AORMS Platform first." };
+
+  const { data: callerMembership } = await platform
+    .from("studio_memberships")
+    .select("id, role, status")
+    .eq("studio_id", studioId)
+    .eq("account_id", user.id)
+    .maybeSingle();
+  if (!callerMembership || callerMembership.role !== "OWNER" || callerMembership.status !== "ACTIVE") {
+    return { error: "Only the studio's current owner can transfer ownership." };
+  }
+  if (newOwnerAccountId === user.id) return { error: "Already the owner." };
+
+  const { data: targetMembership } = await platform
+    .from("studio_memberships")
+    .select("id, status")
+    .eq("studio_id", studioId)
+    .eq("account_id", newOwnerAccountId)
+    .maybeSingle();
+  if (!targetMembership || targetMembership.status !== "ACTIVE") {
+    return { error: "The new owner must be an active member of this studio first." };
+  }
+
+  // studios.owner_id has no self-serve-safe RLS story (see the doc
+  // comment above) — the service-role client is the deliberate,
+  // considered writer here, not a bypass of a real policy this action
+  // could otherwise satisfy.
+  const platformService = createPlatformServiceRoleClient();
+  const { error: studioError } = await platformService.from("studios").update({ owner_id: newOwnerAccountId }).eq("id", studioId);
+  if (studioError) return { error: studioError.message };
+
+  const { error: promoteError } = await platformService
+    .from("studio_memberships")
+    .update({ role: "OWNER" })
+    .eq("id", targetMembership.id);
+  if (promoteError) return { error: promoteError.message };
+
+  const { error: demoteError } = await platformService
+    .from("studio_memberships")
+    .update({ role: "MEMBER" })
+    .eq("id", callerMembership.id);
+  if (demoteError) return { error: demoteError.message };
+
+  revalidatePath(`/studios/${studioId}`);
+  return {};
+}
+
+const SUBDOMAIN_RESERVED_WORDS = new Set(["identity", "connectdex", "sysdex", "www", "admin", "api", "app", "support"]);
+
+/**
+ * Custom subdomain reservation (2026-09-14) — Enterprise-only perk.
+ * Schema + slug reservation this pass, confirmed with the user: this
+ * validates and stores `studios.subdomain_slug`, it does NOT make
+ * `<slug>.aorms.in` actually resolve anywhere — that needs wildcard DNS
+ * plus a dynamic Host-header->studio lookup in proxy.ts/subdomains.ts
+ * (today's PortalKey union is a fixed 3-value set, not a per-studio
+ * lookup), disclosed as a follow-up in docs/esti/ROADMAP.md, not built
+ * here.
+ */
+export async function setStudioSubdomain(studioId: string, slug: string): Promise<{ error?: string }> {
+  const normalized = slug.trim().toLowerCase();
+  if (!/^[a-z0-9]([a-z0-9-]{1,61}[a-z0-9])?$/.test(normalized)) {
+    return { error: "Use 3-63 lowercase letters, digits, or hyphens — no leading/trailing hyphen." };
+  }
+  if (SUBDOMAIN_RESERVED_WORDS.has(normalized)) return { error: `"${normalized}" is reserved and can't be used.` };
+
+  const platform = await createPlatformClient();
+  const {
+    data: { user },
+  } = await platform.auth.getUser();
+  if (!user) return { error: "Sign in to the AORMS Platform first." };
+
+  const { data: membership } = await platform
+    .from("studio_memberships")
+    .select("role, status")
+    .eq("studio_id", studioId)
+    .eq("account_id", user.id)
+    .maybeSingle();
+  if (!membership || membership.role !== "OWNER" || membership.status !== "ACTIVE") {
+    return { error: "Only the studio's owner can set its subdomain." };
+  }
+
+  const { data: licence } = await platform.from("licences").select("plan, expires_at").eq("studio_id", studioId).maybeSingle();
+  const licenceActive = !licence?.expires_at || new Date(licence.expires_at) > new Date();
+  if (licence?.plan !== "ENTERPRISE" || !licenceActive) {
+    return { error: "A custom subdomain is an Enterprise-plan perk — this studio isn't on an active Enterprise licence." };
+  }
+
+  const { error } = await platform.from("studios").update({ subdomain_slug: normalized }).eq("id", studioId);
+  if (error) {
+    // Postgres unique_violation — surface a clean message instead of the
+    // raw constraint-violation text.
+    if (error.code === "23505") return { error: `"${normalized}" is already taken.` };
+    return { error: error.message };
+  }
 
   revalidatePath(`/studios/${studioId}`);
   return {};

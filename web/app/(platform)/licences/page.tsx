@@ -80,14 +80,24 @@ export default async function LicencesPage() {
     ? await platformService.from("licences").select("studio_id, plan, seats, expires_at").in("studio_id", studioIds)
     : { data: [] };
 
-  const { data: firmPricingRow } = await platformService
-    .from("plan_pricing")
-    .select("base_price_paise, price_per_seat_monthly_paise")
-    .eq("plan", "AORMS_FIRM")
-    .maybeSingle();
-  const firmPricing = {
-    basePricePaise: firmPricingRow?.base_price_paise ?? 0,
-    pricePerSeatMonthlyPaise: firmPricingRow?.price_per_seat_monthly_paise ?? 0,
+  // Active member count per studio — Enterprise eligibility (20+, see
+  // createLicenceOrder) is shown here, not just enforced server-side.
+  const activeMemberCounts = new Map<string, number>();
+  if (studioIds.length) {
+    const { data: allMemberships } = await platformService
+      .from("studio_memberships")
+      .select("studio_id")
+      .in("studio_id", studioIds)
+      .eq("status", "ACTIVE");
+    for (const m of allMemberships ?? []) {
+      activeMemberCounts.set(m.studio_id, (activeMemberCounts.get(m.studio_id) ?? 0) + 1);
+    }
+  }
+
+  const { data: planPricingRows } = await platformService.from("plan_pricing").select("plan, base_price_paise").in("plan", ["PRO", "ENTERPRISE"]);
+  const studioPricing = {
+    proPricePaise: planPricingRows?.find((p) => p.plan === "PRO")?.base_price_paise ?? 0,
+    enterprisePricePaise: planPricingRows?.find((p) => p.plan === "ENTERPRISE")?.base_price_paise ?? 0,
   };
 
   return (
@@ -117,18 +127,28 @@ export default async function LicencesPage() {
                   {licence ? (
                     <>
                       <Stack gap={2} orientation="horizontal">
-                        <Tag type={licence.plan === "AORMS_FIRM" ? "purple" : "gray"} size="md">
-                          {licence.plan === "AORMS_FIRM" ? "AORMS Firm" : licence.plan}
+                        <Tag
+                          type={licence.plan === "ENTERPRISE" ? "magenta" : licence.plan === "PRO" ? "purple" : "gray"}
+                          size="md"
+                        >
+                          {licence.plan === "PRO" ? "Pro" : licence.plan === "ENTERPRISE" ? "Enterprise" : licence.plan}
                         </Tag>
                         <Tag type={active ? "green" : "red"} size="md">
                           {active ? "ACTIVE" : "EXPIRED"}
                         </Tag>
                       </Stack>
                       <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                        {licence.seats} seat{licence.seats === 1 ? "" : "s"}
+                        {licence.seats} PRO seat{licence.seats === 1 ? "" : "s"} included
                         {licence.expires_at ? ` · expires ${new Date(licence.expires_at).toLocaleDateString()}` : " · no expiry"}
                       </p>
-                      {isOwner && <UpgradeLicenceButton studioId={studio.id} studioName={studio.name} pricing={firmPricing} />}
+                      {isOwner && (
+                        <UpgradeLicenceButton
+                          studioId={studio.id}
+                          studioName={studio.name}
+                          activeMemberCount={activeMemberCounts.get(studio.id) ?? 0}
+                          pricing={studioPricing}
+                        />
+                      )}
                     </>
                   ) : (
                     <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

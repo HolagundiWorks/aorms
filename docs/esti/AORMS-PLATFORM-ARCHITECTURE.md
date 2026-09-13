@@ -260,6 +260,23 @@ reuses AORMS_FIRM's already-built seat purchase rather than inventing a
 second "pay for a different account's benefit" flow (confirmed none
 existed anywhere in this codebase before this correction).
 
+**Second correction, same day: AORMS_FIRM renamed/split into Pro +
+Enterprise (migration 0019).** The single ₹1,999/yr+₹199/user/month
+AORMS_FIRM tier above is retired — `licences.plan` now has two paid
+values, **PRO** (₹1,999/yr flat) and **ENTERPRISE** (₹14,999/yr flat,
+gated to 20+ active team members). Neither has a per-seat component at
+all anymore; `licences.seats` (which the PRO-seat-assignment mechanism
+above depends on) is now a fixed allotment baked into the plan a Studio
+buys — 20 for Pro, 9999 (effectively unlimited) for Enterprise — not a
+purchased quantity. Enterprise also carries a **`studios.subdomain_slug`**
+reservation (validated, unique) as a named perk — schema + UI only; it
+does not make `<slug>.aorms.in` actually resolve (see
+`docs/esti/ROADMAP.md`'s dated entry for the disclosed DNS/routing
+follow-up). New `transferStudioOwnership` gives `studios.owner_id` its
+first real, validated write path — previously any owner could `PATCH` it
+to any UUID via RLS with zero validation, since `is_studio_owner()`
+checks `studio_memberships.role`, not this column.
+
 The "Companies have no licence" open question below is unaffected by any
 of this — it only touches Studio/individual pricing, not Company.
 

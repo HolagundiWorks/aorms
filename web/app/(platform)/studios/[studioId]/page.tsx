@@ -7,6 +7,8 @@ import { InviteMemberForm } from "../../../../components/aorms/platform/InviteMe
 import { MembershipRoleSelect } from "../../../../components/aorms/platform/MembershipRoleSelect";
 import { LeaveStudioButton } from "../../../../components/aorms/platform/LeaveStudioButton";
 import { ProSeatToggle, ProSeatTag } from "../../../../components/aorms/platform/ProSeatToggle";
+import { TransferOwnershipForm } from "../../../../components/aorms/platform/TransferOwnershipForm";
+import { SetStudioSubdomainForm } from "../../../../components/aorms/platform/SetStudioSubdomainForm";
 import { StudioProfileForm } from "../../../../components/aorms/platform/StudioProfileForm";
 import { AddBoardMemberForm } from "../../../../components/aorms/platform/AddBoardMemberForm";
 import { BoardMemberRow } from "../../../../components/aorms/platform/BoardMemberRow";
@@ -53,15 +55,17 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
   const { data: studio, error: studioError } = await platformService
     .from("studios")
     .select(
-      "id, name, public_id, coa_registration_no, gstin, pan, gst_type, tds_applicable_default, address_line1, address_line2, city, district, state, pincode, email, phone",
+      "id, name, public_id, subdomain_slug, coa_registration_no, gstin, pan, gst_type, tds_applicable_default, address_line1, address_line2, city, district, state, pincode, email, phone",
     )
     .eq("id", studioId)
     .maybeSingle();
   if (studioError) throw new Error(studioError.message);
   if (!studio) notFound();
 
-  const { data: licence } = await platformService.from("licences").select("seats").eq("studio_id", studioId).maybeSingle();
+  const { data: licence } = await platformService.from("licences").select("plan, seats, expires_at").eq("studio_id", studioId).maybeSingle();
   const seats = licence?.seats ?? 0;
+  const enterpriseActive =
+    licence?.plan === "ENTERPRISE" && (!licence.expires_at || new Date(licence.expires_at) > new Date());
 
   const [{ data: memberships }, { data: boardMembers }, { data: contacts }] = await Promise.all([
     platformService
@@ -124,11 +128,13 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
               <h2 className="cds--type-heading-02" style={{ margin: 0 }}>
                 Members
               </h2>
-              {/* PRO is granted from this studio's own paid AORMS_FIRM seats
-                  (2026-09-13) — no longer a free automatic flip at 100
-                  usage-hours. Seats come from /licences' own Upgrade flow,
-                  already built — this is just the first thing that count
-                  actually does. */}
+              {/* PRO is granted from this studio's own paid Pro/Enterprise
+                  licence seats (2026-09-13) — no longer a free automatic
+                  flip at 100 usage-hours. Seats come from /licences' own
+                  Upgrade flow, already built — this is just the first
+                  thing that count actually does; each plan now bakes in a
+                  fixed allotment (20 for Pro, 9999 for Enterprise) rather
+                  than a purchased quantity, see createLicenceOrder. */}
               <Tag type="cool-gray" size="sm">
                 {proAssignedCount} of {seats} PRO seat{seats === 1 ? "" : "s"} used
               </Tag>
@@ -195,6 +201,36 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
               </Tile>
             )}
           </div>
+
+          {isOwner && (
+            <div>
+              <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                Transfer ownership
+              </h2>
+              <Tile>
+                <TransferOwnershipForm
+                  studioId={studio.id}
+                  otherActiveMembers={(memberships ?? [])
+                    .filter((m) => m.account_id !== currentAccountId && m.status === "ACTIVE")
+                    .map((m) => {
+                      const acc = (Array.isArray(m.accounts) ? m.accounts[0] : m.accounts) as AccountEmbed;
+                      return { accountId: m.account_id, label: `${acc?.full_name ?? "—"} (${acc?.public_id ?? "—"})` };
+                    })}
+                />
+              </Tile>
+            </div>
+          )}
+
+          {isOwner && enterpriseActive && (
+            <div>
+              <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                Custom subdomain
+              </h2>
+              <Tile>
+                <SetStudioSubdomainForm studioId={studio.id} currentSlug={studio.subdomain_slug} />
+              </Tile>
+            </div>
+          )}
 
           <div>
             <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>

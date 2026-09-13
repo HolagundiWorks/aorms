@@ -14,8 +14,9 @@ import { IdentityPortalHeader } from "../../../components/aorms/platform/PortalH
 
 // 2026-09-13: PRO is no longer free/automatic at 100 hours — see
 // migration 0018's header. It's now something a Studio grants to one of
-// its own members (capped at that Studio's paid AORMS_FIRM seat count).
-// 100 hours now gates something else entirely: the one-time ₹199
+// its own members (capped at that Studio's paid Pro/Enterprise seat
+// count — migration 0019 renamed the single AORMS_FIRM tier into these
+// two). 100 hours now gates something else entirely: the one-time ₹199
 // "verified identity" purchase below (IDENTITY_VERIFICATION_HOURS_
 // REQUIRED in lib/actions/platform-payments.ts — kept as a separate
 // constant there since these two 100-hour thresholds are conceptually

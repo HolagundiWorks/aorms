@@ -4859,6 +4859,134 @@ confirmed "1 of 1 PRO seat used" and the Revoke button rendering
 correctly. All test rows/state reverted to exactly their original values
 afterward (re-verified with a final zero-residue sweep).
 
+**Office Hub shell audit + Studio Pro/Enterprise rename, transfer,
+custom-subdomain reservation, landing pricing (2026-09-14).** Two
+requests in one message: a full Carbon-compliance audit of the
+authenticated app shell (`AppShell.tsx`/`globals.scss`/the four header
+utilities) against a 29-point brief, and a pricing correction —
+AORMS_FIRM split into named **Pro** (₹1,999/yr flat) and **Enterprise**
+(₹14,999/yr, 20+ team members, custom subdomain) tiers — plus Studio
+ownership transfer and a real landing-page pricing section.
+
+**Shell audit — a genuine audit, not an assumed rewrite.** Read the real
+code and had an Explore agent cross-check every `@carbon/react` import in
+`web/` against `globals.scss`'s `@use` list before proposing anything.
+Confirmed already-compliant (untouched): nav state is one centralized
+boolean, not duplicated; breakpoints (`42rem`/`66rem`) are Carbon's real
+`md`/`lg` tokens; zero `outline: none` anywhere; only 3 justified
+`!important` uses; zero shell-level arbitrary z-index; zero page-specific
+CSS overriding shell geometry; every header utility already gets Carbon's
+tooltip/keyboard/focus handling for free via `HeaderGlobalAction`. Two
+real defects found and fixed:
+1. **`Stack` (Carbon's own gap/grid primitive) had no matching `@use`** —
+   used in ~130 files across this app, every one of them rendering with
+   zero gap/grid layout the entire session, the same "used the
+   component, forgot its Sass partial" defect already found three times
+   before (Toggle, `--cds-layout-density-*`, `cds--type-*`), just far
+   larger in blast radius. Six smaller instances of the same gap fixed
+   alongside it: `Dropdown`, `FileUploader`, `InlineLoading`,
+   `ContentSwitcher`/`Switch`, `ProgressBar`,
+   `ProgressIndicator`/`ProgressStep`, `SkeletonPlaceholder`/
+   `SkeletonText`. `Popover`/`Tooltip` (backing all four header
+   utilities) were found to work today only by *accident* — traced the
+   real Sass module graph and confirmed the CSS rides in transitively
+   through `components/button`'s own internal dependency chain, fragile
+   and undocumented; made explicit with their own `@use` lines.
+2. **`HeaderPomodoro`** swapped its icon for a variable-width text
+   countdown while running — investigated against Carbon's own
+   `.cds--header__action` CSS (a genuinely FIXED 48px box, not
+   auto-sizing) and found the swap itself is the correct Carbon-
+   compatible approach (side-by-side icon+text would overflow that fixed
+   box); the actual, smaller gap was a missing descriptive `aria-label`
+   when the icon disappears — fixed that instead of the larger rewrite
+   originally hypothesized, a real course-correction once the fixed-width
+   constraint was discovered, not silently building the wrong fix.
+`AppShell.tsx`'s side-nav state (a single boolean, already Carbon-
+idiomatic) got an explicit, documented 4-state mapping
+(expanded/collapsed/mobile-open/mobile-closed) in code — clarity only, no
+behavior change. Verified: `tsc`/`eslint`/`next build` clean; zero
+horizontal overflow confirmed via `document.documentElement.scrollWidth`
+at a 1536px-wide viewport; a real `<Stack>`-based form (New Team Member)
+visually confirmed with correct field-to-field gaps post-fix. **Disclosed
+limitation**: a reliable live keyboard-focus-ring screenshot wasn't
+achieved — this session's browser-automation tooling had CDP screenshot
+timeouts and synthetic Tab key-presses that didn't reliably move
+`document.activeElement` in this environment; keyboard/focus compliance
+is verified by reading Carbon's own component source (a deliberate
+`border-color` focus treatment on `.cds--header__action`, not outline
+removal) and confirming this app never overrides it, not by a live
+recording.
+
+**Studio Pro/Enterprise correction.** Migration
+`platform/supabase/migrations/0019_studio_pro_enterprise_tiers.sql`:
+`plan_pricing`'s single `AORMS_FIRM` row → `PRO` (₹1,999/yr,
+199900 paise) + `ENTERPRISE` (₹14,999/yr, 1499900 paise), both flat, no
+per-seat component at all (confirmed with the user — the ₹199/user/month
+component from migration 0017 is fully retired, not kept alongside
+anything new); `licences`/`payments.plan` narrowed to
+`TRIAL`/`PRO`/`ENTERPRISE`; new `studios.subdomain_slug` (unique, shape-
+checked). **Resolved without asking a third time**: since Pro/Enterprise
+are flat, `licences.seats` (still capping `assignProSeat`/`revokeProSeat`
+from the prior pass) needed a new meaning — now a fixed allotment per
+plan (`PLAN_SEAT_ALLOTMENT` in `platform-payments.ts`: Pro=20,
+Enterprise=9999), not a purchased quantity; Enterprise's own "20+
+employees" line is what it's gated on in `createLicenceOrder`. Naming
+collision flagged, not silently ignored: the Studio *plan* is now also
+named "Pro," the same word `accounts.level` uses for an individual's free
+usage status (migration 0018) — kept apart by convention ("the Pro plan"
+vs. "PRO level/status") everywhere in code and copy.
+
+New **`transferStudioOwnership`** (`platform.ts`) — closes a real,
+separate gap found while exploring: `studios.owner_id` had zero
+validated write path (any owner could already `PATCH` it to any UUID via
+RLS, since `is_studio_owner()` checks `studio_memberships.role`, not this
+column, and nothing had touched it since creation). A clean single-owner
+handoff: target promoted to OWNER, caller demoted to MEMBER, `owner_id`
+moves. New **`setStudioSubdomain`** — Enterprise-gated slug reservation
+(shape + reserved-word validation, unique constraint) — schema + UI only,
+confirmed with the user: nothing makes `<slug>.aorms.in` actually
+resolve yet. **Disclosed follow-up, not built here**: today's
+`web/lib/platform/subdomains.ts` `PortalKey` is a fixed 3-value union
+(identity/connectdex/sysdex) resolved by exact hostname match; real
+per-studio subdomains need (a) a wildcard DNS record for `*.aorms.in`
+pointed at the same Hostinger app, and (b) `proxy.ts`'s Host-header
+routing extended with a dynamic `subdomain_slug → studio_id` lookup
+(a Supabase REST call, Edge-safe) as a fourth routing branch alongside
+the three fixed portals — comparable in scope to the original 3-subdomain
+rollout (`docs/esti/PLATFORM-SUBDOMAINS-DEPLOY.md`), not attempted this
+pass.
+
+Landing page (`web/lib/marketing-content.ts` + `app/page.tsx`): fixed
+now-stale/false copy independent of anything new — `FEE_PROPOSAL`,
+`IDENTITY`, `STUDIO_IDENTITY`, `INDIVIDUAL_IDENTITY`, and the FAQ all
+said "Trial, Standard, Premium" (retired since migration 0017) and
+"every identity promotes to Pro automatically at 100 hours" (**flatly
+false** since migration 0018 — PRO hasn't been automatic all session).
+New `PRICING` export + a real landing-page Pricing section: AORMS
+Identity (free + one-time ₹199 verification), Studio Pro (₹1,999/yr),
+Studio Enterprise (₹14,999/yr, 20+ members, custom subdomain),
+ConnectDeX Partners (₹5,999 one-time onboarding; Base Line/Pro/Pro Plus
+described by feature only, deliberately unpriced per the user's own
+direction).
+
+Verified: `tsc --noEmit`/`eslint .`/full `next build` all clean. Live
+data round-trip against `aorms-platform` (temporary rows/state, fully
+reverted after, final zero-residue sweep confirmed): `/licences` browser-
+verified showing Pro selected by default and Enterprise correctly
+disabled with "needs 20+ active team members — this studio has 1";
+`createLicenceOrder`'s Enterprise gate gate-checked live (server action
+correctly required a real Platform session, same limitation as every
+owner-scoped mutation without one — verified the underlying data effect
+via the same service-role REST path proven for PRO-seat assignment
+instead); a full ownership transfer simulated end-to-end against the one
+real studio (owner_id + both membership roles flipped correctly,
+`MEMBER_ROLE_CHANGED` fired twice) and reverted; `setStudioSubdomain`'s
+shape/reserved-word/uniqueness validation confirmed live (a valid slug
+saved, an invalid one correctly rejected by the DB check constraint) and
+reverted; the landing page's new pricing section confirmed rendering all
+four real prices via an anonymous `curl` fetch (no session, matching what
+a real visitor sees).
+
 ---
 
 ## Support & questions
