@@ -25,6 +25,30 @@ export function isSuperAdmin(account: CurrentPlatformAccount | null): boolean {
 }
 
 /**
+ * Resolves a platform account's admin_role from the new `platform_staff`
+ * table (2026-09-14, Identity/Admin separation phase 1 — platform
+ * migration 0022, see docs/esti/SYSDEX-PORTAL-AUDIT-2026-09-14.md § 5),
+ * falling back to the old `accounts.is_admin`/`admin_role` columns if
+ * the account isn't in `platform_staff` yet — the same "check both
+ * sources during the transition" shape `is_platform_admin()` (the SQL
+ * side of this same migration) uses, so app code and RLS never disagree
+ * about who's actually staff. `accounts.is_admin`/`admin_role`
+ * themselves are NOT dropped yet (deliberately — see the audit doc's
+ * own sequencing for why), so this fallback is real safety, not
+ * decoration, until that later step.
+ */
+async function resolveAdminRole(
+  platformService: ReturnType<typeof createPlatformServiceRoleClient>,
+  accountId: string,
+): Promise<AdminRole> {
+  const { data: staff } = await platformService.from("platform_staff").select("admin_role").eq("id", accountId).maybeSingle();
+  if (staff?.admin_role) return staff.admin_role as AdminRole;
+
+  const { data: legacy } = await platformService.from("accounts").select("is_admin, admin_role").eq("id", accountId).maybeSingle();
+  return legacy?.is_admin ? ((legacy.admin_role as AdminRole) ?? null) : null;
+}
+
+/**
  * Resolves the AORMS Platform account linked to the current web/ session,
  * if any — the same "profile.platform_public_id -> platform accounts
  * lookup" two-step every platform-touching Server Action/page has needed
@@ -53,11 +77,13 @@ export async function getCurrentPlatformAccount(): Promise<CurrentPlatformAccoun
   const platformService = createPlatformServiceRoleClient();
   const { data: account } = await platformService
     .from("accounts")
-    .select("id, public_id, is_admin, admin_role, full_name")
+    .select("id, public_id, full_name")
     .eq("public_id", profile.platform_public_id)
     .maybeSingle();
+  if (!account) return null;
 
-  return account ?? null;
+  const admin_role = await resolveAdminRole(platformService, account.id);
+  return { ...account, admin_role, is_admin: admin_role !== null };
 }
 
 /**
@@ -83,13 +109,11 @@ export async function getCurrentPlatformSessionAccount(): Promise<CurrentPlatfor
   if (!user) return null;
 
   const platformService = createPlatformServiceRoleClient();
-  const { data: account } = await platformService
-    .from("accounts")
-    .select("id, public_id, is_admin, admin_role, full_name")
-    .eq("id", user.id)
-    .maybeSingle();
+  const { data: account } = await platformService.from("accounts").select("id, public_id, full_name").eq("id", user.id).maybeSingle();
+  if (!account) return null;
 
-  return account ?? null;
+  const admin_role = await resolveAdminRole(platformService, account.id);
+  return { ...account, admin_role, is_admin: admin_role !== null };
 }
 
 /** Nav-bar status shared by all three portal headers

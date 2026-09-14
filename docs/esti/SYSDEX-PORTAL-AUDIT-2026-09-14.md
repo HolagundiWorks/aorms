@@ -196,25 +196,54 @@ here as a scoped, sequenced follow-up rather than attempted inside an
 "audit and fix bugs" pass where a half-migrated admin table would be a
 materially worse outcome than the current, merely-inelegant one.
 
-### 5.3 Recommended sequencing (not yet started)
+### 5.3 Sequencing — steps 1-4 done same day, step 5 deliberately deferred
 
-1. Add `public.platform_staff (id uuid references auth.users, admin_role
-   text, created_at)` — additive, no existing table touched yet.
-2. Backfill the two real admin rows from `accounts.is_admin`/
-   `admin_role` into it.
-3. Repoint `is_platform_admin()` to read `platform_staff` instead of
-   `accounts` — one function, every RLS policy that calls it updates
-   for free.
-4. Repoint `getCurrentPlatformSessionAccount()`'s admin fields (or add a
-   sibling resolver) to read `platform_staff`.
-5. Only once every read path is confirmed working against the new
-   table: drop `accounts.is_admin`/`admin_role` and this audit's own
-   `adminSetAccountRole` action's target table.
+1. ✅ **Done** — `public.platform_staff (id uuid references auth.users,
+   admin_role text, created_at)`, platform migration `0022_platform_
+   staff_table.sql`. Additive; `accounts.is_admin`/`admin_role` untouched.
+2. ✅ **Done** — same migration backfills the two real admin rows
+   (`AORMS-U-6WG2` SUPER_ADMIN, `AORMS-U-SHAM` SUPPORT_STAFF) from
+   `accounts` into `platform_staff`.
+3. ✅ **Done** — `is_platform_admin()` now checks `platform_staff` OR
+   `accounts.is_admin` (transition-safe — every existing RLS policy that
+   calls it, unchanged, now recognizes staff from either table).
+4. ✅ **Done** — `lib/platform/account.ts`'s `getCurrentPlatformAccount`/
+   `getCurrentPlatformSessionAccount` resolve `admin_role` via a shared
+   `resolveAdminRole()` helper: `platform_staff` first, falling back to
+   the legacy columns. `adminSetAccountRole` (lib/actions/platform.ts)
+   now writes `platform_staff` exclusively (upsert to grant, delete to
+   revoke) — the one path that *grants* admin status, so it needed to
+   move first. **Real regression caught and fixed in the same pass:**
+   `/admin/accounts`'s own list was still reading `accounts.admin_role`
+   directly for display — since that column is no longer kept in sync
+   by writes, the list would have silently gone stale the moment anyone
+   used the very control this same audit added. Fixed by joining
+   `platform_staff` into the list query instead.
+5. **Deliberately not done** — dropping `accounts.is_admin`/`admin_role`
+   stays a follow-up, done only once this phase has run live for a
+   while with no read path found still depending on the legacy columns.
 
-Each step is independently revertible and independently verifiable
-against the live project the same way every migration in this codebase
-already is — the sequencing exists specifically so no single step is a
-point where a mistake breaks the live SysDeX login for its own admins.
+**Verified live, end-to-end, with real accounts and a real revocation
+path** (all test accounts deleted afterward):
+- Created an account admin *only* via `platform_staff` (zero
+  `accounts.is_admin` involvement) — signed in, confirmed full SUPER_ADMIN
+  SysDeX access (all nav items, all four dashboard KPIs).
+- Confirmed the two real pre-existing admin accounts still show their
+  correct role on `/admin/accounts` post-migration (SUPPORT_STAFF /
+  SUPER_ADMIN), via the newly-joined query.
+- Created a plain, non-admin account; used the live `/admin/accounts`
+  UI (`adminSetAccountRole` → `platform_staff` upsert) to grant it
+  SUPPORT_STAFF; signed in as that exact account and confirmed it
+  landed on the correct restricted SysDeX view (Dashboard + HelpDeX nav
+  only, the single HelpDeX-ticket-count KPI) — proving the grant path,
+  the RLS check, and the app-level resolver all agree, for an account
+  the legacy `accounts` table has never marked as admin at all.
+
+Each step above was independently verifiable against the live project
+the same way every migration in this codebase already is — no single
+step was a point where a mistake could have broken the live SysDeX
+login for its two real admins, and at every point their access kept
+working (checked directly, not assumed).
 
 ---
 

@@ -833,18 +833,26 @@ export async function adminSetAccountLevel(accountId: string, level: "BASIC" | "
 }
 
 /**
- * Grants or revokes platform-staff admin status. `adminRole: null` fully
- * revokes (sets both is_admin=false and admin_role=null in one write, not
- * two — an account with is_admin=false but a stale admin_role left over
- * would be a confusing half-revoked state). Refuses to let a Super Admin
- * revoke their OWN admin status through this action — not a technical
- * limitation, a deliberate guard against a solo admin locking themselves
- * out with no other path back in (migration 0009's own comment: granting
- * is_admin at all otherwise requires direct DB access).
+ * Grants or revokes platform-staff admin status. Writes to
+ * `platform_staff` now (2026-09-14, Identity/Admin separation phase 1 —
+ * platform migration 0022, see docs/esti/SYSDEX-PORTAL-AUDIT-2026-09-14
+ * .md § 5), NOT the legacy `accounts.is_admin`/`admin_role` columns —
+ * this is the one write path that needed to move first, since it's the
+ * only place admin status is ever *granted*, not just read.
+ * `adminRole: null` fully revokes (deletes the row — no "is_admin=false
+ * but a stale admin_role left over" state possible when the fact simply
+ * doesn't exist, unlike the old two-column shape on `accounts`).
+ * Refuses to let a Super Admin revoke their OWN admin status through
+ * this action — not a technical limitation, a deliberate guard against
+ * a solo admin locking themselves out with no other path back in
+ * (migration 0009's own original comment: granting admin status at all
+ * otherwise requires direct DB access).
  *
- * Service-role client, not RLS-scoped — same reason as
- * adminSetAccountLevel above: `accounts` has no UPDATE RLS policy at
- * all, so this would silently no-op through the normal client.
+ * Service-role client, not RLS-scoped — `platform_staff` has no
+ * insert/update/delete policy for the authenticated role at all
+ * (migration 0022's own header comment: writes are app-code + service-
+ * role only, by design, mirroring the exact same shape `accounts.
+ * is_admin` had before this table existed).
  */
 export async function adminSetAccountRole(
   accountId: string,
@@ -859,10 +867,9 @@ export async function adminSetAccountRole(
   }
 
   const supabase = createPlatformServiceRoleClient();
-  const { error } = await supabase
-    .from("accounts")
-    .update({ admin_role: adminRole, is_admin: adminRole !== null })
-    .eq("id", accountId);
+  const { error } = adminRole
+    ? await supabase.from("platform_staff").upsert({ id: accountId, admin_role: adminRole }, { onConflict: "id" })
+    : await supabase.from("platform_staff").delete().eq("id", accountId);
   if (error) return { error: error.message };
 
   revalidatePath("/admin/accounts");

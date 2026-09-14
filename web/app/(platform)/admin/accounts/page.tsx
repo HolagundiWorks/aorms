@@ -26,11 +26,18 @@ export default async function AdminAccountsPage() {
   if (!isSuperAdmin(account)) return <AdminAccessDenied title="Accounts" />;
 
   const platformService = createPlatformServiceRoleClient();
-  const { data: accounts } = await platformService
-    .from("accounts")
-    .select("id, public_id, full_name, level, admin_role, created_at")
-    .order("created_at", { ascending: false })
-    .limit(200);
+  // admin_role now comes from platform_staff (2026-09-14, Identity/Admin
+  // separation phase 1 — adminSetAccountRole only writes there now), not
+  // accounts.admin_role directly — that column is legacy and no longer
+  // kept in sync by writes, so reading it here would go stale the
+  // moment anyone used the new control below. See lib/platform/
+  // account.ts's resolveAdminRole for the same "platform_staff first"
+  // resolution this list mirrors.
+  const [{ data: accounts }, { data: staffRows }] = await Promise.all([
+    platformService.from("accounts").select("id, public_id, full_name, level, created_at").order("created_at", { ascending: false }).limit(200),
+    platformService.from("platform_staff").select("id, admin_role"),
+  ]);
+  const staffByAccountId = new Map((staffRows ?? []).map((s) => [s.id, s.admin_role as "SUPER_ADMIN" | "SUPPORT_STAFF"]));
 
   return (
     <>
@@ -58,7 +65,7 @@ export default async function AdminAccountsPage() {
                     <AccountAdminControls
                       accountId={a.id}
                       level={a.level}
-                      adminRole={a.admin_role as "SUPER_ADMIN" | "SUPPORT_STAFF" | null}
+                      adminRole={staffByAccountId.get(a.id) ?? null}
                       isSelf={a.id === account?.id}
                     />
                   </TableCell>
