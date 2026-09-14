@@ -190,14 +190,18 @@ export default async function LandingPage() {
                   </span>
                 ))}
               </div>
-              <div style={{ marginTop: "1.5rem", paddingTop: "1.5rem", borderTop: "1px solid var(--cds-border-subtle)" }}>
+            </Column>
+            {/* Resolution — a Tile, right-aligned (explicit follow-up
+                request), instead of a plain full-width text block. */}
+            <Column sm={4} md={8} lg={{ span: 5, offset: 11 }} style={{ marginTop: "1.5rem" }}>
+              <Tile>
                 <p className="cds--type-productive-heading-02">{PROBLEM.resolution.title}</p>
                 {PROBLEM.resolution.lines.map((line) => (
                   <p key={line} className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
                     {line}
                   </p>
                 ))}
-              </div>
+              </Tile>
             </Column>
           </Grid>
         </section>
