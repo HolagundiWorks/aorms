@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type RepoSourceActionState = { error: string } | null;
 
@@ -43,7 +44,7 @@ export async function createRepoSource(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "repo_source",
@@ -75,7 +76,7 @@ export async function publishRepoSource(sourceId: string): Promise<PublishAction
     .select("status")
     .eq("id", sourceId)
     .maybeSingle();
-  if (fetchError) return { error: fetchError.message };
+  if (fetchError) return { error: toSafeErrorMessage(fetchError) };
   if (!src || (src.status !== "REVIEW" && src.status !== "PUBLISHED")) {
     return { error: "Run EOMS processing and review sections before publishing." };
   }
@@ -84,7 +85,7 @@ export async function publishRepoSource(sourceId: string): Promise<PublishAction
     .from("repo_sources")
     .update({ status: "PUBLISHED", published_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq("id", sourceId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "repo_source",
@@ -106,7 +107,7 @@ export async function unpublishRepoSource(sourceId: string): Promise<PublishActi
     .from("repo_sources")
     .update({ status: "REVIEW", published_at: null, updated_at: new Date().toISOString() })
     .eq("id", sourceId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "repo_source",

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type PhaseActionState = { error: string } | null;
 
@@ -38,7 +39,7 @@ export async function createPhaseRecord(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "phase",

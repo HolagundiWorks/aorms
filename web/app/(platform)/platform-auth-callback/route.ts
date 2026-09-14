@@ -19,13 +19,15 @@
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "../../../lib/platform/server";
+import { safeNextPath } from "../../../lib/security/safe-next-path";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aorms.in";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/identity";
+  // 2026-09-14 — same open-redirect guard as the Office Hub callback.
+  const next = safeNextPath(searchParams.get("next"), "/identity");
 
   if (code) {
     const supabase = await createClient();

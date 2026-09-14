@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Collaborator Portal submissions — port of the writing half of
@@ -56,7 +57,7 @@ export async function submitToProject(
     body,
     submitted_by_id: user?.id ?? null,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/collab-portal/${projectId}`);
   return null;
@@ -68,7 +69,7 @@ export async function completeTask(submissionId: string, projectId: string): Pro
     .from("consultant_submissions")
     .update({ status: "RESOLVED", updated_at: new Date().toISOString() })
     .eq("id", submissionId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/collab-portal/${projectId}`);
   return {};

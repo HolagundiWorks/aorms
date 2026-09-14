@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { parseCsvFile } from "../import-export/csv";
 import { checkFreeTierRecordCap, getFirmStudio, FREE_TIER_RECORD_CAP } from "../platform/firm-studio";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type ClientActionState = { error: string } | null;
 
@@ -95,7 +96,7 @@ export async function importClientsCsv(_prev: ImportClientsState, formData: Form
     .from("clients")
     .insert(toInsert)
     .select("id, name, kind, city, email, phone, contact_person");
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   for (const row of inserted ?? []) {
     await supabase.rpc("write_audit", {
@@ -142,7 +143,7 @@ export async function createClientRecord(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "client",

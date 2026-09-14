@@ -32,6 +32,7 @@ import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 import type { PlatformActionState } from "./platform";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 // Instant self-serve company creation (createCompany) was removed here
 // 2026-09-10 when the ConnectDeX Partners gated onboarding pipeline
@@ -82,7 +83,7 @@ export async function joinCompany(
     .select("id")
     .eq("public_id", handle)
     .maybeSingle();
-  if (lookupError) return { error: lookupError.message };
+  if (lookupError) return { error: toSafeErrorMessage(lookupError) };
   if (!company) return { error: `No company found with handle ${handle}.` };
 
   const { error } = await cx.from("company_memberships").upsert(
@@ -96,7 +97,7 @@ export async function joinCompany(
     },
     { onConflict: "account_id,company_id" },
   );
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/identity");
   return null;
@@ -124,7 +125,7 @@ export async function inviteCompanyMember(
     .select("id")
     .eq("public_id", handle)
     .maybeSingle();
-  if (lookupError) return { error: lookupError.message };
+  if (lookupError) return { error: toSafeErrorMessage(lookupError) };
   if (!account) return { error: `No AORMS Company account found with handle ${handle}.` };
 
   const supabase = await createPlatformClient();
@@ -139,7 +140,7 @@ export async function inviteCompanyMember(
     },
     { onConflict: "account_id,company_id" },
   );
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   return null;
@@ -154,7 +155,7 @@ export async function updateCompanyMembershipRole(membershipId: string, role: "O
     .eq("id", membershipId)
     .select("company_id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${membership.company_id}`);
   return {};
@@ -167,7 +168,7 @@ export async function leaveCompany(membershipId: string): Promise<{ error?: stri
     .from("company_memberships")
     .update({ status: "LEFT", left_at: new Date().toISOString() })
     .eq("id", membershipId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/identity");
   return {};
@@ -202,7 +203,7 @@ export async function updateCompanyProfile(
       phone: String(formData.get("phone") ?? "").trim() || null,
     })
     .eq("id", companyId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   return null;
@@ -226,7 +227,7 @@ export async function addCompanyBoardMember(
     designation: String(formData.get("designation") ?? "").trim() || null,
     appointed_at: String(formData.get("appointedAt") ?? "").trim() || null,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   return null;
@@ -252,7 +253,7 @@ export async function updateCompanyBoardMember(
       appointed_at: String(formData.get("appointedAt") ?? "").trim() || null,
     })
     .eq("id", boardMemberId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   return null;
@@ -261,7 +262,7 @@ export async function updateCompanyBoardMember(
 export async function removeCompanyBoardMember(boardMemberId: string, companyId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
   const { error } = await supabase.schema("connectdex").from("company_board_members").delete().eq("id", boardMemberId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   return {};
@@ -286,7 +287,7 @@ export async function addCompanyContact(
     phone: String(formData.get("phone") ?? "").trim() || null,
     is_primary: formData.get("isPrimary") === "on",
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   return null;
@@ -313,7 +314,7 @@ export async function updateCompanyContact(
       is_primary: formData.get("isPrimary") === "on",
     })
     .eq("id", contactId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   return null;
@@ -322,7 +323,7 @@ export async function updateCompanyContact(
 export async function removeCompanyContact(contactId: string, companyId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
   const { error } = await supabase.schema("connectdex").from("company_contacts").delete().eq("id", contactId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   return {};

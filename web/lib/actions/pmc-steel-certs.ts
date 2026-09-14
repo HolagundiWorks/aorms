@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -29,7 +30,7 @@ export async function createSteelCert(_prev: ActionState, formData: FormData): P
     p_scope: "pmc_steel_cert",
     p_default_prefix: "STL",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("pmc_steel_certs")
@@ -46,7 +47,7 @@ export async function createSteelCert(_prev: ActionState, formData: FormData): P
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "pmc_steel_cert",
@@ -83,7 +84,7 @@ export async function updateSteelCertStatus(certId: string, status: string): Pro
   if (status === "SENT_TO_CLIENT") patch.sent_at = new Date().toISOString();
 
   const { error } = await supabase.from("pmc_steel_certs").update(patch).eq("id", certId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "pmc_steel_cert",

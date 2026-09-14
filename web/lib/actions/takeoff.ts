@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 import {
   MasonryFields,
   PlasterFields,
@@ -264,7 +265,7 @@ export async function createTakeoffItem(
     fields,
     notes,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/takeoff/${projectId}`);
   return null;
@@ -309,7 +310,7 @@ export async function deriveWallFinishes(masonryItemId: string, projectId: strin
     .select("id, category, mark, fields")
     .eq("id", masonryItemId)
     .maybeSingle();
-  if (fetchError) return { error: fetchError.message };
+  if (fetchError) return { error: toSafeErrorMessage(fetchError) };
   if (!masonry || masonry.category !== "MASONRY") return { error: "Not a masonry wall." };
 
   const source = MasonryFields.safeParse(masonry.fields);
@@ -321,7 +322,7 @@ export async function deriveWallFinishes(masonryItemId: string, projectId: strin
     .eq("project_id", projectId)
     .eq("wall_mark", masonry.mark)
     .in("category", ["PLASTER", "PAINTING"]);
-  if (existingError) return { error: existingError.message };
+  if (existingError) return { error: toSafeErrorMessage(existingError) };
   const already = new Set((existing ?? []).map((r) => r.category));
 
   const rows: { category: string; mark: string; wall_mark: string; fields: Record<string, unknown> }[] = [];
@@ -339,7 +340,7 @@ export async function deriveWallFinishes(masonryItemId: string, projectId: strin
   const { error: insertError } = await supabase.from("takeoff_items").insert(
     rows.map((r) => ({ project_id: projectId, category: r.category, mark: r.mark, wall_mark: r.wall_mark, fields: r.fields })),
   );
-  if (insertError) return { error: insertError.message };
+  if (insertError) return { error: toSafeErrorMessage(insertError) };
 
   revalidatePath(`/takeoff/${projectId}`);
   return { created: rows.map((r) => r.category) };

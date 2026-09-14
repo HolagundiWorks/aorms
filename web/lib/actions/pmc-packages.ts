@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -23,7 +24,7 @@ export async function createPackage(_prev: ActionState, formData: FormData): Pro
     p_scope: "pmc_package",
     p_default_prefix: "PKG",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("pmc_packages")
@@ -38,7 +39,7 @@ export async function createPackage(_prev: ActionState, formData: FormData): Pro
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "pmc_package",
@@ -70,7 +71,7 @@ export async function inviteContractor(
     .insert({ package_id: packageId, contractor_id: contractorId, invited_by_id: user?.id ?? null })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "pmc_package_invite",
@@ -91,7 +92,7 @@ export async function openPackageBids(packageId: string): Promise<{ error?: stri
     .from("pmc_packages")
     .update({ bids_opened_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq("id", packageId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "pmc_package",
@@ -121,10 +122,10 @@ export async function awardPackage(
       updated_at: new Date().toISOString(),
     })
     .eq("id", packageId);
-  if (packageError) return { error: packageError.message };
+  if (packageError) return { error: toSafeErrorMessage(packageError) };
 
   const { error: bidError } = await supabase.from("pmc_package_bids").update({ status: "AWARDED" }).eq("id", bidId);
-  if (bidError) return { error: bidError.message };
+  if (bidError) return { error: toSafeErrorMessage(bidError) };
 
   await supabase.rpc("write_audit", {
     p_entity: "pmc_package",

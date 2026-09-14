@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { DECISION_STATES, DECISION_TRANSITIONS, type DecisionState } from "../decisions";
 import { ingestRecord } from "../rag/ingest";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * CRIF decision register — port of backend/src/modules/decision/router.ts's
@@ -49,7 +50,7 @@ export async function createDecision(projectId: string, _prev: ActionState, form
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "decision",
@@ -81,7 +82,7 @@ export async function updateDecisionState(projectId: string, decisionId: string,
     .select("state")
     .eq("id", decisionId)
     .maybeSingle();
-  if (beforeError) return { error: beforeError.message };
+  if (beforeError) return { error: toSafeErrorMessage(beforeError) };
   if (!before) return { error: "Decision not found." };
 
   const fromState = before.state as DecisionState;
@@ -95,7 +96,7 @@ export async function updateDecisionState(projectId: string, decisionId: string,
   if (fromState === "LOCKED" && nextState === "OPEN") patch.locked_at = null;
 
   const { error } = await supabase.from("decisions").update(patch).eq("id", decisionId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "decision",

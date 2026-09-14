@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
 import { ingestRecord } from "../rag/ingest";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -36,7 +37,7 @@ export async function createProgressReport(_prev: ActionState, formData: FormDat
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "progress_report",
@@ -57,7 +58,7 @@ export async function createProgressReport(_prev: ActionState, formData: FormDat
 export async function issueProgressReport(reportId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("progress_reports").update({ status: "ISSUED", updated_at: new Date().toISOString() }).eq("id", reportId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "progress_report",

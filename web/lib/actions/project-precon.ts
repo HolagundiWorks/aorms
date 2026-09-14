@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { canDecidePhaseGate, type ConsPhaseGateDecision } from "../project-precon";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -22,7 +23,7 @@ export async function createRisk(projectId: string, _prev: ActionState, formData
     .insert({ project_id: projectId, title, likelihood, impact, owner, response, mitigation, residual_likelihood: likelihood, residual_impact: impact })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_risk",
@@ -42,7 +43,7 @@ export async function setRiskStatus(projectId: string, riskId: string, status: s
   if (!RISK_STATUSES.includes(status)) return { error: "Invalid status." };
   const supabase = await createClient();
   const { error } = await supabase.from("project_risks").update({ status, updated_at: new Date().toISOString() }).eq("id", riskId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
   revalidatePath(`/projects/${projectId}/precon`);
   return {};
 }
@@ -65,7 +66,7 @@ export async function createOpportunity(projectId: string, _prev: ActionState, f
     .insert({ project_id: projectId, title, source, area, probability, impact, response, owner, action_plan: actionPlan })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_opportunity",
@@ -85,7 +86,7 @@ export async function setOpportunityStatus(projectId: string, opportunityId: str
   if (!OPPORTUNITY_STATUSES.includes(status)) return { error: "Invalid status." };
   const supabase = await createClient();
   const { error } = await supabase.from("project_opportunities").update({ status, updated_at: new Date().toISOString() }).eq("id", opportunityId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
   revalidatePath(`/projects/${projectId}/precon`);
   return {};
 }
@@ -124,7 +125,7 @@ export async function upsertPhaseGate(
       { project_id: projectId, gate_key: gateKey, checklist, decision, notes, ...decided, updated_at: new Date().toISOString() },
       { onConflict: "project_id,gate_key" },
     );
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_phase_gate",

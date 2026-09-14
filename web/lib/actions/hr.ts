@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -21,7 +22,7 @@ export async function createAssignment(
     .insert({ project_id: projectId, team_member_id: memberId, role })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "assignment",
@@ -56,7 +57,7 @@ export async function createLeave(
     .insert({ team_member_id: memberId, type, from_date: fromDate, to_date: toDate, days, reason })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "leave",
@@ -73,7 +74,7 @@ export async function createLeave(
 export async function updateLeaveStatus(memberId: string, leaveId: string, status: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("leaves").update({ status }).eq("id", leaveId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "leave",
@@ -111,7 +112,7 @@ export async function markAttendance(
     )
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "attendance",
@@ -168,7 +169,7 @@ export async function saveHrProfile(
     },
     { onConflict: "member_id" },
   );
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "hr_profile",
@@ -201,7 +202,7 @@ export async function createHrDocument(
     .insert({ member_id: memberId, document_type: documentType, document_name: documentName, issue_date: issueDate, expiry_date: expiryDate })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "hr_document",
@@ -236,7 +237,7 @@ export async function grantRewardPoints(
     .insert({ team_member_id: memberId, points, reason, created_by_id: user?.id ?? null })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "reward_points",

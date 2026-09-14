@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type MasterPlanActionState = { error: string } | null;
 
@@ -42,7 +43,7 @@ export async function createMasterPlan(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "master_plan",

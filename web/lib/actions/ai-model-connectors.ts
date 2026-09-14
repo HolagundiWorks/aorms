@@ -13,6 +13,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
 import { createServiceRoleClient } from "../platform/service";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type ConnectorKind = "openai_compatible" | "anthropic" | "ollama" | "device_gateway" | "custom_http";
 
@@ -53,7 +54,7 @@ export async function createModelConnector(_prev: ActionResult | null, formData:
     default_for_all: defaultForAll,
     notes,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/ai-connectors");
   return {};
@@ -65,7 +66,7 @@ export async function updateModelConnectorEnabled(connectorId: string, enabled: 
 
   const platform = createServiceRoleClient();
   const { error } = await platform.from("ai_model_connectors").update({ enabled }).eq("id", connectorId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/ai-connectors");
   return {};
@@ -77,7 +78,7 @@ export async function deleteModelConnector(connectorId: string): Promise<ActionR
 
   const platform = createServiceRoleClient();
   const { error } = await platform.from("ai_model_connectors").delete().eq("id", connectorId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/ai-connectors");
   return {};
@@ -104,7 +105,7 @@ export async function grantConnectorAccess(
     company_id: scopeType === "company" ? scopeValue : null,
     account_id: scopeType === "account" ? scopeValue : null,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/ai-connectors");
   return {};
@@ -116,7 +117,7 @@ export async function revokeConnectorAccess(accessId: string): Promise<ActionRes
 
   const platform = createServiceRoleClient();
   const { error } = await platform.from("ai_model_connector_access").delete().eq("id", accessId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/ai-connectors");
   return {};
@@ -131,7 +132,7 @@ export async function resolveHandleToId(scopeType: "company" | "account", handle
   const platform = createServiceRoleClient();
   const table = scopeType === "company" ? "companies" : "accounts";
   const { data, error } = await platform.from(table).select("id").eq("public_id", handle.trim()).maybeSingle();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
   if (!data) return { error: `No ${scopeType} found for handle "${handle}".` };
   return { id: data.id };
 }

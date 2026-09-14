@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Office Templates — reusable letter/scope/COA/contract/MOM boilerplate.
@@ -35,7 +36,7 @@ export async function createOfficeTemplate(
     .insert({ kind, title, body, tags })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "office_template",
@@ -69,7 +70,7 @@ export async function updateOfficeTemplate(
     .from("office_templates")
     .update({ kind, title, body, tags, updated_at: new Date().toISOString() })
     .eq("id", id);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "office_template",
@@ -87,7 +88,7 @@ export async function updateOfficeTemplate(
 export async function deleteOfficeTemplate(id: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("office_templates").delete().eq("id", id);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "office_template",

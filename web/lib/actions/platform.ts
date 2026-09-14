@@ -139,7 +139,7 @@ export async function linkPlatformIdentity(
     .select("public_id")
     .eq("public_id", handle)
     .maybeSingle();
-  if (lookupError) return { error: lookupError.message };
+  if (lookupError) return { error: toSafeErrorMessage(lookupError) };
   if (!account) return { error: `No AORMS Platform account found with handle ${handle}.` };
 
   const webService = createWebServiceRoleClient();
@@ -147,7 +147,7 @@ export async function linkPlatformIdentity(
     .from("profiles")
     .update({ platform_public_id: account.public_id })
     .eq("id", user.id);
-  if (updateError) return { error: updateError.message };
+  if (updateError) return { error: toSafeErrorMessage(updateError) };
 
   await webSupabase.rpc("write_audit", {
     p_entity: "profile",
@@ -178,7 +178,7 @@ export async function linkFirmToStudio(_prev: PlatformActionState, formData: For
 
   const platformService = createPlatformServiceRoleClient();
   const { data: studio, error: lookupError } = await platformService.from("studios").select("public_id").eq("public_id", handle).maybeSingle();
-  if (lookupError) return { error: lookupError.message };
+  if (lookupError) return { error: toSafeErrorMessage(lookupError) };
   if (!studio) return { error: `No studio found with handle ${handle}.` };
 
   const webSupabase = await createWebClient();
@@ -186,7 +186,7 @@ export async function linkFirmToStudio(_prev: PlatformActionState, formData: For
     .from("firm")
     .update({ platform_studio_public_id: studio.public_id })
     .eq("singleton", true);
-  if (updateError) return { error: updateError.message };
+  if (updateError) return { error: toSafeErrorMessage(updateError) };
 
   revalidatePath("/firm-settings");
   return null;
@@ -211,7 +211,7 @@ export async function createStudio(
   // before_studio_insert/after_studio_insert triggers mint the AORMS-S-
   // handle and the founding OWNER membership automatically.
   const { error } = await supabase.from("studios").insert({ name, owner_id: user.id });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/identity");
   return null;
@@ -290,7 +290,7 @@ export async function joinStudio(
     .select("id")
     .eq("public_id", handle)
     .maybeSingle();
-  if (lookupError) return { error: lookupError.message };
+  if (lookupError) return { error: toSafeErrorMessage(lookupError) };
   if (!studio) return { error: `No studio found with handle ${handle}.` };
 
   const capError = await checkStudioMemberCap(studio.id, user.id);
@@ -307,7 +307,7 @@ export async function joinStudio(
     },
     { onConflict: "account_id,studio_id" },
   );
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/identity");
   return null;
@@ -343,7 +343,7 @@ export async function inviteStudioMember(
     .select("id")
     .eq("public_id", handle)
     .maybeSingle();
-  if (lookupError) return { error: lookupError.message };
+  if (lookupError) return { error: toSafeErrorMessage(lookupError) };
   if (!account) return { error: `No AORMS Platform account found with handle ${handle}.` };
 
   const capError = await checkStudioMemberCap(studioId, account.id);
@@ -361,7 +361,7 @@ export async function inviteStudioMember(
     },
     { onConflict: "account_id,studio_id" },
   );
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/studios/${studioId}`);
   return null;
@@ -375,7 +375,7 @@ export async function updateStudioMembershipRole(membershipId: string, role: "OW
     .eq("id", membershipId)
     .select("studio_id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/studios/${membership.studio_id}`);
   return {};
@@ -387,7 +387,7 @@ export async function leaveStudio(membershipId: string): Promise<{ error?: strin
     .from("studio_memberships")
     .update({ status: "LEFT", left_at: new Date().toISOString() })
     .eq("id", membershipId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/identity");
   return {};
@@ -438,11 +438,11 @@ export async function assignProSeat(studioId: string, membershipId: string, acco
     .from("studio_memberships")
     .update({ pro_assigned_at: new Date().toISOString() })
     .eq("id", membershipId);
-  if (membershipError) return { error: membershipError.message };
+  if (membershipError) return { error: toSafeErrorMessage(membershipError) };
 
   const platformService = createPlatformServiceRoleClient();
   const { error: levelError } = await platformService.from("accounts").update({ level: "PRO" }).eq("id", accountId);
-  if (levelError) return { error: levelError.message };
+  if (levelError) return { error: toSafeErrorMessage(levelError) };
 
   revalidatePath(`/studios/${studioId}`);
   return {};
@@ -454,11 +454,11 @@ export async function assignProSeat(studioId: string, membershipId: string, acco
 export async function revokeProSeat(studioId: string, membershipId: string, accountId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
   const { error: membershipError } = await supabase.from("studio_memberships").update({ pro_assigned_at: null }).eq("id", membershipId);
-  if (membershipError) return { error: membershipError.message };
+  if (membershipError) return { error: toSafeErrorMessage(membershipError) };
 
   const platformService = createPlatformServiceRoleClient();
   const { error: levelError } = await platformService.from("accounts").update({ level: "BASIC" }).eq("id", accountId);
-  if (levelError) return { error: levelError.message };
+  if (levelError) return { error: toSafeErrorMessage(levelError) };
 
   revalidatePath(`/studios/${studioId}`);
   return {};
@@ -508,19 +508,19 @@ export async function transferStudioOwnership(studioId: string, newOwnerAccountI
   // could otherwise satisfy.
   const platformService = createPlatformServiceRoleClient();
   const { error: studioError } = await platformService.from("studios").update({ owner_id: newOwnerAccountId }).eq("id", studioId);
-  if (studioError) return { error: studioError.message };
+  if (studioError) return { error: toSafeErrorMessage(studioError) };
 
   const { error: promoteError } = await platformService
     .from("studio_memberships")
     .update({ role: "OWNER" })
     .eq("id", targetMembership.id);
-  if (promoteError) return { error: promoteError.message };
+  if (promoteError) return { error: toSafeErrorMessage(promoteError) };
 
   const { error: demoteError } = await platformService
     .from("studio_memberships")
     .update({ role: "MEMBER" })
     .eq("id", callerMembership.id);
-  if (demoteError) return { error: demoteError.message };
+  if (demoteError) return { error: toSafeErrorMessage(demoteError) };
 
   revalidatePath(`/studios/${studioId}`);
   return {};
@@ -572,7 +572,7 @@ export async function setStudioSubdomain(studioId: string, slug: string): Promis
     // Postgres unique_violation — surface a clean message instead of the
     // raw constraint-violation text.
     if (error.code === "23505") return { error: `"${normalized}" is already taken.` };
-    return { error: error.message };
+    return { error: toSafeErrorMessage(error) };
   }
 
   revalidatePath(`/studios/${studioId}`);
@@ -613,7 +613,7 @@ export async function updateStudioProfile(
       phone: String(formData.get("phone") ?? "").trim() || null,
     })
     .eq("id", studioId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/studios/${studioId}`);
   return null;
@@ -637,7 +637,7 @@ export async function addStudioBoardMember(
     designation: String(formData.get("designation") ?? "").trim() || null,
     appointed_at: String(formData.get("appointedAt") ?? "").trim() || null,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/studios/${studioId}`);
   return null;
@@ -662,7 +662,7 @@ export async function updateStudioBoardMember(
       appointed_at: String(formData.get("appointedAt") ?? "").trim() || null,
     })
     .eq("id", boardMemberId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/studios/${studioId}`);
   return null;
@@ -671,7 +671,7 @@ export async function updateStudioBoardMember(
 export async function removeStudioBoardMember(boardMemberId: string, studioId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
   const { error } = await supabase.from("studio_board_members").delete().eq("id", boardMemberId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/studios/${studioId}`);
   return {};
@@ -696,7 +696,7 @@ export async function addStudioContact(
     phone: String(formData.get("phone") ?? "").trim() || null,
     is_primary: formData.get("isPrimary") === "on",
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/studios/${studioId}`);
   return null;
@@ -722,7 +722,7 @@ export async function updateStudioContact(
       is_primary: formData.get("isPrimary") === "on",
     })
     .eq("id", contactId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/studios/${studioId}`);
   return null;
@@ -731,7 +731,7 @@ export async function updateStudioContact(
 export async function removeStudioContact(contactId: string, studioId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
   const { error } = await supabase.from("studio_contacts").delete().eq("id", contactId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/studios/${studioId}`);
   return {};
@@ -794,7 +794,7 @@ export async function recordHeartbeat(seconds: number = 60): Promise<{ ok: boole
   const { error } = await platformService
     .from("usage_heartbeats")
     .insert({ account_id: account.id, seconds: clamped });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: toSafeErrorMessage(error) };
 
   return { ok: true };
 }
@@ -844,7 +844,7 @@ export async function adminSetAccountLevel(accountId: string, level: "BASIC" | "
 
   const platformService = createPlatformServiceRoleClient();
   const { error } = await platformService.from("accounts").update({ level }).eq("id", accountId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/accounts");
   return {};
@@ -888,7 +888,7 @@ export async function adminSetAccountRole(
   const { error } = adminRole
     ? await supabase.from("platform_staff").upsert({ id: accountId, admin_role: adminRole }, { onConflict: "id" })
     : await supabase.from("platform_staff").delete().eq("id", accountId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/accounts");
   return {};

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -25,7 +26,7 @@ export async function createSiteInstruction(_prev: ActionState, formData: FormDa
     p_scope: "siteinstruction",
     p_default_prefix: "SI",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("site_instructions")
@@ -40,7 +41,7 @@ export async function createSiteInstruction(_prev: ActionState, formData: FormDa
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "site_instruction",

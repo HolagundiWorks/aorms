@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -12,7 +13,7 @@ export async function createTeam(_prev: ActionState, formData: FormData): Promis
 
   const supabase = await createClient();
   const { data: inserted, error } = await supabase.from("teams").insert({ name, description }).select("id").single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "team",
@@ -40,7 +41,7 @@ export async function addTeamMembership(
     .insert({ team_id: teamId, team_member_id: teamMemberId })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "team_membership",

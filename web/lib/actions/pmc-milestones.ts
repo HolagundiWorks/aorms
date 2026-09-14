@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -22,14 +23,14 @@ export async function createMilestone(_prev: ActionState, formData: FormData): P
     p_scope: "pmc_milestone",
     p_default_prefix: "MS",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("pmc_milestones")
     .insert({ project_id: projectId, ref: refData, title, planned_date: plannedDate, created_by_id: user?.id ?? null })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "pmc_milestone",
@@ -53,7 +54,7 @@ export async function updateMilestoneStatus(milestoneId: string, status: string)
   if (status === "COMPLETE") patch.actual_date = new Date().toISOString().slice(0, 10);
 
   const { error } = await supabase.from("pmc_milestones").update(patch).eq("id", milestoneId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "pmc_milestone",

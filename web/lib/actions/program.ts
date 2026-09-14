@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -34,7 +35,7 @@ export async function getOrCreateProgram(projectId: string): Promise<{ error?: s
     .insert({ project_id: projectId, version: 1, status: "DRAFT", max_built_area_sqm: envelope, created_by_id: user?.id ?? null })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "program",
@@ -72,7 +73,7 @@ export async function addProgramSpace(
   const { error } = await supabase
     .from("program_spaces")
     .insert({ program_id: programId, name, category, floor_level: floorLevel, unit_area_sqm: unitAreaSqm, count, notes });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/projects/${projectId}/program`);
   return null;
@@ -92,7 +93,7 @@ export async function freezeProgram(programId: string, projectId: string): Promi
     .from("programs")
     .update({ status: "FROZEN", max_built_area_sqm: envelope, frozen_at: new Date().toISOString(), frozen_by_id: user?.id ?? null, updated_at: new Date().toISOString() })
     .eq("id", programId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "program",
@@ -120,7 +121,7 @@ export async function newProgramVersion(projectId: string): Promise<{ error?: st
     .order("version", { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (latestError) return { error: latestError.message };
+  if (latestError) return { error: toSafeErrorMessage(latestError) };
   if (!latest) return { error: "No program to version." };
   if (latest.status !== "FROZEN") return { error: "Freeze the current draft before starting a new version." };
 
@@ -130,7 +131,7 @@ export async function newProgramVersion(projectId: string): Promise<{ error?: st
     .insert({ project_id: projectId, version: latest.version + 1, status: "DRAFT", max_built_area_sqm: envelope, notes: latest.notes, created_by_id: user?.id ?? null })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   const { data: prevSpaces } = await supabase.from("program_spaces").select("*").eq("program_id", latest.id);
   if (prevSpaces && prevSpaces.length > 0) {

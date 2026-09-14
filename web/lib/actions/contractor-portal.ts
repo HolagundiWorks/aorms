@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Contractor Portal — sealed tender bid submission. Port of
@@ -42,7 +43,7 @@ export async function submitBid(
     .select("id, status, tenders(status)")
     .eq("id", invitationId)
     .maybeSingle();
-  if (invError) return { error: invError.message };
+  if (invError) return { error: toSafeErrorMessage(invError) };
   if (!invitation) return { error: "Invitation not found." };
   const tender = Array.isArray(invitation.tenders) ? invitation.tenders[0] : invitation.tenders;
   if (tender?.status !== "OPEN") return { error: "Bidding is only open while the tender is OPEN." };
@@ -68,13 +69,13 @@ export async function submitBid(
   const { error } = existing
     ? await supabase.from("tender_bids").update(payload).eq("id", existing.id)
     : await supabase.from("tender_bids").insert({ invitation_id: invitationId, ...payload });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   const { error: statusError } = await supabase
     .from("tender_invitations")
     .update({ status: "SUBMITTED" })
     .eq("id", invitationId);
-  if (statusError) return { error: statusError.message };
+  if (statusError) return { error: toSafeErrorMessage(statusError) };
 
   revalidatePath(`/contractor-portal/${invitationId}`);
   revalidatePath("/contractor-portal");
@@ -89,11 +90,11 @@ export async function declineInvitation(invitationId: string): Promise<{ error?:
     .select("status")
     .eq("id", invitationId)
     .maybeSingle();
-  if (invError) return { error: invError.message };
+  if (invError) return { error: toSafeErrorMessage(invError) };
   if (invitation?.status === "SUBMITTED") return { error: "Cannot decline after submitting a bid." };
 
   const { error } = await supabase.from("tender_invitations").update({ status: "DECLINED" }).eq("id", invitationId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/contractor-portal/${invitationId}`);
   revalidatePath("/contractor-portal");

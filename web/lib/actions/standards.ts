@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type StandardActionState = { error: string } | null;
 
@@ -23,7 +24,7 @@ export async function createStandard(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "standard",
@@ -62,7 +63,7 @@ export async function createStandardFile(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "standard_file",

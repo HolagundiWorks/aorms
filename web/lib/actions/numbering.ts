@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Numbering-pattern overrides — migration 0003's own header comment
@@ -36,7 +37,7 @@ export async function addNumberingPatternRecord(
     .upsert({ scope, prefix, padding }, { onConflict: "scope" })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "numbering_pattern",
@@ -53,7 +54,7 @@ export async function addNumberingPatternRecord(
 export async function removeNumberingPatternRecord(patternId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("numbering_patterns").delete().eq("id", patternId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "numbering_pattern",

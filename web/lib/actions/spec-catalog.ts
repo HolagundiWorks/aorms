@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Spec Catalog (Library → Specification) — port of backend/src/modules/
@@ -28,7 +29,7 @@ export async function createSpecCatalogVersion(
     .insert({ label, description })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "spec_catalog_version",
@@ -51,10 +52,10 @@ export async function setActiveSpecCatalogVersion(versionId: string): Promise<{ 
   // safe (setting a second row active before clearing the first would hit
   // the same constraint).
   const { error: clearError } = await supabase.from("spec_catalog_versions").update({ active: false }).eq("active", true);
-  if (clearError) return { error: clearError.message };
+  if (clearError) return { error: toSafeErrorMessage(clearError) };
 
   const { error } = await supabase.from("spec_catalog_versions").update({ active: true }).eq("id", versionId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "spec_catalog_version",
@@ -99,7 +100,7 @@ export async function addSpecCatalogItem(
     .insert({ version_id: versionId, category, item, make, specification, finish, remarks, sort_order: sortOrder })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "spec_catalog_item",
@@ -116,7 +117,7 @@ export async function addSpecCatalogItem(
 export async function removeSpecCatalogItem(itemId: string, versionId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("spec_catalog_items").delete().eq("id", itemId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "spec_catalog_item",

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -20,14 +21,14 @@ export async function createSnag(_prev: ActionState, formData: FormData): Promis
     p_scope: "snag",
     p_default_prefix: "SNG",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("snags")
     .insert({ project_id: projectId, ref: refData, location, trade, description, due_date: dueDate })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "snag",
@@ -51,7 +52,7 @@ export async function updateSnagStatus(snagId: string, status: string): Promise<
   if (status === "CLOSED") patch.closed_at = new Date().toISOString();
 
   const { error } = await supabase.from("snags").update(patch).eq("id", snagId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "snag",

@@ -16,6 +16,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type AdminAccountActionState = { error: string } | { success: string } | null;
 
@@ -69,14 +70,14 @@ export async function adminTriggerPasswordReset(
   const { error: resetError } = await platformService.auth.resetPasswordForEmail(userData.user.email, {
     redirectTo: `${SITE_URL}/platform-auth-callback?next=${encodeURIComponent("/platform-reset-password")}`,
   });
-  if (resetError) return { error: resetError.message };
+  if (resetError) return { error: toSafeErrorMessage(resetError) };
 
   const { error: logError } = await platformService.from("password_reset_requests").insert(
     accountKind === "company"
       ? { company_account_id: accountId, triggered_by_id: gate.accountId, email_sent_to: userData.user.email }
       : { account_id: accountId, triggered_by_id: gate.accountId, email_sent_to: userData.user.email },
   );
-  if (logError) return { error: logError.message };
+  if (logError) return { error: toSafeErrorMessage(logError) };
 
   revalidatePath("/admin/accounts");
   return { success: `Password reset email sent to ${userData.user.email}.` };

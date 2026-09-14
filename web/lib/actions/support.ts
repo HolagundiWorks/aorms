@@ -17,6 +17,7 @@ import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
 import { getCurrentPlatformSessionAccount } from "../platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type SupportActionState = { error: string; success?: undefined } | { success: string; error?: undefined } | null;
 
@@ -79,7 +80,7 @@ export async function submitSupportTicket(_prev: SupportActionState, formData: F
     subject,
     message,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   return { success: "Thanks — HelpDeX will review your request and follow up by email." };
 }
@@ -112,7 +113,7 @@ export async function adminUpdateSupportTicketStatus(
       ...(isResolving ? { resolved_at: new Date().toISOString(), resolved_by_id: gate.accountId } : {}),
     })
     .eq("id", ticketId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/helpdesk");
   return {};

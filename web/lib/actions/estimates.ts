@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { computeTakeoffQuantity, type StoredTakeoffItem } from "../takeoff/formulas";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type EstimateActionState = { error: string } | null;
 
@@ -47,7 +48,7 @@ export async function createEstimateRecord(
     p_scope: "estimate",
     p_default_prefix: "EST",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("estimates")
@@ -67,7 +68,7 @@ export async function createEstimateRecord(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "estimate",
@@ -118,7 +119,7 @@ async function insertEstimateItem(
   // The estimate-editable-lock trigger (assert_estimate_editable) surfaces as
   // a Postgres exception here if the parent estimate is APPROVED/CANCELLED —
   // its message is already user-facing ("This estimate is approved...").
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "estimate_item",
@@ -211,7 +212,7 @@ export async function addEstimateMeasurementRecord(
   // assert_estimate_editable (fired by the recompute trigger) surfaces as a
   // Postgres exception here if the parent estimate is APPROVED/CANCELLED —
   // its message is already user-facing.
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/estimates/${estimateId}/items/${estimateItemId}`);
   revalidatePath(`/estimates/${estimateId}`);
@@ -225,7 +226,7 @@ export async function removeEstimateMeasurementRecord(
 ): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("estimate_measurements").delete().eq("id", measurementId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/estimates/${estimateId}/items/${estimateItemId}`);
   revalidatePath(`/estimates/${estimateId}`);
@@ -261,7 +262,7 @@ export async function sendTakeoffItemToEstimate(
     .from("takeoff_items")
     .select("id, category, mark, wall_mark, fields")
     .eq("project_id", projectId);
-  if (fetchError) return { error: fetchError.message };
+  if (fetchError) return { error: toSafeErrorMessage(fetchError) };
 
   const allRows = (rows ?? []) as StoredTakeoffItem[];
   const row = allRows.find((r) => r.id === takeoffItemId);

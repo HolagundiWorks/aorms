@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { logAutoDocumentIssue } from "../document-issues-log";
 import { ingestRecord } from "../rag/ingest";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type MomActionState = { error: string } | null;
 
@@ -27,7 +28,7 @@ export async function createMomRecord(
     p_scope: "mom",
     p_default_prefix: "MOM",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("moms")
@@ -43,7 +44,7 @@ export async function createMomRecord(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "mom",
@@ -82,7 +83,7 @@ export async function issueMomRecord(momId: string): Promise<{ error?: string }>
     .eq("status", "DRAFT")
     .select("ref, project_id")
     .maybeSingle();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
   if (!mom) return { error: "Already issued, or not found." };
 
   await supabase.rpc("write_audit", {
@@ -146,7 +147,7 @@ export async function addMomActionRecord(
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "mom_action",
@@ -170,7 +171,7 @@ export async function updateMomActionStatus(
   if (!MOM_ACTION_STATUSES.includes(status)) return { error: "Invalid status." };
   const supabase = await createClient();
   const { error } = await supabase.from("mom_actions").update({ status }).eq("id", actionId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/moms/${momId}`);
   return {};
@@ -179,7 +180,7 @@ export async function updateMomActionStatus(
 export async function removeMomAction(actionId: string, momId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("mom_actions").delete().eq("id", actionId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/moms/${momId}`);
   return {};

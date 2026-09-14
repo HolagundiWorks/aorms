@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { canTransition, evaluateActivationGate, type ProjectStatus } from "../project-os";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Port of gatherActivationGate() + the activate mutation
@@ -61,7 +62,7 @@ export async function updateProjectStatus(projectId: string, to: ProjectStatus):
   }
 
   const { error } = await supabase.from("project_offices").update({ status: to, updated_at: new Date().toISOString() }).eq("id", projectId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_office",
@@ -87,7 +88,7 @@ export async function activateProject(projectId: string): Promise<{ error?: stri
     .from("project_offices")
     .update({ status: "ACTIVE", updated_at: new Date().toISOString() })
     .eq("id", projectId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_office",

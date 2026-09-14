@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Firm settings — a Postgres singleton row (migration 0024 seeded it; the
@@ -39,7 +40,7 @@ export async function updateFirmSettings(
   const supabase = await createClient();
 
   const { data: firm, error: firmError } = await supabase.from("firm").select("id").limit(1).maybeSingle();
-  if (firmError) return { error: firmError.message };
+  if (firmError) return { error: toSafeErrorMessage(firmError) };
   if (!firm) return { error: "No firm record exists to update — this should have been seeded by migration 0024." };
 
   const { error } = await supabase
@@ -50,7 +51,7 @@ export async function updateFirmSettings(
       updated_at: new Date().toISOString(),
     })
     .eq("id", firm.id);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "firm",

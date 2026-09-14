@@ -12,6 +12,7 @@ import {
   type BbsElement,
 } from "../bbs/formulas";
 import { computeMember, type BbsMemberStored } from "../bbs/engine";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Project BBS Server Actions — port of backend/src/modules/bbs/router.ts
@@ -63,14 +64,14 @@ export async function createBbsSchedule(
     p_scope: "bbs",
     p_default_prefix: "BBS",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("bbs_schedules")
     .insert({ ref: refData, project_id: projectId, title, notes, created_by_id: user?.id ?? null })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "bbs",
@@ -90,7 +91,7 @@ export async function updateBbsStatus(bbsId: string, status: "DRAFT" | "ISSUED")
     .from("bbs_schedules")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", bbsId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "bbs",
@@ -107,7 +108,7 @@ export async function updateBbsStatus(bbsId: string, status: "DRAFT" | "ISSUED")
 export async function removeBbsSchedule(bbsId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("bbs_schedules").delete().eq("id", bbsId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "bbs",
@@ -149,7 +150,7 @@ async function insertMemberAndBars(
     })
     .select("id")
     .single();
-  if (memberError) return { error: memberError.message };
+  if (memberError) return { error: toSafeErrorMessage(memberError) };
 
   if (computed.bars.length > 0) {
     const { error: itemsError } = await supabase.from("bbs_items").insert(
@@ -168,7 +169,7 @@ async function insertMemberAndBars(
         shape: b.shape,
       })),
     );
-    if (itemsError) return { error: itemsError.message };
+    if (itemsError) return { error: toSafeErrorMessage(itemsError) };
   }
 
   await supabase.rpc("write_audit", {
@@ -360,7 +361,7 @@ export type BbsElementType = BbsElement;
 export async function removeBbsMember(memberId: string, bbsId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("bbs_members").delete().eq("id", memberId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "bbs_member",
@@ -382,7 +383,7 @@ export async function regenerateBbsMember(memberId: string, bbsId: string): Prom
     .select("id, element, input")
     .eq("id", memberId)
     .maybeSingle();
-  if (memberError) return { error: memberError.message };
+  if (memberError) return { error: toSafeErrorMessage(memberError) };
   if (!member) return { error: "Member not found." };
 
   const stored = { element: member.element, input: member.input } as BbsMemberStored;
@@ -393,7 +394,7 @@ export async function regenerateBbsMember(memberId: string, bbsId: string): Prom
     .delete()
     .eq("bbs_id", bbsId)
     .eq("member_id", memberId);
-  if (deleteError) return { error: deleteError.message };
+  if (deleteError) return { error: toSafeErrorMessage(deleteError) };
 
   if (computed.bars.length > 0) {
     const { error: itemsError } = await supabase.from("bbs_items").insert(
@@ -412,14 +413,14 @@ export async function regenerateBbsMember(memberId: string, bbsId: string): Prom
         shape: b.shape,
       })),
     );
-    if (itemsError) return { error: itemsError.message };
+    if (itemsError) return { error: toSafeErrorMessage(itemsError) };
   }
 
   const { error: updateError } = await supabase
     .from("bbs_members")
     .update({ mark: computed.mark, updated_at: new Date().toISOString() })
     .eq("id", memberId);
-  if (updateError) return { error: updateError.message };
+  if (updateError) return { error: toSafeErrorMessage(updateError) };
 
   revalidatePath(`/bbs/${bbsId}`);
   return {};
@@ -460,7 +461,7 @@ export async function addManualBbsItem(_prev: BbsActionState, formData: FormData
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "bbs_item",
@@ -477,7 +478,7 @@ export async function addManualBbsItem(_prev: BbsActionState, formData: FormData
 export async function removeBbsItem(itemId: string, bbsId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("bbs_items").delete().eq("id", itemId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "bbs_item",

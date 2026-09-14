@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
 import { logAutoDocumentIssue } from "../document-issues-log";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type SpecSheetActionState = { error: string } | null;
 
@@ -23,7 +24,7 @@ export async function createSpecSheetRecord(
     p_scope: "specsheet",
     p_default_prefix: "SPC",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("spec_sheets")
@@ -31,7 +32,7 @@ export async function createSpecSheetRecord(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "spec_sheet",
@@ -80,7 +81,7 @@ export async function createSpecItemRecord(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "spec_item",

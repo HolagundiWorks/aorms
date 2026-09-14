@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { conversionProbability } from "../project-os";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -24,7 +25,7 @@ export async function addNegotiationRound(projectId: string, _prev: ActionState,
     .from("project_negotiations")
     .select("round_no, discount_requested_pct")
     .eq("project_id", projectId);
-  if (existingError) return { error: existingError.message };
+  if (existingError) return { error: toSafeErrorMessage(existingError) };
 
   const roundNo = (existing ?? []).reduce((m, r) => Math.max(m, r.round_no), 0) + 1;
   const totalDiscountPct = (existing ?? []).reduce((s, r) => s + Number(r.discount_requested_pct), 0) + discountRequestedPct;
@@ -47,7 +48,7 @@ export async function addNegotiationRound(projectId: string, _prev: ActionState,
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_negotiation",
@@ -69,7 +70,7 @@ export async function setNegotiationOutcome(projectId: string, negotiationId: st
   const supabase = await createClient();
   const { data: before } = await supabase.from("project_negotiations").select("outcome").eq("id", negotiationId).maybeSingle();
   const { error } = await supabase.from("project_negotiations").update({ outcome }).eq("id", negotiationId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_negotiation",

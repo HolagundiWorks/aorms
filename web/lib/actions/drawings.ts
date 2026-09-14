@@ -5,6 +5,7 @@ import { createClient } from "../supabase/server";
 import { enqueueJob, JobEnqueueError } from "../jobs/enqueue";
 import { getFirmForPdf } from "../jobs/firm";
 import { uploadDrawingCore, type DrawingActionState } from "../drawings/upload";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type { DrawingActionState };
 
@@ -60,7 +61,7 @@ export async function generateDrawingIssuePdf(drawingId: string): Promise<{ erro
     .select("id, svg_key, status, issue_pdf_status")
     .eq("id", drawingId)
     .maybeSingle();
-  if (drawingError) return { error: drawingError.message };
+  if (drawingError) return { error: toSafeErrorMessage(drawingError) };
   if (!drawing) return { error: "Drawing not found." };
   if (drawing.issue_pdf_status === "PROCESSING") return { error: "PDF is already being generated." };
   if (drawing.status !== "READY" || !drawing.svg_key) {
@@ -77,7 +78,7 @@ export async function generateDrawingIssuePdf(drawingId: string): Promise<{ erro
       undefined,
     );
   } catch (err) {
-    if (err instanceof JobEnqueueError) return { error: err.message };
+    if (err instanceof JobEnqueueError) return { error: toSafeErrorMessage(err) };
     throw err;
   }
 

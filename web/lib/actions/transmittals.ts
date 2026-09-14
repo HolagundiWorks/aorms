@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
 import { logAutoDocumentIssue } from "../document-issues-log";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type TransmittalActionState = { error: string } | null;
 
@@ -31,7 +32,7 @@ export async function createTransmittalRecord(
     p_scope: "transmittal",
     p_default_prefix: "TRN",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("transmittals")
@@ -48,7 +49,7 @@ export async function createTransmittalRecord(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "transmittal",
@@ -126,7 +127,7 @@ export async function addTransmittalItemRecord(
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "transmittal_item",
@@ -143,7 +144,7 @@ export async function addTransmittalItemRecord(
 export async function removeTransmittalItem(itemId: string, transmittalId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("transmittal_items").delete().eq("id", itemId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/transmittals/${transmittalId}`);
   return {};

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Staff user management — closes a gap this repo's own module map calls out
@@ -20,7 +21,7 @@ export async function updateUserRole(userId: string, role: string): Promise<{ er
   if (!ROLES.includes(role)) return { error: "Invalid role." };
   const supabase = await createClient();
   const { error } = await supabase.from("profiles").update({ role }).eq("id", userId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "profile",
@@ -37,7 +38,7 @@ export async function updateUserRole(userId: string, role: string): Promise<{ er
 export async function toggleUserDisabled(userId: string, disabled: boolean): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("profiles").update({ disabled }).eq("id", userId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "profile",
@@ -67,7 +68,7 @@ export async function updateMyName(fullName: string): Promise<{ error?: string }
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("update_my_full_name", { p_full_name: trimmed });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/users");
   return {};
@@ -85,13 +86,13 @@ export async function updateMyName(fullName: string): Promise<{ error?: string }
 export async function getMyCalendarFeedToken(): Promise<{ token?: string; error?: string }> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("ensure_my_calendar_feed_token");
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
   return { token: data as string };
 }
 
 export async function rotateMyCalendarFeedToken(): Promise<{ token?: string; error?: string }> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("rotate_my_calendar_feed_token");
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
   return { token: data as string };
 }

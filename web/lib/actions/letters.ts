@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
 import { logAutoDocumentIssue } from "../document-issues-log";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type LetterActionState = { error: string } | null;
 
@@ -27,7 +28,7 @@ export async function createLetterRecord(
     p_scope: "letter",
     p_default_prefix: "LTR",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("letters")
@@ -35,7 +36,7 @@ export async function createLetterRecord(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "letter",

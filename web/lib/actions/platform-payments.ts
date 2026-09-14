@@ -24,6 +24,7 @@ import { getCurrentPlatformAccount, getCurrentPlatformSessionAccount, isSuperAdm
 import { createOrder, verifyPaymentSignature } from "../platform/razorpay";
 import { applyCapturedPayment } from "../platform/licence-payment";
 import { applyCapturedIdentityPayment } from "../platform/identity-payment";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type PaymentActionState = { error: string } | null;
 
@@ -97,7 +98,7 @@ export async function createLicenceOrder(studioId: string, plan: "PRO" | "ENTERP
     .select("base_price_paise")
     .eq("plan", plan)
     .maybeSingle();
-  if (pricingError) return { error: pricingError.message };
+  if (pricingError) return { error: toSafeErrorMessage(pricingError) };
   if (!pricing) return { error: `No pricing configured for ${plan} yet — contact support.` };
 
   const amountPaise = pricing.base_price_paise;
@@ -123,7 +124,7 @@ export async function createLicenceOrder(studioId: string, plan: "PRO" | "ENTERP
     razorpay_order_id: order.id,
     status: "CREATED",
   });
-  if (insertError) return { error: insertError.message };
+  if (insertError) return { error: toSafeErrorMessage(insertError) };
 
   return { orderId: order.id, amountPaise, currency: "INR", keyId };
 }
@@ -163,7 +164,7 @@ export async function createIdentityOrder(): Promise<CreateOrderResult> {
     .select("total_active_seconds")
     .eq("id", account.id)
     .maybeSingle();
-  if (usageError) return { error: usageError.message };
+  if (usageError) return { error: toSafeErrorMessage(usageError) };
   if (!accountUsage || accountUsage.total_active_seconds < IDENTITY_VERIFICATION_SECONDS_REQUIRED) {
     const hoursLogged = (accountUsage?.total_active_seconds ?? 0) / 3600;
     return {
@@ -176,7 +177,7 @@ export async function createIdentityOrder(): Promise<CreateOrderResult> {
     .select("plan")
     .eq("account_id", account.id)
     .maybeSingle();
-  if (licenceError) return { error: licenceError.message };
+  if (licenceError) return { error: toSafeErrorMessage(licenceError) };
   if (existingLicence?.plan === "AORMS_IDENTITY") return { error: "Already verified — this is a one-time purchase." };
 
   const plan = "AORMS_IDENTITY" as const;
@@ -185,7 +186,7 @@ export async function createIdentityOrder(): Promise<CreateOrderResult> {
     .select("base_price_paise")
     .eq("plan", plan)
     .maybeSingle();
-  if (pricingError) return { error: pricingError.message };
+  if (pricingError) return { error: toSafeErrorMessage(pricingError) };
   if (!pricing) return { error: `No pricing configured for ${plan} yet — contact support.` };
 
   const amountPaise = pricing.base_price_paise;
@@ -207,7 +208,7 @@ export async function createIdentityOrder(): Promise<CreateOrderResult> {
     razorpay_order_id: order.id,
     status: "CREATED",
   });
-  if (insertError) return { error: insertError.message };
+  if (insertError) return { error: toSafeErrorMessage(insertError) };
 
   return { orderId: order.id, amountPaise, currency: "INR", keyId };
 }
@@ -233,7 +234,7 @@ export async function confirmPaymentClientSide(orderId: string, paymentId: strin
     .select("id, studio_id, plan, seats, status")
     .eq("razorpay_order_id", orderId)
     .maybeSingle();
-  if (fetchError) return { error: fetchError.message };
+  if (fetchError) return { error: toSafeErrorMessage(fetchError) };
   if (!payment) return { error: "No matching order found." };
 
   // Already applied by the webhook (or a prior call to this same action) —
@@ -262,7 +263,7 @@ export async function confirmIdentityPaymentClientSide(orderId: string, paymentI
     .select("id, account_id, status")
     .eq("razorpay_order_id", orderId)
     .maybeSingle();
-  if (fetchError) return { error: fetchError.message };
+  if (fetchError) return { error: toSafeErrorMessage(fetchError) };
   if (!payment) return { error: "No matching order found." };
 
   if (payment.status === "CAPTURED") {
@@ -315,7 +316,7 @@ export async function adminUpdateLicence(_prev: PaymentActionState, formData: Fo
     .from("licences")
     .update({ plan, seats, expires_at: expiresAtRaw ? new Date(expiresAtRaw).toISOString() : null })
     .eq("studio_id", studioId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/licences");
   return null;
@@ -352,7 +353,7 @@ export async function adminSetPricing(_prev: PaymentActionState, formData: FormD
       updated_at: new Date().toISOString(),
     })
     .eq("plan", plan);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/pricing");
   return null;

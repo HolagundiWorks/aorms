@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -25,7 +26,7 @@ export async function createRaBill(_prev: ActionState, formData: FormData): Prom
     p_scope: "pmc_ra_bill",
     p_default_prefix: "RA",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("pmc_ra_bills")
@@ -39,7 +40,7 @@ export async function createRaBill(_prev: ActionState, formData: FormData): Prom
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "pmc_ra_bill",
@@ -73,7 +74,7 @@ export async function createRaLine(billId: string, _prev: LineActionState, formD
     .insert({ bill_id: billId, description, unit, this_qty: thisQty, rate_paise: ratePaise, amount_paise: amountPaise })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   // Roll the line amount into the bill's gross total.
   const { data: bill } = await supabase.from("pmc_ra_bills").select("gross_paise").eq("id", billId).maybeSingle();
@@ -115,7 +116,7 @@ export async function updateRaBillStatus(billId: string, status: string): Promis
   if (status === "SENT_TO_CLIENT") patch.sent_at = new Date().toISOString();
 
   const { error } = await supabase.from("pmc_ra_bills").update(patch).eq("id", billId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "pmc_ra_bill",

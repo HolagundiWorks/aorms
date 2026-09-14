@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { logAutoDocumentIssue } from "../document-issues-log";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type ContractActionState = { error: string } | null;
 
@@ -30,7 +31,7 @@ export async function createContractRecord(
     p_scope: "contract",
     p_default_prefix: "CTR",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("contracts")
@@ -47,7 +48,7 @@ export async function createContractRecord(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "contract",

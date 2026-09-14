@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -51,7 +52,7 @@ export async function saveBasicInfo(projectId: string, _prev: ActionState, formD
   };
 
   const { data: row, error } = await upsertBrief(supabase, projectId, { basic_info: basicInfo });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_brief",
@@ -84,7 +85,7 @@ export async function saveProjectInfo(projectId: string, _prev: ActionState, for
   };
 
   const { data: row, error } = await upsertBrief(supabase, projectId, { project_info: projectInfo });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_brief",
@@ -112,7 +113,7 @@ export async function saveStaffRequirements(projectId: string, _prev: ActionStat
     : [];
 
   const { data: row, error } = await upsertBrief(supabase, projectId, { occupants: { household, staffRequirements } });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_brief",
@@ -148,7 +149,7 @@ export async function addHouseholdMember(projectId: string, _prev: ActionState, 
   const { data: row, error } = await upsertBrief(supabase, projectId, {
     occupants: { ...occupants, household },
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_brief",
@@ -176,7 +177,7 @@ export async function removeHouseholdMember(projectId: string, index: number): P
     .from("project_briefs")
     .update({ occupants: { ...occupants, household }, updated_at: new Date().toISOString() })
     .eq("project_id", projectId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/projects/${projectId}/brief`);
   return {};
@@ -200,7 +201,7 @@ export async function saveDesignPrefs(projectId: string, _prev: ActionState, for
   }
 
   const { data: row, error } = await upsertBrief(supabase, projectId, { design_prefs: designPrefs });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_brief",
@@ -238,7 +239,7 @@ export async function addSpaceRow(projectId: string, _prev: ActionState, formDat
   });
 
   const { data: row, error } = await upsertBrief(supabase, projectId, { space_schedule: spaceSchedule });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_brief",
@@ -265,7 +266,7 @@ export async function removeSpaceRow(projectId: string, index: number): Promise<
     .from("project_briefs")
     .update({ space_schedule: spaceSchedule, updated_at: new Date().toISOString() })
     .eq("project_id", projectId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/projects/${projectId}/brief`);
   return {};
@@ -286,7 +287,7 @@ export async function saveMaterials(projectId: string, _prev: ActionState, formD
   }
 
   const { data: row, error } = await upsertBrief(supabase, projectId, { materials });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_brief",
@@ -322,7 +323,7 @@ export async function addRoomDetail(projectId: string, _prev: ActionState, formD
   });
 
   const { data: row, error } = await upsertBrief(supabase, projectId, { room_details: roomDetails });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_brief",
@@ -349,7 +350,7 @@ export async function removeRoomDetail(projectId: string, index: number): Promis
     .from("project_briefs")
     .update({ room_details: roomDetails, updated_at: new Date().toISOString() })
     .eq("project_id", projectId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/projects/${projectId}/brief`);
   return {};
@@ -366,7 +367,7 @@ export async function saveAssumptions(projectId: string, _prev: ActionState, for
   const assumptions = String(formData.get("assumptions") ?? "").trim() || null;
 
   const { data: row, error } = await upsertBrief(supabase, projectId, { assumptions });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_brief",
@@ -388,7 +389,7 @@ export async function approveBrief(projectId: string, _prev: ActionState, formDa
 
   const supabase = await createClient();
   const { data: row, error } = await upsertBrief(supabase, projectId, { approval_note: approvalNote, approved_at: approvedAt });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_brief",
@@ -408,7 +409,7 @@ export async function reopenBrief(projectId: string): Promise<{ error?: string }
     .from("project_briefs")
     .update({ approved_at: null, updated_at: new Date().toISOString() })
     .eq("project_id", projectId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "project_brief",

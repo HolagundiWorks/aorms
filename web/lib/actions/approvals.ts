@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type ApprovalActionState = { error: string } | null;
 
@@ -43,7 +44,7 @@ export async function createApproval(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "approval",
@@ -74,7 +75,7 @@ export async function updateApprovalStatus(
   }
 
   const { error } = await supabase.from("approvals").update(patch).eq("id", approvalId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "approval",

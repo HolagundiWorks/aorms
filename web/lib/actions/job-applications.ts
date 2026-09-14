@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -29,7 +30,7 @@ export async function createJobApplication(_prev: ActionState, formData: FormDat
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "job_application",
@@ -53,7 +54,7 @@ export async function updateJobApplicationStatus(applicationId: string, status: 
     .from("job_applications")
     .update({ status, status_updated_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq("id", applicationId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "job_application",

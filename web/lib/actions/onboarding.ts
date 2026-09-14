@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -38,7 +39,7 @@ export async function saveOnboarding(projectId: string, _prev: ActionState, form
     )
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "client_onboarding",
@@ -65,12 +66,12 @@ export async function completeOnboarding(projectId: string): Promise<{ error?: s
       .from("client_onboardings")
       .update({ status: "COMPLETE", completed_at: new Date().toISOString(), completed_by_id: user?.id ?? null, updated_at: new Date().toISOString() })
       .eq("project_id", projectId);
-    if (error) return { error: error.message };
+    if (error) return { error: toSafeErrorMessage(error) };
   } else {
     const { error } = await supabase
       .from("client_onboardings")
       .insert({ project_id: projectId, status: "COMPLETE", completed_at: new Date().toISOString(), completed_by_id: user?.id ?? null });
-    if (error) return { error: error.message };
+    if (error) return { error: toSafeErrorMessage(error) };
   }
 
   await supabase.rpc("write_audit", {
@@ -91,7 +92,7 @@ export async function reopenOnboarding(projectId: string): Promise<{ error?: str
     .from("client_onboardings")
     .update({ status: "PENDING", completed_at: null, completed_by_id: null, updated_at: new Date().toISOString() })
     .eq("project_id", projectId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/projects/${projectId}/onboarding`);
   return {};

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -26,7 +27,7 @@ export async function createPayslip(_prev: ActionState, formData: FormData): Pro
     .insert({ team_member_id: teamMemberId, month, gross_paise: grossPaise, deductions_paise: deductionsPaise, net_paise: netPaise })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "payslip",
@@ -46,7 +47,7 @@ export async function markPayslipPaid(payslipId: string): Promise<{ error?: stri
     .from("payslips")
     .update({ paid: true, paid_date: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString() })
     .eq("id", payslipId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "payslip",

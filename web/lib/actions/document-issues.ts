@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Document Issues register — Phase 4's own flagged gap: "the cross-entity
@@ -70,7 +71,7 @@ export async function logDocumentIssue(
     issued_at: new Date().toISOString(),
     issued_by_id: user?.id ?? null,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/document-issues");
   return null;

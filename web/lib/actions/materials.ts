@@ -29,6 +29,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
 import type { PlatformActionState } from "./platform";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 // ── Products ─────────────────────────────────────────────────────────────
 
@@ -91,7 +92,7 @@ export async function addProduct(
     mrp_paise: mrpPaise,
     description: String(formData.get("description") ?? "").trim() || null,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   revalidatePath("/materials");
@@ -127,7 +128,7 @@ export async function updateProduct(
       description: String(formData.get("description") ?? "").trim() || null,
     })
     .eq("id", productId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   revalidatePath("/materials");
@@ -137,7 +138,7 @@ export async function updateProduct(
 export async function removeProduct(productId: string, companyId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
   const { error } = await supabase.schema("connectdex").from("products").delete().eq("id", productId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   revalidatePath("/materials");
@@ -158,7 +159,7 @@ export async function addProductSpecification(
 
   const supabase = await createPlatformClient();
   const { error } = await supabase.schema("connectdex").from("product_specifications").insert({ product_id: productId, label, value });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   revalidatePath("/materials");
@@ -177,7 +178,7 @@ export async function updateProductSpecification(
 
   const supabase = await createPlatformClient();
   const { error } = await supabase.schema("connectdex").from("product_specifications").update({ label, value }).eq("id", specId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   revalidatePath("/materials");
@@ -187,7 +188,7 @@ export async function updateProductSpecification(
 export async function removeProductSpecification(specId: string, companyId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
   const { error } = await supabase.schema("connectdex").from("product_specifications").delete().eq("id", specId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   revalidatePath("/materials");
@@ -214,7 +215,7 @@ export async function addProductTestResult(
     lab_name: String(formData.get("labName") ?? "").trim() || null,
     tested_at: String(formData.get("testedAt") ?? "").trim() || null,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   revalidatePath("/materials");
@@ -242,7 +243,7 @@ export async function updateProductTestResult(
       tested_at: String(formData.get("testedAt") ?? "").trim() || null,
     })
     .eq("id", testResultId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   revalidatePath("/materials");
@@ -252,7 +253,7 @@ export async function updateProductTestResult(
 export async function removeProductTestResult(testResultId: string, companyId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
   const { error } = await supabase.schema("connectdex").from("product_test_results").delete().eq("id", testResultId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   revalidatePath("/materials");

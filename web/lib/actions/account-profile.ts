@@ -39,6 +39,8 @@
 import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
+import { matchesClaimedType } from "../security/file-signature";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type AccountProfileActionState = { error: string } | null;
 
@@ -82,7 +84,7 @@ export async function updateAccountProfile(
     },
     { onConflict: "account_id" },
   );
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/identity/profile");
   return null;
@@ -99,6 +101,9 @@ export async function uploadAccountPhoto(
   if (!(file instanceof File) || file.size === 0) return { error: "Choose a photo to upload." };
   if (file.size > MAX_FILE_BYTES) return { error: "Photo is too large (10MB max)." };
   if (!ALLOWED_TYPES.has(file.type)) return { error: "Photo must be a JPEG, PNG, or WebP image." };
+  if (!(await matchesClaimedType(file, file.type))) {
+    return { error: "That file doesn't look like a valid JPEG, PNG, or WebP image." };
+  }
 
   const platformService = createPlatformServiceRoleClient();
   const key = `${gate.accountId}/photo-${crypto.randomUUID()}`;
@@ -107,7 +112,7 @@ export async function uploadAccountPhoto(
     contentType: file.type,
     upsert: false,
   });
-  if (uploadError) return { error: uploadError.message };
+  if (uploadError) return { error: toSafeErrorMessage(uploadError) };
 
   // Fetch the previous photo key so it can be removed after the new one
   // is confirmed written — never delete-then-upload (a failed upload
@@ -121,7 +126,7 @@ export async function uploadAccountPhoto(
   );
   if (upsertError) {
     await platformService.storage.from(BUCKET).remove([key]);
-    return { error: upsertError.message };
+    return { error: toSafeErrorMessage(upsertError) };
   }
 
   if (previousKey) {
@@ -155,12 +160,15 @@ export async function addAccountCertificate(
   if (file instanceof File && file.size > 0) {
     if (file.size > MAX_FILE_BYTES) return { error: "File is too large (10MB max)." };
     if (!ALLOWED_TYPES.has(file.type)) return { error: "File must be a JPEG, PNG, WebP image, or PDF." };
+    if (!(await matchesClaimedType(file, file.type))) {
+      return { error: "That file doesn't look like a valid JPEG, PNG, WebP image, or PDF." };
+    }
     fileKey = `${gate.accountId}/cert-${crypto.randomUUID()}`;
     const { error: uploadError } = await platformService.storage.from(BUCKET).upload(fileKey, file, {
       contentType: file.type,
       upsert: false,
     });
-    if (uploadError) return { error: uploadError.message };
+    if (uploadError) return { error: toSafeErrorMessage(uploadError) };
   }
 
   const { error } = await platformService.from("account_certificates").insert({
@@ -173,7 +181,7 @@ export async function addAccountCertificate(
   });
   if (error) {
     if (fileKey) await platformService.storage.from(BUCKET).remove([fileKey]);
-    return { error: error.message };
+    return { error: toSafeErrorMessage(error) };
   }
 
   revalidatePath("/identity/profile");
@@ -194,7 +202,7 @@ export async function removeAccountCertificate(certificateId: string): Promise<{
   if (!certificate) return { error: "Certificate not found." };
 
   const { error } = await platformService.from("account_certificates").delete().eq("id", certificateId).eq("account_id", gate.accountId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   if (certificate.file_key) {
     await platformService.storage.from(BUCKET).remove([certificate.file_key]);

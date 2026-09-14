@@ -20,6 +20,7 @@
 import { randomBytes, createHash } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type RegisterDeviceResult = { error: string } | { deviceId: string; secret: string };
 
@@ -49,7 +50,7 @@ export async function registerAiDevice(deviceName: string, deviceType: string): 
     device_secret_hash: hashSecret(secret),
     status: "offline",
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "ai_device",
@@ -66,7 +67,7 @@ export async function registerAiDevice(deviceName: string, deviceType: string): 
 export async function deleteAiDevice(deviceId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("ai_devices").delete().eq("device_id", deviceId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "ai_device",

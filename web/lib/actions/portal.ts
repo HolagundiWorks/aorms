@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Client Portal submissions — port of the writing half of
@@ -57,7 +58,7 @@ export async function submitChangeRequest(
     body,
     revision_category: revisionCategory,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/portal/${projectId}`);
   return null;
@@ -91,7 +92,7 @@ export async function submitFeedback(
     body,
     rating,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/portal/${projectId}`);
   return null;
@@ -124,7 +125,7 @@ export async function requestMeeting(
     subject,
     body: agenda,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/portal/${projectId}`);
   return null;
@@ -148,7 +149,7 @@ export async function acknowledgeItem(
     object_id: objectId,
     subject,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   // The old router also stamped the transmittal register row itself
   // (acknowledged_at/acknowledged_by) as a second write. Not ported here —
@@ -188,7 +189,7 @@ export async function respondToApproval(
     p_status: status,
     p_remarks: remarks.trim() || null,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/portal/${projectId}`);
   return {};
@@ -211,7 +212,7 @@ export async function respondToDecision(decisionId: string, response: string, pr
     p_decision_id: decisionId,
     p_response: response,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/portal/${projectId}`);
   return {};

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -33,7 +34,7 @@ export async function createTender(_prev: ActionState, formData: FormData): Prom
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "tender",
@@ -61,7 +62,7 @@ export async function inviteTenderContractor(
     .insert({ tender_id: tenderId, contractor_id: contractorId })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "tender_invitation",
@@ -82,7 +83,7 @@ export async function closeTender(tenderId: string): Promise<{ error?: string }>
     .from("tenders")
     .update({ status: "CLOSED", updated_at: new Date().toISOString() })
     .eq("id", tenderId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "tender",
@@ -102,7 +103,7 @@ export async function awardTender(tenderId: string, contractorId: string): Promi
     .from("tenders")
     .update({ status: "AWARDED", awarded_contractor_id: contractorId, updated_at: new Date().toISOString() })
     .eq("id", tenderId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "tender",

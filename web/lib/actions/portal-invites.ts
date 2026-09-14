@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { createServiceRoleClient } from "../supabase/service";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 // 2026-09-14 remediation — all three inviteUserByEmail calls below used to
 // omit `redirectTo` entirely, falling back to whatever Supabase's
@@ -63,13 +64,13 @@ export async function inviteContractorLogin(contractorId: string, email: string)
     data: { full_name: contractor.name },
     redirectTo: INVITE_REDIRECT_TO,
   });
-  if (inviteError) return { error: inviteError.message };
+  if (inviteError) return { error: toSafeErrorMessage(inviteError) };
 
   const { error: profileError } = await admin
     .from("profiles")
     .update({ role: "CONTRACTOR", contractor_id: contractorId, full_name: contractor.name })
     .eq("id", invited.user.id);
-  if (profileError) return { error: profileError.message };
+  if (profileError) return { error: toSafeErrorMessage(profileError) };
 
   await supabase.rpc("write_audit", {
     p_entity: "contractor",
@@ -99,13 +100,13 @@ export async function inviteConsultantLogin(consultantId: string, email: string)
     data: { full_name: consultant.name },
     redirectTo: INVITE_REDIRECT_TO,
   });
-  if (inviteError) return { error: inviteError.message };
+  if (inviteError) return { error: toSafeErrorMessage(inviteError) };
 
   const { error: profileError } = await admin
     .from("profiles")
     .update({ role: "CONSULTANT", consultant_id: consultantId, full_name: consultant.name })
     .eq("id", invited.user.id);
-  if (profileError) return { error: profileError.message };
+  if (profileError) return { error: toSafeErrorMessage(profileError) };
 
   await supabase.rpc("write_audit", {
     p_entity: "consultant",
@@ -142,10 +143,10 @@ export async function inviteStaffMember(_prev: { error: string } | null, formDat
     data: { full_name: fullName },
     redirectTo: INVITE_REDIRECT_TO,
   });
-  if (inviteError) return { error: inviteError.message };
+  if (inviteError) return { error: toSafeErrorMessage(inviteError) };
 
   const { error: profileError } = await admin.from("profiles").update({ role, full_name: fullName }).eq("id", invited.user.id);
-  if (profileError) return { error: profileError.message };
+  if (profileError) return { error: toSafeErrorMessage(profileError) };
 
   const supabase = await createClient();
   await supabase.rpc("write_audit", {

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../supabase/server";
 import { LEAD_TERMINAL_STATUSES, type LeadStatus } from "../project-os";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 type ActionState = { error: string } | null;
 
@@ -29,7 +30,7 @@ export async function createLead(_prev: ActionState, formData: FormData): Promis
     p_scope: "lead",
     p_default_prefix: "LDR",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("leads")
@@ -48,7 +49,7 @@ export async function createLead(_prev: ActionState, formData: FormData): Promis
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "lead",
@@ -69,7 +70,7 @@ export async function setLeadStatus(leadId: string, status: LeadStatus): Promise
   if (before?.converted_project_id) return { error: "A converted lead cannot change status." };
 
   const { error } = await supabase.from("leads").update({ status, updated_at: new Date().toISOString() }).eq("id", leadId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "lead",
@@ -122,7 +123,7 @@ export async function convertLead(_prev: ConvertActionState, formData: FormData)
   } = await supabase.auth.getUser();
 
   const { data: lead, error: leadError } = await supabase.from("leads").select("*").eq("id", leadId).maybeSingle();
-  if (leadError) return { error: leadError.message };
+  if (leadError) return { error: toSafeErrorMessage(leadError) };
   if (!lead) return { error: "Lead not found." };
   if (lead.converted_project_id) return { error: "Lead is already converted." };
   if (LEAD_TERMINAL_STATUSES.has(lead.status as LeadStatus) && lead.status !== "QUALIFIED") {
@@ -137,7 +138,7 @@ export async function convertLead(_prev: ConvertActionState, formData: FormData)
       .insert({ name: lead.client_name, kind: "INDIVIDUAL", email: lead.email, phone: lead.phone, city: lead.city })
       .select("id")
       .single();
-    if (clientError) return { error: clientError.message };
+    if (clientError) return { error: toSafeErrorMessage(clientError) };
     resolvedClientId = newClient.id;
   }
 
@@ -145,7 +146,7 @@ export async function convertLead(_prev: ConvertActionState, formData: FormData)
     p_scope: "projectoffice",
     p_default_prefix: "PRJ",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: project, error: projectError } = await supabase
     .from("project_offices")
@@ -163,7 +164,7 @@ export async function convertLead(_prev: ConvertActionState, formData: FormData)
     })
     .select("id")
     .single();
-  if (projectError) return { error: projectError.message };
+  if (projectError) return { error: toSafeErrorMessage(projectError) };
 
   // Seed the default phase plan (DEFAULT_PHASE_PLAN, packages/contracts/src/schemas.ts).
   const DEFAULT_PHASE_PLAN = [
@@ -198,7 +199,7 @@ export async function convertLead(_prev: ConvertActionState, formData: FormData)
       updated_at: new Date().toISOString(),
     })
     .eq("id", leadId);
-  if (updateLeadError) return { error: updateLeadError.message };
+  if (updateLeadError) return { error: toSafeErrorMessage(updateLeadError) };
 
   // The conflict-of-interest attestation gates a COA-1989 obligation, so it
   // belongs in the immutable audit trail, not only in a lead column that

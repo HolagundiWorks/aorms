@@ -9,6 +9,7 @@ import { ESTI_AGENT_SYSTEM } from "../ai/prompt";
 import { buildLiveSnapshot } from "../ai/snapshot";
 import { draftKindNeedsProject, isAiDraftKind, type AiDraftKind } from "../ai/draft-kinds";
 import { buildDraftPrompt } from "../ai/draft-prompts";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * ESTI agent — read-only Q&A mode (the "agent" half of the old backend's
@@ -131,7 +132,7 @@ export async function generateAiDraft(_prev: GenerateAiDraftState, formData: For
       .select("ref, title, status, clients(name)")
       .eq("id", projectId)
       .maybeSingle();
-    if (projError) return { error: projError.message };
+    if (projError) return { error: toSafeErrorMessage(projError) };
     if (!proj) return { error: "Project not found." };
     const client = Array.isArray(proj.clients) ? proj.clients[0] : (proj.clients as { name: string } | null);
     project = { ref: proj.ref, title: proj.title, status: proj.status, clientName: client?.name ?? null };
@@ -231,7 +232,7 @@ export async function generateAiDraft(_prev: GenerateAiDraftState, formData: For
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/ai-runs");
   redirect(`/ai-runs/${row.id}`);
@@ -261,14 +262,14 @@ export async function updateAiRunApproval(runId: string, nextState: string): Pro
     .select("approval_state")
     .eq("id", runId)
     .maybeSingle();
-  if (beforeError) return { error: beforeError.message };
+  if (beforeError) return { error: toSafeErrorMessage(beforeError) };
   if (!before) return { error: "Run not found." };
   if (!APPROVAL_TRANSITIONS[before.approval_state]?.includes(nextState)) {
     return { error: `Can't move ${before.approval_state} → ${nextState}.` };
   }
 
   const { error } = await supabase.from("ai_runs").update({ approval_state: nextState }).eq("id", runId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/ai-runs/${runId}`);
   revalidatePath("/ai-runs");

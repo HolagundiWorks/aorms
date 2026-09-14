@@ -11,6 +11,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { createServiceRoleClient } from "../supabase/service";
 import { recomputeTaskScores } from "../pulse/recompute";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 const DEPENDENCY_TYPES = ["BLOCKS", "INFORMS", "APPROVAL", "DOCUMENT"];
 
@@ -36,7 +37,7 @@ export async function addTaskDependency(
     depends_on_task_id: dependsOnTaskId,
     dependency_type: dependencyType,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/pulse");
   revalidatePath("/tasks");
@@ -46,7 +47,7 @@ export async function addTaskDependency(
 export async function resolveTaskDependency(dependencyId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("task_dependencies").update({ status: "RESOLVED" }).eq("id", dependencyId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/pulse");
   revalidatePath("/tasks");
@@ -77,7 +78,7 @@ export async function resolveMissingParam(paramId: string, status: string): Prom
   }
 
   const { error } = await supabase.from("task_missing_params").update(patch).eq("id", paramId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/pulse");
   return {};

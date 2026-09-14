@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { NUMERIC_FIELDS, TABLE_FIELDS, type ComplianceTable } from "../compliance-fields";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type { ComplianceTable };
 
@@ -30,7 +31,7 @@ export async function createComplianceRow(
 
   const supabase = await createClient();
   const { data: inserted, error } = await supabase.from(table).insert(row).select("id").single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: table,

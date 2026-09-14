@@ -35,6 +35,7 @@ import { createServiceRoleClient as createPlatformServiceRoleClient } from "../p
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
 import { createOrder, verifyPaymentSignature } from "../platform/razorpay";
 import { applyCapturedConnectDexPayment } from "../platform/connectdex-payment";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type ConnectDexActionState = { error: string; success?: undefined } | { success: string; error?: undefined } | null;
 
@@ -76,7 +77,7 @@ export async function submitConnectDexApplication(_prev: ConnectDexActionState, 
     category,
     message: message || null,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   return { success: "Thanks — we'll review your application and be in touch." };
 }
@@ -120,14 +121,14 @@ export async function adminInviteConnectDexApplication(applicationId: string): P
     .select("company_name, contact_name, email, status")
     .eq("id", applicationId)
     .maybeSingle();
-  if (fetchError) return { error: fetchError.message };
+  if (fetchError) return { error: toSafeErrorMessage(fetchError) };
   if (!application) return { error: "Application not found." };
   if (application.status !== "PENDING") return { error: "This application has already been actioned." };
 
   const { data: invited, error: inviteError } = await platformService.auth.admin.inviteUserByEmail(application.email, {
     data: { full_name: application.contact_name, account_kind: "company" },
   });
-  if (inviteError) return { error: inviteError.message };
+  if (inviteError) return { error: toSafeErrorMessage(inviteError) };
 
   const { data: company, error: companyError } = await cx
     .from("companies")
@@ -138,14 +139,14 @@ export async function adminInviteConnectDexApplication(applicationId: string): P
     .insert({ name: application.company_name, owner_id: invited.user.id, status: "PENDING_ONBOARDING", tier: "BASE_LINE" })
     .select("id")
     .single();
-  if (companyError) return { error: companyError.message };
+  if (companyError) return { error: toSafeErrorMessage(companyError) };
 
   const account = await getCurrentPlatformSessionAccount();
   const { error: updateError } = await cx
     .from("connectdex_applications")
     .update({ status: "INVITED", invited_account_id: invited.user.id, reviewed_at: new Date().toISOString(), reviewed_by_id: account?.id })
     .eq("id", applicationId);
-  if (updateError) return { error: updateError.message };
+  if (updateError) return { error: toSafeErrorMessage(updateError) };
 
   revalidatePath("/admin/connectdex");
   return { success: `Invited — Company ${company.id} created, pending onboarding.` };
@@ -163,7 +164,7 @@ export async function adminRejectConnectDexApplication(applicationId: string): P
     .update({ status: "REJECTED", reviewed_at: new Date().toISOString(), reviewed_by_id: account?.id })
     .eq("id", applicationId)
     .eq("status", "PENDING");
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/connectdex");
   return null;
@@ -185,7 +186,7 @@ export async function adminVerifyConnectDexCompany(companyId: string): Promise<C
     .update({ verified_at: new Date().toISOString(), verified_by_id: account?.id, status: "PENDING_PAYMENT" })
     .eq("id", companyId)
     .eq("status", "PENDING_VERIFICATION");
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/connectdex");
   return null;
@@ -209,7 +210,7 @@ export async function adminSetCompanyTier(_prev: ConnectDexActionState, formData
 
   const platformService = createPlatformServiceRoleClient();
   const { error } = await platformService.schema("connectdex").from("companies").update({ tier }).eq("id", companyId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/connectdex");
   return null;
@@ -229,7 +230,7 @@ export async function adminSetConnectDexFee(_prev: ConnectDexActionState, formDa
     .from("connectdex_settings")
     .update({ onboarding_fee_paise: Math.round(feeRupees * 100), updated_at: new Date().toISOString() })
     .eq("id", true);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/connectdex");
   return null;
@@ -278,7 +279,7 @@ export async function submitConnectDexOnboardingForm(_prev: ConnectDexActionStat
     })
     .eq("id", companyId)
     .eq("status", "PENDING_ONBOARDING");
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/companies/${companyId}`);
   return null;
@@ -312,7 +313,7 @@ export async function createConnectDexOnboardingOrder(companyId: string): Promis
   }
 
   const { data: settings, error: settingsError } = await cx.from("connectdex_settings").select("onboarding_fee_paise").eq("id", true).maybeSingle();
-  if (settingsError) return { error: settingsError.message };
+  if (settingsError) return { error: toSafeErrorMessage(settingsError) };
   if (!settings) return { error: "Onboarding fee isn't configured yet — contact support." };
 
   const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
@@ -334,7 +335,7 @@ export async function createConnectDexOnboardingOrder(companyId: string): Promis
     razorpay_order_id: order.id,
     status: "CREATED",
   });
-  if (insertError) return { error: insertError.message };
+  if (insertError) return { error: toSafeErrorMessage(insertError) };
 
   return { orderId: order.id, amountPaise: settings.onboarding_fee_paise, currency: "INR", keyId };
 }
@@ -357,7 +358,7 @@ export async function confirmConnectDexPaymentClientSide(orderId: string, paymen
     .select("id, company_id, status")
     .eq("razorpay_order_id", orderId)
     .maybeSingle();
-  if (fetchError) return { error: fetchError.message };
+  if (fetchError) return { error: toSafeErrorMessage(fetchError) };
   if (!payment) return { error: "No matching order found." };
 
   if (payment.status === "CAPTURED") {

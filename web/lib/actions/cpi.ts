@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import type { CpiReportShape } from "../cpi-sections";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Called directly from client components (not via useActionState/<form
@@ -37,7 +38,7 @@ export async function saveCpiSection(
       { onConflict: "project_id" },
     );
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "cpi_response",
@@ -70,7 +71,7 @@ export async function saveCpiReport(
       { onConflict: "project_id" },
     );
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "cpi_response",

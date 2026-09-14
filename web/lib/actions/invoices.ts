@@ -6,6 +6,7 @@ import { generatePdfForTarget } from "../jobs/generate-pdf";
 import { computeGst, computeTds194j, GstSystem, tds194jApplies } from "../tax/gst";
 import { derivePlaceOfSupply } from "../tax/place-of-supply";
 import { financialYearRange } from "../tax/fy";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type InvoiceActionState = { error: string } | null;
 
@@ -62,8 +63,8 @@ export async function createInvoiceRecord(
     supabase.from("firm").select("gst_type, state, gstin, tds_applicable_default").limit(1).maybeSingle(),
     supabase.from("project_offices").select("state").eq("id", projectId).maybeSingle(),
   ]);
-  if (firmError) return { error: `Could not load firm settings: ${firmError.message}` };
-  if (projectError) return { error: `Could not load project: ${projectError.message}` };
+  if (firmError) return { error: `Could not load firm settings: ${toSafeErrorMessage(firmError)}` };
+  if (projectError) return { error: `Could not load project: ${toSafeErrorMessage(projectError)}` };
 
   const { data: client } = clientId
     ? await supabase.from("clients").select("state, gstin").eq("id", clientId).maybeSingle()
@@ -91,7 +92,7 @@ export async function createInvoiceRecord(
     p_scope: "invoice",
     p_default_prefix: "INV",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("invoices")
@@ -121,7 +122,7 @@ export async function createInvoiceRecord(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "invoice",

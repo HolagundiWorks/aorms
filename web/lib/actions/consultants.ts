@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { parseCsvFile } from "../import-export/csv";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Consultants — the staff-facing directory + engagement CRUD side of
@@ -35,7 +36,7 @@ export async function createConsultant(
     .insert({ name, discipline, firm, email, phone })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "consultant",
@@ -107,7 +108,7 @@ export async function importConsultantsCsv(
     .from("consultants")
     .insert(toInsert)
     .select("id, name, discipline");
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   for (const row of inserted ?? []) {
     await supabase.rpc("write_audit", {
@@ -147,7 +148,7 @@ export async function createEngagement(
     .insert({ consultant_id: consultantId, project_id: projectId, scope, agreed_fee_paise: agreedFeePaise, status })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "engagement",
@@ -174,7 +175,7 @@ export async function updateEngagementStatus(
     .from("engagements")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", engagementId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/consultants/${consultantId}`);
   return {};
@@ -198,14 +199,14 @@ export async function recordEngagementPayment(
     .select("paid_paise")
     .eq("id", engagementId)
     .maybeSingle();
-  if (fetchError) return { error: fetchError.message };
+  if (fetchError) return { error: toSafeErrorMessage(fetchError) };
   if (!engagement) return { error: "Engagement not found." };
 
   const { error } = await supabase
     .from("engagements")
     .update({ paid_paise: engagement.paid_paise + amountPaise, updated_at: new Date().toISOString() })
     .eq("id", engagementId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath(`/consultants/${consultantId}`);
   return null;

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type PurchaseOrderActionState = { error: string } | null;
 
@@ -27,7 +28,7 @@ export async function createPurchaseOrderRecord(
     p_scope: "purchaseorder",
     p_default_prefix: "PO",
   });
-  if (refError) return { error: `Could not mint a reference: ${refError.message}` };
+  if (refError) return { error: `Could not mint a reference: ${toSafeErrorMessage(refError)}` };
 
   const { data: inserted, error } = await supabase
     .from("purchase_orders")
@@ -35,7 +36,7 @@ export async function createPurchaseOrderRecord(
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "purchase_order",
@@ -96,7 +97,7 @@ export async function addPoItemRecord(
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   // Keep the PO header's total in sync with its line items — no trigger
   // does this (checked live), so it's done here, same as the header total
@@ -120,7 +121,7 @@ export async function addPoItemRecord(
 export async function removePoItem(itemId: string, poId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { error } = await supabase.from("po_items").delete().eq("id", itemId);
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   const { data: items } = await supabase.from("po_items").select("amount_paise").eq("po_id", poId);
   const totalPaise = (items ?? []).reduce((sum, it) => sum + it.amount_paise, 0);

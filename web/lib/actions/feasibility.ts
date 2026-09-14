@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { generatePdfForTarget } from "../jobs/generate-pdf";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
  * Port of feasibility.generate (backend/src/modules/projectos/feasibility.ts)
@@ -24,7 +25,7 @@ export async function generateFeasibilityReport(projectId: string): Promise<{ er
     .select("*")
     .eq("project_id", projectId)
     .maybeSingle();
-  if (assessmentError) return { error: assessmentError.message };
+  if (assessmentError) return { error: toSafeErrorMessage(assessmentError) };
   if (!assessment) return { error: "Record a pre-project assessment first." };
 
   const { data: project, error: projectError } = await supabase
@@ -32,7 +33,7 @@ export async function generateFeasibilityReport(projectId: string): Promise<{ er
     .select("ref, title")
     .eq("id", projectId)
     .maybeSingle();
-  if (projectError) return { error: projectError.message };
+  if (projectError) return { error: toSafeErrorMessage(projectError) };
   if (!project) return { error: "Project not found." };
 
   const now = new Date().toISOString();
@@ -68,7 +69,7 @@ export async function generateFeasibilityReport(projectId: string): Promise<{ er
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
     p_entity: "feasibility_report",
