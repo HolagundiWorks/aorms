@@ -254,7 +254,7 @@ export default async function LandingPage() {
             panel), not stacked rows, per explicit follow-up request. */}
         <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <Grid>
-            <Column sm={4} md={8} lg={7}>
+            <Column sm={4} md={4} lg={7}>
               <p
                 className="cds--type-productive-heading-01"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
@@ -278,7 +278,7 @@ export default async function LandingPage() {
                 ))}
               </div>
             </Column>
-            <Column sm={4} md={8} lg={{ span: 8, offset: 1 }} style={{ marginTop: "1.5rem" }}>
+            <Column sm={4} md={4} lg={{ span: 8, offset: 1 }}>
               <BillingForecastPanel />
             </Column>
           </Grid>
