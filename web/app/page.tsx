@@ -22,6 +22,7 @@ import {
   FAQ,
   FEE_RECOVERY,
   HUMAN_CENTRIC_WORKS,
+  OPERATIONAL_LEAKAGE,
   PRICING,
   PROBLEM,
   PROJECT_RECORD,
@@ -375,6 +376,30 @@ export default async function LandingPage() {
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
               <h2 className="cds--type-heading-05">What is operational leakage costing your practice?</h2>
             </Column>
+
+            {/* Explains what operational leakage is and how it shows up
+                specifically in an Indian practice, ahead of the
+                calculator (explicit follow-up request). */}
+            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2.5rem" }}>
+              <h3 className="cds--type-productive-heading-03">{OPERATIONAL_LEAKAGE.title}</h3>
+              <p className="cds--type-body-02" style={{ marginTop: "0.5rem", maxWidth: 720, color: "var(--cds-text-secondary)" }}>
+                {OPERATIONAL_LEAKAGE.body}
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(15rem, 1fr))", gap: "1rem", marginTop: "1.5rem" }}>
+                {OPERATIONAL_LEAKAGE.causes.map((cause) => (
+                  <Tile key={cause.title}>
+                    <p className="cds--type-productive-heading-02">{cause.title}</p>
+                    <p className="cds--type-body-01" style={{ marginTop: "0.375rem", color: "var(--cds-text-secondary)" }}>
+                      {cause.body}
+                    </p>
+                  </Tile>
+                ))}
+              </div>
+              <p className="cds--type-body-02" style={{ marginTop: "1.5rem", maxWidth: 720, color: "var(--cds-text-secondary)" }}>
+                {OPERATIONAL_LEAKAGE.closing}
+              </p>
+            </Column>
+
             <Column sm={4} md={8} lg={{ span: 10, offset: 3 }}>
               <RoiCalculatorSection />
             </Column>

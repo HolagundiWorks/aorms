@@ -280,6 +280,46 @@ export const COMPANY_IDENTITY = [
   },
 ] as const;
 
+/**
+ * Explains what "operational leakage" actually is and how it shows up
+ * in an Indian architecture practice specifically — added ahead of the
+ * ROI calculator (2026-09-14 follow-up request) so the calculator's
+ * inputs aren't abstract line items someone has to guess the meaning
+ * of; each cause here maps to a real habit most Indian practices
+ * already recognize.
+ */
+export const OPERATIONAL_LEAKAGE = {
+  title: "What operational leakage actually is.",
+  body: "Operational leakage is billable work and management time that quietly disappears before it ever reaches an invoice or a clear decision — not one dramatic loss, but a stack of small, familiar habits that eat into a practice's hours and fees every week.",
+  causes: [
+    {
+      title: "Unbilled revisions",
+      body: "A client asks for a change mid-project, the team makes it, and it's never logged as a separate scope item — the extra hours go in, but no fee ever comes out for them.",
+    },
+    {
+      title: "Cost overruns",
+      body: "Without a running view of phase progress against fee, a project quietly goes over budget on hours long before anyone notices — often not until the final account.",
+    },
+    {
+      title: "Repetitive tasks",
+      body: "The same coordination steps — chasing a drawing revision, re-confirming a site measurement, re-sending a document — get redone by hand on every project instead of once, properly.",
+    },
+    {
+      title: "Figuring out task priority",
+      body: "With no single ranked list, each team member spends real time every morning deciding what to work on first, instead of just working the list.",
+    },
+    {
+      title: "Constant meetings",
+      body: "Status updates that could be a glance at a dashboard become a recurring meeting instead — real hours spent restating what already happened rather than deciding what's next.",
+    },
+    {
+      title: "Manual timesheet entries",
+      body: "Hours get reconstructed from memory at the end of the week instead of tracked as work happens — some of it is simply forgotten, and never billed.",
+    },
+  ],
+  closing: "Each of these on its own looks small. Together, they're the actual reason a task gets delayed — not the design work itself, but the management overhead stacked on top of it.",
+} as const;
+
 /** ROI Calculator disclaimer (spec §13 — always shown, unconditionally). */
 export const ROI_DISCLAIMER = "Illustrative ROI only. Actual results vary by practice, workflow, billing discipline, and adoption.";
 
