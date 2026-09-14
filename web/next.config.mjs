@@ -29,16 +29,21 @@
 // this app loads at all — see lib/platform/razorpay.ts), Supabase Storage
 // for photo/certificate/drawing signed URLs (both cloud projects,
 // *.supabase.co), and no external fonts (self-hosted, see globals.scss).
-// `style-src 'unsafe-inline'` is required, not an oversight: Next.js and
-// Carbon both emit inline `<style>`/`style=` at runtime (this app's own
-// pervasive inline `style={{...}}` prop usage included) — a nonce-based
-// style CSP is a real follow-up, not a same-pass fix. A plain function
-// (not a method on `nextConfig`) so it doesn't depend on `this` binding,
-// which Next's config loader isn't guaranteed to preserve.
+// `'unsafe-inline'` on both `style-src` and `script-src` is required, not
+// an oversight: Next.js itself emits inline hydration/RSC-payload
+// `<script>` tags on every page load (confirmed live in Report-Only mode
+// first — without this, the App Router's own bootstrap scripts were
+// reported as CSP violations on a completely vanilla page load, before
+// this app's code ever runs), and Next/Carbon both emit inline
+// `<style>`/`style=` at runtime too. A nonce-based CSP for both is a real,
+// larger follow-up (Next supports it via middleware-generated nonces),
+// not a same-pass fix. A plain function (not a method on `nextConfig`) so
+// it doesn't depend on `this` binding, which Next's config loader isn't
+// guaranteed to preserve.
 function buildCspHeader(reportOnly) {
   const directives = [
     "default-src 'self'",
-    "script-src 'self' https://checkout.razorpay.com",
+    "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https://*.supabase.co",
     "font-src 'self'",
