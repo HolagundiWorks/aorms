@@ -278,7 +278,7 @@ export default async function LandingPage() {
                 ))}
               </div>
             </Column>
-            <Column sm={4} md={4} lg={{ span: 8, offset: 1 }}>
+            <Column sm={4} md={4} lg={{ span: 8, offset: 8 }}>
               <BillingForecastPanel />
             </Column>
           </Grid>
@@ -321,7 +321,7 @@ export default async function LandingPage() {
                 {PROJECT_RECORD.title}
               </h2>
             </Column>
-            <Column sm={4} md={8} lg={{ span: 8, offset: 1 }} style={{ marginTop: "1.5rem" }}>
+            <Column sm={4} md={8} lg={{ span: 8, offset: 8 }} style={{ marginTop: "1.5rem" }}>
               <Tile>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                   {PROJECT_RECORD.fields.map((field) => (
@@ -352,7 +352,7 @@ export default async function LandingPage() {
                 {ESTI_SECTION.body}
               </p>
             </Column>
-            <Column sm={4} md={8} lg={{ span: 8, offset: 1 }} style={{ marginTop: "1.5rem" }}>
+            <Column sm={4} md={8} lg={{ span: 8, offset: 8 }} style={{ marginTop: "1.5rem" }}>
               {ESTI_SECTION.exampleQuestions.map((q) => (
                 <Tile key={q} style={{ marginBottom: "0.75rem" }}>
                   <p className="cds--type-body-01">&ldquo;{q}&rdquo;</p>
