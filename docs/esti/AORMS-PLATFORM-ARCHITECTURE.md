@@ -13,7 +13,7 @@ go" has one answer instead of being re-decided ad hoc each time.
 | | **AORMS Office Hub** | **AORMS Platform** |
 | --- | --- | --- |
 | Route group | `app/(app)/*` | `app/(platform)/*` |
-| Supabase project | `aorms-web` (`fyedovpqjwbslrughwdv`) | `aorms-platform` (`qbgbnhthchhbammzeebg`) |
+| Supabase project | `aorms-web` (`fyedovpqjwbslrughwdv`) | `aorms-platform` (`qbgbnhthchhbammzeebg`) — as of 2026-09-14 (migration `0025`), the Company/ConnectDeX domain (11 tables: `companies`, `company_accounts`, `company_memberships`, board/contacts, `connectdex_*`, `products`/specs/test-results) lives in its own `connectdex` Postgres **schema** within this same project, not `public` — a deliberate namespace-only move (see SYSDEX-PORTAL-AUDIT-2026-09-14.md § 8) so a future split into a genuinely separate Supabase project, once ConnectDeX has real traffic, is a mechanical schema dump/restore rather than a fresh audit. Every Supabase call touching those tables goes through `.schema("connectdex")` |
 | What it is | **The product.** Office management for one architecture practice — clients, projects, tasks, invoices, estimates, BBS, HR, ESTI AI. This is "AORMS" as a prospect or user experiences it. | **The substrate underneath it.** Portable personal identity (`AORMS-U-` handles), the two business-entity types (Studios, Companies), memberships, usage-hour tracking, and — as of this date — licensing and payments. Not a product a user "uses" for its own sake; it's what a person's AORMS-U- identity, a Studio's licence, and a Company's supplier profile actually live in. |
 | Tenancy | Single-tenant per deployment (one firm, per CLAUDE.md § Conventions — "Tenancy decided: single-tenant per deployment, no org_id") | Multi-tenant by design — one platform database can (eventually) sit underneath many separate Office Hub deployments, each a different firm |
 | Auth | Its own Supabase Auth session (`sb-*` cookie) | A **separate** Supabase Auth session (`sb-platform-auth-token` cookie — see `lib/platform/client.ts`'s own header comment for why the name had to be explicit) |
@@ -36,6 +36,71 @@ see `lib/platform/account.ts`'s `getCurrentPlatformAccount()` for the
 canonical two-step resolution every Platform-touching Server Action/page
 needs.
 
+**2026-09-14 — `aorms.in/login` now accepts an AORMS Identity password
+too**, per explicit user direction after being shown the concrete
+consequence and confirming anyway (`web/lib/actions/auth.ts`'s
+`signInWithIdentity()`; see that function's own header comment for the
+full design). This does **not** weaken "link, not merge" — sessions and
+databases are still fully separate, and a Platform-verified password
+never becomes a real Office Hub password. What it adds: `signIn()` now
+falls back to checking the Platform's own Auth when a password doesn't
+match this deployment's `auth.users` directly, and can auto-provision a
+brand-new `profiles` row for a Platform Identity that has never touched
+this Office Hub before. **The critical safety property, found and fixed
+before this shipped, not after**: `profiles.role` defaults to
+`'ASSOCIATE'` — real staff access — the instant a new `auth.users` row is
+created (`handle_new_user()`'s own trigger). A naive version of this
+feature would have let literally any internet stranger with a free
+Identity account sign into any Office Hub deployment with real staff
+access. Fixed with a new `'PENDING'` role (`web/supabase/migrations/
+0049_pending_role_for_identity_signin.sql`) that `roleHome()` and every
+role-gated RLS policy in this schema (all explicit allowlists, none of
+them exclusion-based — confirmed before relying on that) already treat as
+"no portal at all" — auto-provisioning creates a real row an OWNER/
+PARTNER can find and promote on `/users`, never real access on its own.
+An *existing* Office Hub account signing in with its Identity password
+instead just auto-links the two (backfilling `platform_public_id` only if
+unset) — its existing role is never touched.
+
+**Stale-doc correction (2026-09-14) — the Platform is now THREE separate
+identity tables, not one "portable AORMS-U- across everything."** This
+doc used to describe one `accounts` table (`AORMS-U-`) as the single
+portable identity underneath every Studio, Company, and admin context —
+several passages below (`accounts.is_admin`, the Nomenclature table's
+"Account" row) still say that and are superseded by this note, kept
+un-rewritten only for the historical account of how the boundary was
+first reasoned through. Explicit user direction, 2026-09-14: "the admin
+users and staff should be separate from aorms hub users, and should be
+separate from company users, three separate tables, and don't reconcile
+every user in a single platform." Confirmed via a clarifying question
+first (this directly conflicted with the design this doc originally
+described) — the user's explicit answer accepted the real tradeoff: **a
+person can no longer use one login across Studio/Identity, Company/
+ConnectDeX, and platform-staff contexts.** Three genuinely separate
+identity tables now exist on `aorms-platform`, each keyed to its own,
+non-overlapping set of `auth.users` rows:
+
+| Table | Handle prefix | Who | Migration |
+| --- | --- | --- | --- |
+| `accounts` | `AORMS-U-` | Studio/architect Identity users only (no longer "everyone") | original (0001), narrowed 2026-09-14 (0023 dropped its `is_admin`/`admin_role` columns) |
+| `platform_staff` | (no handle — internal only) | AORMS admin/support staff, independent of any Studio/Company/Office Hub deployment | 0022 (created), 0023 (`accounts.is_admin`/`admin_role` retired in its favor) |
+| `company_accounts` | `AORMS-CU-` | ConnectDeX/Company-side users only — minted solely via the admin ConnectDeX invite path, never self-signup | 0024 |
+
+Mutual exclusion between `accounts` and `company_accounts` is enforced by
+construction: the one trigger on every `auth.users` insert,
+`handle_new_platform_account()`, branches on
+`raw_user_meta_data->>'account_kind'` — `'company'` creates a
+`company_accounts` row, anything else (the default, every existing
+signup path unchanged) creates an `accounts` row. Every `auth.users` row
+gets exactly one of the two, permanently, at signup/invite time — a
+person needing both a Studio/Identity login and a Company login needs
+two separate accounts (two separate emails). See `lib/platform/
+account.ts`'s `resolveAdminRole()`/`getPlatformNavStatus()` and
+`platform/supabase/migrations/0022`-`0024` for the implementation; the
+"two separate sessions, two separate databases, joined by one stored
+handle" sentence above (Office Hub ↔ Platform) is unaffected by any of
+this — that's a different link, one level up.
+
 ## Three portals (2026-09-10)
 
 The boundary rules below (Admin / Portal / Directory) haven't changed —
@@ -49,7 +114,7 @@ Partners are already named sub-brands elsewhere in this codebase:
 | --- | --- | --- | --- | --- |
 | **Identity Portal** | Architects & Studios | `identity.aorms.in` | `/identity`, `/studios/[studioId]`, `/licences` | `IdentityPortalHeader` |
 | **ConnectDeX Portal** | Material/interior suppliers (Companies) | `connectdex.aorms.in` | `/connectdex`, `/connectdex-apply`, `/companies/[companyId]`, `/materials` | `ConnectDexPortalHeader` |
-| **SysDeX** | Platform staff (`accounts.is_admin`) | `sysdex.aorms.in` | every `/admin/*` page | `SysDexPortalHeader` |
+| **SysDeX** | Platform staff (`platform_staff` — see the 2026-09-14 correction above; was `accounts.is_admin`) | `sysdex.aorms.in` | every `/admin/*` page | `SysDexPortalHeader` |
 
 **Subdomains (2026-09-10)** — each portal's canonical URL is now its own
 subdomain, not a path prefix on the main domain. This is routing-level
@@ -101,18 +166,19 @@ convention as `inviteUserByEmail` elsewhere), logging a
 itself stays DB-only — no grant/revoke toggle was added; that boundary
 (see `platform/supabase/migrations/0009_admin_role.sql`) is unchanged.
 
-**SysDeX has two staff roles (2026-09-10)** — `accounts.admin_role`
-(`platform/supabase/migrations/0016_admin_role.sql`): **SUPER_ADMIN**
-sees every `/admin/*` page (Accounts, Licences, Payments, Pricing,
-ConnectDeX review, Logs) and can perform every admin write action;
-**SUPPORT_STAFF** is scoped to the dashboard and `/admin/helpdesk` only
-— everything else renders `AdminAccessDenied`. `accounts.is_admin`
-(the older column) keeps meaning "any platform staff at all" and every
-RLS "admin read" policy still keys off it unchanged — the role split is
-enforced at the page/Server-Action layer (`isSuperAdmin()` in
-`lib/platform/account.ts`), not at the RLS layer. See
-`docs/esti/ROADMAP.md`'s dated entry for the full account, including the
-disclosed scope boundary (support staff can still technically *read*,
+**SysDeX has two staff roles (2026-09-10)** — originally
+`accounts.admin_role` (`platform/supabase/migrations/0016_admin_role.sql`),
+now `platform_staff.admin_role` (see the 2026-09-14 correction above):
+**SUPER_ADMIN** sees every `/admin/*` page (Accounts, Licences, Payments,
+Pricing, ConnectDeX review, Logs) and can perform every admin write
+action; **SUPPORT_STAFF** is scoped to the dashboard and
+`/admin/helpdesk` only — everything else renders `AdminAccessDenied`.
+`is_platform_admin()` (the RLS-facing function every "admin read" policy
+keys off) now checks `platform_staff` only, unchanged in shape — the
+role split is still enforced at the page/Server-Action layer
+(`isSuperAdmin()` in `lib/platform/account.ts`), not at the RLS layer.
+See `docs/esti/ROADMAP.md`'s dated entry for the full account, including
+the disclosed scope boundary (support staff can still technically *read*,
 not write, Licence/Payment/Account data via a direct API call — same as
 before this split, unchanged, not newly introduced).
 
@@ -143,8 +209,9 @@ Office Hub account needed. Every admin gate (`admin/*` pages, both
 | **AORMS Platform** | The identity/licensing substrate (`(platform)/*`) | A second product; a "hub" |
 | **Studio** | An architecture-firm entity (`studios` table, `AORMS-S-` handle) — was called "Company" until the 2026-09-07 rename | A material-supplier business |
 | **Company** | A material-supplier business entity (`companies` table, `AORMS-C-` handle) — the *new* meaning as of the Studio/Company split | An architecture firm (that's a Studio now) |
-| **Account** | A person's portable identity on the Platform (`accounts` table, `AORMS-U-` handle) | A Studio or Company (those are entities, not people) |
-| **Identity page** (`/identity`) | A signed-in person's own landing page on the Platform — their account, level, and every Studio/Company membership | "The hub" (see above) |
+| **Account** | A person's Studio/Identity login on the Platform (`accounts` table, `AORMS-U-` handle) — **not** portable to Company/ConnectDeX or staff contexts as of 2026-09-14, see the correction above | A Company member's login (that's a Company Account, below); a Studio or Company itself (those are entities, not people) |
+| **Company Account** | A person's Company/ConnectDeX login (`company_accounts` table, `AORMS-CU-` handle, 2026-09-14) — a genuinely separate identity from Account, minted only via the admin ConnectDeX invite path | An Account; anything Studio-scoped |
+| **Identity page** (`/identity`) | A signed-in Account's own landing page on the Platform — their account, level, and every Studio membership (Company memberships are `/connectdex`'s own page, resolved from a Company Account instead) | "The hub" (see above) |
 | **Portal** | A self-service page scoped to **one entity the caller belongs to** — sees only that entity's own data | The Admin back office (opposite scope) |
 | **Admin** / **Admin back office** | The platform-staff-only area (`/admin/*`) — sees **every** entity's data, platform-wide | A Portal; anything a Studio/Company member can reach |
 | **Directory** | A cross-entity *discovery* surface (currently just `/materials`) — any Studio can browse any Company's products. Neither Portal-scoped (it deliberately shows other entities' data) nor Admin (any authenticated account can use it, not just staff) | A Portal or Admin |
@@ -174,9 +241,11 @@ in Admin, gated behind `accounts.is_admin`, and nowhere else.
 | `/admin/payments` | **Admin** | Every payment, every studio — a Studio's own Portal never shows another studio's payment history (RLS: `"payments: studio members read"` scopes a member to their own studio's rows only; `"payments: admin read"` is the only cross-studio read path) |
 | `/admin/pricing` | **Admin** | The one global `plan_pricing` table — per-seat prices apply platform-wide, so this is inherently Admin-only, never something a Studio Portal could reasonably expose |
 | `/admin/logs` | **Admin** | `platform_activity_log` — every event, every entity. No Portal-level "my studio's activity log" exists yet (see § Open questions) |
-| `/admin/accounts` | **Admin** | Every `accounts` row, platform-wide — admin-triggered password reset (see § Three portals above) |
+| `/admin/accounts` (nav label "Users") | **Admin** | Every person-level login, platform-wide, under two headed sections (2026-09-14): Users (`accounts`, with level/admin-role overrides) and Company Accounts (`connectdex.company_accounts`) — both with admin-triggered password reset |
+| `/admin/studios` | **Admin** | Every `studios` row, platform-wide (2026-09-14) — name, handle, location, member count, licence plan, linking into `/studios/[studioId]`. Distinct from `/admin/licences` (licence-framed) |
+| `/admin/companies` | **Admin** | Every `companies` row, platform-wide, any onboarding status (2026-09-14) — distinct from `/admin/connectdex`'s onboarding-review queue, which stays workflow-shaped |
 | `/admin/helpdesk` | **Admin** | HelpDeX — every `support_tickets` row, status/internal-note triage (see § Three portals above) |
-| `/connectdex` | Personal (ConnectDeX) | The signed-in account's own Company memberships (list, not detail) — the ConnectDeX Portal's counterpart to `/identity` |
+| `/connectdex` | Personal (ConnectDeX) | The signed-in **Company Account**'s own Company memberships (list, not detail) — the ConnectDeX Portal's counterpart to `/identity`. Resolved from the Platform's own session directly (2026-09-14), not an Office Hub link — a Company Account has no relationship to any Office Hub deployment at all |
 | `/support` | Auth-neutral | Public HelpDeX ticket submit form — no account required |
 | `/platform-login`, `/platform-signup` | Auth | Sign in/up for a personal Platform Account — not entity-scoped at all, this is what creates the `AORMS-U-` identity everything else hangs off of |
 

@@ -1,7 +1,7 @@
 import NextLink from "next/link";
 import { notFound } from "next/navigation";
 import { Column, Grid, InlineNotification, Stack, Tag, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tile } from "@carbon/react";
-import { createClient as createWebClient } from "../../../../lib/supabase/server";
+import { createClient as createPlatformClient } from "../../../../lib/platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { InviteCompanyMemberForm } from "../../../../components/aorms/platform/company/InviteCompanyMemberForm";
 import { CompanyMembershipRoleSelect } from "../../../../components/aorms/platform/company/CompanyMembershipRoleSelect";
@@ -26,10 +26,16 @@ type AccountEmbed = { id: string; full_name: string; public_id: string } | null;
  * split + Material Catalogue plan, 2026-09-07). Mirrors
  * studios/[studioId]/page.tsx exactly, minus the COA registration field
  * (Council of Architecture registration doesn't apply to a supplier) and
- * with a Products/Material Catalogue section to follow in Phase C. Reads
- * via the platform's service-role client, scoped by the current web/
- * user's own already-verified linked handle (same justification as
- * identity/page.tsx). OWNER-only invite/role-change/remove controls only
+ * with a Products/Material Catalogue section to follow in Phase C.
+ *
+ * **2026-09-14 rewrite — Company/ConnectDeX identity split (platform
+ * migration 0024):** the caller's own identity used to be resolved via the
+ * Office Hub session → profiles.platform_public_id → `accounts` — that path
+ * can no longer resolve a Company member at all (Company identities live
+ * in their own `company_accounts` table now, unrelated to any Office Hub
+ * link). Resolved directly from the AORMS Platform's own session instead
+ * (same pattern as getCurrentPlatformSessionAccount(), just against
+ * `company_accounts`). OWNER-only invite/role-change/remove controls only
  * render for the caller's own ACTIVE OWNER membership — the real gate is
  * still the platform's RLS on the underlying mutations, this is just what
  * decides what to show.
@@ -37,20 +43,15 @@ type AccountEmbed = { id: string; full_name: string; public_id: string } | null;
 export default async function CompanyDetailPage({ params }: { params: Promise<{ companyId: string }> }) {
   const { companyId } = await params;
 
-  const webSupabase = await createWebClient();
+  const platformSupabase = await createPlatformClient();
   const {
     data: { user },
-  } = await webSupabase.auth.getUser();
-  const { data: profile } = await webSupabase
-    .from("profiles")
-    .select("platform_public_id")
-    .eq("id", user?.id ?? "")
-    .maybeSingle();
-  const handle = profile?.platform_public_id ?? null;
+  } = await platformSupabase.auth.getUser();
 
   const platformService = createPlatformServiceRoleClient();
+  const cx = platformService.schema("connectdex");
 
-  const { data: company, error: companyError } = await platformService
+  const { data: company, error: companyError } = await cx
     .from("companies")
     .select(
       "id, name, public_id, status, gstin, pan, gst_type, tds_applicable_default, address_line1, address_line2, city, district, state, pincode, email, phone",
@@ -72,17 +73,14 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
   // the gate itself).
   if (company.status !== "ACTIVE") {
     let isPendingOwner = false;
-    if (handle) {
-      const { data: account } = await platformService.from("accounts").select("id").eq("public_id", handle).maybeSingle();
-      if (account) {
-        const { data: membership } = await platformService
-          .from("company_memberships")
-          .select("role, status")
-          .eq("company_id", companyId)
-          .eq("account_id", account.id)
-          .maybeSingle();
-        isPendingOwner = membership?.role === "OWNER" && membership?.status === "ACTIVE";
-      }
+    if (user) {
+      const { data: membership } = await cx
+        .from("company_memberships")
+        .select("role, status")
+        .eq("company_id", companyId)
+        .eq("account_id", user.id)
+        .maybeSingle();
+      isPendingOwner = membership?.role === "OWNER" && membership?.status === "ACTIVE";
     }
 
     return (
@@ -149,23 +147,23 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
   }
 
   const [{ data: memberships }, { data: boardMembers }, { data: contacts }, { data: products }] = await Promise.all([
-    platformService
+    cx
       .from("company_memberships")
-      .select("id, account_id, role, status, accounts(full_name, public_id)")
+      .select("id, account_id, role, status, company_accounts(full_name, public_id)")
       .eq("company_id", companyId)
       .neq("status", "LEFT")
       .order("created_at", { ascending: true }),
-    platformService
+    cx
       .from("company_board_members")
       .select("id, full_name, din, designation, appointed_at")
       .eq("company_id", companyId)
       .order("created_at", { ascending: true }),
-    platformService
+    cx
       .from("company_contacts")
       .select("id, full_name, role_title, email, phone, is_primary")
       .eq("company_id", companyId)
       .order("created_at", { ascending: true }),
-    platformService
+    cx
       .from("products")
       .select(
         "id, name, category, sku, mrp_paise, description, product_specifications(id, label, value), product_test_results(id, test_name, result, lab_name, tested_at)",
@@ -174,15 +172,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
       .order("created_at", { ascending: true }),
   ]);
 
-  let currentAccountId: string | null = null;
-  if (handle) {
-    const { data: account } = await platformService
-      .from("accounts")
-      .select("id")
-      .eq("public_id", handle)
-      .maybeSingle();
-    currentAccountId = account?.id ?? null;
-  }
+  const currentAccountId: string | null = user?.id ?? null;
 
   const isOwner = (memberships ?? []).some(
     (m) => m.account_id === currentAccountId && m.role === "OWNER" && m.status === "ACTIVE",
@@ -225,7 +215,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
               </TableHead>
               <TableBody>
                 {(memberships ?? []).map((m) => {
-                  const acc = (Array.isArray(m.accounts) ? m.accounts[0] : m.accounts) as AccountEmbed;
+                  const acc = (Array.isArray(m.company_accounts) ? m.company_accounts[0] : m.company_accounts) as AccountEmbed;
                   return (
                     <TableRow key={m.id}>
                       <TableCell>{acc?.full_name ?? "—"}</TableCell>

@@ -13,7 +13,7 @@ export function InviteCompanyMemberForm({ companyId }: { companyId: string }) {
     <Form action={formAction}>
       <input type="hidden" name="companyId" value={companyId} />
       <Stack gap={4}>
-        <TextInput id="invite-company-handle" name="handle" labelText="Member's AORMS-U- handle" placeholder="AORMS-U-XXXX" required />
+        <TextInput id="invite-company-handle" name="handle" labelText="Member's AORMS-CU- handle" placeholder="AORMS-CU-XXXX" required />
         {state?.error ? (
           <InlineNotification kind="error" title="Couldn't invite" subtitle={state.error} lowContrast hideCloseButton />
         ) : null}

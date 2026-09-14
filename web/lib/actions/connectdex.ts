@@ -17,6 +17,17 @@
  * Same house style as platform.ts/company.ts/platform-payments.ts
  * throughout: errors as {error}, revalidatePath before a successful
  * return.
+ *
+ * **2026-09-14 — ConnectDeX/Company schema split (platform migration
+ * 0025):** every table this file touches (`connectdex_applications`,
+ * `companies`, `connectdex_settings`, `connectdex_payments`,
+ * `company_memberships`) now lives in its own `connectdex` Postgres
+ * schema within `aorms-platform`, not `public` — a namespace-only move
+ * (see the migration's own header comment) so a future physical split
+ * into a genuinely separate Supabase project is a mechanical schema dump/
+ * restore. Every data call below goes through `.schema("connectdex")`
+ * first; `.auth.admin.inviteUserByEmail` is unaffected (Auth isn't
+ * schema-scoped).
  */
 import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
@@ -55,7 +66,7 @@ export async function submitConnectDexApplication(_prev: ConnectDexActionState, 
   if (!["BUILDING_MATERIAL", "INTERIOR_MATERIAL", "FINISH", "OTHER"].includes(category)) return { error: "Pick a category." };
 
   const platformService = createPlatformServiceRoleClient();
-  const { error } = await platformService.from("connectdex_applications").insert({
+  const { error } = await platformService.schema("connectdex").from("connectdex_applications").insert({
     company_name: companyName,
     contact_name: contactName,
     email,
@@ -81,20 +92,30 @@ async function requirePlatformAdmin(): Promise<{ error: string } | null> {
 
 /**
  * Invites the applicant (Supabase's own inviteUserByEmail — creates the
- * auth.users row, firing handle_new_platform_account()'s trigger which
- * mints an AORMS-U- handle immediately; emails a link to set a password)
- * and creates the companies row directly — before_company_insert/
- * after_company_insert (platform/supabase/migrations/0001_core.sql,
- * 0007_supplier_companies.sql) still mint the AORMS-C- handle and
- * founding OWNER membership automatically, unchanged, just triggered by
+ * auth.users row, firing handle_new_platform_account()'s trigger; emails a
+ * link to set a password) and creates the companies row directly —
+ * before_company_insert/after_company_insert (platform/supabase/migrations/
+ * 0001_core.sql, 0007_supplier_companies.sql) still mint the AORMS-C- handle
+ * and founding OWNER membership automatically, unchanged, just triggered by
  * this admin action's insert instead of a user's own.
+ *
+ * `account_kind: "company"` in the invite metadata (2026-09-14, Company/
+ * ConnectDeX identity split — platform migration 0024) is what makes
+ * handle_new_platform_account() mint a company_accounts row (AORMS-CU-
+ * handle) here instead of the default accounts row (AORMS-U-) — this is
+ * the ONLY place in the app that sets it, since this is the only path that
+ * creates a Company-side identity. A person invited this way gets a
+ * genuinely separate login from any AORMS Identity/Studio account they may
+ * already have — the explicit, accepted tradeoff of the split (see the
+ * migration's own header comment).
  */
 export async function adminInviteConnectDexApplication(applicationId: string): Promise<ConnectDexActionState> {
   const gate = await requirePlatformAdmin();
   if (gate) return gate;
 
   const platformService = createPlatformServiceRoleClient();
-  const { data: application, error: fetchError } = await platformService
+  const cx = platformService.schema("connectdex");
+  const { data: application, error: fetchError } = await cx
     .from("connectdex_applications")
     .select("company_name, contact_name, email, status")
     .eq("id", applicationId)
@@ -104,11 +125,11 @@ export async function adminInviteConnectDexApplication(applicationId: string): P
   if (application.status !== "PENDING") return { error: "This application has already been actioned." };
 
   const { data: invited, error: inviteError } = await platformService.auth.admin.inviteUserByEmail(application.email, {
-    data: { full_name: application.contact_name },
+    data: { full_name: application.contact_name, account_kind: "company" },
   });
   if (inviteError) return { error: inviteError.message };
 
-  const { data: company, error: companyError } = await platformService
+  const { data: company, error: companyError } = await cx
     .from("companies")
     // tier: "BASE_LINE" is also the column default (migration 0018) — set
     // explicitly here anyway, matching this file's own style of not
@@ -120,7 +141,7 @@ export async function adminInviteConnectDexApplication(applicationId: string): P
   if (companyError) return { error: companyError.message };
 
   const account = await getCurrentPlatformSessionAccount();
-  const { error: updateError } = await platformService
+  const { error: updateError } = await cx
     .from("connectdex_applications")
     .update({ status: "INVITED", invited_account_id: invited.user.id, reviewed_at: new Date().toISOString(), reviewed_by_id: account?.id })
     .eq("id", applicationId);
@@ -137,6 +158,7 @@ export async function adminRejectConnectDexApplication(applicationId: string): P
   const platformService = createPlatformServiceRoleClient();
   const account = await getCurrentPlatformSessionAccount();
   const { error } = await platformService
+    .schema("connectdex")
     .from("connectdex_applications")
     .update({ status: "REJECTED", reviewed_at: new Date().toISOString(), reviewed_by_id: account?.id })
     .eq("id", applicationId)
@@ -158,6 +180,7 @@ export async function adminVerifyConnectDexCompany(companyId: string): Promise<C
   const account = await getCurrentPlatformSessionAccount();
   const platformService = createPlatformServiceRoleClient();
   const { error } = await platformService
+    .schema("connectdex")
     .from("companies")
     .update({ verified_at: new Date().toISOString(), verified_by_id: account?.id, status: "PENDING_PAYMENT" })
     .eq("id", companyId)
@@ -185,7 +208,7 @@ export async function adminSetCompanyTier(_prev: ConnectDexActionState, formData
   if (!["BASE_LINE", "PRO", "PRO_PLUS"].includes(tier)) return { error: "Invalid tier." };
 
   const platformService = createPlatformServiceRoleClient();
-  const { error } = await platformService.from("companies").update({ tier }).eq("id", companyId);
+  const { error } = await platformService.schema("connectdex").from("companies").update({ tier }).eq("id", companyId);
   if (error) return { error: error.message };
 
   revalidatePath("/admin/connectdex");
@@ -202,6 +225,7 @@ export async function adminSetConnectDexFee(_prev: ConnectDexActionState, formDa
 
   const platform = await createPlatformClient();
   const { error } = await platform
+    .schema("connectdex")
     .from("connectdex_settings")
     .update({ onboarding_fee_paise: Math.round(feeRupees * 100), updated_at: new Date().toISOString() })
     .eq("id", true);
@@ -235,6 +259,7 @@ export async function submitConnectDexOnboardingForm(_prev: ConnectDexActionStat
 
   const platform = await createPlatformClient();
   const { error } = await platform
+    .schema("connectdex")
     .from("companies")
     .update({
       gstin: gstin || null,
@@ -265,15 +290,16 @@ export type CreateConnectDexOrderResult =
 
 export async function createConnectDexOnboardingOrder(companyId: string): Promise<CreateConnectDexOrderResult> {
   const platform = await createPlatformClient();
+  const cx = platform.schema("connectdex");
   const {
     data: { user },
   } = await platform.auth.getUser();
   if (!user) return { error: "Sign in to the AORMS Platform first." };
 
-  const { data: company } = await platform.from("companies").select("status").eq("id", companyId).maybeSingle();
+  const { data: company } = await cx.from("companies").select("status").eq("id", companyId).maybeSingle();
   if (!company || company.status !== "PENDING_PAYMENT") return { error: "This company isn't ready for payment yet." };
 
-  const { data: membership } = await platform
+  const { data: membership } = await cx
     .from("company_memberships")
     .select("role, status")
     .eq("company_id", companyId)
@@ -283,7 +309,7 @@ export async function createConnectDexOnboardingOrder(companyId: string): Promis
     return { error: "Only the company's owner can pay the onboarding fee." };
   }
 
-  const { data: settings, error: settingsError } = await platform.from("connectdex_settings").select("onboarding_fee_paise").eq("id", true).maybeSingle();
+  const { data: settings, error: settingsError } = await cx.from("connectdex_settings").select("onboarding_fee_paise").eq("id", true).maybeSingle();
   if (settingsError) return { error: settingsError.message };
   if (!settings) return { error: "Onboarding fee isn't configured yet — contact support." };
 
@@ -298,7 +324,7 @@ export async function createConnectDexOnboardingOrder(companyId: string): Promis
   }
 
   const platformService = createPlatformServiceRoleClient();
-  const { error: insertError } = await platformService.from("connectdex_payments").insert({
+  const { error: insertError } = await platformService.schema("connectdex").from("connectdex_payments").insert({
     company_id: companyId,
     account_id: user.id,
     amount_paise: settings.onboarding_fee_paise,
@@ -324,6 +350,7 @@ export async function confirmConnectDexPaymentClientSide(orderId: string, paymen
 
   const platformService = createPlatformServiceRoleClient();
   const { data: payment, error: fetchError } = await platformService
+    .schema("connectdex")
     .from("connectdex_payments")
     .select("id, company_id, status")
     .eq("razorpay_order_id", orderId)

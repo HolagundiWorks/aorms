@@ -39,7 +39,9 @@ export default async function AiConnectorsAdminPage() {
   const accountIds = [...new Set(grantRows.filter((g) => g.scope_type === "account").map((g) => g.account_id as string))];
 
   const [{ data: companies }, { data: accounts }] = await Promise.all([
-    companyIds.length ? platform.from("companies").select("id, public_id, name").in("id", companyIds) : Promise.resolve({ data: [] as { id: string; public_id: string; name: string }[] }),
+    companyIds.length
+      ? platform.schema("connectdex").from("companies").select("id, public_id, name").in("id", companyIds)
+      : Promise.resolve({ data: [] as { id: string; public_id: string; name: string }[] }),
     accountIds.length
       ? platform.from("accounts").select("id, public_id, full_name").in("id", accountIds)
       : Promise.resolve({ data: [] as { id: string; public_id: string; full_name: string | null }[] }),

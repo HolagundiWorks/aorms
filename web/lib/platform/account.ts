@@ -117,7 +117,17 @@ export async function getCurrentPlatformSessionAccount(): Promise<CurrentPlatfor
  * SysDeX nav items to show — support staff only ever see Dashboard +
  * HelpDeX), and their display name for the header's own greeting
  * (2026-09-14 shell remediation — falls back to "there" same as Office
- * Hub's own greeting does for a name-less profile). */
+ * Hub's own greeting does for a name-less profile).
+ *
+ * **2026-09-14, Company/ConnectDeX identity split (platform migration
+ * 0024):** falls back to `company_accounts` when the session has no
+ * Studio/staff `accounts` row — otherwise a signed-in Company user (a
+ * genuinely separate identity now, not a row in `accounts`) would show
+ * "Sign in" in every portal header despite having an active session. A
+ * Company identity is never admin/super-admin (those flags stay tied to
+ * `platform_staff`, layered only on top of an `accounts` row), so this
+ * fallback only ever affects `signedIn`/`displayName`.
+ */
 export async function getPlatformNavStatus(): Promise<{
   signedIn: boolean;
   isAdmin: boolean;
@@ -125,10 +135,33 @@ export async function getPlatformNavStatus(): Promise<{
   displayName: string;
 }> {
   const account = await getCurrentPlatformSessionAccount();
+  if (account) {
+    return {
+      signedIn: true,
+      isAdmin: account.is_admin,
+      isSuperAdmin: isSuperAdmin(account),
+      displayName: account.full_name?.trim() || "there",
+    };
+  }
+
+  const platform = await createPlatformClient();
+  const {
+    data: { user },
+  } = await platform.auth.getUser();
+  if (!user) return { signedIn: false, isAdmin: false, isSuperAdmin: false, displayName: "there" };
+
+  const platformService = createPlatformServiceRoleClient();
+  const { data: companyAccount } = await platformService
+    .schema("connectdex")
+    .from("company_accounts")
+    .select("full_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
   return {
-    signedIn: !!account,
-    isAdmin: !!account?.is_admin,
-    isSuperAdmin: isSuperAdmin(account),
-    displayName: account?.full_name?.trim() || "there",
+    signedIn: !!companyAccount,
+    isAdmin: false,
+    isSuperAdmin: false,
+    displayName: companyAccount?.full_name?.trim() || "there",
   };
 }

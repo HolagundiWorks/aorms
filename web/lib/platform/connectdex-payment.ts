@@ -19,10 +19,12 @@ export async function applyCapturedConnectDexPayment(
   platformService: ReturnType<typeof createServiceRoleClient>,
   payment: { id: string; company_id: string; razorpay_payment_id: string },
 ): Promise<void> {
-  await platformService
+  const cx = platformService.schema("connectdex");
+
+  await cx
     .from("connectdex_payments")
     .update({ status: "CAPTURED", razorpay_payment_id: payment.razorpay_payment_id, updated_at: new Date().toISOString() })
     .eq("id", payment.id);
 
-  await platformService.from("companies").update({ status: "ACTIVE" }).eq("id", payment.company_id).eq("status", "PENDING_PAYMENT");
+  await cx.from("companies").update({ status: "ACTIVE" }).eq("id", payment.company_id).eq("status", "PENDING_PAYMENT");
 }

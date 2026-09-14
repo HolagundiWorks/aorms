@@ -78,6 +78,7 @@ export async function POST(request: Request) {
       }
     } else {
       const { data: connectDexRow } = await platformService
+        .schema("connectdex")
         .from("connectdex_payments")
         .select("id, company_id, status")
         .eq("razorpay_order_id", orderId)
@@ -106,6 +107,7 @@ export async function POST(request: Request) {
       .select("id");
     if (!failedLicenceRows || failedLicenceRows.length === 0) {
       const { data: failedConnectDexRows } = await platformService
+        .schema("connectdex")
         .from("connectdex_payments")
         .update({ status: "FAILED", updated_at: new Date().toISOString() })
         .eq("razorpay_order_id", orderId)

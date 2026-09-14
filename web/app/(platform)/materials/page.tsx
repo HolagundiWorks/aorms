@@ -92,6 +92,7 @@ export default async function MaterialsPage({
   }
 
   let query = platformService
+    .schema("connectdex")
     .from("products")
     .select("id, name, category, sku, mrp_paise, companies(id, name, public_id, city, state)");
   if (q) query = query.ilike("name", `%${q}%`);

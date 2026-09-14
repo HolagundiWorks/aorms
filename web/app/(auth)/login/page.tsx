@@ -34,6 +34,13 @@ function LoginForm() {
           <p className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
             Office management for architecture practices.
           </p>
+          {/* 2026-09-14 — signIn() now falls back to AORMS Identity
+              credentials when they don't match this Office Hub directly
+              (lib/actions/auth.ts) — surfaced here so it's discoverable,
+              not a silent behavior nobody knows exists. */}
+          <p className="cds--type-helper-text-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
+            Your AORMS Identity (Platform) email and password work here too.
+          </p>
         </div>
         <TextInput id="email" name="email" labelText="Email" type="email" autoComplete="email" required />
         <div>

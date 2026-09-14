@@ -33,8 +33,21 @@ async function requirePlatformAdmin(): Promise<{ accountId: string } | { error: 
  * trigger can hang an activity-log entry off of — the actual reset call
  * itself is an Auth API call, not a table write, see the migration's own
  * header comment).
+ *
+ * `accountKind` (2026-09-14, portal-completion audit) — `password_reset_
+ * requests` gained a `company_account_id` column alongside the original
+ * `account_id` (platform migration 0027), exactly one of which must be
+ * set now: an Identity account's row still goes in `account_id`, a
+ * Company account's row goes in `company_account_id` instead — Company
+ * Accounts have no row in `accounts` at all post the identity split
+ * (migration 0024), so inserting their id into `account_id` would violate
+ * that column's FK. `getUserById` itself is unaffected either way (Auth
+ * is schema-neutral).
  */
-export async function adminTriggerPasswordReset(accountId: string): Promise<AdminAccountActionState> {
+export async function adminTriggerPasswordReset(
+  accountId: string,
+  accountKind: "identity" | "company" = "identity",
+): Promise<AdminAccountActionState> {
   const gate = await requirePlatformAdmin();
   if ("error" in gate) return gate;
 
@@ -48,11 +61,11 @@ export async function adminTriggerPasswordReset(accountId: string): Promise<Admi
   });
   if (resetError) return { error: resetError.message };
 
-  const { error: logError } = await platformService.from("password_reset_requests").insert({
-    account_id: accountId,
-    triggered_by_id: gate.accountId,
-    email_sent_to: userData.user.email,
-  });
+  const { error: logError } = await platformService.from("password_reset_requests").insert(
+    accountKind === "company"
+      ? { company_account_id: accountId, triggered_by_id: gate.accountId, email_sent_to: userData.user.email }
+      : { account_id: accountId, triggered_by_id: gate.accountId, email_sent_to: userData.user.email },
+  );
   if (logError) return { error: logError.message };
 
   revalidatePath("/admin/accounts");

@@ -10,6 +10,13 @@
  * owning company's OWNER only for writes); these actions don't re-check
  * ownership client-side, they just surface whatever RLS returns.
  *
+ * **2026-09-14 — ConnectDeX/Company schema split (platform migration
+ * 0025):** `companies`/`products`/`product_specifications`/
+ * `product_test_results` all moved into their own `connectdex` Postgres
+ * schema, not `public` — a namespace-only move (see the migration's own
+ * header comment). Every call below goes through `.schema("connectdex")`
+ * first.
+ *
  * Same house style as platform.ts/company.ts throughout: errors as
  * {error} objects, never thrown; revalidatePath before a successful
  * return; no write_audit (platform-side, no audit_log table there).
@@ -42,10 +49,11 @@ async function checkBaseLineCategoryCap(
   companyId: string,
   newCategory: string,
 ): Promise<string | null> {
-  const { data: company } = await supabase.from("companies").select("tier").eq("id", companyId).maybeSingle();
+  const cx = supabase.schema("connectdex");
+  const { data: company } = await cx.from("companies").select("tier").eq("id", companyId).maybeSingle();
   if (company?.tier !== "BASE_LINE") return null;
 
-  const { data: existingProducts } = await supabase.from("products").select("category").eq("company_id", companyId);
+  const { data: existingProducts } = await cx.from("products").select("category").eq("company_id", companyId);
   const distinctCategories = new Set((existingProducts ?? []).map((p) => p.category));
   if (distinctCategories.has(newCategory)) return null;
   if (distinctCategories.size >= BASE_LINE_MAX_CATEGORIES) {
@@ -75,7 +83,7 @@ export async function addProduct(
   const capError = await checkBaseLineCategoryCap(supabase, companyId, category);
   if (capError) return { error: capError };
 
-  const { error } = await supabase.from("products").insert({
+  const { error } = await supabase.schema("connectdex").from("products").insert({
     company_id: companyId,
     name,
     category,
@@ -109,6 +117,7 @@ export async function updateProduct(
 
   const supabase = await createPlatformClient();
   const { error } = await supabase
+    .schema("connectdex")
     .from("products")
     .update({
       name,
@@ -127,7 +136,7 @@ export async function updateProduct(
 
 export async function removeProduct(productId: string, companyId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
-  const { error } = await supabase.from("products").delete().eq("id", productId);
+  const { error } = await supabase.schema("connectdex").from("products").delete().eq("id", productId);
   if (error) return { error: error.message };
 
   revalidatePath(`/companies/${companyId}`);
@@ -148,7 +157,7 @@ export async function addProductSpecification(
   if (!productId || !label || !value) return { error: "Label and value are required." };
 
   const supabase = await createPlatformClient();
-  const { error } = await supabase.from("product_specifications").insert({ product_id: productId, label, value });
+  const { error } = await supabase.schema("connectdex").from("product_specifications").insert({ product_id: productId, label, value });
   if (error) return { error: error.message };
 
   revalidatePath(`/companies/${companyId}`);
@@ -167,7 +176,7 @@ export async function updateProductSpecification(
   if (!specId || !label || !value) return { error: "Label and value are required." };
 
   const supabase = await createPlatformClient();
-  const { error } = await supabase.from("product_specifications").update({ label, value }).eq("id", specId);
+  const { error } = await supabase.schema("connectdex").from("product_specifications").update({ label, value }).eq("id", specId);
   if (error) return { error: error.message };
 
   revalidatePath(`/companies/${companyId}`);
@@ -177,7 +186,7 @@ export async function updateProductSpecification(
 
 export async function removeProductSpecification(specId: string, companyId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
-  const { error } = await supabase.from("product_specifications").delete().eq("id", specId);
+  const { error } = await supabase.schema("connectdex").from("product_specifications").delete().eq("id", specId);
   if (error) return { error: error.message };
 
   revalidatePath(`/companies/${companyId}`);
@@ -198,7 +207,7 @@ export async function addProductTestResult(
   if (!productId || !testName || !result) return { error: "Test name and result are required." };
 
   const supabase = await createPlatformClient();
-  const { error } = await supabase.from("product_test_results").insert({
+  const { error } = await supabase.schema("connectdex").from("product_test_results").insert({
     product_id: productId,
     test_name: testName,
     result,
@@ -224,6 +233,7 @@ export async function updateProductTestResult(
 
   const supabase = await createPlatformClient();
   const { error } = await supabase
+    .schema("connectdex")
     .from("product_test_results")
     .update({
       test_name: testName,
@@ -241,7 +251,7 @@ export async function updateProductTestResult(
 
 export async function removeProductTestResult(testResultId: string, companyId: string): Promise<{ error?: string }> {
   const supabase = await createPlatformClient();
-  const { error } = await supabase.from("product_test_results").delete().eq("id", testResultId);
+  const { error } = await supabase.schema("connectdex").from("product_test_results").delete().eq("id", testResultId);
   if (error) return { error: error.message };
 
   revalidatePath(`/companies/${companyId}`);

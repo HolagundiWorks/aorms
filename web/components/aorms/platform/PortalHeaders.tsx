@@ -51,7 +51,9 @@ export function SysDexPortalHeader() {
       showSysDexLink={false}
       navItems={[
         { href: "/admin", label: "Dashboard" },
-        { href: "/admin/accounts", label: "Accounts", superAdminOnly: true },
+        { href: "/admin/accounts", label: "Users", superAdminOnly: true },
+        { href: "/admin/studios", label: "Studios", superAdminOnly: true },
+        { href: "/admin/companies", label: "Companies", superAdminOnly: true },
         { href: "/admin/licences", label: "Licences", superAdminOnly: true },
         { href: "/admin/payments", label: "Payments", superAdminOnly: true },
         { href: "/admin/pricing", label: "Pricing", superAdminOnly: true },

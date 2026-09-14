@@ -1,0 +1,22 @@
+-- 2026-09-14 — Office Hub sign-in now falls back to AORMS Identity
+-- (Platform) credentials when a password doesn't match this deployment's
+-- own auth.users (web/lib/actions/auth.ts's signIn). A successful
+-- Identity sign-in with no existing Office Hub profile auto-provisions
+-- one — but with NO real access: a brand-new profile lands in this new
+-- 'PENDING' role, which `roleHome()` (web/lib/auth/role-home.ts) already
+-- treats as "no portal" (falls through to null, same as any role not in
+-- its explicit allowlists) since it isn't in STAFF_ROLES or the
+-- CLIENT/CONSULTANT/CONTRACTOR set. `is_office_staff()` and every other
+-- role-gated RLS policy in this schema use explicit allowlists (`role IN
+-- (...)`), not an exclusion list — confirmed by reading is_office_staff()
+-- before writing this migration — so PENDING is fail-closed by
+-- construction: it cannot accidentally match anywhere access is granted.
+-- An OWNER/PARTNER must explicitly promote a PENDING profile via /users
+-- before it can see anything. This is the deliberate, safer alternative
+-- to literally auto-granting any Identity account real access — see the
+-- design conversation this migration implements.
+--
+-- ALTER TYPE ... ADD VALUE cannot run in the same transaction as a
+-- statement that uses the new value — this migration is deliberately
+-- just the one statement.
+alter type public.app_role add value 'PENDING';

@@ -10,7 +10,15 @@ import { adminTriggerPasswordReset } from "../../../lib/actions/admin-accounts";
  * (which email address the reset actually went to) — worth confirming
  * inline since there's no other feedback the email delivery worked.
  */
-export function SendPasswordResetButton({ accountId, accountLabel }: { accountId: string; accountLabel: string }) {
+export function SendPasswordResetButton({
+  accountId,
+  accountLabel,
+  accountKind = "identity",
+}: {
+  accountId: string;
+  accountLabel: string;
+  accountKind?: "identity" | "company";
+}) {
   const [result, setResult] = useState<{ error?: string; success?: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -24,7 +32,7 @@ export function SendPasswordResetButton({ accountId, accountLabel }: { accountId
           if (!window.confirm(`Send a password reset email to ${accountLabel}?`)) return;
           setResult(null);
           startTransition(async () => {
-            const res = await adminTriggerPasswordReset(accountId);
+            const res = await adminTriggerPasswordReset(accountId, accountKind);
             setResult(res);
           });
         }}

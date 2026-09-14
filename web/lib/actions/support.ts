@@ -27,8 +27,17 @@ const STATUSES = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] as const;
  * Public — no auth required, same shape as submitConnectDexApplication
  * (lib/actions/connectdex.ts): a support request may come from someone
  * with no Platform account at all. If the caller does happen to have an
- * active Platform session, its account_id is attached so they can later
- * check the ticket's status (RLS: "support_tickets: submitter read own").
+ * active Platform session, its id is attached so they can later check the
+ * ticket's status (RLS: "support_tickets: submitter read own").
+ *
+ * **2026-09-14 fix (portal-completion audit, found via proactive FK
+ * sweep, not user report)**: an active session could be either an
+ * Identity account OR a Company account — `support_tickets` gained a
+ * `company_account_id` column alongside `account_id` (platform migration
+ * 0028) so a signed-in Company user submitting a ticket doesn't violate
+ * `account_id`'s FK to `accounts` (Company Accounts have no row there
+ * post migration 0024). Checks which table the session id actually
+ * belongs to rather than guessing from context.
  */
 export async function submitSupportTicket(_prev: SupportActionState, formData: FormData): Promise<SupportActionState> {
   const name = String(formData.get("name") ?? "").trim();
@@ -49,10 +58,23 @@ export async function submitSupportTicket(_prev: SupportActionState, formData: F
   } = await platform.auth.getUser();
 
   const platformService = createPlatformServiceRoleClient();
+  let accountId: string | null = null;
+  let companyAccountId: string | null = null;
+  if (user) {
+    const { data: identityAccount } = await platformService.from("accounts").select("id").eq("id", user.id).maybeSingle();
+    if (identityAccount) {
+      accountId = user.id;
+    } else {
+      const { data: companyAccount } = await platformService.schema("connectdex").from("company_accounts").select("id").eq("id", user.id).maybeSingle();
+      if (companyAccount) companyAccountId = user.id;
+    }
+  }
+
   const { error } = await platformService.from("support_tickets").insert({
     name,
     email,
-    account_id: user?.id ?? null,
+    account_id: accountId,
+    company_account_id: companyAccountId,
     category,
     subject,
     message,

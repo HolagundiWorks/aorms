@@ -22,20 +22,21 @@ export default async function AdminConnectDexPage() {
   if (!isSuperAdmin(account)) return <AdminAccessDenied title="ConnectDeX Partners" />;
 
   const platformService = createPlatformServiceRoleClient();
+  const cx = platformService.schema("connectdex");
   const [{ data: applications }, { data: pendingVerification }, { data: pendingPayment }, { data: settings }, { data: activeCompanies }] =
     await Promise.all([
-      platformService
+      cx
         .from("connectdex_applications")
         .select("id, company_name, contact_name, email, phone, city, state, category, message, created_at")
         .eq("status", "PENDING")
         .order("created_at", { ascending: true }),
-      platformService
+      cx
         .from("companies")
         .select("id, name, public_id, gstin, pan, address_line1, city, state, email, phone")
         .eq("status", "PENDING_VERIFICATION"),
-      platformService.from("companies").select("id, name, public_id").eq("status", "PENDING_PAYMENT"),
-      platformService.from("connectdex_settings").select("onboarding_fee_paise").eq("id", true).maybeSingle(),
-      platformService.from("companies").select("id, name, public_id, tier").eq("status", "ACTIVE").order("name"),
+      cx.from("companies").select("id, name, public_id").eq("status", "PENDING_PAYMENT"),
+      cx.from("connectdex_settings").select("onboarding_fee_paise").eq("id", true).maybeSingle(),
+      cx.from("companies").select("id, name, public_id, tier").eq("status", "ACTIVE").order("name"),
     ]);
 
   return (

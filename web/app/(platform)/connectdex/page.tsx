@@ -1,9 +1,7 @@
 import NextLink from "next/link";
 import { Column, Grid, Stack, Tag, Tile } from "@carbon/react";
-import { createClient as createWebClient } from "../../../lib/supabase/server";
 import { createClient as createPlatformClient } from "../../../lib/platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
-import { LinkIdentityForm } from "../../../components/aorms/platform/LinkIdentityForm";
 import { PlatformAuthCta } from "../../../components/aorms/platform/PlatformAuthCta";
 import { JoinCompanyForm } from "../../../components/aorms/platform/company/JoinCompanyForm";
 import { LeaveCompanyButton } from "../../../components/aorms/platform/company/LeaveCompanyButton";
@@ -16,11 +14,20 @@ type CompanyEmbed = { id: string; name: string; public_id: string } | null;
  * My ConnectDeX Companies — the ConnectDeX Portal's own landing page
  * (2026-09-10), split out of app/(platform)/identity/page.tsx's old
  * "Companies" section once Identity became Studio-only (see
- * docs/esti/AORMS-PLATFORM-ARCHITECTURE.md § Three portals). Same
- * personal-account-resolution shape as identity/page.tsx (Office Hub
- * session → profiles.platform_public_id → platform account) — this is
- * still the one AORMS-U- identity a person has, just showing their
- * Company memberships instead of Studio ones.
+ * docs/esti/AORMS-PLATFORM-ARCHITECTURE.md § Three portals).
+ *
+ * **2026-09-14 rewrite — Company/ConnectDeX identity split (platform
+ * migration 0024):** this page used to resolve the caller via the Office
+ * Hub session → profiles.platform_public_id → `accounts` (the same
+ * portable-identity link Studio pages use) — that's no longer correct.
+ * Company membership now lives on its own `company_accounts` identity
+ * (AORMS-CU-), resolved from the AORMS Platform's OWN session directly
+ * (createPlatformClient, same as getCurrentPlatformSessionAccount() does
+ * for Studio/staff — see lib/platform/account.ts), with no Office Hub link
+ * involved at all. A Company identity is only ever minted via an admin's
+ * ConnectDeX invite (adminInviteConnectDexApplication), never self-signup,
+ * so an AORMS Identity/Studio account and a Company account are always two
+ * separate logins — the explicit, accepted tradeoff of the split.
  *
  * Creating a brand-new Company is no longer instant self-serve — it goes
  * through the gated ConnectDeX onboarding pipeline
@@ -30,45 +37,18 @@ type CompanyEmbed = { id: string; name: string; public_id: string } | null;
  * (JoinCompanyForm, same as before).
  */
 export default async function ConnectDexPage() {
-  const webSupabase = await createWebClient();
+  const platformSupabase = await createPlatformClient();
   const {
-    data: { user },
-  } = await webSupabase.auth.getUser();
-  const { data: profile } = await webSupabase
-    .from("profiles")
-    .select("platform_public_id")
-    .eq("id", user?.id ?? "")
-    .maybeSingle();
-
-  const handle = profile?.platform_public_id ?? null;
+    data: { user: platformUser },
+  } = await platformSupabase.auth.getUser();
 
   const platformService = createPlatformServiceRoleClient();
-  const { data: account } = handle
-    ? await platformService
-        .from("accounts")
-        .select("id, public_id, full_name")
-        .eq("public_id", handle)
-        .maybeSingle()
+  const cx = platformService.schema("connectdex");
+  const { data: companyAccount } = platformUser
+    ? await cx.from("company_accounts").select("id, public_id, full_name").eq("id", platformUser.id).maybeSingle()
     : { data: null };
 
-  const isStaleLink = !!handle && !account;
-
-  if (!account) {
-    const platformSupabase = await createPlatformClient();
-    const {
-      data: { user: platformUser },
-    } = await platformSupabase.auth.getUser();
-
-    let knownHandle: string | undefined;
-    if (platformUser) {
-      const { data: sessionAccount } = await platformSupabase
-        .from("accounts")
-        .select("public_id")
-        .eq("id", platformUser.id)
-        .maybeSingle();
-      knownHandle = sessionAccount?.public_id ?? undefined;
-    }
-
+  if (!platformUser || !companyAccount) {
     return (
       <>
         <ConnectDexPortalHeader />
@@ -76,29 +56,22 @@ export default async function ConnectDexPage() {
           <Column sm={4} md={8} lg={8}>
             <PageHeader
               title="ConnectDeX"
-              description={
-                <>
-                  Link your AORMS Identity first — company membership belongs to your portable AORMS-U- account.{" "}
-                  {isStaleLink ? "Linked handle no longer resolves." : "Not linked to this login yet."}
-                </>
-              }
+              description="Sign in with your AORMS Company account — a separate login from an AORMS Identity/Studio account."
             />
             <Tile>
               <Stack gap={5}>
-                {isStaleLink && (
-                  <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
-                    Previously linked to <strong>{handle}</strong>, which no longer exists on the AORMS Platform.
-                    Link a different (or newly re-created) identity below.
-                  </p>
-                )}
-                {knownHandle ? (
-                  <p className="cds--type-body-01">
-                    You&apos;re signed in to the AORMS Platform as <strong>{knownHandle}</strong>.
-                  </p>
-                ) : (
+                {!platformUser ? (
                   <PlatformAuthCta />
+                ) : (
+                  <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
+                    You&apos;re signed in to the AORMS Platform, but not with a Company account — Company (ConnectDeX)
+                    membership needs its own login, separate from any AORMS Identity/Studio account. Apply below, or ask an
+                    AORMS admin to invite your company email.
+                  </p>
                 )}
-                <LinkIdentityForm knownHandle={knownHandle} />
+                <NextLink href="/connectdex-apply" className="cds--link">
+                  Apply to become a ConnectDeX Partner →
+                </NextLink>
               </Stack>
             </Tile>
           </Column>
@@ -107,10 +80,10 @@ export default async function ConnectDexPage() {
     );
   }
 
-  const { data: companyMemberships } = await platformService
+  const { data: companyMemberships } = await cx
     .from("company_memberships")
     .select("id, role, status, companies(id, name, public_id)")
-    .eq("account_id", account.id)
+    .eq("account_id", companyAccount.id)
     .neq("status", "LEFT")
     .order("created_at", { ascending: true });
 
