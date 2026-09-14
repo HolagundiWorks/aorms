@@ -257,17 +257,17 @@ export default async function LandingPage() {
               <TodaysBriefingPanel />
             </Column>
 
-            {/* KPI-tile anatomy diagram (explicit follow-up request) —
-                explains each visual part of a KPI tile with leader
-                lines, and what it maps to in Carbon's own primitives/
-                type tokens (Carbon has no official "KPI card" component;
-                this is a composition of Tile + type tokens + semantic
-                color, same as the real product's own KpiTile.tsx). */}
+            {/* KPI-tile anatomy diagram (explicit follow-up request,
+                narrowed same day to just the alert line + how a glance
+                reads it) — Carbon has no official "KPI card" component;
+                this is a composition of Tile + semantic color tokens,
+                same as the real product's own KpiTile.tsx. */}
             <Column sm={4} md={8} lg={16} style={{ marginTop: "3rem" }}>
               <h3 className="cds--type-productive-heading-03">How to read a Pulse KPI tile.</h3>
               <p className="cds--type-body-01" style={{ marginTop: "0.5rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
-                Every tile above — and every KPI tile across AORMS, not just Pulse — follows this same anatomy, built entirely
-                from stock Carbon Design System primitives rather than a bespoke card design.
+                Every tile above — and every KPI tile across AORMS, not just Pulse — carries the same alert line along its
+                top edge, built entirely from stock Carbon Design System semantic color tokens rather than a bespoke
+                indicator.
               </p>
               <div style={{ marginTop: "1.5rem", maxWidth: 800 }}>
                 <KpiAnatomyDiagram />

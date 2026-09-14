@@ -27,6 +27,16 @@
  * toward `TOTAL_LEAKAGE_PCT` and the totals below — the prior request
  * ("merge the cost overrun with it") was to fold its contribution into
  * the aggregate, not to give it a standalone card.
+ *
+ * The totals block used to sit as its own full-width row underneath the
+ * cause grid, which (5 cause tiles, an even-ish `auto-fit` CSS grid)
+ * left a real phantom empty cell next to "Manual timesheet entries" —
+ * the same composition bug class already fixed once this session on
+ * TodaysBriefingPanel.tsx. Same fix here (2026-09-14 follow-up: "move
+ * the tile from bottom to the place [the empty cell]"): flex-wrap
+ * instead of CSS grid, and the totals block is now one of the wrapped
+ * items (a wider one) rather than a separate row, so it fills that
+ * space instead of leaving it blank.
  */
 import { useMemo, useState } from "react";
 import { NumberInput, Tile } from "@carbon/react";
@@ -85,9 +95,9 @@ export function OperationalLeakageCalculator() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(15rem, 1fr))", gap: "1rem", marginTop: "1.5rem" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginTop: "1.5rem" }}>
         {tileRows.map((cause) => (
-          <Tile key={cause.title}>
+          <Tile key={cause.title} style={{ flex: "1 1 15rem" }}>
             <p className="cds--type-productive-heading-02">{cause.title}</p>
             <p className="cds--type-body-01" style={{ marginTop: "0.375rem", color: "var(--cds-text-secondary)" }}>
               {cause.body}
@@ -102,36 +112,39 @@ export function OperationalLeakageCalculator() {
             </div>
           </Tile>
         ))}
-      </div>
 
-      <div
-        style={{
-          marginTop: "1.5rem",
-          border: "1px solid var(--cds-border-subtle)",
-          borderLeft: "3px solid var(--cds-support-info)",
-          background: "var(--cds-layer)",
-          padding: "1.25rem",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "0.75rem",
-        }}
-      >
-        <div>
-          <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
-            Operational leakage on a project like this — {TOTAL_LEAKAGE_PCT}% of hours worked
-          </p>
-          <p className="cds--type-heading-04" style={{ marginTop: "0.25rem" }}>
-            {Math.round(totalHours)} hrs · {formatInr(totalCost)}
+        {/* Totals — a wrapped flex item like the cause tiles above, not a
+            separate full-width row, so it fills the row's remaining
+            space instead of leaving a phantom empty cell beside it. */}
+        <div
+          style={{
+            flex: "2 1 30rem",
+            border: "1px solid var(--cds-border-subtle)",
+            borderLeft: "3px solid var(--cds-support-info)",
+            background: "var(--cds-layer)",
+            padding: "1.25rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "0.75rem",
+          }}
+        >
+          <div>
+            <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+              Operational leakage on a project like this — {TOTAL_LEAKAGE_PCT}% of hours worked
+            </p>
+            <p className="cds--type-heading-04" style={{ marginTop: "0.25rem" }}>
+              {Math.round(totalHours)} hrs · {formatInr(totalCost)}
+            </p>
+          </div>
+          <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", maxWidth: 320 }}>
+            This is what AORMS gives back — replacing manual timesheet entry, priority-guessing, and status-chasing meetings with a tracked, single operating record.
           </p>
         </div>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", maxWidth: 320 }}>
-          This is what AORMS gives back — replacing manual timesheet entry, priority-guessing, and status-chasing meetings with a tracked, single operating record.
-        </p>
       </div>
 
-      <p className="cds--type-caption-01" style={{ marginTop: "1rem", color: "var(--cds-text-secondary)" }}>
+      <p className="cds--type-caption-01" style={{ marginTop: "1.5rem", color: "var(--cds-text-secondary)" }}>
         {ROI_DISCLAIMER}
       </p>
     </div>
