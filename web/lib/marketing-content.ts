@@ -31,6 +31,15 @@ export const AORMS_PLATFORM = {
   heroHeadline: "The Command Center for Architecture Practice.",
   heroSupport:
     "Built for architects, not adapted from generic project software. Every client, project, fee, and drawing lives on one record — precise, cross-referenced, and always current. Web-based, cloud-only. Developed for architecture practices in India.",
+  /**
+   * SEO meta description (2026-09-14 audit) — separate from
+   * `heroSupport` above, which is 243 characters and would be truncated
+   * mid-sentence in a Google result (~155-160 char practical limit).
+   * Kept to 154 chars, front-loads the product category + audience +
+   * flagship features for the SERP snippet.
+   */
+  metaDescription:
+    "AORMS is the office management system built for architecture practices — clients, projects, billing, and GST-compliant invoicing on one hub.",
 } as const;
 
 export const ESTI = {
@@ -39,41 +48,6 @@ export const ESTI = {
   summary:
     "Built-in office automation — answers only from validated firm repositories; recommendations, insights, task automation, document generation.",
 } as const;
-
-/**
- * Illustrative examples of what ESTI surfaces on a real studio's
- * dashboard — shown as floating notice cards around the hero (2026-09-10,
- * moved there from a preview modal on the Intelligence section per
- * feedback: separate floating elements, not one grouped dialog).
- * Placeholder content, not real data from any studio: a round billing
- * figure, a generic staff name, and the same demo project name ("Sharma
- * Residence Extension") used throughout this repo's own QA/test history
- * — chosen deliberately over inventing a new one, same "don't fabricate
- * specifics" posture as TRUST_STRIP above. `kind` picks both the icon
- * (HeroFloatingNotices.tsx) and the Carbon semantic color.
- */
-export const HERO_FLOATING_NOTICES = [
-  {
-    kind: "billing",
-    title: "Billing",
-    text: "₹1,56,000 ready to be billed this month",
-  },
-  {
-    kind: "workload",
-    title: "Workload",
-    text: "Team workload needs balancing",
-  },
-  {
-    kind: "leave",
-    title: "Team",
-    text: "Ar. Akash is on leave today",
-  },
-  {
-    kind: "inspection",
-    title: "Site Inspection",
-    text: "Sharma Residence Extension — 18 Sep, 10:00 AM",
-  },
-] as const;
 
 /**
  * "ConnectDeX Partners" (2026-09-10) — a landing-page product name for the
@@ -134,87 +108,201 @@ export const TRUST_STRIP = [
   "No metered AI billing",
 ] as const;
 
-export const BRIEF = [
-  {
-    n: "01",
-    title: "One record, not a folder per app",
-    body: "Clients, projects, proposals, and invoices linked on one record — a fee proposal references its project, an invoice references its proposal and phase. Nothing re-typed, nothing drifts out of sync.",
-  },
-  {
-    n: "02",
-    title: "Written for how a practice actually bills",
-    body: "COA fee scales, phase-wise billing against work stages, GST/TDS on professional fees, client approval gates before a rupee is invoiced — the domain logic is architecture, not adapted from a generic project template.",
-  },
-  {
-    n: "03",
-    title: "Your drawings, your data, your infrastructure",
-    body: "Firm data stays in your environment; nothing trains a third-party model. The built-in AI (ESTI) answers only from your own firm's records — never a public model guessing at your practice.",
-  },
-] as const;
-
-export const SPECIFICATION = [
-  { code: "M-01", title: "Clients & Leads", body: "CRM with interaction log, tender tracking, portal access" },
-  { code: "M-02", title: "Projects", body: "Phases, tasks, milestones, moodboards, delivery tracking" },
-  { code: "M-03", title: "Proposals & Contracts", body: "Unified proposals with client approval gates and versioning" },
-  { code: "M-04", title: "Invoicing & Finance", body: "GST-compliant invoicing, reconciliation, cash book, reports" },
-  { code: "M-05", title: "Team & HR", body: "Roster, assignments, leaves, payroll, performance scoring" },
-  { code: "M-06", title: "Estimation & BBS", body: "Rate books, priced BOQ, IS 456 bar bending schedules" },
-] as const;
-
-export const FEE_PROPOSAL = [
-  {
-    eyebrow: "Scope",
-    title: "Every plan, the same hub",
-    body: "Trial, Pro, and Enterprise all run the same office hub — clients, projects, proposals, invoices, team, knowledge bank, delivery tracking. Plans differ in team size and support, never in which features you can reach.",
-  },
-  {
-    eyebrow: "Basis of fee",
-    title: "One flat fee, no per-seat billing",
-    body: "One licence per studio, a flat annual fee — managed from your own AORMS Identity — start on Trial, upgrade in-app when you're ready. No edition lock-in, no separate module purchases, no per-seat math.",
-  },
-  {
-    eyebrow: "Exclusions",
-    title: "No metered AI",
-    body: "ESTI runs on the hub against your firm's own data — no per-token billing, no bring-your-own key needed, on every plan including Trial.",
-  },
-] as const;
+/**
+ * Dedicated feature section, hero-adjacent (2026-09-14, explicit
+ * direction: "below hero section let's have a dedicated feature
+ * section"). Billing forecast reads task progress already recorded
+ * against a project (per-task % complete, tied to a phase's fee) and
+ * projects two numbers from it: what's already earned but not yet
+ * invoiced, and what's still short of billable. Not a live figure here —
+ * `BillingForecastPanel`'s sample uses the same placeholder project name
+ * as the hero record chain and TRUST_STRIP's posture: illustrative, not
+ * a real firm's data.
+ */
+export const BILLING_FORECAST = {
+  eyebrow: "Feature",
+  title: "Know what's billable before month-end.",
+  body: "Every task carries progress against its phase's fee. AORMS reads that progress across a project and predicts two numbers as work happens — not at invoice time: what's already earned but not yet billed, and what's still short of the next milestone.",
+  points: [
+    {
+      title: "Progress-linked, not a guess",
+      body: "The forecast is computed from actual task completion recorded in the portal — the same numbers your team already updates, not a separate estimate to maintain.",
+    },
+    {
+      title: "Updates as work happens",
+      body: "Mark a task done and the billable-so-far figure moves with it — no waiting for month-end to find out what's ready to invoice.",
+    },
+    {
+      title: "One phase or the whole project",
+      body: "See the prediction per phase, or rolled up across every active project — the same view a running bill or invoice draws from.",
+    },
+  ],
+} as const;
 
 /**
- * Real prices (2026-09-14) — plan_pricing on the AORMS Platform
- * (platform/supabase/migrations/0018_identity_verification_pro_seats_
- * connectdex_tiers.sql, 0019_studio_pro_enterprise_tiers.sql). AORMS
- * Identity is free; its ₹199 is a one-time, 100-usage-hour-gated
- * verification fee, not a subscription — worded accordingly below, not
- * as "199/year" the way Pro/Enterprise's own annual fees are. ConnectDeX
- * Partners' Base Line/Pro/Pro Plus tiers (renamed from Silver/Gold/
- * Platinum) are deliberately unpriced here — explicit user direction —
- * described by feature only.
+ * Second dedicated feature section (2026-09-14, explicit direction) — the
+ * revision lifecycle: a client-requested change is tagged where it's
+ * first raised (a meeting or site visit, via Minutes of Meeting), routed
+ * to the client portal, costed and scoped by the responsible team
+ * member/lead, sent back for the client's explicit approval, and only
+ * then worked on. The point stated alongside the request: this is what
+ * stops an unauthorised change from quietly moving the budget or the
+ * design without anyone having agreed to it first.
+ */
+export const REVISION_LIFECYCLE = {
+  eyebrow: "Feature",
+  title: "Every revision, on the record before it's built.",
+  body: "A change discussed on-site or in a meeting shouldn't turn into scope creep nobody signed off on. AORMS routes every client revision through the same four-stage lifecycle — tagged, costed, approved — before a single hour is spent on it.",
+  stages: [
+    {
+      n: "01",
+      title: "Tagged in the meeting",
+      body: "Raised on a site visit or in a client meeting, the revision is tagged directly in that meeting's Minutes of Meeting — not a separate note someone has to remember to log later.",
+    },
+    {
+      n: "02",
+      title: "Sent to the client portal",
+      body: "The tagged revision posts straight to the client's portal as a change request — the client sees exactly what was discussed, in their own words, not a summary written days later.",
+    },
+    {
+      n: "03",
+      title: "Costed by the team lead",
+      body: "The assigned team member or lead acknowledges the request and adds what it actually changes — the cost difference and any further design or schedule impact — before it goes anywhere near the client's answer.",
+    },
+    {
+      n: "04",
+      title: "Approved, then worked on",
+      body: "The costed revision goes back to the client for explicit approval. Nothing is built against it until they say yes — so the budget and the design only ever move on record, never quietly.",
+    },
+  ],
+} as const;
+
+/**
+ * Third dedicated feature section (2026-09-14, explicit direction) — task
+ * prioritization and workload balance. The pitch as given: tasks pile up
+ * and become hard to triage by hand, so AORMS scores and ranks them
+ * automatically from what's already on record (a task's own progress,
+ * its due date, and site situation/urgency signals raised against it) —
+ * surfacing what to work on today instead of leaving each person to sort
+ * a growing pile themselves, and balancing that load across the team
+ * rather than letting it stack on whoever's already busiest.
+ */
+export const TASK_PRIORITIZATION = {
+  eyebrow: "Feature",
+  title: "Stop triaging the pile. Just work the list.",
+  body: "Every task already carries its own progress, due date, and any site situation raised against it. AORMS scores and ranks all of it automatically — what's urgent surfaces to the top of today's list on its own, and no one has to re-sort a growing pile by hand to find out what to do next.",
+  points: [
+    {
+      title: "Scored, not self-reported",
+      body: "Priority is computed from progress, due date, and any linked site issue or client escalation — not a number someone assigns by feel and forgets to update.",
+    },
+    {
+      title: "Today's list, already ordered",
+      body: "Open the day and the highest-priority work is already at the top — across every project someone is assigned to, not one list per project to check separately.",
+    },
+    {
+      title: "Balanced across the team",
+      body: "The same scoring that orders one person's list also shows where load is stacking up unevenly, before it turns into a bottleneck at delivery.",
+    },
+  ],
+} as const;
+
+/**
+ * Fourth dedicated feature section (2026-09-14, explicit direction) —
+ * Pulse's Today's Brief. Grounded in the real pipeline: a deterministic
+ * template (`lib/ai/phraser.ts`'s `buildDailyBriefText`) turns real
+ * Supabase queries — absences, ready-to-bill/awaiting-payment totals,
+ * open client/consultant/tender requests, pending approvals, contractor
+ * submissions, top priorities — into plain sentences, with an optional
+ * bounded Ollama rephrase for warmth only (never allowed to add a fact,
+ * name, or number that wasn't already in the deterministic text). No
+ * click needed — it's generated once when the page renders. Copy below
+ * states that pipeline honestly rather than implying free-form AI.
+ */
+export const TODAYS_BRIEFING = {
+  eyebrow: "Feature",
+  title: "Start the day already briefed.",
+  body: "Pulse opens to a brief written the moment the page loads — who's out today, what's ready to bill, what's still open across clients and consultants, and what's most urgent. Every line comes from your own studio's records; nothing is generated from a guess.",
+  points: [
+    {
+      title: "Built from real numbers first",
+      body: "A deterministic pass over your own data writes the correct sentence before any AI touches it — the brief is accurate on its own, with or without a rephrase.",
+    },
+    {
+      title: "Reworded, never invented",
+      body: "An optional AI pass may reword that same text for warmth and clarity — it's explicitly barred from adding a fact, name, or number that wasn't already there.",
+    },
+    {
+      title: "Waiting when you open it",
+      body: "No question to type, no button to click first — the brief is already written by the time Pulse loads.",
+    },
+  ],
+} as const;
+
+/**
+ * The Brief, Specification, and Fee Proposal sections were removed from
+ * the landing page (2026-09-14, explicit direction) — the old
+ * BRIEF/SPECIFICATION/FEE_PROPOSAL exports that fed them are removed
+ * here as dead code along with the sections themselves.
+ *
+ * Account packages (2026-09-14 rewrite, second pass — explicit
+ * direction: "for user basic and pro... for studio basic, pro and
+ * enterprise, for basic it's just an identity exists, to use the
+ * features pro subscription is required, for staff more than 25+
+ * enterprise comes into picture"). Two DIFFERENT profiles, not two views
+ * of the same thing (explicit follow-up: "don't confuse user profile
+ * with studio profile") — each is its own account with its own
+ * Basic/Pro state, and the two only relate one way: a Studio's own paid
+ * plan is what a Studio *grants* Pro status to its members from. A
+ * person is never billed directly and never buys their own Pro status.
+ * - `individual` — a person's own AORMS Identity account. Basic is the
+ *   identity existing with no feature access; Pro is a status on that
+ *   *same identity*, granted by whichever Studio the person works at —
+ *   there is no price a person pays here, only a status their Studio
+ *   sets.
+ * - `studio` — a completely separate account: the architecture
+ *   practice's own AORMS-S- identity. Its own Basic/Pro/Enterprise are
+ *   what the *Studio* subscribes to and pays for directly; Enterprise
+ *   applies once its staff count passes 25.
+ * This is a marketing-copy change only; it does not touch the
+ * underlying `plan_pricing` rows or the Platform's own licence machinery
+ * (platform/supabase/migrations/0018-0019) — those still exist
+ * server-side under their own naming.
  */
 export const PRICING = {
-  identity: {
-    name: "AORMS Identity",
-    price: "Free",
-    detail: "₹199 one-time — after 100 hours of active use, to permanently verify your identity. Never required, never recurring.",
-  },
-  studioPro: {
-    name: "Studio Pro",
-    price: "₹1,999/year",
-    detail: "Up to 20 team members on PRO status, the full office hub, everything in Trial plus ongoing support.",
-  },
-  studioEnterprise: {
-    name: "Studio Enterprise",
-    price: "₹14,999/year",
-    detail: "For studios with 20+ team members — effectively unlimited PRO seats, plus your own address: yourstudio.aorms.in.",
-  },
-  connectDexOnboarding: {
-    name: "ConnectDeX Partners onboarding",
-    price: "₹5,999 one-time",
-    detail: "A single onboarding fee to list your catalogue — no recurring platform fee to be found.",
-  },
-  connectDexTiers: [
-    { name: "Base Line", detail: "Company listing, up to 5 product categories." },
-    { name: "Pro", detail: "Unlimited catalogue, interactive browsing for buyers." },
-    { name: "Pro Plus", detail: "Everything in Pro, plus direct purchase-order generation and lead delivery." },
+  individual: [
+    {
+      name: "Basic",
+      price: "Free",
+      verified: false,
+      detail: "Your personal AORMS Identity exists — one AORMS-U- handle, portable across every studio you work at. No feature access on its own; it's the account, not a subscription.",
+    },
+    {
+      name: "Pro",
+      price: "A status, not a purchase",
+      verified: true,
+      detail: "The verified checkmark and full feature access on your own identity — a status the Studio you work at grants you from its own paid plan. You never buy this yourself.",
+    },
+  ],
+  studio: [
+    {
+      name: "Basic",
+      price: "Free",
+      verified: false,
+      detail: "Your Studio's own account exists — invite your team, hold the identity — but nobody on it can use the hub's features until the Studio itself is on Pro.",
+    },
+    {
+      name: "Pro",
+      price: "₹1,999/year",
+      verified: true,
+      detail: "The Studio's own subscription — unlocks the full office hub and lets the Studio grant Pro status to its members. One flat annual fee, no per-seat math.",
+    },
+    {
+      name: "Enterprise",
+      price: "₹14,999/year",
+      verified: true,
+      detail: "For Studios with 25+ staff — the same Studio-level subscription, sized for a bigger team, plus your own address: yourstudio.aorms.in.",
+    },
   ],
 } as const;
 
@@ -230,36 +318,26 @@ export const PRICING = {
  * an Individual identity once signed in, not a parallel account type you
  * choose instead of one — both sub-sections share IdentityCtas for
  * exactly that reason.
+ *
+ * Simplified 2026-09-14 (explicit direction: "simplify the identities
+ * section, and merge identities with pricing section") — trimmed to one
+ * short sentence each; the standalone Identity section and its 3-card
+ * IDENTITY array (now removed as dead code) are gone, folded into the
+ * Pricing section's own "Your Identity"/"Your Studio" groups instead —
+ * see PRICING above for the account-package detail that used to live in
+ * that array.
  */
 export const INDIVIDUAL_IDENTITY = {
   eyebrow: "Individual Identity",
   title: "You, not your employer.",
-  body: "A portable personal account — one AORMS-U- handle that's yours alone, independent of who currently employs you, and free for as long as you use it. Link it once, carry it into every practice you work at, present or future. PRO status is something your studio grants you from its own plan — not automatic, and never something you pay for yourself. After 100 hours of use, a one-time ₹199 fee permanently verifies your identity, entirely optional.",
+  body: "One portable AORMS-U- handle, yours alone — link it once and carry it into every studio you work at, present or future.",
 } as const;
 
 export const STUDIO_IDENTITY = {
   eyebrow: "Studio Identity",
   title: "Your practice's own account.",
-  body: "Your architecture practice gets its own identity too — an AORMS-S- handle, separate from any one person's login. Invite your team, manage who's an owner versus a member, and hold the Studio's own Trial/Pro/Enterprise licence — all under the Studio itself, not scattered across individual accounts. Ownership can be handed off to another member any time, in-app.",
+  body: "A separate AORMS-S- account for the practice itself — invite your team and hold the Studio's own Basic or Pro status under one identity, not scattered across individual logins.",
 } as const;
-
-export const IDENTITY = [
-  {
-    eyebrow: "Portable",
-    title: "One handle, every studio",
-    body: "Your AORMS Identity (an AORMS-U- handle) is yours, not your studio's — link it once and carry the same account into every practice you work at, present or future.",
-  },
-  {
-    eyebrow: "Granted, not automatic",
-    title: "PRO status comes from your studio",
-    body: "Every identity starts Basic and stays free either way. PRO status is something your studio grants from its own Pro/Enterprise plan — never something an individual applies for or pays for directly.",
-  },
-  {
-    eyebrow: "Licensing lives here",
-    title: "Your studio's plan, in one place",
-    body: "A studio's Trial/Pro/Enterprise licence and renewal all sit under the same Identity sign-in that manages the account itself.",
-  },
-] as const;
 
 /**
  * A second, distinct entity type from Studio above — material/interior
@@ -304,14 +382,14 @@ export const FAQ = [
       "No — AORMS is web-only, single sign-on into one office hub. No installers, no per-app logins, no separate desktop shell to maintain.",
   },
   {
-    question: "What happens when our Trial ends?",
+    question: "Is there a free plan, or do we have to start on a trial?",
     answer:
-      "Every Studio starts on a 30-day Trial, no card required. If it lapses before you upgrade, the licence shows as inactive until Pro or Enterprise is purchased — nothing is auto-charged, and nothing is deleted.",
+      "No trial — Basic is free for as long as you use it, no card and no expiry. Upgrade to Pro in-app whenever you're ready; nothing is time-boxed or auto-charged.",
   },
   {
-    question: "Is there a limit on team size?",
+    question: "What does Pro actually add?",
     answer:
-      "Pro includes up to 20 team members on PRO status; Enterprise (for studios past that size) is effectively unlimited. Either way there's no fixed cap on staff logins themselves — just on how many can hold PRO status at once, which your studio assigns from its own plan.",
+      "The same office hub, plus a verified checkmark on your Studio's identity and ongoing support — Pro never unlocks a feature Basic can't reach.",
   },
   {
     question: "Can we bring in our existing client and project data?",

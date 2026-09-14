@@ -8,8 +8,7 @@ import { Menu, Close } from "@carbon/icons-react";
 // down to 4 items) — see that file's own comment for why Brief/
 // Specification aren't separate links anymore.
 const NAV_LINKS = [
-  { href: "#identity", label: "Architect" },
-  { href: "#connectdex", label: "ConnectDeX" },
+  { href: "#pricing", label: "Architect" },
   { href: "/blog", label: "Blog" },
   { href: "/login", label: "Sign in" },
 ] as const;

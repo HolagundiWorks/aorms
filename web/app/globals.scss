@@ -90,6 +90,52 @@
 // statement in the file.
 @include type.type-classes;
 
+// Self-hosted IBM Plex (2026-09-14 CWV/SEO audit) — every `cds--type-*`
+// class and Carbon component already declares `font-family: 'IBM Plex
+// Sans'`/`'IBM Plex Mono'` (via `$css--font-face: true` in the `config`
+// @use above, which only toggles *whether* Carbon's own font tokens
+// reference these family names — it does not itself emit the @font-face
+// rules that back them). Confirmed via the compiled CSS bundle: zero
+// @font-face rules existed anywhere, so the browser silently fell back
+// to the system-ui stack in every family list — harmless for
+// performance (no webfont penalty), but the actual IBM Plex Sans
+// typeface CLAUDE.md's UI section specifies never once rendered.
+// Self-hosted from `@ibm/plex-sans`/`@ibm/plex-mono` (already a
+// transitive dependency, SIL Open Font License) via `public/fonts/`,
+// not Google Fonts or any other CDN — no third-party request added.
+// Regular/SemiBold/Bold cover every weight Carbon's own type tokens and
+// this codebase's own markup use (SemiBold for headings, Bold for the
+// odd `<strong>`); italics omitted, unused anywhere. `font-display:
+// swap` avoids blocking first paint on the font load.
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/plex-sans/IBMPlexSans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/plex-sans/IBMPlexSans-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/plex-sans/IBMPlexSans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/fonts/plex-mono/IBMPlexMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   @include theme.theme(themes.$white);
 }
@@ -348,53 +394,57 @@ body {
   }
 }
 
-// Hero floating notice cards (components/aorms/HeroFloatingNotices.tsx,
-// 2026-09-10) — hidden below Carbon's `lg` breakpoint, where the hero
-// text column (lg=12 of 16) no longer leaves room beside it without
-// overlapping the copy. The component's own root div sets no `display`
-// inline (an inline style would silently override this media-query
-// toggle, since inline styles beat a class selector without
-// `!important`) — only this class controls show/hide.
-.landing-hero-floats {
-  display: none;
+// Landing page theme (2026-09-14, explicit direction: "apply g100 theme
+// for landing page"). Scoped to `app/page.tsx`'s own root wrapper only
+// (className="cds--g100" there) — the rest of the app (office hub,
+// portals) stays on the default white theme untouched. `@carbon/react`'s
+// `Theme` component would set this same class, but it's a Client
+// Component (uses `useMemo`) and `app/page.tsx` is a Server Component
+// (needs the auth redirect before render, same RSC-boundary reasoning as
+// LandingButtons.tsx) — so the class is applied directly in markup and
+// its CSS emitted here instead. `theme.theme()` only emits the custom
+// properties themselves; `background`/`color` are set explicitly on the
+// same selector in page.tsx's wrapper because plain elements that only
+// inherit `color` from `body` (white theme) wouldn't otherwise re-resolve
+// against this subtree's overridden custom properties.
+// Horizontal masonry row for RevisionLifecyclePanel.tsx (2026-09-14) — 4
+// equal-width tiles with staggered `margin-top` offsets applied inline
+// per-item (the actual masonry effect); this class only handles the row
+// layout itself. Below Carbon's `md` breakpoint the offsets would just
+// misalign single-column content, so it collapses to a plain stacked
+// column with every item's offset zeroed out.
+.revision-masonry {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
 }
 
-@media (min-width: 66rem) {
-  .landing-hero-floats {
-    display: block;
+.revision-masonry-item {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+@media (max-width: 42rem) {
+  .revision-masonry {
+    flex-direction: column;
+  }
+
+  .revision-masonry-item {
+    margin-top: 0 !important;
+    height: auto !important;
   }
 }
 
-// Animated card-stack cycle for the hero floats — four nearly-identical
-// keyframes (one per card, `heroCardCycle0`–`3`), each just a fanned
-// "receded" rotation/offset baked in per card plus a shared "front" peak
-// state, all sharing one timing shape: 0%→6% pop to front, 6%→19% hold,
-// 19%→25% settle back, 25%→100% hold receded (== the 0% value, so the
-// loop point is seamless). Each card's `animation-delay` in the
-// component (a negative offset of a quarter-cycle × its index) phase-
-// shifts the same shape so exactly one card is "front" at a time,
-// cycling through all four. `z-index` isn't smoothly interpolable — it
-// just flips near the scale/opacity transition, which reads fine here.
-@keyframes heroCardCycle0 {
-  0%, 25%, 100% { transform: rotate(-6deg) translate(-0.6rem, 0.3rem) scale(0.92); opacity: 0.65; z-index: 1; }
-  6%, 19% { transform: rotate(0deg) translate(0, -0.4rem) scale(1.05); opacity: 1; z-index: 10; }
-}
-@keyframes heroCardCycle1 {
-  0%, 25%, 100% { transform: rotate(-2deg) translate(-0.2rem, 0.15rem) scale(0.92); opacity: 0.65; z-index: 2; }
-  6%, 19% { transform: rotate(0deg) translate(0, -0.4rem) scale(1.05); opacity: 1; z-index: 10; }
-}
-@keyframes heroCardCycle2 {
-  0%, 25%, 100% { transform: rotate(2deg) translate(0.2rem, 0.05rem) scale(0.92); opacity: 0.65; z-index: 3; }
-  6%, 19% { transform: rotate(0deg) translate(0, -0.4rem) scale(1.05); opacity: 1; z-index: 10; }
-}
-@keyframes heroCardCycle3 {
-  0%, 25%, 100% { transform: rotate(6deg) translate(0.6rem, -0.05rem) scale(0.92); opacity: 0.65; z-index: 4; }
-  6%, 19% { transform: rotate(0deg) translate(0, -0.4rem) scale(1.05); opacity: 1; z-index: 10; }
-}
+.cds--g100 {
+  @include theme.theme(themes.$g100);
 
-@media (prefers-reduced-motion: reduce) {
-  .landing-hero-card {
-    animation: none !important;
+  // The wordmark PNG (aorms-logo.png) is a dark navy mark on a
+  // transparent background — nearly invisible against g100's near-black
+  // background. No light-on-dark variant of the asset exists yet, so
+  // invert it to a flat white mark within this theme scope only; the
+  // white theme's own header/footer logos are untouched.
+  img[alt="AORMS"] {
+    filter: brightness(0) invert(1);
   }
 }
 

@@ -27,6 +27,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
       priority: 0.5,
     })),
+    // ConnectDeX Partners' full marketing content, and the Legal route
+    // group (2026-09-14) — added alongside the landing page changes that
+    // introduced them: /connectdex-partners (moved off the landing
+    // page's own #connectdex teaser), /privacy and /legal (new).
+    { url: `${base}/connectdex-partners`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${base}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${base}/legal`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/login`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     // Moved off the main domain onto their own subdomain (2026-09-10, see
     // lib/platform/subdomains.ts) — identity.aorms.in is the canonical

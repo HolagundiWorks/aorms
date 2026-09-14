@@ -46,6 +46,16 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-IN">
+      <head>
+        {/* Preload the one font weight nearly every element on first
+            paint needs (body text renders at 400) — self-hosted
+            IBM Plex Sans, see globals.scss's @font-face block for why
+            this exists at all (2026-09-14 CWV/SEO audit). SemiBold/Bold/
+            mono aren't preloaded: they're each used on a smaller share
+            of first-paint content, so preloading them too would compete
+            with this one for bandwidth rather than help LCP. */}
+        <link rel="preload" href="/fonts/plex-sans/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+      </head>
       <body>{children}</body>
     </html>
   );

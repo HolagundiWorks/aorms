@@ -24,6 +24,11 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   }
 
   return {
+    // 2026-09-14 SEO audit: robots.txt didn't point at the sitemap at
+    // all before this — crawlers can still discover it via Search
+    // Console submission, but declaring it here is the standard,
+    // zero-cost way to help them find it on the first crawl.
+    sitemap: "https://aorms.in/sitemap.xml",
     rules: {
       userAgent: "*",
       allow: "/",

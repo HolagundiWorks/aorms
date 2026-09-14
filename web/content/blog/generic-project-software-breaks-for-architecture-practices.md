@@ -1,6 +1,6 @@
 ---
 title: Why generic project software breaks for architecture practices
-description: Fee scales, phase-wise billing, and GST on professional fees aren't edge cases for an architecture practice — they're the whole job. Most project tools treat them as an afterthought.
+description: Fee scales, phase-wise billing, and GST on professional fees aren't edge cases for an architecture practice — they're the whole job.
 date: 2026-09-05
 ---
 

@@ -57,28 +57,23 @@ export function LandingHeader() {
         {/* Simplified to 4 items with literal "|" separators (2026-09-10,
             explicit direction: "Architect | ConnectDeX | Blog | Signin")
             — was 6 separate links (Brief/Specification/Identity/For
-            Suppliers/Blog/Sign in). "Architect" points at #identity (the
-            architect-facing Individual/Studio explanation) and
-            "ConnectDeX" at #connectdex (renamed from #company/"For
-            Suppliers" — see marketing-content.ts's CONNECTDEX constant) —
-            the two now read as a deliberate pair: one link per audience
-            this Platform actually serves. Brief/Specification are still
-            real sections on the page, just no longer linked directly from
-            the header; a visitor reaches them by scrolling or via
-            #identity's own surrounding content. */}
+            Suppliers/Blog/Sign in), later reduced further as those
+            sections were removed/merged (2026-09-14). "Architect" points
+            at #pricing (the merged Identity & Pricing section — the old
+            standalone #identity section it used to point at was folded
+            in there the same date). "ConnectDeX" removed 2026-09-14
+            (explicit direction) — the #connectdex section itself is kept
+            (a small teaser, moved to last on the page, right before the
+            footer), just no longer linked from the nav; a visitor
+            reaches it by scrolling, or via the footer's own ConnectDeX
+            Partners column. */}
         <nav
           aria-label="Landing page sections"
           className="landing-nav-desktop"
           style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}
         >
-          <Link href="#identity" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
+          <Link href="#pricing" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             Architect
-          </Link>
-          <span aria-hidden className="cds--type-body-01" style={{ color: "var(--cds-border-subtle)" }}>
-            |
-          </span>
-          <Link href="#connectdex" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
-            ConnectDeX
           </Link>
           <span aria-hidden className="cds--type-body-01" style={{ color: "var(--cds-border-subtle)" }}>
             |

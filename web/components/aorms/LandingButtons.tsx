@@ -15,47 +15,39 @@ import { Button } from "@carbon/react";
 import { ArrowRight } from "@carbon/icons-react";
 import { portalUrl } from "../../lib/platform/subdomains";
 
-export function HeroCtas() {
-  return (
-    <div style={{ display: "flex", gap: "1rem", marginTop: "2rem", flexWrap: "wrap", alignItems: "center" }}>
-      <Button as={Link} href="/login" renderIcon={ArrowRight}>
-        Sign in
-      </Button>
-      <Button kind="tertiary" href="#specification">
-        Read the specification
-      </Button>
-    </div>
-  );
-}
-
+/**
+ * All landing-page sign-in/signup CTAs, consolidated into this one
+ * component (2026-09-14, explicit direction: "move all the login,
+ * signup and other CTA to this section" — the CTA band headlined "Bring
+ * the practice onto one hub."). Previously split three ways: HeroCtas
+ * (Sign in + a "see more" scroll link) in the hero, IdentityCtas
+ * (Create Identity / Identity sign-in) in the Identity & Pricing
+ * section, and this component's own office-hub Sign in + Talk to HCW.
+ * HeroCtas is removed entirely (the hero now carries no CTA of its own);
+ * IdentityCtas' two buttons are folded in here alongside the originals.
+ * The office-hub `/login` and the Identity portal's `/platform-login`/
+ * `/platform-signup` (see docs/esti/AORMS-PLATFORM-ARCHITECTURE.md)
+ * stay separate targets — different logins, not the same sign-in.
+ */
 export function BandCtas() {
   return (
-    <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
-      <Button as={Link} href="/login" renderIcon={ArrowRight}>
-        Sign in
-      </Button>
-      <Button kind="ghost" href="mailto:hi@aorms.in">
-        Talk to HCW
-      </Button>
-    </div>
-  );
-}
-
-/**
- * The Identity section's own CTAs — a separate portal/login from the
- * office hub's own (`/platform-signup`, `/platform-login`; see
- * docs/esti/AORMS-PLATFORM-ARCHITECTURE.md), so deliberately not reusing
- * HeroCtas/BandCtas's `/login` target.
- */
-export function IdentityCtas() {
-  return (
-    <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
-      <Button as={Link} href={portalUrl("identity", "/platform-signup")} renderIcon={ArrowRight}>
-        Create your AORMS Identity
-      </Button>
-      <Button kind="tertiary" as={Link} href={portalUrl("identity", "/platform-login")}>
-        Already have one? Sign in
-      </Button>
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1.5rem", alignItems: "flex-start" }}>
+      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+        <Button as={Link} href="/login" renderIcon={ArrowRight}>
+          Sign in
+        </Button>
+        <Button kind="ghost" href="mailto:hi@aorms.in">
+          Talk to HCW
+        </Button>
+      </div>
+      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+        <Button kind="tertiary" as={Link} href={portalUrl("identity", "/platform-signup")} renderIcon={ArrowRight}>
+          Create your AORMS Identity
+        </Button>
+        <Button kind="ghost" as={Link} href={portalUrl("identity", "/platform-login")}>
+          Already have one? Sign in
+        </Button>
+      </div>
     </div>
   );
 }
