@@ -22,21 +22,29 @@ function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
 }
 
-export default async function TeamMembersPage() {
-  const supabase = await createClient();
-
+async function resolveIsOwner(supabase: Awaited<ReturnType<typeof createClient>>): Promise<boolean> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
   const { data: profile } = user
     ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
     : { data: null };
-  const isOwner = profile?.role === "OWNER";
+  return profile?.role === "OWNER";
+}
 
-  const { data: members, error } = await supabase
-    .from("team_members")
-    .select("id, name, role, job_title, employment_type, monthly_salary_paise, active")
-    .order("name");
+export default async function TeamMembersPage() {
+  const supabase = await createClient();
+
+  // The role-lookup chain (for isOwner, UI-gating only) and the
+  // team_members list don't depend on each other — run them together
+  // instead of the role lookup blocking the list fetch.
+  const [isOwner, { data: members, error }] = await Promise.all([
+    resolveIsOwner(supabase),
+    supabase
+      .from("team_members")
+      .select("id, name, role, job_title, employment_type, monthly_salary_paise, active")
+      .order("name"),
+  ]);
 
   const rows = members ?? [];
   const activeCount = rows.filter((m) => m.active).length;

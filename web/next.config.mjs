@@ -24,6 +24,34 @@
  * Next 16.3. webpack's sass-loader resolves the same imports without issue.
  * Retry Turbopack (drop --webpack) next time Next.js/Turbopack is bumped.
  */
+// 2026-09-14 — Content-Security-Policy, built from what the app actually
+// loads: Razorpay's checkout script/iframe (the only third-party script
+// this app loads at all — see lib/platform/razorpay.ts), Supabase Storage
+// for photo/certificate/drawing signed URLs (both cloud projects,
+// *.supabase.co), and no external fonts (self-hosted, see globals.scss).
+// `style-src 'unsafe-inline'` is required, not an oversight: Next.js and
+// Carbon both emit inline `<style>`/`style=` at runtime (this app's own
+// pervasive inline `style={{...}}` prop usage included) — a nonce-based
+// style CSP is a real follow-up, not a same-pass fix. A plain function
+// (not a method on `nextConfig`) so it doesn't depend on `this` binding,
+// which Next's config loader isn't guaranteed to preserve.
+function buildCspHeader(reportOnly) {
+  const directives = [
+    "default-src 'self'",
+    "script-src 'self' https://checkout.razorpay.com",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https://*.supabase.co",
+    "font-src 'self'",
+    "connect-src 'self' https://*.supabase.co https://api.razorpay.com https://lumberjack.razorpay.com",
+    "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+  ];
+  return { key: reportOnly ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy", value: directives.join("; ") };
+}
+
 const nextConfig = {
   reactStrictMode: true,
   // 2026-09-13: Next 16's dev server only trusts its own "Local:" host
@@ -41,6 +69,14 @@ const nextConfig = {
   sassOptions: {
     includePaths: ["./styles"],
   },
+  // 2026-09-14 — lets next/image optimize the one real user-uploaded
+  // content image in the app (AccountPhotoUpload.tsx's profile photo, a
+  // signed Storage URL). Wildcarded to cover both cloud Supabase projects
+  // (aorms-web, aorms-platform each have their own *.supabase.co host)
+  // rather than hardcoding either ref, matching the CSP's img-src above.
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "*.supabase.co" }],
+  },
   experimental: {
     // Server Actions default to a 1MB body — too small for the drawings
     // upload Server Action (DRAWING_MAX_BYTES is 25MB, matching the old
@@ -51,15 +87,22 @@ const nextConfig = {
     },
   },
   // Baseline security headers (2026-09-09 hosting-prep audit — none existed
-  // before this). Applied to every response. Deliberately NOT including a
-  // Content-Security-Policy here: this app renders six distinct route
-  // groups (office hub, three external portals, the platform identity app,
+  // before this). Applied to every response.
+  //
+  // 2026-09-14 — Content-Security-Policy added, in Report-Only mode first.
+  // The 2026-09-09 comment above (kept for history, no longer current)
+  // deferred a CSP entirely: this app renders six distinct route groups
+  // (office hub, three external portals, the platform identity app,
   // marketing) with dynamic Supabase Storage asset URLs and Server-Action
   // form submissions throughout, and a hand-authored CSP wrong in any one
   // of those surfaces fails silently (a blocked resource, not a build
-  // error) — shipping one untested is worse than shipping none. Add a CSP
-  // as its own follow-up, page-by-page verified in the browser, not bundled
-  // into this pass.
+  // error) — shipping one untested is worse than shipping none. Report-Only
+  // ships the exact intended policy without blocking anything, so it can be
+  // verified live (browser console, zero unexpected violations, across
+  // login/an Office Hub page/a Platform portal page/a Razorpay checkout)
+  // before a follow-up flips this to the enforcing `Content-Security-
+  // Policy` header.
+  //
   async headers() {
     return [
       {
@@ -80,6 +123,13 @@ const nextConfig = {
           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
           // Lock off browser features this app never uses.
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          // Blocks a same-origin window opened by this app (e.g. a
+          // Razorpay popup) from getting a JS handle back on this page's
+          // window — safe to add directly (unlike COEP/CORP, it doesn't
+          // touch cross-origin *resource* loading, so it can't break the
+          // Supabase Storage images this app already loads cross-origin).
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          buildCspHeader(true),
         ],
       },
     ];

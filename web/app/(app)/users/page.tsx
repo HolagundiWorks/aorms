@@ -53,23 +53,24 @@ import { MyCalendarFeedButton } from "../../../components/aorms/MyCalendarFeedBu
  * (2026-09-09) — was a permanently inline form above the table before.
  */
 const STAFF_ROLES = ["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE", "VIEWER", "SITE_SUPERVISOR"];
+
 export default async function UsersPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: myProfile } = user
-    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
-    : { data: null };
+  // My own role (for isOwner, UI-gating only) and the staff directory
+  // list don't depend on each other (only on `user.id`, already known
+  // above) — run them together instead of one blocking the other.
+  const [{ data: myProfile }, { data: profiles, error }] = await Promise.all([
+    user
+      ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+      : Promise.resolve({ data: null as { role: string } | null }),
+    supabase.from("profiles").select("id, full_name, role, disabled").in("role", STAFF_ROLES).order("full_name"),
+  ]);
 
   const isOwner = myProfile?.role === "OWNER";
-
-  const { data: profiles, error } = await supabase
-    .from("profiles")
-    .select("id, full_name, role, disabled")
-    .in("role", STAFF_ROLES)
-    .order("full_name");
 
   const rows = profiles ?? [];
   const activeCount = rows.filter((p) => !p.disabled).length;

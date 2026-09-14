@@ -101,8 +101,16 @@ export const config = {
     /*
      * Match all request paths except:
      * - _next/static, _next/image (Next internals)
-     * - favicon.ico, images
+     * - favicon.ico, images, and fonts
+     *
+     * 2026-09-14 — font extensions added: `updateSession()` below does a
+     * real Supabase network call (JWT validation, sometimes a token
+     * refresh) on every matched request. `public/fonts/*.woff2` isn't
+     * under `_next/static` (it's a static file served straight from
+     * `public/`), so it was silently matching and paying that cost on
+     * the font-preload request too, for zero benefit (a font file has no
+     * session to refresh).
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|otf)$).*)",
   ],
 };

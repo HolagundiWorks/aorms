@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useRef } from "react";
+import Image from "next/image";
 import { Button, InlineNotification } from "@carbon/react";
 import { Upload } from "@carbon/icons-react";
 import { uploadAccountPhoto, type AccountProfileActionState } from "../../../lib/actions/account-profile";
@@ -30,8 +31,13 @@ export function AccountPhotoUpload({ photoUrl }: { photoUrl: string | null }) {
           flexShrink: 0,
         }}
       >
-        {/* Plain <img>, not next/image — a signed Storage URL, not a static/optimizable asset. */}
-        {photoUrl && <img src={photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+        {/* 2026-09-14 — switched to next/image (images.remotePatterns in
+            next.config.mjs allows *.supabase.co): the only real user-
+            content image in the app (every other <img> in this codebase
+            is a small fixed brand asset) — this one is a full-resolution
+            upload shrunk into a 64px avatar purely via CSS before this,
+            downloading far more bytes than the avatar ever displays. */}
+        {photoUrl && <Image src={photoUrl} alt="" width={64} height={64} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
       </div>
       <div>
         <input
