@@ -4,13 +4,17 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, Close } from "@carbon/icons-react";
 
-// Kept in sync with LandingHeader.tsx's desktop nav (2026-09-10 rebrand
-// down to 4 items) — see that file's own comment for why Brief/
-// Specification aren't separate links anymore.
+// Kept in sync with LandingHeader.tsx's desktop nav (2026-09-14 landing
+// rebuild, spec §3's nav set).
 const NAV_LINKS = [
-  { href: "#pricing", label: "Architect" },
-  { href: "/blog", label: "Blog" },
+  { href: "#value", label: "Product" },
+  { href: "#pricing", label: "Solutions" },
+  { href: "#pulse", label: "How It Works" },
+  { href: "#roi", label: "ROI" },
+  { href: "#pricing", label: "Pricing" },
+  { href: "/blog", label: "Resources" },
   { href: "/login", label: "Sign in" },
+  { href: "#live-demo", label: "Explore Demo →" },
 ] as const;
 
 /**

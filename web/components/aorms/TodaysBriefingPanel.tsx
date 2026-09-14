@@ -1,60 +1,49 @@
-import { Calendar, Money, Renew, WarningAltFilled } from "@carbon/icons-react";
+import { CheckmarkFilled, Money, Renew, UserMultiple, WarningAltFilled } from "@carbon/icons-react";
 import { AnimatedNumber } from "./AnimatedNumber";
 
 /**
- * Visual for the Today's Briefing feature section (2026-09-14) — a
- * sample Pulse brief, shaped like the real deterministic output
- * (`lib/ai/phraser.ts`'s `buildDailyBriefText`): one line per real data
- * source (absences, ready-to-bill, open requests, top priority), not
- * free-form paragraph text. Illustrative figures only, same placeholder
- * project as the other feature panels — not a real studio's numbers.
+ * Visual for Pulse — the hero section (spec §5) and the dedicated Pulse
+ * showcase section (spec §8) both render this same component. A 5-stat
+ * grid matching the developer spec's own worked example exactly
+ * (₹8,42,500 ready to bill / 7 client approvals / 3 projects at risk /
+ * 12 open revisions / 4 team members unavailable), styled after the
+ * real product's own KpiTile pattern (icon + big number + label, a
+ * colored top stripe) — icon + big number + label — rather than the
+ * bullet-line "brief" shape this component used before the 2026-09-14
+ * landing rebuild. Illustrative figures only, same posture as every
+ * other feature panel on this page: not a real studio's numbers.
  */
-const LINES = [
-  { icon: Calendar, text: "Ar. Akash is on leave today." },
-  { icon: Money, text: "ready to bill across 3 drafted invoices.", value: 156000, kind: "inr" as const },
-  { icon: WarningAltFilled, text: "open requests need attention — 2 from clients, 1 open tender awaiting bids.", value: 3, kind: "plain" as const },
-  { icon: Renew, text: "Top priority: Site instruction — waterproofing detail (Sharma Residence Extension)." },
-];
+const STATS = [
+  { icon: Money, value: 842500, kind: "inr" as const, label: "Ready to bill", stripe: "var(--cds-support-success)" },
+  { icon: CheckmarkFilled, value: 7, kind: "plain" as const, label: "Client approvals", stripe: "var(--cds-support-info)" },
+  { icon: WarningAltFilled, value: 3, kind: "plain" as const, label: "Projects at risk", stripe: "var(--cds-support-error)" },
+  { icon: Renew, value: 12, kind: "plain" as const, label: "Open revisions", stripe: "var(--cds-support-warning)" },
+  { icon: UserMultiple, value: 4, kind: "plain" as const, label: "Team unavailable", stripe: "var(--cds-text-secondary)" },
+] as const;
 
 export function TodaysBriefingPanel() {
   return (
     <div style={{ border: "1px solid var(--cds-border-subtle)", background: "var(--cds-layer)" }} aria-hidden>
       <div style={{ padding: "1.25rem 1.25rem 0.75rem", borderBottom: "1px solid var(--cds-border-subtle)" }}>
         <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
-          Pulse — Today's Brief
+          Pulse
         </p>
         <p className="cds--type-productive-heading-02" style={{ marginTop: "0.25rem" }}>
-          Written the moment you open it
+          Good morning. Here&apos;s the practice today.
         </p>
       </div>
 
-      <div style={{ padding: "1.25rem" }}>
-        {LINES.map((line, i) => {
-          const Icon = line.icon;
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(9rem, 1fr))", gap: "1px", background: "var(--cds-border-subtle)" }}>
+        {STATS.map((stat) => {
+          const Icon = stat.icon;
           return (
-            <div
-              key={line.text}
-              style={{
-                display: "flex",
-                gap: "0.75rem",
-                alignItems: "flex-start",
-                paddingBottom: i === LINES.length - 1 ? 0 : "0.875rem",
-                marginBottom: i === LINES.length - 1 ? 0 : "0.875rem",
-                borderBottom: i === LINES.length - 1 ? "none" : "1px solid var(--cds-border-subtle)",
-              }}
-            >
-              <Icon size={18} style={{ color: "var(--cds-icon-secondary)", flexShrink: 0, marginTop: "0.125rem" }} />
-              <p className="cds--type-body-01">
-                {"value" in line && line.value !== undefined && (
-                  <>
-                    <AnimatedNumber
-                      value={line.value}
-                      kind={line.kind}
-                      style={{ color: "var(--cds-support-info)", fontWeight: 600 }}
-                    />{" "}
-                  </>
-                )}
-                {line.text}
+            <div key={stat.label} style={{ background: "var(--cds-layer)", padding: "1rem", borderTop: `3px solid ${stat.stripe}` }}>
+              <Icon size={18} style={{ color: "var(--cds-icon-secondary)" }} />
+              <p className="cds--type-heading-04" style={{ marginTop: "0.5rem" }}>
+                <AnimatedNumber value={stat.value} kind={stat.kind} />
+              </p>
+              <p className="cds--type-label-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
+                {stat.label}
               </p>
             </div>
           );

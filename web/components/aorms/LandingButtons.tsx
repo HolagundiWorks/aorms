@@ -6,59 +6,81 @@
  * and Carbon's `Button` is a Client Component — passing it `as={Link}` or
  * `renderIcon={ArrowRight}` (component references, not plain data) straight
  * from a Server Component crashes with "Functions cannot be passed directly
- * to Client Components", the same RSC boundary issue `not-found.tsx` hit
- * earlier (see ROADMAP-CLOUD.md's UI/UX row). Isolating just the buttons
- * here — not the whole page — keeps the auth-gated redirect server-side.
+ * to Client Components". Isolating just the buttons here — not the whole
+ * page — keeps the auth-gated redirect server-side.
+ *
+ * 2026-09-14 landing rebuild (spec §4, §27, §36) — CTAs rewritten around
+ * the spec's own hierarchy: primary "Explore Live Demo", secondary
+ * "Start Free", each carrying a `data-analytics-event` marker (spec §36)
+ * so a future analytics vendor can wire real tracking without touching
+ * markup again — no vendor is actually integrated yet (see
+ * docs/esti/ROADMAP.md's dated entry).
  */
 import Link from "next/link";
 import { Button } from "@carbon/react";
 import { ArrowRight } from "@carbon/icons-react";
 import { portalUrl } from "../../lib/platform/subdomains";
 
-/**
- * All landing-page sign-in/signup CTAs, consolidated into this one
- * component (2026-09-14, explicit direction: "move all the login,
- * signup and other CTA to this section" — the CTA band headlined "Bring
- * the practice onto one hub."). Previously split three ways: HeroCtas
- * (Sign in + a "see more" scroll link) in the hero, IdentityCtas
- * (Create Identity / Identity sign-in) in the Identity & Pricing
- * section, and this component's own office-hub Sign in + Talk to HCW.
- * HeroCtas is removed entirely (the hero now carries no CTA of its own);
- * IdentityCtas' two buttons are folded in here alongside the originals.
- * The office-hub `/login` and the Identity portal's `/platform-login`/
- * `/platform-signup` (see docs/esti/AORMS-PLATFORM-ARCHITECTURE.md)
- * stay separate targets — different logins, not the same sign-in.
- */
-export function BandCtas() {
+export function ExploreDemoButton({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1.5rem", alignItems: "flex-start" }}>
-      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-        <Button as={Link} href="/login" renderIcon={ArrowRight}>
-          Sign in
-        </Button>
-        <Button kind="ghost" href="mailto:hi@aorms.in">
-          Talk to HCW
-        </Button>
-      </div>
-      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-        <Button kind="tertiary" as={Link} href={portalUrl("identity", "/platform-signup")} renderIcon={ArrowRight}>
-          Create your AORMS Identity
-        </Button>
-        <Button kind="ghost" as={Link} href={portalUrl("identity", "/platform-login")}>
-          Already have one? Sign in
-        </Button>
-      </div>
+    <Button as={Link} href="#live-demo" size={size} data-analytics-event="hero_demo_click">
+      Explore Demo
+    </Button>
+  );
+}
+
+/** Hero CTAs (spec §4): primary "Explore Live Demo", secondary "Start Free". */
+export function HeroCtas() {
+  return (
+    <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "2rem" }}>
+      <Button as={Link} href="#live-demo" renderIcon={ArrowRight} data-analytics-event="hero_demo_click">
+        Explore Live Demo
+      </Button>
+      <Button
+        kind="tertiary"
+        as={Link}
+        href={portalUrl("identity", "/platform-signup")}
+        renderIcon={ArrowRight}
+        data-analytics-event="hero_start_free"
+      >
+        Start Free
+      </Button>
+    </div>
+  );
+}
+
+/** Live Demo section CTAs (spec §26): "Enter Live Demo" + "Create Your Practice". */
+export function LiveDemoCtas() {
+  return (
+    <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "1.5rem" }}>
+      <Button as={Link} href="/login" renderIcon={ArrowRight} data-analytics-event="live_demo_enter">
+        Enter Live Demo
+      </Button>
+      <Button kind="tertiary" as={Link} href={portalUrl("identity", "/platform-signup")} data-analytics-event="signup_start">
+        Create Your Practice
+      </Button>
+    </div>
+  );
+}
+
+/** Final CTA band (spec §27): "Start Free" + "Explore Live Demo". */
+export function FinalCtas() {
+  return (
+    <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "1.5rem" }}>
+      <Button as={Link} href={portalUrl("identity", "/platform-signup")} renderIcon={ArrowRight} data-analytics-event="hero_start_free">
+        Start Free
+      </Button>
+      <Button kind="tertiary" as={Link} href="#live-demo" data-analytics-event="hero_demo_click">
+        Explore Live Demo
+      </Button>
     </div>
   );
 }
 
 /**
- * The ConnectDeX Partners section's own CTA (2026-09-10) — points at the
- * gated connect form (/connectdex-apply), not IdentityCtas' signup/sign-in
- * pair: creating a Company is no longer instant self-serve (see
- * platform/supabase/migrations/0013_connectdex_onboarding.sql) — a
- * prospective partner applies and waits on admin review, they don't sign
- * up directly.
+ * The ConnectDeX Partners section's own CTA — points at the gated
+ * connect form (/connectdex-apply), not a signup/sign-in pair: creating
+ * a Company is admin-reviewed, not instant self-serve.
  */
 export function ConnectDexCtas() {
   return (

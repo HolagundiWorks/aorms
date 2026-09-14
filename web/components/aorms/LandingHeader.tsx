@@ -1,23 +1,25 @@
 import Link from "next/link";
 import { MobileNavToggle } from "./MobileNavToggle";
+import { ExploreDemoButton } from "./LandingButtons";
 
 /**
- * Landing page header (2026-09-10 — the page had no persistent header at
- * all before this; the wordmark only ever appeared once, inline in the
- * hero section). Plain `next/link` throughout for the desktop nav, no
- * Carbon `Button`: this component stays a Server Component intentionally
- * — a `Button` with `renderIcon`/`as` needs a Client Component wrapper
- * (the same RSC boundary issue documented on `LandingButtons.tsx`), and
- * a header with only text links doesn't need one for the desktop case.
+ * Landing page header — 2026-09-14 landing rebuild, spec §3 nav set
+ * (Product/Solutions/How It Works/ROI/Pricing/Resources/Sign In/Explore
+ * Demo). Plain `next/link` throughout for the desktop nav, no Carbon
+ * `Button` on the text links: this component stays a Server Component
+ * intentionally — a `Button` with `renderIcon`/`as` needs a Client
+ * Component wrapper (the same RSC boundary issue documented on
+ * `LandingButtons.tsx`), and a header with only text links doesn't need
+ * one for that part; the one real Button (Explore Demo) is isolated in
+ * its own small Client Component instead of converting this whole header.
  *
- * Mobile collapse menu added 2026-09-10 (feedback: text links just
- * wrapped onto extra lines on a narrow viewport, no real toggle) —
- * `MobileNavToggle` is the one piece that needs client-side state, kept
- * in its own file for exactly that reason rather than converting this
- * whole header to a Client Component. Both navs render unconditionally
- * here; `.landing-nav-desktop`/`.landing-nav-mobile-toggle` in
- * globals.scss decide which is actually visible via a media query, so
- * there's no server/client viewport-detection mismatch to worry about.
+ * Mobile collapse menu: `MobileNavToggle` is the one piece that needs
+ * client-side state, kept in its own file for exactly that reason rather
+ * than converting this whole header to a Client Component. Both navs
+ * render unconditionally here; `.landing-nav-desktop`/
+ * `.landing-nav-mobile-toggle` in globals.scss decide which is actually
+ * visible via a media query, so there's no server/client
+ * viewport-detection mismatch to worry about.
  */
 export function LandingHeader() {
   return (
@@ -45,8 +47,6 @@ export function LandingHeader() {
         <Link href="/" aria-label="AORMS home" style={{ display: "flex", alignItems: "center", gap: "0.75rem", textDecoration: "none" }}>
           {/* Plain <img>, not next/image — a fixed brand asset. */}
           <img src="/aorms-logo.png" alt="AORMS" style={{ height: "24px", width: "auto" }} />
-          {/* Explicit direction (2026-09-10) — the header previously said
-              nothing about who this is for at all, logo + nav links only. */}
           <span
             className="cds--type-caption-01"
             style={{ color: "var(--cds-text-secondary)", borderLeft: "1px solid var(--cds-border-subtle)", paddingLeft: "0.75rem" }}
@@ -54,39 +54,33 @@ export function LandingHeader() {
             for Architecture Practices
           </span>
         </Link>
-        {/* Simplified to 4 items with literal "|" separators (2026-09-10,
-            explicit direction: "Architect | ConnectDeX | Blog | Signin")
-            — was 6 separate links (Brief/Specification/Identity/For
-            Suppliers/Blog/Sign in), later reduced further as those
-            sections were removed/merged (2026-09-14). "Architect" points
-            at #pricing (the merged Identity & Pricing section — the old
-            standalone #identity section it used to point at was folded
-            in there the same date). "ConnectDeX" removed 2026-09-14
-            (explicit direction) — the #connectdex section itself is kept
-            (a small teaser, moved to last on the page, right before the
-            footer), just no longer linked from the nav; a visitor
-            reaches it by scrolling, or via the footer's own ConnectDeX
-            Partners column. */}
         <nav
           aria-label="Landing page sections"
           className="landing-nav-desktop"
-          style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}
+          style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}
         >
+          <Link href="#value" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
+            Product
+          </Link>
           <Link href="#pricing" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
-            Architect
+            Solutions
           </Link>
-          <span aria-hidden className="cds--type-body-01" style={{ color: "var(--cds-border-subtle)" }}>
-            |
-          </span>
+          <Link href="#pulse" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
+            How It Works
+          </Link>
+          <Link href="#roi" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
+            ROI
+          </Link>
+          <Link href="#pricing" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
+            Pricing
+          </Link>
           <Link href="/blog" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
-            Blog
+            Resources
           </Link>
-          <span aria-hidden className="cds--type-body-01" style={{ color: "var(--cds-border-subtle)" }}>
-            |
-          </span>
           <Link href="/login" className="cds--type-body-01" style={{ textDecoration: "none", color: "var(--cds-link-primary)" }}>
             Sign in
           </Link>
+          <ExploreDemoButton size="sm" />
         </nav>
         <MobileNavToggle />
       </div>

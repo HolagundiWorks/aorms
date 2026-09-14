@@ -1,6 +1,6 @@
 import { Chat, Send, Calculator, CheckmarkFilled } from "@carbon/icons-react";
 import { Tile } from "@carbon/react";
-import { REVISION_LIFECYCLE } from "../../lib/marketing-content";
+import { REVISION_MANAGEMENT } from "../../lib/marketing-content";
 import { AnimatedNumber } from "./AnimatedNumber";
 
 /**
@@ -30,7 +30,7 @@ const COST_DELTA = 18500; // ₹18,500 illustrative cost delta, not a real figur
 export function RevisionLifecyclePanel() {
   return (
     <div className="revision-masonry" aria-hidden>
-      {REVISION_LIFECYCLE.stages.map((stage, i) => {
+      {REVISION_MANAGEMENT.stages.map((stage, i) => {
         const Icon = ICONS[i];
         return (
           <div key={stage.n} className="revision-masonry-item" style={{ marginTop: OFFSETS[i], height: TILE_HEIGHT }}>

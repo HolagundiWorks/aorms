@@ -16,29 +16,49 @@ import "./globals.scss";
  * child wins per-field) — `app/page.tsx` does exactly that for its own
  * title/description.
  */
+/**
+ * 2026-09-14 landing rebuild — title/description/keywords rewritten to
+ * match the "AORMS Landing Page & Pricing" developer spec §35. See
+ * app/page.tsx's own metadata export, which overrides these for the
+ * homepage itself (Next's `title.template` doesn't cascade to a route
+ * segment at the same level as the layout defining it) — kept in sync
+ * with the spec's exact wording here too so a page that DOES inherit the
+ * default (anything without its own metadata export) still reads right.
+ */
 export const metadata: Metadata = {
   metadataBase: new URL("https://aorms.in"),
   title: {
-    default: "AORMS — Office Management System",
+    default: "AORMS — Architecture Practice Operating System",
     template: "%s — AORMS",
   },
-  description: "Office management system for architecture practices.",
-  keywords: ["architecture practice management", "AEC software", "architecture firm ERP", "COA fee proposal software", "India architecture software"],
+  description:
+    "AORMS is an operating system for architecture practices, connecting projects, fees, revisions, billing, approvals, teams, and practice intelligence in one platform.",
+  keywords: [
+    "architecture practice management software",
+    "architecture firm management software",
+    "architecture project management software India",
+    "architecture billing software",
+    "architecture practice ERP",
+    "architecture office management software",
+    "architecture project tracking software",
+  ],
   authors: [{ name: "Human Centric Works" }],
   robots: { index: true, follow: true },
   openGraph: {
     type: "website",
     siteName: "AORMS",
-    title: "AORMS — Office Management System",
-    description: "Office management system for architecture practices.",
+    title: "AORMS — Architecture Practice Operating System",
+    description:
+      "AORMS is an operating system for architecture practices, connecting projects, fees, revisions, billing, approvals, teams, and practice intelligence in one platform.",
     url: "https://aorms.in",
     locale: "en_IN",
     images: [{ url: "/aorms-logo.png", width: 816, height: 216, alt: "AORMS" }],
   },
   twitter: {
     card: "summary",
-    title: "AORMS — Office Management System",
-    description: "Office management system for architecture practices.",
+    title: "AORMS — Architecture Practice Operating System",
+    description:
+      "AORMS is an operating system for architecture practices, connecting projects, fees, revisions, billing, approvals, teams, and practice intelligence in one platform.",
     images: ["/aorms-logo.png"],
   },
 };
