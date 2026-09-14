@@ -171,11 +171,14 @@ export default async function LandingPage() {
               </p>
             </Column>
             <Column sm={4} md={8} lg={{ span: 5, offset: 11 }} style={{ marginTop: "1.5rem" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "flex-start" }}>
-                {PROBLEM.chain.map((step) => (
-                  <Tag key={step} type="cool-gray" size="md">
-                    {step}
-                  </Tag>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
+                {PROBLEM.chain.map((step, i) => (
+                  <span key={step} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <Tag type="cool-gray" size="md">
+                      {step}
+                    </Tag>
+                    {i < PROBLEM.chain.length - 1 && <ArrowRight size={14} style={{ color: "var(--cds-icon-secondary)" }} />}
+                  </span>
                 ))}
               </div>
               <div style={{ marginTop: "1.5rem", paddingTop: "1.5rem", borderTop: "1px solid var(--cds-border-subtle)" }}>
