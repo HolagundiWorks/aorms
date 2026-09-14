@@ -34,30 +34,56 @@ import { ROOT_DOMAIN, PORTAL_HOME, isSharedPath, ownerOf, portalFromHost } from 
  * against this same dev server with this gate temporarily lifted — see
  * docs/esti/ROADMAP.md's dated entry for that account.
  */
+/**
+ * 2026-09-14 — critical bug fix, found live in production (every one of
+ * these redirects was landing on an unreachable URL): `request.url`/
+ * `request.nextUrl` reflect the *internal* socket Hostinger's reverse
+ * proxy forwards requests to (port 3000), not the public
+ * `https://<host>` the visitor's browser actually connected to. Every
+ * redirect below used to derive its target from `request.url` — `new
+ * URL(request.url)` then only reassigning `hostname`, or `new URL(path,
+ * request.url)` — which silently carried that internal `:3000` straight
+ * into the `Location` header sent back to the browser (confirmed via
+ * `curl -sI https://aorms.in/admin`: `location: https://sysdex.aorms.in
+ * :3000/admin`, an address nothing public can reach). This broke every
+ * portal-owned path reached from the main domain — `/identity`,
+ * `/studios`, `/licences`, `/connectdex`, `/connectdex-apply`,
+ * `/companies`, `/materials`, `/admin` — for any visitor who landed on
+ * `aorms.in` directly rather than already being on the right subdomain
+ * (an old bookmark, a shared link, or simply not knowing about the
+ * subdomain split, which is the common case, not an edge one). Fixed by
+ * building every redirect target from scratch — explicit `https:`
+ * protocol, explicit empty `port`, host and path assembled directly from
+ * `ROOT_DOMAIN`/the current path/query — never carrying `request.url`'s
+ * own origin forward at all.
+ */
+function portalRedirectUrl(hostname: string, pathname: string, search: string): URL {
+  const target = new URL(`https://${hostname}${pathname}${search}`);
+  target.port = "";
+  return target;
+}
+
 function routePortalSubdomains(request: NextRequest): NextResponse | null {
   if (process.env.NODE_ENV !== "production") return null;
 
   const currentPortal = portalFromHost(request.headers.get("host"));
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
 
   if (currentPortal) {
     if (pathname === "/") {
-      return NextResponse.redirect(new URL(PORTAL_HOME[currentPortal], request.url));
+      return NextResponse.redirect(portalRedirectUrl(`${currentPortal}.${ROOT_DOMAIN}`, PORTAL_HOME[currentPortal], ""));
     }
     const owner = ownerOf(pathname);
     if (owner === currentPortal || isSharedPath(pathname)) {
       return null;
     }
-    const target = new URL(request.url);
-    target.hostname = owner ? `${owner}.${ROOT_DOMAIN}` : ROOT_DOMAIN;
-    return NextResponse.redirect(target);
+    const hostname = owner ? `${owner}.${ROOT_DOMAIN}` : ROOT_DOMAIN;
+    return NextResponse.redirect(portalRedirectUrl(hostname, pathname, search));
   }
 
   const mainDomainOwner = ownerOf(pathname);
   if (mainDomainOwner) {
-    const target = new URL(request.url);
-    target.hostname = `${mainDomainOwner}.${ROOT_DOMAIN}`;
-    return NextResponse.redirect(target);
+    return NextResponse.redirect(portalRedirectUrl(`${mainDomainOwner}.${ROOT_DOMAIN}`, pathname, search));
   }
 
   return null;
