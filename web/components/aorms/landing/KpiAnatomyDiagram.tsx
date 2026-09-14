@@ -37,6 +37,23 @@
  * use a fixed magenta (Carbon's own `magenta-60`, `#d02670`) as
  * documentation-annotation chrome, distinct from the status colors used
  * on the tiles themselves.
+ *
+ * Layout (2026-09-14 same-day follow-up: "whole anatomy and explanation
+ * in single row") — the diagram and its explanation used to be three
+ * stacked blocks (SVG, then a legend grid, then a color-key grid) each
+ * spanning the full width. Now one flex row: the SVG on the left,
+ * legend + color key stacked as one condensed column on the right,
+ * side by side. `flexWrap` keeps it readable by falling back to a
+ * stacked column below roughly tablet width, where a true single row
+ * would otherwise squeeze both halves unreadably narrow.
+ *
+ * Panel 2's internal layout (2026-09-14 same-day follow-up: "stack the
+ * tiles on top of each other and explanation on top of each other") —
+ * the four severity tiles were a horizontal row (mimicking scanning a
+ * row of Pulse tiles left to right); now a vertical stack, top to
+ * bottom, matching the explanation column beside it — everything in
+ * this diagram, panels included, reads top-to-bottom now, not as a
+ * left-to-right scan.
  */
 const ANNOTATION = "#d02670";
 const ORANGE = "#eb6200"; // Carbon's orange-60 palette value — no dedicated --cds-support-* token for orange exists
@@ -50,8 +67,13 @@ const SEVERITY_SCALE = [
 
 export function KpiAnatomyDiagram() {
   return (
-    <div>
-      <svg viewBox="0 0 820 400" width="100%" role="img" aria-label="Anatomy of a Pulse KPI tile's alert line, and the red/orange/yellow/green status scale it reads at a glance">
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "2rem", alignItems: "flex-start" }}>
+      <svg
+        viewBox="0 0 820 400"
+        style={{ flex: "1 1 28rem", minWidth: 0, width: "100%", height: "auto" }}
+        role="img"
+        aria-label="Anatomy of a Pulse KPI tile's alert line, and the red/orange/yellow/green status scale it reads at a glance"
+      >
         {/* ── Panel 1: the annotated tile — alert line only ── */}
         <rect x="1" y="40" width="380" height="300" fill="var(--cds-layer)" stroke="var(--cds-border-subtle)" strokeWidth="1" />
         <circle cx="25" cy="64" r="14" fill={ANNOTATION} />
@@ -82,8 +104,8 @@ export function KpiAnatomyDiagram() {
           A
         </text>
 
-        {/* ── Panel 2: the glance — four stripe-only tiles, one per
-            severity color, no figures ── */}
+        {/* ── Panel 2: the glance — four stripe-only tiles, stacked top
+            to bottom, one per severity color, no figures ── */}
         <rect x="401" y="40" width="418" height="300" fill="var(--cds-layer)" stroke="var(--cds-border-subtle)" strokeWidth="1" />
         <circle cx="425" cy="64" r="14" fill={ANNOTATION} />
         <text x="425" y="68.5" fontSize="13" fontWeight="600" fill="white" textAnchor="middle">
@@ -93,16 +115,14 @@ export function KpiAnatomyDiagram() {
         <text x="421" y="105" fontSize="12" fill="var(--cds-text-secondary)">
           Same tile, four states — color is status, not identity
         </text>
-        <line x1="421" y1="118" x2="789" y2="118" stroke={ANNOTATION} strokeWidth="1" />
-        <polygon points="789,113 799,118 789,123" fill={ANNOTATION} />
 
         {SEVERITY_SCALE.map((tile, i) => {
-          const x = 421 + i * 92;
+          const y = 125 + i * 52;
           return (
             <g key={tile.name}>
-              <rect x={x} y="150" width="80" height="90" fill="var(--cds-layer)" stroke="var(--cds-border-subtle)" strokeWidth="1" />
-              <rect x={x} y="150" width="80" height="4" fill={tile.color} />
-              <text x={x + 40} y="205" fontSize="11" fill="var(--cds-text-secondary)" textAnchor="middle">
+              <rect x="421" y={y} width="280" height="38" fill="var(--cds-layer)" stroke="var(--cds-border-subtle)" strokeWidth="1" />
+              <rect x="421" y={y} width="280" height="4" fill={tile.color} />
+              <text x="435" y={y + 25} fontSize="13" fill="var(--cds-text-secondary)">
                 {tile.name}
               </text>
             </g>
@@ -110,16 +130,9 @@ export function KpiAnatomyDiagram() {
         })}
       </svg>
 
-      {/* ── Legend, Carbon's own "N. <name>" convention — one entry per
-          panel. ── */}
-      <div
-        style={{
-          marginTop: "1.5rem",
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(18rem, 1fr))",
-          gap: "1.5rem 2rem",
-        }}
-      >
+      {/* ── Explanation column, beside the diagram: legend (Carbon's own
+          "N. <name>" convention) then the color key, stacked. ── */}
+      <div style={{ flex: "1 1 18rem", minWidth: 0 }}>
         <div style={{ display: "flex", gap: "0.75rem" }}>
           <span
             aria-hidden
@@ -148,7 +161,8 @@ export function KpiAnatomyDiagram() {
             </p>
           </div>
         </div>
-        <div>
+
+        <div style={{ marginTop: "1.25rem" }}>
           <p className="cds--type-heading-compact-01">2. How a glance reads it</p>
           <p className="cds--type-label-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
             Your eye registers color before it registers a figure or a label — that&apos;s what lets a whole row of
@@ -156,26 +170,19 @@ export function KpiAnatomyDiagram() {
             sign.
           </p>
         </div>
-      </div>
 
-      {/* ── Color key — explicit, since the whole point is a fixed
-          4-color status scale, not five different tile categories. ── */}
-      <div
-        style={{
-          marginTop: "1.5rem",
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(14rem, 1fr))",
-          gap: "0.75rem 1.5rem",
-        }}
-      >
-        {SEVERITY_SCALE.map((tile) => (
-          <div key={tile.name} style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-            <span aria-hidden style={{ flex: "0 0 auto", width: "0.875rem", height: "0.875rem", background: tile.color }} />
-            <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
-              <strong style={{ color: "var(--cds-text-primary)" }}>{tile.name}</strong> — {tile.meaning}
-            </p>
-          </div>
-        ))}
+        {/* Color key — explicit, since the whole point is a fixed
+            4-color status scale, not five different tile categories. */}
+        <div style={{ marginTop: "1.25rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          {SEVERITY_SCALE.map((tile) => (
+            <div key={tile.name} style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+              <span aria-hidden style={{ flex: "0 0 auto", width: "0.875rem", height: "0.875rem", background: tile.color }} />
+              <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+                <strong style={{ color: "var(--cds-text-primary)" }}>{tile.name}</strong> — {tile.meaning}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
