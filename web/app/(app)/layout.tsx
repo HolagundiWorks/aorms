@@ -5,6 +5,8 @@ import { roleHome } from "../../lib/auth/role-home";
 import { ROLE_LABEL } from "../../lib/auth/rank";
 import { getIstHour } from "../../lib/shell/identity";
 import { UsageHeartbeat } from "../../components/aorms/platform/UsageHeartbeat";
+import { IdleSessionGuard } from "../../components/aorms/security/IdleSessionGuard";
+import { signOut } from "../../lib/actions/auth";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -40,6 +42,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <>
       <UsageHeartbeat />
+      <IdleSessionGuard signOutAction={signOut} />
       <AppShell
         companyName={firm?.company_name ?? ""}
         userName={profile?.full_name?.trim() || "there"}

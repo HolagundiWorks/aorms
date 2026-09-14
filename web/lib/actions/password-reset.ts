@@ -18,6 +18,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "../supabase/server";
 import { roleHome } from "../auth/role-home";
+import { checkRateLimit, rateLimitIdentifier } from "../security/rate-limit";
+import { validatePassword } from "../security/password-policy";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type PasswordActionState = { error: string } | { success: true } | null;
 
@@ -26,6 +29,15 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aorms.in";
 export async function requestPasswordReset(_prev: PasswordActionState, formData: FormData): Promise<PasswordActionState> {
   const email = String(formData.get("email") ?? "").trim();
   if (!email) return { error: "Enter your email address." };
+
+  // Rate-limited per IP+email — a reset-request flood is both a spam
+  // vector (unsolicited emails to a real address) and an enumeration
+  // probe if timing/response ever differed by account existence.
+  const rateLimit = checkRateLimit("requestPasswordReset", `${await rateLimitIdentifier()}:${email.toLowerCase()}`, {
+    max: 5,
+    windowMs: 60 * 60 * 1000,
+  });
+  if (!rateLimit.ok) return { error: `Too many requests — try again in ${rateLimit.retryAfterSeconds}s.` };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -36,7 +48,7 @@ export async function requestPasswordReset(_prev: PasswordActionState, formData:
   // exists — resetPasswordForEmail itself doesn't error on an unknown
   // address (Supabase's own anti-enumeration behavior); surfacing a
   // difference here would just reintroduce the leak at this layer.
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
   return { success: true };
 }
 
@@ -44,7 +56,8 @@ export async function updatePassword(_prev: PasswordActionState, formData: FormD
   const password = String(formData.get("password") ?? "");
   const confirm = String(formData.get("confirmPassword") ?? "");
 
-  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+  const passwordCheck = validatePassword(password);
+  if (!passwordCheck.ok) return { error: passwordCheck.error };
   if (password !== confirm) return { error: "Passwords don't match." };
 
   const supabase = await createClient();
@@ -59,7 +72,7 @@ export async function updatePassword(_prev: PasswordActionState, formData: FormD
   if (!user) return { error: "This link has expired or was already used. Request a new one and try again." };
 
   const { error } = await supabase.auth.updateUser({ password });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   // Straight into the app, not back to /login — the callback's own code
   // exchange already established a real session; forcing a second

@@ -4,6 +4,7 @@ import { platformSignOut } from "../../../lib/actions/platform";
 import { getPlatformNavStatus } from "../../../lib/platform/account";
 import { portalUrl } from "../../../lib/platform/subdomains";
 import { getGreeting, getIstHour, getInitials, getFirstName } from "../../../lib/shell/identity";
+import { IdleSessionGuard } from "../security/IdleSessionGuard";
 
 export type PlatformNavItem = { href: string; label: string; superAdminOnly?: boolean };
 
@@ -44,6 +45,7 @@ export async function PlatformShellHeader({
 
   return (
     <Header aria-label={portalName}>
+      {signedIn && <IdleSessionGuard signOutAction={platformSignOut} />}
       {/* prefix="" explicitly, not omitted — Carbon's HeaderName
           defaults to prefix="IBM" when the prop isn't given at all
           (found live: "IBM Identity Portal"). No prefix at all here

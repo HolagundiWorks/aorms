@@ -32,6 +32,9 @@ import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 import { resolvePortalHomeFromHost } from "../platform/subdomains";
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
+import { checkRateLimit, rateLimitIdentifier } from "../security/rate-limit";
+import { validatePassword } from "../security/password-policy";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type PlatformActionState = { error: string } | null;
 
@@ -54,6 +57,12 @@ export async function platformSignUp(
 
   if (!fullName) return { error: "Full name is required." };
   if (!email || !password) return { error: "Email and password are required." };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Enter a valid email address." };
+  const passwordCheck = validatePassword(password);
+  if (!passwordCheck.ok) return { error: passwordCheck.error };
+
+  const rateLimit = checkRateLimit("platformSignUp", await rateLimitIdentifier(), { max: 5, windowMs: 60 * 60 * 1000 });
+  if (!rateLimit.ok) return { error: `Too many sign-up attempts — try again in ${rateLimit.retryAfterSeconds}s.` };
 
   const supabase = await createPlatformClient();
   const { error } = await supabase.auth.signUp({
@@ -61,7 +70,7 @@ export async function platformSignUp(
     password,
     options: { data: { full_name: fullName } },
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   redirect(await currentPortalHome());
 }
@@ -73,9 +82,18 @@ export async function platformSignIn(
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
+  // Rate-limited per IP+email so one mistyped password from a real user
+  // never blocks them from trying a different account from the same
+  // network — only repeated attempts against the same identifier count.
+  const rateLimit = checkRateLimit("platformSignIn", `${await rateLimitIdentifier()}:${email.toLowerCase()}`, {
+    max: 8,
+    windowMs: 15 * 60 * 1000,
+  });
+  if (!rateLimit.ok) return { error: `Too many attempts — try again in ${rateLimit.retryAfterSeconds}s.` };
+
   const supabase = await createPlatformClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   redirect(await currentPortalHome());
 }

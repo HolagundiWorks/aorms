@@ -23,6 +23,8 @@
  */
 import { redirect } from "next/navigation";
 import { createClient } from "../platform/server";
+import { validatePassword } from "../security/password-policy";
+import { toSafeErrorMessage } from "../security/safe-error";
 
 export type PlatformPasswordActionState = { error: string } | null;
 
@@ -33,7 +35,8 @@ export async function updatePlatformPassword(
   const password = String(formData.get("password") ?? "");
   const confirm = String(formData.get("confirmPassword") ?? "");
 
-  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+  const passwordCheck = validatePassword(password);
+  if (!passwordCheck.ok) return { error: passwordCheck.error };
   if (password !== confirm) return { error: "Passwords don't match." };
 
   const supabase = await createClient();
@@ -48,7 +51,7 @@ export async function updatePlatformPassword(
   if (!user) return { error: "This link has expired or was already used. Ask an admin to send a new one." };
 
   const { error } = await supabase.auth.updateUser({ password });
-  if (error) return { error: error.message };
+  if (error) return { error: toSafeErrorMessage(error) };
 
   redirect("/identity");
 }

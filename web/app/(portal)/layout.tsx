@@ -5,6 +5,7 @@ import { createClient } from "../../lib/supabase/server";
 import { signOut } from "../../lib/actions/auth";
 import { roleHome } from "../../lib/auth/role-home";
 import { PortalHeaderName } from "../../components/aorms/PortalHeaderName";
+import { IdleSessionGuard } from "../../components/aorms/security/IdleSessionGuard";
 
 /**
  * Client Portal shell — a minimal Carbon `Header` + `Content`, deliberately
@@ -32,6 +33,7 @@ export default async function PortalLayout({ children }: { children: React.React
 
   return (
     <>
+      <IdleSessionGuard signOutAction={signOut} />
       <Header aria-label="AORMS Client Portal">
         <PortalHeaderName href="/portal" label="Client Portal" />
         <HeaderGlobalBar>

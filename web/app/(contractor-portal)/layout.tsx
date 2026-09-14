@@ -5,6 +5,7 @@ import { createClient } from "../../lib/supabase/server";
 import { signOut } from "../../lib/actions/auth";
 import { roleHome } from "../../lib/auth/role-home";
 import { PortalHeaderName } from "../../components/aorms/PortalHeaderName";
+import { IdleSessionGuard } from "../../components/aorms/security/IdleSessionGuard";
 
 /**
  * Contractor Portal shell — same minimal Carbon `Header` + `Content`
@@ -29,6 +30,7 @@ export default async function ContractorPortalLayout({ children }: { children: R
 
   return (
     <>
+      <IdleSessionGuard signOutAction={signOut} />
       <Header aria-label="AORMS Contractor Portal">
         <PortalHeaderName href="/contractor-portal" label="Contractor Portal" />
         <HeaderGlobalBar>

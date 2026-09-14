@@ -6,12 +6,19 @@ import { createServiceRoleClient } from "../supabase/service";
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 import { roleHome } from "../auth/role-home";
+import { checkRateLimit, rateLimitIdentifier } from "../security/rate-limit";
 
 export type AuthActionState = { error: string } | null;
 
 export async function signIn(_prev: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
+
+  const rateLimit = checkRateLimit("signIn", `${await rateLimitIdentifier()}:${email.toLowerCase()}`, {
+    max: 8,
+    windowMs: 15 * 60 * 1000,
+  });
+  if (!rateLimit.ok) return { error: `Too many attempts — try again in ${rateLimit.retryAfterSeconds}s.` };
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });

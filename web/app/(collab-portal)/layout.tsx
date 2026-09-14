@@ -5,6 +5,7 @@ import { createClient } from "../../lib/supabase/server";
 import { signOut } from "../../lib/actions/auth";
 import { roleHome } from "../../lib/auth/role-home";
 import { PortalHeaderName } from "../../components/aorms/PortalHeaderName";
+import { IdleSessionGuard } from "../../components/aorms/security/IdleSessionGuard";
 
 /**
  * Collaborator Portal shell — same minimal Carbon `Header` + `Content`
@@ -31,6 +32,7 @@ export default async function CollabPortalLayout({ children }: { children: React
 
   return (
     <>
+      <IdleSessionGuard signOutAction={signOut} />
       <Header aria-label="AORMS Collaborator Portal">
         <PortalHeaderName href="/collab-portal" label="Collaborator Portal" />
         <HeaderGlobalBar>
