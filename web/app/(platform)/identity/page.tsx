@@ -245,6 +245,11 @@ export default async function IdentityPage() {
           <PageHeader
             title="AORMS Identity"
             description="Your portable personal identity — carries across every studio you work with."
+            actions={
+              <NextLink href="/identity/profile" className="cds--type-body-01">
+                My Profile →
+              </NextLink>
+            }
           />
 
           <Stack gap={6}>
