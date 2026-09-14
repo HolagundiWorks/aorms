@@ -12,13 +12,16 @@
  * not a share of hours worked) so it's shown without a figure rather
  * than forced into the same math.
  *
- * `RoiCalculator.tsx` reads `TOTAL_LEAKAGE_PCT` from this same source
- * so its "estimated fee leakage" is this calculation, not a second,
- * separately-guessed manual percentage.
+ * The old, separate ROI Calculator (annual fees / mgmt+admin hours /
+ * potential-annual-value form) was removed (2026-09-14 follow-up
+ * request) once this component covered the same "what does leakage
+ * cost" ground directly from real cause hours — this is now the one
+ * cost calculator on the page, not one of two. Its disclaimer
+ * (`ROI_DISCLAIMER`) moved here with it.
  */
 import { useMemo, useState } from "react";
 import { NumberInput, Tile } from "@carbon/react";
-import { OPERATIONAL_LEAKAGE } from "../../../lib/marketing-content";
+import { OPERATIONAL_LEAKAGE, ROI_DISCLAIMER } from "../../../lib/marketing-content";
 
 export const TOTAL_LEAKAGE_PCT = OPERATIONAL_LEAKAGE.causes.reduce((sum, cause) => sum + (cause.pctOfHours ?? 0), 0);
 
@@ -80,7 +83,7 @@ export function OperationalLeakageCalculator() {
                 <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
                   {cause.pctOfHours}% of project hours
                 </p>
-                <p className="cds--type-productive-heading-02" style={{ marginTop: "0.25rem", color: "var(--cds-support-warning)" }}>
+                <p className="cds--type-productive-heading-02" style={{ marginTop: "0.25rem", color: "var(--cds-support-info)" }}>
                   {Math.round(cause.hours)} hrs · {formatInr(cause.cost ?? 0)}
                 </p>
               </div>
@@ -97,7 +100,7 @@ export function OperationalLeakageCalculator() {
         style={{
           marginTop: "1.5rem",
           border: "1px solid var(--cds-border-subtle)",
-          borderLeft: "3px solid var(--cds-support-warning)",
+          borderLeft: "3px solid var(--cds-support-info)",
           background: "var(--cds-layer)",
           padding: "1.25rem",
           display: "flex",
@@ -119,6 +122,10 @@ export function OperationalLeakageCalculator() {
           This is what AORMS gives back — replacing manual timesheet entry, priority-guessing, and status-chasing meetings with a tracked, single operating record.
         </p>
       </div>
+
+      <p className="cds--type-caption-01" style={{ marginTop: "1rem", color: "var(--cds-text-secondary)" }}>
+        {ROI_DISCLAIMER}
+      </p>
     </div>
   );
 }

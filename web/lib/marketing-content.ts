@@ -291,10 +291,11 @@ export const COMPANY_IDENTITY = [
  * `pctOfHours` (2026-09-14 follow-up request) — five of the six causes
  * are given an illustrative share of a project's total worked hours
  * (the user's own worked example: a ~300hr project, 15% unbilled
- * revisions ≈ 45 hours), used by `OperationalLeakageCalculator.tsx` to
- * turn this list from prose into an actual hours/₹ breakdown per cause,
- * and by `RoiCalculator.tsx` as the calculated (no longer manually
- * guessed) fee-leakage percentage. "Cost overruns" has no `pctOfHours`
+ * revisions ≈ 45 hours), used by `OperationalLeakageCalculator.tsx`
+ * (the page's one cost calculator — the earlier separate ROI Calculator
+ * form was removed the same day once this covered the same ground) to
+ * turn this list from prose into an actual hours/₹ breakdown per cause.
+ * "Cost overruns" has no `pctOfHours`
  * — it's a budget-overrun pattern, not a share of hours worked, so it
  * stays qualitative rather than forced into the same hours math.
  */

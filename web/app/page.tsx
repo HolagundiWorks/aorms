@@ -13,7 +13,6 @@ import { LandingHeader } from "../components/aorms/LandingHeader";
 import { BillingForecastPanel } from "../components/aorms/BillingForecastPanel";
 import { RevisionLifecyclePanel } from "../components/aorms/RevisionLifecyclePanel";
 import { TodaysBriefingPanel } from "../components/aorms/TodaysBriefingPanel";
-import { RoiCalculatorSection } from "../components/aorms/landing/RoiCalculatorSection";
 import { OperationalLeakageCalculator } from "../components/aorms/landing/OperationalLeakageCalculator";
 import { KpiAnatomyDiagram } from "../components/aorms/landing/KpiAnatomyDiagram";
 import {
@@ -389,7 +388,11 @@ export default async function LandingPage() {
           </Grid>
         </section>
 
-        {/* 9. ROI Calculator (spec §13) */}
+        {/* 9. Operational leakage / cost calculator (spec §13) — the
+            standalone ROI Calculator (annual fees / mgmt+admin hours /
+            potential-annual-value form) was removed 2026-09-14 once
+            OperationalLeakageCalculator covered the same "what does
+            leakage cost" ground directly from real cause hours. */}
         <section id="roi" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
@@ -410,10 +413,6 @@ export default async function LandingPage() {
               <p className="cds--type-body-02" style={{ marginTop: "1.5rem", maxWidth: 720, color: "var(--cds-text-secondary)" }}>
                 {OPERATIONAL_LEAKAGE.closing}
               </p>
-            </Column>
-
-            <Column sm={4} md={8} lg={{ span: 10, offset: 3 }}>
-              <RoiCalculatorSection />
             </Column>
           </Grid>
         </section>
