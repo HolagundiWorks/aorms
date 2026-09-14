@@ -179,7 +179,12 @@ export default async function LandingPage() {
                 {PROBLEM.body}
               </p>
             </Column>
-            <Column sm={4} md={8} lg={16} style={{ marginTop: "2rem" }}>
+            {/* Chain and the resolution Tile share one row (explicit
+                follow-up request — the Tile was sitting in its own row
+                below instead of beside the chain). md=4/md=4 splits
+                evenly starting at Carbon's md breakpoint, same earlier-
+                breakpoint fix already applied to Fee Recovery. */}
+            <Column sm={4} md={4} lg={10} style={{ marginTop: "2rem" }}>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
                 {PROBLEM.chain.map((step, i) => (
                   <span key={step} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -191,9 +196,7 @@ export default async function LandingPage() {
                 ))}
               </div>
             </Column>
-            {/* Resolution — a Tile, right-aligned (explicit follow-up
-                request), instead of a plain full-width text block. */}
-            <Column sm={4} md={8} lg={{ span: 5, offset: 11 }} style={{ marginTop: "1.5rem" }}>
+            <Column sm={4} md={4} lg={{ span: 5, offset: 11 }} style={{ marginTop: "2rem" }}>
               <Tile>
                 <p className="cds--type-productive-heading-02">{PROBLEM.resolution.title}</p>
                 {PROBLEM.resolution.lines.map((line) => (
