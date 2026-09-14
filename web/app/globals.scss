@@ -315,6 +315,36 @@ body {
   }
 }
 
+// AORMS Platform portal header-overlap fix (found live, 2026-09-14 —
+// user report: "the shell content is overlapping with header"). Every
+// (platform)/* page renders `<PortalHeader />` (a Carbon `Header`,
+// `position: fixed`, 3rem tall — `mini-units(6)` per @carbon/styles'
+// own ui-shell/_functions.scss) immediately followed by its own
+// `<Grid>` — but never wraps that Grid in Carbon's `cds--content` class
+// (or the `<Content>` component), so Carbon's own built-in offset rule
+// (`.cds--header ~ .cds--content { margin-block-start: mini-units(6); }`,
+// @carbon/styles' ui-shell/content/_content.scss — already compiled into
+// this app via the existing `@use "@carbon/react/scss/components/
+// ui-shell"` above) never matches anything: there is no `.cds--content`
+// element on these pages at all. The Grid starts at margin 0, sliding
+// directly under the fixed header — confirmed by re-examining this
+// session's own earlier screenshots, several of which show a
+// first line of text visibly cut off right where the header ends,
+// misread at the time as a viewport artifact rather than the actual bug.
+//
+// Fixed the same way as the SideNav-margin block above — a supplemental
+// rule targeting the class these pages' actual `<Grid>` component
+// renders (`.cds--css-grid`, confirmed via @carbon/react's own
+// CSSGrid.js) rather than requiring every platform page to adopt an
+// unused `cds--content` wrapper. Scoped to `.cds--header ~` so it only
+// ever applies to a Grid that's a direct sibling of a fixed header —
+// never touches Office Hub's own AppShell layout (a different DOM
+// structure entirely, already handled correctly via real `cds--content`
+// usage there).
+.cds--header ~ .cds--css-grid {
+  margin-block-start: 3rem;
+}
+
 // Blog post prose (app/blog/[slug]/page.tsx, 2026-09-10) — `marked`-rendered
 // markdown has no styling of its own (plain h1-h6/p/ul/a/strong/em/code),
 // and Carbon's own type classes aren't applied automatically to raw HTML
