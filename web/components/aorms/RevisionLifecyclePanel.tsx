@@ -4,18 +4,14 @@ import { REVISION_MANAGEMENT } from "../../lib/marketing-content";
 import { AnimatedNumber } from "./AnimatedNumber";
 
 /**
- * Horizontal masonry tile row for the revision lifecycle (2026-09-14,
- * explicit direction: "horizontal masonry layout... use tiles for data
- * presentation, and animate the data"). Four stage tiles, same width AND
- * same fixed height (`TILE_HEIGHT` — 2026-09-14 follow-up: "all tiles
- * should be of same height", since stage 3's extra cost-delta block
- * otherwise made it taller than the rest), with staggered vertical
- * offsets (`OFFSETS` below) so the row still reads as a brick-laid strip
- * left to right rather than four flush-aligned cards — the "horizontal"
- * distinction from a conventional (vertical, column-based) masonry grid.
- * Both the offset and the fixed height are zeroed on narrow viewports
- * (`.revision-masonry` in globals.scss), where a single stacked column
- * reads better than a fixed box height.
+ * Four-stage tile row for the revision lifecycle. Same width AND same
+ * fixed height (`TILE_HEIGHT`, since stage 3's extra cost-delta block
+ * would otherwise make it taller than the rest) — flush-aligned, no
+ * stagger (2026-09-14 follow-up: "align all the cards, make them all
+ * of same height, don't stagger" — replaces an earlier staggered-
+ * "brick-laid" treatment). The fixed height is zeroed on narrow
+ * viewports (`.revision-masonry` in globals.scss), where a single
+ * stacked column reads better than a fixed box height.
  *
  * One illustrative "in flight" example is layered onto stage 3 (Costed
  * by the team lead) — the same placeholder project used elsewhere on
@@ -23,7 +19,6 @@ import { AnimatedNumber } from "./AnimatedNumber";
  * consistent with the billing forecast panel above it.
  */
 const ICONS = [Chat, Send, Calculator, CheckmarkFilled] as const;
-const OFFSETS = ["0", "2rem", "0.5rem", "2.75rem"] as const;
 const TILE_HEIGHT = "23rem";
 const COST_DELTA = 18500; // ₹18,500 illustrative cost delta, not a real figure
 
@@ -33,7 +28,7 @@ export function RevisionLifecyclePanel() {
       {REVISION_MANAGEMENT.stages.map((stage, i) => {
         const Icon = ICONS[i];
         return (
-          <div key={stage.n} className="revision-masonry-item" style={{ marginTop: OFFSETS[i], height: TILE_HEIGHT }}>
+          <div key={stage.n} className="revision-masonry-item" style={{ height: TILE_HEIGHT }}>
             <Tile style={{ height: "100%", display: "flex", flexDirection: "column" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span className="cds--type-code-01" style={{ color: "var(--cds-text-placeholder)" }}>
