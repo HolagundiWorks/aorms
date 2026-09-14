@@ -43,46 +43,122 @@ type StudioEmbed = { id: string; name: string; public_id: string } | null;
  * memberships in a second section — removed here, not merged, since a
  * material supplier has no reason to see (or be shown) Studio-branded
  * chrome and vice versa.
+ *
+ * **2026-09-14, critical fix — this page's ONLY account-resolution path
+ * used to be the Office-Hub-link (`webSupabase` → `profiles.
+ * platform_public_id` → `accounts`), found live to be a total dead end
+ * for anyone signing in directly at identity.aorms.in (the portal's own,
+ * intended entry point — same "found no option to reach studio create/
+ * join" report SysDeX and ConnectDeX had already been fixed for on
+ * 2026-09-10/14).** Worse than just "less convenient than it should be":
+ * in production, `/identity` always resolves to `identity.aorms.in`
+ * (proxy.ts's own subdomain redirect), and the Office Hub's own session
+ * cookie is host-scoped to plain `aorms.in` (lib/supabase/server.ts sets
+ * no explicit cookie domain, unlike the Platform's own
+ * `.aorms.in`-scoped one) — so that cookie is **never sent** to the
+ * subdomain this page actually renders on. The old primary path was
+ * unreachable for every real visitor, every time, not just an edge case:
+ * anyone signing in directly here landed on "Not linked to this login
+ * yet" with no way forward, regardless of whether they already had
+ * Studio memberships.
+ *
+ * Fixed by resolving the Platform's OWN session first (same pattern
+ * `getCurrentPlatformSessionAccount()` already uses for SysDeX/
+ * ConnectDeX) — works on any subdomain, no Office Hub relationship
+ * required. The Office-Hub-link path is kept as a genuine fallback (it
+ * still works in local dev, where there's no subdomain split at all —
+ * see proxy.ts's own "production only" gate), not removed, but it no
+ * longer blocks the primary flow.
  */
 export default async function IdentityPage() {
-  const webSupabase = await createWebClient();
-  const {
-    data: { user },
-  } = await webSupabase.auth.getUser();
-  const { data: profile } = await webSupabase
-    .from("profiles")
-    .select("platform_public_id")
-    .eq("id", user?.id ?? "")
-    .maybeSingle();
-
-  const handle = profile?.platform_public_id ?? null;
-
-  // Resolve the linked handle (if any) up front — a stale link (the
-  // handle is set but no longer resolves, e.g. the platform database was
-  // reset independently of this one, which happened live during this
-  // feature's own testing) falls through to the same link/re-link UI as
-  // "never linked," rather than a dead-end error with no way to recover.
   const platformService = createPlatformServiceRoleClient();
-  const { data: account } = handle
-    ? await platformService
+
+  const platformSupabase = await createPlatformClient();
+  const {
+    data: { user: platformUser },
+  } = await platformSupabase.auth.getUser();
+
+  let account:
+    | { id: string; public_id: string; full_name: string; level: string; total_active_seconds: number }
+    | null = null;
+  let isCompanyAccountMismatch = false;
+
+  if (platformUser) {
+    const { data: sessionAccount } = await platformService
+      .from("accounts")
+      .select("id, public_id, full_name, level, total_active_seconds")
+      .eq("id", platformUser.id)
+      .maybeSingle();
+    if (sessionAccount) {
+      account = sessionAccount;
+    } else {
+      // A real Platform session, but not an Identity/Studio account —
+      // most likely a Company Account (2026-09-14 identity split) or a
+      // platform-staff-only login. A distinct message, not a silent
+      // "not linked" that implies linking something would fix it.
+      isCompanyAccountMismatch = true;
+    }
+  }
+
+  // Fallback — the Office-Hub-link path (see this function's own header
+  // comment for why this is unreachable in production today, kept for
+  // local dev and any future architecture change that makes it reachable
+  // again).
+  let handle: string | null = null;
+  let isStaleLink = false;
+  if (!account && !isCompanyAccountMismatch) {
+    const webSupabase = await createWebClient();
+    const {
+      data: { user },
+    } = await webSupabase.auth.getUser();
+    const { data: profile } = await webSupabase
+      .from("profiles")
+      .select("platform_public_id")
+      .eq("id", user?.id ?? "")
+      .maybeSingle();
+    handle = profile?.platform_public_id ?? null;
+
+    if (handle) {
+      const { data: linkedAccount } = await platformService
         .from("accounts")
         .select("id, public_id, full_name, level, total_active_seconds")
         .eq("public_id", handle)
-        .maybeSingle()
-    : { data: null };
+        .maybeSingle();
+      if (linkedAccount) account = linkedAccount;
+      else isStaleLink = true;
+    }
+  }
 
-  const isStaleLink = !!handle && !account;
+  if (isCompanyAccountMismatch) {
+    return (
+      <>
+        <IdentityPortalHeader />
+        <Grid>
+          <Column sm={4} md={8} lg={8}>
+            <PageHeader
+              title="AORMS Identity"
+              description="Signed in to the AORMS Platform, but not with a Studio/Identity account."
+            />
+            <Tile>
+              <Stack gap={4}>
+                <p className="cds--type-body-01">
+                  This login is a Company (ConnectDeX) account — a separate identity from AORMS-U-, by design. Head to
+                  the <NextLink href="/connectdex">ConnectDeX Portal</NextLink> instead, or sign out and sign in with an
+                  AORMS-U- Identity account.
+                </p>
+              </Stack>
+            </Tile>
+          </Column>
+        </Grid>
+      </>
+    );
+  }
 
   if (!account) {
-    // Not linked yet (or the link is stale — see isStaleLink). If this
-    // browser tab happens to have an active AORMS Platform session, offer
-    // a one-click link with the handle pre-filled; either way, also offer
-    // a plain text field + sign-up/sign-in links.
-    const platformSupabase = await createPlatformClient();
-    const {
-      data: { user: platformUser },
-    } = await platformSupabase.auth.getUser();
-
+    // Neither a direct Platform session nor an Office Hub link resolved
+    // an account — offer a one-click link with the handle pre-filled if
+    // this browser tab happens to have an active AORMS Platform session
+    // (the local-dev case), plus a plain sign-in/sign-up CTA either way.
     let knownHandle: string | undefined;
     if (platformUser) {
       const { data: sessionAccount } = await platformSupabase
