@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Accordion, AccordionItem, Column, Grid, Tag, Tile } from "@carbon/react";
-import { Currency, Renew, WarningAlt, UserMultiple, CheckmarkFilled, ArrowRight } from "@carbon/icons-react";
+import { Currency, Renew, WarningAlt, UserMultiple, CheckmarkFilled, Close, ArrowRight } from "@carbon/icons-react";
 import { createClient } from "../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../lib/platform/service";
 import { portalUrl } from "../lib/platform/subdomains";
@@ -177,8 +177,13 @@ export default async function LandingPage() {
           </Grid>
         </section>
 
-        {/* 2. Problem (spec §6) — two rows (text, then chain/resolution),
-            not side-by-side columns, per explicit follow-up request. */}
+        {/* 2. Problem (spec §6). Reworked 2026-09-14 (follow-up: "the
+            problem section... feels incomplete") — this was the only
+            section on the page with no real supporting component, just
+            a headline over a row of Tags. Added a genuine before/after
+            comparison (PROBLEM.without/with, five paired scenarios each)
+            beneath the chain, giving it the same substantive weight
+            every other section gets from its own panel. */}
         <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <MotionReveal>
           <Grid>
@@ -196,12 +201,7 @@ export default async function LandingPage() {
                 {PROBLEM.body}
               </p>
             </Column>
-            {/* Chain and the resolution Tile share one row (explicit
-                follow-up request — the Tile was sitting in its own row
-                below instead of beside the chain). md=4/md=4 splits
-                evenly starting at Carbon's md breakpoint, same earlier-
-                breakpoint fix already applied to Fee Recovery. */}
-            <Column sm={4} md={4} lg={10} style={{ marginTop: "2rem" }}>
+            <Column sm={4} md={8} lg={16} style={{ marginTop: "2rem" }}>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
                 {PROBLEM.chain.map((step, i) => (
                   <span key={step} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -213,15 +213,52 @@ export default async function LandingPage() {
                 ))}
               </div>
             </Column>
-            <Column sm={4} md={4} lg={{ span: 5, offset: 11 }} style={{ marginTop: "2rem" }}>
-              <Tile>
-                <p className="cds--type-productive-heading-02">{PROBLEM.resolution.title}</p>
-                {PROBLEM.resolution.lines.map((line) => (
-                  <p key={line} className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
-                    {line}
-                  </p>
-                ))}
+
+            {/* Without / With comparison — the section's real supporting
+                component, five paired scenarios each. */}
+            <Column sm={4} md={4} lg={8} style={{ marginTop: "2rem" }}>
+              <Tile style={{ height: "100%", borderLeft: "3px solid var(--cds-support-error)" }}>
+                <p className="cds--type-productive-heading-02">{PROBLEM.without.title}</p>
+                <div style={{ marginTop: "0.875rem" }}>
+                  {PROBLEM.without.lines.map((line) => (
+                    <div key={line} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start", marginBottom: "0.625rem" }}>
+                      <Close size={16} style={{ color: "var(--cds-support-error)", flexShrink: 0, marginTop: "0.125rem" }} />
+                      <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        {line}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </Tile>
+            </Column>
+            <Column sm={4} md={4} lg={8} style={{ marginTop: "2rem" }}>
+              <Tile style={{ height: "100%", borderLeft: "3px solid var(--cds-support-success)" }}>
+                <p className="cds--type-productive-heading-02">{PROBLEM.with.title}</p>
+                <div style={{ marginTop: "0.875rem" }}>
+                  {PROBLEM.with.lines.map((line) => (
+                    <div key={line} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start", marginBottom: "0.625rem" }}>
+                      <CheckmarkFilled size={16} style={{ color: "var(--cds-support-success)", flexShrink: 0, marginTop: "0.125rem" }} />
+                      <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                        {line}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </Tile>
+            </Column>
+
+            <Column sm={4} md={8} lg={16} style={{ marginTop: "1.5rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+                <p className="cds--type-productive-heading-02">{PROBLEM.resolution.title}:</p>
+                {PROBLEM.resolution.lines.map((line, i) => (
+                  <span key={line} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <span className="cds--type-body-02" style={{ color: "var(--cds-text-secondary)" }}>
+                      {line}
+                    </span>
+                    {i < PROBLEM.resolution.lines.length - 1 && <span style={{ color: "var(--cds-border-subtle)" }}>·</span>}
+                  </span>
+                ))}
+              </div>
             </Column>
           </Grid>
           </MotionReveal>
@@ -265,14 +302,15 @@ export default async function LandingPage() {
           </MotionReveal>
         </section>
 
-        {/* 4. Pulse showcase (spec §8). UI/UX audit fix (2026-09-14):
-            this section used to render the exact same TodaysBriefingPanel
-            the Hero already shows, full-width, with identical figures —
-            teaching a scrolling visitor nothing new two sections after
-            they'd already seen it. Dropped the repeat; this section now
-            only adds what the Hero didn't: the KPI-anatomy explanation,
-            trimmed and re-worded to reference "the tiles above" (Hero)
-            instead of a tile that no longer renders in this section. */}
+        {/* 4. Pulse showcase (spec §8). Reworked 2026-09-14 twice —
+            first an audit fix dropped the duplicate TodaysBriefingPanel
+            (it repeated the Hero's exact KPI tiles, teaching nothing
+            new), but that left the section with only an explainer of
+            tiles shown two sections up: "feels incomplete." Added
+            `sampleBrief` (marketing-content.ts) — Pulse calls itself a
+            "daily operating brief," which is a narrative, not five
+            numbers; this is the first place on the page that actually
+            shows one. */}
         <section id="pulse" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <MotionReveal>
           <Grid>
@@ -291,13 +329,37 @@ export default async function LandingPage() {
               </p>
             </Column>
 
+            {/* Sample daily brief — the section's own real content,
+                distinct from the Hero's KPI-tile row above. */}
+            <Column sm={4} md={8} lg={{ span: 10, offset: 3 }}>
+              <Tile style={{ borderLeft: "3px solid var(--cds-support-info)" }} aria-hidden>
+                <p className="cds--type-heading-compact-01">{PULSE_SECTION.sampleBrief.greeting}</p>
+                <div style={{ marginTop: "1rem" }}>
+                  {PULSE_SECTION.sampleBrief.lines.map((line) => (
+                    <p
+                      key={line}
+                      className="cds--type-body-01"
+                      style={{
+                        marginTop: "0.625rem",
+                        paddingLeft: "0.875rem",
+                        borderLeft: "2px solid var(--cds-border-subtle)",
+                        color: "var(--cds-text-secondary)",
+                      }}
+                    >
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              </Tile>
+            </Column>
+
             {/* KPI-tile anatomy diagram (explicit follow-up request,
                 narrowed twice since to just the alert line + how a
                 glance reads it, then to plain HTML/CSS) — Carbon has no
                 official "KPI card" component; this is a composition of
                 Tile + semantic color tokens, same as the real product's
                 own KpiTile.tsx. */}
-            <Column sm={4} md={8} lg={16}>
+            <Column sm={4} md={8} lg={16} style={{ marginTop: "3rem" }}>
               <h3 className="cds--type-productive-heading-02">How to read the tiles above.</h3>
               <p className="cds--type-body-01" style={{ marginTop: "0.375rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
                 Every KPI tile across AORMS carries the same alert line along its top edge, built entirely from stock

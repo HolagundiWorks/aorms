@@ -79,11 +79,41 @@ export const HUMAN_CENTRIC_WORKS = {
  * The problem section (spec §6) — the information-scatter chain
  * collapsing into one operating record.
  */
+/**
+ * Reworked 2026-09-14 (follow-up: "the problem section... feels
+ * incomplete") — the chain-of-tags + resolution tile was the only
+ * section on the page with no substantive supporting component, just
+ * typography and a row of `Tag`s. `without`/`with` gives it the same
+ * "real comparison" weight every other section gets from its own panel
+ * — five concrete, specific scenarios (not abstract "information lives
+ * in many places") paired one-to-one against what AORMS actually does
+ * about each, so it reads as a real before/after rather than a slogan.
+ */
 export const PROBLEM = {
   eyebrow: "The problem",
   title: "Architecture practices don't have a project problem.\nThey have an information problem.",
   body: "Projects live across WhatsApp, email, spreadsheets, drawings, meetings, site discussions, and invoices. By the time the information reaches the right person, the decision is already late.",
   chain: ["WhatsApp", "Email", "Excel", "Drawings", "Meetings", "Client", "Invoice"],
+  without: {
+    title: "Without AORMS",
+    lines: [
+      "A revision discussed on-site lives in someone's WhatsApp, if it's written down at all.",
+      "The client's approval is buried three replies deep in an email thread.",
+      "Nobody's quite sure which drawing version is the current one.",
+      "Billing status gets reconstructed from memory at month-end.",
+      "\"What's the status on this?\" means pinging four people and waiting.",
+    ],
+  },
+  with: {
+    title: "With AORMS",
+    lines: [
+      "Every revision is tagged, assessed, and approved — on the record, not in a chat.",
+      "Client approvals happen in the portal, with a timestamp, not an email trail.",
+      "One current drawing register, not a folder of \"final_v3_FINAL\" files.",
+      "What's billable is always a live figure, not a month-end reconstruction.",
+      "\"What's the status\" is one page, answered before anyone has to ask.",
+    ],
+  },
   resolution: {
     title: "AORMS",
     lines: ["One practice", "One operating record", "One source of truth"],
@@ -129,12 +159,30 @@ export const VALUE_CARDS = [
   },
 ] as const;
 
-/** Pulse showcase (spec §8) — the same daily-brief pipeline the hero
- * visual uses, shown again as its own dedicated section. */
+/**
+ * Pulse showcase (spec §8). Reworked 2026-09-14 (follow-up: "the...
+ * pulse section... feels incomplete") — an earlier pass removed the
+ * duplicate `TodaysBriefingPanel` render (it repeated the Hero's exact
+ * KPI tiles with no new information), but left this section with
+ * nothing of its own besides an explainer of tiles shown two sections
+ * up. `sampleBrief` gives it real, unique content: Pulse's own copy
+ * calls itself a "daily operating brief," which is a narrative, not
+ * just five numbers — this is the first place on the page that actually
+ * shows one, in the studio-owner's own voice a Pulse brief would use.
+ */
 export const PULSE_SECTION = {
   eyebrow: "Pulse",
   title: "Start the day already briefed.",
   body: "Pulse turns your practice data into a daily operating brief — what changed, what's urgent, what's billable, and what needs attention. Written the moment the page loads, from your own studio's real records.",
+  sampleBrief: {
+    greeting: "Good morning. Here's what changed since yesterday:",
+    lines: [
+      "Kitchen finish revision on Sharma Residence was approved — ₹18,500 added to the phase fee.",
+      "Working drawings for Mehta Bungalow crossed 65% — on track for Friday's client review.",
+      "Two invoices are 7+ days overdue: Verma Residence, Reddy Extension.",
+      "Structural coordination task has sat unassigned since Monday.",
+    ],
+  },
 } as const;
 
 /**
