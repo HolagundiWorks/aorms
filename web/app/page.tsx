@@ -161,7 +161,8 @@ export default async function LandingPage() {
           </Grid>
         </section>
 
-        {/* 2. Problem (spec §6) */}
+        {/* 2. Problem (spec §6) — two rows (text, then chain/resolution),
+            not side-by-side columns, per explicit follow-up request. */}
         <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <Grid>
             <Column sm={4} md={8} lg={10}>
@@ -178,7 +179,7 @@ export default async function LandingPage() {
                 {PROBLEM.body}
               </p>
             </Column>
-            <Column sm={4} md={8} lg={{ span: 5, offset: 11 }} style={{ marginTop: "1.5rem" }}>
+            <Column sm={4} md={8} lg={16} style={{ marginTop: "2rem" }}>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
                 {PROBLEM.chain.map((step, i) => (
                   <span key={step} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -249,20 +250,21 @@ export default async function LandingPage() {
           </Grid>
         </section>
 
-        {/* 5. Fee Recovery (spec §9) */}
+        {/* 5. Fee Recovery (spec §9) — two columns (text+chain, then the
+            panel), not stacked rows, per explicit follow-up request. */}
         <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <Grid>
-            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
+            <Column sm={4} md={8} lg={7}>
               <p
                 className="cds--type-productive-heading-01"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
               >
                 {FEE_RECOVERY.eyebrow}
               </p>
-              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem", maxWidth: 640 }}>
+              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
                 {FEE_RECOVERY.title}
               </h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
+              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
                 {FEE_RECOVERY.body}
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem", alignItems: "center" }}>
@@ -276,7 +278,7 @@ export default async function LandingPage() {
                 ))}
               </div>
             </Column>
-            <Column sm={4} md={8} lg={{ span: 8, offset: 4 }}>
+            <Column sm={4} md={8} lg={{ span: 8, offset: 1 }} style={{ marginTop: "1.5rem" }}>
               <BillingForecastPanel />
             </Column>
           </Grid>
