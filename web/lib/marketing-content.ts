@@ -126,10 +126,22 @@ export const PULSE_SECTION = {
  * Fee Recovery (spec §9) — the same billing-forecast pipeline
  * (task progress → billable ₹), framed around the work→invoice chain.
  */
+/**
+ * "Billable so far" and "Still pending" used to sit as two equally-
+ * weighted footer stats in BillingForecastPanel.tsx (§9) — but the one
+ * question a practice actually asks day to day is "what can I bill
+ * today?", not "what's left" (2026-09-14 follow-up: "the important
+ * metric is the [figure] that needs to be billed today, structure both
+ * the visuals and explanation accordingly"). Copy + panel restructured
+ * so that figure — renamed "Ready to bill today" — is the one thing
+ * this section leads with; the task progress bars become supporting
+ * evidence for that number, and "still pending" is a small secondary
+ * line, not a second hero figure.
+ */
 export const FEE_RECOVERY = {
   eyebrow: "Fee recovery",
-  title: "Stop doing work you forgot to bill.",
-  body: "AORMS connects operational activity with the commercial side of the practice — every task carries progress against its phase's fee, and that progress predicts what's billable before invoice time, not at it.",
+  title: "Always know what's ready to bill today.",
+  body: "AORMS connects operational activity with the commercial side of the practice — every task carries progress against its phase's fee, so the practice always has one live figure for what's earned and billable right now, not a guess reconstructed at invoice time.",
   chain: ["Work", "Task", "Milestone", "Billable", "Invoice", "Payment"],
 } as const;
 

@@ -10,6 +10,17 @@
  * bars") via AnimatedProgressBar/AnimatedNumber — this file itself stays
  * a plain Server Component, only those two leaf pieces are Client
  * Components.
+ *
+ * Restructured (2026-09-14 same-day follow-up: "the important metric is
+ * the [figure] that needs to be billed today, structure both the visuals
+ * and explanation accordingly") — "Billable so far" and "Still pending"
+ * used to be two equal-weight footer stats. The question a practice
+ * actually asks is "what can I bill today", not "what's left", so that
+ * figure (renamed "Ready to bill today") is now the panel's lead: a
+ * large hero number at the top, in front of the task progress that
+ * derives it. The task list becomes supporting evidence for the hero
+ * figure rather than the panel's main content; "still pending" is a
+ * single small secondary line at the bottom, not a second hero stat.
  */
 import { AnimatedNumber } from "./AnimatedNumber";
 import { AnimatedProgressBar } from "./AnimatedProgressBar";
@@ -39,12 +50,31 @@ export function BillingForecastPanel() {
         <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
           Design Development — Sharma Residence Extension
         </p>
-        <p className="cds--type-productive-heading-02" style={{ marginTop: "0.25rem" }}>
-          <AnimatedNumber value={overallPct} kind="percent" /> of phase complete
+      </div>
+
+      {/* Hero: the one figure this panel leads with. */}
+      <div style={{ padding: "1.25rem", borderBottom: "1px solid var(--cds-border-subtle)" }}>
+        <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+          Ready to bill today
+        </p>
+        <p className="cds--type-heading-04" style={{ marginTop: "0.25rem", color: "var(--cds-support-success)" }}>
+          <AnimatedNumber value={billable} kind="inr" />
+        </p>
+        <p className="cds--type-caption-01" style={{ marginTop: "0.375rem", color: "var(--cds-text-secondary)" }}>
+          <AnimatedNumber value={pending} kind="inr" /> still pending, from the phase work below.
         </p>
       </div>
 
+      {/* Supporting evidence: the task progress this figure comes from. */}
       <div style={{ padding: "1.25rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+          <span className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+            Phase progress
+          </span>
+          <span className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+            <AnimatedNumber value={overallPct} kind="percent" />
+          </span>
+        </div>
         {TASKS.map((task) => (
           <div key={task.name} style={{ marginBottom: "0.875rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
@@ -56,25 +86,6 @@ export function BillingForecastPanel() {
             <AnimatedProgressBar pct={task.pct} color={task.pct === 100 ? "var(--cds-support-success)" : "var(--cds-support-info)"} />
           </div>
         ))}
-      </div>
-
-      <div style={{ display: "flex", borderTop: "1px solid var(--cds-border-subtle)" }}>
-        <div style={{ flex: 1, padding: "1rem 1.25rem", borderRight: "1px solid var(--cds-border-subtle)" }}>
-          <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
-            Billable so far
-          </p>
-          <p className="cds--type-productive-heading-03" style={{ marginTop: "0.25rem", color: "var(--cds-support-success)" }}>
-            <AnimatedNumber value={billable} kind="inr" />
-          </p>
-        </div>
-        <div style={{ flex: 1, padding: "1rem 1.25rem" }}>
-          <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
-            Still pending
-          </p>
-          <p className="cds--type-productive-heading-03" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
-            <AnimatedNumber value={pending} kind="inr" />
-          </p>
-        </div>
       </div>
     </div>
   );
