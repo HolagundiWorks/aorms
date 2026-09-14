@@ -287,6 +287,16 @@ export const COMPANY_IDENTITY = [
  * inputs aren't abstract line items someone has to guess the meaning
  * of; each cause here maps to a real habit most Indian practices
  * already recognize.
+ *
+ * `pctOfHours` (2026-09-14 follow-up request) — five of the six causes
+ * are given an illustrative share of a project's total worked hours
+ * (the user's own worked example: a ~300hr project, 15% unbilled
+ * revisions ≈ 45 hours), used by `OperationalLeakageCalculator.tsx` to
+ * turn this list from prose into an actual hours/₹ breakdown per cause,
+ * and by `RoiCalculator.tsx` as the calculated (no longer manually
+ * guessed) fee-leakage percentage. "Cost overruns" has no `pctOfHours`
+ * — it's a budget-overrun pattern, not a share of hours worked, so it
+ * stays qualitative rather than forced into the same hours math.
  */
 export const OPERATIONAL_LEAKAGE = {
   title: "What operational leakage actually is.",
@@ -295,26 +305,32 @@ export const OPERATIONAL_LEAKAGE = {
     {
       title: "Unbilled revisions",
       body: "A client asks for a change mid-project, the team makes it, and it's never logged as a separate scope item — the extra hours go in, but no fee ever comes out for them.",
+      pctOfHours: 15,
     },
     {
       title: "Cost overruns",
       body: "Without a running view of phase progress against fee, a project quietly goes over budget on hours long before anyone notices — often not until the final account.",
+      pctOfHours: null,
     },
     {
       title: "Repetitive tasks",
       body: "The same coordination steps — chasing a drawing revision, re-confirming a site measurement, re-sending a document — get redone by hand on every project instead of once, properly.",
+      pctOfHours: 5,
     },
     {
       title: "Figuring out task priority",
       body: "With no single ranked list, each team member spends real time every morning deciding what to work on first, instead of just working the list.",
+      pctOfHours: 5,
     },
     {
       title: "Constant meetings",
       body: "Status updates that could be a glance at a dashboard become a recurring meeting instead — real hours spent restating what already happened rather than deciding what's next.",
+      pctOfHours: 5,
     },
     {
       title: "Manual timesheet entries",
       body: "Hours get reconstructed from memory at the end of the week instead of tracked as work happens — some of it is simply forgotten, and never billed.",
+      pctOfHours: 5,
     },
   ],
   closing: "Each of these on its own looks small. Together, they're the actual reason a task gets delayed — not the design work itself, but the management overhead stacked on top of it.",

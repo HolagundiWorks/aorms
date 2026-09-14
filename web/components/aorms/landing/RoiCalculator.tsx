@@ -14,12 +14,18 @@
  * wrapper (RoiCalculatorSection.tsx), which reads it live from
  * `plan_pricing` — never hardcoded, so the value/cost multiplier stays
  * correct if an admin changes the price on /admin/pricing later.
+ *
+ * "Estimated fee leakage" (2026-09-14 follow-up) is no longer a manually
+ * guessed 1/2/3/5% pill — it's `TOTAL_LEAKAGE_PCT`, the sum of
+ * `OPERATIONAL_LEAKAGE.causes[].pctOfHours` from the breakdown shown just
+ * above this calculator (`OperationalLeakageCalculator.tsx`), so the two
+ * sections stay one calculation instead of two independently-guessed
+ * numbers.
  */
 import { useMemo, useState } from "react";
-import { Button, NumberInput, Stack, Tag } from "@carbon/react";
+import { NumberInput, Stack, Tag } from "@carbon/react";
 import { ROI_DISCLAIMER } from "../../../lib/marketing-content";
-
-const LEAKAGE_OPTIONS = [1, 2, 3, 5] as const;
+import { TOTAL_LEAKAGE_PCT } from "./OperationalLeakageCalculator";
 
 function formatInr(n: number): string {
   return `₹${Math.round(n).toLocaleString("en-IN")}`;
@@ -27,20 +33,19 @@ function formatInr(n: number): string {
 
 export function RoiCalculator({ professionalPricePaise }: { professionalPricePaise: number }) {
   const [annualFees, setAnnualFees] = useState(10000000); // ₹1,00,00,000 default, matches the spec's own example
-  const [leakagePct, setLeakagePct] = useState<(typeof LEAKAGE_OPTIONS)[number]>(2);
   const [mgmtHoursPerWeek, setMgmtHoursPerWeek] = useState(6);
   const [adminHoursPerWeek, setAdminHoursPerWeek] = useState(4);
   const [hourlyValue, setHourlyValue] = useState(1000);
 
   const { feeRecovery, managementRecovered, adminRecovered, potentialAnnualValue, multiplier } = useMemo(() => {
-    const feeRecovery = annualFees * (leakagePct / 100);
+    const feeRecovery = annualFees * (TOTAL_LEAKAGE_PCT / 100);
     const managementRecovered = mgmtHoursPerWeek * 52 * hourlyValue;
     const adminRecovered = adminHoursPerWeek * 52 * hourlyValue;
     const potentialAnnualValue = feeRecovery + managementRecovered + adminRecovered;
     const professionalPriceRupees = professionalPricePaise / 100;
     const multiplier = professionalPriceRupees > 0 ? potentialAnnualValue / professionalPriceRupees : 0;
     return { feeRecovery, managementRecovered, adminRecovered, potentialAnnualValue, multiplier };
-  }, [annualFees, leakagePct, mgmtHoursPerWeek, adminHoursPerWeek, hourlyValue, professionalPricePaise]);
+  }, [annualFees, mgmtHoursPerWeek, adminHoursPerWeek, hourlyValue, professionalPricePaise]);
 
   return (
     <div style={{ border: "1px solid var(--cds-border-subtle)", background: "var(--cds-layer)", padding: "1.5rem" }}>
@@ -56,16 +61,13 @@ export function RoiCalculator({ professionalPricePaise }: { professionalPricePai
         />
 
         <div>
-          <p className="cds--type-label-01" style={{ marginBottom: "0.5rem" }}>
+          <p className="cds--type-label-01" style={{ marginBottom: "0.25rem", color: "var(--cds-text-secondary)" }}>
             Estimated fee leakage
           </p>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            {LEAKAGE_OPTIONS.map((pct) => (
-              <Button key={pct} kind={leakagePct === pct ? "primary" : "tertiary"} size="sm" onClick={() => setLeakagePct(pct)}>
-                {pct}%
-              </Button>
-            ))}
-          </div>
+          <p className="cds--type-heading-03">{TOTAL_LEAKAGE_PCT}%</p>
+          <p className="cds--type-helper-text-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
+            Calculated from the operational leakage breakdown above — not a manual guess.
+          </p>
         </div>
 
         <NumberInput

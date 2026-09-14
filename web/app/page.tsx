@@ -14,6 +14,8 @@ import { BillingForecastPanel } from "../components/aorms/BillingForecastPanel";
 import { RevisionLifecyclePanel } from "../components/aorms/RevisionLifecyclePanel";
 import { TodaysBriefingPanel } from "../components/aorms/TodaysBriefingPanel";
 import { RoiCalculatorSection } from "../components/aorms/landing/RoiCalculatorSection";
+import { OperationalLeakageCalculator } from "../components/aorms/landing/OperationalLeakageCalculator";
+import { KpiAnatomyDiagram } from "../components/aorms/landing/KpiAnatomyDiagram";
 import {
   AORMS_PLATFORM,
   CONNECTDEX,
@@ -255,6 +257,23 @@ export default async function LandingPage() {
             <Column sm={4} md={8} lg={16}>
               <TodaysBriefingPanel />
             </Column>
+
+            {/* KPI-tile anatomy diagram (explicit follow-up request) —
+                explains each visual part of a KPI tile with leader
+                lines, and what it maps to in Carbon's own primitives/
+                type tokens (Carbon has no official "KPI card" component;
+                this is a composition of Tile + type tokens + semantic
+                color, same as the real product's own KpiTile.tsx). */}
+            <Column sm={4} md={8} lg={16} style={{ marginTop: "3rem" }}>
+              <h3 className="cds--type-productive-heading-03">How to read a Pulse KPI tile.</h3>
+              <p className="cds--type-body-01" style={{ marginTop: "0.5rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
+                Every tile above — and every KPI tile across AORMS, not just Pulse — follows this same anatomy, built entirely
+                from stock Carbon Design System primitives rather than a bespoke card design.
+              </p>
+              <div style={{ marginTop: "1.5rem", maxWidth: 800 }}>
+                <KpiAnatomyDiagram />
+              </div>
+            </Column>
           </Grid>
         </section>
 
@@ -385,15 +404,8 @@ export default async function LandingPage() {
               <p className="cds--type-body-02" style={{ marginTop: "0.5rem", maxWidth: 720, color: "var(--cds-text-secondary)" }}>
                 {OPERATIONAL_LEAKAGE.body}
               </p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(15rem, 1fr))", gap: "1rem", marginTop: "1.5rem" }}>
-                {OPERATIONAL_LEAKAGE.causes.map((cause) => (
-                  <Tile key={cause.title}>
-                    <p className="cds--type-productive-heading-02">{cause.title}</p>
-                    <p className="cds--type-body-01" style={{ marginTop: "0.375rem", color: "var(--cds-text-secondary)" }}>
-                      {cause.body}
-                    </p>
-                  </Tile>
-                ))}
+              <div style={{ marginTop: "1.5rem" }}>
+                <OperationalLeakageCalculator />
               </div>
               <p className="cds--type-body-02" style={{ marginTop: "1.5rem", maxWidth: 720, color: "var(--cds-text-secondary)" }}>
                 {OPERATIONAL_LEAKAGE.closing}
