@@ -61,6 +61,29 @@ export async function POST(request: Request) {
   const orderId = payment?.order_id;
   const paymentId = payment?.id;
 
+  // 2026-09-14 — replay defense-in-depth. Keyed on event type + Razorpay's
+  // own stable payment id (see the migration's own header comment for why
+  // not a "Razorpay event id" — no such stable field exists in the
+  // documented payload shape). A unique-violation on this insert means
+  // "already processed this exact event" — short-circuit with 200 (not an
+  // error; Razorpay should stop retrying) without touching the business
+  // logic below at all. Additive to that logic's own status!=='CAPTURED'
+  // idempotency check, not a replacement for it.
+  if (paymentId && (event.event === "payment.captured" || event.event === "payment.failed")) {
+    const dedupService = createServiceRoleClient();
+    const { error: dedupError } = await dedupService
+      .from("razorpay_webhook_events")
+      .insert({ dedup_key: `${event.event}:${paymentId}` });
+    if (dedupError) {
+      // 23505 = unique_violation — a genuine replay, not a real error.
+      if (dedupError.code === "23505") return NextResponse.json({ ok: true, replay: true });
+      // Any other failure (e.g. a transient DB error): fail closed on the
+      // dedup check itself would silently drop a real payment event, so
+      // fall through and process normally rather than block on this
+      // additive safety layer.
+    }
+  }
+
   if (event.event === "payment.captured" && orderId && paymentId) {
     const platformService = createServiceRoleClient();
     const { data: licenceRow } = await platformService
