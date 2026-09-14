@@ -33,11 +33,27 @@ export function TodaysBriefingPanel() {
         </p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(9rem, 1fr))", gap: "1px", background: "var(--cds-border-subtle)" }}>
+      {/* flex-wrap, not a 2-column CSS grid — 5 items in a 2-column
+          `repeat(auto-fit, ...)` grid leaves a visible empty phantom
+          cell in the last row on narrow viewports (found live, 2026-09-14
+          composition review). Flexbox wraps the same way without ever
+          creating that dead cell, since there's no implicit grid track
+          to leave unfilled. */}
+      <div style={{ display: "flex", flexWrap: "wrap" }}>
         {STATS.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} style={{ background: "var(--cds-layer)", padding: "1rem", borderTop: `3px solid ${stat.stripe}` }}>
+            <div
+              key={stat.label}
+              style={{
+                flex: "1 1 9rem",
+                background: "var(--cds-layer)",
+                padding: "1rem",
+                borderTop: `3px solid ${stat.stripe}`,
+                borderRight: "1px solid var(--cds-border-subtle)",
+                borderBottom: "1px solid var(--cds-border-subtle)",
+              }}
+            >
               <Icon size={18} style={{ color: "var(--cds-icon-secondary)" }} />
               <p className="cds--type-heading-04" style={{ marginTop: "0.5rem" }}>
                 <AnimatedNumber value={stat.value} kind={stat.kind} />
