@@ -452,6 +452,18 @@ body {
   }
 }
 
+// Live Demo section's "Demo credentials" card (2026-09-14 follow-up
+// request: move it inline, to the right, with the section) — its inline
+// `marginTop` gives breathing room while sm/md stack it full-width below
+// the copy, but at Carbon's `lg` breakpoint (66rem) the two columns sit
+// in the same row, so the margin is zeroed there to keep the card's top
+// edge level with the heading beside it instead of dropping lower.
+@media (min-width: 66rem) {
+  .live-demo-card {
+    margin-top: 0 !important;
+  }
+}
+
 // 2026-09-14 UI-polish request: "no rounded edges, simple straight
 // geometries" — Carbon's stock Tag ships pill-shaped by default
 // (.cds--tag's own border-radius: 16px, plus a circular close icon on

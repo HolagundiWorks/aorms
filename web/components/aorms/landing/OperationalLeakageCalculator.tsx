@@ -8,9 +8,12 @@
  * value); every cause's leaked hours and leaked cost are *calculated*
  * from `OPERATIONAL_LEAKAGE.causes[].pctOfHours`, not separately typed
  * in per cause — that's the "remove that manual entry field" half of the
- * request. "Cost overruns" has no `pctOfHours` (it's a budget pattern,
- * not a share of hours worked) so it's shown without a figure rather
- * than forced into the same math.
+ * request. "Cost overruns" was briefly excluded from this math as a
+ * budget-overrun pattern rather than an hours share, but was merged
+ * back in (2026-09-14 same-day follow-up: "Illustrative ROI... merge
+ * the cost overrun with it" — the disclaimer this whole calculator
+ * already carries covers it too, no reason to carve it out) at an
+ * illustrative 10%, so every cause now renders the same hrs/₹ figure.
  *
  * The old, separate ROI Calculator (annual fees / mgmt+admin hours /
  * potential-annual-value form) was removed (2026-09-14 follow-up
@@ -18,10 +21,18 @@
  * cost" ground directly from real cause hours — this is now the one
  * cost calculator on the page, not one of two. Its disclaimer
  * (`ROI_DISCLAIMER`) moved here with it.
+ *
+ * "Cost overruns" has no own tile (2026-09-14 same-day follow-up:
+ * "remove the cost overrun tile") but its `pctOfHours` still counts
+ * toward `TOTAL_LEAKAGE_PCT` and the totals below — the prior request
+ * ("merge the cost overrun with it") was to fold its contribution into
+ * the aggregate, not to give it a standalone card.
  */
 import { useMemo, useState } from "react";
 import { NumberInput, Tile } from "@carbon/react";
 import { OPERATIONAL_LEAKAGE, ROI_DISCLAIMER } from "../../../lib/marketing-content";
+
+const TILE_CAUSES = OPERATIONAL_LEAKAGE.causes.filter((cause) => cause.title !== "Cost overruns");
 
 export const TOTAL_LEAKAGE_PCT = OPERATIONAL_LEAKAGE.causes.reduce((sum, cause) => sum + (cause.pctOfHours ?? 0), 0);
 
@@ -33,15 +44,18 @@ export function OperationalLeakageCalculator() {
   const [projectHours, setProjectHours] = useState(300);
   const [hourlyValue, setHourlyValue] = useState(1000);
 
-  const { rows, totalHours, totalCost } = useMemo(() => {
-    const rows = OPERATIONAL_LEAKAGE.causes.map((cause) => {
-      const hours = cause.pctOfHours != null ? (projectHours * cause.pctOfHours) / 100 : null;
-      const cost = hours != null ? hours * hourlyValue : null;
+  const { tileRows, totalHours, totalCost } = useMemo(() => {
+    const withFigures = (cause: (typeof OPERATIONAL_LEAKAGE.causes)[number]) => {
+      const hours = (projectHours * cause.pctOfHours) / 100;
+      const cost = hours * hourlyValue;
       return { ...cause, hours, cost };
-    });
-    const totalHours = rows.reduce((sum, r) => sum + (r.hours ?? 0), 0);
+    };
+    const tileRows = TILE_CAUSES.map(withFigures);
+    // Totals sum every cause, including "Cost overruns" (no tile of its
+    // own, but its share still counts toward the aggregate).
+    const totalHours = OPERATIONAL_LEAKAGE.causes.map(withFigures).reduce((sum, r) => sum + r.hours, 0);
     const totalCost = totalHours * hourlyValue;
-    return { rows, totalHours, totalCost };
+    return { tileRows, totalHours, totalCost };
   }, [projectHours, hourlyValue]);
 
   return (
@@ -72,26 +86,20 @@ export function OperationalLeakageCalculator() {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(15rem, 1fr))", gap: "1rem", marginTop: "1.5rem" }}>
-        {rows.map((cause) => (
+        {tileRows.map((cause) => (
           <Tile key={cause.title}>
             <p className="cds--type-productive-heading-02">{cause.title}</p>
             <p className="cds--type-body-01" style={{ marginTop: "0.375rem", color: "var(--cds-text-secondary)" }}>
               {cause.body}
             </p>
-            {cause.hours != null ? (
-              <div style={{ marginTop: "0.875rem", paddingTop: "0.75rem", borderTop: "1px solid var(--cds-border-subtle)" }}>
-                <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
-                  {cause.pctOfHours}% of project hours
-                </p>
-                <p className="cds--type-productive-heading-02" style={{ marginTop: "0.25rem", color: "var(--cds-support-info)" }}>
-                  {Math.round(cause.hours)} hrs · {formatInr(cause.cost ?? 0)}
-                </p>
-              </div>
-            ) : (
-              <p className="cds--type-label-01" style={{ marginTop: "0.875rem", paddingTop: "0.75rem", borderTop: "1px solid var(--cds-border-subtle)", color: "var(--cds-text-placeholder)" }}>
-                Budget-overrun pattern — not a share of hours worked
+            <div style={{ marginTop: "0.875rem", paddingTop: "0.75rem", borderTop: "1px solid var(--cds-border-subtle)" }}>
+              <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+                {cause.pctOfHours}% of project hours
               </p>
-            )}
+              <p className="cds--type-productive-heading-02" style={{ marginTop: "0.25rem", color: "var(--cds-support-info)" }}>
+                {Math.round(cause.hours)} hrs · {formatInr(cause.cost)}
+              </p>
+            </div>
           </Tile>
         ))}
       </div>

@@ -562,7 +562,17 @@ export default async function LandingPage() {
               </p>
               <LiveDemoCtas />
             </Column>
-            <Column sm={4} md={8} lg={{ span: 6, offset: 1 }} style={{ marginTop: "1.5rem" }}>
+            {/* lg offset is absolute from the grid's own start, not
+                relative to the sibling column — the first column spans
+                9, so this one has to start at offset 10 to sit right
+                after it instead of overlapping it (same Carbon Column
+                offset bug pattern fixed elsewhere on this page,
+                2026-09-14 follow-up: card was landing under/behind the
+                text column instead of beside it). marginTop only
+                applies while sm/md stack the columns full-width — at lg
+                the two columns sit in the same row, so it's zeroed
+                there to keep the card's top edge level with the heading. */}
+            <Column sm={4} md={8} lg={{ span: 6, offset: 10 }} style={{ marginTop: "1.5rem" }} className="live-demo-card">
               <Tile>
                 <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-support-info)" }}>
                   Demo credentials

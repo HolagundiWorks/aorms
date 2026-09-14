@@ -288,16 +288,19 @@ export const COMPANY_IDENTITY = [
  * of; each cause here maps to a real habit most Indian practices
  * already recognize.
  *
- * `pctOfHours` (2026-09-14 follow-up request) — five of the six causes
- * are given an illustrative share of a project's total worked hours
- * (the user's own worked example: a ~300hr project, 15% unbilled
- * revisions ≈ 45 hours), used by `OperationalLeakageCalculator.tsx`
- * (the page's one cost calculator — the earlier separate ROI Calculator
- * form was removed the same day once this covered the same ground) to
- * turn this list from prose into an actual hours/₹ breakdown per cause.
- * "Cost overruns" has no `pctOfHours`
- * — it's a budget-overrun pattern, not a share of hours worked, so it
- * stays qualitative rather than forced into the same hours math.
+ * `pctOfHours` (2026-09-14 follow-up request) — every cause is given an
+ * illustrative share of a project's total worked hours (the user's own
+ * worked example: a ~300hr project, 15% unbilled revisions ≈ 45 hours),
+ * used by `OperationalLeakageCalculator.tsx` (the page's one cost
+ * calculator — the earlier separate ROI Calculator form was removed the
+ * same day once this covered the same ground) to turn this list from
+ * prose into an actual hours/₹ breakdown per cause. "Cost overruns" was
+ * first left out of this math as a budget-overrun pattern rather than an
+ * hours share, but was folded back in the same day ("Illustrative ROI"
+ * — the disclaimer this whole calculator already carries — covers it
+ * too, so there's no reason to carve it out into its own, separately
+ * unmeasured card) at an illustrative 10%, same order of magnitude as
+ * unbilled revisions.
  */
 export const OPERATIONAL_LEAKAGE = {
   title: "What operational leakage actually is.",
@@ -311,7 +314,7 @@ export const OPERATIONAL_LEAKAGE = {
     {
       title: "Cost overruns",
       body: "Without a running view of phase progress against fee, a project quietly goes over budget on hours long before anyone notices — often not until the final account.",
-      pctOfHours: null,
+      pctOfHours: 10,
     },
     {
       title: "Repetitive tasks",
