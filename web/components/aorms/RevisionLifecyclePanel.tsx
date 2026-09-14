@@ -3,6 +3,7 @@ import { Tile } from "@carbon/react";
 import { REVISION_MANAGEMENT } from "../../lib/marketing-content";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { AnimatedProgressBar } from "./AnimatedProgressBar";
+import { MotionStagger } from "./motion/MotionStagger";
 
 /**
  * Four-stage tile row for the revision lifecycle. Same width AND same
@@ -26,6 +27,14 @@ import { AnimatedProgressBar } from "./AnimatedProgressBar";
  * through stage 3 (assessed, not yet back from the client), so
  * `PROGRESS_PCT` treats stages 1-2 as done and stage 3 as half-done:
  * (2 + 0.5) / 4 stages ≈ 62%.
+ *
+ * Entrance (2026-09-14 same-day follow-up: "animate it ... move the
+ * next tile, move the progress bar") — `MotionStagger` wraps the
+ * progress-bar block and the tile row as two items, landing one after
+ * the other on scroll rather than as one flat block. Stage 3's own
+ * cost-delta figure is untouched ("keep tile 3 section") — it keeps
+ * animating exactly as before, via its own `AnimatedNumber`, once the
+ * tile row itself has landed.
  */
 const ICONS = [Chat, Send, Calculator, CheckmarkFilled] as const;
 const TILE_HEIGHT = "23rem";
@@ -36,6 +45,7 @@ const PROGRESS_PCT = 62; // stages 1-2 done + stage 3 half-done, of 4 stages
 export function RevisionLifecyclePanel() {
   return (
     <div aria-hidden>
+    <MotionStagger>
       <div style={{ marginBottom: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
           <span className="cds--type-body-01">Kitchen finish revision — Sharma Residence Extension</span>
@@ -79,6 +89,7 @@ export function RevisionLifecyclePanel() {
         );
       })}
       </div>
+    </MotionStagger>
     </div>
   );
 }
