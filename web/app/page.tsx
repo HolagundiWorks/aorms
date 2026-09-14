@@ -126,7 +126,15 @@ export default async function LandingPage() {
       <div style={{ maxWidth: PAGE_MAX, margin: "0 auto", padding: "0 1rem" }}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
 
-        {/* 1. Hero (spec §4-5) */}
+        {/* 1. Hero (spec §4-5) — visual stacked full-width below the
+            headline, same presentation as the dedicated Pulse section
+            further down (id="pulse") rather than squeezed into a narrow
+            side column, per explicit follow-up request ("replace the
+            hero visual with the pulse dashboard visual, copy the same
+            from pulse section"). Both sections render the exact same
+            TodaysBriefingPanel component/data — this only changes the
+            hero's own column layout to match how that panel is shown
+            there (full Grid width, one clean horizontal row). */}
         <section id="top" style={{ padding: "clamp(2.5rem, 5vw, 4rem) 0" }}>
           <Grid>
             <Column sm={4} md={8} lg={11}>
@@ -147,7 +155,7 @@ export default async function LandingPage() {
                 No installation · Browser-based · Built for architecture practices
               </p>
             </Column>
-            <Column sm={4} md={8} lg={{ span: 5, offset: 11 }} style={{ marginTop: "2rem" }}>
+            <Column sm={4} md={8} lg={16} style={{ marginTop: "2.5rem" }}>
               <TodaysBriefingPanel />
             </Column>
           </Grid>
