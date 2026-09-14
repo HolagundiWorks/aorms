@@ -25,27 +25,21 @@ export function isSuperAdmin(account: CurrentPlatformAccount | null): boolean {
 }
 
 /**
- * Resolves a platform account's admin_role from the new `platform_staff`
- * table (2026-09-14, Identity/Admin separation phase 1 — platform
- * migration 0022, see docs/esti/SYSDEX-PORTAL-AUDIT-2026-09-14.md § 5),
- * falling back to the old `accounts.is_admin`/`admin_role` columns if
- * the account isn't in `platform_staff` yet — the same "check both
- * sources during the transition" shape `is_platform_admin()` (the SQL
- * side of this same migration) uses, so app code and RLS never disagree
- * about who's actually staff. `accounts.is_admin`/`admin_role`
- * themselves are NOT dropped yet (deliberately — see the audit doc's
- * own sequencing for why), so this fallback is real safety, not
- * decoration, until that later step.
+ * Resolves a platform account's admin_role from `platform_staff`
+ * (2026-09-14, Identity/Admin separation — platform migration 0022; the
+ * legacy `accounts.is_admin`/`admin_role` fallback this function had
+ * during the transition was removed by migration 0023, which drops
+ * those columns entirely — see docs/esti/SYSDEX-PORTAL-AUDIT-2026-09-14
+ * .md § 5.3 step 5). `platform_staff` is now the only source of truth;
+ * no fallback query left to remove before those columns could be
+ * dropped without erroring.
  */
 async function resolveAdminRole(
   platformService: ReturnType<typeof createPlatformServiceRoleClient>,
   accountId: string,
 ): Promise<AdminRole> {
   const { data: staff } = await platformService.from("platform_staff").select("admin_role").eq("id", accountId).maybeSingle();
-  if (staff?.admin_role) return staff.admin_role as AdminRole;
-
-  const { data: legacy } = await platformService.from("accounts").select("is_admin, admin_role").eq("id", accountId).maybeSingle();
-  return legacy?.is_admin ? ((legacy.admin_role as AdminRole) ?? null) : null;
+  return staff?.admin_role ? (staff.admin_role as AdminRole) : null;
 }
 
 /**

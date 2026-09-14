@@ -219,9 +219,22 @@ materially worse outcome than the current, merely-inelegant one.
    by writes, the list would have silently gone stale the moment anyone
    used the very control this same audit added. Fixed by joining
    `platform_staff` into the list query instead.
-5. **Deliberately not done** — dropping `accounts.is_admin`/`admin_role`
-   stays a follow-up, done only once this phase has run live for a
-   while with no read path found still depending on the legacy columns.
+5. ✅ **Done** (2026-09-14, same day, explicit request: "drop the legacy
+   accounts.is_admin columns now") — platform migration
+   `0023_drop_legacy_admin_columns.sql`. First removed
+   `resolveAdminRole()`'s fallback query against the legacy columns
+   (`lib/platform/account.ts`) and `is_platform_admin()`'s `OR
+   accounts.is_admin` clause, confirmed nothing else in `web/` read
+   those columns directly (grepped the whole app — every remaining
+   `is_admin`/`admin_role` reference was either a derived field on
+   `CurrentPlatformAccount` or a comment), *then* dropped the columns.
+   **One dependency found live, handled before it could block anything**:
+   `before_account_admin_role_sync` (`sync_account_is_admin()`), a
+   pre-existing trigger keeping `is_admin` derived from `admin_role` on
+   every write — a pure consistency helper for the two-column model this
+   step retires, confirmed to be the *only* trigger on `accounts`
+   depending on either column, dropped explicitly (not via blanket
+   `CASCADE`) in the same migration before the columns themselves.
 
 **Verified live, end-to-end, with real accounts and a real revocation
 path** (all test accounts deleted afterward):
@@ -245,16 +258,31 @@ step was a point where a mistake could have broken the live SysDeX
 login for its two real admins, and at every point their access kept
 working (checked directly, not assumed).
 
+**Post-drop verification (step 5), separately, same discipline:** typecheck/
+lint/build all clean before the drop was even applied (so a code issue
+would have surfaced before the destructive step, not after). After
+applying it: confirmed via `information_schema` that `accounts` no
+longer has either column; created a fresh temp SUPER_ADMIN (via
+`platform_staff` only) and confirmed full SysDeX access and a correct,
+error-free `/admin/accounts` list for all five real+test accounts;
+granted and then revoked SUPPORT_STAFF on a real existing account
+through the live UI, confirming both directions persist correctly with
+the legacy columns gone entirely. Test account deleted afterward;
+`platform_staff` confirmed to hold exactly the two real admin rows.
+
 ---
 
 ## 6. Files touched this pass
 
 - `platform/supabase/migrations/0021_trial_zero_pro_seats.sql` (new)
+- `platform/supabase/migrations/0022_platform_staff_table.sql` (new)
+- `platform/supabase/migrations/0023_drop_legacy_admin_columns.sql` (new)
 - `web/lib/actions/platform.ts` — `adminSetAccountLevel`,
   `adminSetAccountRole`, `requireSuperAdmin`
 - `web/lib/actions/platform-payments.ts` — seat validation `>= 0`
+- `web/lib/platform/account.ts` — `resolveAdminRole()`
 - `web/components/aorms/platform/UpdateLicenceForm.tsx` — seats input
   `min={0}`
 - `web/components/aorms/platform/AccountAdminControls.tsx` (new)
 - `web/app/(platform)/admin/accounts/page.tsx` — wired in the new
-  controls, merged the Level/Admin columns
+  controls, merged the Level/Admin columns, joins `platform_staff`
