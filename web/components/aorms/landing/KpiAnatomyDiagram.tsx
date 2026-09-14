@@ -42,10 +42,10 @@ const ANNOTATION = "#d02670";
 const ORANGE = "#eb6200"; // Carbon's orange-60 palette value — no dedicated --cds-support-* token for orange exists
 
 const SEVERITY_SCALE = [
-  { color: "var(--cds-support-success)", name: "Green", meaning: "On track — no action needed." },
-  { color: "var(--cds-support-warning)", name: "Yellow", meaning: "Caution — worth a look." },
-  { color: ORANGE, name: "Orange", meaning: "Warning — needs attention soon." },
-  { color: "var(--cds-support-error)", name: "Red", meaning: "Critical — needs attention now." },
+  { color: "var(--cds-support-success)", name: "Green", meaning: "Good progress — on track, no action needed." },
+  { color: "var(--cds-support-warning)", name: "Yellow", meaning: "Needs attention." },
+  { color: ORANGE, name: "Orange", meaning: "Needs attention — more urgent than yellow." },
+  { color: "var(--cds-support-error)", name: "Red", meaning: "Alert — needs immediate action." },
 ] as const;
 
 export function KpiAnatomyDiagram() {
