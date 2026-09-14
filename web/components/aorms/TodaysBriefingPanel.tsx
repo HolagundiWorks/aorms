@@ -1,5 +1,6 @@
 import { CheckmarkFilled, Money, Renew, UserMultiple, WarningAltFilled } from "@carbon/icons-react";
 import { AnimatedNumber } from "./AnimatedNumber";
+import { KPI_SEVERITY } from "../../lib/kpi-severity";
 
 /**
  * Visual for Pulse — the hero section (spec §5) and the dedicated Pulse
@@ -12,13 +13,23 @@ import { AnimatedNumber } from "./AnimatedNumber";
  * bullet-line "brief" shape this component used before the 2026-09-14
  * landing rebuild. Illustrative figures only, same posture as every
  * other feature panel on this page: not a real studio's numbers.
+ *
+ * Stripe colors (2026-09-14 same-day follow-up: "update the alert
+ * colours in kpi tiles in hero section and pulse section") — these were
+ * five different `--cds-support-*`/`text-secondary` colors read as five
+ * different *kinds* of tile, the exact anti-pattern the KPI anatomy
+ * diagram's own color key (`KpiAnatomyDiagram.tsx`) argues against. Now
+ * the same shared `KPI_SEVERITY` 4-color scale (`lib/kpi-severity.ts`)
+ * that diagram explains: green (good progress — money already earned),
+ * yellow (needs attention — waiting on someone else), orange (needs
+ * attention, more urgent — sitting unbilled), red (alert — at risk).
  */
 const STATS = [
-  { icon: Money, value: 842500, kind: "inr" as const, label: "Ready to bill", stripe: "var(--cds-support-success)" },
-  { icon: CheckmarkFilled, value: 7, kind: "plain" as const, label: "Client approvals", stripe: "var(--cds-support-info)" },
-  { icon: WarningAltFilled, value: 3, kind: "plain" as const, label: "Projects at risk", stripe: "var(--cds-support-error)" },
-  { icon: Renew, value: 12, kind: "plain" as const, label: "Open revisions", stripe: "var(--cds-support-warning)" },
-  { icon: UserMultiple, value: 4, kind: "plain" as const, label: "Team unavailable", stripe: "var(--cds-text-secondary)" },
+  { icon: Money, value: 842500, kind: "inr" as const, label: "Ready to bill", stripe: KPI_SEVERITY.green },
+  { icon: CheckmarkFilled, value: 7, kind: "plain" as const, label: "Client approvals", stripe: KPI_SEVERITY.yellow },
+  { icon: WarningAltFilled, value: 3, kind: "plain" as const, label: "Projects at risk", stripe: KPI_SEVERITY.red },
+  { icon: Renew, value: 12, kind: "plain" as const, label: "Open revisions", stripe: KPI_SEVERITY.orange },
+  { icon: UserMultiple, value: 4, kind: "plain" as const, label: "Team unavailable", stripe: KPI_SEVERITY.yellow },
 ] as const;
 
 export function TodaysBriefingPanel() {

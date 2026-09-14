@@ -15,6 +15,9 @@ import { RevisionLifecyclePanel } from "../components/aorms/RevisionLifecyclePan
 import { TodaysBriefingPanel } from "../components/aorms/TodaysBriefingPanel";
 import { OperationalLeakageCalculator } from "../components/aorms/landing/OperationalLeakageCalculator";
 import { KpiAnatomyDiagram } from "../components/aorms/landing/KpiAnatomyDiagram";
+import { MotionRoot } from "../components/aorms/motion/MotionRoot";
+import { MotionReveal } from "../components/aorms/motion/MotionReveal";
+import { MotionEnter } from "../components/aorms/motion/MotionEnter";
 import {
   AORMS_PLATFORM,
   CONNECTDEX,
@@ -123,6 +126,7 @@ export default async function LandingPage() {
   const formatRupees = (paise: number) => `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
   return (
+    <MotionRoot>
     <div style={{ minHeight: "100vh", background: "var(--cds-background)", color: "var(--cds-text-primary)" }}>
       <LandingHeader />
       <div style={{ maxWidth: PAGE_MAX, margin: "0 auto", padding: "0 1rem" }}>
@@ -140,25 +144,35 @@ export default async function LandingPage() {
         <section id="top" style={{ padding: "clamp(2.5rem, 5vw, 4rem) 0" }}>
           <Grid>
             <Column sm={4} md={8} lg={11}>
-              <p
-                className="cds--type-productive-heading-01"
-                style={{ letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-              >
-                {AORMS_PLATFORM.expansion.toUpperCase()}
-              </p>
-              <h1 className="cds--type-heading-06" style={{ marginTop: "0.75rem", maxWidth: 620, whiteSpace: "pre-line" }}>
-                {AORMS_PLATFORM.heroHeadline}
-              </h1>
-              <p className="cds--type-body-02" style={{ marginTop: "1rem", maxWidth: 560, color: "var(--cds-text-secondary)" }}>
-                {AORMS_PLATFORM.heroSupport}
-              </p>
-              <HeroCtas />
-              <p className="cds--type-caption-01" style={{ marginTop: "1rem", color: "var(--cds-text-secondary)" }}>
-                No installation · Browser-based · Built for architecture practices
-              </p>
+              <MotionEnter step={0}>
+                <p
+                  className="cds--type-productive-heading-01"
+                  style={{ letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
+                >
+                  {AORMS_PLATFORM.expansion.toUpperCase()}
+                </p>
+              </MotionEnter>
+              <MotionEnter step={1}>
+                <h1 className="cds--type-heading-06" style={{ marginTop: "0.75rem", maxWidth: 620, whiteSpace: "pre-line" }}>
+                  {AORMS_PLATFORM.heroHeadline}
+                </h1>
+              </MotionEnter>
+              <MotionEnter step={2}>
+                <p className="cds--type-body-02" style={{ marginTop: "1rem", maxWidth: 560, color: "var(--cds-text-secondary)" }}>
+                  {AORMS_PLATFORM.heroSupport}
+                </p>
+              </MotionEnter>
+              <MotionEnter step={3}>
+                <HeroCtas />
+                <p className="cds--type-caption-01" style={{ marginTop: "1rem", color: "var(--cds-text-secondary)" }}>
+                  No installation · Browser-based · Built for architecture practices
+                </p>
+              </MotionEnter>
             </Column>
             <Column sm={4} md={8} lg={16} style={{ marginTop: "2.5rem" }}>
-              <TodaysBriefingPanel />
+              <MotionEnter step={4}>
+                <TodaysBriefingPanel />
+              </MotionEnter>
             </Column>
           </Grid>
         </section>
@@ -166,6 +180,7 @@ export default async function LandingPage() {
         {/* 2. Problem (spec §6) — two rows (text, then chain/resolution),
             not side-by-side columns, per explicit follow-up request. */}
         <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={10}>
               <p
@@ -209,10 +224,12 @@ export default async function LandingPage() {
               </Tile>
             </Column>
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* 3. Core value proposition — four cards (spec §7) */}
         <section id="value" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
               <h2 className="cds--type-heading-05">See what needs attention before it becomes expensive.</h2>
@@ -234,10 +251,12 @@ export default async function LandingPage() {
               );
             })}
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* 4. Pulse showcase (spec §8) */}
         <section id="pulse" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
               <p
@@ -274,11 +293,13 @@ export default async function LandingPage() {
               </div>
             </Column>
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* 5. Fee Recovery (spec §9) — two columns (text+chain, then the
             panel), not stacked rows, per explicit follow-up request. */}
         <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={4} lg={7}>
               <p
@@ -308,10 +329,12 @@ export default async function LandingPage() {
               <BillingForecastPanel />
             </Column>
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* 6. Revision Management (spec §10) */}
         <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
               <p
@@ -331,10 +354,12 @@ export default async function LandingPage() {
               <RevisionLifecyclePanel />
             </Column>
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* 7. Project Operating Record (spec §11) */}
         <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={7}>
               <p
@@ -359,10 +384,12 @@ export default async function LandingPage() {
               </Tile>
             </Column>
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* 8. ESTI (spec §12) */}
         <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={7}>
               <p
@@ -386,6 +413,7 @@ export default async function LandingPage() {
               ))}
             </Column>
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* 9. Operational leakage / cost calculator (spec §13) — the
@@ -394,6 +422,7 @@ export default async function LandingPage() {
             OperationalLeakageCalculator covered the same "what does
             leakage cost" ground directly from real cause hours. */}
         <section id="roi" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
               <h2 className="cds--type-heading-05">What is operational leakage costing your practice?</h2>
@@ -415,10 +444,12 @@ export default async function LandingPage() {
               </p>
             </Column>
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* 11. Trust (spec §15) */}
         <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "1.5rem" }}>
               <h2 className="cds--type-heading-05">Your practice data stays yours.</h2>
@@ -434,12 +465,14 @@ export default async function LandingPage() {
               </Column>
             ))}
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* 12. Pricing (spec §16-20, §25) — reads live prices from
             plan_pricing so this section never drifts from what /licences
             actually charges. */}
         <section id="pricing" data-analytics-event="pricing_view" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
               <h2 className="cds--type-heading-05">One practice. One subscription. No per-seat tax.</h2>
@@ -509,12 +542,14 @@ export default async function LandingPage() {
               </p>
             </Column>
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* Blog teaser */}
         {latestPosts.length > 0 && (
           <section id="blog" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-            <Grid>
+            <MotionReveal>
+          <Grid>
               <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
                 <p
                   className="cds--type-productive-heading-01"
@@ -549,11 +584,13 @@ export default async function LandingPage() {
                 </Link>
               </Column>
             </Grid>
+          </MotionReveal>
           </section>
         )}
 
         {/* 13. Live Demo (spec §26) */}
         <section id="live-demo" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={9}>
               <h2 className="cds--type-heading-05">Don&apos;t take our word for it. Open the practice.</h2>
@@ -588,10 +625,12 @@ export default async function LandingPage() {
               </Tile>
             </Column>
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* RFI (FAQ) */}
         <section id="rfi" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
               <p
@@ -616,10 +655,12 @@ export default async function LandingPage() {
               </Accordion>
             </Column>
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* 14. Final CTA (spec §27) */}
         <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)", borderBottom: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={12}>
               <h2 className="cds--type-heading-05">Run your practice from one operating record.</h2>
@@ -629,11 +670,13 @@ export default async function LandingPage() {
               <FinalCtas />
             </Column>
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* ConnectDeX Partners — kept small, per spec's non-negotiable
             list (ConnectDeX out of the primary AORMS story). */}
         <section id="connectdex" style={{ padding: "1.5rem 0", borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "0.5rem 1rem" }}>
               <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
@@ -644,6 +687,7 @@ export default async function LandingPage() {
               </Link>
             </Column>
           </Grid>
+          </MotionReveal>
         </section>
 
         {/* 15. Footer (spec §28) — 5 columns: Product/Solutions/
@@ -749,5 +793,6 @@ export default async function LandingPage() {
         </footer>
       </div>
     </div>
+    </MotionRoot>
   );
 }
