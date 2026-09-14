@@ -37,9 +37,22 @@
  * instead of CSS grid, and the totals block is now one of the wrapped
  * items (a wider one) rather than a separate row, so it fills that
  * space instead of leaving it blank.
+ *
+ * UI/UX audit fix (2026-09-14): this was the single longest, heaviest
+ * section on the page — two inputs, five cause tiles, and a totals
+ * block, all rendered at once. Restructured so the total leads (same
+ * "hero figure first" pattern as Fee Recovery's "ready to bill today")
+ * with the five cause tiles now collapsed behind a "See the full
+ * breakdown" toggle instead of always-open — the number a skimming
+ * visitor actually wants is visible immediately; the per-cause detail
+ * is one click away, not a mandatory scroll. `ROI_DISCLAIMER` moved to
+ * sit directly under the total figure it caveats (it used to be a
+ * `caption-01` line at the very bottom of the whole section, easy to
+ * miss entirely if a visitor didn't scroll past the breakdown).
  */
 import { useMemo, useState } from "react";
-import { NumberInput, Tile } from "@carbon/react";
+import { Button, NumberInput, Tile } from "@carbon/react";
+import { ChevronDown, ChevronUp } from "@carbon/icons-react";
 import { OPERATIONAL_LEAKAGE, ROI_DISCLAIMER } from "../../../lib/marketing-content";
 
 const TILE_CAUSES = OPERATIONAL_LEAKAGE.causes.filter((cause) => cause.title !== "Cost overruns");
@@ -53,6 +66,7 @@ function formatInr(n: number): string {
 export function OperationalLeakageCalculator() {
   const [projectHours, setProjectHours] = useState(300);
   const [hourlyValue, setHourlyValue] = useState(1000);
+  const [showBreakdown, setShowBreakdown] = useState(false);
 
   const { tileRows, totalHours, totalCost } = useMemo(() => {
     const withFigures = (cause: (typeof OPERATIONAL_LEAKAGE.causes)[number]) => {
@@ -95,58 +109,67 @@ export function OperationalLeakageCalculator() {
         </div>
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginTop: "1.5rem" }}>
-        {tileRows.map((cause) => (
-          <Tile key={cause.title} style={{ flex: "1 1 15rem" }}>
-            <p className="cds--type-productive-heading-02">{cause.title}</p>
-            <p className="cds--type-body-01" style={{ marginTop: "0.375rem", color: "var(--cds-text-secondary)" }}>
-              {cause.body}
-            </p>
-            <div style={{ marginTop: "0.875rem", paddingTop: "0.75rem", borderTop: "1px solid var(--cds-border-subtle)" }}>
-              <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
-                {cause.pctOfHours}% of project hours
-              </p>
-              <p className="cds--type-productive-heading-02" style={{ marginTop: "0.25rem", color: "var(--cds-support-info)" }}>
-                {Math.round(cause.hours)} hrs · {formatInr(cause.cost)}
-              </p>
-            </div>
-          </Tile>
-        ))}
-
-        {/* Totals — a wrapped flex item like the cause tiles above, not a
-            separate full-width row, so it fills the row's remaining
-            space instead of leaving a phantom empty cell beside it. */}
-        <div
-          style={{
-            flex: "2 1 30rem",
-            border: "1px solid var(--cds-border-subtle)",
-            borderLeft: "3px solid var(--cds-support-info)",
-            background: "var(--cds-layer)",
-            padding: "1.25rem",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "0.75rem",
-          }}
-        >
-          <div>
-            <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
-              Operational leakage on a project like this — {TOTAL_LEAKAGE_PCT}% of hours worked
-            </p>
-            <p className="cds--type-heading-04" style={{ marginTop: "0.25rem" }}>
-              {Math.round(totalHours)} hrs · {formatInr(totalCost)}
-            </p>
-          </div>
-          <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", maxWidth: 320 }}>
-            This is what AORMS gives back — replacing manual timesheet entry, priority-guessing, and status-chasing meetings with a tracked, single operating record.
+      {/* Totals lead — the one figure a skimming visitor actually wants,
+          same "hero figure first" posture as Fee Recovery's "ready to
+          bill today" panel. The disclaimer sits directly under it now,
+          not buried at the bottom of the whole section. */}
+      <div
+        style={{
+          marginTop: "1.5rem",
+          border: "1px solid var(--cds-border-subtle)",
+          borderLeft: "3px solid var(--cds-support-info)",
+          background: "var(--cds-layer)",
+          padding: "1.25rem",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "0.75rem",
+        }}
+      >
+        <div>
+          <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+            Operational leakage on a project like this — {TOTAL_LEAKAGE_PCT}% of hours worked
+          </p>
+          <p className="cds--type-heading-04" style={{ marginTop: "0.25rem" }}>
+            {Math.round(totalHours)} hrs · {formatInr(totalCost)}
           </p>
         </div>
+        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", maxWidth: 320 }}>
+          This is what AORMS gives back — replacing manual timesheet entry, priority-guessing, and status-chasing meetings with a tracked, single operating record.
+        </p>
       </div>
 
-      <p className="cds--type-caption-01" style={{ marginTop: "1.5rem", color: "var(--cds-text-secondary)" }}>
+      <p className="cds--type-label-01" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
         {ROI_DISCLAIMER}
       </p>
+
+      <div style={{ marginTop: "1.25rem" }}>
+        <Button kind="ghost" size="sm" renderIcon={showBreakdown ? ChevronUp : ChevronDown} onClick={() => setShowBreakdown((v) => !v)}>
+          {showBreakdown ? "Hide the breakdown" : "See the full breakdown"}
+        </Button>
+      </div>
+
+      {showBreakdown && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginTop: "1rem" }}>
+          {tileRows.map((cause) => (
+            <Tile key={cause.title} style={{ flex: "1 1 15rem" }}>
+              <p className="cds--type-productive-heading-02">{cause.title}</p>
+              <p className="cds--type-body-01" style={{ marginTop: "0.375rem", color: "var(--cds-text-secondary)" }}>
+                {cause.body}
+              </p>
+              <div style={{ marginTop: "0.875rem", paddingTop: "0.75rem", borderTop: "1px solid var(--cds-border-subtle)" }}>
+                <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  {cause.pctOfHours}% of project hours
+                </p>
+                <p className="cds--type-productive-heading-02" style={{ marginTop: "0.25rem", color: "var(--cds-support-info)" }}>
+                  {Math.round(cause.hours)} hrs · {formatInr(cause.cost)}
+                </p>
+              </div>
+            </Tile>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

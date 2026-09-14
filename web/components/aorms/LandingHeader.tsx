@@ -20,6 +20,15 @@ import { ExploreDemoButton } from "./LandingButtons";
  * `.landing-nav-mobile-toggle` in globals.scss decide which is actually
  * visible via a media query, so there's no server/client
  * viewport-detection mismatch to worry about.
+ *
+ * UI/UX audit fix (2026-09-14): "Solutions" and "Pricing" both pointed
+ * to `#pricing` — a visitor clicking "Solutions" landed on the pricing
+ * table, not a solutions overview. Repointed "Solutions" to
+ * `#project-record` (the "one project, one operating record" section —
+ * the closest thing this page has to a "here's the solution" moment),
+ * distinct from Pricing. `.landing-header-subtitle` (also this pass) is
+ * hidden below 30rem — see globals.scss — where it was wrapping to two
+ * cramped lines next to the logo.
  */
 export function LandingHeader() {
   return (
@@ -48,7 +57,7 @@ export function LandingHeader() {
           {/* Plain <img>, not next/image — a fixed brand asset. */}
           <img src="/aorms-logo.png" alt="AORMS" style={{ height: "24px", width: "auto" }} />
           <span
-            className="cds--type-caption-01"
+            className="cds--type-caption-01 landing-header-subtitle"
             style={{ color: "var(--cds-text-secondary)", borderLeft: "1px solid var(--cds-border-subtle)", paddingLeft: "0.75rem" }}
           >
             for Architecture Practices
@@ -62,7 +71,7 @@ export function LandingHeader() {
           <Link href="#value" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             Product
           </Link>
-          <Link href="#pricing" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
+          <Link href="#project-record" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             Solutions
           </Link>
           <Link href="#pulse" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>

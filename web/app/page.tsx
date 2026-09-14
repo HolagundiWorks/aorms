@@ -227,7 +227,16 @@ export default async function LandingPage() {
           </MotionReveal>
         </section>
 
-        {/* 3. Core value proposition — four cards (spec §7) */}
+        {/* 3. Core value proposition — four cards (spec §7). UI/UX audit
+            fix (2026-09-14): each card is an implicit "read more below"
+            promise; two of the four had nowhere to send a visitor who
+            believed it (no dedicated section existed for "what's
+            slipping" or "team status"). Rather than inventing sections
+            for capabilities the product doesn't have their own page for,
+            each card links to where that capability is genuinely already
+            shown (`VALUE_CARDS[].anchor`, marketing-content.ts) — Fee
+            Recovery, Revision Management, or Pulse's own risk/team
+            tiles. */}
         <section id="value" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <MotionReveal>
           <Grid>
@@ -238,15 +247,17 @@ export default async function LandingPage() {
               const Icon = VALUE_ICONS[card.icon];
               return (
                 <Column key={card.title} sm={4} md={4} lg={4} style={{ marginBottom: "1rem" }}>
-                  <Tile style={{ height: "100%" }}>
-                    <Icon size={24} style={{ color: "var(--cds-support-info)" }} />
-                    <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.75rem" }}>
-                      {card.title}
-                    </h3>
-                    <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
-                      {card.body}
-                    </p>
-                  </Tile>
+                  <Link href={card.anchor} style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}>
+                    <Tile style={{ height: "100%" }}>
+                      <Icon size={24} style={{ color: "var(--cds-support-info)" }} />
+                      <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.75rem" }}>
+                        {card.title}
+                      </h3>
+                      <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
+                        {card.body}
+                      </p>
+                    </Tile>
+                  </Link>
                 </Column>
               );
             })}
@@ -254,7 +265,14 @@ export default async function LandingPage() {
           </MotionReveal>
         </section>
 
-        {/* 4. Pulse showcase (spec §8) */}
+        {/* 4. Pulse showcase (spec §8). UI/UX audit fix (2026-09-14):
+            this section used to render the exact same TodaysBriefingPanel
+            the Hero already shows, full-width, with identical figures —
+            teaching a scrolling visitor nothing new two sections after
+            they'd already seen it. Dropped the repeat; this section now
+            only adds what the Hero didn't: the KPI-anatomy explanation,
+            trimmed and re-worded to reference "the tiles above" (Hero)
+            instead of a tile that no longer renders in this section. */}
         <section id="pulse" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <MotionReveal>
           <Grid>
@@ -272,23 +290,20 @@ export default async function LandingPage() {
                 {PULSE_SECTION.body}
               </p>
             </Column>
-            <Column sm={4} md={8} lg={16}>
-              <TodaysBriefingPanel />
-            </Column>
 
             {/* KPI-tile anatomy diagram (explicit follow-up request,
-                narrowed same day to just the alert line + how a glance
-                reads it) — Carbon has no official "KPI card" component;
-                this is a composition of Tile + semantic color tokens,
-                same as the real product's own KpiTile.tsx. */}
-            <Column sm={4} md={8} lg={16} style={{ marginTop: "3rem" }}>
-              <h3 className="cds--type-productive-heading-03">How to read a Pulse KPI tile.</h3>
-              <p className="cds--type-body-01" style={{ marginTop: "0.5rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
-                Every tile above — and every KPI tile across AORMS, not just Pulse — carries the same alert line along its
-                top edge, built entirely from stock Carbon Design System semantic color tokens rather than a bespoke
-                indicator.
+                narrowed twice since to just the alert line + how a
+                glance reads it, then to plain HTML/CSS) — Carbon has no
+                official "KPI card" component; this is a composition of
+                Tile + semantic color tokens, same as the real product's
+                own KpiTile.tsx. */}
+            <Column sm={4} md={8} lg={16}>
+              <h3 className="cds--type-productive-heading-02">How to read the tiles above.</h3>
+              <p className="cds--type-body-01" style={{ marginTop: "0.375rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
+                Every KPI tile across AORMS carries the same alert line along its top edge, built entirely from stock
+                Carbon Design System semantic color tokens rather than a bespoke indicator.
               </p>
-              <div style={{ marginTop: "1.5rem", maxWidth: 800 }}>
+              <div style={{ marginTop: "1.25rem", maxWidth: 800 }}>
                 <KpiAnatomyDiagram />
               </div>
             </Column>
@@ -297,8 +312,11 @@ export default async function LandingPage() {
         </section>
 
         {/* 5. Fee Recovery (spec §9) — two columns (text+chain, then the
-            panel), not stacked rows, per explicit follow-up request. */}
-        <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+            panel), not stacked rows, per explicit follow-up request.
+            id added (UI/UX audit fix, 2026-09-14) — this section had no
+            anchor, so nav/footer links describing it had nowhere real
+            to point. */}
+        <section id="fee-recovery" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <MotionReveal>
           <Grid>
             <Column sm={4} md={4} lg={7}>
@@ -332,8 +350,9 @@ export default async function LandingPage() {
           </MotionReveal>
         </section>
 
-        {/* 6. Revision Management (spec §10) */}
-        <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+        {/* 6. Revision Management (spec §10). id added (UI/UX audit
+            fix, 2026-09-14) — see Fee Recovery above. */}
+        <section id="revision-management" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
@@ -357,8 +376,12 @@ export default async function LandingPage() {
           </MotionReveal>
         </section>
 
-        {/* 7. Project Operating Record (spec §11) */}
-        <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+        {/* 7. Project Operating Record (spec §11). id added + body copy
+            now rendered (UI/UX audit fix, 2026-09-14) — this was the
+            only section on the page with no body copy at all, just a
+            heading over a tag wall with nothing telling a visitor why
+            the list mattered. */}
+        <section id="project-record" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={7}>
@@ -371,6 +394,9 @@ export default async function LandingPage() {
               <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
                 {PROJECT_RECORD.title}
               </h2>
+              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
+                {PROJECT_RECORD.body}
+              </p>
             </Column>
             <Column sm={4} md={8} lg={{ span: 8, offset: 8 }} style={{ marginTop: "1.5rem" }}>
               <Tile>
@@ -387,8 +413,10 @@ export default async function LandingPage() {
           </MotionReveal>
         </section>
 
-        {/* 8. ESTI (spec §12) */}
-        <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+        {/* 8. ESTI (spec §12). id added (UI/UX audit fix, 2026-09-14) —
+            the footer's own "ESTI" link had nowhere to point (`href="#"`,
+            a dead link) until this existed. */}
+        <section id="esti" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={7}>
@@ -447,8 +475,9 @@ export default async function LandingPage() {
           </MotionReveal>
         </section>
 
-        {/* 11. Trust (spec §15) */}
-        <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+        {/* 11. Trust (spec §15). id added (UI/UX audit fix, 2026-09-14) —
+            see Fee Recovery above. */}
+        <section id="trust" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <MotionReveal>
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "1.5rem" }}>
@@ -498,7 +527,11 @@ export default async function LandingPage() {
                   suffix: "/month",
                   sub: `${formatRupees(livePrice("PROFESSIONAL"))}/year, billed annually`,
                 },
-                { key: "ENTERPRISE", plan: PRICING.enterprise, price: `From ${formatRupees(livePrice("ENTERPRISE"))}`, suffix: "/year", sub: "Custom pricing" },
+                // sub: null (UI/UX audit fix, 2026-09-14) — "From ₹X/year"
+                // already says this is a starting/custom price; a second
+                // "Custom pricing" line directly under it read as two
+                // different pricing framings stacked instead of one.
+                { key: "ENTERPRISE", plan: PRICING.enterprise, price: `From ${formatRupees(livePrice("ENTERPRISE"))}`, suffix: "/year", sub: null },
               ] as const
             ).map(({ key, plan, price, suffix, sub }) => (
               <Column key={key} sm={4} md={4} lg={4} style={{ marginBottom: "1rem" }}>
@@ -705,20 +738,24 @@ export default async function LandingPage() {
               <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-text-secondary)" }}>
                 Product
               </p>
+              {/* UI/UX audit fix (2026-09-14): "Projects"/"Revisions" both
+                  pointed to #value (identical destination, different
+                  labels) and "ESTI" pointed to `href="#"` (a dead link) —
+                  all three now have real, distinct anchors to point to. */}
               <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }} aria-label="Product">
                 <Link href="#pulse" className="cds--link">
                   Pulse
                 </Link>
-                <Link href="#value" className="cds--link">
+                <Link href="#project-record" className="cds--link">
                   Projects
                 </Link>
-                <Link href="#pricing" className="cds--link">
+                <Link href="#fee-recovery" className="cds--link">
                   Fees &amp; Billing
                 </Link>
-                <Link href="#value" className="cds--link">
+                <Link href="#revision-management" className="cds--link">
                   Revisions
                 </Link>
-                <Link href="#" className="cds--link">
+                <Link href="#esti" className="cds--link">
                   ESTI
                 </Link>
               </nav>

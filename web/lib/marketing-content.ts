@@ -90,27 +90,42 @@ export const PROBLEM = {
   },
 } as const;
 
-/** Four core value cards (spec §7). */
+/**
+ * Four core value cards (spec §7). `anchor` (UI/UX audit fix, 2026-09-14)
+ * — each card used to be an implicit "read more below" promise that only
+ * two of the four actually kept (fee recovery and revisions have their
+ * own deep-dive sections; "what's slipping" and "team status" didn't
+ * point anywhere). Rather than inventing two new sections that don't
+ * exist in the product, each card now links to where that capability is
+ * genuinely already shown: Pulse's own "Projects at risk"/"Open
+ * revisions" tiles for slipping work, and its "Team unavailable" tile
+ * for team status — connecting an existing promise to existing proof,
+ * not a new claim.
+ */
 export const VALUE_CARDS = [
   {
     icon: "currency",
     title: "Capture work you forgot to bill.",
     body: "Connect work, revisions, milestones, and fees so billable activity doesn't disappear into the day-to-day project workflow.",
+    anchor: "#fee-recovery",
   },
   {
     icon: "revision",
     title: "Every client change gets a price.",
     body: "Record the revision, assess its impact, cost it, get client approval, and only then execute it.",
+    anchor: "#revision-management",
   },
   {
     icon: "risk",
     title: "Know what's slipping.",
     body: "Surface overdue tasks, blocked decisions, pending approvals, and project risk before they become delivery problems.",
+    anchor: "#pulse",
   },
   {
     icon: "team",
     title: "Know where your team stands.",
     body: "See workload, ownership, availability, and pending work without asking everyone for a status update.",
+    anchor: "#pulse",
   },
 ] as const;
 
@@ -180,10 +195,16 @@ export const REVISION_MANAGEMENT = {
   ],
 } as const;
 
-/** Project Operating Record (spec §11). */
+/**
+ * Project Operating Record (spec §11). `body` added (UI/UX audit fix,
+ * 2026-09-14) — this was the only section on the page with no body
+ * copy at all, just a heading over a wall of tags with nothing telling
+ * a first-time visitor why the list mattered.
+ */
 export const PROJECT_RECORD = {
   eyebrow: "One project. One operating record.",
   title: "Every project, one place — not a folder plus a group chat.",
+  body: "Every one of these lives on the same project record, not scattered across a chat thread, an inbox, and someone's personal spreadsheet — so the answer to \"what's the status\" is always one page, not a search.",
   fields: ["Client", "Project", "Phases", "Tasks", "Meetings", "Documents", "Revisions", "Approvals", "Fees", "Invoices", "Team", "Activity"],
 } as const;
 

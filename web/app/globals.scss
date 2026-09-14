@@ -424,6 +424,18 @@ body {
   }
 }
 
+// Header wordmark subtitle ("for Architecture Practices") — UI/UX audit
+// finding (2026-09-14): wraps to two cramped lines next to the logo
+// below roughly 30rem, since it previously had no responsive treatment
+// at all. Hidden below that width instead — the logo alone is enough
+// brand identification on a narrow header, and the full nav is already
+// collapsed to the hamburger by 42rem anyway.
+@media (max-width: 30rem) {
+  .landing-header-subtitle {
+    display: none;
+  }
+}
+
 // Horizontal masonry row for RevisionLifecyclePanel.tsx (2026-09-14) — 4
 // equal-width tiles with staggered `margin-top` offsets applied inline
 // per-item (the actual masonry effect); this class only handles the row
