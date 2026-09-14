@@ -189,22 +189,6 @@ export const ESTI_SECTION = {
   ],
 } as const;
 
-/** Built for Architecture (spec §14) — real, already-shipped concepts. */
-export const BUILT_FOR = [
-  "Projects",
-  "Fees",
-  "Phases",
-  "Revisions",
-  "Consultants",
-  "Approvals",
-  "Drawings",
-  "Meetings",
-  "Billing",
-  "GST",
-  "Team",
-  "Clients",
-] as const;
-
 /** Trust section (spec §15) — four cards, only claims already true
  * elsewhere on this page. */
 export const TRUST_CARDS = [

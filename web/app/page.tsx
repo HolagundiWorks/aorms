@@ -16,7 +16,6 @@ import { TodaysBriefingPanel } from "../components/aorms/TodaysBriefingPanel";
 import { RoiCalculatorSection } from "../components/aorms/landing/RoiCalculatorSection";
 import {
   AORMS_PLATFORM,
-  BUILT_FOR,
   CONNECTDEX,
   DEMO,
   ESTI_SECTION,
@@ -362,27 +361,6 @@ export default async function LandingPage() {
           </Grid>
         </section>
 
-        {/* 10. Built for Architecture (spec §14) */}
-        <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <Grid>
-            <Column sm={4} md={8} lg={16} style={{ marginBottom: "1.5rem" }}>
-              <h2 className="cds--type-heading-05">Built around how architecture practices actually work.</h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
-                AORMS is not generic project management software adapted for architects. The practice model is built into the system.
-              </p>
-            </Column>
-            <Column sm={4} md={8} lg={16}>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                {BUILT_FOR.map((item) => (
-                  <Tag key={item} type="purple" size="md">
-                    {item}
-                  </Tag>
-                ))}
-              </div>
-            </Column>
-          </Grid>
-        </section>
-
         {/* 11. Trust (spec §15) */}
         <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <Grid>
@@ -416,17 +394,24 @@ export default async function LandingPage() {
 
             {(
               [
-                { key: "FREE", plan: PRICING.free, price: "₹0", sub: null },
-                { key: "STUDIO", plan: PRICING.studio, price: formatRupees(livePrice("STUDIO")), sub: `${formatRupees(livePrice("STUDIO") / 12)}/month` },
+                { key: "FREE", plan: PRICING.free, price: "₹0", suffix: null, sub: null },
+                {
+                  key: "STUDIO",
+                  plan: PRICING.studio,
+                  price: formatRupees(livePrice("STUDIO") / 12),
+                  suffix: "/month",
+                  sub: `${formatRupees(livePrice("STUDIO"))}/year, billed annually`,
+                },
                 {
                   key: "PROFESSIONAL",
                   plan: PRICING.professional,
-                  price: formatRupees(livePrice("PROFESSIONAL")),
-                  sub: `${formatRupees(livePrice("PROFESSIONAL") / 12)}/month`,
+                  price: formatRupees(livePrice("PROFESSIONAL") / 12),
+                  suffix: "/month",
+                  sub: `${formatRupees(livePrice("PROFESSIONAL"))}/year, billed annually`,
                 },
-                { key: "ENTERPRISE", plan: PRICING.enterprise, price: `From ${formatRupees(livePrice("ENTERPRISE"))}`, sub: "Custom" },
+                { key: "ENTERPRISE", plan: PRICING.enterprise, price: `From ${formatRupees(livePrice("ENTERPRISE"))}`, suffix: "/year", sub: "Custom pricing" },
               ] as const
-            ).map(({ key, plan, price, sub }) => (
+            ).map(({ key, plan, price, suffix, sub }) => (
               <Column key={key} sm={4} md={4} lg={4} style={{ marginBottom: "1rem" }}>
                 <Tile style={{ height: "100%", display: "flex", flexDirection: "column" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -442,7 +427,7 @@ export default async function LandingPage() {
                   </p>
                   <p className="cds--type-heading-04" style={{ marginTop: "0.75rem" }}>
                     {price}
-                    {key !== "FREE" && key !== "ENTERPRISE" && <span className="cds--type-body-01">/year</span>}
+                    {suffix && <span className="cds--type-body-01">{suffix}</span>}
                   </p>
                   {sub && (
                     <p className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>

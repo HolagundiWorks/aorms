@@ -5117,6 +5117,74 @@ gaps to rediscover later):
 
 ---
 
+### 2026-09-14 — landing page rebuild + real Free/Studio/Professional/Enterprise pricing
+
+User supplied a full "AORMS Landing Page & Pricing — Developer
+Implementation Specification" (40 sections) and, when asked whether the
+pricing change should be landing-copy-only or a real restructure of the
+live billing system, explicitly chose the real restructure. Confirmed
+safe before touching anything live: zero studios held a real PRO/
+ENTERPRISE licence and zero CAPTURED payments existed for either — a
+clean rename, not a paying-customer migration.
+
+**Pricing** (`platform` migration `0033_free_studio_professional_tiers.sql`):
+`TRIAL`/`PRO`/`ENTERPRISE` renamed to `FREE`/`STUDIO`/`PROFESSIONAL`/
+`ENTERPRISE`. Free is now a real, permanent tier (no expiry) instead of
+a 30-day countdown. New prices: Free ₹0, Studio ₹24,990/yr, Professional
+₹49,990/yr, Enterprise ₹1,00,000/yr (a reference "starting at" price —
+Enterprise dropped out of self-serve Razorpay checkout entirely and
+moved to a "Talk to AORMS" contact flow, reusing the existing
+`support_tickets` pipeline rather than new contact infra). Real caps
+added/generalized: Free is capped at 1 team member, 2 active projects, 3
+clients, 3 contractors; Studio at 10 members/10 projects; Professional/
+Enterprise unlimited on all of those — `firm-studio.ts`'s `PLAN_CAPS`
+and `platform.ts`'s `STUDIO_MEMBER_CAP` are the two enforcement points
+(Office-Hub-side and Platform-side respectively; kept as two functions
+since they resolve a studio through genuinely different session
+contexts, not one shared shape). `/licences`, `/admin/licences`,
+`/admin/pricing`, `/admin/studios` all updated for the new plan set.
+
+**Landing page** (`app/page.tsx`, `lib/marketing-content.ts` — full
+rebuild): replaced the previous Identity/Studio-account-framed page with
+the spec's Problem → Outcome → Product → Proof → ROI → Pricing → Demo
+structure. Reused the existing illustrative-panel pattern
+(`BillingForecastPanel`, `RevisionLifecyclePanel`, a rewritten
+`TodaysBriefingPanel`) rather than building pixel-real screenshots — no
+product screenshots exist anywhere in this repo, and those panels were
+already hand-built Carbon mockups with clearly-illustrative data. New
+ROI Calculator (`components/aorms/landing/`) uses the spec's own
+3-component formula (fee recovery + management capacity + admin
+effort), verified against the spec's own worked example math; its
+value/cost multiplier reads the live `PROFESSIONAL` price from
+`plan_pricing`, never hardcoded. Revision Management's copy describes
+the real product (a qualitative impact rating + client-approval
+workflow) rather than the spec's own worked example (a specific ₹/days
+figure on one named revision) — the real `decisions` table has no such
+fields; stated as a deliberate, disclosed deviation, not an oversight.
+
+**Deferred, disclosed rather than silently skipped**: no analytics
+vendor is wired (every CTA the spec named carries a
+`data-analytics-event` marker so wiring one later needs no markup
+changes, but none exists in this codebase today); no dedicated SEO
+keyword landing pages (the spec's own §35 says these deserve separate
+pages, not homepage stuffing — homepage title/description/keywords were
+still updated to the spec's exact wording); no ESTI Lite-vs-Full feature
+split (Studio's pricing card says "ESTI Lite," Professional's says "Full
+ESTI," but the underlying feature is identical today — a real product
+differentiation, not built this pass); no Founding Studio launch promo
+(spec marked it optional).
+
+Verified: `tsc --noEmit`/`eslint .`/full `next build --webpack` all
+clean after every batch (pricing backend, landing page, SEO/docs — three
+separate commits, not one giant one). Migration 0033 applied live and
+re-verified via the same read-only query pattern used before writing it
+— live `plan_pricing` now returns all four new rows at the correct
+prices. See this entry's own commit for the full live browser/functional
+verification pass (caps enforcement, ROI calculator arithmetic,
+Enterprise contact flow, mobile viewport).
+
+---
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,
