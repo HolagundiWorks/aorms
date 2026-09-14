@@ -13,12 +13,13 @@
  * client instance is used purely for convenience (already at hand for the
  * getUserById lookup), not because the call itself is privileged.
  */
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 
 export type AdminAccountActionState = { error: string } | { success: string } | null;
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aorms.in";
 
 async function requirePlatformAdmin(): Promise<{ accountId: string } | { error: string }> {
   const account = await getCurrentPlatformSessionAccount();
@@ -55,9 +56,18 @@ export async function adminTriggerPasswordReset(
   const { data: userData, error: getUserError } = await platformService.auth.admin.getUserById(accountId);
   if (getUserError || !userData?.user?.email) return { error: "Couldn't find that account's email." };
 
-  const origin = (await headers()).get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? "https://aorms.in";
+  // 2026-09-14 — this used to redirect straight to /platform-login with
+  // no code-exchange step at all (the platform project's own
+  // /auth/callback equivalent didn't exist yet, see
+  // lib/actions/platform-password-reset.ts's header comment for the
+  // full account of why every one of these emails silently failed to
+  // actually let anyone set a new password). Also stopped reading the
+  // origin from the request's own Origin header — same "never derive a
+  // redirect target from anything request-scoped" discipline as
+  // app/auth/callback/route.ts's own fix earlier this day, for a link
+  // this sensitive there's no reason to accept any variability at all.
   const { error: resetError } = await platformService.auth.resetPasswordForEmail(userData.user.email, {
-    redirectTo: `${origin}/platform-login`,
+    redirectTo: `${SITE_URL}/platform-auth-callback?next=${encodeURIComponent("/platform-reset-password")}`,
   });
   if (resetError) return { error: resetError.message };
 

@@ -36,9 +36,18 @@ export const PORTAL_OWNED_PREFIXES: Record<PortalKey, string[]> = {
 /**
  * Reachable identically on every portal subdomain AND the main domain,
  * with no redirect — signing in (or asking for help) shouldn't bounce you
- * off the portal you're already on.
+ * off the portal you're already on. `/platform-auth-callback` and
+ * `/platform-reset-password` (2026-09-14) are the same shape — a
+ * password-reset email link can land on whichever subdomain the click
+ * happens to resolve to, and both need to work there unchanged.
  */
-export const SHARED_PREFIXES = ["/platform-login", "/platform-signup", "/support"];
+export const SHARED_PREFIXES = [
+  "/platform-login",
+  "/platform-signup",
+  "/support",
+  "/platform-auth-callback",
+  "/platform-reset-password",
+];
 
 function matchesPrefix(pathname: string, prefixes: string[]): boolean {
   return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
