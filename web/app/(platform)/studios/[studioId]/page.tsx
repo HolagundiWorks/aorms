@@ -2,6 +2,7 @@ import NextLink from "next/link";
 import { notFound } from "next/navigation";
 import { Column, Grid, Stack, Tag, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tile } from "@carbon/react";
 import { createClient as createWebClient } from "../../../../lib/supabase/server";
+import { createClient as createPlatformClient } from "../../../../lib/platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { InviteMemberForm } from "../../../../components/aorms/platform/InviteMemberForm";
 import { MembershipRoleSelect } from "../../../../components/aorms/platform/MembershipRoleSelect";
@@ -23,34 +24,61 @@ type AccountEmbed = { id: string; full_name: string; public_id: string } | null;
  * Studio profile (an architecture firm — was called "Company" until the
  * 2026-09-07 rename freed that name for material-supplier businesses, see
  * the Studio/Company split + Material Catalogue plan) — reads via the
- * platform's service-role client, scoped by the current web/ user's own
- * already-verified linked handle (same justification as identity/page.tsx).
- * OWNER-only invite/role-change/remove controls only render for the
- * caller's own ACTIVE OWNER membership — the real gate is still the
- * platform's RLS on the underlying mutations, this is just what decides
- * what to show.
+ * platform's service-role client. OWNER-only invite/role-change/remove
+ * controls only render for the caller's own ACTIVE OWNER membership —
+ * the real gate is still the platform's RLS on the underlying mutations,
+ * this is just what decides what to show.
  *
  * Lives under the (platform) route group — see identity/page.tsx's header
  * comment. Carries the studio's regulatory/contact profile (COA/GST/tax/
  * address, board of directors, "who's who") — this is the data the Office
  * Hub's own Firm Settings page used to be the only place to edit; it's now
  * a read-only mirror pointing here.
+ *
+ * **2026-09-14 fix — same Office-Hub-link dead end already fixed on
+ * identity/page.tsx and companies/[companyId]/page.tsx, found here too
+ * (explicit report: "join firm, unjoin firms, admit people in firm in
+ * identity portal not active").** This page's account resolution used
+ * to be Office-Hub-only (`webSupabase` → `profiles.platform_public_id`
+ * → `accounts`) — in production `/studios/[studioId]` is only ever
+ * served on `identity.aorms.in` (proxy.ts's subdomain routing), and the
+ * Office Hub's session cookie is host-scoped to plain `aorms.in`, so it
+ * is never sent there. `currentAccountId` — and therefore `isOwner` —
+ * was always false for every visitor, including the real owner, which
+ * silently hid Add a member, role changes, remove-member, transfer
+ * ownership, custom subdomain, and the editable studio profile form.
+ * Resolved from the Platform's own session first instead (`accounts.id`
+ * IS the platform auth uid directly, same as identity/page.tsx); the
+ * Office-Hub-link path is kept as a fallback for local dev, where there
+ * is no subdomain/cookie split at all.
  */
 export default async function StudioDetailPage({ params }: { params: Promise<{ studioId: string }> }) {
   const { studioId } = await params;
 
-  const webSupabase = await createWebClient();
+  const platformSupabase = await createPlatformClient();
   const {
-    data: { user },
-  } = await webSupabase.auth.getUser();
-  const { data: profile } = await webSupabase
-    .from("profiles")
-    .select("platform_public_id")
-    .eq("id", user?.id ?? "")
-    .maybeSingle();
-  const handle = profile?.platform_public_id ?? null;
+    data: { user: platformUser },
+  } = await platformSupabase.auth.getUser();
 
   const platformService = createPlatformServiceRoleClient();
+
+  let currentAccountId: string | null = platformUser?.id ?? null;
+  if (!currentAccountId) {
+    const webSupabase = await createWebClient();
+    const {
+      data: { user },
+    } = await webSupabase.auth.getUser();
+    const { data: profile } = await webSupabase
+      .from("profiles")
+      .select("platform_public_id")
+      .eq("id", user?.id ?? "")
+      .maybeSingle();
+    const handle = profile?.platform_public_id ?? null;
+    if (handle) {
+      const { data: account } = await platformService.from("accounts").select("id").eq("public_id", handle).maybeSingle();
+      currentAccountId = account?.id ?? null;
+    }
+  }
 
   const { data: studio, error: studioError } = await platformService
     .from("studios")
@@ -87,16 +115,6 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
   ]);
 
   const proAssignedCount = (memberships ?? []).filter((m) => !!m.pro_assigned_at).length;
-
-  let currentAccountId: string | null = null;
-  if (handle) {
-    const { data: account } = await platformService
-      .from("accounts")
-      .select("id")
-      .eq("public_id", handle)
-      .maybeSingle();
-    currentAccountId = account?.id ?? null;
-  }
 
   const isOwner = (memberships ?? []).some(
     (m) => m.account_id === currentAccountId && m.role === "OWNER" && m.status === "ACTIVE",
