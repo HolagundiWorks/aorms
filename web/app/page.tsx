@@ -123,7 +123,7 @@ export default async function LandingPage() {
   const latestPosts = listBlogPosts().slice(0, 3);
 
   return (
-    <div className="cds--g100" style={{ minHeight: "100vh", background: "var(--cds-background)", color: "var(--cds-text-primary)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--cds-background)", color: "var(--cds-text-primary)" }}>
       <LandingHeader />
       <div style={{ maxWidth: PAGE_MAX, margin: "0 auto", padding: "0 1rem" }}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />

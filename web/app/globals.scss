@@ -424,19 +424,6 @@ body {
   }
 }
 
-// Landing page theme (2026-09-14, explicit direction: "apply g100 theme
-// for landing page"). Scoped to `app/page.tsx`'s own root wrapper only
-// (className="cds--g100" there) — the rest of the app (office hub,
-// portals) stays on the default white theme untouched. `@carbon/react`'s
-// `Theme` component would set this same class, but it's a Client
-// Component (uses `useMemo`) and `app/page.tsx` is a Server Component
-// (needs the auth redirect before render, same RSC-boundary reasoning as
-// LandingButtons.tsx) — so the class is applied directly in markup and
-// its CSS emitted here instead. `theme.theme()` only emits the custom
-// properties themselves; `background`/`color` are set explicitly on the
-// same selector in page.tsx's wrapper because plain elements that only
-// inherit `color` from `body` (white theme) wouldn't otherwise re-resolve
-// against this subtree's overridden custom properties.
 // Horizontal masonry row for RevisionLifecyclePanel.tsx (2026-09-14) — 4
 // equal-width tiles with staggered `margin-top` offsets applied inline
 // per-item (the actual masonry effect); this class only handles the row
@@ -462,19 +449,6 @@ body {
   .revision-masonry-item {
     margin-top: 0 !important;
     height: auto !important;
-  }
-}
-
-.cds--g100 {
-  @include theme.theme(themes.$g100);
-
-  // The wordmark PNG (aorms-logo.png) is a dark navy mark on a
-  // transparent background — nearly invisible against g100's near-black
-  // background. No light-on-dark variant of the asset exists yet, so
-  // invert it to a flat white mark within this theme scope only; the
-  // white theme's own header/footer logos are untouched.
-  img[alt="AORMS"] {
-    filter: brightness(0) invert(1);
   }
 }
 
