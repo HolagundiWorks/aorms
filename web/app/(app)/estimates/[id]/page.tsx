@@ -203,9 +203,9 @@ export default async function EstimateDetailPage({
                 <span className="cds--type-body-01">Consulting fee ({estimate.consulting_fee_pct}%)</span>
                 <span className="cds--type-body-01">{formatInr(totals.markups.consultingFeePaise)}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0", fontWeight: 600 }}>
-                <span className="cds--type-body-01">Subtotal after markups</span>
-                <span className="cds--type-body-01">{formatInr(totals.markuppedSubtotalPaise)}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>
+                <strong className="cds--type-body-01">Subtotal after markups</strong>
+                <strong className="cds--type-body-01">{formatInr(totals.markuppedSubtotalPaise)}</strong>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>
                 <span className="cds--type-body-01">Contingency ({estimate.contingency_pct}%)</span>
@@ -225,11 +225,10 @@ export default async function EstimateDetailPage({
                   justifyContent: "space-between",
                   padding: "0.5rem 0",
                   borderTop: "1px solid var(--cds-border-subtle)",
-                  fontWeight: 600,
                 }}
               >
-                <span className="cds--type-body-01">Grand total</span>
-                <span className="cds--type-body-01">{formatInr(totals.grandTotalPaise)}</span>
+                <strong className="cds--type-body-01">Grand total</strong>
+                <strong className="cds--type-body-01">{formatInr(totals.grandTotalPaise)}</strong>
               </div>
             </div>
           </>

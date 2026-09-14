@@ -89,13 +89,12 @@ export function ActionQueueList({ items }: { items: PriorityItem[] }) {
                   <p
                     className="cds--type-body-compact-01"
                     style={{
-                      fontWeight: 600,
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {item.title}
+                    <strong>{item.title}</strong>
                   </p>
                 </Link>
                 <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.1875rem" }}>

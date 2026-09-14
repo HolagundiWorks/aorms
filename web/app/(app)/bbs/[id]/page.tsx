@@ -242,10 +242,12 @@ export default async function BbsDetailPage({ params }: { params: Promise<{ id: 
               </TableRow>
             ))}
             <TableRow>
-              <TableCell colSpan={3} style={{ fontWeight: 600 }}>
-                Total
+              <TableCell colSpan={3}>
+                <strong>Total</strong>
               </TableCell>
-              <TableCell style={{ fontWeight: 600 }}>{totalWeightKg.toFixed(2)}</TableCell>
+              <TableCell>
+                <strong>{totalWeightKg.toFixed(2)}</strong>
+              </TableCell>
             </TableRow>
           </TableBody>
         </Table>

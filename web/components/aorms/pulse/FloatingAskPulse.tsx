@@ -66,7 +66,6 @@ export function FloatingAskPulse({ projects }: { projects: ProjectOption[] }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 2px 6px rgba(0, 0, 0, 0.25)",
           }}
         >
           {open ? <Close size={20} /> : <Ai size={20} />}

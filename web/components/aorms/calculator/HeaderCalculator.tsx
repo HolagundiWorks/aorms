@@ -72,6 +72,7 @@ export function HeaderCalculator() {
           />
 
           <div
+            className="cds--type-heading-04"
             style={{
               minHeight: "3rem",
               display: "flex",
@@ -79,13 +80,10 @@ export function HeaderCalculator() {
               justifyContent: "flex-end",
               textAlign: "right",
               wordBreak: "break-all",
-              fontSize: "1.75rem",
-              lineHeight: 1.1,
-              fontWeight: 600,
               color: "var(--cds-support-info)",
             }}
           >
-            {displayResult}
+            <strong>{displayResult}</strong>
           </div>
 
           {showInvalid ? (

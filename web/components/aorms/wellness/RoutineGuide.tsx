@@ -60,7 +60,7 @@ export function RoutineGuide({
 
   return (
     <div style={{ display: "grid", placeItems: "center", gap: "0.5rem", padding: "1rem 0", width: "100%" }}>
-      <span className="cds--type-heading-compact-02" style={{ fontWeight: 700, textAlign: "center" }}>
+      <span className="cds--type-heading-compact-02" style={{ textAlign: "center" }}>
         {step.name}
       </span>
       <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", textAlign: "center", maxWidth: "20rem" }}>

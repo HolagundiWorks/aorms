@@ -248,15 +248,15 @@ export default async function ReportsPage({
                   </TableRow>
                 ))}
                 <TableRow>
-                  <TableCell style={{ fontWeight: 600 }}>Total</TableCell>
-                  <TableCell style={{ fontWeight: 600 }}>{totals.count}</TableCell>
-                  <TableCell style={{ fontWeight: 600 }}>{formatInr(totals.taxablePaise)}</TableCell>
-                  <TableCell style={{ fontWeight: 600 }}>{formatInr(totals.cgstPaise)}</TableCell>
-                  <TableCell style={{ fontWeight: 600 }}>{formatInr(totals.sgstPaise)}</TableCell>
-                  <TableCell style={{ fontWeight: 600 }}>{formatInr(totals.igstPaise)}</TableCell>
-                  <TableCell style={{ fontWeight: 600 }}>{formatInr(totals.gstTotalPaise)}</TableCell>
-                  <TableCell style={{ fontWeight: 600 }}>{formatInr(totals.compositionLevyPaise)}</TableCell>
-                  <TableCell style={{ fontWeight: 600 }}>{formatInr(totals.invoiceTotalPaise)}</TableCell>
+                  <TableCell><strong>Total</strong></TableCell>
+                  <TableCell><strong>{totals.count}</strong></TableCell>
+                  <TableCell><strong>{formatInr(totals.taxablePaise)}</strong></TableCell>
+                  <TableCell><strong>{formatInr(totals.cgstPaise)}</strong></TableCell>
+                  <TableCell><strong>{formatInr(totals.sgstPaise)}</strong></TableCell>
+                  <TableCell><strong>{formatInr(totals.igstPaise)}</strong></TableCell>
+                  <TableCell><strong>{formatInr(totals.gstTotalPaise)}</strong></TableCell>
+                  <TableCell><strong>{formatInr(totals.compositionLevyPaise)}</strong></TableCell>
+                  <TableCell><strong>{formatInr(totals.invoiceTotalPaise)}</strong></TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -300,11 +300,11 @@ export default async function ReportsPage({
                   </TableRow>
                 ) : (
                   <TableRow>
-                    <TableCell style={{ fontWeight: 600 }}>Total</TableCell>
-                    <TableCell style={{ fontWeight: 600 }}>{totals.tdsCount}</TableCell>
-                    <TableCell style={{ fontWeight: 600 }}>{formatInr(totals.tdsTaxablePaise)}</TableCell>
-                    <TableCell style={{ fontWeight: 600 }}>{formatInr(totals.tdsPaise)}</TableCell>
-                    <TableCell style={{ fontWeight: 600 }}>{formatInr(totals.netReceivablePaise)}</TableCell>
+                    <TableCell><strong>Total</strong></TableCell>
+                    <TableCell><strong>{totals.tdsCount}</strong></TableCell>
+                    <TableCell><strong>{formatInr(totals.tdsTaxablePaise)}</strong></TableCell>
+                    <TableCell><strong>{formatInr(totals.tdsPaise)}</strong></TableCell>
+                    <TableCell><strong>{formatInr(totals.netReceivablePaise)}</strong></TableCell>
                   </TableRow>
                 )}
               </TableBody>

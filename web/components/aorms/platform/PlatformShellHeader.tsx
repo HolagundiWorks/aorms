@@ -86,6 +86,7 @@ export async function PlatformShellHeader({
             </span>
             <span
               aria-hidden
+              className="cds--type-label-01"
               style={{
                 width: "2rem",
                 height: "2rem",
@@ -95,12 +96,10 @@ export async function PlatformShellHeader({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "0.75rem",
-                fontWeight: 600,
                 flexShrink: 0,
               }}
             >
-              {initials}
+              <strong>{initials}</strong>
             </span>
             <form action={platformSignOut}>
               <button

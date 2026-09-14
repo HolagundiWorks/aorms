@@ -58,11 +58,14 @@ export function HeaderUserMenu({ name, role, initials, hour }: { name: string; r
             explicit request) — greeting + name only here; role still
             shows inside the opened dropdown below, which isn't visible
             header clutter. */}
-        <span className="aorms-header-user-text cds--type-body-compact-01" style={{ fontWeight: 600, textAlign: "right" }}>
-          {greeting}, {firstName}
+        <span className="aorms-header-user-text cds--type-body-compact-01" style={{ textAlign: "right" }}>
+          <strong>
+            {greeting}, {firstName}
+          </strong>
         </span>
         <span
           aria-hidden
+          className="cds--type-label-01"
           style={{
             width: "2rem",
             height: "2rem",
@@ -72,19 +75,17 @@ export function HeaderUserMenu({ name, role, initials, hour }: { name: string; r
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: "0.75rem",
-            fontWeight: 600,
             flexShrink: 0,
           }}
         >
-          {initials}
+          <strong>{initials}</strong>
         </span>
         <ChevronDown size={16} />
       </button>
       <PopoverContent>
         <div style={{ padding: "1rem", minWidth: "14rem" }}>
-          <p className="cds--type-body-compact-02" style={{ fontWeight: 600 }}>
-            {name}
+          <p className="cds--type-body-compact-02">
+            <strong>{name}</strong>
           </p>
           <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.75rem" }}>
             {role}

@@ -77,7 +77,7 @@ export default async function FeasibilityPage({
                         : "—"}
                     </TableCell>
                     <TableCell>
-                      <code style={{ fontSize: "0.75rem", wordBreak: "break-all" }}>{shareUrl}</code>
+                      <code className="cds--type-code-01" style={{ wordBreak: "break-all" }}>{shareUrl}</code>
                     </TableCell>
                     <TableCell>
                       <GeneratePdfButton

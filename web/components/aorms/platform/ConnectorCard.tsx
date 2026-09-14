@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Button, InlineNotification, Select, SelectItem, Tag, TextInput, Toggle } from "@carbon/react";
+import { Button, InlineNotification, Select, SelectItem, Tag, TextInput, Tile, Toggle } from "@carbon/react";
 import { TrashCan } from "@carbon/icons-react";
 import {
   deleteModelConnector,
@@ -60,7 +60,7 @@ export function ConnectorCard({ connector }: { connector: Connector }) {
   }
 
   return (
-    <div style={{ border: "1px solid var(--cds-border-subtle)", padding: "1rem", borderRadius: "2px" }}>
+    <Tile>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -171,6 +171,6 @@ export function ConnectorCard({ connector }: { connector: Connector }) {
           <InlineNotification kind="error" title="Couldn't grant access" subtitle={grantError} lowContrast hideCloseButton style={{ marginTop: "0.5rem" }} />
         )}
       </div>
-    </div>
+    </Tile>
   );
 }

@@ -91,7 +91,7 @@ export default async function AuditLogPage() {
                     </TableCell>
                     <TableCell>{e.entity}</TableCell>
                     <TableCell>
-                      <code style={{ fontSize: "0.75rem" }}>{e.entity_id?.slice(0, 8) ?? "—"}</code>
+                      <code className="cds--type-code-01">{e.entity_id?.slice(0, 8) ?? "—"}</code>
                     </TableCell>
                   </TableRow>
                 );

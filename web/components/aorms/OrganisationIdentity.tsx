@@ -13,9 +13,9 @@ export function OrganisationIdentity({ companyName }: { companyName: string }) {
   return (
     <span
       className="cds--type-body-compact-02"
-      style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}
+      style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}
     >
-      {name}
+      <strong>{name}</strong>
     </span>
   );
 }
