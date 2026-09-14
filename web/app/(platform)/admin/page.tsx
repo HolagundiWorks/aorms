@@ -9,15 +9,22 @@ import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SysDexPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
 
 /**
- * AORMS Platform admin back office — dashboard. Gated behind
- * accounts.is_admin (any platform staff, SUPER_ADMIN or SUPPORT_STAFF —
- * platform/supabase/migrations/0016_admin_role.sql), a column settable
- * only via direct DB access, no self-service grant UI in this pass. The
- * full platform-wide KPIs/payments/activity below are SUPER_ADMIN only —
- * support staff get a smaller, HelpDeX-focused view instead of dead-end
- * links into pages they can't open. Every count below is a cheap
- * `head: true` row count, not a full row fetch — same KPI-strip pattern
- * used throughout app/(app)/*.
+ * AORMS Platform admin back office — dashboard. Gated behind platform
+ * staff status (any role, SUPER_ADMIN or SUPPORT_STAFF) — originally
+ * `accounts.is_admin`, settable only via direct DB access (migration
+ * 0016); as of 2026-09-14's Identity/Admin separation, that's
+ * `public.platform_staff` instead (platform migrations 0022-0023), with
+ * a real self-service grant/revoke UI now (SUPER_ADMIN-only —
+ * /admin/accounts's AccountAdminControls.tsx) rather than "requires
+ * direct DB access" being the only path. This page's own gate
+ * (`account?.is_admin` below) reads the derived field
+ * `getCurrentPlatformSessionAccount()` resolves from that table, not a
+ * raw column, so it needed no change when the underlying table did. The
+ * full platform-wide KPIs/payments/activity below are SUPER_ADMIN
+ * only — support staff get a smaller, HelpDeX-focused view instead of
+ * dead-end links into pages they can't open. Every count below is a
+ * cheap `head: true` row count, not a full row fetch — same KPI-strip
+ * pattern used throughout app/(app)/*.
  */
 export default async function AdminDashboardPage() {
   const account = await getCurrentPlatformSessionAccount();
