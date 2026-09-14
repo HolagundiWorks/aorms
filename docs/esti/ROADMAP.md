@@ -4989,6 +4989,134 @@ a real visitor sees).
 
 ---
 
+### 2026-09-14 — enterprise-grade security hardening + performance pass
+
+Explicit user request: full security audit with gaps filled, an
+auto-logout feature specifically, and a performance audit with
+improvements — across the whole `web/` app (Office Hub, Client/
+Consultant/Contractor portals, and Identity/ConnectDeX/SysDeX). Three
+parallel Explore agents audited auth/session/headers/rate-limiting/RLS,
+input-validation/file-upload/IDOR/webhook/redirect/error-disclosure, and
+performance (data fetching, indexes, images, bundle, caching, middleware)
+before any code changed — full findings summarized below by what shipped.
+
+**Shipped, live-verified:**
+- **Auto-logout** (`components/aorms/security/IdleSessionGuard.tsx`) — no
+  idle-timeout mechanism existed anywhere before this. 30-minute idle
+  timer, a Carbon `Modal` warning at 29 minutes with a live 60s countdown
+  and "Stay signed in"/"Sign out now", cross-tab sync via a `localStorage`
+  timestamp so activity in one tab resets every open tab's timer. Mounted
+  in every authenticated shell: Office Hub (`app/(app)/layout.tsx`), all
+  three external portals, and the shared `PlatformShellHeader.tsx`
+  (covers Identity/ConnectDeX/SysDeX in one change). Live-tested end to
+  end against a throwaway test account: fast-forwarded the shared
+  activity timestamp via `localStorage`, confirmed the warning modal
+  fires with a working countdown, "Stay signed in" correctly resets it,
+  and a full 30-minute idle genuinely force-signs-out and redirects.
+- **Rate limiting** (`lib/security/rate-limit.ts`) — in-memory sliding-
+  window counter (explicitly documented as single-instance, no
+  distributed store exists for this app) on `signIn`, `platformSignIn`
+  (8/15min), `platformSignUp`, `requestPasswordReset` (5/hour). Live-
+  tested: 9 rapid failed `platformSignIn` attempts against a real account
+  in production correctly returned "Too many attempts — try again in
+  857s" after the 8th.
+- **Password policy** (`lib/security/password-policy.ts`) — shared 8+
+  chars/one letter/one digit rule, closing a real gap (`platformSignUp`
+  previously had no validation beyond non-empty, falling back to
+  Supabase's own 6-char project minimum).
+- **File-upload magic-byte validation** (`lib/security/file-signature.ts`)
+  — `account-profile.ts`'s photo/certificate uploads previously trusted
+  the client-supplied `file.type` alone (spoofable). Ported the same
+  sniffing approach already proven in `lib/drawings/filetype.ts`.
+  Live-tested: a plain-text file spoofed as `image/jpeg` was correctly
+  rejected ("doesn't look like a valid JPEG, PNG, or WebP image"); a
+  genuine PNG uploaded fine immediately after (no false positive).
+- **Open-redirect guard** (`lib/security/safe-next-path.ts`) — both PKCE
+  callback routes (`app/auth/callback`, `app/(platform)/
+  platform-auth-callback`) previously built a redirect from an
+  unvalidated `?next=` param. Verified the guard's logic directly against
+  `https://evil.com`, `//evil.com`, and other payloads — all correctly
+  fall back to the safe default instead of following them.
+- **Error-message sanitization** (`lib/security/safe-error.ts`) — 218
+  Server Action call sites across `lib/actions/*.ts` (76 files) were
+  returning raw Postgres `error.message` straight to the client,
+  confirmed by the audit as pervasive. Mechanical substitution (same
+  shape everywhere, no logic change) to a helper mapping known Postgres
+  codes to clean text and genericizing anything unrecognized, while
+  passing through already-clean messages (confirmed live: Supabase
+  Auth's own "Invalid login credentials" still shows verbatim, only raw
+  SQL-shaped errors get genericized).
+- **Content-Security-Policy** — shipped in **Report-Only** mode first
+  (never blocks anything), built from what the app actually loads
+  (Razorpay checkout, Supabase Storage, self-hosted fonts). The
+  report-only rollout caught a real issue before enforcing: Next.js's own
+  App Router emits inline hydration/RSC-payload `<script>` tags on every
+  page load, which the browser correctly flagged — fixed by adding
+  `'unsafe-inline'` to `script-src` (same documented tradeoff `style-src`
+  already needed). **Known open item**: as of this entry, `aorms.in` is
+  intermittently/persistently serving the *pre-fix* header (missing
+  `'unsafe-inline'` in `script-src`) despite the fix being committed
+  (`bf3ba34d`) and pushed to `main` well before this entry — confirmed via
+  repeated `git fetch`/`git log` that `main` has the fix, so this is a
+  Hostinger deploy-serving issue, not a code defect. Low severity (report-
+  only blocks nothing, just under-reports one violation class in the
+  browser console) but needs a human check of the Hostinger dashboard/a
+  manual redeploy if it hasn't self-resolved by the time this is read —
+  do not flip to enforcing `Content-Security-Policy` until the live
+  header is confirmed to include `'unsafe-inline'` in `script-src`.
+- **Cross-Origin-Opener-Policy: same-origin** — added directly (safe,
+  unlike COEP/CORP which would risk breaking cross-origin Supabase
+  Storage image loads).
+- **Razorpay webhook replay dedup** (`platform` migration `0031`,
+  `razorpay_webhook_events`) — additive to the webhook's existing
+  business-state idempotency (skip if already `CAPTURED`), keyed on
+  event-type + Razorpay's own stable payment id (no stable top-level
+  event id exists in Razorpay's documented webhook payload). Live-
+  verified: a duplicate insert against the real table correctly raised
+  `23505`, exactly the condition the route handler checks for.
+- **Missing DB indexes** (`web/supabase` migration `0050`, `platform`
+  migration `0032`) — `project_id` added across 36 tables (the single
+  most commonly filtered column app-wide, previously indexed on only 2
+  tables), plus `tasks.assignee_id`, `engagements.consultant_id`, four
+  Contractor Portal `contractor_id` columns, and
+  `studio_memberships.studio_id` / `company_memberships.company_id`
+  (previously covered only as the non-leading column of a composite
+  unique constraint). Confirmed present live via `pg_indexes`; on the
+  current (lightly-populated) tables Postgres's planner correctly still
+  picks a Seq Scan for now — expected, correct behavior at this data
+  volume, not a failed fix; the indexes are there for when it isn't.
+- **Performance**: `Promise.all` for three pages that sequenced
+  independent queries (`licences`, `team-members`, `users`); `next/image`
+  for the one real user-content image in the app
+  (`AccountPhotoUpload.tsx`'s profile photo — every other `<img>` is a
+  small fixed brand asset); `proxy.ts`'s middleware matcher now excludes
+  font extensions too, so the Supabase session-refresh call it runs on
+  every request no longer fires on the font-preload request.
+
+**Explicitly deferred, not silently missed** (documented decisions, not
+gaps to rediscover later):
+- **`httpOnly: false` on the Supabase auth cookie** — required by
+  `@supabase/ssr`'s browser client, which reads the session cookie via
+  `document.cookie` to manage client-side auth state; forcing `httpOnly:
+  true` would break sign-in under the current architecture. Moving to a
+  server-only-cookie/BFF token model is a real architecture change, not a
+  config flag.
+- **A full app-level ownership-check retrofit** for every ID-based
+  Server Action — dozens of actions across the codebase rely entirely on
+  RLS/security-definer RPCs for authorization rather than re-checking
+  ownership in the action itself. Every sampled instance had a correct,
+  scoped RLS policy backing it (confirmed by the audit), so this is a
+  known, working-as-designed pattern, not a live hole — but any future
+  migration that drops/weakens one of those policies has zero
+  application-layer backstop. A blanket retrofit of ~75 action files was
+  judged too large/risky to do blind in one pass.
+- **A distributed rate limiter** — the in-memory limiter shipped is real
+  protection against casual/scripted brute-forcing from one source, but
+  resets on redeploy and wouldn't share state across multiple server
+  instances if this app is ever scaled horizontally on Hostinger.
+
+---
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,
