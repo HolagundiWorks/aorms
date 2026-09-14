@@ -2,6 +2,7 @@ import { Chat, Send, Calculator, CheckmarkFilled } from "@carbon/icons-react";
 import { Tile } from "@carbon/react";
 import { REVISION_MANAGEMENT } from "../../lib/marketing-content";
 import { AnimatedNumber } from "./AnimatedNumber";
+import { AnimatedProgressBar } from "./AnimatedProgressBar";
 
 /**
  * Four-stage tile row for the revision lifecycle. Same width AND same
@@ -17,14 +18,35 @@ import { AnimatedNumber } from "./AnimatedNumber";
  * by the team lead) — the same placeholder project used elsewhere on
  * this page — with its cost-delta figure animated via AnimatedNumber,
  * consistent with the billing forecast panel above it.
+ *
+ * Overall progress bar (2026-09-14 same-day follow-up: "add progress
+ * bar in revision management along with tiles") — the tiles show the
+ * four stages as a static list; this adds the one thing they don't:
+ * where THIS illustrative revision actually is right now. It's mid-way
+ * through stage 3 (assessed, not yet back from the client), so
+ * `PROGRESS_PCT` treats stages 1-2 as done and stage 3 as half-done:
+ * (2 + 0.5) / 4 stages ≈ 62%.
  */
 const ICONS = [Chat, Send, Calculator, CheckmarkFilled] as const;
 const TILE_HEIGHT = "23rem";
 const COST_DELTA = 18500; // ₹18,500 illustrative cost delta, not a real figure
+const CURRENT_STAGE = 3; // matches the "in flight" example layered onto stage 3 below
+const PROGRESS_PCT = 62; // stages 1-2 done + stage 3 half-done, of 4 stages
 
 export function RevisionLifecyclePanel() {
   return (
-    <div className="revision-masonry" aria-hidden>
+    <div aria-hidden>
+      <div style={{ marginBottom: "1.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+          <span className="cds--type-body-01">Kitchen finish revision — Sharma Residence Extension</span>
+          <span className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+            Stage {CURRENT_STAGE} of {REVISION_MANAGEMENT.stages.length} — {REVISION_MANAGEMENT.stages[CURRENT_STAGE - 1].title}
+          </span>
+        </div>
+        <AnimatedProgressBar pct={PROGRESS_PCT} color="var(--cds-support-info)" height="0.5rem" />
+      </div>
+
+      <div className="revision-masonry">
       {REVISION_MANAGEMENT.stages.map((stage, i) => {
         const Icon = ICONS[i];
         return (
@@ -56,6 +78,7 @@ export function RevisionLifecyclePanel() {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
