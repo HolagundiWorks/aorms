@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { toSafeErrorMessage } from "../security/safe-error";
+import { checkPlanCap } from "../platform/firm-studio";
 
 export type ProjectActionState = { error: string } | null;
 
@@ -36,6 +37,19 @@ export async function createProjectRecord(
   // since migration 0003 but this action predated it and was never switched
   // over. Fixed here rather than knowingly introducing the same inconsistency
   // for Phase 10's lead-conversion path, which creates project_offices rows too.
+  // Plan cap (2026-09-14, real pricing restructure) — Free-tier studios
+  // are capped at 2 active projects (see lib/platform/firm-studio.ts's
+  // PLAN_CAPS); "active" excludes ARCHIVED/COMPLETED so a wrapped-up
+  // project doesn't permanently occupy one of a free studio's 2 slots.
+  // No cap at all on Studio/Professional/Enterprise, or when this
+  // deployment isn't linked to a Platform studio.
+  const { count: activeProjectCount } = await supabase
+    .from("project_offices")
+    .select("id", { count: "exact", head: true })
+    .not("status", "in", "(ARCHIVED,COMPLETED)");
+  const capError = await checkPlanCap(activeProjectCount ?? 0, "project");
+  if (capError) return capError;
+
   const { data: refData, error: refError } = await supabase.rpc("next_ref", {
     p_scope: "projectoffice",
     p_default_prefix: "PRJ",

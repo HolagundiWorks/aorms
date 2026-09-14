@@ -12,6 +12,13 @@ function isLicenceActive(expiresAt: string | null): boolean {
   return !expiresAt || new Date(expiresAt) > new Date();
 }
 
+const PLAN_TAG: Record<string, { label: string; type: "gray" | "blue" | "purple" | "magenta" }> = {
+  FREE: { label: "Free", type: "gray" },
+  STUDIO: { label: "Studio", type: "blue" },
+  PROFESSIONAL: { label: "Professional", type: "purple" },
+  ENTERPRISE: { label: "Enterprise", type: "magenta" },
+};
+
 /**
  * AORMS Licence Management — a separate portal from Identity (own page
  * under the same (platform) route group/login boundary), listing the
@@ -25,8 +32,15 @@ function isLicenceActive(expiresAt: string | null): boolean {
  * (platform/supabase/migrations/0010_payments.sql,
  * 0011_licence_payment_gate.sql) and closed that direct-edit RLS policy.
  * The owner now sees an "Upgrade" button (UpgradeLicenceButton, opens
- * Razorpay Checkout) instead of a free-edit form; a platform admin can
- * still override any studio's licence directly from /admin/licences.
+ * Razorpay Checkout for Studio/Professional, "Talk to AORMS" for
+ * Enterprise) instead of a free-edit form; a platform admin can still
+ * override any studio's licence directly from /admin/licences.
+ *
+ * 2026-09-14 — real pricing restructure (platform migration 0033):
+ * TRIAL/PRO/ENTERPRISE renamed to FREE/STUDIO/PROFESSIONAL/ENTERPRISE.
+ * FREE no longer expires (a real, permanent tier now, not a 30-day
+ * countdown) — `isLicenceActive()` already treats a null `expires_at` as
+ * active, so FREE studios simply never show EXPIRED.
  */
 /** The user → profile → account resolution chain, genuinely sequential
  * (each step needs the last step's id) — pulled into its own function so
@@ -48,9 +62,9 @@ async function resolveAccount(webSupabase: Awaited<ReturnType<typeof createWebCl
   const handle = profile?.platform_public_id ?? null;
 
   const { data: account } = handle
-    ? await platformService.from("accounts").select("id").eq("public_id", handle).maybeSingle()
+    ? await platformService.from("accounts").select("id, full_name").eq("public_id", handle).maybeSingle()
     : { data: null };
-  return account;
+  return account ? { ...account, email: user?.email ?? "" } : null;
 }
 
 export default async function LicencesPage() {
@@ -62,7 +76,7 @@ export default async function LicencesPage() {
   // rather than fetching it last.
   const [account, { data: planPricingRows }] = await Promise.all([
     resolveAccount(webSupabase, platformService),
-    platformService.from("plan_pricing").select("plan, base_price_paise").in("plan", ["PRO", "ENTERPRISE"]),
+    platformService.from("plan_pricing").select("plan, base_price_paise").in("plan", ["STUDIO", "PROFESSIONAL", "ENTERPRISE"]),
   ]);
 
   if (!account) {
@@ -96,24 +110,14 @@ export default async function LicencesPage() {
     })
     .filter((id): id is string => !!id);
 
-  // Both depend only on studioIds, not on each other — run together.
-  const [{ data: licences }, { data: allMemberships }] = studioIds.length
-    ? await Promise.all([
-        platformService.from("licences").select("studio_id, plan, seats, expires_at").in("studio_id", studioIds),
-        platformService.from("studio_memberships").select("studio_id").in("studio_id", studioIds).eq("status", "ACTIVE"),
-      ])
-    : [{ data: [] as { studio_id: string; plan: string; seats: number; expires_at: string | null }[] }, { data: [] as { studio_id: string }[] }];
-
-  // Active member count per studio — Enterprise eligibility (20+, see
-  // createLicenceOrder) is shown here, not just enforced server-side.
-  const activeMemberCounts = new Map<string, number>();
-  for (const m of allMemberships ?? []) {
-    activeMemberCounts.set(m.studio_id, (activeMemberCounts.get(m.studio_id) ?? 0) + 1);
-  }
+  const { data: licences } = studioIds.length
+    ? await platformService.from("licences").select("studio_id, plan, seats, expires_at").in("studio_id", studioIds)
+    : { data: [] as { studio_id: string; plan: string; seats: number; expires_at: string | null }[] };
 
   const studioPricing = {
-    proPricePaise: planPricingRows?.find((p) => p.plan === "PRO")?.base_price_paise ?? 0,
-    enterprisePricePaise: planPricingRows?.find((p) => p.plan === "ENTERPRISE")?.base_price_paise ?? 0,
+    studioPricePaise: planPricingRows?.find((p) => p.plan === "STUDIO")?.base_price_paise ?? 0,
+    professionalPricePaise: planPricingRows?.find((p) => p.plan === "PROFESSIONAL")?.base_price_paise ?? 0,
+    enterpriseStartingAtPaise: planPricingRows?.find((p) => p.plan === "ENTERPRISE")?.base_price_paise ?? 0,
   };
 
   return (
@@ -130,6 +134,7 @@ export default async function LicencesPage() {
             const licence = (licences ?? []).find((l) => l.studio_id === studio.id);
             const isOwner = m.role === "OWNER";
             const active = licence ? isLicenceActive(licence.expires_at) : false;
+            const planTag = licence ? (PLAN_TAG[licence.plan] ?? { label: licence.plan, type: "gray" as const }) : null;
 
             return (
               <Tile key={studio.id}>
@@ -140,28 +145,28 @@ export default async function LicencesPage() {
                       {studio.public_id}
                     </Tag>
                   </Stack>
-                  {licence ? (
+                  {licence && planTag ? (
                     <>
                       <Stack gap={2} orientation="horizontal">
-                        <Tag
-                          type={licence.plan === "ENTERPRISE" ? "magenta" : licence.plan === "PRO" ? "purple" : "gray"}
-                          size="md"
-                        >
-                          {licence.plan === "PRO" ? "Pro" : licence.plan === "ENTERPRISE" ? "Enterprise" : licence.plan}
+                        <Tag type={planTag.type} size="md">
+                          {planTag.label}
                         </Tag>
                         <Tag type={active ? "green" : "red"} size="md">
                           {active ? "ACTIVE" : "EXPIRED"}
                         </Tag>
                       </Stack>
                       <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                        {licence.seats} PRO seat{licence.seats === 1 ? "" : "s"} included
+                        {licence.plan === "FREE"
+                          ? "1 team member, 2 active projects, 3 clients, 3 contractors"
+                          : `${licence.seats} PRO seat${licence.seats === 1 ? "" : "s"} included`}
                         {licence.expires_at ? ` · expires ${new Date(licence.expires_at).toLocaleDateString()}` : " · no expiry"}
                       </p>
-                      {isOwner && (
+                      {isOwner && licence.plan !== "ENTERPRISE" && (
                         <UpgradeLicenceButton
                           studioId={studio.id}
                           studioName={studio.name}
-                          activeMemberCount={activeMemberCounts.get(studio.id) ?? 0}
+                          ownerName={account.full_name || "there"}
+                          ownerEmail={account.email}
                           pricing={studioPricing}
                         />
                       )}

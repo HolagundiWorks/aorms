@@ -26,29 +26,44 @@ export async function getFirmStudio(): Promise<FirmStudio | null> {
 
   const { data: licence } = await platformService.from("licences").select("plan").eq("studio_id", studio.id).maybeSingle();
 
-  return { id: studio.id, name: studio.name, public_id: studio.public_id, plan: licence?.plan ?? "TRIAL" };
+  return { id: studio.id, name: studio.name, public_id: studio.public_id, plan: licence?.plan ?? "FREE" };
 }
 
 /**
- * Free-tier (TRIAL plan) cap for a firm-scoped count (2026-09-14,
- * explicit request: "free studio account will host 3 users, 3 clients,
- * and 3 contractors only"). Returns null (no cap) when this deployment
- * isn't linked to any studio at all, or the linked studio is on a paid
- * plan — never fabricates a limit against data that isn't actually
- * studio-scoped.
+ * 2026-09-14 — real pricing restructure (see platform migration 0033 and
+ * docs/esti/ROADMAP.md's dated entry): per-tier caps on Office-Hub-side
+ * record counts. Replaces the old flat "FREE_TIER_RECORD_CAP = 3,
+ * TRIAL-only" shape — the tier set grew from TRIAL/PRO/ENTERPRISE to
+ * FREE/STUDIO/PROFESSIONAL/ENTERPRISE, and Studio/Professional now have
+ * their own real project caps too (previously only clients/contractors
+ * were capped, and only on TRIAL). `null` = unlimited. Team-member caps
+ * are a separate, Platform-side check (`checkStudioMemberCap` in
+ * lib/actions/platform.ts) since they operate on a studio's membership
+ * directly, not via this file's Office-Hub-deployment resolution — kept
+ * as two functions rather than forced into one shared shape, since they
+ * genuinely run in different contexts.
  */
-export const FREE_TIER_RECORD_CAP = 3;
+export const PLAN_CAPS: Record<string, { client: number | null; contractor: number | null; project: number | null }> = {
+  FREE: { client: 3, contractor: 3, project: 2 },
+  STUDIO: { client: null, contractor: null, project: 10 },
+  PROFESSIONAL: { client: null, contractor: null, project: null },
+  ENTERPRISE: { client: null, contractor: null, project: null },
+};
 
-export async function checkFreeTierRecordCap(
+export async function checkPlanCap(
   currentCount: number,
-  kind: "client" | "contractor",
+  kind: "client" | "contractor" | "project",
 ): Promise<{ error: string } | null> {
   const studio = await getFirmStudio();
-  if (!studio || studio.plan !== "TRIAL") return null;
+  if (!studio) return null;
 
-  if (currentCount >= FREE_TIER_RECORD_CAP) {
+  const cap = PLAN_CAPS[studio.plan]?.[kind];
+  if (cap === null || cap === undefined) return null;
+
+  if (currentCount >= cap) {
+    const nextTier = studio.plan === "FREE" ? "Studio" : studio.plan === "STUDIO" ? "Professional" : "a higher tier";
     return {
-      error: `Free studio accounts (${studio.name}) are limited to ${FREE_TIER_RECORD_CAP} ${kind}s. Upgrade to Pro or Enterprise on the AORMS Platform to add more.`,
+      error: `${studio.name}'s current plan is limited to ${cap} ${kind}s. Upgrade to ${nextTier} on the AORMS Platform to add more.`,
     };
   }
   return null;

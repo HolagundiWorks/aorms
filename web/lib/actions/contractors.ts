@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { parseCsvFile } from "../import-export/csv";
-import { checkFreeTierRecordCap, getFirmStudio, FREE_TIER_RECORD_CAP } from "../platform/firm-studio";
+import { checkPlanCap, getFirmStudio, PLAN_CAPS } from "../platform/firm-studio";
 import { toSafeErrorMessage } from "../security/safe-error";
 
 export type ContractorActionState = { error: string } | null;
@@ -99,18 +99,19 @@ export async function importContractorsCsv(
 
   for (const message of parseErrors) skipped.push({ row: 0, message });
 
-  // Free-tier studio cap (2026-09-14) — see lib/platform/firm-studio.ts's
-  // own header comment; trims toInsert to however many slots remain
-  // rather than rejecting the whole file. No cap at all when this
-  // deployment isn't linked to a studio, or the linked studio isn't on
-  // the free (TRIAL) plan.
+  // Plan cap (2026-09-14, real pricing restructure) — see
+  // lib/platform/firm-studio.ts's own header comment; trims toInsert to
+  // however many slots remain rather than rejecting the whole file. No
+  // cap at all when this deployment isn't linked to a studio, or the
+  // linked studio's plan has no contractor cap (only FREE does).
   const studio = await getFirmStudio();
-  if (studio?.plan === "TRIAL" && toInsert.length > 0) {
+  const contractorCap = studio ? PLAN_CAPS[studio.plan]?.contractor : null;
+  if (studio && contractorCap != null && toInsert.length > 0) {
     const { count: existingCount } = await supabase.from("contractors").select("id", { count: "exact", head: true });
-    const remaining = Math.max(0, FREE_TIER_RECORD_CAP - (existingCount ?? 0));
+    const remaining = Math.max(0, contractorCap - (existingCount ?? 0));
     const overflow = toInsert.splice(remaining);
     if (overflow.length > 0) {
-      const message = `Free studio accounts (${studio.name}) are limited to ${FREE_TIER_RECORD_CAP} contractors — upgrade to Pro or Enterprise on the AORMS Platform to add more.`;
+      const message = `${studio.name}'s current plan is limited to ${contractorCap} contractors — upgrade to Studio or Professional on the AORMS Platform to add more.`;
       for (let i = 0; i < overflow.length; i++) skipped.push({ row: 0, message });
     }
   }
@@ -167,7 +168,7 @@ export async function createContractor(
   // Free-tier studio cap (2026-09-14) — see lib/platform/firm-studio.ts;
   // a no-op when this deployment isn't linked to a studio at all.
   const { count: existingCount } = await supabase.from("contractors").select("id", { count: "exact", head: true });
-  const capError = await checkFreeTierRecordCap(existingCount ?? 0, "contractor");
+  const capError = await checkPlanCap(existingCount ?? 0, "contractor");
   if (capError) return capError;
 
   const { data: inserted, error } = await supabase

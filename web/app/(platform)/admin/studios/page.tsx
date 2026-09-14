@@ -74,8 +74,11 @@ export default async function AdminStudiosPage() {
                     <TableCell>{memberCountByStudio.get(s.id) ?? 0}</TableCell>
                     <TableCell>
                       {plan ? (
-                        <Tag type={plan === "ENTERPRISE" ? "magenta" : plan === "PRO" ? "purple" : "gray"} size="sm">
-                          {plan === "PRO" ? "Pro" : plan === "ENTERPRISE" ? "Enterprise" : plan}
+                        <Tag
+                          type={plan === "ENTERPRISE" ? "magenta" : plan === "PROFESSIONAL" ? "purple" : plan === "STUDIO" ? "blue" : "gray"}
+                          size="sm"
+                        >
+                          {plan === "STUDIO" ? "Studio" : plan === "PROFESSIONAL" ? "Professional" : plan === "ENTERPRISE" ? "Enterprise" : "Free"}
                         </Tag>
                       ) : (
                         "—"

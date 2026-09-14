@@ -232,19 +232,25 @@ export async function createStudio(
  * (leave)" RLS covers the insert and the ON CONFLICT DO UPDATE path
  * respectively.
  */
-const FREE_TIER_MEMBER_CAP = 3;
+/**
+ * 2026-09-14 — real pricing restructure (platform migration 0033, see
+ * docs/esti/ROADMAP.md's dated entry). Per-tier team-member caps,
+ * replacing the old flat "3 on TRIAL, unlimited otherwise" shape now
+ * that Studio/Professional have their own real member caps too — the
+ * same numbers `PLAN_SEAT_ALLOTMENT` (platform-payments.ts) already uses
+ * for the separate individual-PRO-status-grant feature, reused here
+ * rather than maintaining two parallel per-plan numbers that could
+ * drift. `null` = unlimited (Enterprise's 9999 seat allotment is treated
+ * as unlimited for membership purposes, not a literal 9999-person cap).
+ */
+const STUDIO_MEMBER_CAP: Record<string, number | null> = { FREE: 1, STUDIO: 10, PROFESSIONAL: 25, ENTERPRISE: null };
 
 /**
- * Free-tier (TRIAL plan — every studio's own real default, see migration
- * 0006's `handle_new_studio_licence()`) studios cap active membership at
- * 3 seats (2026-09-14, explicit request: "free studio account will host
- * 3 users..."). Checked before both ways a studio gains a member —
- * self-serve join (joinStudio) and owner invite (inviteStudioMember) —
- * so neither path can silently exceed it. Skips the check for someone
+ * Checked before both ways a studio gains a member — self-serve join
+ * (joinStudio) and owner invite (inviteStudioMember) — so neither path
+ * can silently exceed the caller's plan cap. Skips the check for someone
  * already an ACTIVE member of this studio (re-inviting/rejoining isn't a
- * net-new seat). PRO/ENTERPRISE studios have no cap here — their own
- * seat count already gates the separate, unrelated "PRO status" grant
- * (assignProSeat), not membership itself.
+ * net-new seat).
  */
 async function checkStudioMemberCap(studioId: string, accountId: string): Promise<{ error: string } | null> {
   const platformService = createPlatformServiceRoleClient();
@@ -258,7 +264,8 @@ async function checkStudioMemberCap(studioId: string, accountId: string): Promis
   if (existing?.status === "ACTIVE") return null;
 
   const { data: licence } = await platformService.from("licences").select("plan").eq("studio_id", studioId).maybeSingle();
-  if (licence?.plan !== "TRIAL") return null;
+  const cap = STUDIO_MEMBER_CAP[licence?.plan ?? "FREE"];
+  if (cap == null) return null;
 
   const { count } = await platformService
     .from("studio_memberships")
@@ -266,8 +273,9 @@ async function checkStudioMemberCap(studioId: string, accountId: string): Promis
     .eq("studio_id", studioId)
     .eq("status", "ACTIVE");
 
-  if ((count ?? 0) >= FREE_TIER_MEMBER_CAP) {
-    return { error: `Free studio accounts are limited to ${FREE_TIER_MEMBER_CAP} members. Upgrade to Pro or Enterprise to add more.` };
+  if ((count ?? 0) >= cap) {
+    const nextTier = licence?.plan === "FREE" || !licence ? "Studio" : licence.plan === "STUDIO" ? "Professional" : "a higher tier";
+    return { error: `This studio's current plan is limited to ${cap} team member${cap === 1 ? "" : "s"}. Upgrade to ${nextTier} to add more.` };
   }
   return null;
 }

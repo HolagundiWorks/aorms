@@ -33,12 +33,13 @@ export function UpdateLicenceForm({ studioId, licence }: { studioId: string; lic
       <Stack gap={4}>
         <FormGrid>
           <Select id="licence-plan" name="plan" labelText="Plan" defaultValue={licence.plan}>
-            <SelectItem value="TRIAL" text="Trial" />
-            <SelectItem value="PRO" text="Pro" />
+            <SelectItem value="FREE" text="Free" />
+            <SelectItem value="STUDIO" text="Studio" />
+            <SelectItem value="PROFESSIONAL" text="Professional" />
             <SelectItem value="ENTERPRISE" text="Enterprise" />
           </Select>
           {/* min={0}, not 1 (2026-09-14 SysDeX audit fix) — a free-tier
-              TRIAL studio legitimately has 0 PRO seats now (see platform
+              studio legitimately has 0 PRO seats now (see platform
               migration 0021); min={1} would block the browser's own
               native validation from ever letting an admin submit that
               real value. */}

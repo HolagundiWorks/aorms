@@ -7,12 +7,17 @@ import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 
 /**
- * Edits plan_pricing — three flat prices as of migration
- * 0019_studio_pro_enterprise_tiers.sql (replacing the single AORMS_FIRM
- * tier from 0017 with Pro/Enterprise): AORMS Identity (₹199 one-time,
- * after 100 usage-hours), Studio Pro (₹1,999/year), Studio Enterprise
- * (₹14,999/year, 20+ team members). No per-seat billing on any plan
- * anymore. Nothing elsewhere in the app hardcodes a price.
+ * Edits plan_pricing — five flat prices as of migration
+ * 0033_free_studio_professional_tiers.sql (the real pricing restructure,
+ * 2026-09-14 — replacing TRIAL/PRO/ENTERPRISE with a real
+ * Free/Studio/Professional/Enterprise model): AORMS Identity (₹199
+ * one-time, after 100 usage-hours), Free (₹0, permanent — not a
+ * countdown), Studio (₹24,990/year), Professional (₹49,990/year),
+ * Enterprise (₹1,00,000/year "starting at" — a reference figure only;
+ * Enterprise no longer sells through self-serve Razorpay checkout at
+ * all, see lib/actions/platform-payments.ts's header comment). No
+ * per-seat billing on any plan. Nothing elsewhere in the app hardcodes a
+ * price — this page is the one place it lives.
  */
 export default async function AdminPricingPage() {
   const account = await getCurrentPlatformSessionAccount();
@@ -33,7 +38,7 @@ export default async function AdminPricingPage() {
             <Tile key={p.plan}>
               <SetPricingForm
                 key={p.base_price_paise}
-                plan={p.plan as "AORMS_IDENTITY" | "PRO" | "ENTERPRISE"}
+                plan={p.plan as "AORMS_IDENTITY" | "FREE" | "STUDIO" | "PROFESSIONAL" | "ENTERPRISE"}
                 basePricePaise={p.base_price_paise}
               />
             </Tile>

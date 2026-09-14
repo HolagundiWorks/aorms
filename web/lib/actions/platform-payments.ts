@@ -34,20 +34,20 @@ export type CreateOrderResult =
   | { error: string }
   | { orderId: string; amountPaise: number; currency: string; keyId: string };
 
-/** Both Studio plans are flat annual fees now (2026-09-14, see migration
- * 0019's header — retires AORMS_FIRM's ₹199/user/month component
- * entirely, confirmed with the user), so `licences.seats`/`payments.seats`
- * (still `not null check (seats > 0)` columns — kept, not migrated away,
- * since assignProSeat/revokeProSeat still cap PRO-level grants against
- * this exact number) are now a fixed allotment baked into the plan a
- * Studio buys, not a buyer-chosen quantity: Pro includes 20 (Enterprise's
- * own defining line is "20+ employees," so that's the natural boundary),
- * Enterprise a high sentinel standing in for "effectively unlimited." */
-const PLAN_SEAT_ALLOTMENT: Record<"PRO" | "ENTERPRISE", number> = { PRO: 20, ENTERPRISE: 9999 };
-/** Enterprise is gated to studios with 20+ ACTIVE team members — the same
- * number that sets its own seat allotment above, not a coincidence: it's
- * the tier's actual defining criterion. */
-const ENTERPRISE_MIN_MEMBERS = 20;
+/** 2026-09-14 — real pricing restructure (platform migration 0033, see
+ * docs/esti/ROADMAP.md's dated entry): Studio/Professional are flat
+ * annual fees, self-serve via Razorpay Checkout; Enterprise moves to a
+ * "Talk to AORMS" contact flow (a support-ticket submission, see
+ * UpgradeLicenceButton.tsx) — no self-serve checkout amount, no
+ * automatic minimum-member gate. Same seat-allotment reasoning as before
+ * (`licences.seats`/`payments.seats` stay fixed-per-plan, not
+ * buyer-chosen — assignProSeat/revokeProSeat still cap PRO-level grants
+ * against this exact number): Studio includes 10 seats, Professional
+ * 25 — the same team-member caps `STUDIO_MEMBER_CAP` (platform.ts)
+ * enforces elsewhere, reused rather than duplicated. Enterprise's seat
+ * allotment (9999, "effectively unlimited") is still set once a platform
+ * admin grants it directly via adminUpdateLicence — unchanged. */
+const PLAN_SEAT_ALLOTMENT: Record<"STUDIO" | "PROFESSIONAL", number> = { STUDIO: 10, PROFESSIONAL: 25 };
 
 /**
  * Called from the client (UpgradeLicenceButton) before opening Razorpay
@@ -57,13 +57,8 @@ const ENTERPRISE_MIN_MEMBERS = 20;
  * spoofed by client-supplied data), since the `payments` table itself
  * grants no authenticated insert policy to lean on instead (see
  * 0010_payments.sql's header comment).
- *
- * 2026-09-14: `plan` is a real choice again — AORMS Firm split into two
- * named tiers, Pro (₹1,999/yr) and Enterprise (₹14,999/yr, 20+ members) —
- * but both flat, no seats parameter at all anymore (see
- * PLAN_SEAT_ALLOTMENT above for what `seats` now means instead).
  */
-export async function createLicenceOrder(studioId: string, plan: "PRO" | "ENTERPRISE"): Promise<CreateOrderResult> {
+export async function createLicenceOrder(studioId: string, plan: "STUDIO" | "PROFESSIONAL"): Promise<CreateOrderResult> {
   const platform = await createPlatformClient();
   const {
     data: { user },
@@ -78,19 +73,6 @@ export async function createLicenceOrder(studioId: string, plan: "PRO" | "ENTERP
     .maybeSingle();
   if (!membership || membership.role !== "OWNER" || membership.status !== "ACTIVE") {
     return { error: "Only a studio's owner can purchase a licence for it." };
-  }
-
-  if (plan === "ENTERPRISE") {
-    const { count: activeMemberCount } = await platform
-      .from("studio_memberships")
-      .select("id", { count: "exact", head: true })
-      .eq("studio_id", studioId)
-      .eq("status", "ACTIVE");
-    if ((activeMemberCount ?? 0) < ENTERPRISE_MIN_MEMBERS) {
-      return {
-        error: `Enterprise is for studios with ${ENTERPRISE_MIN_MEMBERS}+ team members — you have ${activeMemberCount ?? 0}.`,
-      };
-    }
   }
 
   const { data: pricing, error: pricingError } = await platform
@@ -304,11 +286,11 @@ export async function adminUpdateLicence(_prev: PaymentActionState, formData: Fo
   const seatsRaw = String(formData.get("seats") ?? "");
   const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
   if (!studioId) return { error: "Missing studio." };
-  if (!["TRIAL", "PRO", "ENTERPRISE"].includes(plan)) return { error: "Invalid plan." };
+  if (!["FREE", "STUDIO", "PROFESSIONAL", "ENTERPRISE"].includes(plan)) return { error: "Invalid plan." };
   const seats = Number(seatsRaw);
-  // >= 0, not < 1 (2026-09-14 SysDeX audit fix) — a free-tier TRIAL
-  // studio legitimately has 0 PRO seats now (platform migration 0021);
-  // the `licences_seats_check` constraint itself was widened to match.
+  // >= 0, not < 1 (2026-09-14 SysDeX audit fix) — a free-tier studio
+  // legitimately has 0 PRO seats now (platform migration 0021); the
+  // `licences_seats_check` constraint itself was widened to match.
   if (!Number.isInteger(seats) || seats < 0) return { error: "Seats must be zero or a positive whole number." };
 
   const platform = await createPlatformClient();
@@ -324,12 +306,16 @@ export async function adminUpdateLicence(_prev: PaymentActionState, formData: Fo
 
 /**
  * 2026-09-13: sets two figures per plan — `basePriceRupees` (the flat
- * fee every plan has: annual for Pro/Enterprise/Identity, one-time for
- * Identity specifically) and `pricePerSeatMonthlyRupees` (retained as a
- * field but always 0 for every plan as of 2026-09-14 — Pro/Enterprise's
- * per-seat-monthly component was fully retired, migration 0019 — kept
- * rather than removed so a future per-seat plan doesn't need to
- * re-litigate this exact field).
+ * fee every plan has: annual for Studio/Professional/Enterprise, one-
+ * time for Identity) and `pricePerSeatMonthlyRupees` (retained as a
+ * field but always 0 for every plan as of 2026-09-14 — the per-seat-
+ * monthly component was fully retired, migration 0019 — kept rather than
+ * removed so a future per-seat plan doesn't need to re-litigate this
+ * exact field). FREE is exempt from the "must be greater than zero"
+ * check below — it's genuinely, permanently ₹0 (2026-09-14 pricing
+ * restructure); this form still renders a row for it (SetPricingForm.tsx
+ * disables its input) so an admin can see it listed, not edit it away
+ * from zero.
  */
 export async function adminSetPricing(_prev: PaymentActionState, formData: FormData): Promise<PaymentActionState> {
   const gate = await requirePlatformAdmin();
@@ -338,9 +324,10 @@ export async function adminSetPricing(_prev: PaymentActionState, formData: FormD
   const plan = String(formData.get("plan") ?? "");
   const baseRaw = String(formData.get("basePriceRupees") ?? "");
   const perSeatRaw = String(formData.get("pricePerSeatMonthlyRupees") ?? "0");
-  if (!["AORMS_IDENTITY", "PRO", "ENTERPRISE"].includes(plan)) return { error: "Invalid plan." };
+  if (!["AORMS_IDENTITY", "FREE", "STUDIO", "PROFESSIONAL", "ENTERPRISE"].includes(plan)) return { error: "Invalid plan." };
   const baseRupees = Number(baseRaw);
-  if (!Number.isFinite(baseRupees) || baseRupees <= 0) return { error: "Enter a base price greater than zero." };
+  if (plan !== "FREE" && (!Number.isFinite(baseRupees) || baseRupees <= 0)) return { error: "Enter a base price greater than zero." };
+  if (plan === "FREE" && baseRupees !== 0) return { error: "The Free plan's price is fixed at ₹0." };
   const perSeatRupees = Number(perSeatRaw || "0");
   if (!Number.isFinite(perSeatRupees) || perSeatRupees < 0) return { error: "Per-seat price can't be negative." };
 

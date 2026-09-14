@@ -48,8 +48,11 @@ export default async function AdminLicencesPage() {
                     <Tag type="cool-gray" size="sm">
                       {studio.public_id}
                     </Tag>
-                    <Tag type={l.plan === "ENTERPRISE" ? "magenta" : l.plan === "PRO" ? "purple" : "gray"} size="sm">
-                      {l.plan === "PRO" ? "Pro" : l.plan === "ENTERPRISE" ? "Enterprise" : l.plan}
+                    <Tag
+                      type={l.plan === "ENTERPRISE" ? "magenta" : l.plan === "PROFESSIONAL" ? "purple" : l.plan === "STUDIO" ? "blue" : "gray"}
+                      size="sm"
+                    >
+                      {l.plan === "STUDIO" ? "Studio" : l.plan === "PROFESSIONAL" ? "Professional" : l.plan === "ENTERPRISE" ? "Enterprise" : "Free"}
                     </Tag>
                     <Tag type={active ? "green" : "red"} size="sm">
                       {active ? "ACTIVE" : "EXPIRED"}
