@@ -13,6 +13,7 @@ export type CompanyProfile = {
   id: string;
   gstin: string | null;
   pan: string | null;
+  cin: string | null;
   gst_type: string;
   tds_applicable_default: boolean;
   address_line1: string | null;
@@ -48,8 +49,15 @@ export function CompanyProfileForm({ company }: { company: CompanyProfile }) {
           <TextInput id="company-phone" name="phone" labelText="Phone" defaultValue={company.phone ?? ""} />
         </FormGrid>
 
-        <h3 className="cds--type-productive-heading-02">GST & Tax</h3>
+        <h3 className="cds--type-productive-heading-02">Registration & Tax</h3>
         <FormGrid>
+          <TextInput
+            id="company-cin"
+            name="cin"
+            labelText="CIN / LLPIN (optional)"
+            helperText="Corporate ID (Pvt Ltd/OPC) or LLP ID — leave blank for a proprietorship or partnership"
+            defaultValue={company.cin ?? ""}
+          />
           <Select id="company-gstType" name="gstType" labelText="GST system" defaultValue={company.gst_type}>
             <SelectItem value="REGULAR" text="Regular" />
             <SelectItem value="COMPOSITION" text="Composition" />

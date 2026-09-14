@@ -189,6 +189,7 @@ export async function updateCompanyProfile(
     .update({
       gstin: String(formData.get("gstin") ?? "").trim() || null,
       pan: String(formData.get("pan") ?? "").trim() || null,
+      cin: String(formData.get("cin") ?? "").trim() || null,
       gst_type: String(formData.get("gstType") ?? "REGULAR"),
       tds_applicable_default: formData.get("tdsApplicableDefault") === "on",
       address_line1: String(formData.get("addressLine1") ?? "").trim() || null,

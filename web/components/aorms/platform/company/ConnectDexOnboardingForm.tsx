@@ -22,6 +22,7 @@ export function ConnectDexOnboardingForm({ companyId }: { companyId: string }) {
         <FormGrid>
           <TextInput id="onboarding-gstin" name="gstin" labelText="GSTIN (optional)" />
           <TextInput id="onboarding-pan" name="pan" labelText="PAN (optional)" />
+          <TextInput id="onboarding-cin" name="cin" labelText="CIN / LLPIN (optional)" />
           <TextInput id="onboarding-address1" name="addressLine1" labelText="Address line 1" required />
           <TextInput id="onboarding-address2" name="addressLine2" labelText="Address line 2 (optional)" />
           <TextInput id="onboarding-city" name="city" labelText="City" required />

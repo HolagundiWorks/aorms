@@ -32,7 +32,7 @@ export default async function AdminConnectDexPage() {
         .order("created_at", { ascending: true }),
       cx
         .from("companies")
-        .select("id, name, public_id, gstin, pan, address_line1, city, state, email, phone")
+        .select("id, name, public_id, gstin, pan, cin, address_line1, city, state, email, phone")
         .eq("status", "PENDING_VERIFICATION"),
       cx.from("companies").select("id, name, public_id").eq("status", "PENDING_PAYMENT"),
       cx.from("connectdex_settings").select("onboarding_fee_paise").eq("id", true).maybeSingle(),
@@ -115,8 +115,9 @@ export default async function AdminConnectDexPage() {
                       </Tag>
                     </Stack>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      GSTIN: {company.gstin ?? "—"} · PAN: {company.pan ?? "—"} · {company.address_line1 ?? "—"}, {company.city ?? "—"},{" "}
-                      {company.state ?? "—"} · {company.email ?? "—"} {company.phone ? `· ${company.phone}` : ""}
+                      GSTIN: {company.gstin ?? "—"} · PAN: {company.pan ?? "—"} · CIN/LLPIN: {company.cin ?? "—"} ·{" "}
+                      {company.address_line1 ?? "—"}, {company.city ?? "—"}, {company.state ?? "—"} · {company.email ?? "—"}{" "}
+                      {company.phone ? `· ${company.phone}` : ""}
                     </p>
                     <ConnectDexActionButton
                       id={company.id}

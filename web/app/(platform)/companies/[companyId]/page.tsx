@@ -54,7 +54,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
   const { data: company, error: companyError } = await cx
     .from("companies")
     .select(
-      "id, name, public_id, status, gstin, pan, gst_type, tds_applicable_default, address_line1, address_line2, city, district, state, pincode, email, phone",
+      "id, name, public_id, status, gstin, pan, cin, gst_type, tds_applicable_default, address_line1, address_line2, city, district, state, pincode, email, phone",
     )
     .eq("id", companyId)
     .maybeSingle();
@@ -262,6 +262,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                 <Stack gap={3}>
                   <p className="cds--type-body-01">GSTIN: {company.gstin ?? "—"}</p>
                   <p className="cds--type-body-01">PAN: {company.pan ?? "—"}</p>
+                  <p className="cds--type-body-01">CIN / LLPIN: {company.cin ?? "—"}</p>
                   <p className="cds--type-body-01">
                     Address: {[company.address_line1, company.address_line2, company.city, company.state, company.pincode]
                       .filter(Boolean)

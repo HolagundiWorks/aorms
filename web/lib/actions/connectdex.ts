@@ -246,6 +246,7 @@ export async function submitConnectDexOnboardingForm(_prev: ConnectDexActionStat
   const companyId = String(formData.get("companyId") ?? "");
   const gstin = String(formData.get("gstin") ?? "").trim();
   const pan = String(formData.get("pan") ?? "").trim();
+  const cin = String(formData.get("cin") ?? "").trim();
   const addressLine1 = String(formData.get("addressLine1") ?? "").trim();
   const addressLine2 = String(formData.get("addressLine2") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim();
@@ -264,6 +265,7 @@ export async function submitConnectDexOnboardingForm(_prev: ConnectDexActionStat
     .update({
       gstin: gstin || null,
       pan: pan || null,
+      cin: cin || null,
       address_line1: addressLine1,
       address_line2: addressLine2 || null,
       city,
