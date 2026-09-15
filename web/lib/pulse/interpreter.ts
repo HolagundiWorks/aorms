@@ -22,6 +22,12 @@ export const PulseIntentSchema = z.discriminatedUnion("intent", [
   z.object({
     intent: z.literal("LIST_PRIORITIES"),
     band: z.enum(["CRITICAL", "ACTION_TODAY", "WATCH", "NORMAL", "BACKLOG"]).nullable().optional(),
+    // Full ESTI only (2026-09-15) — best-effort project-name extraction
+    // from phrasing like "...on Sharma Residence right now" so a
+    // question naming a specific project actually gets scoped to it.
+    // ESTI Lite still classifies and answers LIST_PRIORITIES; it just
+    // ignores this hint (see ask-pulse.ts's tier gate).
+    projectNameHint: z.string().nullable().optional(),
   }),
   z.object({
     intent: z.literal("LIST_TASKS"),
@@ -30,6 +36,16 @@ export const PulseIntentSchema = z.discriminatedUnion("intent", [
   }),
   z.object({
     intent: z.literal("LIST_MISSING_PARAMS"),
+  }),
+  // Full ESTI only (2026-09-15) — a genuinely different question from
+  // LIST_TASKS{status:"BLOCKED"}: that's a task someone manually marked
+  // BLOCKED; this is task_dependencies data (a task can't start until
+  // another finishes), the same real, already-tracked signal
+  // lib/pulse/queries.ts's getBlockedTasks (the Pulse dashboard's own
+  // "Blocked tasks" widget) reads — just never reachable from Ask Pulse
+  // before this. See ask-pulse.ts for the ESTI Lite upsell behavior.
+  z.object({
+    intent: z.literal("LIST_DEPENDENCY_BLOCKS"),
   }),
   z.object({
     intent: z.literal("RAG_QUERY"),
@@ -46,6 +62,15 @@ export type PulseIntent = z.infer<typeof PulseIntentSchema>;
 // "missing") is more specific than a bare priority word, so it's tested
 // first to avoid a gap-related question being misread as a priority one.
 const MISSING_PARAM_PATTERN = /\b(missing|gap|incomplete|not\s+assigned|no\s+assignee|no\s+due\s*date|unassigned)\b/i;
+// Checked before TASK_LIST_PATTERN — "blocked by"/"depends on"/
+// "dependency" phrasing is asking about task_dependencies data, a
+// different real signal than a task someone manually set to the
+// BLOCKED status (TASK_STATUS_PATTERNS below).
+const DEPENDENCY_BLOCK_PATTERN = /\b(blocked\s+by|depends?\s+on|dependenc(y|ies)|waiting\s+on\s+(?:another|a)\s+task)\b/i;
+// Full ESTI project-name extraction for LIST_PRIORITIES — best-effort:
+// "...on <name> right now/today?" → captures <name>. Not run for every
+// question, only ones that already matched PRIORITY_PATTERN.
+const PROJECT_NAME_HINT_PATTERN = /\bon\s+([a-z][a-z0-9&' -]{2,60}?)(?:\s+(?:right\s+now|today|currently))?\s*\??$/i;
 const TASK_STATUS_PATTERNS: [PulseIntentTaskStatus, RegExp][] = [
   ["TODO", /\bto[\s-]?do\b/i],
   ["IN_PROGRESS", /\bin[\s-]?progress\b/i],
@@ -78,6 +103,10 @@ export function classifyPulseIntent(question: string): PulseIntent {
     return { intent: "LIST_MISSING_PARAMS" };
   }
 
+  if (DEPENDENCY_BLOCK_PATTERN.test(trimmed)) {
+    return { intent: "LIST_DEPENDENCY_BLOCKS" };
+  }
+
   if (TASK_LIST_PATTERN.test(trimmed)) {
     let status: PulseIntentTaskStatus | null = null;
     for (const [candidate, pattern] of TASK_STATUS_PATTERNS) {
@@ -101,7 +130,9 @@ export function classifyPulseIntent(question: string): PulseIntent {
         break;
       }
     }
-    return { intent: "LIST_PRIORITIES", band };
+    const projectMatch = trimmed.match(PROJECT_NAME_HINT_PATTERN);
+    const projectNameHint = projectMatch ? projectMatch[1].trim() : null;
+    return { intent: "LIST_PRIORITIES", band, projectNameHint };
   }
 
   if (RAG_PATTERN.test(trimmed)) {

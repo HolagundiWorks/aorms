@@ -10,6 +10,12 @@ import { KpiTile } from "../../../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../../../components/aorms/PageHeader";
 import type { DecisionState } from "../../../../../lib/decisions";
 
+function formatCostDelta(paise: number): string {
+  const rupees = Math.abs(paise) / 100;
+  const sign = paise < 0 ? "-" : "+";
+  return `${sign}₹${rupees.toLocaleString("en-IN")}`;
+}
+
 export default async function ProjectDecisionsPage({
   params,
 }: {
@@ -22,7 +28,7 @@ export default async function ProjectDecisionsPage({
     supabase.from("project_offices").select("id, ref, title").eq("id", id).maybeSingle(),
     supabase
       .from("decisions")
-      .select("id, title, rationale, state, revision_category, revision_source, impact, owner_name, review_deadline")
+      .select("id, title, rationale, state, revision_category, revision_source, impact, owner_name, review_deadline, cost_delta_paise")
       .eq("project_id", id)
       .order("created_at", { ascending: false }),
   ]);
@@ -141,6 +147,19 @@ export default async function ProjectDecisionsPage({
                           </p>
                           <p className="cds--type-body-01">{d.review_deadline ?? "—"}</p>
                         </div>
+                        {d.cost_delta_paise != null && (
+                          <div>
+                            <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
+                              Cost delta on this revision
+                            </p>
+                            <p
+                              className="cds--type-body-01"
+                              style={{ color: d.cost_delta_paise < 0 ? "var(--cds-support-success)" : "var(--cds-support-warning)" }}
+                            >
+                              {formatCostDelta(d.cost_delta_paise)}
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                       <div>

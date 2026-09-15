@@ -26,9 +26,16 @@ export async function createDecision(projectId: string, _prev: ActionState, form
   const impact = String(formData.get("impact") ?? "LOW");
   const ownerName = String(formData.get("ownerName") ?? "").trim() || null;
   const reviewDeadline = String(formData.get("reviewDeadline") ?? "").trim() || null;
+  // Optional signed ₹ cost impact (migration 0051) — entered in rupees,
+  // stored in paise like every other money field in this schema. Empty
+  // input stays null, not 0 — "no quantified cost impact" and "quantified
+  // at zero" are different claims.
+  const costDeltaRupeesRaw = String(formData.get("costDeltaRupees") ?? "").trim();
+  const costDeltaPaise = costDeltaRupeesRaw ? Math.round(Number(costDeltaRupeesRaw) * 100) : null;
 
   if (!title) return { error: "Title is required." };
   if (!rationale) return { error: "Rationale is required." };
+  if (costDeltaRupeesRaw && Number.isNaN(costDeltaPaise)) return { error: "Cost delta must be a number." };
 
   const supabase = await createClient();
   const {
@@ -46,6 +53,7 @@ export async function createDecision(projectId: string, _prev: ActionState, form
       impact,
       owner_name: ownerName,
       review_deadline: reviewDeadline,
+      cost_delta_paise: costDeltaPaise,
       created_by_id: user?.id ?? null,
     })
     .select("id")

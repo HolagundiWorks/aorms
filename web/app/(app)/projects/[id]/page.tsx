@@ -1,4 +1,4 @@
-import { ListChecked, Task, Time } from "@carbon/icons-react";
+import { ListChecked, Task, Time, Calendar, Document, CheckmarkOutline, CurrencyRupee, Wallet, UserMultiple, Activity } from "@carbon/icons-react";
 import { notFound } from "next/navigation";
 import {
   Column,
@@ -33,6 +33,13 @@ export default async function ProjectDetailPage({
     { data: phases, error: phasesError },
     { count: openTaskCount },
     { data: decisionStates },
+    { count: meetingsCount },
+    { count: documentsCount },
+    { count: approvalsCount },
+    { data: proposalFees },
+    { data: invoiceTotals },
+    { count: teamCount },
+    { count: activityCount },
   ] = await Promise.all([
     supabase
       .from("project_offices")
@@ -48,6 +55,21 @@ export default async function ProjectDetailPage({
       .order("sort_order"),
     supabase.from("tasks").select("id", { count: "exact", head: true }).eq("project_id", id).neq("status", "DONE"),
     supabase.from("decisions").select("state").eq("project_id", id),
+    // "One project, one operating record" consolidation (2026-09-15) —
+    // closes a real cross-verification gap: 7 of the marketing page's
+    // own 12 listed fields (Meetings, Documents, Approvals, Fees,
+    // Invoices, Team, Activity) lived only in separate, unlinked
+    // top-level modules — the "one page, not a search" claim wasn't
+    // actually true for most of what it listed. Each of these is a
+    // genuine count/total from that field's own real table, filtered to
+    // this project — not new data, just surfaced here too.
+    supabase.from("moms").select("id", { count: "exact", head: true }).eq("project_id", id),
+    supabase.from("drawings").select("id", { count: "exact", head: true }).eq("project_id", id),
+    supabase.from("approvals").select("id", { count: "exact", head: true }).eq("project_id", id),
+    supabase.from("proposals").select("fee_paise").eq("project_id", id),
+    supabase.from("invoices").select("grand_total_paise").eq("project_id", id),
+    supabase.from("assignments").select("id", { count: "exact", head: true }).eq("project_id", id),
+    supabase.from("audit_log").select("id", { count: "exact", head: true }).eq("entity", "project").eq("entity_id", id),
   ]);
 
   if (projectError) {
@@ -72,6 +94,10 @@ export default async function ProjectDetailPage({
 
   const gate = await getActivationGate(project.id);
   const decisionsAwaitingClient = (decisionStates ?? []).filter((d) => d.state === "CLIENT_REVIEW").length;
+
+  const totalFeesPaise = (proposalFees ?? []).reduce((sum, p) => sum + (p.fee_paise ?? 0), 0);
+  const totalInvoicedPaise = (invoiceTotals ?? []).reduce((sum, i) => sum + (i.grand_total_paise ?? 0), 0);
+  const formatInr = (paise: number) => `₹${(paise / 100).toLocaleString("en-IN")}`;
 
   return (
     <ContextPanelLayout>
@@ -106,6 +132,28 @@ export default async function ProjectDetailPage({
               <KpiTile label="Open tasks" value={openTaskCount ?? 0} icon={ListChecked} />
               <KpiTile label="Decisions logged" value={(decisionStates ?? []).length} icon={Task} />
               <KpiTile label="Awaiting client" value={decisionsAwaitingClient} icon={Time} />
+            </div>
+
+            {/* "One project, one operating record" (2026-09-15) — the
+                rest of what this project's record actually is: meetings,
+                documents, approvals, fees, invoices, team, and activity,
+                each a real count from that field's own table, one click
+                from its own module rather than a second search. */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, 11rem)",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <KpiTile label="Meetings" value={meetingsCount ?? 0} icon={Calendar} href="/moms" />
+              <KpiTile label="Documents" value={documentsCount ?? 0} icon={Document} href="/drawings" />
+              <KpiTile label="Approvals" value={approvalsCount ?? 0} icon={CheckmarkOutline} href="/approvals" />
+              <KpiTile label="Fees" value={formatInr(totalFeesPaise)} icon={CurrencyRupee} href="/proposals" />
+              <KpiTile label="Invoices" value={formatInr(totalInvoicedPaise)} icon={Wallet} href="/invoices" />
+              <KpiTile label="Team" value={teamCount ?? 0} icon={UserMultiple} href="/team-members" />
+              <KpiTile label="Activity" value={activityCount ?? 0} icon={Activity} href="/audit-log" />
             </div>
 
             {/* Client + project contact (migration 0044) — the project

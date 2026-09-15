@@ -1,6 +1,7 @@
 import { Grid, Column, Tile, Tag } from "@carbon/react";
 import {
   WarningFilled,
+  WarningAlt,
   CheckmarkFilled,
   LockedAndBlocked,
   Query,
@@ -13,6 +14,7 @@ import {
   FolderDetails,
   DocumentRequirements,
   Chat,
+  Renew,
 } from "@carbon/icons-react";
 import { createClient } from "../../../lib/supabase/server";
 import { hasRank } from "../../../lib/auth/rank";
@@ -29,7 +31,13 @@ import { MissingParamActions } from "../../../components/aorms/pulse/MissingPara
 import { AskPulseForm } from "../../../components/aorms/pulse/AskPulseForm";
 import { PRIORITY_BAND_LABEL, type PriorityBand } from "../../../lib/pulse/scoring";
 import { getTopPriorities } from "../../../lib/dashboard/priority";
-import { getTopPriorityTasks, getLowConfidenceTasks, getBlockedTasks, getOpenMissingParams } from "../../../lib/pulse/queries";
+import {
+  getTopPriorityTasks,
+  getLowConfidenceTasks,
+  getBlockedTasks,
+  getOpenMissingParams,
+  getProjectsAtRiskCount,
+} from "../../../lib/pulse/queries";
 import {
   getAbsencesToday,
   getApprovalsSummary,
@@ -40,7 +48,9 @@ import {
   getOpenTenders,
   getPendingClientReviewDecisions,
   getReadyToBill,
+  getUnbilledRevisions,
 } from "../../../lib/dashboard/queries";
+import { getFirmStudio } from "../../../lib/platform/firm-studio";
 
 /**
  * Pulse — the AORMS home/dashboard (2026-09-14 remediation, per the
@@ -165,6 +175,7 @@ export default async function PulsePage() {
     { count: projectCount },
     { count: openTaskCount },
     { count: proposalCount },
+    { count: openRevisionsCount },
     { data: recentActivity },
     { data: myTasks },
     { data: upcomingMeetings },
@@ -183,11 +194,20 @@ export default async function PulsePage() {
     pulsePriorities,
     blockedTasks,
     missingParams,
+    projectsAtRiskCount,
+    unbilledRevisions,
+    firmStudio,
   ] = await Promise.all([
     supabase.from("clients").select("id", { count: "exact", head: true }),
     supabase.from("project_offices").select("id", { count: "exact", head: true }),
     supabase.from("tasks").select("id", { count: "exact", head: true }).neq("status", "DONE"),
     supabase.from("proposals").select("id", { count: "exact", head: true }),
+    // "Open revisions" (2026-09-15) — in-flight decisions, not yet
+    // resolved either way: OPEN (drafted, not sent) + CLIENT_REVIEW
+    // (sent, awaiting response). Closes a cross-verification gap: the
+    // landing page's Pulse showcase shows this tile; nothing computed
+    // it in the real product before this.
+    supabase.from("decisions").select("id", { count: "exact", head: true }).in("state", ["OPEN", "CLIENT_REVIEW"]),
     supabase.from("audit_log").select("id, entity, action, created_at").order("created_at", { ascending: false }).limit(8),
     user
       ? supabase
@@ -223,10 +243,17 @@ export default async function PulsePage() {
     getTopPriorityTasks(supabase),
     getBlockedTasks(supabase),
     getOpenMissingParams(supabase),
+    getProjectsAtRiskCount(supabase, today),
+    getUnbilledRevisions(supabase),
+    getFirmStudio(),
   ]);
 
   const { data: profile } = user ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : { data: null };
   const showFinancials = hasRank(profile?.role, 80);
+  // Fee-leakage detection (2026-09-15) — Professional-plan feature per
+  // pricing copy; no studio linked at all defaults to showing it (same
+  // permissive-when-unlinked posture checkPlanCap already uses).
+  const showFeeLeakage = !firmStudio || firmStudio.plan === "PROFESSIONAL" || firmStudio.plan === "ENTERPRISE";
   const openRequestCount = clientRequests.length + consultantRequests.length + openTenders.length;
   const criticalPulseCount = pulsePriorities.filter((t) => t.band === "CRITICAL").length;
 
@@ -234,6 +261,11 @@ export default async function PulsePage() {
   const openRequestStatus = countStatus(openRequestCount, 1, 4);
   const oldestUnpaidDays = awaitingPayment.rows.reduce((max, r) => Math.max(max, r.daysSinceIssue ?? 0), 0);
   const awaitingPaymentStatus = countStatus(oldestUnpaidDays, 15, 31);
+  // 4-tier status (2026-09-15) — the real showcase of KpiTile's new
+  // WATCH (orange) tier, closing the cross-verification gap that "every
+  // KPI tile across AORMS carries the same alert line" wasn't actually
+  // true before this: a real tile using all four KPI_SEVERITY colors.
+  const projectsAtRiskStatus: KpiStatus = projectsAtRiskCount >= 3 ? "CRITICAL" : projectsAtRiskCount >= 1 ? "WATCH" : "NORMAL";
 
   const financePanel = showFinancials ? (
     <div style={MASONRY_PANEL_STYLE}>
@@ -277,6 +309,31 @@ export default async function PulsePage() {
           ))
         )}
       </DashboardWidget>
+
+      {/* Fee-leakage detection (2026-09-15, Professional plan) — honest
+          scope: a review list, not proof of a missed invoice (this
+          schema has no link from a decision to the invoice line that
+          eventually billed it). What it can say truthfully: every
+          accepted/locked revision that added fee is worth a human
+          double-check before the next invoice goes out — see
+          getUnbilledRevisions's own header comment. */}
+      {showFeeLeakage && (
+        <DashboardWidget title="Fee Leakage — Revisions to Review">
+          {unbilledRevisions.rows.length === 0 ? (
+            <EmptyRow text="No accepted revisions with an added fee are sitting unreviewed." />
+          ) : (
+            unbilledRevisions.rows.map((r) => (
+              <WidgetRow
+                key={r.id}
+                href={`/projects/${r.projectId}/decisions`}
+                primary={r.title}
+                secondary={r.projectTitle ?? "—"}
+                right={<span className="cds--type-body-01" style={{ color: "var(--cds-support-warning)" }}>+{formatInr(r.costDeltaPaise)}</span>}
+              />
+            ))
+          )}
+        </DashboardWidget>
+      )}
     </div>
   ) : null;
 
@@ -573,6 +630,8 @@ export default async function PulsePage() {
     { key: "others_projects", current: projectCount ?? 0, higherIsBetter: true },
     { key: "others_proposals", current: proposalCount ?? 0, higherIsBetter: true },
     { key: "others_open_requests", current: openRequestCount, higherIsBetter: false },
+    { key: "pulse_projects_at_risk", current: projectsAtRiskCount, higherIsBetter: false },
+    { key: "pulse_open_revisions", current: openRevisionsCount ?? 0, higherIsBetter: false },
   ]);
 
   const pulseKpis = (
@@ -587,6 +646,14 @@ export default async function PulsePage() {
       <Kpi label="Blocked tasks" value={blockedTasks.length} icon={LockedAndBlocked} trend={kpiTrends.pulse_blocked_tasks} />
       <Kpi label="Open gaps" value={missingParams.length} icon={Query} trend={kpiTrends.pulse_open_gaps} />
       <Kpi label="Low confidence" value={lowConfidenceTasks.length} icon={ChartLineData} trend={kpiTrends.pulse_low_confidence} />
+      <Kpi
+        label="Projects at risk"
+        value={projectsAtRiskCount}
+        status={projectsAtRiskStatus}
+        icon={WarningAlt}
+        trend={kpiTrends.pulse_projects_at_risk}
+      />
+      <Kpi label="Open revisions" value={openRevisionsCount ?? 0} icon={Renew} trend={kpiTrends.pulse_open_revisions} />
     </div>
   );
 

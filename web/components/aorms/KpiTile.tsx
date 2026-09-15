@@ -2,40 +2,47 @@ import type { ComponentType } from "react";
 import Link from "next/link";
 import { Tile } from "@carbon/react";
 import { ArrowUp, ArrowDown, ArrowRight } from "@carbon/icons-react";
+import { KPI_SEVERITY } from "../../lib/kpi-severity";
 
 /**
- * The 3-state health read some KPIs support (2026-09-13) — deliberately
- * NOT every KPI: a status only makes sense where "more" has a real bad
- * direction (absences, an aging outstanding balance, a request pile-up).
- * A pure headline count like Clients/Projects/Proposals/Total billed has
- * no such direction (more is never bad), so those stay plain, unstatused
- * numbers — see dashboard/page.tsx's own per-metric threshold comments
- * for where each status actually comes from.
+ * The status read some KPIs support (2026-09-13, extended to 4 tiers
+ * 2026-09-15) — deliberately NOT every KPI: a status only makes sense
+ * where "more" has a real bad direction (absences, an aging outstanding
+ * balance, a request pile-up). A pure headline count like Clients/
+ * Projects/Proposals/Total billed has no such direction (more is never
+ * bad), so those stay plain, unstatused numbers — see dashboard/page.tsx's
+ * own per-metric threshold comments for where each status actually
+ * comes from.
+ *
+ * 4-tier extension (2026-09-15, closing a real landing-page/product gap
+ * found by cross-verification: the marketing site's KPI-anatomy diagram
+ * and Pulse tiles document a 4-color green/yellow/orange/red alert-line
+ * scale — `KPI_SEVERITY`, `lib/kpi-severity.ts` — but this shared tile
+ * only had 3 tiers, so "every KPI tile across AORMS carries the same
+ * alert line" wasn't actually true of the real product). `WATCH` is the
+ * new tier, between `NEEDS_INTERVENTION` (yellow) and `CRITICAL` (red) —
+ * existing call sites that only ever pass NORMAL/NEEDS_INTERVENTION/
+ * CRITICAL are unaffected; `WATCH` is additive, for a caller that wants
+ * to distinguish "worth a look" from "needs attention soon."
  */
-export type KpiStatus = "NORMAL" | "NEEDS_INTERVENTION" | "CRITICAL";
+export type KpiStatus = "NORMAL" | "NEEDS_INTERVENTION" | "WATCH" | "CRITICAL";
 
 const STATUS_LABEL: Record<KpiStatus, string> = {
   NORMAL: "Normal",
   NEEDS_INTERVENTION: "Needs intervention",
+  WATCH: "Needs attention",
   CRITICAL: "Critical",
 };
 
-// Carbon's own semantic support tokens (success/warning/error), not the
-// generic Tag color palette — Tag has no "yellow"/amber option at all
-// (its TYPES are red/magenta/purple/blue/cyan/teal/green/gray only), and
-// these are the tokens Carbon itself reserves for exactly this 3-state
-// status meaning app-wide (e.g. this app's own "Low confidence" %,
-// pulse's confidence score), not a decorative label color. Maps onto the
-// shell/identity/KPI spec's own 5-token model (neutral/info/positive/
-// warning/critical) as NORMAL→positive, NEEDS_INTERVENTION→warning,
-// CRITICAL→critical; "neutral"/"info" aren't separate tokens here
-// because they're just "no status passed at all" (below) — this app has
-// no KPI that's informational-but-not-actionable in a way "no stripe"
-// doesn't already say.
+// Reads from the same KPI_SEVERITY scale the landing page's KPI-anatomy
+// diagram and TodaysBriefingPanel.tsx use (lib/kpi-severity.ts) — one
+// source for the real product and the marketing page that documents it,
+// so they can't drift apart the way they had before this fix.
 const STATUS_COLOR: Record<KpiStatus, string> = {
-  NORMAL: "var(--cds-support-success)",
-  NEEDS_INTERVENTION: "var(--cds-support-warning)",
-  CRITICAL: "var(--cds-support-error)",
+  NORMAL: KPI_SEVERITY.green,
+  NEEDS_INTERVENTION: KPI_SEVERITY.yellow,
+  WATCH: KPI_SEVERITY.orange,
+  CRITICAL: KPI_SEVERITY.red,
 };
 
 /**

@@ -80,6 +80,42 @@ export async function getBlockedTasks(supabase: SupabaseClient, limit = 8): Prom
   });
 }
 
+/**
+ * Distinct project count with a real risk signal (2026-09-15) — closes a
+ * cross-verification gap: the landing page's Pulse showcase shows a
+ * "Projects at risk" tile, but no real query backed that label anywhere
+ * in the product. "At risk" here is three concrete, already-tracked
+ * signals — not a new scoring model: a project has at least one open
+ * task in the CRITICAL priority band (same `bandForScore` this page's
+ * own Top Priorities widget uses), at least one open task past its due
+ * date, or at least one open task blocked on another (same BLOCKS
+ * dependency `getBlockedTasks` already reads). One open task can trip
+ * more than one signal — this only cares whether the project has any.
+ */
+export async function getProjectsAtRiskCount(supabase: SupabaseClient, today: string): Promise<number> {
+  const [{ data: openTasks }, { data: blockedDeps }] = await Promise.all([
+    supabase.from("tasks").select("project_id, priority_score, due_date").neq("status", "DONE").not("project_id", "is", null),
+    supabase
+      .from("task_dependencies")
+      .select("tasks!task_dependencies_task_id_fkey(project_id)")
+      .eq("dependency_type", "BLOCKS")
+      .eq("status", "OPEN"),
+  ]);
+
+  const atRisk = new Set<string>();
+  for (const t of openTasks ?? []) {
+    const projectId = t.project_id as string | null;
+    if (!projectId) continue;
+    const overdue = !!t.due_date && (t.due_date as string) < today;
+    if (overdue || bandForScore((t.priority_score as number) ?? 0) === "CRITICAL") atRisk.add(projectId);
+  }
+  for (const d of blockedDeps ?? []) {
+    const task = Array.isArray(d.tasks) ? d.tasks[0] : (d.tasks as { project_id: string | null } | null);
+    if (task?.project_id) atRisk.add(task.project_id);
+  }
+  return atRisk.size;
+}
+
 export type MissingParamRow = {
   id: string;
   taskId: string;

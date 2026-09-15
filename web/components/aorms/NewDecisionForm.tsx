@@ -58,6 +58,13 @@ export function NewDecisionForm({ projectId, onSuccess }: { projectId: string; o
           </Select>
           <TextInput id="ownerName" name="ownerName" labelText="Owner" />
           <TextInput id="reviewDeadline" name="reviewDeadline" labelText="Review deadline" type="date" />
+          <TextInput
+            id="costDeltaRupees"
+            name="costDeltaRupees"
+            labelText="Cost delta (₹)"
+            helperText="Optional — leave blank if this revision has no quantified cost impact yet."
+            placeholder="e.g. 18500"
+          />
         </FormGrid>
         <Button type="submit" disabled={pending}>
           {pending ? "Adding…" : "Add decision"}

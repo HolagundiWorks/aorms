@@ -277,6 +277,40 @@ export async function getPendingClientReviewDecisions(supabase: Client): Promise
   }));
 }
 
+export type UnbilledRevision = { id: string; title: string; projectId: string; projectTitle: string | null; costDeltaPaise: number };
+
+/**
+ * "Fee-leakage detection" (2026-09-15) — closes a real pricing-page gap:
+ * Professional's plan copy has promised this since the pricing rebuild
+ * with no feature behind it. Honest scope: this is a review list, not
+ * proof of a missed invoice — this schema has no link from a `decisions`
+ * row to the `invoices` line item that eventually billed it (if any), so
+ * "unbilled" can't be verified directly. What it *can* say truthfully:
+ * every ACCEPTED/LOCKED revision that added fee (a positive
+ * `cost_delta_paise`, migration 0051) is worth a human double-check
+ * before the next invoice goes out — accepted revisions are exactly
+ * where added scope most often never makes it onto an invoice. Surfaced
+ * only to Professional-plan studios (see FinancialSummary in
+ * app/(app)/pulse/page.tsx), same as the pricing page's own claim.
+ */
+export async function getUnbilledRevisions(supabase: Client, limit = 8): Promise<{ total: number; rows: UnbilledRevision[] }> {
+  const { data } = await supabase
+    .from("decisions")
+    .select("id, title, project_id, cost_delta_paise, project_offices(title)")
+    .in("state", ["ACCEPTED", "LOCKED"])
+    .gt("cost_delta_paise", 0)
+    .order("cost_delta_paise", { ascending: false })
+    .limit(limit);
+  const rows = (data ?? []).map((r) => ({
+    id: r.id,
+    title: r.title,
+    projectId: r.project_id,
+    projectTitle: embedOne<{ title: string }>(r.project_offices)?.title ?? null,
+    costDeltaPaise: r.cost_delta_paise ?? 0,
+  }));
+  return { total: rows.reduce((sum, r) => sum + r.costDeltaPaise, 0), rows };
+}
+
 export type OpenTask = {
   id: string;
   title: string;
