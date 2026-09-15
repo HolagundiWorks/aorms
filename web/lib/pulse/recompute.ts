@@ -24,12 +24,23 @@ export type RecomputeSummary = {
   missingParamsResolved: number;
 };
 
-export async function recomputeTaskScores(supabase: SupabaseClient, today: string): Promise<RecomputeSummary> {
+/**
+ * Multi-tenancy (migration 0053+) — `firmId` is required because this is
+ * routinely called with a service-role client (the bearer-secured cron
+ * route), which bypasses RLS entirely: without an explicit filter here,
+ * a service-role call would silently scan every firm's tasks at once, and
+ * `task_missing_params`/`task_priority_log`'s own firm_id (NOT NULL, no
+ * usable default for a session-less caller) would fail every insert
+ * outright. A session-bound caller (the on-demand Server Action) already
+ * has its own firm_id from context and passes it through the same way.
+ */
+export async function recomputeTaskScores(supabase: SupabaseClient, today: string, firmId: string): Promise<RecomputeSummary> {
   const summary: RecomputeSummary = { tasksScanned: 0, tasksChanged: 0, missingParamsOpened: 0, missingParamsResolved: 0 };
 
   const { data: tasks } = await supabase
     .from("tasks")
     .select("id, project_id, priority, status, due_date, updated_at, created_at, assignee_id, classification, priority_score, confidence_score")
+    .eq("firm_id", firmId)
     .neq("status", "DONE");
   const taskRows = tasks ?? [];
   if (taskRows.length === 0) return summary;
@@ -131,7 +142,7 @@ export async function recomputeTaskScores(supabase: SupabaseClient, today: strin
     const toInsert = detected.filter((d) => !activeTypes.has(d.parameterType));
     if (toInsert.length > 0) {
       await supabase.from("task_missing_params").insert(
-        toInsert.map((d) => ({ task_id: task.id, parameter_type: d.parameterType, description: d.description })),
+        toInsert.map((d) => ({ task_id: task.id, parameter_type: d.parameterType, description: d.description, firm_id: firmId })),
       );
       summary.missingParamsOpened += toInsert.length;
     }
@@ -150,6 +161,7 @@ export async function recomputeTaskScores(supabase: SupabaseClient, today: strin
         old_confidence_score: task.confidence_score,
         new_confidence_score: confidenceScore,
         reason,
+        firm_id: firmId,
       });
       summary.tasksChanged++;
     }

@@ -58,10 +58,23 @@ export async function ingestRecord(input: {
   sourceId: string;
   projectId: string | null;
   content: string;
+  /**
+   * Multi-tenancy (migration 0066) — esti_embeddings.firm_id is NOT NULL
+   * with a session-based default, but this function runs as service-role
+   * (no session, no default). Callers already have this for free: the
+   * record they just inserted was firm-scoped by its own firm_id default,
+   * so pass its `firm_id` straight through rather than re-resolving it.
+   */
+  firmId: string;
 }): Promise<IngestResult> {
   const service = createServiceRoleClient();
 
-  await service.from("esti_embeddings").delete().eq("source_table", input.sourceTable).eq("source_id", input.sourceId);
+  await service
+    .from("esti_embeddings")
+    .delete()
+    .eq("source_table", input.sourceTable)
+    .eq("source_id", input.sourceId)
+    .eq("firm_id", input.firmId);
 
   const content = input.content.trim();
   if (!content) return { ok: true, chunksIndexed: 0 };
@@ -74,6 +87,7 @@ export async function ingestRecord(input: {
     source_id: input.sourceId,
     project_id: input.projectId,
     content: chunk,
+    firm_id: input.firmId,
   }));
 
   const { error } = await service.from("esti_embeddings").insert(rows);

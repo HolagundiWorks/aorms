@@ -100,6 +100,12 @@ export async function recomputeNow(): Promise<RecomputeNowState> {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to recompute Pulse." };
 
+  // Multi-tenancy (migration 0053+) — resolve the caller's own firm via
+  // the session client (RLS-correct: reads only their own profile row),
+  // since the service-role client below has no session to derive it from.
+  const { data: profile } = await supabase.from("profiles").select("firm_id").eq("id", user.id).maybeSingle();
+  if (!profile?.firm_id) return { error: "Your account isn't linked to a firm yet." };
+
   // Uses the service-role client for the actual writes (same reasoning
   // as the route handler: recompute touches task_priority_log, which has
   // no write RLS policy at all — service-role only, by design).
@@ -107,7 +113,7 @@ export async function recomputeNow(): Promise<RecomputeNowState> {
   const today = new Date().toISOString().slice(0, 10);
 
   try {
-    const summary = await recomputeTaskScores(service, today);
+    const summary = await recomputeTaskScores(service, today, profile.firm_id);
     revalidatePath("/pulse");
     revalidatePath("/tasks");
     revalidatePath("/pulse");

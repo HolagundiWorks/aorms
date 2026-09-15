@@ -41,7 +41,7 @@ export async function createMomRecord(
       attendees,
       minutes,
     })
-    .select("id")
+    .select("id, firm_id")
     .single();
 
   if (error) return { error: toSafeErrorMessage(error) };
@@ -59,7 +59,7 @@ export async function createMomRecord(
   // is never surfaced as this action's error: Ollama being unreachable
   // means this MoM isn't retrievable via Ask Pulse yet, not that saving
   // the MoM itself failed.
-  if (minutes) await ingestRecord({ sourceTable: "moms", sourceId: inserted.id, projectId, content: minutes });
+  if (minutes) await ingestRecord({ sourceTable: "moms", sourceId: inserted.id, projectId, content: minutes, firmId: inserted.firm_id });
 
   revalidatePath("/moms");
   return null;

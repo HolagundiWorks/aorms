@@ -34,8 +34,22 @@ export async function POST(request: Request) {
   const today = new Date().toISOString().slice(0, 10);
 
   try {
-    const summary = await recomputeTaskScores(supabase, today);
-    return NextResponse.json({ ok: true, ...summary });
+    // Multi-tenancy (migration 0053+) — this is a service-role call (no
+    // session, bypasses RLS entirely), so recomputeTaskScores() must be
+    // run once per firm with an explicit filter rather than once globally
+    // — see its own header comment for why.
+    const { data: firms, error: firmsError } = await supabase.from("firms").select("id");
+    if (firmsError) return NextResponse.json({ error: firmsError.message }, { status: 500 });
+
+    const totals = { tasksScanned: 0, tasksChanged: 0, missingParamsOpened: 0, missingParamsResolved: 0 };
+    for (const firm of firms ?? []) {
+      const summary = await recomputeTaskScores(supabase, today, firm.id);
+      totals.tasksScanned += summary.tasksScanned;
+      totals.tasksChanged += summary.tasksChanged;
+      totals.missingParamsOpened += summary.missingParamsOpened;
+      totals.missingParamsResolved += summary.missingParamsResolved;
+    }
+    return NextResponse.json({ ok: true, firmsProcessed: firms?.length ?? 0, ...totals });
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : "Recompute failed" }, { status: 500 });
   }

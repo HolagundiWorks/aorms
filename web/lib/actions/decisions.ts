@@ -56,7 +56,7 @@ export async function createDecision(projectId: string, _prev: ActionState, form
       cost_delta_paise: costDeltaPaise,
       created_by_id: user?.id ?? null,
     })
-    .select("id")
+    .select("id, firm_id")
     .single();
   if (error) return { error: toSafeErrorMessage(error) };
 
@@ -70,7 +70,7 @@ export async function createDecision(projectId: string, _prev: ActionState, form
 
   // Best-effort RAG indexing (ESTI Pulse Module 7) — see
   // lib/actions/moms.ts's createMomRecord for the full rationale.
-  await ingestRecord({ sourceTable: "decisions", sourceId: inserted.id, projectId, content: rationale });
+  await ingestRecord({ sourceTable: "decisions", sourceId: inserted.id, projectId, content: rationale, firmId: inserted.firm_id });
 
   revalidatePath(`/projects/${projectId}/decisions`);
   return null;

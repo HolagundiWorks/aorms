@@ -35,7 +35,7 @@ export async function createProgressReport(_prev: ActionState, formData: FormDat
       schedule_progress_pct: schedulePct ? Number(schedulePct) : null,
       created_by_id: user?.id ?? null,
     })
-    .select("id")
+    .select("id, firm_id")
     .single();
   if (error) return { error: toSafeErrorMessage(error) };
 
@@ -49,7 +49,7 @@ export async function createProgressReport(_prev: ActionState, formData: FormDat
 
   // Best-effort RAG indexing (ESTI Pulse Module 7) — see moms.ts's
   // createMomRecord for the same pattern and its full rationale.
-  if (narrative) await ingestRecord({ sourceTable: "progress_reports", sourceId: inserted.id, projectId, content: narrative });
+  if (narrative) await ingestRecord({ sourceTable: "progress_reports", sourceId: inserted.id, projectId, content: narrative, firmId: inserted.firm_id });
 
   revalidatePath("/progress-reports");
   return null;

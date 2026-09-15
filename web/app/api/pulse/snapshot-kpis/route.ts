@@ -35,61 +35,79 @@ export async function POST(request: Request) {
   const supabase = createServiceRoleClient();
   const today = new Date().toISOString().slice(0, 10);
 
+  // Multi-tenancy (migration 0053+) — service-role bypasses RLS entirely,
+  // so this must run once per firm. kpi_snapshots.firm_id is NOT NULL with
+  // no usable default for a session-less caller, and its unique key is now
+  // (firm_id, metric_key, captured_on) — an unscoped upsert would fail
+  // outright, not just be imprecise. The 4 inline counts below are
+  // explicitly firm-filtered; the ~10 query helpers from lib/dashboard/
+  // queries.ts and lib/pulse/queries.ts are NOT yet firm-scoped (they're
+  // designed for session-bound callers where RLS already handles it
+  // transparently — see the /pulse page's own use of them) — a disclosed
+  // gap, not silently declared fixed: correct only while a single firm's
+  // data exists in this project, which is still true today.
+  const { data: firms, error: firmsError } = await supabase.from("firms").select("id");
+  if (firmsError) return NextResponse.json({ error: firmsError.message }, { status: 500 });
+
   try {
-    const [
-      clientCount,
-      projectCount,
-      proposalCount,
-      openTaskCount,
-      absences,
-      readyToBill,
-      awaitingPayment,
-      clientRequests,
-      consultantRequests,
-      openTenders,
-      pulseTasks,
-      blockedTasks,
-      missingParams,
-      lowConfidenceTasks,
-    ] = await Promise.all([
-      supabase.from("clients").select("id", { count: "exact", head: true }).then((r) => r.count ?? 0),
-      supabase.from("project_offices").select("id", { count: "exact", head: true }).then((r) => r.count ?? 0),
-      supabase.from("proposals").select("id", { count: "exact", head: true }).then((r) => r.count ?? 0),
-      supabase.from("tasks").select("id", { count: "exact", head: true }).neq("status", "DONE").then((r) => r.count ?? 0),
-      getAbsencesToday(supabase, today),
-      getReadyToBill(supabase),
-      getAwaitingPayment(supabase, today),
-      getOpenClientRequests(supabase),
-      getOpenConsultantRequests(supabase),
-      getOpenTenders(supabase),
-      getTopPriorityTasks(supabase),
-      getBlockedTasks(supabase),
-      getOpenMissingParams(supabase),
-      getLowConfidenceTasks(supabase),
-    ]);
+    let totalMetrics = 0;
+    for (const firm of firms ?? []) {
+      const [
+        clientCount,
+        projectCount,
+        proposalCount,
+        openTaskCount,
+        absences,
+        readyToBill,
+        awaitingPayment,
+        clientRequests,
+        consultantRequests,
+        openTenders,
+        pulseTasks,
+        blockedTasks,
+        missingParams,
+        lowConfidenceTasks,
+      ] = await Promise.all([
+        supabase.from("clients").select("id", { count: "exact", head: true }).eq("firm_id", firm.id).then((r) => r.count ?? 0),
+        supabase.from("project_offices").select("id", { count: "exact", head: true }).eq("firm_id", firm.id).then((r) => r.count ?? 0),
+        supabase.from("proposals").select("id", { count: "exact", head: true }).eq("firm_id", firm.id).then((r) => r.count ?? 0),
+        supabase.from("tasks").select("id", { count: "exact", head: true }).eq("firm_id", firm.id).neq("status", "DONE").then((r) => r.count ?? 0),
+        getAbsencesToday(supabase, today),
+        getReadyToBill(supabase),
+        getAwaitingPayment(supabase, today),
+        getOpenClientRequests(supabase),
+        getOpenConsultantRequests(supabase),
+        getOpenTenders(supabase),
+        getTopPriorityTasks(supabase),
+        getBlockedTasks(supabase),
+        getOpenMissingParams(supabase),
+        getLowConfidenceTasks(supabase),
+      ]);
 
-    const criticalPulseCount = pulseTasks.filter((t) => t.band === "CRITICAL").length;
-    const openRequestCount = clientRequests.length + consultantRequests.length + openTenders.length;
+      const criticalPulseCount = pulseTasks.filter((t) => t.band === "CRITICAL").length;
+      const openRequestCount = clientRequests.length + consultantRequests.length + openTenders.length;
 
-    const rows: { metric_key: string; value: number; captured_on: string }[] = [
-      { metric_key: "pulse_critical", value: criticalPulseCount, captured_on: today },
-      { metric_key: "pulse_blocked_tasks", value: blockedTasks.length, captured_on: today },
-      { metric_key: "pulse_open_gaps", value: missingParams.length, captured_on: today },
-      { metric_key: "pulse_low_confidence", value: lowConfidenceTasks.length, captured_on: today },
-      { metric_key: "finance_ready_to_bill", value: readyToBill.total, captured_on: today },
-      { metric_key: "finance_awaiting_payment", value: awaitingPayment.total, captured_on: today },
-      { metric_key: "team_absent_today", value: absences.length, captured_on: today },
-      { metric_key: "team_open_tasks", value: openTaskCount, captured_on: today },
-      { metric_key: "others_clients", value: clientCount, captured_on: today },
-      { metric_key: "others_projects", value: projectCount, captured_on: today },
-      { metric_key: "others_proposals", value: proposalCount, captured_on: today },
-      { metric_key: "others_open_requests", value: openRequestCount, captured_on: today },
-    ];
+      const rows: { metric_key: string; value: number; captured_on: string; firm_id: string }[] = [
+        { metric_key: "pulse_critical", value: criticalPulseCount, captured_on: today, firm_id: firm.id },
+        { metric_key: "pulse_blocked_tasks", value: blockedTasks.length, captured_on: today, firm_id: firm.id },
+        { metric_key: "pulse_open_gaps", value: missingParams.length, captured_on: today, firm_id: firm.id },
+        { metric_key: "pulse_low_confidence", value: lowConfidenceTasks.length, captured_on: today, firm_id: firm.id },
+        { metric_key: "finance_ready_to_bill", value: readyToBill.total, captured_on: today, firm_id: firm.id },
+        { metric_key: "finance_awaiting_payment", value: awaitingPayment.total, captured_on: today, firm_id: firm.id },
+        { metric_key: "team_absent_today", value: absences.length, captured_on: today, firm_id: firm.id },
+        { metric_key: "team_open_tasks", value: openTaskCount, captured_on: today, firm_id: firm.id },
+        { metric_key: "others_clients", value: clientCount, captured_on: today, firm_id: firm.id },
+        { metric_key: "others_projects", value: projectCount, captured_on: today, firm_id: firm.id },
+        { metric_key: "others_proposals", value: proposalCount, captured_on: today, firm_id: firm.id },
+        { metric_key: "others_open_requests", value: openRequestCount, captured_on: today, firm_id: firm.id },
+      ];
 
-    const { error } = await supabase.from("kpi_snapshots").upsert(rows, { onConflict: "metric_key,captured_on" });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      const { error } = await supabase.from("kpi_snapshots").upsert(rows, { onConflict: "firm_id,metric_key,captured_on" });
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      totalMetrics += rows.length;
+    }
 
-    return NextResponse.json({ ok: true, captured_on: today, metrics: rows.length });
+    return NextResponse.json({ ok: true, captured_on: today, firmsProcessed: firms?.length ?? 0, metrics: totalMetrics });
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : "Snapshot failed" }, { status: 500 });
   }
