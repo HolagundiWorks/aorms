@@ -162,15 +162,15 @@ export async function linkPlatformIdentity(
 }
 
 /**
- * Links THIS Office Hub deployment (not the caller's own personal
- * identity — see linkPlatformIdentity above for that) to one AORMS
- * Platform Studio (2026-09-14, migration 0048's firm.platform_studio_
- * public_id) — the studio whose free/paid plan then gates the client
- * and contractor caps (lib/platform/firm-studio.ts). `firm` is a
- * singleton, so this is deployment-wide, not per-user; the update goes
- * through the caller's own RLS-scoped client (not service-role) so
- * "firm: owner/partner update" is the actual authorization check, not
- * this function deciding who's allowed.
+ * Links the caller's own firm (not their personal identity — see
+ * linkPlatformIdentity above for that) to one AORMS Platform Studio
+ * (migration 0048's firms.platform_studio_public_id) — the studio whose
+ * free/paid plan then gates the client and contractor caps
+ * (lib/platform/firm-studio.ts). Multi-tenant as of migration 0053: the
+ * update goes through the caller's own RLS-scoped client (not
+ * service-role), scoped to `id = current_firm_id()`, so "firm: owner/
+ * partner update" is the actual authorization check, not this function
+ * deciding who's allowed.
  */
 export async function linkFirmToStudio(_prev: PlatformActionState, formData: FormData): Promise<PlatformActionState> {
   const handle = String(formData.get("handle") ?? "").trim().toUpperCase();
@@ -183,9 +183,8 @@ export async function linkFirmToStudio(_prev: PlatformActionState, formData: For
 
   const webSupabase = await createWebClient();
   const { error: updateError } = await webSupabase
-    .from("firm")
-    .update({ platform_studio_public_id: studio.public_id })
-    .eq("singleton", true);
+    .from("firms")
+    .update({ platform_studio_public_id: studio.public_id });
   if (updateError) return { error: toSafeErrorMessage(updateError) };
 
   revalidatePath("/firm-settings");

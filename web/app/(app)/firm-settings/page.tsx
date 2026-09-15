@@ -20,11 +20,11 @@ import { LinkFirmStudioForm } from "../../../components/aorms/platform/LinkFirmS
 import { getFirmStudio } from "../../../lib/platform/firm-studio";
 
 /**
- * Firm Settings — the singleton `firm` row (migration 0024 seeded it after
- * this session's tax-engine work found the live project had zero rows).
- * RLS gates the update to OWNER/PARTNER already ("firm: owner/partner
- * update"); a VIEWER/ASSOCIATE etc. opening this page just sees a save
- * that silently fails via RLS today — a clearer "you can't edit this"
+ * Firm Settings — the caller's own `firms` row (one per Studio as of
+ * migration 0053; originally seeded as a Postgres singleton by migration
+ * 0024). RLS gates the update to OWNER/PARTNER already ("firm: owner/
+ * partner update"); a VIEWER/ASSOCIATE etc. opening this page just sees a
+ * save that silently fails via RLS today — a clearer "you can't edit this"
  * state is a possible follow-up, not attempted here.
  *
  * GST/PAN/COA/architect/address fields are now a **read-only mirror**
@@ -44,7 +44,7 @@ export default async function FirmSettingsPage() {
 
   const [{ data: firm, error }, { data: myProfile }, { data: patterns, error: patternsError }] = await Promise.all([
     supabase
-      .from("firm")
+      .from("firms")
       .select(
         "company_name, firm_type, gst_type, gstin, pan, architect_name, coa_reg_no, email, phone, address_line1, address_line2, city, district, state, pincode, tds_applicable_default",
       )

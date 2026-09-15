@@ -10,6 +10,54 @@ import { checkRateLimit, rateLimitIdentifier } from "../security/rate-limit";
 
 export type AuthActionState = { error: string } | null;
 
+/**
+ * Multi-tenancy (migration 0055) — a single AORMS Identity account can
+ * belong to more than one Studio (`platform.studio_memberships`), and one
+ * Office Hub profile can in turn hold `profile_firm_memberships` in more
+ * than one firm (switchable "active firm" — see 0055's own header). Both
+ * signIn() and signInWithIdentity() call this after establishing a real
+ * session to decide: straight to the profile's usual home (the common
+ * case, zero extra friction), to the studio picker (genuine ambiguity —
+ * more than one firm already joined, or more Platform studios available
+ * to join/provision than have been claimed yet), or fall through to the
+ * existing "no portal yet" sign-out.
+ *
+ * Returns a redirect path, or null to mean "proceed with roleHome() as
+ * before" (unchanged behavior for every account that isn't multi-studio).
+ */
+async function resolveSignInDestination(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  webUserId: string,
+  platformPublicId: string | null | undefined,
+): Promise<string | null> {
+  const { count: membershipCount } = await supabase
+    .from("profile_firm_memberships")
+    .select("id", { count: "exact", head: true })
+    .eq("profile_id", webUserId);
+
+  if ((membershipCount ?? 0) >= 2) return "/select-studio";
+  if ((membershipCount ?? 0) === 1) return null;
+
+  // No firm membership yet. If this profile is linked to a Platform
+  // Identity account, check whether there's at least one Studio it could
+  // join/provision from — if so, send them to the picker (onboarding)
+  // instead of the flat "not available yet" sign-out, so a profile that
+  // later gains Studio access via the Platform isn't stuck forever.
+  if (!platformPublicId) return null;
+
+  const platformService = createPlatformServiceRoleClient();
+  const { data: account } = await platformService.from("accounts").select("id").eq("public_id", platformPublicId).maybeSingle();
+  if (!account) return null;
+
+  const { count: studioCount } = await platformService
+    .from("studio_memberships")
+    .select("id", { count: "exact", head: true })
+    .eq("account_id", account.id)
+    .eq("status", "ACTIVE");
+
+  return (studioCount ?? 0) >= 1 ? "/select-studio" : null;
+}
+
 export async function signIn(_prev: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
@@ -35,9 +83,12 @@ export async function signIn(_prev: AuthActionState, formData: FormData): Promis
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, platform_public_id")
     .eq("id", data.user.id)
     .maybeSingle();
+
+  const destination = await resolveSignInDestination(supabase, data.user.id, profile?.platform_public_id);
+  if (destination) redirect(destination);
 
   const home = roleHome(profile?.role);
   if (!home) {
@@ -176,7 +227,52 @@ async function signInWithIdentity(email: string, password: string): Promise<Auth
     await webService.from("profiles").update({ platform_public_id: platformAccount.public_id }).eq("id", webUserId).is("platform_public_id", null);
   }
 
+  // Multi-tenancy (migration 0055) — resolve which firm this Platform
+  // account gets into. Only ever auto-provisions/joins when there's
+  // exactly one unambiguous Studio; zero or two-or-more always defer
+  // (0 → the existing "not available yet" sign-out below; 2+ → the
+  // picker via resolveSignInDestination(), never guessed here).
+  const { count: existingMembershipCount } = await supabase
+    .from("profile_firm_memberships")
+    .select("id", { count: "exact", head: true })
+    .eq("profile_id", webUserId);
+
+  if ((existingMembershipCount ?? 0) === 0) {
+    const { data: eligibleMemberships } = await platformService
+      .from("studio_memberships")
+      .select("studios(id, name, public_id)")
+      .eq("account_id", platformAccount.id)
+      .eq("status", "ACTIVE");
+
+    type StudioRow = { studios: { id: string; name: string; public_id: string } | null };
+    const studios = ((eligibleMemberships ?? []) as unknown as StudioRow[])
+      .map((m) => m.studios)
+      .filter((s): s is { id: string; name: string; public_id: string } => !!s);
+
+    if (studios.length === 1) {
+      const studio = studios[0];
+      const { data: existingFirm } = await webService
+        .from("firms")
+        .select("id")
+        .eq("platform_studio_public_id", studio.public_id)
+        .maybeSingle();
+
+      if (existingFirm) {
+        await supabase.rpc("join_firm", { p_firm_id: existingFirm.id });
+      } else {
+        await supabase.rpc("provision_firm", {
+          p_company_name: studio.name,
+          p_platform_studio_public_id: studio.public_id,
+        });
+      }
+    }
+  }
+
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", webUserId).maybeSingle();
+
+  const destination = await resolveSignInDestination(supabase, webUserId, platformAccount.public_id);
+  if (destination) redirect(destination);
+
   const home = roleHome(profile?.role);
   if (!home) {
     await supabase.auth.signOut();

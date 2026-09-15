@@ -25,11 +25,10 @@ export async function getFirmForPdf(
   supabase: SupabaseClient,
 ): Promise<{ firm: FirmForPdf; error?: never } | { firm?: never; error: string }> {
   const { data: firm, error } = await supabase
-    .from("firm")
+    .from("firms")
     .select(
       "company_name, gstin, pan, coa_reg_no, email, phone, address_line1, address_line2, city, state, pincode",
     )
-    .eq("singleton", true)
     .maybeSingle();
   if (error) return { error: error.message };
 

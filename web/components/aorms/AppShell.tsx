@@ -236,9 +236,10 @@ export function AppShell({
   userRole,
   istHour,
   projects,
+  hasMultipleStudios,
 }: {
   children: React.ReactNode;
-  /** From firm.company_name (app/(app)/layout.tsx) — see OrganisationIdentity.tsx for the fallback when unset. */
+  /** From firms.company_name (app/(app)/layout.tsx) — see OrganisationIdentity.tsx for the fallback when unset. */
   companyName: string;
   /** From profiles.full_name — falls back to "there" (as in "Good evening, there") for the rare profile with no name set yet, rather than showing an empty greeting. */
   userName: string;
@@ -248,6 +249,8 @@ export function AppShell({
   istHour: number;
   /** For FloatingAskPulse.tsx's own project selector (app/(app)/layout.tsx). */
   projects: { id: string; title: string }[];
+  /** True when this profile belongs to more than one firm (profile_firm_memberships, migration 0055) — shows "Switch studio" in the user menu. */
+  hasMultipleStudios?: boolean;
 }) {
   const pathname = usePathname();
   // isPersistent (Carbon's default, left un-set here) means Carbon's own
@@ -314,7 +317,13 @@ export function AppShell({
               Role text was removed from the always-visible trigger
               (2026-09-14, explicit request) — it still appears inside
               the opened dropdown, which isn't visible header clutter. */}
-          <HeaderUserMenu name={userName} role={userRole} initials={getInitials(userName)} hour={istHour} />
+          <HeaderUserMenu
+            name={userName}
+            role={userRole}
+            initials={getInitials(userName)}
+            hour={istHour}
+            hasMultipleStudios={hasMultipleStudios}
+          />
         </HeaderGlobalBar>
       </Header>
       <SideNav

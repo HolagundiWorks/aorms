@@ -60,7 +60,7 @@ export async function createInvoiceRecord(
   const supabase = await createClient();
 
   const [{ data: firm, error: firmError }, { data: project, error: projectError }] = await Promise.all([
-    supabase.from("firm").select("gst_type, state, gstin, tds_applicable_default").limit(1).maybeSingle(),
+    supabase.from("firms").select("gst_type, state, gstin, tds_applicable_default").maybeSingle(),
     supabase.from("project_offices").select("state").eq("id", projectId).maybeSingle(),
   ]);
   if (firmError) return { error: `Could not load firm settings: ${toSafeErrorMessage(firmError)}` };

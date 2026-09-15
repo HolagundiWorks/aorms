@@ -27,10 +27,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Server Component) and passed down to AppShell.tsx (a Client
   // Component, can't fetch its own Supabase data) rather than each page
   // re-fetching its own copy.
-  const [{ data: profile }, { data: firm }, { data: projects }] = await Promise.all([
+  const [{ data: profile }, { data: firm }, { data: projects }, { count: membershipCount }] = await Promise.all([
     supabase.from("profiles").select("full_name, role").eq("id", user?.id ?? "").maybeSingle(),
-    supabase.from("firm").select("company_name").eq("singleton", true).maybeSingle(),
+    supabase.from("firms").select("company_name").maybeSingle(),
     supabase.from("project_offices").select("id, title").order("title"),
+    // Multi-tenancy (migration 0055) — a profile belonging to more than one
+    // firm gets a "Switch studio" entry in the user menu (HeaderUserMenu.tsx).
+    supabase.from("profile_firm_memberships").select("id", { count: "exact", head: true }).eq("profile_id", user?.id ?? ""),
   ]);
   const home = roleHome(profile?.role);
   // 2026-09-14: staff's own home is "/pulse" now (roleHome() — the
@@ -49,6 +52,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         userRole={ROLE_LABEL[profile?.role ?? ""] ?? "Staff"}
         istHour={getIstHour()}
         projects={projects ?? []}
+        hasMultipleStudios={(membershipCount ?? 0) > 1}
       >
         {children}
       </AppShell>

@@ -5,11 +5,13 @@ import { createClient } from "../supabase/server";
 import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
- * Firm settings — a Postgres singleton row (migration 0024 seeded it; the
- * table's own RLS only allows UPDATE, never INSERT, matching the "exactly
- * one row, always exists" design). Gated to OWNER/PARTNER at the RLS layer
- * already — this action doesn't re-check the role, same as every other
- * domain here.
+ * Firm settings — one `firms` row per Studio (migration 0053 converted
+ * the old Postgres singleton into a real multi-tenant table; RLS scopes
+ * this read/update to the caller's own firm via current_firm_id(), and
+ * still allows UPDATE only, never INSERT — a new firm is only ever
+ * created via the provision_firm() RPC). Gated to OWNER/PARTNER at the
+ * RLS layer already — this action doesn't re-check the role, same as
+ * every other domain here.
  *
  * GST/PAN/COA/architect/address/TDS fields moved to the AORMS Identity
  * portal's company profile (platform/supabase/migrations/
@@ -39,12 +41,12 @@ export async function updateFirmSettings(
 
   const supabase = await createClient();
 
-  const { data: firm, error: firmError } = await supabase.from("firm").select("id").limit(1).maybeSingle();
+  const { data: firm, error: firmError } = await supabase.from("firms").select("id").maybeSingle();
   if (firmError) return { error: toSafeErrorMessage(firmError) };
   if (!firm) return { error: "No firm record exists to update — this should have been seeded by migration 0024." };
 
   const { error } = await supabase
-    .from("firm")
+    .from("firms")
     .update({
       company_name: companyName,
       firm_type: firmType,

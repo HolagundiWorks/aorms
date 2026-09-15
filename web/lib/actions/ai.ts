@@ -185,7 +185,7 @@ export async function generateAiDraft(_prev: GenerateAiDraftState, formData: For
     };
   }
 
-  const { data: firm } = await supabase.from("firm").select("company_name").limit(1).maybeSingle();
+  const { data: firm } = await supabase.from("firms").select("company_name").maybeSingle();
 
   const built = buildDraftPrompt(kind, { project, billing, decisions, userPrompt, firmName: firm?.company_name || undefined });
 

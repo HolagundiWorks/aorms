@@ -4,19 +4,19 @@ import { createServiceRoleClient as createPlatformServiceRoleClient } from "./se
 export type FirmStudio = { id: string; name: string; public_id: string; plan: string };
 
 /**
- * Resolves the one AORMS Platform Studio this Office Hub deployment is
- * linked to (2026-09-14, migration 0048 — firm.platform_studio_public_id)
- * — null if never linked (the default; every check that uses this treats
- * "not linked" as "no cap applies," not an error, since most deployments
- * won't have this set up at all). `firm` is a singleton, so this is a
- * deployment-wide resolution, not a per-user one — every client/
- * contractor in this deployment already belongs to whichever one studio
- * is linked here, unlike Identity's own per-person
- * profiles.platform_public_id link.
+ * Resolves the Platform Studio the *signed-in user's own firm* is linked
+ * to (migration 0048 — firms.platform_studio_public_id). Multi-tenant as
+ * of migration 0053: `firms` now holds one row per Studio, and RLS scopes
+ * this read to `id = current_firm_id()` — so this is a per-session
+ * resolution (the caller's own firm), not a deployment-wide one the way it
+ * was when `firm` was a Postgres singleton. Returns null if the caller's
+ * firm was never linked to a Platform Studio (most deployments won't have
+ * this set up — every check using this treats "not linked" as "no cap
+ * applies," not an error).
  */
 export async function getFirmStudio(): Promise<FirmStudio | null> {
   const webSupabase = await createWebClient();
-  const { data: firm } = await webSupabase.from("firm").select("platform_studio_public_id").eq("singleton", true).maybeSingle();
+  const { data: firm } = await webSupabase.from("firms").select("platform_studio_public_id").maybeSingle();
   const handle = firm?.platform_studio_public_id;
   if (!handle) return null;
 

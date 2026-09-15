@@ -26,7 +26,20 @@ import { ChevronDown } from "@carbon/icons-react";
 import { signOut } from "../../lib/actions/auth";
 import { getGreeting, getFirstName } from "../../lib/shell/identity";
 
-export function HeaderUserMenu({ name, role, initials, hour }: { name: string; role: string; initials: string; hour: number }) {
+export function HeaderUserMenu({
+  name,
+  role,
+  initials,
+  hour,
+  hasMultipleStudios,
+}: {
+  name: string;
+  role: string;
+  initials: string;
+  hour: number;
+  /** True when this profile belongs to more than one firm (profile_firm_memberships, migration 0055) — shows a "Switch studio" link to the picker. */
+  hasMultipleStudios?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const greeting = getGreeting(hour);
   // First name only in the always-visible trigger (2026-09-14, explicit
@@ -102,6 +115,11 @@ export function HeaderUserMenu({ name, role, initials, hour }: { name: string; r
             <Link href="/firm-settings" onClick={() => setOpen(false)} className="cds--type-body-01" style={{ color: "inherit" }}>
               Firm settings
             </Link>
+            {hasMultipleStudios ? (
+              <Link href="/select-studio" onClick={() => setOpen(false)} className="cds--type-body-01" style={{ color: "inherit" }}>
+                Switch studio
+              </Link>
+            ) : null}
             <form action={signOut}>
               <button
                 type="submit"
