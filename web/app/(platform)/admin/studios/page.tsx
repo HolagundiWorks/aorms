@@ -2,6 +2,7 @@ import NextLink from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
+import { portalUrl } from "../../../../lib/platform/subdomains";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
@@ -22,7 +23,29 @@ import { SysDexPortalHeader } from "../../../../components/aorms/platform/Portal
  * pattern already used by `/admin/ai-connectors` for its grant rows;
  * fine at this scale, revisit with a real aggregate query if the studio
  * count ever grows large enough for it to matter.
+ *
+ * **Bug fix (2026-09-15, "portal sometimes jumps from SysDeX to
+ * Identity")**: the studio-name link used to be a plain relative
+ * `NextLink href="/studios/${id}"`. In production, `/admin/*` only ever
+ * renders on `sysdex.aorms.in` (proxy.ts's subdomain routing), and
+ * `/studios/*` is Identity-owned (`PORTAL_OWNED_PREFIXES`, lib/platform/
+ * subdomains.ts) — so clicking it bounced the admin off
+ * `sysdex.aorms.in` onto `identity.aorms.in`, out of SysDeX entirely.
+ * `portalUrl("identity", ...)` builds the correct absolute cross-portal
+ * URL instead, same pattern PlatformShellHeader.tsx already uses for
+ * its own SysDeX link.
+ *
+ * **Members now shown as "used / cap" (2026-09-15, "assign users limits
+ * as per plan" — the cap itself was already enforced, `STUDIO_MEMBER_CAP`
+ * in lib/actions/platform.ts, but SysDeX never surfaced what that limit
+ * actually was anywhere)** — `STUDIO_MEMBER_CAP_DISPLAY` mirrors that
+ * map; duplicated rather than imported since `platform.ts` is a
+ * `"use server"` file (every export from one must be an async Server
+ * Action, so a plain constant can't be imported from it into a Server
+ * Component).
  */
+const STUDIO_MEMBER_CAP_DISPLAY: Record<string, number | null> = { FREE: 1, STUDIO: 10, PROFESSIONAL: 25, ENTERPRISE: null };
+
 export default async function AdminStudiosPage() {
   const account = await getCurrentPlatformSessionAccount();
   if (!isSuperAdmin(account)) return <AdminAccessDenied title="Studios" />;
@@ -64,14 +87,18 @@ export default async function AdminStudiosPage() {
             <TableBody>
               {(studios ?? []).map((s) => {
                 const plan = planByStudio.get(s.id);
+                const memberCount = memberCountByStudio.get(s.id) ?? 0;
+                const cap = STUDIO_MEMBER_CAP_DISPLAY[plan ?? "FREE"] ?? null;
                 return (
                   <TableRow key={s.id}>
                     <TableCell>
-                      <NextLink href={`/studios/${s.id}`}>{s.name}</NextLink>
+                      <NextLink href={portalUrl("identity", `/studios/${s.id}`)}>{s.name}</NextLink>
                     </TableCell>
                     <TableCell>{s.public_id}</TableCell>
                     <TableCell>{[s.city, s.state].filter(Boolean).join(", ") || "—"}</TableCell>
-                    <TableCell>{memberCountByStudio.get(s.id) ?? 0}</TableCell>
+                    <TableCell>
+                      {memberCount} / {cap ?? "∞"}
+                    </TableCell>
                     <TableCell>
                       {plan ? (
                         <Tag

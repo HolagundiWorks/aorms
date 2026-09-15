@@ -44,6 +44,53 @@ import { toSafeErrorMessage } from "../security/safe-error";
 // path that creates a companies row).
 
 /**
+ * Company member caps by tier (2026-09-15, SysDeX portal audit: "assign
+ * user limits as per plan" — a real gap, Studios had `STUDIO_MEMBER_CAP`
+ * (lib/actions/platform.ts) but Companies had no equivalent at all).
+ * `null` = unlimited. Mirrors the Studio cap shape (small/medium/
+ * unlimited tier); Companies have no priced self-serve upgrade path yet
+ * (`adminSetCompanyTier`'s own comment — "don't provide any prices" for
+ * these tiers, by explicit direction), so these are the same kind of
+ * defensible-default cap Studio's own FREE/STUDIO/PROFESSIONAL numbers
+ * were before this file had any cap to reference.
+ */
+const COMPANY_MEMBER_CAP: Record<string, number | null> = { BASE_LINE: 3, PRO: 10, PRO_PLUS: null };
+
+/**
+ * Checked before both ways a company gains a member — self-serve join
+ * (joinCompany) and owner/admin invite (inviteCompanyMember) — same
+ * shape and reasoning as checkStudioMemberCap (lib/actions/platform.ts).
+ * Skips the check for someone already an ACTIVE member (re-inviting/
+ * rejoining isn't a net-new seat).
+ */
+async function checkCompanyMemberCap(companyId: string, accountId: string): Promise<{ error: string } | null> {
+  const platformService = createPlatformServiceRoleClient();
+  const cx = platformService.schema("connectdex");
+
+  const { data: existing } = await cx
+    .from("company_memberships")
+    .select("status")
+    .eq("company_id", companyId)
+    .eq("account_id", accountId)
+    .maybeSingle();
+  if (existing?.status === "ACTIVE") return null;
+
+  const { data: company } = await cx.from("companies").select("tier").eq("id", companyId).maybeSingle();
+  const cap = COMPANY_MEMBER_CAP[company?.tier ?? "BASE_LINE"];
+  if (cap == null) return null;
+
+  const { count } = await cx.from("company_memberships").select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("status", "ACTIVE");
+
+  if ((count ?? 0) >= cap) {
+    const nextTier = company?.tier === "PRO" ? "Pro Plus" : "Pro";
+    return {
+      error: `This company's current plan (${company?.tier ?? "BASE_LINE"}) is limited to ${cap} team member${cap === 1 ? "" : "s"}. Ask an AORMS admin to upgrade to ${nextTier} to add more.`,
+    };
+  }
+  return null;
+}
+
+/**
  * Self-serve join by AORMS-C- handle — same upsert-not-insert reasoning
  * as joinStudio (web/lib/actions/platform.ts): `(account_id, company_id)`
  * is unique, so re-joining after leaving needs an upsert to resurrect the
@@ -86,6 +133,9 @@ export async function joinCompany(
   if (lookupError) return { error: toSafeErrorMessage(lookupError) };
   if (!company) return { error: `No company found with handle ${handle}.` };
 
+  const capError = await checkCompanyMemberCap(company.id, user.id);
+  if (capError) return capError;
+
   const { error } = await cx.from("company_memberships").upsert(
     {
       account_id: user.id,
@@ -127,6 +177,9 @@ export async function inviteCompanyMember(
     .maybeSingle();
   if (lookupError) return { error: toSafeErrorMessage(lookupError) };
   if (!account) return { error: `No AORMS Company account found with handle ${handle}.` };
+
+  const capError = await checkCompanyMemberCap(companyId, account.id);
+  if (capError) return capError;
 
   const supabase = await createPlatformClient();
   const { error } = await supabase.schema("connectdex").from("company_memberships").upsert(

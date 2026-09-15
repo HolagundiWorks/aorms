@@ -69,7 +69,16 @@ export default async function AdminDashboardPage() {
       platformService.from("platform_activity_log").select("id, event_type, created_at").order("created_at", { ascending: false }).limit(5),
     ]);
 
-  const planCounts = { TRIAL: 0, PRO: 0, ENTERPRISE: 0 };
+  // 2026-09-15 fix — this object was still keyed on the pre-2026-09-14
+  // plan names (TRIAL/PRO/ENTERPRISE), renamed to FREE/STUDIO/
+  // PROFESSIONAL/ENTERPRISE by platform migration 0033. Every real
+  // licence has been on the new names since that migration, so
+  // "Trial licences" always read 0, and "Paid licences" (PRO+ENTERPRISE)
+  // silently excluded every STUDIO and PROFESSIONAL licence — both
+  // Supabase clients here have no generated Database type, so `l.plan`
+  // is untyped `string` and neither tsc nor eslint could catch the
+  // stale key mismatch.
+  const planCounts = { FREE: 0, STUDIO: 0, PROFESSIONAL: 0, ENTERPRISE: 0 };
   for (const l of licences ?? []) {
     if (l.plan in planCounts) planCounts[l.plan as keyof typeof planCounts]++;
   }
@@ -91,8 +100,12 @@ export default async function AdminDashboardPage() {
         >
           <KpiTile label="Studios" value={studioCount ?? 0} icon={Building} />
           <KpiTile label="Accounts" value={accountCount ?? 0} icon={UserMultiple} />
-          <KpiTile label="Trial licences" value={planCounts.TRIAL} icon={Certificate} />
-          <KpiTile label="Paid licences" value={planCounts.PRO + planCounts.ENTERPRISE} icon={CurrencyRupee} />
+          <KpiTile label="Free licences" value={planCounts.FREE} icon={Certificate} />
+          <KpiTile
+            label="Paid licences"
+            value={planCounts.STUDIO + planCounts.PROFESSIONAL + planCounts.ENTERPRISE}
+            icon={CurrencyRupee}
+          />
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))", gap: "1.5rem" }}>

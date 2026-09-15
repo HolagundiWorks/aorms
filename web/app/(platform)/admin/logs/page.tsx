@@ -14,6 +14,22 @@ import { SysDexPortalHeader } from "../../../../components/aorms/platform/Portal
  * doesn't paginate well; a real filter would want server-side query
  * params — left for a follow-up once real usage shows what filters matter
  * most).
+ *
+ * **Bug fix (2026-09-15, SysDeX portal audit)** — `company_id` has a real
+ * FK to `companies` (migration 0013), but migration 0025 moved
+ * `companies` from `public` into its own `connectdex` Postgres schema.
+ * The FK itself survives that move (Postgres resolves it by OID, not by
+ * re-parsing a schema-qualified name), but PostgREST's embed syntax
+ * (`companies(name, public_id)` inside a `public.platform_activity_log`
+ * query) only resolves relationships within the single schema exposed by
+ * the request's own profile — it can't auto-embed across two different
+ * schemas in one query, unlike every other cross-schema query in this
+ * codebase (which explicitly fetches the connectdex-schema side as its
+ * own `.schema("connectdex")` call, per migration 0025's own "app code
+ * updated to match" list — this page was the one spot that list missed).
+ * Fixed the same way: `companies` fetched as its own query against the
+ * `connectdex`-scoped client, joined in JS by `company_id` instead of a
+ * PostgREST embed.
  */
 export default async function AdminLogsPage() {
   const account = await getCurrentPlatformSessionAccount();
@@ -22,9 +38,16 @@ export default async function AdminLogsPage() {
   const platformService = createPlatformServiceRoleClient();
   const { data: log } = await platformService
     .from("platform_activity_log")
-    .select("id, event_type, detail, created_at, accounts(public_id), studios(name, public_id), companies(name, public_id)")
+    .select("id, event_type, detail, created_at, company_id, accounts(public_id), studios(name, public_id)")
     .order("created_at", { ascending: false })
     .limit(200);
+
+  const companyIds = Array.from(new Set((log ?? []).map((r) => r.company_id).filter((id): id is string => !!id)));
+  const { data: companiesRows } =
+    companyIds.length > 0
+      ? await platformService.schema("connectdex").from("companies").select("id, name, public_id").in("id", companyIds)
+      : { data: [] as { id: string; name: string; public_id: string }[] };
+  const companyById = new Map((companiesRows ?? []).map((c) => [c.id, c]));
 
   return (
     <>
@@ -47,7 +70,7 @@ export default async function AdminLogsPage() {
             {(log ?? []).map((row) => {
               const acct = (Array.isArray(row.accounts) ? row.accounts[0] : row.accounts) as { public_id: string } | null;
               const studio = (Array.isArray(row.studios) ? row.studios[0] : row.studios) as { name: string; public_id: string } | null;
-              const company = (Array.isArray(row.companies) ? row.companies[0] : row.companies) as { name: string; public_id: string } | null;
+              const company = row.company_id ? (companyById.get(row.company_id) ?? null) : null;
               return (
                 <TableRow key={row.id}>
                   <TableCell>{row.event_type}</TableCell>

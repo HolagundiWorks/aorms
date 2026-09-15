@@ -198,6 +198,10 @@ export async function adminVerifyConnectDexCompany(companyId: string): Promise<C
  * flow yet, since none of the three has a price attached (explicit user
  * direction: "don't provide any prices" for these). Mirrors
  * adminUpdateLicence's shape exactly.
+ *
+ * 2026-09-15 — revalidates `/admin/companies` too now that
+ * `SetCompanyTierForm` renders there for any company, not just ACTIVE
+ * ones from `/admin/connectdex` (see AdminCompaniesPage's own comment).
  */
 export async function adminSetCompanyTier(_prev: ConnectDexActionState, formData: FormData): Promise<ConnectDexActionState> {
   const gate = await requirePlatformAdmin();
@@ -213,7 +217,44 @@ export async function adminSetCompanyTier(_prev: ConnectDexActionState, formData
   if (error) return { error: toSafeErrorMessage(error) };
 
   revalidatePath("/admin/connectdex");
+  revalidatePath("/admin/companies");
   return null;
+}
+
+/**
+ * SysDeX-only manual activation override (2026-09-15, portal audit: "no
+ * proper licence management system for companies... to activate,
+ * convert" — a real gap). Before this, the only path to ACTIVE was a
+ * real captured Razorpay payment (applyCapturedConnectDexPayment, fired
+ * only from the webhook/client-confirm flow) — a company stuck in
+ * PENDING_ONBOARDING/PENDING_VERIFICATION/PENDING_PAYMENT (a failed
+ * payment, a complimentary partner, a manual arrangement) had no
+ * admin-facing way forward at all, unlike Studios (adminUpdateLicence
+ * already lets an admin override plan/seats/expiry directly, no payment
+ * required). Mirrors that same "admin override, no payment gate" shape.
+ */
+export async function adminActivateCompany(companyId: string): Promise<ConnectDexActionState> {
+  const gate = await requirePlatformAdmin();
+  if (gate) return gate;
+  if (!companyId) return { error: "Missing company." };
+
+  const account = await getCurrentPlatformSessionAccount();
+  const platformService = createPlatformServiceRoleClient();
+  const cx = platformService.schema("connectdex");
+
+  const { data: company } = await cx.from("companies").select("status").eq("id", companyId).maybeSingle();
+  if (!company) return { error: "Company not found." };
+  if (company.status === "ACTIVE") return { error: "This company is already active." };
+
+  const { error } = await cx
+    .from("companies")
+    .update({ status: "ACTIVE", verified_at: new Date().toISOString(), verified_by_id: account?.id })
+    .eq("id", companyId);
+  if (error) return { error: toSafeErrorMessage(error) };
+
+  revalidatePath("/admin/connectdex");
+  revalidatePath("/admin/companies");
+  return { success: "Company activated." };
 }
 
 export async function adminSetConnectDexFee(_prev: ConnectDexActionState, formData: FormData): Promise<ConnectDexActionState> {

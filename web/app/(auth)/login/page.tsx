@@ -7,6 +7,7 @@ import { useActionState } from "react";
 import { Button, Form, InlineNotification, PasswordInput, Stack, TextInput } from "@carbon/react";
 import { ArrowRight } from "@carbon/icons-react";
 import { signIn, type AuthActionState } from "../../../lib/actions/auth";
+import { offerToSaveCredentials } from "../../../lib/credential-store";
 
 function LoginForm() {
   const [state, formAction, pending] = useActionState<AuthActionState, FormData>(signIn, null);
@@ -20,7 +21,7 @@ function LoginForm() {
   const callbackError = useSearchParams().get("error");
 
   return (
-    <Form action={formAction}>
+    <Form action={formAction} onSubmit={(e) => offerToSaveCredentials(e.currentTarget)}>
       <Stack gap={6}>
         <div>
           {/* Wrapped in a Link back to the landing page (2026-09-10) — was a

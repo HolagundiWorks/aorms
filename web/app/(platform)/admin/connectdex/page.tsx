@@ -1,7 +1,12 @@
 import { Column, Grid, Stack, Tag, Tile } from "@carbon/react";
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../../lib/platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
-import { adminInviteConnectDexApplication, adminRejectConnectDexApplication, adminVerifyConnectDexCompany } from "../../../../lib/actions/connectdex";
+import {
+  adminInviteConnectDexApplication,
+  adminRejectConnectDexApplication,
+  adminVerifyConnectDexCompany,
+  adminActivateCompany,
+} from "../../../../lib/actions/connectdex";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { ConnectDexActionButton } from "../../../../components/aorms/platform/company/ConnectDexActionButton";
 import { SetConnectDexFeeForm } from "../../../../components/aorms/platform/company/SetConnectDexFeeForm";
@@ -14,8 +19,15 @@ import { SysDexPortalHeader } from "../../../../components/aorms/platform/Portal
  * gated onboarding pipeline (platform/supabase/migrations/
  * 0013_connectdex_onboarding.sql). Three action stages plus the flat fee:
  * pending applications (Invite/Reject), companies awaiting manual
- * verification (Verify), and companies awaiting their own payment
- * (informational only — nothing for an admin to do there but wait).
+ * verification (Verify), and companies awaiting their own payment.
+ *
+ * 2026-09-15 fix (SysDeX portal audit: "no proper licence management...
+ * to activate") — "Awaiting payment" used to be informational-only, with
+ * no admin-facing way forward if a real payment never came (a failed
+ * attempt, a complimentary partner, a manual arrangement) other than
+ * waiting indefinitely for a Razorpay webhook that would never fire.
+ * `adminActivateCompany` gives it the same manual-override shape
+ * `adminUpdateLicence` already gives Studios.
  */
 export default async function AdminConnectDexPage() {
   const account = await getCurrentPlatformSessionAccount();
@@ -142,11 +154,28 @@ export default async function AdminConnectDexPage() {
             <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
               Awaiting payment
             </h2>
-            <Stack gap={2}>
+            <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "1rem" }}>
+              Normally resolved by a real Razorpay payment. "Activate" is a manual override for a failed payment, a
+              complimentary partner, or another arrangement made outside the flow — same posture as a Studio licence
+              override.
+            </p>
+            <Stack gap={3}>
               {(pendingPayment ?? []).map((company) => (
-                <p key={company.id} className="cds--type-body-01">
-                  {company.name} ({company.public_id})
-                </p>
+                <Tile key={company.id}>
+                  <Stack gap={2} orientation="horizontal" style={{ alignItems: "center", justifyContent: "space-between" }}>
+                    <span className="cds--type-body-01">
+                      {company.name} ({company.public_id})
+                    </span>
+                    <ConnectDexActionButton
+                      id={company.id}
+                      label="Activate"
+                      pendingLabel="Activating…"
+                      kind="primary"
+                      confirmMessage={`Activate ${company.name} without a captured payment? Use this only for a confirmed manual/complimentary arrangement.`}
+                      action={adminActivateCompany}
+                    />
+                  </Stack>
+                </Tile>
               ))}
               {(pendingPayment ?? []).length === 0 && (
                 <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>

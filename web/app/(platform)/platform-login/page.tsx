@@ -5,6 +5,7 @@ import { Button, Column, Form, Grid, InlineNotification, PasswordInput, Stack, T
 import { ArrowRight } from "@carbon/icons-react";
 import NextLink from "next/link";
 import { platformSignIn, type PlatformActionState } from "../../../lib/actions/platform";
+import { offerToSaveCredentials } from "../../../lib/credential-store";
 
 export default function PlatformLoginPage() {
   const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(platformSignIn, null);
@@ -12,7 +13,7 @@ export default function PlatformLoginPage() {
   return (
     <Grid>
       <Column sm={4} md={6} lg={8} style={{ margin: "0 auto" }}>
-        <Form action={formAction}>
+        <Form action={formAction} onSubmit={(e) => offerToSaveCredentials(e.currentTarget)}>
           <Stack gap={6}>
             <div>
               {/* Link back to the landing page (2026-09-10) — this page had
