@@ -5183,6 +5183,136 @@ prices. See this entry's own commit for the full live browser/functional
 verification pass (caps enforcement, ROI calculator arithmetic,
 Enterprise contact flow, mobile viewport).
 
+### 2026-09-19 — real multi-tenancy: `firms`, `firm_id` everywhere, switchable active firm
+
+Explicit user direction, after being shown the concrete scope tradeoffs
+and choosing the largest option anyway: **"Build real multi-tenancy (big
+project)."** The trigger was concrete, not hypothetical — the user's own
+account had created its own Platform Studio ("Holgundi Consulting Works")
+and discovered there was no way to get it its own isolated Office Hub;
+every Office Hub sign-in landed in the same shared "Aurelia Design
+Collective" demo/production firm's data regardless of which Studio a
+person actually belonged to, because `public.firm` was a hard Postgres
+singleton (`UNIQUE`/`CHECK` on `singleton`, migration `0024`) by original
+2026-09-04 design.
+
+**Core conversion** — twelve staged migrations
+(`web/supabase/migrations/0053`–`0066`), each applied live against
+`aorms-web` via the Management API and verified before the next (policy
+text confirmed via `pg_policies`, `firm_id` backfill confirmed zero-null,
+grouped by the same domain batches this file's migration numbering
+already follows: Core, Commercial, Estimation, Documents, Delivery/
+Tenders, HR, Delivery Ops/PMC, Compliance, Project OS/Precon/BBS,
+Portals, AI/Knowledge Bank, everything else):
+- `firm` → `firms` (singleton constraints dropped, `platform_studio_
+  public_id` made genuinely unique); `current_firm_id()` helper (same
+  shape as `current_app_role()`); `firm_id` added to every one of the
+  ~90 remaining tenant tables (`not null default current_firm_id()` —
+  the default is what kept ~112 files doing direct `.insert()` working
+  with zero code changes, since a session-scoped insert's payload never
+  needed to know about `firm_id` at all).
+- Every RLS policy rewritten in place (`alter policy`, no drop/recreate
+  window) to add `firm_id = current_firm_id()` — Pattern A (staff-only)
+  policies get it ANDed into their one clause; Pattern B (portal)
+  policies get it as an independent top-level AND alongside the existing
+  CLIENT/CONSULTANT/CONTRACTOR subquery, never folded into it — same
+  independent-checks discipline the `memberships` RLS incident (see
+  CLAUDE.md) established. A schema-wide sweep after the last batch
+  confirmed **zero** policies anywhere in `public` missing that check,
+  outside three deliberately-scoped-differently ones (`profiles: read
+  own`, `profile_firm_memberships: read own`, `firms: member read own
+  memberships`).
+- Three pre-existing RLS gaps found and fixed in passing (UPDATE
+  policies with a `using` clause but no `with_check` — the exact
+  `memberships` incident's bug class): `profiles: owner manages`,
+  `clients: owner disables`, `project_offices: staff update`.
+- `sequences`/`next_ref()` and `numbering_patterns` (both special cases,
+  not plain add-a-column tables): unique keys folded `firm_id` in
+  (`(firm_id, scope, fy)` / `(firm_id, scope)`), `next_ref()` resolves
+  the firm from `current_firm_id()` internally and raises if none.
+  `ref`-unique constraints on `proposals`/`letters`/`contracts`/
+  `purchase_orders`/`invoices` — globally unique before this, would have
+  collided the moment two firms both minted their first `PRP/2026-27/
+  0001` — changed to `unique (firm_id, ref)`, caught and fixed before
+  it ever shipped broken.
+
+**Live regression found and fixed same-day, not just future risk**: after
+`0053` landed, 9 call sites across `web/lib` and `web/app/(app)` still
+read `.from("firm")`/`.eq("singleton", true)` — a real break in
+production, caught by grepping the whole app immediately after applying
+the rename rather than assuming call sites were already covered.
+`reset_demo_data()` (the nightly `pg_cron` job) needed two same-day
+hotfixes (`0056` syntax-only, then `0067`/`0068` a full rewrite once every
+table it touches required `firm_id`) — verified by actually invoking
+`select public.reset_demo_data();` live, twice in a row (idempotency), not
+just reading the SQL. `0068` fixed a genuine pre-existing bug the first
+live run surfaced (a stray `assignments` row referencing a demo project,
+never in the function's delete list, unrelated to firm-scoping).
+
+**Switchable active firm** (migration `0055`) — `profiles.firm_id` is the
+caller's *currently active* firm, not permanent: a single AORMS Identity
+account can belong to more than one Platform Studio, and Supabase Auth's
+own per-project email uniqueness means one person can only ever have one
+Office Hub login, so multi-studio access has to be a session concept, not
+a second account. `profile_firm_memberships` (one row per firm a profile
+can access) backs three security-definer RPCs — `provision_firm()`,
+`join_firm()`, `switch_active_firm()` — and a new `/select-studio` picker
+page (`app/select-studio/page.tsx`, deliberately outside the `(app)`
+route group since a profile landing there may have no active firm yet).
+`lib/actions/auth.ts`'s `signIn()`/`signInWithIdentity()` both call a new
+`resolveSignInDestination()` after establishing a session: unambiguous
+(the common case) goes straight to `roleHome()` with zero added friction;
+2+ firm memberships or 2+ un-joined Platform Studios go to the picker. A
+"Switch studio" entry in the header user menu (gated on
+`hasMultipleStudios`) reaches the same picker after sign-in.
+
+**Service-role write paths re-scoped** (these bypass RLS entirely, so a
+`firm_id` column default can't help them): `lib/rag/ingest.ts`'s
+`ingestRecord()` now takes an explicit `firmId`, threaded through by its
+three callers from the record they just inserted; `lib/pulse/
+recompute.ts`'s `recomputeTaskScores()` now takes a required `firmId`,
+and both its callers (`app/api/pulse/recompute/route.ts`'s bearer-secured
+cron and `lib/actions/pulse.ts`'s on-demand `recomputeNow()`) loop over
+every firm instead of scanning all firms' tasks in one unscoped pass;
+`app/api/pulse/snapshot-kpis/route.ts` does the same per-firm loop for
+its 4 inline counts and the `kpi_snapshots` upsert (`kpi_snapshots`'
+unique key is now `(firm_id, metric_key, captured_on)`). **Disclosed, not
+silently fixed**: the ~10 shared query helpers in `lib/dashboard/
+queries.ts`/`lib/pulse/queries.ts` that `snapshot-kpis` also calls are
+still designed for session-bound callers (where RLS already scopes them
+correctly, e.g. the `/pulse` page's own use of them) — that one
+service-role cron endpoint's snapshot numbers stay correct only while a
+single firm's data exists, which is still true today. `app/api/razorpay/
+webhook/route.ts` read and confirmed unaffected (Platform project only).
+`app/api/calendar/[token]/route.ts`/`app/api/feasibility/[token]/
+route.ts` read and confirmed unaffected (read-only, token-authorized).
+
+**Explicit non-goals, not attempted this pass**: subdomain routing
+(`<slug>.aorms.in`) — session-based resolution achieves real isolation
+without it, `studios.subdomain_slug` stays exactly as inert as documented
+elsewhere in this file; a separate Supabase project per firm — ruled out
+by this org's 2-project free-tier cap (already hit once, see the
+SysDeX/ConnectDeX entry above); Storage bucket isolation for
+`web/lib/drawings/upload.ts` (content-hash-addressed keys, no
+Storage-level RLS found anywhere — a real open question, not solved
+here); the Python worker's own firm-awareness (job payloads don't carry
+`firm_id` yet — outside `web/`'s repo scope).
+
+**End-to-end verification, the real scenario this was built for**: after
+the schema work, confirmed live that the user's own real Office Hub
+profile (`vishwabhiram@gmail.com`, linked via AORMS Identity) was still
+parked in the shared demo firm with their real Platform Studio ("Holgundi
+Consulting Works", `AORMS-S-EF54`) unclaimed — exactly the gap this
+project existed to close. With the user's explicit confirmation (asked
+first, since this mutates a real account), called `provision_firm()`
+against their real profile: they are now `OWNER` of a brand-new,
+genuinely empty `firms` row (`50e73d35-a62f-4eb2-b45f-642e919ad1ef`) —
+confirmed live, zero clients/projects/tasks, completely isolated from the
+demo firm's 12 projects/10 clients/30 tasks — while keeping their
+original demo-firm membership switchable via `/select-studio`.
+
+Six commits, all `tsc --noEmit`/`eslint` clean, pushed to `main`.
+
 ---
 
 ## Support & questions

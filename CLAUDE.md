@@ -113,6 +113,66 @@ Migration sequencing and full phase-by-phase status lives in
 [ROADMAP.md](docs/esti/ROADMAP.md) § History; see also
 § Branch & environment split below for where this work happens.
 
+**Third stale-doc correction (2026-09-19): the Office Hub is real
+multi-tenant now, not single-tenant per deployment.** Every place in this
+repo that still says "single-tenant per deployment," "one firm, no
+org_id," or similar (this file's own § Conventions used to say it;
+`docs/esti/AORMS-PLATFORM-ARCHITECTURE.md`'s tenancy table did too;
+several dated `docs/esti/NEXTJS-MIGRATION-PHASE*-AUDIT.md` files record it
+as the decision current at the time they were written — those are kept
+as historical snapshots, not corrected) was accurate through 2026-09-15
+and is not accurate now. `public.firm` (a hard Postgres singleton —
+`UNIQUE`/`CHECK` on a `singleton` column, migration `0024`) was converted
+to `public.firms` (one row per Studio) across twelve staged migrations
+(`web/supabase/migrations/0053`–`0066`, each applied live against
+`aorms-web` and verified before the next), plus two same-day hotfixes
+(`0067`/`0068`) for the nightly demo-data reset job, which needed a full
+firm-scoped rewrite once every table it touches required `firm_id`.
+**Every one of the ~90 tenant tables now carries `firm_id`, and every RLS
+policy checks `firm_id = current_firm_id()`** (a new helper, same shape as
+`current_app_role()`) — confirmed by a schema-wide sweep with zero
+policies missing that check outside three deliberately-exempt ones
+(`profiles: read own`, `profile_firm_memberships: read own`, `firms:
+member read own memberships` — see `0053`/`0055`'s own header comments
+for why each is scoped differently on purpose).
+
+**`profiles.firm_id` is the caller's *currently active* firm, not a
+permanent one-time assignment** — migration `0055` added
+`profile_firm_memberships` (one row per firm a profile has access to) plus
+three security-definer RPCs: `provision_firm()` (creates a brand-new firm
+for a Studio that's never reached Office Hub before), `join_firm()` (a
+teammate joining a firm someone else already provisioned, as `PENDING`),
+and `switch_active_firm()` (re-points `profiles.firm_id`/`role` to a firm
+the caller already belongs to). This exists because a single AORMS
+Identity account can belong to more than one Platform Studio, and Supabase
+Auth's own per-project email uniqueness means one real person can only
+ever have one Office Hub login — so "which firm am I looking at right
+now" has to be a switchable session concept, not a second account.
+`lib/actions/auth.ts`'s `signIn()`/`signInWithIdentity()` both call
+`resolveSignInDestination()` after establishing a session: straight to
+`roleHome()` when unambiguous (the common case), to a new `/select-studio`
+picker when the profile has 2+ firm memberships or 2+ Platform Studios it
+could still join/provision. A "Switch studio" entry in the header user
+menu (`HeaderUserMenu.tsx`, gated on `hasMultipleStudios`) reaches the
+same picker after sign-in, not just at login.
+
+**What's still explicitly NOT done, tracked separately rather than
+silently declared complete:** subdomain-based routing
+(`<slug>.aorms.in`) — session-based tenant resolution achieves real data
+isolation without it, and `studios.subdomain_slug`'s existing DNS-inert
+reservation is untouched; a separate Supabase project per firm — ruled out
+by this org's 2-project free-tier cap; full firm-scoping of the ~10 shared
+query helpers in `lib/dashboard/queries.ts`/`lib/pulse/queries.ts` (they're
+designed for session-bound callers where RLS already scopes them
+correctly — only `app/api/pulse/snapshot-kpis/route.ts`'s service-role
+cron call bypasses that, and only its own inline counts were fixed, not
+the helpers themselves); Storage bucket isolation for
+`web/lib/drawings/upload.ts` (content-hash-addressed keys, no
+Storage-level RLS found anywhere); and the Python worker's own
+firm-awareness (its job payloads don't carry `firm_id` yet — outside
+`web/`'s repo scope to fix). See `docs/esti/ROADMAP.md`'s dated entry for
+the full account.
+
 ## Launch status (2026-09-04)
 
 **aorms.in ships landing + blog.** Office hub login going live soon (web-only, no desktop).
@@ -530,8 +590,14 @@ branch before starting anything that could overlap — not just at hand-off.
   Basic→Pro at 100h) lives in its **own** Supabase CLI project,
   `platform/supabase/`, deliberately separate from `web/supabase/` — see
   `docs/esti/AORMS-IDENTITY.md` and `docs/esti/ROADMAP.md` for why
-  (short version: `web/`'s schema is single-tenant per deployment, so
-  "one person, many companies" needs a genuinely separate database).
+  (short version, true when this stack existed: `web/`'s schema was
+  single-tenant per deployment at the time, so "one person, many
+  companies" needed a genuinely separate database. **Stale as of
+  2026-09-19** — `web/` is now genuinely multi-tenant, see the Multi-
+  tenancy entry below — but the two projects stay split regardless: the
+  Platform's own concerns (portable cross-org identity, licensing,
+  `AORMS-U-`/`AORMS-C-` handles) are still a different problem from an
+  Office Hub session's single active firm, not something worth merging).
   Start/stop the same way as `web/`'s own stack, from `platform/`:
   `cd platform && DOCKER_HOST="npipe:////./pipe/podman-machine-default" npx supabase start` /
   `... npx supabase stop`. Ports are every one of `web/supabase/config.toml`'s
