@@ -418,14 +418,14 @@ keep database access provider-independent.
 - [x] Supabase remains default DB
 - [x] External DB/API architecture exists
 - [x] AI provider abstraction exists
-- [ ] Ollama connector exists *(the abstraction exists — `OllamaProvider` — see LIGHTWEIGHT-ARCHITECTURE-PLAN.md phase 5; not yet wired into a live call site)*
+- [x] Ollama connector exists *(wired end-to-end into `askEsti()` — see LIGHTWEIGHT-ARCHITECTURE-PLAN.md; not runtime-tested against a live model, no Ollama instance reachable in this environment)*
 - [ ] Desktop Agent architecture exists
 - [ ] WhatsApp channel abstraction exists
-- [ ] External users don't require mandatory accounts
+- [ ] External users don't require mandatory accounts *(not audited this pass — flagged, not assumed either way)*
 - [x] Event system exists
 - [x] Workflow engine exists
-- [ ] Initial automations work *(the mechanism is verified; the §23 automations list itself isn't built yet)*
-- [x] Esti uses tools rather than unrestricted DB access *(tool layer built, not yet wired into a live Server Action)*
+- [ ] Initial automations work *(the mechanism is verified with real test workflows; the §23 automations list itself isn't built as real `workflow_definitions` rows yet)*
+- [x] Esti uses tools rather than unrestricted DB access *(wired into `askEsti()`, not just built)*
 - [ ] RAG works against customer-controlled data
 - [x] Audit logs exist *(pre-existing `audit_log`, not yet the expanded §25 event set)*
 - [x] RLS/tenant isolation is enforced
