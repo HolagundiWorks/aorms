@@ -238,7 +238,7 @@ tool-capable model (llama3.1+) to actually exercise, and/or a UI surface
 to reach `askEsti` from at all — both real remaining steps, not silently
 declared done.
 
-## Google Sign-In (§5 — code complete, blocked on one config toggle)
+## Google Sign-In (§5 — code and Supabase config both live; one Google Cloud step left)
 
 Built and verified end-to-end against the real `aorms-platform` Supabase
 Auth endpoint (not just type-checked): `signInWithGoogle()`
@@ -251,46 +251,49 @@ magic links/password reset — `exchangeCodeForSession` is the same
 mechanism OAuth uses, so it needed zero changes) rather than writing a
 second callback. "Continue with Google" added to both `/platform-login`
 and `/platform-signup` (the same action serves both — Google OAuth
-creates the account on first use, no separate signup step). Verified live
-in a browser: clicking the button correctly builds a PKCE authorize URL
-with the right `redirect_to`/`code_challenge` and redirects to Supabase's
-real `/auth/v1/authorize` endpoint — which currently 400s with
-`"provider is not enabled"`, proving the code path is exactly right and
-the only missing piece is enabling the provider.
+creates the account on first use, no separate signup step).
 
-**Blocked**: enabling the provider needs a `PATCH /v1/projects/{ref}/
-config/auth` call (`external_google_enabled/client_id/secret`) — no
-Supabase MCP tool covers Auth provider config, so this needs the raw
-Management API. Claude Code's own auto-mode permission classifier
-declined it (reason: "Permission Grant") when attempted with the session
-PAT. Two ways to finish this: approve the Bash permission when re-
-attempted, or enable it directly in the Supabase dashboard's Platform
-project → Auth → Providers → Google → paste the same client ID/secret
-already in `web/.env` → Save (a 30-second manual step, no code changes
-either way). Also needs `https://qbgbnhthchhbammzeebg.supabase.co/
-auth/v1/callback` added as an authorized redirect URI on the Google
-Cloud OAuth client (Google Cloud Console → Credentials → the OAuth
-client → Authorized redirect URIs) — a second one-time step only the
-account owner can do, separate from the Supabase-side toggle.
+**The provider is now enabled** (`PATCH /v1/projects/qbgbnhthchhbammzeebg/
+config/auth` with `external_google_enabled/client_id/secret`, approved
+2026-09-20 — took roughly 2 minutes to actually propagate to the live
+Auth endpoint after the config API confirmed the change; a same-second
+retry still 400s with "provider is not enabled," don't read that as
+failure). Verified live on **production** (`identity.aorms.in`), not
+just locally: clicking "Continue with Google" now reaches Google's real
+consent screen with the correct client ID and `redirect_uri`
+(`https://qbgbnhthchhbammzeebg.supabase.co/auth/v1/callback`) — Google
+itself then blocks it with `Error 400: redirect_uri_mismatch`, because
+that URI isn't registered on the Google Cloud OAuth client yet.
 
-## Hostinger deploy — authorized 2026-09-20, one step still blocked
+**One remaining step, only the account owner can do it**: Google Cloud
+Console → APIs & Services → Credentials → the OAuth client (the one
+whose ID/secret are in `web/.env`) → Authorized redirect URIs → add
+`https://qbgbnhthchhbammzeebg.supabase.co/auth/v1/callback` → Save. No
+code or Supabase-side changes needed after that — the flow is otherwise
+fully wired and live.
+
+## Hostinger deploy — a manual deploy was never actually needed
 
 The Hostinger connector is now genuinely connected (387 tools — hosting,
 VPS, DNS, domains, mail, billing). Confirmed live: `aorms.in` and 3 other
 subdomains (`identity.`, `connectdex.`, `sysdex.`) are all the same
-`web/` deployment, routed by hostname (see `lib/platform/subdomains.ts`),
-all Git-auto-deployed from this repo's `main` branch, all confirmed
-rendering correctly with no console errors.
+`web/` deployment, routed by hostname (see `lib/platform/subdomains.ts`).
 
-**A real deploy was attempted** (the landing page V2 content, verified
-and pushed to `main`) and got as far as building a clean archive from
-`git archive HEAD:web` (1.4MB, only git-tracked files — confirmed no
-`.env` inside) before the TUS upload step itself (a raw `curl` to
-Hostinger's file-storage host) was declined by the same auto-mode
-classifier (reason: "Production Deploy"). The Hostinger skill's own docs
-confirm there's no MCP tool wrapper for this one step — `curl` is the
-only way to do it. Needs the same Bash-permission approval as the Google
-provider toggle above to actually complete.
+**Important finding, 2026-09-20:** this site already has **Git
+auto-deploy configured** (`hosting_getGitAutoDeploymentSettingsV1` on
+`aorms.in` → `HolagundiWorks/aorms`, branch `main`, `is_enabled: true`) —
+`hosting_listNodeJSBuildsV1` shows a completed build for *every commit
+this entire session pushed*, automatically, within minutes of each push.
+The Google-provider-toggle permission block earlier led to a manual
+`git archive` → TUS upload → `hosting_startNode_jsBuildV1` deploy attempt
+that turned out to be unnecessary work — once approved and run to
+completion, it just re-deployed content that auto-deploy had already
+shipped. Confirmed by checking the live site directly: the landing page
+V2 content and the "Continue with Google" button were both already live
+on `aorms.in`/`identity.aorms.in` before the manual build even finished.
+**For any future session: check `hosting_getGitAutoDeploymentSettingsV1`
+before attempting a manual deploy** — if `is_enabled: true`, pushing to
+`main` is the entire deploy step.
 
 **Production env vars, deliberately not touched**:
 `hosting_replaceNode_jsEnvironmentVariablesV1` is a **full replace** —
