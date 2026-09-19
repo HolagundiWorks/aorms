@@ -13,7 +13,7 @@ import {
 
 export type ConnectorAccessGrant = {
   id: string;
-  scope_type: "company" | "account";
+  scope_type: "studio" | "account";
   label: string; // resolved handle, for display — see page.tsx's own resolution pass
 };
 
@@ -41,7 +41,7 @@ const KIND_LABEL: Record<string, string> = {
 export function ConnectorCard({ connector }: { connector: Connector }) {
   const [isPending, startTransition] = useTransition();
   const [grantHandle, setGrantHandle] = useState("");
-  const [grantScope, setGrantScope] = useState<"company" | "account">("company");
+  const [grantScope, setGrantScope] = useState<"studio" | "account">("studio");
   const [grantError, setGrantError] = useState<string | null>(null);
 
   function handleGrant(e: React.FormEvent) {
@@ -128,7 +128,7 @@ export function ConnectorCard({ connector }: { connector: Connector }) {
             {connector.grants.map((g) => (
               <Tag
                 key={g.id}
-                type={g.scope_type === "company" ? "teal" : "gray"}
+                type={g.scope_type === "studio" ? "teal" : "gray"}
                 size="sm"
                 filter
                 onClose={() =>
@@ -149,17 +149,17 @@ export function ConnectorCard({ connector }: { connector: Connector }) {
             labelText="Scope"
             size="sm"
             value={grantScope}
-            onChange={(e) => setGrantScope(e.target.value as "company" | "account")}
+            onChange={(e) => setGrantScope(e.target.value as "studio" | "account")}
             style={{ maxWidth: "9rem" }}
           >
-            <SelectItem value="company" text="Studio" />
+            <SelectItem value="studio" text="Studio" />
             <SelectItem value="account" text="Individual" />
           </Select>
           <TextInput
             id={`grant-handle-${connector.id}`}
             labelText="Handle"
             size="sm"
-            placeholder={grantScope === "company" ? "AORMS-C-XXXX" : "AORMS-U-XXXX"}
+            placeholder={grantScope === "studio" ? "AORMS-S-XXXX" : "AORMS-U-XXXX"}
             value={grantHandle}
             onChange={(e) => setGrantHandle(e.target.value)}
           />

@@ -16,7 +16,18 @@
 -- Esti Mobile Inference Samsung phone work) uniformly; the adapter code
 -- (web/lib/ai/connectors.ts) is what actually knows the wire-format
 -- differences per `kind`, not the database.
-
+--
+-- Fixed 2026-09-20 (never successfully applied until now — the original
+-- version referenced `public.companies`, which doesn't exist in this
+-- project: `0006_rename_companies_to_studios.sql` renamed that entity to
+-- `public.studios` months earlier, and a *different* `companies` table
+-- was later added under the `connectdex` schema for material suppliers
+-- (0007/0025) — an unrelated entity with its own `AORMS-C-` handle
+-- prefix, not the Studio this table's own header always meant. Every
+-- `create table`/insert below runs against a clean project (the broken
+-- FK made the original migration fail outright, so nothing here was ever
+-- live) — this is the first real application of this migration, not a
+-- follow-up patch.
 create table public.ai_model_connectors (
   id uuid primary key default gen_random_uuid(),
 
@@ -62,34 +73,34 @@ create trigger ai_model_connectors_touch_updated_at
   before update on public.ai_model_connectors
   for each row execute function public.touch_ai_model_connectors_updated_at();
 
--- Entitlements: which Studio (company) or which individual Account may
--- use a given connector. A row grants access; there is no separate
--- "deny" row — removing the grant removes the access.
+-- Entitlements: which Studio or which individual Account may use a given
+-- connector. A row grants access; there is no separate "deny" row —
+-- removing the grant removes the access.
 create table public.ai_model_connector_access (
   id uuid primary key default gen_random_uuid(),
   connector_id uuid not null references public.ai_model_connectors (id) on delete cascade,
 
-  scope_type text not null check (scope_type in ('company', 'account')),
-  company_id uuid references public.companies (id) on delete cascade,
+  scope_type text not null check (scope_type in ('studio', 'account')),
+  studio_id uuid references public.studios (id) on delete cascade,
   account_id uuid references public.accounts (id) on delete cascade,
 
   created_at timestamptz not null default now(),
 
   constraint ai_model_connector_access_scope_shape check (
-    (scope_type = 'company' and company_id is not null and account_id is null) or
-    (scope_type = 'account' and account_id is not null and company_id is null)
+    (scope_type = 'studio' and studio_id is not null and account_id is null) or
+    (scope_type = 'account' and account_id is not null and studio_id is null)
   )
 );
 
 -- Plain UNIQUE can't be relied on here — Postgres treats two NULLs as
 -- distinct for uniqueness purposes, so a naive
--- unique(connector_id, scope_type, company_id, account_id) would happily
--- accept the same (connector, company) grant twice (account_id is NULL
+-- unique(connector_id, scope_type, studio_id, account_id) would happily
+-- accept the same (connector, studio) grant twice (account_id is NULL
 -- both times). Partial indexes on the always-non-null column per
 -- scope_type instead.
-create unique index ai_model_connector_access_company_uniq
-  on public.ai_model_connector_access (connector_id, company_id)
-  where scope_type = 'company';
+create unique index ai_model_connector_access_studio_uniq
+  on public.ai_model_connector_access (connector_id, studio_id)
+  where scope_type = 'studio';
 create unique index ai_model_connector_access_account_uniq
   on public.ai_model_connector_access (connector_id, account_id)
   where scope_type = 'account';

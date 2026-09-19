@@ -4,7 +4,7 @@
  * Esti AI Model Connectors — platform-admin management (2026-09-13).
  * Lives in aorms-platform (migration 0020_ai_model_connectors.sql), not
  * aorms-web — a generic "connect any model over an API" registry, plus
- * entitlements deciding which Studio (company) or individual Account may
+ * entitlements deciding which Studio or individual Account may
  * use each one. Every write here uses the platform service-role client,
  * same as the rest of app/(platform)/admin/* — these Server Actions are
  * themselves the authorization boundary (isSuperAdmin), not RLS acting
@@ -85,14 +85,14 @@ export async function deleteModelConnector(connectorId: string): Promise<ActionR
 }
 
 /**
- * `scopeValue` is a company_id or account_id (uuid) depending on
+ * `scopeValue` is a studio_id or account_id (uuid) depending on
  * scopeType — the admin UI resolves a Studio/individual's public handle
- * (AORMS-C-.../AORMS-U-...) to that internal id before calling this, same
+ * (AORMS-S-.../AORMS-U-...) to that internal id before calling this, same
  * as every other platform-admin lookup-by-handle flow already does.
  */
 export async function grantConnectorAccess(
   connectorId: string,
-  scopeType: "company" | "account",
+  scopeType: "studio" | "account",
   scopeValue: string,
 ): Promise<ActionResult> {
   const denied = await requireSuperAdmin();
@@ -102,7 +102,7 @@ export async function grantConnectorAccess(
   const { error } = await platform.from("ai_model_connector_access").insert({
     connector_id: connectorId,
     scope_type: scopeType,
-    company_id: scopeType === "company" ? scopeValue : null,
+    studio_id: scopeType === "studio" ? scopeValue : null,
     account_id: scopeType === "account" ? scopeValue : null,
   });
   if (error) return { error: toSafeErrorMessage(error) };
@@ -123,14 +123,14 @@ export async function revokeConnectorAccess(accessId: string): Promise<ActionRes
   return {};
 }
 
-/** Resolves a public handle (AORMS-C-xxxx / AORMS-U-xxxx) to its internal
+/** Resolves a public handle (AORMS-S-xxxx / AORMS-U-xxxx) to its internal
  * id — the admin UI never asks for a raw uuid. */
-export async function resolveHandleToId(scopeType: "company" | "account", handle: string): Promise<{ id?: string; error?: string }> {
+export async function resolveHandleToId(scopeType: "studio" | "account", handle: string): Promise<{ id?: string; error?: string }> {
   const denied = await requireSuperAdmin();
   if (denied) return { error: denied.error };
 
   const platform = createServiceRoleClient();
-  const table = scopeType === "company" ? "companies" : "accounts";
+  const table = scopeType === "studio" ? "studios" : "accounts";
   const { data, error } = await platform.from(table).select("id").eq("public_id", handle.trim()).maybeSingle();
   if (error) return { error: toSafeErrorMessage(error) };
   if (!data) return { error: `No ${scopeType} found for handle "${handle}".` };

@@ -31,23 +31,23 @@ export default async function AiConnectorsAdminPage() {
       .from("ai_model_connectors")
       .select("id, name, kind, base_url, api_key, model_name, enabled, default_for_all, notes")
       .order("created_at", { ascending: true }),
-    platform.from("ai_model_connector_access").select("id, connector_id, scope_type, company_id, account_id"),
+    platform.from("ai_model_connector_access").select("id, connector_id, scope_type, studio_id, account_id"),
   ]);
 
   const grantRows = grants ?? [];
-  const companyIds = [...new Set(grantRows.filter((g) => g.scope_type === "company").map((g) => g.company_id as string))];
+  const studioIds = [...new Set(grantRows.filter((g) => g.scope_type === "studio").map((g) => g.studio_id as string))];
   const accountIds = [...new Set(grantRows.filter((g) => g.scope_type === "account").map((g) => g.account_id as string))];
 
-  const [{ data: companies }, { data: accounts }] = await Promise.all([
-    companyIds.length
-      ? platform.schema("connectdex").from("companies").select("id, public_id, name").in("id", companyIds)
+  const [{ data: studios }, { data: accounts }] = await Promise.all([
+    studioIds.length
+      ? platform.from("studios").select("id, public_id, name").in("id", studioIds)
       : Promise.resolve({ data: [] as { id: string; public_id: string; name: string }[] }),
     accountIds.length
       ? platform.from("accounts").select("id, public_id, full_name").in("id", accountIds)
       : Promise.resolve({ data: [] as { id: string; public_id: string; full_name: string | null }[] }),
   ]);
 
-  const companyLabel = new Map((companies ?? []).map((c) => [c.id, `${c.name} (${c.public_id})`]));
+  const studioLabel = new Map((studios ?? []).map((s) => [s.id, `${s.name} (${s.public_id})`]));
   const accountLabel = new Map((accounts ?? []).map((a) => [a.id, `${a.full_name ?? "—"} (${a.public_id})`]));
 
   const connectorList: Connector[] = (connectors ?? []).map((c) => ({
@@ -64,10 +64,10 @@ export default async function AiConnectorsAdminPage() {
       .filter((g) => g.connector_id === c.id)
       .map((g) => ({
         id: g.id,
-        scope_type: g.scope_type as "company" | "account",
+        scope_type: g.scope_type as "studio" | "account",
         label:
-          g.scope_type === "company"
-            ? (companyLabel.get(g.company_id as string) ?? "unknown studio")
+          g.scope_type === "studio"
+            ? (studioLabel.get(g.studio_id as string) ?? "unknown studio")
             : (accountLabel.get(g.account_id as string) ?? "unknown account"),
       })),
   }));

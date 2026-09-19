@@ -32,11 +32,11 @@ export type ResolvedConnector = {
 
 /**
  * Resolution order: an explicit account-level grant beats an explicit
- * company-level grant (a person-specific override should win over their
+ * studio-level grant (a person-specific override should win over their
  * studio's default), which beats any `default_for_all` connector. Only
  * `enabled` connectors are ever considered.
  */
-export async function resolveConnectorForScope(scope: { companyId?: string; accountId?: string }): Promise<ResolvedConnector | null> {
+export async function resolveConnectorForScope(scope: { studioId?: string; accountId?: string }): Promise<ResolvedConnector | null> {
   const platform = createPlatformServiceRoleClient();
 
   if (scope.accountId) {
@@ -52,12 +52,12 @@ export async function resolveConnectorForScope(scope: { companyId?: string; acco
     if (connector) return toResolved(connector);
   }
 
-  if (scope.companyId) {
+  if (scope.studioId) {
     const { data } = await platform
       .from("ai_model_connector_access")
       .select("ai_model_connectors!inner(id, name, kind, base_url, api_key, model_name, enabled)")
-      .eq("scope_type", "company")
-      .eq("company_id", scope.companyId)
+      .eq("scope_type", "studio")
+      .eq("studio_id", scope.studioId)
       .eq("ai_model_connectors.enabled", true)
       .limit(1)
       .maybeSingle();
