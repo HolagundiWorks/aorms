@@ -2,6 +2,7 @@ package com.aorms.mobile.ui
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Warning
@@ -23,6 +24,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.aorms.mobile.data.Supa
+import com.aorms.mobile.ui.account.AccountScreen
+import com.aorms.mobile.ui.account.AccountViewModel
 import com.aorms.mobile.ui.auth.AuthScreen
 import com.aorms.mobile.ui.auth.AuthViewModel
 import com.aorms.mobile.ui.dashboard.DashboardScreen
@@ -42,6 +45,7 @@ private val BOTTOM_DESTS = listOf(
     BottomDest("tasks", "Tasks", Icons.AutoMirrored.Filled.Assignment),
     BottomDest("leads", "Leads", Icons.Default.PersonAdd),
     BottomDest("reports", "Site", Icons.Default.Warning),
+    BottomDest("account", "Account", Icons.Default.AccountCircle),
 )
 
 @Composable
@@ -86,6 +90,7 @@ private fun AuthenticatedApp() {
             composable("tasks") { TasksScreen(viewModel<TasksViewModel>()) }
             composable("leads") { LeadsScreen(viewModel<LeadsViewModel>()) }
             composable("reports") { SiteReportsScreen(viewModel<SiteReportsViewModel>()) }
+            composable("account") { AccountScreen(viewModel<AccountViewModel>()) }
         }
     }
 }

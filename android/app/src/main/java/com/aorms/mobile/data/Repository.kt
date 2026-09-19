@@ -23,17 +23,97 @@ object Repository {
             count(io.github.jan.supabase.postgrest.query.Count.EXACT)
         }.countOrNull() ?: 0L
 
-    suspend fun openLeadCount(): Long =
-        Supa.db.from("leads").select {
-            filter { neq("status", "CONVERTED") }
+    // ---- Pulse KPIs — same tables/thresholds as app/(app)/pulse/page.tsx
+    // and lib/pulse/{scoring,queries}.ts, so these numbers agree with what
+    // the web app shows for the same firm. priority_score/confidence_score
+    // are pre-computed server-side (recomputeTaskScores(), migration
+    // 0053+'s per-firm cron) — this never re-derives the scoring formula
+    // itself, only reads the stored result and applies the same band
+    // cutoff (bandForScore(): CRITICAL is priority_score >= 70).
+
+    suspend fun pulseCriticalCount(): Long =
+        Supa.db.from("tasks").select {
+            filter {
+                neq("status", "DONE")
+                gte("priority_score", 70)
+            }
             count(io.github.jan.supabase.postgrest.query.Count.EXACT)
         }.countOrNull() ?: 0L
 
-    suspend fun openSnagCount(): Long =
-        Supa.db.from("snags").select {
-            filter { neq("status", "CLOSED") }
+    suspend fun pulseBlockedCount(): Long =
+        Supa.db.from("task_dependencies").select {
+            filter {
+                eq("dependency_type", "BLOCKS")
+                eq("status", "OPEN")
+            }
             count(io.github.jan.supabase.postgrest.query.Count.EXACT)
         }.countOrNull() ?: 0L
+
+    suspend fun pulseOpenGapsCount(): Long =
+        Supa.db.from("task_missing_params").select {
+            filter { eq("status", "OPEN") }
+            count(io.github.jan.supabase.postgrest.query.Count.EXACT)
+        }.countOrNull() ?: 0L
+
+    suspend fun pulseLowConfidenceCount(): Long =
+        Supa.db.from("tasks").select {
+            filter {
+                neq("status", "DONE")
+                lt("confidence_score", 60)
+            }
+            count(io.github.jan.supabase.postgrest.query.Count.EXACT)
+        }.countOrNull() ?: 0L
+
+    /** In-flight decisions — OPEN (drafted, not sent) or CLIENT_REVIEW (sent, awaiting response) — matches app/(app)/pulse/page.tsx's own "Open revisions" query exactly. */
+    suspend fun pulseOpenRevisionsCount(): Long =
+        Supa.db.from("decisions").select {
+            filter { isIn("state", listOf("OPEN", "CLIENT_REVIEW")) }
+            count(io.github.jan.supabase.postgrest.query.Count.EXACT)
+        }.countOrNull() ?: 0L
+
+    /** A project counts "at risk" if it has an open task that's overdue, CRITICAL band, or blocked on another — same three signals as getProjectsAtRiskCount() in lib/pulse/queries.ts. */
+    suspend fun pulseProjectsAtRiskCount(today: String): Long {
+        val openTasks = Supa.db.from("tasks").select(Columns.list("project_id, due_date, priority_score")) {
+            filter { neq("status", "DONE") }
+        }.decodeList<RiskTaskRow>()
+
+        val blockedProjects = Supa.db.from("task_dependencies")
+            .select(Columns.raw("tasks!task_dependencies_task_id_fkey(project_id)")) {
+                filter {
+                    eq("dependency_type", "BLOCKS")
+                    eq("status", "OPEN")
+                }
+            }.decodeList<BlockedDepProjectRow>()
+
+        val atRisk = mutableSetOf<String>()
+        for (t in openTasks) {
+            val projectId = t.projectId ?: continue
+            val overdue = t.dueDate != null && t.dueDate < today
+            if (overdue || t.priorityScore >= 70) atRisk.add(projectId)
+        }
+        for (d in blockedProjects) {
+            d.tasks?.projectId?.let { atRisk.add(it) }
+        }
+        return atRisk.size.toLong()
+    }
+
+    // ---- Profile / firm switching ----
+
+    suspend fun myProfile(userId: String): MyProfile =
+        Supa.db.from("profiles").select(Columns.list("full_name, role, firm_id")) {
+            filter { eq("id", userId) }
+        }.decodeSingle()
+
+    suspend fun myFirms(userId: String): List<FirmMembershipRow> =
+        Supa.db.from("profile_firm_memberships")
+            .select(Columns.list("firm_id, role, firms(company_name)")) {
+                filter { eq("profile_id", userId) }
+            }.decodeList()
+
+    suspend fun switchFirm(firmId: String) {
+        val args = Json.encodeToJsonElement(SwitchFirmArgs.serializer(), SwitchFirmArgs(firmId = firmId)).jsonObject
+        Supa.db.rpc("switch_active_firm", args)
+    }
 
     suspend fun projects(): List<ProjectOption> =
         Supa.db.from("project_offices")

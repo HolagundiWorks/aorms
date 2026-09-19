@@ -10,6 +10,7 @@ import com.aorms.mobile.data.ProjectOption
 import com.aorms.mobile.data.Repository
 import com.aorms.mobile.data.Supa
 import com.aorms.mobile.data.TaskRow
+import com.aorms.mobile.data.toUserMessage
 import kotlinx.coroutines.launch
 
 class TasksViewModel : ViewModel() {
@@ -26,7 +27,7 @@ class TasksViewModel : ViewModel() {
             runCatching {
                 tasks = Repository.myTasks(userId)
                 if (projects.isEmpty()) projects = Repository.projects()
-            }.onFailure { error = it.message }
+            }.onFailure { error = it.toUserMessage() }
             loading = false
         }
     }
@@ -46,8 +47,11 @@ class TasksViewModel : ViewModel() {
         viewModelScope.launch {
             runCatching {
                 Repository.createTask(NewTask(title = title, projectId = projectId, priority = priority, dueDate = dueDate))
-            }.onFailure { error = it.message }
-            showNewTask = false
+            }.onSuccess {
+                showNewTask = false
+            }.onFailure {
+                error = it.toUserMessage()
+            }
             load()
         }
     }

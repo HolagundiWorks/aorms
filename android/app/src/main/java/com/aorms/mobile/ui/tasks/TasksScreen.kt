@@ -22,6 +22,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +42,16 @@ private val PRIORITIES = listOf("LOW", "MEDIUM", "HIGH", "CRITICAL")
 fun TasksScreen(viewModel: TasksViewModel) {
     LaunchedEffect(Unit) { viewModel.load() }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(viewModel.error) {
+        viewModel.error?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.error = null
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = { viewModel.showNewTask = true }) {
                 Icon(Icons.Default.Add, contentDescription = "New task")

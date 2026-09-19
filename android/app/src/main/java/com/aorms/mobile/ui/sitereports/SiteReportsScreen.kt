@@ -21,6 +21,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -41,7 +43,16 @@ private val TABS = listOf("Progress", "Snags", "Instructions")
 fun SiteReportsScreen(viewModel: SiteReportsViewModel) {
     LaunchedEffect(Unit) { viewModel.load() }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(viewModel.error) {
+        viewModel.error?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.error = null
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = { viewModel.showNewSheet = true }) {
                 Icon(Icons.Default.Add, contentDescription = "New site report")

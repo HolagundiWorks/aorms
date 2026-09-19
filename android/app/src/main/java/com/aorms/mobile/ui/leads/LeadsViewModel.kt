@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.aorms.mobile.data.LeadRow
 import com.aorms.mobile.data.NewLead
 import com.aorms.mobile.data.Repository
+import com.aorms.mobile.data.toUserMessage
 import kotlinx.coroutines.launch
 
 class LeadsViewModel : ViewModel() {
@@ -19,7 +20,7 @@ class LeadsViewModel : ViewModel() {
     fun load() {
         loading = true
         viewModelScope.launch {
-            runCatching { leads = Repository.leads() }.onFailure { error = it.message }
+            runCatching { leads = Repository.leads() }.onFailure { error = it.toUserMessage() }
             loading = false
         }
     }
@@ -33,8 +34,11 @@ class LeadsViewModel : ViewModel() {
             runCatching {
                 val ref = Repository.nextLeadRef()
                 Repository.createLead(NewLead(ref = ref, clientName = clientName, leadSource = leadSource, city = city, phone = phone))
-            }.onFailure { error = it.message }
-            showNewLead = false
+            }.onSuccess {
+                showNewLead = false
+            }.onFailure {
+                error = it.toUserMessage()
+            }
             load()
         }
     }

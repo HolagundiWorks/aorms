@@ -130,3 +130,41 @@ data class NextRefArgs(
     @SerialName("p_scope") val scope: String,
     @SerialName("p_default_prefix") val defaultPrefix: String,
 )
+
+// ---- Pulse KPIs (mirrors app/(app)/pulse/page.tsx's own tiles exactly —
+// same tables, same thresholds, so the numbers agree with the web app) ----
+
+@Serializable
+data class RiskTaskRow(
+    @SerialName("project_id") val projectId: String? = null,
+    @SerialName("due_date") val dueDate: String? = null,
+    @SerialName("priority_score") val priorityScore: Int = 0,
+)
+
+@Serializable
+data class BlockedDepProjectRow(val tasks: ProjectIdHolder? = null)
+
+@Serializable
+data class ProjectIdHolder(@SerialName("project_id") val projectId: String? = null)
+
+// ---- Profile / firm switching (no AORMS Identity — plain login/logout only) ----
+
+@Serializable
+data class MyProfile(
+    @SerialName("full_name") val fullName: String,
+    val role: String,
+    @SerialName("firm_id") val firmId: String? = null,
+)
+
+@Serializable
+data class FirmName(@SerialName("company_name") val companyName: String)
+
+@Serializable
+data class FirmMembershipRow(
+    @SerialName("firm_id") val firmId: String,
+    val role: String,
+    val firms: FirmName? = null,
+)
+
+@Serializable
+data class SwitchFirmArgs(@SerialName("p_firm_id") val firmId: String)

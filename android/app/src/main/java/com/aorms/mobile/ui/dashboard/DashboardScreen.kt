@@ -26,17 +26,22 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
     LaunchedEffect(Unit) { viewModel.load() }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Good day, ${viewModel.userName.substringBefore('@')}", style = MaterialTheme.typography.titleLarge)
+        Text("Pulse", style = MaterialTheme.typography.titleLarge)
         Text(
-            "Here's what needs attention today.",
+            "What needs attention today — same six numbers as the web app's Pulse dashboard.",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 20.dp),
         )
 
+        // Same six tiles, same colors, as app/(app)/pulse/page.tsx — red for
+        // alert, orange for "needs attention", blue for a neutral count.
         val kpis = listOf(
-            Kpi("My open tasks", viewModel.myOpenTasks, Color(0xFF0F62FE)),
-            Kpi("Open leads", viewModel.openLeads, Color(0xFF24A148)),
-            Kpi("Open snags", viewModel.openSnags, Color(0xFFDA1E28)),
+            Kpi("Critical", viewModel.critical, Color(0xFFDA1E28)),
+            Kpi("Blocked tasks", viewModel.blocked, Color(0xFFFF832B)),
+            Kpi("Open gaps", viewModel.openGaps, Color(0xFFF1C21B)),
+            Kpi("Low confidence", viewModel.lowConfidence, Color(0xFFFF832B)),
+            Kpi("Projects at risk", viewModel.projectsAtRisk, Color(0xFFDA1E28)),
+            Kpi("Open revisions", viewModel.openRevisions, Color(0xFF0F62FE)),
         )
 
         LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.fillMaxWidth()) {

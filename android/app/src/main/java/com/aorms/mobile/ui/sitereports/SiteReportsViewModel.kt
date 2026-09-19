@@ -12,6 +12,7 @@ import com.aorms.mobile.data.ProjectOption
 import com.aorms.mobile.data.Repository
 import com.aorms.mobile.data.SiteInstructionRow
 import com.aorms.mobile.data.SnagRow
+import com.aorms.mobile.data.toUserMessage
 import kotlinx.coroutines.launch
 
 class SiteReportsViewModel : ViewModel() {
@@ -34,7 +35,7 @@ class SiteReportsViewModel : ViewModel() {
                 progressReports = Repository.progressReports()
                 snags = Repository.snags()
                 instructions = Repository.siteInstructions()
-            }.onFailure { error = it.message }
+            }.onFailure { error = it.toUserMessage() }
             loading = false
         }
     }
@@ -45,24 +46,29 @@ class SiteReportsViewModel : ViewModel() {
                 Repository.createProgressReport(
                     NewProgressReport(projectId = projectId, periodStart = periodStart, periodEnd = periodEnd, narrative = narrative, physicalProgressPct = pct),
                 )
-            }.onFailure { error = it.message }
-            showNewSheet = false
+            }.onSuccess {
+                showNewSheet = false
+            }.onFailure {
+                error = it.toUserMessage()
+            }
             load()
         }
     }
 
     fun createSnag(projectId: String, location: String?, trade: String?, description: String) {
         viewModelScope.launch {
-            runCatching { Repository.createSnag(location, trade, description, projectId) }.onFailure { error = it.message }
-            showNewSheet = false
+            runCatching { Repository.createSnag(location, trade, description, projectId) }
+                .onSuccess { showNewSheet = false }
+                .onFailure { error = it.toUserMessage() }
             load()
         }
     }
 
     fun createInstruction(projectId: String, subject: String, body: String?) {
         viewModelScope.launch {
-            runCatching { Repository.createSiteInstruction(subject, body, projectId) }.onFailure { error = it.message }
-            showNewSheet = false
+            runCatching { Repository.createSiteInstruction(subject, body, projectId) }
+                .onSuccess { showNewSheet = false }
+                .onFailure { error = it.toUserMessage() }
             load()
         }
     }
