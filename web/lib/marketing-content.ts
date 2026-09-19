@@ -68,6 +68,33 @@ export const DEMO = {
   password: "DemoAORMS2026!",
 } as const;
 
+/**
+ * Real product screenshots (2026-09-20) — the page's own longstanding
+ * gap, flagged in a 2026-09-10 review as the single highest-impact
+ * remaining item: every section here was text/tiles, nothing showing the
+ * actual product. Captured live against production, signed in as the
+ * same demo account this section already prints credentials for — not
+ * mockups, not a design file, the real running app with the real seeded
+ * demo studio's data.
+ */
+export const PRODUCT_SCREENSHOTS = [
+  {
+    src: "/screenshots/pulse-dashboard.png",
+    alt: "AORMS Pulse dashboard showing today's brief, next-up tasks, and office KPIs",
+    caption: "Pulse — the daily brief, written from real project data",
+  },
+  {
+    src: "/screenshots/tasks-board.png",
+    alt: "AORMS office-wide task list with status, priority, and Pulse escalation columns",
+    caption: "Tasks — one office-wide list, not a chat thread",
+  },
+  {
+    src: "/screenshots/projects-list.png",
+    alt: "AORMS projects list showing every practice's projects with client, type, and status",
+    caption: "Projects — every practice's projects, one table",
+  },
+] as const;
+
 export const HUMAN_CENTRIC_WORKS = {
   legalName: "Human Centric Works",
   attribution: "Developed by Human Centric Works",

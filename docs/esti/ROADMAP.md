@@ -143,12 +143,13 @@ Hub data reset nightly via `pg_cron`).
   `demo@aorms.in` (VIEWER) login already exists live, with real seeded
   data (24 clients, 16 projects, 60 tasks, 8 invoices) — this is the
   same account used throughout this session's own Android device
-  testing. **Still genuinely open**: no public "Try the demo" CTA exists
-  anywhere on the landing page or `/login` — a visitor who wants to
-  explore the product has to already know the credentials. That's a
-  real product/UX decision (one-click sign-in as a shared account has
-  its own abuse-surface considerations) worth the user's own call before
-  building it, not assumed here.
+  testing. **Correction to this entry's own earlier draft**: a public
+  "Try the demo" CTA already exists (`#live-demo` section on the landing
+  page, `DEMO.email`/`DEMO.password` in `marketing-content.ts`, printed
+  directly on the page) — an earlier pass through this file claimed
+  otherwise without actually checking `app/page.tsx` first. Verified
+  end-to-end this time by actually signing in with those exact printed
+  credentials against production.
 - **Landing page product screenshots** — flagged in a review pass
   (2026-09-10) as the single highest-impact remaining gap: the page is
   entirely text/tiles, no screenshot of the actual product anywhere.

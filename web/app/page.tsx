@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { Accordion, AccordionItem, Column, Grid, Tag, Tile } from "@carbon/react";
 import { Currency, Renew, WarningAlt, UserMultiple, CheckmarkFilled, Close, ArrowRight } from "@carbon/icons-react";
@@ -32,6 +33,7 @@ import {
   OPERATIONAL_LEAKAGE,
   PRICING,
   PROBLEM,
+  PRODUCT_SCREENSHOTS,
   PROJECT_RECORD,
   PULSE_SECTION,
   REVISION_MANAGEMENT,
@@ -787,6 +789,28 @@ export default async function LandingPage() {
         {/* 13. Live Demo (spec §26) */}
         <section id="live-demo" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <MotionReveal>
+          <Grid style={{ marginBottom: "3rem" }}>
+            {PRODUCT_SCREENSHOTS.map((shot) => (
+              <Column key={shot.src} sm={4} md={8} lg={{ span: 5 }} style={{ marginBottom: "1.5rem" }}>
+                <div style={{ border: "1px solid var(--cds-border-subtle)", overflow: "hidden" }}>
+                  <Image
+                    src={shot.src}
+                    alt={shot.alt}
+                    width={1440}
+                    height={900}
+                    style={{ width: "100%", height: "auto", display: "block" }}
+                    sizes="(max-width: 672px) 100vw, 33vw"
+                  />
+                </div>
+                <p
+                  className="cds--type-helper-text-01"
+                  style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}
+                >
+                  {shot.caption}
+                </p>
+              </Column>
+            ))}
+          </Grid>
           <Grid>
             <Column sm={4} md={8} lg={9}>
               <h2 className="cds--type-heading-05">Don&apos;t take our word for it. Open the practice.</h2>
