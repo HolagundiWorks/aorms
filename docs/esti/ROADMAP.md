@@ -98,6 +98,19 @@ Hub data reset nightly via `pg_cron`).
 
 ## Open items — honest, not yet done
 
+- **Database-per-tenant architecture pivot (2026-09-19, in progress)** —
+  direction changed from the RLS-based shared-database multi-tenancy
+  (still live, migrations 0053-0068) to each Studio getting its own
+  dedicated database, with identity/licensing/support/admin staying
+  shared in `aorms-platform`. Registry table (`tenant_databases`) and a
+  Supabase-project provisioning script are live; the real blocker is a
+  hosting decision only the account owner can make (this org is capped at
+  2 free-plan Supabase projects — a third needs a paid plan) plus an
+  auth-handoff design (Supabase JWTs are project-scoped, so per-tenant
+  databases need per-tenant sessions). Full design, tradeoffs, and staged
+  rollout: [DATABASE-PER-TENANT-ARCHITECTURE.md](DATABASE-PER-TENANT-ARCHITECTURE.md).
+  `createClient()` in `web/lib/supabase/server.ts` deliberately NOT yet
+  changed — see that doc's § Why connection routing isn't flipped yet.
 - **Razorpay live test-mode payment** — the checkout flow is built,
   migrated, and RLS-verified against a real signed-up account, but no
   actual test-mode payment has been run end-to-end yet (needs Razorpay
