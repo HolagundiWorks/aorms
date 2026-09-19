@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.scss";
+import { PwaServiceWorker } from "../components/aorms/PwaServiceWorker";
 
 /**
  * Root metadata (2026-09-10 — previously just title/description, no
@@ -63,6 +64,17 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * 2026-09-19 — PWA installability (app/manifest.ts). themeColor matches
+ * the manifest's own (Carbon Blue 60, #0f62fe) so the installed app's
+ * Android status bar and this same color agree; Next injects both the
+ * `<meta name="theme-color">` tag and the manifest `<link>` from these
+ * two exports automatically — neither needs a manual <head> tag.
+ */
+export const viewport: Viewport = {
+  themeColor: "#0f62fe",
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-IN">
@@ -76,7 +88,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             with this one for bandwidth rather than help LCP. */}
         <link rel="preload" href="/fonts/plex-sans/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
-      <body>{children}</body>
+      <body>
+        <PwaServiceWorker />
+        {children}
+      </body>
     </html>
   );
 }
