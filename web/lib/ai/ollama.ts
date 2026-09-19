@@ -62,15 +62,29 @@ export async function checkOllamaHealth(input?: { baseUrl?: string; model?: stri
   }
 }
 
+/** Ollama /api/chat tool-calling shapes — see https://github.com/ollama/ollama/blob/main/docs/api.md#chat-request-with-tools */
+export type OllamaToolDefinition = {
+  type: "function";
+  function: { name: string; description: string; parameters: Record<string, unknown> };
+};
+
+export type OllamaToolCall = { function: { name: string; arguments: Record<string, unknown> } };
+
+/** A prior turn in a multi-step tool-calling exchange, appended after system/user. */
+export type OllamaHistoryMessage = { role: "assistant" | "tool"; content: string; tool_name?: string };
+
 export type OllamaChatInput = {
   baseUrl: string;
   model: string;
   system: string;
   user: string;
   timeoutMs?: number;
+  /** Only present for a tool-calling call (lib/ai/agent-loop.ts) — every existing caller omits this. */
+  tools?: OllamaToolDefinition[];
+  history?: OllamaHistoryMessage[];
 };
 
-export type OllamaChatResult = { text: string; tokens: number | null };
+export type OllamaChatResult = { text: string; tokens: number | null; toolCalls?: OllamaToolCall[] };
 
 export async function callOllamaChat(input: OllamaChatInput): Promise<OllamaChatResult> {
   const url = `${input.baseUrl.replace(/\/$/, "")}/api/chat`;
@@ -84,17 +98,24 @@ export async function callOllamaChat(input: OllamaChatInput): Promise<OllamaChat
       messages: [
         { role: "system", content: input.system },
         { role: "user", content: input.user },
+        ...(input.history ?? []),
       ],
+      ...(input.tools ? { tools: input.tools } : {}),
     }),
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`Ollama HTTP ${res.status}: ${body.slice(0, 200)}`);
   }
-  const data = (await res.json()) as { message?: { content?: string }; eval_count?: number };
+  const data = (await res.json()) as { message?: { content?: string; tool_calls?: OllamaToolCall[] }; eval_count?: number };
   const text = data.message?.content?.trim() ?? "";
-  if (!text) {
+  const toolCalls = data.message?.tool_calls;
+  // A tool-calling turn legitimately has empty content (the model asked to
+  // call a tool instead of answering) — only the no-tools, no-tool-call
+  // shape (every existing caller, since none pass `tools`) still treats
+  // empty content as an error.
+  if (!text && !(toolCalls && toolCalls.length > 0)) {
     throw new Error("Ollama returned empty content — pull the model with `ollama pull`");
   }
-  return { text, tokens: data.eval_count ?? null };
+  return { text, tokens: data.eval_count ?? null, ...(toolCalls && toolCalls.length > 0 ? { toolCalls } : {}) };
 }

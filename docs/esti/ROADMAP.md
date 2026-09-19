@@ -98,15 +98,18 @@ Hub data reset nightly via `pg_cron`).
 
 ## Open items — honest, not yet done
 
-- **Lightweight architecture master plan (2026-09-20)** — tracks the full
-  direction (events, workflow engine, AI provider abstraction, Google
-  Drive, Desktop Agent, RAG, CAD automation) phase by phase, with an
-  honest done/stubbed/blocked read on each:
-  [LIGHTWEIGHT-ARCHITECTURE-PLAN.md](LIGHTWEIGHT-ARCHITECTURE-PLAN.md).
-  Real blockers needing a decision: Google OAuth app credentials (Drive),
-  Desktop Agent distribution/signing decisions, Hostinger deploy
-  connector not yet authorized in-session, Supabase org still free-plan
-  (2-project cap).
+- **AORMS V2 frozen architecture + lightweight master plan (2026-09-20)**
+  — [AORMS-V2-DEVELOPER-GUIDELINES.md](AORMS-V2-DEVELOPER-GUIDELINES.md)
+  is the canonical, user-authored spec ("FROZEN ARCHITECTURE" — do not
+  redesign without explicit approval);
+  [LIGHTWEIGHT-ARCHITECTURE-PLAN.md](LIGHTWEIGHT-ARCHITECTURE-PLAN.md)
+  tracks build status against it phase by phase (events, workflow engine,
+  connector modes, AI provider abstraction, Esti tool layer, Google Drive
+  all live and verified this pass; Desktop Agent, WhatsApp channel, RAG
+  over Drive, CAD automation still ahead). Hostinger deploy is now
+  authorized (387 tools, confirmed live against all 4 deployed
+  subdomains). Real remaining blockers: Desktop Agent distribution/
+  signing decisions, Supabase org still free-plan (2-project cap).
 - **Events system + connector modes (2026-09-20)** — first slice of a
   deliberately lightweight event/workflow architecture (plain Postgres
   table, not Kafka/Redis — the explicit direction at this scale). Live

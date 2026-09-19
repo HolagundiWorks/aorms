@@ -26,7 +26,7 @@ all session, not new for this doc.
 | 4. Workflow engine (events → conditions → actions) | ✅ Live, verified end-to-end | this doc, § Workflow engine |
 | 5. AI provider abstraction (chat only — see below) | ✅ Built, not yet wired into live call sites | this doc, § AI provider abstraction |
 | 6. Esti tool layer (Esti calls AORMS, not the reverse) | ⏳ Not started, depends on 5's call sites actually migrating | — |
-| 7. Google Drive document layer | 🔴 Blocked — needs a Google Cloud OAuth app | this doc, § Blockers |
+| 7. Google Drive document layer | ✅ OAuth flow + metadata schema live; unblocked 2026-09-20 | this doc, § Google Drive |
 | 8. Desktop Agent (Ollama/Whisper/CAD/local files) | 🔴 Blocked — new codebase, distribution/signing decisions | this doc, § Blockers |
 | 9. RAG over Drive documents | ⏳ Not started, depends on 7 | — |
 | 10. CAD/architecture automation (DWG/Revit tooling) | ⏳ Not started, depends on 8 | — |
@@ -62,23 +62,43 @@ follow-up task with the right project/priority/due-date resolved from
 the triggering event's payload. Both runs correctly marked their source
 events `PROCESSED`. All test data cleaned up afterward.
 
-**A real gap found and fixed while verifying it, worth knowing about
-generally:** `revoke execute on function ... from anon, authenticated`
-does **not** actually close anon/authenticated access — Postgres grants
-EXECUTE to the `PUBLIC` pseudo-role by default on function creation, and
-every role inherits through `PUBLIC` membership regardless of what's
-separately revoked from it by name. `information_schema.routine_
-privileges` still showed `('PUBLIC', 'EXECUTE')` after the first revoke;
-the real fix (`0072_fix_public_execute_grant_gap.sql`) targets `PUBLIC`
-directly. Re-verified live afterward — zero rows for `PUBLIC`/`anon`/
-`authenticated`, `service_role` untouched, triggers still fire correctly.
-**This same gap almost certainly exists on other pre-existing
-internal-only functions from earlier in this build** — `reset_demo_data()`
-confirmed still `PUBLIC`-executable via the same check, i.e. still
-callable by an anonymous request today. Not fixed here (out of scope for
-this pass, and a wider audit of which functions are meant to be
-internal-only vs. genuinely user-callable deserves its own pass rather
-than a drive-by fix) — flagged for a dedicated follow-up.
+**A real gap found and fixed while verifying it — took two follow-up
+passes to actually close, worth knowing the full shape of:**
+`revoke execute on function ... from anon, authenticated` does **not**
+actually close anon/authenticated access on its own — Postgres also
+grants EXECUTE to the `PUBLIC` pseudo-role by default on function
+creation, and every role inherits through `PUBLIC` membership regardless
+of what's separately revoked from it by name (`0072_fix_public_execute_
+grant_gap.sql` closed this for the events/workflow functions).
+
+**That wasn't the whole story.** Two brand-new functions in the Google
+Drive migration (`0073`) were created with `revoke ... from public`
+*only* (no separate `anon, authenticated` revoke), and
+`information_schema.routine_privileges` still showed `anon`/
+`authenticated` as **direct** grantees afterward — not inherited through
+`PUBLIC` at all. The `0072` fixes had only worked because those functions
+*also* already had an explicit `anon, authenticated` revoke from an
+earlier migration (`0070`) — two fixes stacking, not one sufficient fix.
+Near as can be determined, Supabase manages a default-privilege grant
+(`ALTER DEFAULT PRIVILEGES ... GRANT EXECUTE ... TO anon, authenticated,
+service_role`) that fires directly on every new `public`-schema function
+at creation time, independent of the `PUBLIC` pseudo-role.
+
+**The real, complete fix, going forward:** revoke from all three in one
+statement — `revoke execute on function X from public, anon,
+authenticated;` — for anything not meant to be end-user-callable, in the
+*same* migration that creates it. Verify with a direct
+`information_schema.routine_privileges` query every time; `get_advisors`
+is a useful summary but its cached view can miss the direct-grant case,
+so don't treat it alone as ground truth. Fixed live for `0073`'s two
+functions (`0074_fix_drive_functions_grant_gap.sql`), re-verified.
+
+**This gap likely exists on other pre-existing internal-only functions
+from earlier in this build** — `reset_demo_data()` confirmed still
+callable by an anonymous request today via the `PUBLIC` path (not
+independently re-checked for the direct-grant path). Not fixed here —
+flagged for the dedicated audit already spun off as a background task,
+which has been sent this corrected methodology.
 
 Design:
 
@@ -136,39 +156,94 @@ already-used, unmodified code, so the risk surface is low, but this is
 still real and worth stating plainly rather than implying more
 verification happened than did).
 
-## Blockers — need your decision, can't proceed alone
+## Google Drive (phase 7 — unblocked 2026-09-20)
 
-1. **Google Drive (phase 7)** needs a Google Cloud project with the
-   Drive API enabled and an OAuth 2.0 client (client ID + secret). I
-   can't create a new Google Cloud account/project — that's outside what
-   I'm allowed to do unilaterally regardless of autopilot framing.
-   Once you create one (Google Cloud Console → APIs & Services →
-   Credentials → OAuth client ID, type "Web application", redirect URI
-   `https://aorms.in/api/drive/oauth/callback`) and share the client ID/
-   secret, I can wire the connector.
-2. **Desktop Agent (phase 8)** is a new, separate codebase (not a web/
-   addition) — a local Windows/Mac app that talks to Ollama/Whisper/CAD
-   tools and exposes them to AORMS over a secure connection. Before
-   writing it I need your call on: distribution (installer vs. a
-   background service the user runs manually), whether it needs code
-   signing (unsigned .exe triggers Windows SmartScreen warnings — a real
-   adoption blocker for a firm's IT-cautious staff), and how it
-   authenticates back to AORMS (a paired device token, most likely,
-   mirroring `ai_devices`/`ai-devices.ts`, which already exists for a
-   related purpose — worth reusing rather than inventing a second
-   pairing flow).
-3. **Hostinger deploy** — the `hosting-deploy-nodejs-app` skill is
-   available, but its underlying MCP tools aren't authorized in this
-   session (confirmed by trying to load them — none are reachable).
-   Authorize it via your claude.ai connector settings, then I can deploy
-   `web/` directly instead of asking you to trigger it via hPanel.
-4. **Supabase org is still on the free plan** (confirmed live via the
-   Supabase MCP connector, 2026-09-20) — capped at 2 projects. This
-   doesn't block anything in phases 1-6 (all live in the existing 2
-   projects), but it's the wall phase 2's Mode B hits at scale: every
-   additional Studio that wants `customer_supabase` isolation needs its
-   own paid-plan project. Worth knowing before more than a couple of
-   Studios actually opt into that mode.
+Real Google OAuth 2.0 credentials (client ID + secret, "Web application"
+type) were provided and stored — locally in `web/.env` (gitignored, never
+committed), not yet set in Hostinger's production environment variables
+(see below for why that step is deliberately separate). Built and
+live-verified this pass:
+
+- `drive_connections` / `documents` (`0073_google_drive_connector.sql`,
+  aorms-web) — one Drive connection per firm, refresh token always via
+  `vault.secrets`, document metadata only (no file bytes ever touch
+  Supabase), matching AORMS-V2-DEVELOPER-GUIDELINES.md § 7 almost
+  field-for-field (see that doc's own § Reconciling for the one
+  deliberate difference: `firm_id`, not `company_id`, to stay consistent
+  with the other ~98 tables).
+- `web/lib/drive/oauth.ts` — the OAuth web-server flow, verified against
+  Google's own docs (not guessed): authorize-URL construction, code-for-
+  tokens exchange, refresh-token exchange. Requests `drive.file` scope
+  only (files AORMS creates or the user explicitly picks via a Picker),
+  not full `drive` access — the narrower, least-privilege default; a
+  future "map an existing folder structure" feature (guidelines § 8)
+  would need to request broader access explicitly, as its own documented
+  scope escalation.
+- `startDriveConnection()` (`lib/actions/drive.ts`) + the callback Route
+  Handler (`app/api/drive/oauth/callback/route.ts`) — the callback uses
+  the signed-in user's own session client, so `store_drive_refresh_
+  token()`'s internal `has_capability('write')` + firm-match check is
+  what actually authorizes the write, not a special-cased service-role
+  path.
+- Auth URL construction, state encode/decode, and the token-exchange
+  request shape were runtime-tested (not just type-checked) against
+  Google's documented format. The full live round trip (real Google
+  consent screen → real refresh token → real Drive API call) has **not**
+  been exercised — that needs a real browser click-through, not something
+  this session did.
+
+**Deliberately not done yet:** no UI surfaces `startDriveConnection()`
+anywhere (no button on `/firm-settings`); no Drive-file-listing/sync code
+exists (`documents` rows have nowhere to come from yet); production
+Hostinger env vars don't have the Google credentials set — that replace-
+the-whole-set endpoint is destructive (see below) and there's no live
+feature yet that would need them in production.
+
+## Desktop Agent (phase 8 — still blocked)
+
+A new, separate codebase (not a `web/` addition) — a local Windows/Mac
+app that talks to Ollama/Whisper/CAD tools and exposes them to AORMS over
+a secure connection. Before writing it, need a decision on: distribution
+(installer vs. a background service the user runs manually), whether it
+needs code signing (unsigned `.exe` triggers Windows SmartScreen
+warnings — a real adoption blocker for IT-cautious staff), and how it
+authenticates back to AORMS (a paired device token, most likely,
+mirroring `ai_devices`/`ai-devices.ts`, which already exists for a
+related purpose — worth reusing rather than inventing a second pairing
+flow). AORMS-V2-DEVELOPER-GUIDELINES.md § 26-27 sets the shape (outbound-
+only connection, explicit per-capability permissions, no unrestricted
+shell by default) but not these deployment specifics.
+
+## Hostinger deploy — authorized 2026-09-20
+
+The Hostinger connector is now genuinely connected (387 tools — hosting,
+VPS, DNS, domains, mail, billing). Confirmed live: `aorms.in` and 3 other
+subdomains (`identity.`, `connectdex.`, `sysdex.`) are all the same
+`web/` deployment, routed by hostname (see `lib/platform/subdomains.ts`),
+all Git-auto-deployed from this repo's `main` branch, all confirmed
+rendering correctly with no console errors. Nothing queued to deploy yet
+— this session's changes are all Supabase migrations (already live) or
+new backend code not yet wired into a live page.
+
+**Production env vars, deliberately not touched**:
+`hosting_replaceNode_jsEnvironmentVariablesV1` is a **full replace** —
+anything not included gets deleted, and existing values come back
+masked, so there's no way to safely read-then-merge. Setting the new
+Google OAuth vars there now, before any Drive UI exists to use them,
+would risk wiping the live Supabase/Ollama/other secrets for zero
+benefit. Do this once there's a real feature ready to ship that needs
+them — reconstruct the full var set from `web/.env`'s real values (this
+repo's own established convention: `.env`'s values are what production
+actually runs), not from the masked list.
+
+## Supabase org — still free plan
+
+Confirmed live via the Supabase MCP connector (2026-09-20) — capped at 2
+projects. Doesn't block anything in phases 1-7 (all live in the existing
+2 projects), but it's the wall phase 2's Mode B hits at scale: every
+additional Studio that wants `customer_supabase` isolation needs its own
+paid-plan project. Worth knowing before more than a couple of Studios opt
+into that mode.
 
 ## Non-blockers — proceeding without asking
 
