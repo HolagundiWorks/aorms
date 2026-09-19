@@ -1,0 +1,38 @@
+-- Follow-up sweep to 0070/0072's PUBLIC-execute grant fix — a full
+-- inventory of every SECURITY DEFINER function in this project via
+-- pg_proc + information_schema.routine_privileges turned up 3 more that
+-- 0072 missed (it only covered the 4 event triggers + run_due_workflows):
+--
+--   * handle_new_user() — trigger-only (`returns trigger`, fired by
+--     on_auth_user_created on auth.users), same category as 0072's
+--     trg_emit_* functions. Never a direct-RPC target.
+--   * reset_demo_data() / seed_landing_page_demo_examples() — both
+--     `security definer`, both invoked only by pg_cron on a nightly
+--     schedule with no session (own header comments say so explicitly:
+--     "invoked nightly by pg_cron with no session"). Confirmed still
+--     PUBLIC-executable via information_schema.routine_privileges before
+--     this migration — meaning an anonymous request could call either on
+--     demand via /rest/v1/rpc/reset_demo_data or
+--     /rest/v1/rpc/seed_landing_page_demo_examples and force a
+--     production demo-data reset outside its schedule.
+--
+-- Every other SECURITY DEFINER function in this project was reviewed and
+-- left untouched on purpose: current_app_role/current_firm_id/
+-- has_capability/is_office_staff are read-only, self-scoped helpers
+-- (return only facts about the caller's own session, safe regardless of
+-- PUBLIC grant); next_ref/acknowledge_transmittal/update_my_full_name/
+-- respond_to_approval/respond_to_decision/ensure_my_calendar_feed_token/
+-- rotate_my_calendar_feed_token/provision_firm/join_firm/
+-- switch_active_firm/emit_event/mark_event_processed are genuine
+-- authenticated end-user RPCs with their own internal ownership/session
+-- checks — grep confirms none of the 3 revoked here are ever called via
+-- `.rpc(...)` from application code, unlike those.
+--
+-- Re-verified live afterward: information_schema.routine_privileges
+-- shows zero PUBLIC/anon/authenticated rows for all 3, and a real
+-- auth.users insert still correctly fires handle_new_user() afterward
+-- (trigger invocation isn't gated by these grants — only direct RPC
+-- calls are).
+revoke execute on function public.handle_new_user() from public;
+revoke execute on function public.reset_demo_data() from public;
+revoke execute on function public.seed_landing_page_demo_examples() from public;
