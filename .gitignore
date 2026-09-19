@@ -48,6 +48,9 @@ dump.rdb
 # ...but backend/src/data holds committed generated SOURCE (CPWD rate-book seed),
 # not runtime volumes — keep it tracked so Docker builds have it.
 !backend/src/data/
+# ...same for the native Android app's com.aorms.mobile.data package (Kotlin
+# source — Supabase client/models/repository), not a runtime volume either.
+!android/app/src/main/java/com/aorms/mobile/data/
 .idea/
 .vscode/
 .claude/
