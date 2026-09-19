@@ -98,6 +98,18 @@ Hub data reset nightly via `pg_cron`).
 
 ## Open items — honest, not yet done
 
+- **Events system + connector modes (2026-09-20)** — first slice of a
+  deliberately lightweight event/workflow architecture (plain Postgres
+  table, not Kafka/Redis — the explicit direction at this scale). Live
+  and verified: `events` table + triggers on 4 real writes
+  (task.created/completed, document.uploaded, project.created), plus
+  `emit_event()`/`mark_event_processed()` for future callers. Also
+  formalizes the 3 database connector modes (AORMS-managed default /
+  Customer Supabase / Customer API) on the `tenant_databases` registry —
+  resolves the earlier "every firm needs its own DB" direction as one
+  optional mode, not mandatory. No workflow engine consumes events yet;
+  that's the next slice. Full design:
+  [EVENTS-AND-CONNECTOR-MODES.md](EVENTS-AND-CONNECTOR-MODES.md).
 - **Database-per-tenant architecture pivot (2026-09-19, in progress)** —
   direction changed from the RLS-based shared-database multi-tenancy
   (still live, migrations 0053-0068) to each Studio getting its own
