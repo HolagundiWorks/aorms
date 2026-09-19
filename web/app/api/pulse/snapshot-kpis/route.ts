@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceRoleClient } from "../../../../lib/supabase/service";
 import { getAbsencesToday, getAwaitingPayment, getOpenClientRequests, getOpenConsultantRequests, getOpenTenders, getReadyToBill } from "../../../../lib/dashboard/queries";
-import { getBlockedTasks, getLowConfidenceTasks, getOpenMissingParams, getTopPriorityTasks } from "../../../../lib/pulse/queries";
+import { getBlockedTasksCount, getCriticalTasksCount, getLowConfidenceTasksCount, getOpenMissingParamsCount } from "../../../../lib/pulse/queries";
 
 /**
  * KPI daily snapshot (2026-09-14, shell/identity/KPI spec §21-22, migration
@@ -63,10 +63,10 @@ export async function POST(request: Request) {
         clientRequests,
         consultantRequests,
         openTenders,
-        pulseTasks,
-        blockedTasks,
-        missingParams,
-        lowConfidenceTasks,
+        criticalCount,
+        blockedTasksCount,
+        openGapsCount,
+        lowConfidenceCount,
       ] = await Promise.all([
         supabase.from("clients").select("id", { count: "exact", head: true }).eq("firm_id", firm.id).then((r) => r.count ?? 0),
         supabase.from("project_offices").select("id", { count: "exact", head: true }).eq("firm_id", firm.id).then((r) => r.count ?? 0),
@@ -78,20 +78,20 @@ export async function POST(request: Request) {
         getOpenClientRequests(supabase),
         getOpenConsultantRequests(supabase),
         getOpenTenders(supabase),
-        getTopPriorityTasks(supabase),
-        getBlockedTasks(supabase),
-        getOpenMissingParams(supabase),
-        getLowConfidenceTasks(supabase),
+        getCriticalTasksCount(supabase),
+        getBlockedTasksCount(supabase),
+        getOpenMissingParamsCount(supabase),
+        getLowConfidenceTasksCount(supabase),
       ]);
 
-      const criticalPulseCount = pulseTasks.filter((t) => t.band === "CRITICAL").length;
+      const criticalPulseCount = criticalCount;
       const openRequestCount = clientRequests.length + consultantRequests.length + openTenders.length;
 
       const rows: { metric_key: string; value: number; captured_on: string; firm_id: string }[] = [
         { metric_key: "pulse_critical", value: criticalPulseCount, captured_on: today, firm_id: firm.id },
-        { metric_key: "pulse_blocked_tasks", value: blockedTasks.length, captured_on: today, firm_id: firm.id },
-        { metric_key: "pulse_open_gaps", value: missingParams.length, captured_on: today, firm_id: firm.id },
-        { metric_key: "pulse_low_confidence", value: lowConfidenceTasks.length, captured_on: today, firm_id: firm.id },
+        { metric_key: "pulse_blocked_tasks", value: blockedTasksCount, captured_on: today, firm_id: firm.id },
+        { metric_key: "pulse_open_gaps", value: openGapsCount, captured_on: today, firm_id: firm.id },
+        { metric_key: "pulse_low_confidence", value: lowConfidenceCount, captured_on: today, firm_id: firm.id },
         { metric_key: "finance_ready_to_bill", value: readyToBill.total, captured_on: today, firm_id: firm.id },
         { metric_key: "finance_awaiting_payment", value: awaitingPayment.total, captured_on: today, firm_id: firm.id },
         { metric_key: "team_absent_today", value: absences.length, captured_on: today, firm_id: firm.id },

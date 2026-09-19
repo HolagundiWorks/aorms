@@ -33,9 +33,13 @@ import { PRIORITY_BAND_LABEL, type PriorityBand } from "../../../lib/pulse/scori
 import { getTopPriorities } from "../../../lib/dashboard/priority";
 import {
   getTopPriorityTasks,
+  getCriticalTasksCount,
   getLowConfidenceTasks,
+  getLowConfidenceTasksCount,
   getBlockedTasks,
+  getBlockedTasksCount,
   getOpenMissingParams,
+  getOpenMissingParamsCount,
   getProjectsAtRiskCount,
 } from "../../../lib/pulse/queries";
 import {
@@ -192,8 +196,12 @@ export default async function PulsePage() {
     contractorSubmissions,
     lowConfidenceTasks,
     pulsePriorities,
+    criticalCount,
     blockedTasks,
+    blockedTasksCount,
     missingParams,
+    openGapsCount,
+    lowConfidenceCount,
     projectsAtRiskCount,
     unbilledRevisions,
     firmStudio,
@@ -241,8 +249,12 @@ export default async function PulsePage() {
     getOpenContractorSubmissions(supabase),
     getLowConfidenceTasks(supabase),
     getTopPriorityTasks(supabase),
+    getCriticalTasksCount(supabase),
     getBlockedTasks(supabase),
+    getBlockedTasksCount(supabase),
     getOpenMissingParams(supabase),
+    getOpenMissingParamsCount(supabase),
+    getLowConfidenceTasksCount(supabase),
     getProjectsAtRiskCount(supabase, today),
     getUnbilledRevisions(supabase),
     getFirmStudio(),
@@ -255,7 +267,7 @@ export default async function PulsePage() {
   // permissive-when-unlinked posture checkPlanCap already uses).
   const showFeeLeakage = !firmStudio || firmStudio.plan === "PROFESSIONAL" || firmStudio.plan === "ENTERPRISE";
   const openRequestCount = clientRequests.length + consultantRequests.length + openTenders.length;
-  const criticalPulseCount = pulsePriorities.filter((t) => t.band === "CRITICAL").length;
+  const criticalPulseCount = criticalCount;
 
   const absentStatus = countStatus(absences.length, 1, 2);
   const openRequestStatus = countStatus(openRequestCount, 1, 4);
@@ -619,9 +631,9 @@ export default async function PulsePage() {
   // showing a fabricated "0% change." See lib/pulse/kpi-trend.ts.
   const kpiTrends = await getKpiTrends(supabase, today, [
     { key: "pulse_critical", current: criticalPulseCount, higherIsBetter: false },
-    { key: "pulse_blocked_tasks", current: blockedTasks.length, higherIsBetter: false },
-    { key: "pulse_open_gaps", current: missingParams.length, higherIsBetter: false },
-    { key: "pulse_low_confidence", current: lowConfidenceTasks.length, higherIsBetter: false },
+    { key: "pulse_blocked_tasks", current: blockedTasksCount, higherIsBetter: false },
+    { key: "pulse_open_gaps", current: openGapsCount, higherIsBetter: false },
+    { key: "pulse_low_confidence", current: lowConfidenceCount, higherIsBetter: false },
     { key: "finance_ready_to_bill", current: readyToBill.total, higherIsBetter: true, isMoney: true },
     { key: "finance_awaiting_payment", current: awaitingPayment.total, higherIsBetter: false, isMoney: true },
     { key: "team_absent_today", current: absences.length, higherIsBetter: false },
@@ -643,9 +655,9 @@ export default async function PulsePage() {
         icon={WarningFilled}
         trend={kpiTrends.pulse_critical}
       />
-      <Kpi label="Blocked tasks" value={blockedTasks.length} icon={LockedAndBlocked} trend={kpiTrends.pulse_blocked_tasks} />
-      <Kpi label="Open gaps" value={missingParams.length} icon={Query} trend={kpiTrends.pulse_open_gaps} />
-      <Kpi label="Low confidence" value={lowConfidenceTasks.length} icon={ChartLineData} trend={kpiTrends.pulse_low_confidence} />
+      <Kpi label="Blocked tasks" value={blockedTasksCount} icon={LockedAndBlocked} trend={kpiTrends.pulse_blocked_tasks} />
+      <Kpi label="Open gaps" value={openGapsCount} icon={Query} trend={kpiTrends.pulse_open_gaps} />
+      <Kpi label="Low confidence" value={lowConfidenceCount} icon={ChartLineData} trend={kpiTrends.pulse_low_confidence} />
       <Kpi
         label="Projects at risk"
         value={projectsAtRiskCount}

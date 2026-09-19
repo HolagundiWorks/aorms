@@ -16,6 +16,20 @@ export type TopPriorityTask = {
   projectTitle: string | null;
 };
 
+/**
+ * Real total for the "Critical" KPI tile (2026-09-19 fix, same bug class
+ * as getOpenMissingParamsCount()/getBlockedTasksCount()/
+ * getLowConfidenceTasksCount() below — every one of these was found by
+ * cross-checking this exact page against the native Android app's own
+ * Dashboard for the same firm). `bandForScore()`'s CRITICAL cutoff is
+ * priority_score >= 70 — mirrored here as a real count rather than
+ * filtering getTopPriorityTasks()'s own capped-at-8 display list.
+ */
+export async function getCriticalTasksCount(supabase: SupabaseClient): Promise<number> {
+  const { count } = await supabase.from("tasks").select("id", { count: "exact", head: true }).neq("status", "DONE").gte("priority_score", 70);
+  return count ?? 0;
+}
+
 export async function getTopPriorityTasks(supabase: SupabaseClient, limit = 8): Promise<TopPriorityTask[]> {
   const { data } = await supabase
     .from("tasks")
@@ -55,6 +69,12 @@ export async function getLowConfidenceTasks(supabase: SupabaseClient, threshold 
   });
 }
 
+/** Real total for the "Low confidence" KPI tile — see getOpenMissingParamsCount()'s own comment for why this exists separately from the capped display list above. */
+export async function getLowConfidenceTasksCount(supabase: SupabaseClient, threshold = 60): Promise<number> {
+  const { count } = await supabase.from("tasks").select("id", { count: "exact", head: true }).neq("status", "DONE").lt("confidence_score", threshold);
+  return count ?? 0;
+}
+
 export type BlockedTaskRow = { dependencyId: string; taskId: string; taskTitle: string; dependsOnTitle: string };
 
 export async function getBlockedTasks(supabase: SupabaseClient, limit = 8): Promise<BlockedTaskRow[]> {
@@ -78,6 +98,12 @@ export async function getBlockedTasks(supabase: SupabaseClient, limit = 8): Prom
       dependsOnTitle: dependsOn?.title ?? "Untitled task",
     };
   });
+}
+
+/** Real total for the "Blocked tasks" KPI tile — see getOpenMissingParamsCount()'s own comment for why this exists separately from the capped display list above. */
+export async function getBlockedTasksCount(supabase: SupabaseClient): Promise<number> {
+  const { count } = await supabase.from("task_dependencies").select("id", { count: "exact", head: true }).eq("dependency_type", "BLOCKS").eq("status", "OPEN");
+  return count ?? 0;
 }
 
 /**
@@ -145,4 +171,20 @@ export async function getOpenMissingParams(supabase: SupabaseClient, limit = 12)
       description: p.description as string,
     };
   });
+}
+
+/**
+ * Real total, not the capped list length (2026-09-19 fix — found live via
+ * the native Android app's own Dashboard showing a genuinely different
+ * "Open gaps" number for the same firm: 117 vs. this page's 12). The "Open
+ * gaps" KPI tile below was using `missingParams.length` — the *display*
+ * list from getOpenMissingParams(), which has always defaulted to
+ * `limit = 12` — so any firm with more than 12 open gaps has always shown
+ * a silently wrong, capped-at-12 number on this tile. This is the fix:
+ * a real `count: "exact", head: true` query, independent of the display
+ * list's own limit.
+ */
+export async function getOpenMissingParamsCount(supabase: SupabaseClient): Promise<number> {
+  const { count } = await supabase.from("task_missing_params").select("id", { count: "exact", head: true }).eq("status", "OPEN");
+  return count ?? 0;
 }
