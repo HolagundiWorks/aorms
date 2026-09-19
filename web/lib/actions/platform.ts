@@ -98,6 +98,38 @@ export async function platformSignIn(
   redirect(await currentPortalHome());
 }
 
+/**
+ * Google sign-in (docs/esti/AORMS-V2-DEVELOPER-GUIDELINES.md § 5) —
+ * against aorms-platform's own Supabase Auth, not aorms-web's: the spec's
+ * flow lands in "AORMS User" then "Create / Join Practice," which is the
+ * Platform's job (Studio membership), not a single Office Hub deployment's.
+ * Reuses the existing PKCE callback (app/(platform)/platform-auth-
+ * callback/route.ts) unchanged — it already does a generic `code` exchange
+ * for any Supabase Auth flow (built for magic links/password reset, but
+ * `exchangeCodeForSession` is the exact same mechanism OAuth uses).
+ *
+ * Requires the Google provider enabled on aorms-platform's Auth config
+ * (external_google_enabled/client_id/secret via the Management API) and
+ * `https://qbgbnhthchhbammzeebg.supabase.co/auth/v1/callback` registered
+ * as an authorized redirect URI on the Google Cloud OAuth client — both
+ * one-time setup steps, not something this code does at runtime.
+ */
+export async function signInWithGoogle(): Promise<never> {
+  const supabase = await createPlatformClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aorms.in";
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: `${siteUrl}/platform-auth-callback` },
+  });
+
+  if (error || !data.url) {
+    redirect(`/platform-login?error=${encodeURIComponent("Google sign-in isn't available right now.")}`);
+  }
+
+  redirect(data.url);
+}
+
 export async function platformSignOut(): Promise<void> {
   const supabase = await createPlatformClient();
   await supabase.auth.signOut();

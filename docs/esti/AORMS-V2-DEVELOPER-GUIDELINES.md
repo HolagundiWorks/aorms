@@ -411,7 +411,7 @@ keep database access provider-independent.
 
 ## 33. Definition of done for V2 architecture
 
-- [ ] Google sign-in works
+- [ ] Google sign-in works *(code built and verified end-to-end against the real Supabase Auth endpoint — see LIGHTWEIGHT-ARCHITECTURE-PLAN.md's Google Sign-In section; blocked on one config toggle only the account owner can approve)*
 - [ ] Drive connects during onboarding
 - [ ] Practice can be created in one setup
 - [ ] Existing Drive folders can be mapped
