@@ -215,6 +215,20 @@ endpoint is destructive (see below) and there's no live feature yet that
 would need them in production, since local dev/`.env` already covers
 what's been tested.
 
+**Relocated 2026-09-20, same day, per explicit correction**: everything
+above describing `drive_connections` as firm_id-keyed on aorms-web is
+now historical, not current — the connection itself moved to
+aorms-platform, studio_id-keyed (`platform/supabase/migrations/
+0039_drive_connector.sql`), and the "Connect Google Drive" UI moved from
+`/firm-settings` to `/studios/[studioId]`. `documents` (file metadata)
+stayed on aorms-web unchanged — it's genuinely project-scoped business
+data, unlike the connection credential. Full reasoning and the pattern
+this now follows: [AORMS-V2-DEVELOPER-GUIDELINES.md](AORMS-V2-DEVELOPER-GUIDELINES.md)'s
+new § Connector configuration lives on the Platform. See also
+ROADMAP.md's dated 2026-09-20 entry for the WhatsApp connector, which got
+the identical correction (and the `ai_model_connectors` migration bug
+fix that finally made the already-built AI-connector admin page work).
+
 ## Desktop Agent (phase 8 — still blocked)
 
 A new, separate codebase (not a `web/` addition) — a local Windows/Mac

@@ -412,7 +412,7 @@ keep database access provider-independent.
 ## 33. Definition of done for V2 architecture
 
 - [ ] Google sign-in works *(code + Supabase config both live and verified on production — see LIGHTWEIGHT-ARCHITECTURE-PLAN.md's Google Sign-In section; one Google Cloud Console step — the redirect URI — left, only the account owner can add it)*
-- [ ] Drive connects during onboarding *(UI live on `/firm-settings` — see LIGHTWEIGHT-ARCHITECTURE-PLAN.md's Google Drive section; button itself not click-tested live, no VIEWER-role test account can reach it, but reuses the exact pattern already proven in production for Google Sign-In)*
+- [ ] Drive connects during onboarding *(UI live on `/studios/[studioId]` (AORMS Platform, not `/firm-settings` — relocated 2026-09-20, see § Connector configuration lives on the Platform below); button itself not click-tested live, no OWNER-role test account can reach it, but reuses the exact pattern already proven in production for Google Sign-In)*
 - [ ] Practice can be created in one setup
 - [ ] Existing Drive folders can be mapped
 - [x] Supabase remains default DB
@@ -434,6 +434,47 @@ keep database access provider-independent.
 Checkboxes reflect this repo's actual state as of 2026-09-20 — updated as
 each phase in LIGHTWEIGHT-ARCHITECTURE-PLAN.md lands and is live-verified,
 not marked done speculatively.
+
+## Connector configuration lives on the Platform, not the Office Hub
+
+**Explicit correction, 2026-09-20**: WhatsApp connections, the Google
+Drive connection (the credential itself, not the `documents` file
+metadata it feeds), AI model connectors, and the database connector
+(`tenant_databases`, unaffected — already correct) all live on
+**aorms-platform**, keyed by `studio_id`, not on **aorms-web**, keyed by
+`firm_id`. This reverses this spec's own original placement for Drive
+and WhatsApp (both originally built firm_id-keyed on aorms-web, then
+relocated same-day once caught) — the reasoning: a connector credential
+is portable identity-platform infrastructure a Studio owns once, not
+Office Hub business data scoped to one deployment's session. `firm_id`
+stays correct for genuine business data (`documents`, `events`,
+`workflow_definitions`, etc. — see § Reconciling below); it was only ever
+wrong for the connector credential tables themselves.
+
+Established pattern for a new connector table, matching
+`tenant_databases` (`platform/supabase/migrations/0034`),
+`whatsapp_connections` (`0038`), and `drive_connections` (`0039`):
+- Table + secret columns on **aorms-platform**, `studio_id not null
+  references public.studios(id)`.
+- RLS: `is_studio_owner(studio_id) or is_platform_admin()` for both read
+  and write — never `has_capability()`/`current_firm_id()`, which are
+  aorms-web-only concepts.
+- A `security definer` `store_*_connection()` RPC that re-checks
+  `is_studio_owner()`/`is_platform_admin()` internally (defense in depth,
+  not just the RLS policy) and writes the secret via `vault.create_secret()`.
+- A `get_*_token()`/`get_*_secret()` reader, `service_role`-only —
+  never even the studio owner reads the decrypted secret back directly.
+- Any write path reached from an **Office Hub** page (not a Platform
+  page) must go through the Platform's service-role client with the
+  Office Hub's own RLS/capability check performed first — the two
+  projects have separate Supabase Auth, so `auth.uid()`-based Platform
+  RLS doesn't see an Office Hub session at all. Prefer routing the actual
+  UI onto a Platform-authenticated page (`/studios/[studioId]`) instead,
+  as Drive's OAuth flow does, rather than bridging sessions.
+- `revoke execute on function ... from public, anon, authenticated;` on
+  every new function immediately, including trigger functions — the
+  PUBLIC-execute grant gap (§ elsewhere in ROADMAP.md's dated entries)
+  applies on aorms-platform exactly as it does on aorms-web.
 
 ## Reconciling this spec with the existing codebase
 

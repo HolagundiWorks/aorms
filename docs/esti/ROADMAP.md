@@ -5350,6 +5350,89 @@ original demo-firm membership switchable via `/select-studio`.
 
 Six commits, all `tsc --noEmit`/`eslint` clean, pushed to `main`.
 
+### SITE_SUPERVISOR RLS gap, `ai_model_connectors`' broken FK, and the Drive/WhatsApp connector relocation (2026-09-20)
+
+Three fixes triggered by a direct question ("are the user hierarchy roles
+implemented for Studio/firm Principal Architect/Senior Architect/Jr
+Architect-Intern/Engineer/Site Supervisor/Accountant/HR, based on
+roles?") and a prior explicit correction ("WhatsApp/Drive/AI-agent
+connection, DB connection should live on the identity platform, not the
+AORMS hub").
+
+**`SITE_SUPERVISOR` RLS gap (fixed, `web/supabase/migrations/0078`).**
+The role has a live `app_role` enum value and a `ROLE_LABEL` entry, but
+was missing from `is_office_staff()`'s allowed-role list — since nearly
+every RLS policy on aorms-web's ~90 tables gates staff read/write through
+that one function, a Site Supervisor account was excluded from virtually
+all staff data access, not just UI rank checks. Also missing from
+`web/lib/auth/rank.ts`'s `ROLE_RANK` (added at 40, matching `ASSOCIATE`'s
+tier). `has_capability()` already had a correct, separate
+`SITE_SUPERVISOR` branch (`site_portal` capability only) — untouched, it
+was never part of the bug. Verified live in a rolled-back transaction: a
+simulated `SITE_SUPERVISOR` session now passes `is_office_staff()` and
+sees real task rows. Answered the user's actual question directly:
+Senior Architect/Accountant/HR exist and map correctly; Principal
+Architect, a distinct Jr Architect/Intern tier, and Engineer do not exist
+as separate roles (flagged, not invented — needs the user's own
+direction on the exact hierarchy wanted, not a unilateral schema
+addition).
+
+**`ai_model_connectors` never successfully applied (fixed, `platform/
+supabase/migrations/0020`, rewritten in place).** The already-designed,
+already-coded (`app/(platform)/admin/ai-connectors/page.tsx`, shipped
+2026-09-13) generic AI connector registry had never actually existed on
+the live `aorms-platform` database — its `company_id references
+public.companies(id)` FK was broken, since `public.companies` doesn't
+exist there (renamed to `public.studios` back in `0006`; a *different*
+`connectdex.companies` — material suppliers — exists under a different
+schema and was never the intended target, despite the coincidental
+name). The broken FK failed the whole migration transaction every time
+it was applied, so this admin page has been broken in production since
+it shipped. Rewritten in place (never having gone live, there was no
+data or applied-elsewhere history to reconcile) with `studio_id
+references public.studios(id)` and `scope_type 'studio'` in place of
+`'company'`, matching this codebase's actual Studio terminology.
+`page.tsx` had a second, independent bug from the same name collision —
+its grant-label lookup queried `connectdex.companies` (material
+suppliers) instead of `public.studios` for "company"-scoped grants,
+which would have shown the wrong labels entirely even once the FK was
+fixed. Applied live and verified with a real insert/grant/cleanup round
+trip. This directly satisfies "AI agent connection should live on the
+identity platform" — it already did, by design, once the FK bug was
+fixed; no new system needed building.
+
+**Drive and WhatsApp connectors relocated to aorms-platform** (see the
+new § Connector configuration lives on the Platform in
+[AORMS-V2-DEVELOPER-GUIDELINES.md](AORMS-V2-DEVELOPER-GUIDELINES.md) for
+the full reasoning and the pattern future connectors should follow).
+Short version: both had been built firm_id-keyed on aorms-web
+(`EVENTS-AND-CONNECTOR-MODES.md`'s WhatsApp section, the Google Drive
+document layer) before the correction landed mid-session. WhatsApp
+(`web/supabase/migrations/0077`) had been applied live and verified but
+never committed to git — dropped from aorms-web outright (confirmed
+empty) and rebuilt clean as `platform/supabase/migrations/0038`. Drive
+(`web/supabase/migrations/0073`–`0075`, **already committed and
+deployed**, with a live UI on `/firm-settings`) needed a real rework, not
+just a schema move: the OAuth flow (`lib/actions/drive.ts`, `lib/drive/
+oauth.ts`, the callback route) now runs against the AORMS Platform
+session instead of the Office Hub session, state carries
+`studioId`/`accountId` instead of `firmId`/`userId`, and the "Connect
+Google Drive" action moved to a new Connections section on
+`/studios/[studioId]` (owner-gated); `/firm-settings` now shows a
+read-only status mirror linking there, same pattern as its existing
+"AORMS Platform Studio" section. `public.documents` (file metadata: which
+project, revision, type) stayed on aorms-web unchanged — deliberately,
+it's genuinely project-scoped business data, unlike the connection
+credential. `drive_connections` had zero rows (shipped same day, no real
+user had connected yet) — dropped via `web/supabase/migrations/0079`, no
+data migration needed. Both new platform migrations (`0038`/`0039`)
+verified live with real insert/grant/cleanup round trips, including
+catching and closing the same PUBLIC-execute grant gap this session has
+hit repeatedly (`0037`/web `0072`/`0074`) on each new trigger function.
+
+Four commits (`2724bea5`, `d8b87aac`, `4e2ad3c7`, `d431e019`), all `tsc
+--noEmit`/`eslint` clean, pushed to `main`.
+
 ---
 
 ## Support & questions
