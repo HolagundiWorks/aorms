@@ -139,10 +139,16 @@ Hub data reset nightly via `pg_cron`).
   migrated, and RLS-verified against a real signed-up account, but no
   actual test-mode payment has been run end-to-end yet (needs Razorpay
   test keys).
-- **Demo account seed data** — `reset_demo_data()` is live and verified
-  to run safely, but the demo login itself (`demo@aorms.in`, role
-  `VIEWER`) needs to be created via `/users` before the seeded data or
-  the public demo CTA can be verified end-to-end.
+- ~~Demo account seed data~~ **Resolved, confirmed 2026-09-20**: the
+  `demo@aorms.in` (VIEWER) login already exists live, with real seeded
+  data (24 clients, 16 projects, 60 tasks, 8 invoices) — this is the
+  same account used throughout this session's own Android device
+  testing. **Still genuinely open**: no public "Try the demo" CTA exists
+  anywhere on the landing page or `/login` — a visitor who wants to
+  explore the product has to already know the credentials. That's a
+  real product/UX decision (one-click sign-in as a shared account has
+  its own abuse-surface considerations) worth the user's own call before
+  building it, not assumed here.
 - **Landing page product screenshots** — flagged in a review pass
   (2026-09-10) as the single highest-impact remaining gap: the page is
   entirely text/tiles, no screenshot of the actual product anywhere.
@@ -155,23 +161,42 @@ Hub data reset nightly via `pg_cron`).
 - **No readiness/dependency health check** — `/api/health` is a pure
   liveness check only; nothing yet distinguishes "process is up" from
   "Supabase is reachable."
-- **Old VPS stack decommission status unconfirmed** — `web/` is
-  confirmed live at `aorms.in`; whether the old `frontend`/`backend`/
-  PostgreSQL VPS deployment was formally torn down, or is still running
-  unreferenced, was not checked as part of the cutover.
+- ~~Old VPS stack decommission status unconfirmed~~ **Resolved
+  2026-09-20**: checked Hostinger directly rather than assuming.
+  `VPS_getVirtualMachinesV1` shows exactly one VM
+  (`srv1742242.hstgr.cloud`, KVM 2, the old `frontend`/`backend`/
+  PostgreSQL host) and its state is `suspended`, not running.
+  `billing_getSubscriptionListV1` confirms the matching `KVM 2`
+  subscription (same `subscription_id`) is `cancelled`, expired
+  2026-08-30 — no active billing, nothing orphaned. Nothing further to
+  do: it's already decommissioned in every way that matters (not
+  running, not costing money); the VM record itself is just Hostinger's
+  normal post-cancellation retention, not something worth deleting
+  without a reason to.
 - **Full authenticated Office Hub flow not re-verified in production** —
   the cutover verification covered routing, headers, and the public
   surface; a real signed-in session against production Supabase data
   hasn't been walked through since.
-- **Carbon Design System migration (Wave 3+)** — last known state
-  (2026-09-04, from the now-retired `ROADMAP-LOCAL.md`) was "Wave 3
-  kick-off, 8 tranches." Not reverified since; status here is genuinely
-  uncertain, not asserted done or newly stale.
-- **Old-stack Phase 4 cleanup** (installer env vars, Tauri dependencies,
-  allied-app API endpoints/contracts) — tracked as unchecked in the
-  now-retired `ROADMAP-LOCAL.md`; given how much of the old stack has
-  been frozen/removed since, some of these may already be moot — not
-  reverified, flagged rather than assumed either way.
+- ~~Carbon Design System migration (Wave 3+)~~ **Moot as of 2026-09-20,
+  not because it finished — because what it was migrating isn't live
+  anymore.** The 8-tranche Wave 3 plan was for `frontend/` (the old
+  React SPA + tRPC/Fastify stack) — it still has 216 files importing
+  `@mui/material`/`@hcw/ui-kit` today, genuinely unmigrated. But
+  `frontend`/`backend` aren't deployed anywhere: `backend`'s Postgres/
+  Drizzle dependencies were removed entirely (this file's own Dev/verify
+  loop section, 2026-09-05) and this session confirmed the VPS that used
+  to host them (`srv1742242.hstgr.cloud`) has its subscription cancelled
+  and expired (see the VPS decommission entry above). `web/` — the
+  actual live product at aorms.in — was built pure `@carbon/react` from
+  day one and has zero MUI/kit imports (`grep -n "@mui\|@hcw" web/
+  package.json` — no matches). Finishing frontend/'s Carbon migration
+  would be real work spent on a codebase nothing serves traffic from;
+  not worth tracking as an open item unless `frontend/` is ever revived.
+- ~~Old-stack Phase 4 cleanup~~ (installer env vars, Tauri dependencies,
+  allied-app API endpoints/contracts) — same reasoning as the Carbon
+  entry above: this was cleanup work for `frontend`/`backend`, which
+  aren't deployed. Not worth reverifying file-by-file for a codebase
+  nothing serves traffic from.
 
 ### Q1 2027+ (forward-looking, unchanged from prior roadmap)
 
