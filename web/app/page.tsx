@@ -20,19 +20,21 @@ import { MotionReveal } from "../components/aorms/motion/MotionReveal";
 import { MotionEnter } from "../components/aorms/motion/MotionEnter";
 import {
   AORMS_PLATFORM,
+  AUTOMATION_SECTION,
   CONNECTDEX,
+  CONTROL_SECTION,
   DEMO,
   ESTI_SECTION,
   FAQ,
   FEE_RECOVERY,
   HUMAN_CENTRIC_WORKS,
+  OLD_WAY,
   OPERATIONAL_LEAKAGE,
   PRICING,
   PROBLEM,
   PROJECT_RECORD,
   PULSE_SECTION,
   REVISION_MANAGEMENT,
-  TRUST_CARDS,
   VALUE_CARDS,
 } from "../lib/marketing-content";
 
@@ -165,7 +167,7 @@ export default async function LandingPage() {
               <MotionEnter step={3}>
                 <HeroCtas />
                 <p className="cds--type-caption-01" style={{ marginTop: "1rem", color: "var(--cds-text-secondary)" }}>
-                  No installation · Browser-based · Built for architecture practices
+                  No credit card required · Browser-based · Built for architecture practices
                 </p>
               </MotionEnter>
             </Column>
@@ -259,6 +261,38 @@ export default async function LandingPage() {
                   </span>
                 ))}
               </div>
+            </Column>
+          </Grid>
+          </MotionReveal>
+        </section>
+
+        {/* Old way / new way — landing page V2 fragmentation visual.
+            Shows the scatter of tools a practice actually juggles, then
+            names AORMS as the one layer connecting them, without
+            attacking any named competitor. */}
+        <section id="old-way" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
+          <Grid>
+            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
+              <h2 className="cds--type-heading-05">Run your architecture practice without running it through WhatsApp, Excel, and memory.</h2>
+            </Column>
+            <Column sm={4} md={8} lg={16}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center" }}>
+                {OLD_WAY.tools.map((tool) => (
+                  <Tag key={tool} type="cool-gray" size="md">
+                    {tool}
+                  </Tag>
+                ))}
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", margin: "1.5rem 0" }}>
+                <ArrowRight size={20} style={{ color: "var(--cds-icon-secondary)", transform: "rotate(90deg)" }} />
+              </div>
+              <Tile style={{ textAlign: "center", maxWidth: 480, margin: "0 auto", borderLeft: "3px solid var(--cds-support-info)" }}>
+                <p className="cds--type-productive-heading-03">{AORMS_PLATFORM.name}</p>
+                <p className="cds--type-body-01" style={{ marginTop: "0.375rem", color: "var(--cds-text-secondary)" }}>
+                  {OLD_WAY.resolution}
+                </p>
+              </Tile>
             </Column>
           </Grid>
           </MotionReveal>
@@ -475,6 +509,50 @@ export default async function LandingPage() {
           </MotionReveal>
         </section>
 
+        {/* Automation — landing page V2, real product flows (Minutes of
+            Meeting → decisions → tasks; drawing → client portal →
+            approval → project record), not the brief's own WhatsApp
+            worked example (no such integration exists — see
+            AUTOMATION_SECTION's header comment in marketing-content.ts). */}
+        <section id="automation" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+          <MotionReveal>
+          <Grid>
+            <Column sm={4} md={8} lg={10}>
+              <p
+                className="cds--type-productive-heading-01"
+                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
+              >
+                {AUTOMATION_SECTION.eyebrow}
+              </p>
+              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
+                {AUTOMATION_SECTION.title}
+              </h2>
+              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
+                {AUTOMATION_SECTION.body}
+              </p>
+            </Column>
+            {AUTOMATION_SECTION.flows.map((flow, i) => (
+              <Column key={i} sm={4} md={4} lg={8} style={{ marginTop: "2rem" }}>
+                <Tile style={{ height: "100%" }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.5rem" }}>
+                    {flow.steps.map((step, j) => (
+                      <div key={step} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
+                        <Tag type="blue" size="md">
+                          {step}
+                        </Tag>
+                        {j < flow.steps.length - 1 && (
+                          <ArrowRight size={14} style={{ color: "var(--cds-icon-secondary)", transform: "rotate(90deg)", margin: "0.25rem 0 0.25rem 0.75rem" }} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </Tile>
+              </Column>
+            ))}
+          </Grid>
+          </MotionReveal>
+        </section>
+
         {/* 8. ESTI (spec §12). id added (UI/UX audit fix, 2026-09-14) —
             the footer's own "ESTI" link had nowhere to point (`href="#"`,
             a dead link) until this existed. */}
@@ -537,18 +615,41 @@ export default async function LandingPage() {
           </MotionReveal>
         </section>
 
-        {/* 11. Trust (spec §15). id added (UI/UX audit fix, 2026-09-14) —
-            see Fee Recovery above. */}
-        <section id="trust" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
+        {/* 11. Control & ownership (spec §9's "Privacy section" — landing
+            page V2). Reframed honest, per-row status (2026-09-20): the
+            brief pitches BYO Drive/AI as live differentiators, but Drive
+            is blocked on an OAuth app that doesn't exist and the AI
+            provider abstraction isn't wired into any live call site yet
+            — see CONTROL_SECTION's header comment in
+            marketing-content.ts. Only "Data" and "Dedicated database"
+            are marked Live/Available; Drive and BYO AI are marked
+            "Coming soon" rather than claimed as present-tense features. */}
+        <section id="control" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
           <MotionReveal>
           <Grid>
-            <Column sm={4} md={8} lg={16} style={{ marginBottom: "1.5rem" }}>
-              <h2 className="cds--type-heading-05">Your practice data stays yours.</h2>
+            <Column sm={4} md={8} lg={10} style={{ marginBottom: "1.5rem" }}>
+              <p
+                className="cds--type-productive-heading-01"
+                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
+              >
+                {CONTROL_SECTION.eyebrow}
+              </p>
+              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
+                {CONTROL_SECTION.title}
+              </h2>
+              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
+                {CONTROL_SECTION.body}
+              </p>
             </Column>
-            {TRUST_CARDS.map((card) => (
+            {CONTROL_SECTION.rows.map((card) => (
               <Column key={card.title} sm={4} md={4} lg={4} style={{ marginBottom: "1rem" }}>
                 <Tile style={{ height: "100%" }}>
-                  <p className="cds--type-productive-heading-02">{card.title}</p>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <p className="cds--type-productive-heading-02">{card.title}</p>
+                    <Tag type={card.status === "Live" || card.status === "Available" ? "green" : "cool-gray"} size="sm">
+                      {card.status}
+                    </Tag>
+                  </div>
                   <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
                     {card.body}
                   </p>
@@ -817,8 +918,14 @@ export default async function LandingPage() {
                 <Link href="#revision-management" className="cds--link">
                   Revisions
                 </Link>
+                <Link href="#automation" className="cds--link">
+                  Automation
+                </Link>
                 <Link href="#esti" className="cds--link">
                   ESTI
+                </Link>
+                <Link href="#control" className="cds--link">
+                  Privacy
                 </Link>
               </nav>
             </Column>

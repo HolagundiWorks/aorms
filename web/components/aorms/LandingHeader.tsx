@@ -74,8 +74,11 @@ export function LandingHeader() {
           <Link href="#project-record" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             Solutions
           </Link>
-          <Link href="#pulse" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
+          <Link href="#automation" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             How It Works
+          </Link>
+          <Link href="#control" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
+            Privacy
           </Link>
           <Link href="#roi" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             ROI

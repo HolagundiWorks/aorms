@@ -26,11 +26,11 @@
 
 export const AORMS_PLATFORM = {
   name: "AORMS",
-  expansion: "Architecture Practice Operating System",
+  expansion: "The Operating System for Architecture Practices",
   tagline: "Run the practice. Don't chase the practice.",
-  heroHeadline: "Run the practice.\nDon't chase the practice.",
+  heroHeadline: "Your architecture practice,\nunder control.",
   heroSupport:
-    "AORMS connects projects, fees, revisions, approvals, tasks, documents, and people into one operating system built specifically for architecture practices — not adapted from generic project software.",
+    "AORMS connects projects, tasks, meetings, documents, approvals, and fees into one operating system — so you stop running your practice through WhatsApp, Excel, and memory.",
   /**
    * SEO meta description (kept under ~160 chars for the SERP snippet —
    * see the on-page heroSupport above for the longer version shown in
@@ -118,6 +118,40 @@ export const PROBLEM = {
     title: "AORMS",
     lines: ["One practice", "One operating record", "One source of truth"],
   },
+} as const;
+
+/**
+ * "The old way" fragmentation visual — landing page V2 (2026-09-20
+ * positioning brief): show the scatter before naming the fix, rather
+ * than attacking named competitors. Deliberately just tool names, no
+ * claim about what AORMS replaces each one with (that's PROBLEM.with,
+ * directly above where this renders).
+ */
+export const OLD_WAY = {
+  tools: ["Google Drive", "Excel", "WhatsApp", "Email", "AutoCAD", "Tally", "Meetings", "Personal notes"],
+  resolution: "One operational layer connecting them all.",
+} as const;
+
+/**
+ * Automation section — landing page V2. Both chains describe flows the
+ * product genuinely runs today: `moms` (Minutes of Meeting) → tagged
+ * revisions/decisions → `tasks` with assignments is real (see
+ * REVISION_MANAGEMENT's "tagged in the meeting" stage above); drawings →
+ * client portal approval → project record update is real (Portal.tsx +
+ * `documents`/decisions). The V2 brief's own worked example routed the
+ * second chain through WhatsApp specifically — cut, since no WhatsApp
+ * integration exists in this codebase (see LIGHTWEIGHT-ARCHITECTURE-
+ * PLAN.md; no code anywhere in web/ references it). The client portal is
+ * the real channel that exists today.
+ */
+export const AUTOMATION_SECTION = {
+  eyebrow: "Automation",
+  title: "Let the practice run the routine work.",
+  body: "The steps that used to mean chasing five people happen automatically, in order, on the record.",
+  flows: [
+    { steps: ["Meeting completed", "Minutes", "Decisions", "Tasks", "Assignments", "Reminders"] },
+    { steps: ["Drawing submitted", "Client portal", "Approval", "Project updated"] },
+  ],
 } as const;
 
 /**
@@ -261,7 +295,7 @@ export const PROJECT_RECORD = {
  * general-purpose conversational AI. */
 export const ESTI_SECTION = {
   eyebrow: "ESTI",
-  title: "Ask your practice.\nNot the internet.",
+  title: "Meet ESTI — the intelligence layer for your practice.",
   body: "ESTI answers from your own studio's records — task priorities, project status, and what's on file for a project — grounded in your data, not the open internet.",
   exampleQuestions: [
     "What's the highest-priority task on Sharma Residence right now?",
@@ -270,14 +304,49 @@ export const ESTI_SECTION = {
   ],
 } as const;
 
-/** Trust section (spec §15) — four cards, only claims already true
- * elsewhere on this page. */
-export const TRUST_CARDS = [
-  { title: "Data", body: "Your practice records stay under your own account, hosted in Mumbai (AWS ap-south-1)." },
-  { title: "AI", body: "ESTI answers from your own studio's data — not trained on it, not shared with a third party." },
-  { title: "Billing", body: "No per-token AI billing — AI is included in every paid plan, not metered separately." },
-  { title: "Access", body: "Role-based access for your practice, enforced at the database level, not just the screen." },
-] as const;
+/**
+ * Control & ownership section — landing page V2's "Privacy" section,
+ * reframed to stay honest about what's live vs. planned per
+ * docs/esti/LIGHTWEIGHT-ARCHITECTURE-PLAN.md (2026-09-20 phase table).
+ * The V2 brief pitches "your Drive, your database, your AI" as a
+ * present-tense differentiator; only the "own database" row is actually
+ * live today (Mode B tenant provisioning). Google Drive's OAuth
+ * connector + metadata schema shipped 2026-09-20 (phase 7), but no
+ * onboarding UI calls it yet — still "Coming soon" here until a user can
+ * actually click something. Same reasoning for AI: the provider
+ * abstraction is built but not wired into any live call site — ESTI in
+ * production is self-hosted Ollama, not bring-your-own-AI yet. Each row
+ * below is marked with its real status so this section can't drift into
+ * a claim the product doesn't back yet — update a row only when a user
+ * can actually do the thing it claims, not when the backend lands.
+ */
+export const CONTROL_SECTION = {
+  eyebrow: "Control & ownership",
+  title: "Your data doesn't have to live with us.",
+  body: "AORMS is built around structured practice data staying under your own account, with document storage and AI infrastructure moving toward the same principle — not a closed system that locks your records in.",
+  rows: [
+    {
+      title: "Data",
+      status: "Live",
+      body: "Your practice records stay under your own account, hosted in Mumbai (AWS ap-south-1), row-level secured per practice.",
+    },
+    {
+      title: "Dedicated database",
+      status: "Available",
+      body: "Practices that need full data isolation can provision their own dedicated project instead of the shared workspace.",
+    },
+    {
+      title: "Your Google Drive",
+      status: "Coming soon",
+      body: "Documents will live in your own Drive — AORMS stores the structured record (project, revision, status), not the file bytes.",
+    },
+    {
+      title: "Bring your own AI",
+      status: "Coming soon",
+      body: "ESTI runs on a self-hosted model today. Connecting your own AI provider instead is on the roadmap, not yet available.",
+    },
+  ],
+} as const;
 
 /**
  * Pricing (spec §17-20, §25) — real restructure (platform migration
@@ -311,7 +380,7 @@ export const PRICING = {
     ],
   },
   professional: {
-    name: "Professional",
+    name: "Practice",
     tagline: "For growing practices",
     includes: [
       "Up to 25 team members",
@@ -325,7 +394,7 @@ export const PRICING = {
     ],
   },
   enterprise: {
-    name: "Enterprise",
+    name: "Private",
     tagline: "For larger practices",
     includes: [
       "25+ team members",
@@ -442,12 +511,12 @@ export const FAQ = [
   {
     question: "Is there a genuinely free plan?",
     answer:
-      "Yes — Free is a real, permanent plan (1 team member, 2 active projects), not a countdown trial. Upgrade to Studio or Professional in-app whenever you outgrow it; nothing is time-boxed or auto-charged.",
+      "Yes — Free is a real, permanent plan (1 team member, 2 active projects), not a countdown trial. Upgrade to Studio or Practice in-app whenever you outgrow it; nothing is time-boxed or auto-charged.",
   },
   {
     question: "How is AORMS priced?",
     answer:
-      "Per practice, not per person — Studio and Professional are flat annual fees covering the whole team up to that plan's member cap, not a per-seat tax. AI is included; there's no separate per-token billing.",
+      "Per practice, not per person — Studio and Practice are flat annual fees covering the whole team up to that plan's member cap, not a per-seat tax. AI is included; there's no separate per-token billing.",
   },
   {
     question: "Can we bring in our existing client and project data?",
