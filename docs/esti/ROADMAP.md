@@ -98,6 +98,15 @@ Hub data reset nightly via `pg_cron`).
 
 ## Open items — honest, not yet done
 
+- **Lightweight architecture master plan (2026-09-20)** — tracks the full
+  direction (events, workflow engine, AI provider abstraction, Google
+  Drive, Desktop Agent, RAG, CAD automation) phase by phase, with an
+  honest done/stubbed/blocked read on each:
+  [LIGHTWEIGHT-ARCHITECTURE-PLAN.md](LIGHTWEIGHT-ARCHITECTURE-PLAN.md).
+  Real blockers needing a decision: Google OAuth app credentials (Drive),
+  Desktop Agent distribution/signing decisions, Hostinger deploy
+  connector not yet authorized in-session, Supabase org still free-plan
+  (2-project cap).
 - **Events system + connector modes (2026-09-20)** — first slice of a
   deliberately lightweight event/workflow architecture (plain Postgres
   table, not Kafka/Redis — the explicit direction at this scale). Live
