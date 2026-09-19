@@ -42,10 +42,13 @@ read):**
 1. **Triggers on business tables** — read `firm_id` straight off `NEW`,
    so they fire correctly whether the write came from a live session or a
    service-role job (e.g. the nightly demo-data reset), matching
-   `next_ref()`'s own `NEW`-firm_id handling. Wired on 4 events so far:
+   `next_ref()`'s own `NEW`-firm_id handling. Wired on 6 events:
    `task.created`, `task.completed` (guarded so a no-op update — status
    already `DONE` — doesn't re-fire), `document.uploaded` (on
-   `drawings`), `project.created` (on `project_offices`).
+   `drawings`), `project.created` (on `project_offices`),
+   `snag.created`, `site_instruction.created` (added 2026-09-20, once the
+   workflow engine existed as a real consumer — a deliberately later
+   addition than the first 4, not an oversight).
 2. **`emit_event(event_type, entity_type, entity_id, payload)`** — a
    security-definer RPC for future Server Actions that need to emit an
    event outside a table write (workflow completions, Esti tool calls).
