@@ -12,16 +12,21 @@ import { buildAuthUrl, encodeState } from "../drive/oauth";
  * firm/user to tie back to on the callback without trusting anything the
  * client could tamper with in between (the callback re-derives nothing
  * from client input except this state and the code Google itself issues).
+ *
+ * Always redirects (never returns) so it can be used directly as a plain
+ * `<form action={startDriveConnection}>` — matches signInWithGoogle()'s
+ * shape. Failure redirects back to /firm-settings with drive_error,
+ * mirroring the OAuth callback route's own error handling.
  */
-export async function startDriveConnection(): Promise<{ error: string } | never> {
+export async function startDriveConnection(): Promise<never> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: "Sign in first." };
+  if (!user) redirect("/firm-settings?drive_error=" + encodeURIComponent("Sign in first."));
 
   const { data: profile } = await supabase.from("profiles").select("firm_id, role").eq("id", user.id).maybeSingle();
-  if (!profile?.firm_id) return { error: "No firm in context." };
+  if (!profile?.firm_id) redirect("/firm-settings?drive_error=" + encodeURIComponent("No firm in context."));
 
   const state = encodeState({ firmId: profile.firm_id, userId: user.id, nonce: crypto.randomUUID() });
   redirect(buildAuthUrl(state));

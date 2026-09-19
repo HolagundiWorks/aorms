@@ -18,6 +18,7 @@ import { RemoveLineItemButton } from "../../../components/aorms/RemoveLineItemBu
 import { removeNumberingPatternRecord } from "../../../lib/actions/numbering";
 import { LinkFirmStudioForm } from "../../../components/aorms/platform/LinkFirmStudioForm";
 import { getFirmStudio } from "../../../lib/platform/firm-studio";
+import { ConnectDriveButton } from "../../../components/aorms/ConnectDriveButton";
 
 /**
  * Firm Settings — the caller's own `firms` row (one per Studio as of
@@ -36,13 +37,18 @@ import { getFirmStudio } from "../../../lib/platform/firm-studio";
  * directly from this table — no schema change, no sync back from the
  * Identity portal in this pass (a disclosed limitation, not an oversight).
  */
-export default async function FirmSettingsPage() {
+export default async function FirmSettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ drive_connected?: string; drive_error?: string }>;
+}) {
+  const sp = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: firm, error }, { data: myProfile }, { data: patterns, error: patternsError }] = await Promise.all([
+  const [{ data: firm, error }, { data: myProfile }, { data: patterns, error: patternsError }, { data: driveConnection }] = await Promise.all([
     supabase
       .from("firms")
       .select(
@@ -52,6 +58,7 @@ export default async function FirmSettingsPage() {
       .maybeSingle(),
     user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
     supabase.from("numbering_patterns").select("id, scope, prefix, padding").order("scope"),
+    supabase.from("drive_connections").select("google_account_email, status").maybeSingle(),
   ]);
 
   const isOwner = myProfile?.role === "OWNER";
@@ -117,6 +124,53 @@ export default async function FirmSettingsPage() {
           ) : (
             <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
               Not linked to a Studio yet — only the firm owner or a partner can link one.
+            </p>
+          )}
+        </div>
+
+        {/* Google Drive (docs/esti/AORMS-V2-DEVELOPER-GUIDELINES.md § 6-7,
+            2026-09-20) — document storage stays in the firm's own Drive;
+            AORMS only stores the connection + file metadata (documents
+            table). Same OWNER/PARTNER gate as Platform Studio linking
+            above, since this changes where the firm's documents live. */}
+        <div style={{ marginTop: "3rem" }}>
+          <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
+            Google Drive
+          </h2>
+          <p className="cds--type-body-01" style={{ marginBottom: "1rem", color: "var(--cds-text-secondary)" }}>
+            Documents live in your own Drive — AORMS stores the connection and each file&apos;s project, revision,
+            and status, never the file bytes.
+          </p>
+
+          {sp.drive_connected === "true" && (
+            <InlineNotification
+              kind="success"
+              title="Google Drive connected"
+              hideCloseButton
+              lowContrast
+              style={{ marginBottom: "1rem" }}
+            />
+          )}
+          {sp.drive_error && (
+            <InlineNotification
+              kind="error"
+              title="Couldn't connect Google Drive"
+              subtitle={sp.drive_error}
+              hideCloseButton
+              lowContrast
+              style={{ marginBottom: "1rem" }}
+            />
+          )}
+
+          {driveConnection?.status === "CONNECTED" ? (
+            <p className="cds--type-body-01">
+              Connected{driveConnection.google_account_email ? <> as <strong>{driveConnection.google_account_email}</strong></> : null}.
+            </p>
+          ) : canEditFirm ? (
+            <ConnectDriveButton />
+          ) : (
+            <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+              Not connected yet — only the firm owner or a partner can connect Google Drive.
             </p>
           )}
         </div>

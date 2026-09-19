@@ -412,7 +412,7 @@ keep database access provider-independent.
 ## 33. Definition of done for V2 architecture
 
 - [ ] Google sign-in works *(code + Supabase config both live and verified on production — see LIGHTWEIGHT-ARCHITECTURE-PLAN.md's Google Sign-In section; one Google Cloud Console step — the redirect URI — left, only the account owner can add it)*
-- [ ] Drive connects during onboarding
+- [ ] Drive connects during onboarding *(UI live on `/firm-settings` — see LIGHTWEIGHT-ARCHITECTURE-PLAN.md's Google Drive section; button itself not click-tested live, no VIEWER-role test account can reach it, but reuses the exact pattern already proven in production for Google Sign-In)*
 - [ ] Practice can be created in one setup
 - [ ] Existing Drive folders can be mapped
 - [x] Supabase remains default DB

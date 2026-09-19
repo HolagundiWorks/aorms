@@ -192,12 +192,28 @@ live-verified this pass:
   been exercised — that needs a real browser click-through, not something
   this session did.
 
-**Deliberately not done yet:** no UI surfaces `startDriveConnection()`
-anywhere (no button on `/firm-settings`); no Drive-file-listing/sync code
-exists (`documents` rows have nowhere to come from yet); production
-Hostinger env vars don't have the Google credentials set — that replace-
-the-whole-set endpoint is destructive (see below) and there's no live
-feature yet that would need them in production.
+**Onboarding UI added 2026-09-20** — a "Google Drive" section on
+`/firm-settings` (same OWNER/PARTNER gate as the existing "AORMS Platform
+Studio" section right above it): shows "Connected as {email}" when
+`drive_connections.status = CONNECTED`, a "Connect Google Drive" button
+otherwise, and handles the OAuth callback's `drive_connected`/
+`drive_error` redirect params with a real `InlineNotification`. Verified
+live in a browser signed in as the demo account (VIEWER role) — the
+read-only "Not connected yet — only the firm owner or a partner..." path
+renders correctly, no console errors. The button's own click-through
+wasn't exercised live (the only test account available is VIEWER-role,
+which correctly never sees the button at all) — it's the same plain
+`<form action={serverAction}>` → `redirect()` shape already proven live
+in production for Google Sign-In, so the pattern itself is trusted, not
+re-guessed.
+
+**Still not done:** no Drive-file-listing/sync code exists yet
+(`documents` rows have nowhere to come from — connecting an account
+doesn't populate anything by itself); production Hostinger env vars
+don't have the Google credentials set — that replace-the-whole-set
+endpoint is destructive (see below) and there's no live feature yet that
+would need them in production, since local dev/`.env` already covers
+what's been tested.
 
 ## Desktop Agent (phase 8 — still blocked)
 
