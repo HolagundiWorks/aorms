@@ -25,7 +25,7 @@ all session, not new for this doc.
 | 3. Events table + real triggers | ✅ Live, 4 events wired | [EVENTS-AND-CONNECTOR-MODES.md](EVENTS-AND-CONNECTOR-MODES.md) |
 | 4. Workflow engine (events → conditions → actions) | ✅ Live, verified end-to-end | this doc, § Workflow engine |
 | 5. AI provider abstraction (chat only — see below) | ✅ Built, not yet wired into live call sites | this doc, § AI provider abstraction |
-| 6. Esti tool layer (Esti calls AORMS, not the reverse) | ⏳ Not started, depends on 5's call sites actually migrating | — |
+| 6. Esti tool layer (Esti calls AORMS, not the reverse) | ✅ Wired into `askEsti()` | this doc, § Esti tool layer wired in |
 | 7. Google Drive document layer | ✅ OAuth flow + metadata schema live; unblocked 2026-09-20 | this doc, § Google Drive |
 | 8. Desktop Agent (Ollama/Whisper/CAD/local files) | 🔴 Blocked — new codebase, distribution/signing decisions | this doc, § Blockers |
 | 9. RAG over Drive documents | ⏳ Not started, depends on 7 | — |
@@ -213,6 +213,30 @@ related purpose — worth reusing rather than inventing a second pairing
 flow). AORMS-V2-DEVELOPER-GUIDELINES.md § 26-27 sets the shape (outbound-
 only connection, explicit per-capability permissions, no unrestricted
 shell by default) but not these deployment specifics.
+
+## Esti tool layer wired in (phase 6 — done)
+
+`askEsti()` (`lib/actions/ai.ts`) now calls `runAgenticChat()` with the 3
+tools from phase 5 (`get_studio_snapshot`, `list_open_tasks`,
+`search_project_records`) instead of always baking a fixed "Live
+snapshot" block into every prompt — ESTI decides per question whether it
+needs a tool at all. Safe to do because `askEsti` remains unreachable
+from any live page (confirmed via a fresh grep, same finding as earlier
+this session — the header's own "Ask ESTI" was replaced by "Daily Brief"
+on 2026-09-10, and nothing else calls it), so this carries zero
+regression risk to a working feature. `ai_runs.sources` now reflects
+which tools actually ran, replacing the previously-always-empty array
+`daily-brief.ts`'s own comment had flagged.
+
+`tsc --noEmit` and `eslint` both clean. **Not runtime-tested against a
+live model** — no Ollama instance is reachable in this environment
+(confirmed: `curl http://127.0.0.1:11434/api/tags` returns nothing), so
+only the graceful-fallback path (no health → `MOCK_FALLBACK`) has real
+runtime verification, from `runChat`/`runAgenticChat`'s own standalone
+tests. The tool-calling round trip itself needs a real Ollama + a
+tool-capable model (llama3.1+) to actually exercise, and/or a UI surface
+to reach `askEsti` from at all — both real remaining steps, not silently
+declared done.
 
 ## Google Sign-In (§5 — code complete, blocked on one config toggle)
 

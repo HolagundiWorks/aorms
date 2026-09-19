@@ -6,7 +6,10 @@ import { createClient } from "../supabase/server";
 import { callOllamaChat, checkOllamaHealth, ollamaBaseUrlFromEnv, ollamaModelFromEnv } from "../ai/ollama";
 import { redactPii } from "../ai/redact";
 import { ESTI_AGENT_SYSTEM } from "../ai/prompt";
-import { buildLiveSnapshot } from "../ai/snapshot";
+import { runAgenticChat } from "../ai/agent-loop";
+import { studioSnapshotTool } from "../ai/tools/studio-snapshot";
+import { listOpenTasksTool } from "../ai/tools/list-open-tasks";
+import { searchProjectRecordsTool } from "../ai/tools/search-project-records";
 import { draftKindNeedsProject, isAiDraftKind, type AiDraftKind } from "../ai/draft-kinds";
 import { buildDraftPrompt } from "../ai/draft-prompts";
 import { toSafeErrorMessage } from "../security/safe-error";
@@ -17,10 +20,21 @@ import { toSafeErrorMessage } from "../security/safe-error";
  * authenticated office-hub user can ask; no `write` capability needed
  * (that's only for the draft-generation modes, not ported here).
  *
+ * Tool-calling (2026-09-20, phase 6 of docs/esti/LIGHTWEIGHT-ARCHITECTURE-
+ * PLAN.md) — replaces the earlier design of always baking a fixed "Live
+ * snapshot" into the prompt. ESTI now decides for itself, per question,
+ * whether it needs get_studio_snapshot/list_open_tasks/
+ * search_project_records (lib/ai/tools/) via runAgenticChat()
+ * (lib/ai/agent-loop.ts). No project is in context here (this is the
+ * header-launched agent, not a project page), so search_project_records
+ * will correctly decline until Esti is reachable from a project page too.
+ *
  * Every call is recorded in ai_runs (migration 0010, already live) —
  * provenance regardless of whether Ollama actually answered or the mock
  * fallback did, matching the old gateway's "always return something, be
  * honest about the fallback" behaviour (backend/src/lib/ai/gateway.ts).
+ * `sources` now reflects which tools actually ran, replacing the
+ * previously-always-empty array daily-brief.ts's own comment noted.
  */
 
 export type AskEstiState = { output: string; error?: string } | null;
@@ -39,54 +53,27 @@ export async function askEsti(_prev: AskEstiState, formData: FormData): Promise<
   } = await supabase.auth.getUser();
   if (!user) return { output: "", error: "Sign in to ask ESTI." };
 
-  const baseUrl = ollamaBaseUrlFromEnv();
-  const model = ollamaModelFromEnv();
-  const snapshot = await buildLiveSnapshot(supabase);
-  const userPrompt = `Live snapshot:\n${snapshot}\n\nQuestion: ${question}`;
-
-  let output: string;
-  let provider: string;
-  let usedModel: string;
-  let tokenEstimate: number | null = null;
-
-  const health = await checkOllamaHealth({ baseUrl, model });
-  if (health.ok) {
-    try {
-      const { text, tokens } = await callOllamaChat({
-        baseUrl,
-        model,
-        system: ESTI_AGENT_SYSTEM,
-        user: userPrompt,
-      });
-      output = redactPii(text);
-      provider = "ollama";
-      usedModel = model;
-      tokenEstimate = tokens;
-    } catch (err) {
-      const hint = err instanceof Error ? err.message : "Ollama call failed";
-      output = `${MOCK_FALLBACK}\n\n*(${hint.slice(0, 160)})*`;
-      provider = "mock";
-      usedModel = "template-fallback";
-    }
-  } else {
-    output = `${MOCK_FALLBACK}\n\n*(${health.error ?? "model not ready"})*`;
-    provider = "mock";
-    usedModel = "template-fallback";
-  }
+  const result = await runAgenticChat({
+    system: ESTI_AGENT_SYSTEM,
+    user: question,
+    tools: [studioSnapshotTool, listOpenTasksTool, searchProjectRecordsTool],
+    context: { supabase, projectId: null },
+    fallback: MOCK_FALLBACK,
+  });
 
   await supabase.from("ai_runs").insert({
     user_id: user.id,
     kind: "AGENT_QA",
-    provider,
-    model: usedModel,
+    provider: result.provider,
+    model: result.model,
     prompt_summary: question.slice(0, 200),
-    sources: [],
-    output_text: output,
+    sources: result.toolsUsed.map((name) => ({ type: "tool", name })),
+    output_text: result.output,
     used_external_api: "false",
-    token_estimate: tokenEstimate === null ? null : String(tokenEstimate),
+    token_estimate: result.tokenEstimate === null ? null : String(result.tokenEstimate),
   });
 
-  return { output };
+  return { output: result.output };
 }
 
 /**
