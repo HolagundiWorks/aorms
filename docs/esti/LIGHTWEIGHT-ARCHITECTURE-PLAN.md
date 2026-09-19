@@ -24,8 +24,8 @@ all session, not new for this doc.
 | 2. Database-per-tenant registry + connector modes | ✅ Live (Mode A/B; Mode C schema-only) | [DATABASE-PER-TENANT-ARCHITECTURE.md](DATABASE-PER-TENANT-ARCHITECTURE.md), [EVENTS-AND-CONNECTOR-MODES.md](EVENTS-AND-CONNECTOR-MODES.md) |
 | 3. Events table + real triggers | ✅ Live, 4 events wired | [EVENTS-AND-CONNECTOR-MODES.md](EVENTS-AND-CONNECTOR-MODES.md) |
 | 4. Workflow engine (events → conditions → actions) | ✅ Live, verified end-to-end | this doc, § Workflow engine |
-| 5. AI provider abstraction (chat/embed/transcribe/vision) | ⏳ Not started | — |
-| 6. Esti tool layer (Esti calls AORMS, not the reverse) | ⏳ Not started, depends on 5 | — |
+| 5. AI provider abstraction (chat only — see below) | ✅ Built, not yet wired into live call sites | this doc, § AI provider abstraction |
+| 6. Esti tool layer (Esti calls AORMS, not the reverse) | ⏳ Not started, depends on 5's call sites actually migrating | — |
 | 7. Google Drive document layer | 🔴 Blocked — needs a Google Cloud OAuth app | this doc, § Blockers |
 | 8. Desktop Agent (Ollama/Whisper/CAD/local files) | 🔴 Blocked — new codebase, distribution/signing decisions | this doc, § Blockers |
 | 9. RAG over Drive documents | ⏳ Not started, depends on 7 | — |
@@ -108,6 +108,33 @@ external scheduled call (a Next.js Route Handler + Vercel Cron/an
 external pinger, matching `app/api/pulse/recompute/route.ts`'s existing
 on-demand-or-cron pattern). Flagged as a real remaining step, not
 silently wired.
+
+## AI provider abstraction (phase 5)
+
+`web/lib/ai/provider.ts` — a minimal `AIProvider` interface, one
+capability (`chat`) since that's the only one any real call site uses
+today (embed/transcribe/vision aren't declared until something actually
+needs them). `providers/ollama-provider.ts` wraps the existing
+`lib/ai/ollama.ts` calls behind it — same self-hosted-in-production/
+native-in-dev Ollama this repo has always used, zero behavior change.
+`resolve-provider.ts` always returns it for now, structured as a
+resolver so a firm-level connector choice (mirroring `tenant_databases`'
+connector modes) can select a `customer_api` or `desktop_agent` provider
+later without touching any caller. `run-chat.ts` centralizes the
+health-check → chat → redact → fallback shape that `askEsti`/
+`generateAiDraft`/`generateDailyBrief` each currently hand-roll
+identically and separately.
+
+**Deliberately not wired into those 3 call sites yet.** They're live,
+shipped, working features — migrating them onto `runChat()` is a small,
+separate, carefully-reviewed change, not bundled into adding the
+abstraction itself; doing both at once risks a subtle regression in a
+production feature with nobody watching to catch it. `tsc --noEmit` and
+`eslint` both clean on the new files; not yet runtime-tested against a
+live Ollama instance (the wrapped functions are 1:1 delegations to
+already-used, unmodified code, so the risk surface is low, but this is
+still real and worth stating plainly rather than implying more
+verification happened than did).
 
 ## Blockers — need your decision, can't proceed alone
 
