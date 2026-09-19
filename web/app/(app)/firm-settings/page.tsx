@@ -18,7 +18,7 @@ import { RemoveLineItemButton } from "../../../components/aorms/RemoveLineItemBu
 import { removeNumberingPatternRecord } from "../../../lib/actions/numbering";
 import { LinkFirmStudioForm } from "../../../components/aorms/platform/LinkFirmStudioForm";
 import { getFirmStudio } from "../../../lib/platform/firm-studio";
-import { ConnectDriveButton } from "../../../components/aorms/ConnectDriveButton";
+import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
 
 /**
  * Firm Settings — the caller's own `firms` row (one per Studio as of
@@ -37,18 +37,13 @@ import { ConnectDriveButton } from "../../../components/aorms/ConnectDriveButton
  * directly from this table — no schema change, no sync back from the
  * Identity portal in this pass (a disclosed limitation, not an oversight).
  */
-export default async function FirmSettingsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ drive_connected?: string; drive_error?: string }>;
-}) {
-  const sp = await searchParams;
+export default async function FirmSettingsPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: firm, error }, { data: myProfile }, { data: patterns, error: patternsError }, { data: driveConnection }] = await Promise.all([
+  const [{ data: firm, error }, { data: myProfile }, { data: patterns, error: patternsError }] = await Promise.all([
     supabase
       .from("firms")
       .select(
@@ -58,12 +53,20 @@ export default async function FirmSettingsPage({
       .maybeSingle(),
     user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
     supabase.from("numbering_patterns").select("id, scope, prefix, padding").order("scope"),
-    supabase.from("drive_connections").select("google_account_email, status").maybeSingle(),
   ]);
 
   const isOwner = myProfile?.role === "OWNER";
   const canEditFirm = isOwner || myProfile?.role === "PARTNER";
   const firmStudio = await getFirmStudio();
+  const driveConnection = firmStudio
+    ? (
+        await createPlatformServiceRoleClient()
+          .from("drive_connections")
+          .select("google_account_email, status")
+          .eq("studio_id", firmStudio.id)
+          .maybeSingle()
+      ).data
+    : null;
 
   return (
     <ContextPanelLayout>
@@ -129,10 +132,13 @@ export default async function FirmSettingsPage({
         </div>
 
         {/* Google Drive (docs/esti/AORMS-V2-DEVELOPER-GUIDELINES.md § 6-7,
-            2026-09-20) — document storage stays in the firm's own Drive;
-            AORMS only stores the connection + file metadata (documents
-            table). Same OWNER/PARTNER gate as Platform Studio linking
-            above, since this changes where the firm's documents live. */}
+            2026-09-20; relocated to the AORMS Platform, studio_id-keyed,
+            same day — see platform/supabase/migrations/0039_drive_connector.sql).
+            Document storage stays in the firm's own Drive; AORMS only
+            stores the connection + file metadata (documents table). The
+            connection itself is managed on the linked Studio's own page
+            now, not here — this is a read-only status mirror, same
+            pattern as "AORMS Platform Studio" above. */}
         <div style={{ marginTop: "3rem" }}>
           <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>
             Google Drive
@@ -142,35 +148,19 @@ export default async function FirmSettingsPage({
             and status, never the file bytes.
           </p>
 
-          {sp.drive_connected === "true" && (
-            <InlineNotification
-              kind="success"
-              title="Google Drive connected"
-              hideCloseButton
-              lowContrast
-              style={{ marginBottom: "1rem" }}
-            />
-          )}
-          {sp.drive_error && (
-            <InlineNotification
-              kind="error"
-              title="Couldn't connect Google Drive"
-              subtitle={sp.drive_error}
-              hideCloseButton
-              lowContrast
-              style={{ marginBottom: "1rem" }}
-            />
-          )}
-
           {driveConnection?.status === "CONNECTED" ? (
             <p className="cds--type-body-01">
               Connected{driveConnection.google_account_email ? <> as <strong>{driveConnection.google_account_email}</strong></> : null}.
             </p>
-          ) : canEditFirm ? (
-            <ConnectDriveButton />
+          ) : firmStudio ? (
+            <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+              Not connected yet — manage this from{" "}
+              <a href={`https://identity.aorms.in/studios/${firmStudio.id}`}>{firmStudio.name}&apos;s Studio page</a> on the AORMS
+              Platform.
+            </p>
           ) : (
             <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-              Not connected yet — only the firm owner or a partner can connect Google Drive.
+              Link this firm to a Platform Studio above first — Google Drive connects from the Studio&apos;s own page.
             </p>
           )}
         </div>

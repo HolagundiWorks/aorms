@@ -2,32 +2,43 @@
 
 import { redirect } from "next/navigation";
 import crypto from "node:crypto";
-import { createClient } from "../supabase/server";
+import { createClient as createPlatformClient } from "../platform/server";
 import { buildAuthUrl, encodeState } from "../drive/oauth";
 
 /**
  * Starts the Google Drive connection flow (docs/esti/AORMS-V2-DEVELOPER-
  * GUIDELINES.md § 6) — a deliberate second step after sign-in, never
- * bundled into Google identity sign-in itself. `state` carries the
- * firm/user to tie back to on the callback without trusting anything the
- * client could tamper with in between (the callback re-derives nothing
- * from client input except this state and the code Google itself issues).
+ * bundled into Google identity sign-in itself. Runs in the AORMS Platform
+ * context (relocated 2026-09-20 from the Office Hub, firm_id-keyed, per
+ * explicit correction: connector config belongs on the identity platform,
+ * studio_id-keyed) — called from a `/studios/[studioId]` form, so
+ * `studioId` is already known and trusted the same way every other
+ * owner-gated action on that page is, not re-derived from a session.
  *
- * Always redirects (never returns) so it can be used directly as a plain
- * `<form action={startDriveConnection}>` — matches signInWithGoogle()'s
- * shape. Failure redirects back to /firm-settings with drive_error,
- * mirroring the OAuth callback route's own error handling.
+ * `state` carries the studio/account to tie back to on the callback
+ * without trusting anything the client could tamper with in between (the
+ * callback re-derives nothing from client input except this state and the
+ * code Google itself issues). Always redirects (never returns) so it can
+ * be used directly as a plain `<form action={startDriveConnection}>`,
+ * bound to a specific studioId via `.bind(null, studioId)`.
  */
-export async function startDriveConnection(): Promise<never> {
-  const supabase = await createClient();
+export async function startDriveConnection(studioId: string): Promise<never> {
+  const platform = await createPlatformClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/firm-settings?drive_error=" + encodeURIComponent("Sign in first."));
+  } = await platform.auth.getUser();
+  if (!user) redirect(`/studios/${studioId}?drive_error=` + encodeURIComponent("Sign in first."));
 
-  const { data: profile } = await supabase.from("profiles").select("firm_id, role").eq("id", user.id).maybeSingle();
-  if (!profile?.firm_id) redirect("/firm-settings?drive_error=" + encodeURIComponent("No firm in context."));
+  const { data: membership } = await platform
+    .from("studio_memberships")
+    .select("id")
+    .eq("studio_id", studioId)
+    .eq("account_id", user.id)
+    .eq("role", "OWNER")
+    .eq("status", "ACTIVE")
+    .maybeSingle();
+  if (!membership) redirect(`/studios/${studioId}?drive_error=` + encodeURIComponent("Only the Studio owner can connect Google Drive."));
 
-  const state = encodeState({ firmId: profile.firm_id, userId: user.id, nonce: crypto.randomUUID() });
+  const state = encodeState({ studioId, accountId: user.id, nonce: crypto.randomUUID() });
   redirect(buildAuthUrl(state));
 }

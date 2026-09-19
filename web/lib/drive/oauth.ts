@@ -24,7 +24,7 @@ function requireEnv(name: string): string {
   return value;
 }
 
-export type DriveOAuthState = { firmId: string; userId: string; nonce: string };
+export type DriveOAuthState = { studioId: string; accountId: string; nonce: string };
 
 export function encodeState(state: DriveOAuthState): string {
   return Buffer.from(JSON.stringify(state)).toString("base64url");
@@ -32,7 +32,7 @@ export function encodeState(state: DriveOAuthState): string {
 
 export function decodeState(raw: string): DriveOAuthState {
   const parsed = JSON.parse(Buffer.from(raw, "base64url").toString("utf-8"));
-  if (typeof parsed?.firmId !== "string" || typeof parsed?.userId !== "string") {
+  if (typeof parsed?.studioId !== "string" || typeof parsed?.accountId !== "string") {
     throw new Error("Invalid OAuth state");
   }
   return parsed;

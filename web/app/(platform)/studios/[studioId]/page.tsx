@@ -1,9 +1,10 @@
 import NextLink from "next/link";
 import { notFound } from "next/navigation";
-import { Column, Grid, Stack, Tag, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tile } from "@carbon/react";
+import { Column, Grid, InlineNotification, Stack, Tag, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tile } from "@carbon/react";
 import { createClient as createWebClient } from "../../../../lib/supabase/server";
 import { createClient as createPlatformClient } from "../../../../lib/platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
+import { ConnectDriveButton } from "../../../../components/aorms/platform/ConnectDriveButton";
 import { InviteMemberForm } from "../../../../components/aorms/platform/InviteMemberForm";
 import { MembershipRoleSelect } from "../../../../components/aorms/platform/MembershipRoleSelect";
 import { LeaveStudioButton } from "../../../../components/aorms/platform/LeaveStudioButton";
@@ -52,8 +53,15 @@ type AccountEmbed = { id: string; full_name: string; public_id: string } | null;
  * Office-Hub-link path is kept as a fallback for local dev, where there
  * is no subdomain/cookie split at all.
  */
-export default async function StudioDetailPage({ params }: { params: Promise<{ studioId: string }> }) {
+export default async function StudioDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ studioId: string }>;
+  searchParams: Promise<{ drive_connected?: string; drive_error?: string }>;
+}) {
   const { studioId } = await params;
+  const sp = await searchParams;
 
   const platformSupabase = await createPlatformClient();
   const {
@@ -95,7 +103,7 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
   const enterpriseActive =
     licence?.plan === "ENTERPRISE" && (!licence.expires_at || new Date(licence.expires_at) > new Date());
 
-  const [{ data: memberships }, { data: boardMembers }, { data: contacts }] = await Promise.all([
+  const [{ data: memberships }, { data: boardMembers }, { data: contacts }, { data: driveConnection }] = await Promise.all([
     platformService
       .from("studio_memberships")
       .select("id, account_id, role, status, pro_assigned_at, accounts(full_name, public_id)")
@@ -112,6 +120,7 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
       .select("id, full_name, role_title, email, phone, is_primary")
       .eq("studio_id", studioId)
       .order("created_at", { ascending: true }),
+    platformService.from("drive_connections").select("google_account_email, status").eq("studio_id", studioId).maybeSingle(),
   ]);
 
   const proAssignedCount = (memberships ?? []).filter((m) => !!m.pro_assigned_at).length;
@@ -269,6 +278,55 @@ export default async function StudioDetailPage({ params }: { params: Promise<{ s
                   </p>
                 </Stack>
               )}
+            </Tile>
+          </div>
+
+          <div>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+              Connections
+            </h2>
+            <p className="cds--type-body-01" style={{ marginBottom: "1rem", color: "var(--cds-text-secondary)" }}>
+              Third-party accounts linked to this Studio — connector credentials live here, on the identity
+              platform, not on the Office Hub deployment itself.
+            </p>
+            <Tile>
+              {sp.drive_connected === "true" && (
+                <InlineNotification
+                  kind="success"
+                  title="Google Drive connected"
+                  hideCloseButton
+                  lowContrast
+                  style={{ marginBottom: "1rem" }}
+                />
+              )}
+              {sp.drive_error && (
+                <InlineNotification
+                  kind="error"
+                  title="Couldn't connect Google Drive"
+                  subtitle={sp.drive_error}
+                  hideCloseButton
+                  lowContrast
+                  style={{ marginBottom: "1rem" }}
+                />
+              )}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+                <div>
+                  <p className="cds--type-heading-compact-01">Google Drive</p>
+                  <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)", marginTop: "0.25rem" }}>
+                    {driveConnection?.status === "CONNECTED"
+                      ? `Connected${driveConnection.google_account_email ? ` as ${driveConnection.google_account_email}` : ""}.`
+                      : "Documents stay in your own Drive — AORMS only stores the connection and each file's project/revision metadata."}
+                  </p>
+                </div>
+                {driveConnection?.status !== "CONNECTED" &&
+                  (isOwner ? (
+                    <ConnectDriveButton studioId={studio.id} />
+                  ) : (
+                    <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                      Only the Studio owner can connect.
+                    </p>
+                  ))}
+              </div>
             </Tile>
           </div>
 

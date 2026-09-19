@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 import { decodeState, exchangeCodeForTokens, fetchGoogleAccountEmail } from "../../../../../lib/drive/oauth";
-import { createClient } from "../../../../../lib/supabase/server";
+import { createClient as createPlatformClient } from "../../../../../lib/platform/server";
 
 /**
  * Google Drive OAuth callback (docs/esti/AORMS-V2-DEVELOPER-GUIDELINES.md
- * § 6). Uses the signed-in user's own session client (not service-role)
- * so store_drive_refresh_token()'s internal has_capability('write') +
- * firm-match check is what actually authorizes the write — same pattern
- * as every other RPC in this codebase, not a special case for OAuth.
+ * § 6). Relocated 2026-09-20 from the Office Hub session to the AORMS
+ * Platform session (connector config is studio_id-keyed now, see
+ * platform/supabase/migrations/0039_drive_connector.sql) — the browser
+ * carries the platform session cookie since the flow only ever starts
+ * from a `/studios/[studioId]` page. Uses the signed-in account's own
+ * session client (not service-role) so store_drive_connection()'s
+ * internal is_studio_owner() check is what actually authorizes the
+ * write — same pattern as every other RPC in this codebase, not a
+ * special case for OAuth.
  */
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -15,23 +20,25 @@ export async function GET(request: Request) {
   const state = url.searchParams.get("state");
   const error = url.searchParams.get("error");
 
-  const fail = (reason: string) => NextResponse.redirect(new URL(`/firm-settings?drive_error=${encodeURIComponent(reason)}`, url.origin));
+  let redirectBase = "/identity";
+  const fail = (reason: string) => NextResponse.redirect(new URL(`${redirectBase}?drive_error=${encodeURIComponent(reason)}`, url.origin));
 
   if (error) return fail(error);
   if (!code || !state) return fail("missing_code");
 
-  let parsedState: { firmId: string; userId: string };
+  let parsedState: { studioId: string; accountId: string };
   try {
     parsedState = decodeState(state);
+    redirectBase = `/studios/${parsedState.studioId}`;
   } catch {
     return fail("invalid_state");
   }
 
-  const supabase = await createClient();
+  const platform = await createPlatformClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
-  if (!user || user.id !== parsedState.userId) {
+  } = await platform.auth.getUser();
+  if (!user || user.id !== parsedState.accountId) {
     return fail("session_mismatch");
   }
 
@@ -47,14 +54,14 @@ export async function GET(request: Request) {
 
     const email = await fetchGoogleAccountEmail(tokens.access_token);
 
-    const { error: rpcError } = await supabase.rpc("store_drive_refresh_token", {
-      p_firm_id: parsedState.firmId,
+    const { error: rpcError } = await platform.rpc("store_drive_connection", {
+      p_studio_id: parsedState.studioId,
       p_refresh_token: tokens.refresh_token,
       p_google_account_email: email,
     });
     if (rpcError) return fail(rpcError.message.slice(0, 100));
 
-    return NextResponse.redirect(new URL("/firm-settings?drive_connected=true", url.origin));
+    return NextResponse.redirect(new URL(`${redirectBase}?drive_connected=true`, url.origin));
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown_error";
     return fail(message.slice(0, 100));
