@@ -11,6 +11,7 @@ export const ROLE_RANK: Record<string, number> = {
   HR_MANAGER: 80,
   SENIOR: 60,
   ASSOCIATE: 40,
+  SITE_SUPERVISOR: 40,
   VIEWER: 20,
 };
 
