@@ -22,7 +22,7 @@ import { matchesClaimedType } from "../../../../lib/security/file-signature";
  * its `firm_id`/`inspector_id` column defaults) does the real enforcement
  * — same division of labour lib/drawings/upload.ts uses.
  */
-export const INSPECTIONS_BUCKET = "esti-site-inspections";
+const INSPECTIONS_BUCKET = "esti-site-inspections";
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
 const MAX_PHOTOS = 12;
 const PHOTO_EXTENSION_BY_TYPE: Record<string, string> = {
