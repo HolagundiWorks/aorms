@@ -174,6 +174,31 @@ Hub data reset nightly via `pg_cron`).
   fixed (`9c3c0e56`), and re-verified end-to-end live: sign-in now
   correctly redirects all the way to `aorms.in/pulse` with both sessions
   intact.
+- **Content-Security-Policy flipped to enforcing, but Hostinger's edge
+  CDN silently overwrites it in production (2026-09-20)** —
+  `next.config.mjs`'s `buildCspHeader()` ran in Report-Only mode since
+  2026-09-14; a full live sweep this date (landing, pricing, an
+  authenticated Office Hub session through Pulse/Clients/Firm Settings,
+  the Platform identity page) found only two real gaps —
+  `cdn.razorpay.com` (Razorpay's own risk-detection bundle) and
+  same-org cross-portal-subdomain prefetching (`*.aorms.in`) — both
+  folded into the policy before flipping to enforcing (`570f45dd`).
+  Build succeeded, but a live header check afterward
+  (`curl -sI https://aorms.in/`) found production is **not** actually
+  serving the app's own policy: every other custom header
+  (`X-Frame-Options`, `Permissions-Policy`, etc.) passes through
+  unmodified, but `Content-Security-Policy` always comes back as the
+  single directive `upgrade-insecure-requests`, regardless of path or
+  which of the 4 deployed subdomains is requested, and confirmed
+  non-cached (`x-hcdn-cache-status: DYNAMIC`). This points at Hostinger's
+  `hcdn` edge overwriting the CSP header specifically — likely tied to
+  its HTTPS-enforcement layer — with no API-exposed toggle found to
+  disable it. **No functional risk** (nothing the app needs is actually
+  being blocked, since the real restrictive policy never reaches the
+  browser), but the hardening itself isn't live. A support-ticket draft
+  was handed to the user rather than guessing further or touching the
+  live HTTPS-redirect setting without confirmation — see the user's own
+  follow-up once Hostinger responds.
 - **AORMS V2 frozen architecture + lightweight master plan (2026-09-20)**
   — [AORMS-V2-DEVELOPER-GUIDELINES.md](AORMS-V2-DEVELOPER-GUIDELINES.md)
   is the canonical, user-authored spec ("FROZEN ARCHITECTURE" — do not
