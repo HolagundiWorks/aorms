@@ -16,6 +16,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { bandForScore, PRIORITY_BAND_LABEL, type PriorityBand } from "../../../lib/pulse/scoring";
+import { MarkTaskDoneButton } from "../../../components/aorms/dashboard/QueueActions";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "red" | "green"> = {
   TODO: "gray",
@@ -105,6 +106,7 @@ export default async function TasksPage() {
                     <TableHeader>Priority</TableHeader>
                     <TableHeader>Pulse</TableHeader>
                     <TableHeader>Due</TableHeader>
+                    <TableHeader>Actions</TableHeader>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -146,12 +148,21 @@ export default async function TasksPage() {
                           )}
                         </TableCell>
                         <TableCell>{t.due_date ?? "—"}</TableCell>
+                        <TableCell>
+                          {/* Same MarkTaskDoneButton the Pulse "Next up" widget
+                              uses (components/aorms/dashboard/QueueActions.tsx
+                              -> lib/actions/tasks.ts's updateTaskStatus, which
+                              already revalidates both /pulse and /tasks) — QA
+                              found /tasks had no way to mark a task done at
+                              all, only Pulse did. */}
+                          {t.status !== "DONE" ? <MarkTaskDoneButton taskId={t.id} /> : "—"}
+                        </TableCell>
                       </TableRow>
                     );
                   })}
                   {(tasks ?? []).length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7}>
+                      <TableCell colSpan={8}>
                         <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                           No tasks yet.
                         </p>

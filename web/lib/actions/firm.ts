@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { getActiveFirmId } from "../firm/current";
 import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
@@ -41,7 +42,28 @@ export async function updateFirmSettings(
 
   const supabase = await createClient();
 
-  const { data: firm, error: firmError } = await supabase.from("firms").select("id").maybeSingle();
+  // Scope explicitly to the caller's ACTIVE firm (profiles.firm_id), not an
+  // unscoped `.from("firms")` read — see lib/firm/current.ts's header for
+  // why that's broken for any profile with 2+ firm memberships (migration
+  // 0055's additive "firms: member read own memberships" SELECT policy
+  // makes every such profile's firm's row visible, not just the active
+  // one). Without this, `firm.id` below could resolve to a NON-active firm
+  // (silently, if RLS-visible-but-not-current), and the UPDATE at the
+  // bottom of this function — scoped by `.eq("id", firm.id)` — would then
+  // either hard-fail with "multiple rows returned" or silently affect zero
+  // rows (blocked by "firm: owner/partner update"'s own `id =
+  // current_firm_id()` check), never actually saving.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const activeFirmId = await getActiveFirmId(supabase, user?.id);
+  if (!activeFirmId) return { error: "No active firm on this account — sign in again or contact support." };
+
+  const { data: firm, error: firmError } = await supabase
+    .from("firms")
+    .select("id")
+    .eq("id", activeFirmId)
+    .maybeSingle();
   if (firmError) return { error: toSafeErrorMessage(firmError) };
   if (!firm) return { error: "No firm record exists to update — this should have been seeded by migration 0024." };
 

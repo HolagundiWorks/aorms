@@ -27,9 +27,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Server Component) and passed down to AppShell.tsx (a Client
   // Component, can't fetch its own Supabase data) rather than each page
   // re-fetching its own copy.
-  const [{ data: profile }, { data: firm }, { data: projects }, { count: membershipCount }] = await Promise.all([
-    supabase.from("profiles").select("full_name, role, platform_public_id").eq("id", user?.id ?? "").maybeSingle(),
-    supabase.from("firms").select("company_name").maybeSingle(),
+  // profile is fetched on its own, first, because the `firms` read below
+  // needs its firm_id to scope by — see lib/firm/current.ts's header for
+  // why an unscoped `.from("firms")` read is broken for any account with
+  // 2+ firm memberships (migration 0055's additive "firms: member read
+  // own memberships" SELECT policy returns every firm a profile has ever
+  // belonged to, not just the active one).
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, role, platform_public_id, firm_id")
+    .eq("id", user?.id ?? "")
+    .maybeSingle();
+
+  const [{ data: firm }, { data: projects }, { count: membershipCount }] = await Promise.all([
+    profile?.firm_id
+      ? supabase.from("firms").select("company_name").eq("id", profile.firm_id).maybeSingle()
+      : Promise.resolve({ data: null }),
     supabase.from("project_offices").select("id, title").order("title"),
     // Multi-tenancy (migration 0055) — a profile belonging to more than one
     // firm gets a "Switch studio" entry in the user menu (HeaderUserMenu.tsx).

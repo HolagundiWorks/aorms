@@ -10,6 +10,21 @@ export type ClientActionState = { error: string } | null;
 
 const CLIENT_KINDS = new Set(["INDIVIDUAL", "COMPANY", "ARCHITECT_FIRM"]);
 
+/**
+ * Roles with `has_capability('write')` (rank >= 40, or an explicit
+ * allow-list role — see web/supabase/migrations/0002_capability_helper.sql)
+ * — same set web/lib/actions/ai.ts's WRITE_TIER_ROLES uses. Mirrored here
+ * as an explicit, friendly-error check in the Server Action (defense in
+ * depth): the real authorization boundary is RLS
+ * (migration 0082_clients_write_requires_capability.sql — "clients: staff
+ * create" now checks has_capability('write') instead of the too-broad
+ * is_office_staff(), which incorrectly included VIEWER and let a VIEWER
+ * actually create client records, found by live QA 2026-09-20). Without
+ * this app-level check, a VIEWER's submit would fail on the INSERT with a
+ * raw RLS-denial error instead of a clear message.
+ */
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export type ImportClientsState =
   | { error: string }
   | { imported: number; skipped: { row: number; message: string }[] }
@@ -28,6 +43,17 @@ export type ImportClientsState =
  * expects back (same column names this parses).
  */
 export async function importClientsCsv(_prev: ImportClientsState, formData: FormData): Promise<ImportClientsState> {
+  const authClient = await createClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+  const { data: authProfile } = user
+    ? await authClient.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  if (!authProfile || !WRITE_TIER_ROLES.has(authProfile.role)) {
+    return { error: "You don't have permission to add clients — contact a firm owner or partner." };
+  }
+
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "Choose a CSV file to import." };
 
@@ -71,7 +97,7 @@ export async function importClientsCsv(_prev: ImportClientsState, formData: Form
 
   for (const message of parseErrors) skipped.push({ row: 0, message });
 
-  const supabase = await createClient();
+  const supabase = authClient;
 
   // Plan cap (2026-09-14, real pricing restructure) — trims toInsert to
   // however many slots remain rather than rejecting the whole file, so a
@@ -132,6 +158,24 @@ export async function createClientRecord(
   if (!name) return { error: "Name is required." };
 
   const supabase = await createClient();
+
+  // Server-side role check (2026-09-20 — VIEWER-can-create-clients bug
+  // found by live QA): the actual authorization boundary is RLS
+  // ("clients: staff create", fixed in migration
+  // 0082_clients_write_requires_capability.sql to check has_capability
+  // ('write') instead of the too-broad is_office_staff(), which
+  // incorrectly included VIEWER). This app-level check is defense in
+  // depth, and turns what would otherwise be a raw RLS-denial error into
+  // a clear message.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: authProfile } = user
+    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  if (!authProfile || !WRITE_TIER_ROLES.has(authProfile.role)) {
+    return { error: "You don't have permission to add clients — contact a firm owner or partner." };
+  }
 
   // Free-tier studio cap (2026-09-14) — see lib/platform/firm-studio.ts;
   // a no-op when this deployment isn't linked to a studio at all.

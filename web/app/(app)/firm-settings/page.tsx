@@ -43,15 +43,33 @@ export default async function FirmSettingsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: firm, error }, { data: myProfile }, { data: patterns, error: patternsError }] = await Promise.all([
-    supabase
-      .from("firms")
-      .select(
-        "company_name, firm_type, gst_type, gstin, pan, architect_name, coa_reg_no, email, phone, address_line1, address_line2, city, district, state, pincode, tds_applicable_default",
-      )
-      .limit(1)
-      .maybeSingle(),
-    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+  const { data: myProfile } = user
+    ? await supabase.from("profiles").select("role, firm_id").eq("id", user.id).maybeSingle()
+    : { data: null };
+
+  // Scope the `firms` read explicitly to the caller's ACTIVE firm
+  // (profiles.firm_id, fetched just above) instead of an unscoped
+  // `.from("firms").select(...).limit(1).maybeSingle()`. That unscoped
+  // read + `.limit(1)` is exactly the bug QA hit: migration 0055's
+  // additive "firms: member read own memberships" SELECT policy makes
+  // EVERY firm a profile has ever belonged to visible on a plain `firms`
+  // select, not just the active one, so `.limit(1)` was silently keeping
+  // whichever row Postgres happened to return first (which, after
+  // switch_active_firm() re-points profiles.firm_id, is not guaranteed to
+  // be the new active firm) — see lib/firm/current.ts's header for the
+  // full account.
+  const activeFirmId = myProfile?.firm_id ?? null;
+
+  const [{ data: firm, error }, { data: patterns, error: patternsError }] = await Promise.all([
+    activeFirmId
+      ? supabase
+          .from("firms")
+          .select(
+            "company_name, firm_type, gst_type, gstin, pan, architect_name, coa_reg_no, email, phone, address_line1, address_line2, city, district, state, pincode, tds_applicable_default",
+          )
+          .eq("id", activeFirmId)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
     supabase.from("numbering_patterns").select("id, scope, prefix, padding").order("scope"),
   ]);
 

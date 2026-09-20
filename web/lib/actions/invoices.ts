@@ -6,6 +6,7 @@ import { generatePdfForTarget } from "../jobs/generate-pdf";
 import { computeGst, computeTds194j, GstSystem, tds194jApplies } from "../tax/gst";
 import { derivePlaceOfSupply } from "../tax/place-of-supply";
 import { financialYearRange } from "../tax/fy";
+import { getActiveFirmId } from "../firm/current";
 import { toSafeErrorMessage } from "../security/safe-error";
 
 export type InvoiceActionState = { error: string } | null;
@@ -59,8 +60,20 @@ export async function createInvoiceRecord(
 
   const supabase = await createClient();
 
+  // Scope the `firms` read to the caller's ACTIVE firm explicitly — see
+  // lib/firm/current.ts's header for why an unscoped `.from("firms")` read
+  // is broken for any account with 2+ firm memberships (migration 0055's
+  // additive "firms: member read own memberships" SELECT policy). This is
+  // exactly what produced the "Could not load firm settings: JSON object
+  // requested, multiple (or no) rows returned" error QA hit.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const activeFirmId = await getActiveFirmId(supabase, user?.id);
+  if (!activeFirmId) return { error: "Could not load firm settings: no active firm on this account." };
+
   const [{ data: firm, error: firmError }, { data: project, error: projectError }] = await Promise.all([
-    supabase.from("firms").select("gst_type, state, gstin, tds_applicable_default").maybeSingle(),
+    supabase.from("firms").select("gst_type, state, gstin, tds_applicable_default").eq("id", activeFirmId).maybeSingle(),
     supabase.from("project_offices").select("state").eq("id", projectId).maybeSingle(),
   ]);
   if (firmError) return { error: `Could not load firm settings: ${toSafeErrorMessage(firmError)}` };

@@ -18,12 +18,30 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { importClientsCsv } from "../../../lib/actions/clients";
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and web/lib/actions/clients.ts's own copy of this set). Gates the
+// "Create client" trigger and CSV import bar the same way Firm Settings
+// gates its edit controls (canEditFirm) and Users gates its management
+// controls — those two already hid write UI correctly for VIEWER; Clients
+// did not (found by live QA 2026-09-20, fixed here — the actual
+// authorization boundary is the RLS/Server Action fix in
+// lib/actions/clients.ts, this is the matching defense-in-depth UI fix).
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function ClientsPage() {
   const supabase = await createClient();
-  const { data: clients, error } = await supabase
-    .from("clients")
-    .select("id, name, kind, city, email, phone, contact_person, disabled")
-    .order("name");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const [{ data: clients, error }, { data: myProfile }] = await Promise.all([
+    supabase
+      .from("clients")
+      .select("id, name, kind, city, email, phone, contact_person, disabled")
+      .order("name"),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+  ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = clients ?? [];
   const activeCount = rows.filter((c) => !c.disabled).length;
@@ -32,16 +50,18 @@ export default async function ClientsPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New client" description="Add a client to AORMS.">
-        <AddClientForm />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New client" description="Add a client to AORMS.">
+          <AddClientForm />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Clients"
               description="Client CRM — attach projects, invoices, and portal logins."
-              actions={<ContextPanelTrigger size="sm">Create client</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Create client</ContextPanelTrigger> : undefined}
             />
 
             <ImportExportBar

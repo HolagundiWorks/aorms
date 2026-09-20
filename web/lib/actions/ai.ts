@@ -11,6 +11,7 @@ import { listOpenTasksTool } from "../ai/tools/list-open-tasks";
 import { searchProjectRecordsTool } from "../ai/tools/search-project-records";
 import { draftKindNeedsProject, isAiDraftKind, type AiDraftKind } from "../ai/draft-kinds";
 import { buildDraftPrompt } from "../ai/draft-prompts";
+import { getActiveFirmId } from "../firm/current";
 import { toSafeErrorMessage } from "../security/safe-error";
 
 /**
@@ -171,7 +172,16 @@ export async function generateAiDraft(_prev: GenerateAiDraftState, formData: For
     };
   }
 
-  const { data: firm } = await supabase.from("firms").select("company_name").maybeSingle();
+  // Scoped to the caller's ACTIVE firm explicitly — see lib/firm/current.ts's
+  // header for why an unscoped `.from("firms")` read is broken for any
+  // account with 2+ firm memberships (migration 0055's additive "firms:
+  // member read own memberships" SELECT policy). Low blast radius here
+  // (wrong/blank firm name in a drafted document), but same root cause as
+  // the /firm-settings and invoice-creation bugs.
+  const activeFirmId = await getActiveFirmId(supabase, user.id);
+  const { data: firm } = activeFirmId
+    ? await supabase.from("firms").select("company_name").eq("id", activeFirmId).maybeSingle()
+    : { data: null };
 
   const built = buildDraftPrompt(kind, { project, billing, decisions, userPrompt, firmName: firm?.company_name || undefined });
 

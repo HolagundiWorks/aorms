@@ -1,4 +1,5 @@
 import { createClient as createWebClient } from "../supabase/server";
+import { getActiveFirmId } from "../firm/current";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "./service";
 
 export type FirmStudio = { id: string; name: string; public_id: string; plan: string };
@@ -16,7 +17,25 @@ export type FirmStudio = { id: string; name: string; public_id: string; plan: st
  */
 export async function getFirmStudio(): Promise<FirmStudio | null> {
   const webSupabase = await createWebClient();
-  const { data: firm } = await webSupabase.from("firms").select("platform_studio_public_id").maybeSingle();
+  const {
+    data: { user },
+  } = await webSupabase.auth.getUser();
+  // Scoped explicitly to the caller's ACTIVE firm — see lib/firm/current.ts's
+  // header for why an unscoped `.from("firms")` read is broken for any
+  // account with 2+ firm memberships (migration 0055's additive "firms:
+  // member read own memberships" SELECT policy). This function gates the
+  // free-tier client/contractor/project caps (checkPlanCap below), so
+  // returning the WRONG firm's studio here would apply the wrong plan's
+  // caps — same class of bug as the /firm-settings and invoice-creation
+  // ones, just with a cap-enforcement blast radius instead of a
+  // read/write one.
+  const activeFirmId = await getActiveFirmId(webSupabase, user?.id);
+  if (!activeFirmId) return null;
+  const { data: firm } = await webSupabase
+    .from("firms")
+    .select("platform_studio_public_id")
+    .eq("id", activeFirmId)
+    .maybeSingle();
   const handle = firm?.platform_studio_public_id;
   if (!handle) return null;
 

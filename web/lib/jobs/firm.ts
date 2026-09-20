@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getActiveFirmId } from "../firm/current";
 
 /**
  * The flat shape worker/esti_worker/jobs/pdf.py's HTML templates expect in
@@ -24,11 +25,24 @@ export async function getFirmForPdf(
   // created client rather than this module creating a second one.
   supabase: SupabaseClient,
 ): Promise<{ firm: FirmForPdf; error?: never } | { firm?: never; error: string }> {
+  // Scoped to the caller's ACTIVE firm explicitly — see lib/firm/current.ts's
+  // header for why an unscoped `.from("firms")` read is broken for any
+  // account with 2+ firm memberships (migration 0055's additive "firms:
+  // member read own memberships" SELECT policy): it can return the wrong
+  // firm's letterhead (company name/GSTIN/PAN/address) onto a generated
+  // PDF, or fail outright with "multiple rows returned".
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const activeFirmId = await getActiveFirmId(supabase, user?.id);
+  if (!activeFirmId) return { error: "No active firm on this account." };
+
   const { data: firm, error } = await supabase
     .from("firms")
     .select(
       "company_name, gstin, pan, coa_reg_no, email, phone, address_line1, address_line2, city, state, pincode",
     )
+    .eq("id", activeFirmId)
     .maybeSingle();
   if (error) return { error: error.message };
 
