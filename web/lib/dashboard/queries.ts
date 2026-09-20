@@ -20,15 +20,27 @@ function embedOne<T>(value: T | T[] | null): T | null {
 
 export type AbsenceToday = { id: string; teamMemberName: string; type: string; toDate: string };
 
-/** Who's on approved leave today — no office-wide reader of `leaves`
- * existed before this (only a per-team-member history view). */
-export async function getAbsencesToday(supabase: Client, today: string): Promise<AbsenceToday[]> {
-  const { data } = await supabase
+/**
+ * Who's on approved leave today — no office-wide reader of `leaves`
+ * existed before this (only a per-team-member history view).
+ *
+ * `firmId` (2026-09-20) — optional, and only ever needed by a service-role
+ * caller (app/api/pulse/snapshot-kpis/route.ts), which bypasses RLS
+ * entirely and must scope explicitly per firm in its own per-firm loop.
+ * Every other caller of this file's functions runs against a session-
+ * bound client, where RLS already restricts every row to the caller's
+ * own active firm — passing `firmId` there would be redundant, not wrong,
+ * but is never necessary and every existing call site is left as-is.
+ */
+export async function getAbsencesToday(supabase: Client, today: string, firmId?: string): Promise<AbsenceToday[]> {
+  let query = supabase
     .from("leaves")
     .select("id, type, to_date, team_members(name)")
     .eq("status", "APPROVED")
     .lte("from_date", today)
     .gte("to_date", today);
+  if (firmId) query = query.eq("firm_id", firmId);
+  const { data } = await query;
   return (data ?? []).map((r) => ({
     id: r.id,
     teamMemberName: embedOne<{ name: string }>(r.team_members)?.name ?? "—",
@@ -42,12 +54,14 @@ export type ReadyToBillInvoice = { id: string; ref: string; projectTitle: string
 /** Drafted invoices ready to issue — "ready to bill," not "billable
  * hours": there's no unbilled-time-entry table in this schema, so a
  * DRAFT invoice's own amount is the honest real-data mapping. */
-export async function getReadyToBill(supabase: Client): Promise<{ total: number; rows: ReadyToBillInvoice[] }> {
-  const { data } = await supabase
+export async function getReadyToBill(supabase: Client, firmId?: string): Promise<{ total: number; rows: ReadyToBillInvoice[] }> {
+  let query = supabase
     .from("invoices")
     .select("id, ref, net_receivable_paise, project_offices(title)")
     .eq("status", "DRAFT")
     .order("net_receivable_paise", { ascending: false });
+  if (firmId) query = query.eq("firm_id", firmId);
+  const { data } = await query;
   const rows = (data ?? []).map((r) => ({
     id: r.id,
     ref: r.ref,
@@ -72,12 +86,15 @@ export type AwaitingPaymentInvoice = {
 export async function getAwaitingPayment(
   supabase: Client,
   today: string,
+  firmId?: string,
 ): Promise<{ total: number; rows: AwaitingPaymentInvoice[] }> {
-  const { data } = await supabase
+  let query = supabase
     .from("invoices")
     .select("id, ref, grand_total_paise, paid_paise, date_invoice, project_offices(title)")
     .eq("status", "ISSUED")
     .order("date_invoice", { ascending: true, nullsFirst: false });
+  if (firmId) query = query.eq("firm_id", firmId);
+  const { data } = await query;
   const todayMs = new Date(today).getTime();
   const rows = (data ?? []).map((r) => ({
     id: r.id,
@@ -144,13 +161,15 @@ export type ClientRequest = {
  * requests — ACKNOWLEDGEMENT excluded, that's a client confirming
  * something, not raising one). New office-wide query: today only the
  * client's own portal reads `portal_submissions`. */
-export async function getOpenClientRequests(supabase: Client): Promise<ClientRequest[]> {
-  const { data } = await supabase
+export async function getOpenClientRequests(supabase: Client, firmId?: string): Promise<ClientRequest[]> {
+  let query = supabase
     .from("portal_submissions")
     .select("id, kind, subject, project_id, revision_category, created_at, project_offices(title)")
     .eq("status", "OPEN")
     .in("kind", ["CHANGE_REQUEST", "FEEDBACK", "MEETING_REQUEST"])
     .order("created_at", { ascending: true });
+  if (firmId) query = query.eq("firm_id", firmId);
+  const { data } = await query;
   return (data ?? []).map((r) => ({
     id: r.id,
     kind: r.kind,
@@ -173,12 +192,14 @@ export type ConsultantRequest = {
 
 /** Open consultant submissions (RFI/deliverable/note/task) — real data
  * source, the Collaborator Portal already writes here. */
-export async function getOpenConsultantRequests(supabase: Client): Promise<ConsultantRequest[]> {
-  const { data } = await supabase
+export async function getOpenConsultantRequests(supabase: Client, firmId?: string): Promise<ConsultantRequest[]> {
+  let query = supabase
     .from("consultant_submissions")
     .select("id, kind, subject, created_at, project_offices(title), consultants(name)")
     .eq("status", "OPEN")
     .order("created_at", { ascending: true });
+  if (firmId) query = query.eq("firm_id", firmId);
+  const { data } = await query;
   return (data ?? []).map((r) => ({
     id: r.id,
     kind: r.kind,
@@ -193,12 +214,14 @@ export type OpenTender = { id: string; title: string; projectTitle: string | nul
 
 /** Open tenders — invited/bid counts, contractor request equivalent for
  * work you're procuring rather than being asked something. */
-export async function getOpenTenders(supabase: Client): Promise<OpenTender[]> {
-  const { data: tenders } = await supabase
+export async function getOpenTenders(supabase: Client, firmId?: string): Promise<OpenTender[]> {
+  let tendersQuery = supabase
     .from("tenders")
     .select("id, title, due_date, project_offices(title)")
     .eq("status", "OPEN")
     .order("due_date", { ascending: true, nullsFirst: false });
+  if (firmId) tendersQuery = tendersQuery.eq("firm_id", firmId);
+  const { data: tenders } = await tendersQuery;
   const tenderRows = tenders ?? [];
   if (tenderRows.length === 0) return [];
 

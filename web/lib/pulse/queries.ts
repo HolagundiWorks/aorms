@@ -25,8 +25,16 @@ export type TopPriorityTask = {
  * priority_score >= 70 — mirrored here as a real count rather than
  * filtering getTopPriorityTasks()'s own capped-at-8 display list.
  */
-export async function getCriticalTasksCount(supabase: SupabaseClient): Promise<number> {
-  const { count } = await supabase.from("tasks").select("id", { count: "exact", head: true }).neq("status", "DONE").gte("priority_score", 70);
+/**
+ * `firmId` (2026-09-20) — optional, only needed by the service-role
+ * snapshot-kpis cron (app/api/pulse/snapshot-kpis/route.ts), which
+ * bypasses RLS entirely; every session-bound caller (this page itself)
+ * relies on RLS to scope rows and leaves this unset, unchanged.
+ */
+export async function getCriticalTasksCount(supabase: SupabaseClient, firmId?: string): Promise<number> {
+  let query = supabase.from("tasks").select("id", { count: "exact", head: true }).neq("status", "DONE").gte("priority_score", 70);
+  if (firmId) query = query.eq("firm_id", firmId);
+  const { count } = await query;
   return count ?? 0;
 }
 
@@ -70,8 +78,10 @@ export async function getLowConfidenceTasks(supabase: SupabaseClient, threshold 
 }
 
 /** Real total for the "Low confidence" KPI tile — see getOpenMissingParamsCount()'s own comment for why this exists separately from the capped display list above. */
-export async function getLowConfidenceTasksCount(supabase: SupabaseClient, threshold = 60): Promise<number> {
-  const { count } = await supabase.from("tasks").select("id", { count: "exact", head: true }).neq("status", "DONE").lt("confidence_score", threshold);
+export async function getLowConfidenceTasksCount(supabase: SupabaseClient, threshold = 60, firmId?: string): Promise<number> {
+  let query = supabase.from("tasks").select("id", { count: "exact", head: true }).neq("status", "DONE").lt("confidence_score", threshold);
+  if (firmId) query = query.eq("firm_id", firmId);
+  const { count } = await query;
   return count ?? 0;
 }
 
@@ -101,8 +111,10 @@ export async function getBlockedTasks(supabase: SupabaseClient, limit = 8): Prom
 }
 
 /** Real total for the "Blocked tasks" KPI tile — see getOpenMissingParamsCount()'s own comment for why this exists separately from the capped display list above. */
-export async function getBlockedTasksCount(supabase: SupabaseClient): Promise<number> {
-  const { count } = await supabase.from("task_dependencies").select("id", { count: "exact", head: true }).eq("dependency_type", "BLOCKS").eq("status", "OPEN");
+export async function getBlockedTasksCount(supabase: SupabaseClient, firmId?: string): Promise<number> {
+  let query = supabase.from("task_dependencies").select("id", { count: "exact", head: true }).eq("dependency_type", "BLOCKS").eq("status", "OPEN");
+  if (firmId) query = query.eq("firm_id", firmId);
+  const { count } = await query;
   return count ?? 0;
 }
 
@@ -184,7 +196,9 @@ export async function getOpenMissingParams(supabase: SupabaseClient, limit = 12)
  * a real `count: "exact", head: true` query, independent of the display
  * list's own limit.
  */
-export async function getOpenMissingParamsCount(supabase: SupabaseClient): Promise<number> {
-  const { count } = await supabase.from("task_missing_params").select("id", { count: "exact", head: true }).eq("status", "OPEN");
+export async function getOpenMissingParamsCount(supabase: SupabaseClient, firmId?: string): Promise<number> {
+  let query = supabase.from("task_missing_params").select("id", { count: "exact", head: true }).eq("status", "OPEN");
+  if (firmId) query = query.eq("firm_id", firmId);
+  const { count } = await query;
   return count ?? 0;
 }

@@ -271,20 +271,17 @@ Hub data reset nightly via `pg_cron`).
   production via a headless Playwright session signed in with the demo
   credentials, added as a gallery in the `#live-demo` section right
   above the existing demo-credentials CTA.
-- **Content-Security-Policy — shipped in Report-Only mode, not yet
-  enforcing (last checked 2026-09-14, not reverified since).** Not the
-  "nothing built yet" state an earlier version of this entry implied:
-  built from what the app actually loads (Razorpay checkout, Supabase
-  Storage, self-hosted fonts), and the Report-Only rollout already
-  caught and fixed one real issue (Next.js App Router's own inline
-  hydration scripts, via `'unsafe-inline'` in `script-src`). **Known
-  unresolved issue as of the 2026-09-14 entry**: `aorms.in` was
-  intermittently/persistently serving the pre-fix header despite the fix
-  being committed and pushed well before — a Hostinger deploy-serving
-  issue, not a code defect (see that dated History entry for the exact
-  commit hash and verification). Do not flip to enforcing until the live
-  header is reconfirmed to include `'unsafe-inline'` in `script-src` —
-  that reconfirmation hasn't happened since 2026-09-14.
+- ~~Content-Security-Policy — shipped in Report-Only mode, not yet
+  enforcing~~ **Superseded 2026-09-20 — see the newer, more specific
+  entry above ("Content-Security-Policy flipped to enforcing, but
+  Hostinger's edge CDN silently overwrites it").** Report-Only was
+  reconfirmed live and clean across 6 page types this date, then flipped
+  to enforcing (`570f45dd`) — the code-side work this entry was tracking
+  is done. What's still open is different and platform-level, not a
+  code gap: production doesn't actually serve the app's own CSP header
+  at all (Hostinger's edge overwrites it), so "flip to enforcing" landed
+  but isn't functionally in effect yet. Kept struck through rather than
+  deleted so the history of what was checked/when isn't lost.
 - **No readiness/dependency health check (deliberate, not an oversight —
   see `web/app/api/health/route.ts`'s own comment)** — `/api/health` is a
   pure liveness check only, on purpose: conflating "process is up" with

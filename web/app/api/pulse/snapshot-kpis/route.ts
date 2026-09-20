@@ -40,12 +40,16 @@ export async function POST(request: Request) {
   // no usable default for a session-less caller, and its unique key is now
   // (firm_id, metric_key, captured_on) — an unscoped upsert would fail
   // outright, not just be imprecise. The 4 inline counts below are
-  // explicitly firm-filtered; the ~10 query helpers from lib/dashboard/
-  // queries.ts and lib/pulse/queries.ts are NOT yet firm-scoped (they're
-  // designed for session-bound callers where RLS already handles it
-  // transparently — see the /pulse page's own use of them) — a disclosed
-  // gap, not silently declared fixed: correct only while a single firm's
-  // data exists in this project, which is still true today.
+  // explicitly firm-filtered.
+  //
+  // 2026-09-20 fix — the other 10 query helpers (lib/dashboard/queries.ts,
+  // lib/pulse/queries.ts) used to be called with no firm filter at all:
+  // designed for session-bound callers where RLS already scopes every
+  // row, they silently returned the SAME cross-firm totals for every
+  // firm's snapshot row once a second firm's data actually existed in
+  // this project (which it now does). Each now takes an optional trailing
+  // `firmId` that adds an explicit `.eq("firm_id", firmId)` — passed here,
+  // left unset at every other (session-bound) call site.
   const { data: firms, error: firmsError } = await supabase.from("firms").select("id");
   if (firmsError) return NextResponse.json({ error: firmsError.message }, { status: 500 });
 
@@ -72,16 +76,16 @@ export async function POST(request: Request) {
         supabase.from("project_offices").select("id", { count: "exact", head: true }).eq("firm_id", firm.id).then((r) => r.count ?? 0),
         supabase.from("proposals").select("id", { count: "exact", head: true }).eq("firm_id", firm.id).then((r) => r.count ?? 0),
         supabase.from("tasks").select("id", { count: "exact", head: true }).eq("firm_id", firm.id).neq("status", "DONE").then((r) => r.count ?? 0),
-        getAbsencesToday(supabase, today),
-        getReadyToBill(supabase),
-        getAwaitingPayment(supabase, today),
-        getOpenClientRequests(supabase),
-        getOpenConsultantRequests(supabase),
-        getOpenTenders(supabase),
-        getCriticalTasksCount(supabase),
-        getBlockedTasksCount(supabase),
-        getOpenMissingParamsCount(supabase),
-        getLowConfidenceTasksCount(supabase),
+        getAbsencesToday(supabase, today, firm.id),
+        getReadyToBill(supabase, firm.id),
+        getAwaitingPayment(supabase, today, firm.id),
+        getOpenClientRequests(supabase, firm.id),
+        getOpenConsultantRequests(supabase, firm.id),
+        getOpenTenders(supabase, firm.id),
+        getCriticalTasksCount(supabase, firm.id),
+        getBlockedTasksCount(supabase, firm.id),
+        getOpenMissingParamsCount(supabase, firm.id),
+        getLowConfidenceTasksCount(supabase, undefined, firm.id),
       ]);
 
       const criticalPulseCount = criticalCount;
