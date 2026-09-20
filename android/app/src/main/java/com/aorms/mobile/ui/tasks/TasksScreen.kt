@@ -96,9 +96,10 @@ fun TasksScreen(viewModel: TasksViewModel) {
     }
 }
 
+/** Shared with ui.today.TodayScreen's own "+ Add task" quick action — same create-task form, one definition. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NewTaskSheet(
+fun NewTaskSheet(
     projects: List<ProjectOption>,
     onDismiss: () -> Unit,
     onCreate: (String, String?, String, String?) -> Unit,
