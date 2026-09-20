@@ -145,16 +145,35 @@ health-check → chat → redact → fallback shape that `askEsti`/
 `generateAiDraft`/`generateDailyBrief` each currently hand-roll
 identically and separately.
 
-**Deliberately not wired into those 3 call sites yet.** They're live,
-shipped, working features — migrating them onto `runChat()` is a small,
-separate, carefully-reviewed change, not bundled into adding the
-abstraction itself; doing both at once risks a subtle regression in a
-production feature with nobody watching to catch it. `tsc --noEmit` and
-`eslint` both clean on the new files; not yet runtime-tested against a
-live Ollama instance (the wrapped functions are 1:1 delegations to
-already-used, unmodified code, so the risk surface is low, but this is
-still real and worth stating plainly rather than implying more
-verification happened than did).
+**`generateAiDraft` wired onto `runChat()` (2026-09-20, same day).** Its
+hand-rolled health-check→chat→redact→fallback block was a byte-for-byte
+match for what `runChat()` already does — confirmed by reading both side
+by side, not assumed — so the swap is behavior-preserving: same
+`provider`/`model`/`tokenEstimate` values on both the success and
+fallback paths. Runtime-verified against a real local Ollama instance
+(pulled `llama3.2`, not just typechecked) before shipping — a real
+prompt through `runChat()` returned real model output with correct
+`provider: "ollama"` labeling.
+
+**`askEsti` and `generateDailyBrief` deliberately NOT wired — this plan's
+original premise that all 3 call sites "hand-roll it identically" turned
+out to be stale by the time this section was revisited, not still true:**
+- `askEsti` (`lib/actions/ai.ts`) now runs through `runAgenticChat()`
+  (`lib/ai/agent-loop.ts`, phase 6 tool-calling), a genuinely different
+  capability — history/tool-call loops `runChat()`'s plain
+  `{system, user, fallback}` shape doesn't support. Wiring it onto
+  `runChat()` as written would be a regression (losing tool-calling), not
+  a refactor. `AIProvider`'s interface would need a `chatWithTools()`
+  capability added first — real, separate future work, not done here.
+- `generateDailyBrief` (`lib/actions/daily-brief.ts`) has a deliberately
+  different fallback: on an unhealthy/failed Ollama call it keeps the
+  already-correct `deterministicText` and labels it
+  `provider: "template"`/`model: "deterministic"` — distinct from
+  `runChat()`'s generic `"mock"`/`"template-fallback"` labels, and that
+  distinction is meaningful provenance data in `ai_runs` (a real
+  deterministic answer vs. a "the AI didn't answer" placeholder), not
+  something to silently collapse into one label by routing it through
+  `runChat()` unchanged.
 
 ## Google Drive (phase 7 — unblocked 2026-09-20)
 

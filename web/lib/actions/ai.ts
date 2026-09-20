@@ -3,8 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
-import { callOllamaChat, checkOllamaHealth, ollamaBaseUrlFromEnv, ollamaModelFromEnv } from "../ai/ollama";
-import { redactPii } from "../ai/redact";
+import { runChat } from "../ai/run-chat";
 import { ESTI_AGENT_SYSTEM } from "../ai/prompt";
 import { runAgenticChat } from "../ai/agent-loop";
 import { studioSnapshotTool } from "../ai/tools/studio-snapshot";
@@ -176,31 +175,11 @@ export async function generateAiDraft(_prev: GenerateAiDraftState, formData: For
 
   const built = buildDraftPrompt(kind, { project, billing, decisions, userPrompt, firmName: firm?.company_name || undefined });
 
-  const baseUrl = ollamaBaseUrlFromEnv();
-  const model = ollamaModelFromEnv();
-  let output: string;
-  let provider: string;
-  let usedModel: string;
-  let tokenEstimate: number | null = null;
-
-  const health = await checkOllamaHealth({ baseUrl, model });
-  if (health.ok) {
-    try {
-      const { text, tokens } = await callOllamaChat({ baseUrl, model, system: built.system, user: built.user });
-      output = redactPii(text);
-      provider = "ollama";
-      usedModel = model;
-      tokenEstimate = tokens;
-    } catch {
-      output = built.fallback;
-      provider = "mock";
-      usedModel = "template-fallback";
-    }
-  } else {
-    output = built.fallback;
-    provider = "mock";
-    usedModel = "template-fallback";
-  }
+  const { output, provider, model: usedModel, tokenEstimate } = await runChat({
+    system: built.system,
+    user: built.user,
+    fallback: built.fallback,
+  });
 
   const { data: row, error } = await supabase
     .from("ai_runs")
