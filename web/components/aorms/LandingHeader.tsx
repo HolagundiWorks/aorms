@@ -68,7 +68,7 @@ export function LandingHeader() {
           className="landing-nav-desktop"
           style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}
         >
-          <Link href="#value" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
+          <Link href="#pulse" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>
             Product
           </Link>
           <Link href="#project-record" className="cds--type-body-01" style={{ color: "inherit", textDecoration: "none" }}>

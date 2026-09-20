@@ -148,18 +148,6 @@ export const PROBLEM = {
 } as const;
 
 /**
- * "The old way" fragmentation visual — landing page V2 (2026-09-20
- * positioning brief): show the scatter before naming the fix, rather
- * than attacking named competitors. Deliberately just tool names, no
- * claim about what AORMS replaces each one with (that's PROBLEM.with,
- * directly above where this renders).
- */
-export const OLD_WAY = {
-  tools: ["Google Drive", "Excel", "WhatsApp", "Email", "AutoCAD", "Tally", "Meetings", "Personal notes"],
-  resolution: "One operational layer connecting them all.",
-} as const;
-
-/**
  * Automation section — landing page V2. Both chains describe flows the
  * product genuinely runs today: `moms` (Minutes of Meeting) → tagged
  * revisions/decisions → `tasks` with assignments is real (see
@@ -180,45 +168,6 @@ export const AUTOMATION_SECTION = {
     { steps: ["Drawing submitted", "Client portal", "Approval", "Project updated"] },
   ],
 } as const;
-
-/**
- * Four core value cards (spec §7). `anchor` (UI/UX audit fix, 2026-09-14)
- * — each card used to be an implicit "read more below" promise that only
- * two of the four actually kept (fee recovery and revisions have their
- * own deep-dive sections; "what's slipping" and "team status" didn't
- * point anywhere). Rather than inventing two new sections that don't
- * exist in the product, each card now links to where that capability is
- * genuinely already shown: Pulse's own "Projects at risk"/"Open
- * revisions" tiles for slipping work, and its "Team unavailable" tile
- * for team status — connecting an existing promise to existing proof,
- * not a new claim.
- */
-export const VALUE_CARDS = [
-  {
-    icon: "currency",
-    title: "Capture work you forgot to bill.",
-    body: "Connect work, revisions, milestones, and fees so billable activity doesn't disappear into the day-to-day project workflow.",
-    anchor: "#fee-recovery",
-  },
-  {
-    icon: "revision",
-    title: "Every client change gets a price.",
-    body: "Record the revision, assess its impact, cost it, get client approval, and only then execute it.",
-    anchor: "#revision-management",
-  },
-  {
-    icon: "risk",
-    title: "Know what's slipping.",
-    body: "Surface overdue tasks, blocked decisions, pending approvals, and project risk before they become delivery problems.",
-    anchor: "#pulse",
-  },
-  {
-    icon: "team",
-    title: "Know where your team stands.",
-    body: "See workload, ownership, availability, and pending work without asking everyone for a status update.",
-    anchor: "#pulse",
-  },
-] as const;
 
 /**
  * Pulse showcase (spec §8). Reworked 2026-09-14 (follow-up: "the...

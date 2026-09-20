@@ -7,7 +7,7 @@ import { Menu, Close } from "@carbon/icons-react";
 // Kept in sync with LandingHeader.tsx's desktop nav (2026-09-14 landing
 // rebuild, spec §3's nav set).
 const NAV_LINKS = [
-  { href: "#value", label: "Product" },
+  { href: "#pulse", label: "Product" },
   { href: "#pricing", label: "Solutions" },
   { href: "#pulse", label: "How It Works" },
   { href: "#roi", label: "ROI" },

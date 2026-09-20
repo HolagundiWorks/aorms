@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { Accordion, AccordionItem, Column, Grid, Tag, Tile } from "@carbon/react";
-import { Currency, Renew, WarningAlt, UserMultiple, CheckmarkFilled, Close, ArrowRight } from "@carbon/icons-react";
+import { CheckmarkFilled, Close, ArrowRight } from "@carbon/icons-react";
 import { createClient } from "../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../lib/platform/service";
 import { portalUrl } from "../lib/platform/subdomains";
@@ -15,7 +15,6 @@ import { BillingForecastPanel } from "../components/aorms/BillingForecastPanel";
 import { RevisionLifecyclePanel } from "../components/aorms/RevisionLifecyclePanel";
 import { TodaysBriefingPanel } from "../components/aorms/TodaysBriefingPanel";
 import { OperationalLeakageCalculator } from "../components/aorms/landing/OperationalLeakageCalculator";
-import { KpiAnatomyDiagram } from "../components/aorms/landing/KpiAnatomyDiagram";
 import { MotionRoot } from "../components/aorms/motion/MotionRoot";
 import { MotionReveal } from "../components/aorms/motion/MotionReveal";
 import { MotionEnter } from "../components/aorms/motion/MotionEnter";
@@ -29,7 +28,6 @@ import {
   FAQ,
   FEE_RECOVERY,
   HUMAN_CENTRIC_WORKS,
-  OLD_WAY,
   OPERATIONAL_LEAKAGE,
   PRICING,
   PROBLEM,
@@ -37,13 +35,10 @@ import {
   PROJECT_RECORD,
   PULSE_SECTION,
   REVISION_MANAGEMENT,
-  VALUE_CARDS,
 } from "../lib/marketing-content";
 
 const PAGE_MAX = 1200;
 const SECTION_PAD = "clamp(3rem, 6vw, 6rem) 0";
-
-const VALUE_ICONS = { currency: Currency, revision: Renew, risk: WarningAlt, team: UserMultiple } as const;
 
 /**
  * SEO (spec §35). Title/description/keywords rewritten for the
@@ -272,71 +267,13 @@ export default async function LandingPage() {
             Shows the scatter of tools a practice actually juggles, then
             names AORMS as the one layer connecting them, without
             attacking any named competitor. */}
-        <section id="old-way" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
-              <h2 className="cds--type-heading-05">Run your architecture practice without running it through WhatsApp, Excel, and memory.</h2>
-            </Column>
-            <Column sm={4} md={8} lg={16}>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center" }}>
-                {OLD_WAY.tools.map((tool) => (
-                  <Tag key={tool} type="cool-gray" size="md">
-                    {tool}
-                  </Tag>
-                ))}
-              </div>
-              <div style={{ display: "flex", justifyContent: "center", margin: "1.5rem 0" }}>
-                <ArrowRight size={20} style={{ color: "var(--cds-icon-secondary)", transform: "rotate(90deg)" }} />
-              </div>
-              <Tile style={{ textAlign: "center", maxWidth: 480, margin: "0 auto", borderLeft: "3px solid var(--cds-support-info)" }}>
-                <p className="cds--type-productive-heading-03">{AORMS_PLATFORM.name}</p>
-                <p className="cds--type-body-01" style={{ marginTop: "0.375rem", color: "var(--cds-text-secondary)" }}>
-                  {OLD_WAY.resolution}
-                </p>
-              </Tile>
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* 3. Core value proposition — four cards (spec §7). UI/UX audit
-            fix (2026-09-14): each card is an implicit "read more below"
-            promise; two of the four had nowhere to send a visitor who
-            believed it (no dedicated section existed for "what's
-            slipping" or "team status"). Rather than inventing sections
-            for capabilities the product doesn't have their own page for,
-            each card links to where that capability is genuinely already
-            shown (`VALUE_CARDS[].anchor`, marketing-content.ts) — Fee
-            Recovery, Revision Management, or Pulse's own risk/team
-            tiles. */}
-        <section id="value" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
-              <h2 className="cds--type-heading-05">See what needs attention before it becomes expensive.</h2>
-            </Column>
-            {VALUE_CARDS.map((card) => {
-              const Icon = VALUE_ICONS[card.icon];
-              return (
-                <Column key={card.title} sm={4} md={4} lg={4} style={{ marginBottom: "1rem" }}>
-                  <Link href={card.anchor} style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}>
-                    <Tile style={{ height: "100%" }}>
-                      <Icon size={24} style={{ color: "var(--cds-support-info)" }} />
-                      <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.75rem" }}>
-                        {card.title}
-                      </h3>
-                      <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
-                        {card.body}
-                      </p>
-                    </Tile>
-                  </Link>
-                </Column>
-              );
-            })}
-          </Grid>
-          </MotionReveal>
-        </section>
+        {/* "old-way" (tool-logos -> AORMS resolution diagram) and "value"
+            (4-card preview of the feature sections below) were both cut
+            2026-09-20 — explicit feedback that the page was too long, and
+            both sections were saying the same thing the Problem section
+            above and the Pulse/Fee Recovery/Revision Management sections
+            below already say, just a third way. See git history if either
+            is ever wanted back. */}
 
         {/* 4. Pulse showcase (spec §8). Reworked 2026-09-14 twice —
             first an audit fix dropped the duplicate TodaysBriefingPanel
@@ -387,23 +324,6 @@ export default async function LandingPage() {
                   ))}
                 </div>
               </Tile>
-            </Column>
-
-            {/* KPI-tile anatomy diagram (explicit follow-up request,
-                narrowed twice since to just the alert line + how a
-                glance reads it, then to plain HTML/CSS) — Carbon has no
-                official "KPI card" component; this is a composition of
-                Tile + semantic color tokens, same as the real product's
-                own KpiTile.tsx. */}
-            <Column sm={4} md={8} lg={16} style={{ marginTop: "3rem" }}>
-              <h3 className="cds--type-productive-heading-02">How to read the tiles above.</h3>
-              <p className="cds--type-body-01" style={{ marginTop: "0.375rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
-                Every KPI tile across AORMS carries the same alert line along its top edge, built entirely from stock
-                Carbon Design System semantic color tokens rather than a bespoke indicator.
-              </p>
-              <div style={{ marginTop: "1.25rem", maxWidth: 800 }}>
-                <KpiAnatomyDiagram />
-              </div>
             </Column>
           </Grid>
           </MotionReveal>
