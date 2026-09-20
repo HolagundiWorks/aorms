@@ -43,11 +43,20 @@
 function buildCspHeader(reportOnly) {
   const directives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com",
+    // cdn.razorpay.com: Razorpay's own risk-detection bundle, loaded by
+    // checkout.razorpay.com's checkout script itself (not code this app
+    // calls directly) — seen live in Report-Only mode on every page that
+    // loads Razorpay checkout, added here rather than left to fail closed.
+    "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://cdn.razorpay.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https://*.supabase.co",
     "font-src 'self'",
-    "connect-src 'self' https://*.supabase.co https://api.razorpay.com https://lumberjack.razorpay.com",
+    // https://*.aorms.in: this app's own portal subdomains (identity/
+    // connectdex/sysdex — see proxy.ts + lib/platform/subdomains.ts's
+    // portalUrl()), not a third party — cross-portal <Link>s trigger a
+    // same-org prefetch fetch() Report-Only mode caught live on every page
+    // with portal nav.
+    "connect-src 'self' https://*.supabase.co https://*.aorms.in https://api.razorpay.com https://lumberjack.razorpay.com",
     "frame-src https://api.razorpay.com https://checkout.razorpay.com",
     "object-src 'none'",
     "base-uri 'self'",
@@ -101,12 +110,16 @@ const nextConfig = {
   // marketing) with dynamic Supabase Storage asset URLs and Server-Action
   // form submissions throughout, and a hand-authored CSP wrong in any one
   // of those surfaces fails silently (a blocked resource, not a build
-  // error) — shipping one untested is worse than shipping none. Report-Only
-  // ships the exact intended policy without blocking anything, so it can be
-  // verified live (browser console, zero unexpected violations, across
-  // login/an Office Hub page/a Platform portal page/a Razorpay checkout)
-  // before a follow-up flips this to the enforcing `Content-Security-
-  // Policy` header.
+  // error) — shipping one untested is worse than shipping none.
+  //
+  // 2026-09-20 — flipped to enforcing. Report-Only ran live across landing,
+  // pricing, an authenticated Office Hub sign-in through Pulse/Clients/
+  // Firm Settings, and the Platform identity page with zero unexpected
+  // violations, after two real gaps it surfaced were folded into the
+  // policy above: Razorpay's own risk-detection bundle
+  // (cdn.razorpay.com, loaded by their checkout script, not this app's
+  // own code) on script-src, and same-org cross-portal-subdomain
+  // prefetching (*.aorms.in) on connect-src.
   //
   async headers() {
     return [
@@ -134,7 +147,7 @@ const nextConfig = {
           // touch cross-origin *resource* loading, so it can't break the
           // Supabase Storage images this app already loads cross-origin).
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-          buildCspHeader(true),
+          buildCspHeader(false),
         ],
       },
     ];
