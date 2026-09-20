@@ -107,6 +107,51 @@ Hub data reset nightly via `pg_cron`).
 
 ## Open items — honest, not yet done
 
+- **Android app product direction, set 2026-09-20 — a full IA spec from
+  the user, "Today" slice shipped, rest genuinely ahead.** Explicit
+  architectural decision: the Android app (`android/`, native Kotlin +
+  Jetpack Compose + Supabase Kotlin SDK — real, existing, not a stub) is
+  a **field/operations companion, not a mobile ERP**. Web/desktop stays
+  the full AORMS workspace; Android is a thin client against the exact
+  same backend (same Postgres, same RLS, same events/workflows, same
+  audit) — no separate Android business logic, ever. Product framing:
+  "AORMS Mobile — Capture, Check, Communicate, Approve," explicitly not
+  "AORMS ERP for Android." Full proposed IA (not all built yet): a
+  **Today** home screen ("what do I need to deal with today" — tasks,
+  meetings, approvals, site visits, quick actions), a trimmed **mobile
+  Projects view** (view + act, not administer), **Tasks** (complete/
+  reassign/snooze/note, no complex management screens), **Site** (visit
+  mode: photo/voice/issue/measurement/task capture, auto-tagged to
+  project+location+user), **Meetings** (record → Esti extracts
+  decisions/actions → one-tap "Create Tasks" — a genuinely new AI
+  capability, not built), **Documents** (consume only — view/approve/
+  share, no bulk admin), **Approvals** (its own one-tap surface),
+  **Esti** (contextual commands, not a general chatbot), **Notifications**
+  (driven by the same event/workflow engine, not ad hoc), and a
+  **Quick Capture** `+` FAB with project inference. An explicit "keep off
+  mobile" list: company/accounting/HR administration, tender management,
+  bulk BOQ/rate-book work, complex reports, workflow/permission
+  administration, advanced analytics, bulk data ops, system config — all
+  stay web-only, reachable via a secure link from mobile if ever needed.
+  **Shipped this date**: the **Today** screen — chosen as the first slice
+  specifically because it needed no new backend capability (a
+  client-side split of the same `myTasks()` read `TasksScreen` already
+  used) and no real product decision beyond "reorder the home screen."
+  Replaces the old raw-KPI Dashboard (`ui.dashboard` → `ui.today`); the
+  six Pulse KPI tiles are kept, not dropped, just demoted to a secondary
+  "Studio Pulse" section below the new overdue/today/upcoming agenda.
+  Verified via a real `gradlew compileDebugKotlin` + `assembleDebug`
+  (found and worked around one real, pre-existing `Modifier.weight()`
+  Kotlin/Compose-BOM version-mismatch compiler bug along the way — see
+  the commit for detail); not click-tested on a device/emulator, none
+  available in this environment. **Explicitly NOT started**: mobile
+  Projects view, Meetings/Esti-transcription (needs new AI capability),
+  Approvals mobile surface, Documents mobile viewer, mobile Esti
+  contextual commands, Quick Capture FAB, notifications, and the
+  Home/Projects/Tasks/+/More bottom-nav restructure (still Today/Tasks/
+  Leads/Site/Account today) — each is its own scoped follow-up, not
+  attempted in this pass per explicit user confirmation to start with
+  Today only.
 - ~~Two separate login pages (aorms.in/login vs. identity.aorms.in)~~
   **Resolved 2026-09-20** — explicit user direction ("keep one page[,]
   improve security"), user chose identity.aorms.in as the surviving
