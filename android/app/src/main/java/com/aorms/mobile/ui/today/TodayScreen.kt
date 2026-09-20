@@ -3,13 +3,16 @@ package com.aorms.mobile.ui.today
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -73,7 +76,16 @@ fun TodayScreen(viewModel: TodayViewModel) {
             }
         },
     ) { padding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
+        // Extra bottom content padding (2026-09-20 fix, real bug found live
+        // on device: the floating "+" button visually overlapped and
+        // obscured the last row of an expanded KPI detail panel — a FAB
+        // floats over scrollable content by design, Scaffold's own
+        // `padding` doesn't reserve clearance for it, so the content itself
+        // has to leave room.
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(bottom = 88.dp),
+        ) {
             item {
                 Text("Today", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 16.dp))
                 Text(
@@ -194,7 +206,22 @@ private val KPI_LABELS = mapOf(
  * Each tile is clickable (2026-09-20, explicit user request: "on clicking
  * kpi tiles expand and show detail") — toggles TodayViewModel.expandedKpi,
  * rendered as a single shared detail panel below the whole grid rather
- * than inline per-tile, so tapping a tile never reflows the grid itself. */
+ * than inline per-tile, so tapping a tile never reflows the grid itself.
+ *
+ * Explicit `BoxWithConstraints` + `Modifier.width(tileWidth)` (2026-09-20
+ * fix, real UI bug found live on device: "kpi tiles are of different
+ * sizes") — the previous `Modifier.fillMaxWidth(0.5f)` on each tile
+ * looked correct in isolation but was wrong for a `Row`'s *second*
+ * non-weighted child: Compose passes each subsequent unweighted child the
+ * *remaining* width after earlier siblings, not the Row's own full width,
+ * so the two 0.5f calls compounded (0.5, then 0.5-of-the-remaining-0.5 =
+ * 0.25) instead of splitting evenly — confirmed by measuring the actual
+ * rendered tile widths in a device screenshot, not just reasoned about.
+ * `Modifier.weight(1f)` is the normal fix for exactly this, but hits a
+ * separate, already-documented Kotlin/Compose-BOM version-mismatch
+ * compiler bug in this project (see the commit that first worked around
+ * it) — computing an explicit `Dp` width up front sidesteps both issues
+ * without touching the project's pinned dependency versions. */
 @Composable
 private fun PulseGrid(viewModel: TodayViewModel) {
     val kpis = listOf(
@@ -205,41 +232,45 @@ private fun PulseGrid(viewModel: TodayViewModel) {
         Kpi("projectsAtRisk", "Projects at risk", viewModel.projectsAtRisk, Color(0xFFDA1E28)),
         Kpi("openRevisions", "Open revisions", viewModel.openRevisions, Color(0xFF0F62FE)),
     )
-    Column(modifier = Modifier.padding(bottom = 8.dp)) {
-        kpis.chunked(2).forEach { pair ->
-            Row(modifier = Modifier.fillMaxWidth()) {
-                pair.forEach { kpi ->
-                    val selected = viewModel.expandedKpi == kpi.key
-                    CarbonTile(
-                        modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                            .padding(6.dp)
-                            .aspectRatio(1.6f)
-                            .clickable { viewModel.toggleKpi(kpi.key) },
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                        border = if (selected) BorderStroke(2.dp, kpi.accent) else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize().padding(12.dp),
-                            verticalArrangement = Arrangement.SpaceBetween,
+    BoxWithConstraints(modifier = Modifier.padding(bottom = 8.dp)) {
+        val gap = 12.dp
+        val tileWidth = (maxWidth - gap) / 2
+        Column {
+            kpis.chunked(2).forEach { pair ->
+                Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+                    pair.forEach { kpi ->
+                        val selected = viewModel.expandedKpi == kpi.key
+                        CarbonTile(
+                            modifier = Modifier
+                                .width(tileWidth)
+                                .padding(vertical = 6.dp)
+                                .aspectRatio(1.6f)
+                                .clickable { viewModel.toggleKpi(kpi.key) },
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            border = if (selected) BorderStroke(2.dp, kpi.accent) else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
+                            Column(
+                                modifier = Modifier.fillMaxSize().padding(12.dp),
+                                verticalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                Text(
-                                    if (viewModel.loading) "…" else kpi.value.toString(),
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = kpi.accent,
-                                )
-                                Icon(
-                                    if (selected) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                    contentDescription = if (selected) "Collapse" else "Expand",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp),
-                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text(
+                                        if (viewModel.loading) "…" else kpi.value.toString(),
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        color = kpi.accent,
+                                    )
+                                    Icon(
+                                        if (selected) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                        contentDescription = if (selected) "Collapse" else "Expand",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                }
+                                Text(kpi.label, style = MaterialTheme.typography.bodySmall)
                             }
-                            Text(kpi.label, style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }

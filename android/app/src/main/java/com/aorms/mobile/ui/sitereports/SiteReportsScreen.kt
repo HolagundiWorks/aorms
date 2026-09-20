@@ -2,6 +2,7 @@ package com.aorms.mobile.ui.sitereports
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -71,7 +72,7 @@ fun SiteReportsScreen(viewModel: SiteReportsViewModel) {
             }
             Box(modifier = Modifier.fillMaxSize()) {
                 when (viewModel.tab) {
-                    0 -> LazyColumn(modifier = Modifier.padding(12.dp)) {
+                    0 -> LazyColumn(modifier = Modifier.padding(12.dp), contentPadding = PaddingValues(bottom = 80.dp)) {
                         items(viewModel.progressReports) { r ->
                             CarbonTile(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                                 Column(modifier = Modifier.padding(12.dp)) {
@@ -85,7 +86,7 @@ fun SiteReportsScreen(viewModel: SiteReportsViewModel) {
                             }
                         }
                     }
-                    1 -> LazyColumn(modifier = Modifier.padding(12.dp)) {
+                    1 -> LazyColumn(modifier = Modifier.padding(12.dp), contentPadding = PaddingValues(bottom = 80.dp)) {
                         items(viewModel.snags) { s ->
                             CarbonTile(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                                 Column(modifier = Modifier.padding(12.dp)) {
@@ -99,7 +100,7 @@ fun SiteReportsScreen(viewModel: SiteReportsViewModel) {
                             }
                         }
                     }
-                    else -> LazyColumn(modifier = Modifier.padding(12.dp)) {
+                    else -> LazyColumn(modifier = Modifier.padding(12.dp), contentPadding = PaddingValues(bottom = 80.dp)) {
                         items(viewModel.instructions) { s ->
                             CarbonTile(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                                 Column(modifier = Modifier.padding(12.dp)) {

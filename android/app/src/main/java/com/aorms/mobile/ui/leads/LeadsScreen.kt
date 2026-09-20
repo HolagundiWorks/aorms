@@ -2,6 +2,7 @@ package com.aorms.mobile.ui.leads
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -59,7 +60,10 @@ fun LeadsScreen(viewModel: LeadsViewModel) {
             if (viewModel.leads.isEmpty() && !viewModel.loading) {
                 Text("No leads yet.", modifier = Modifier.padding(24.dp))
             }
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(12.dp),
+                contentPadding = PaddingValues(bottom = 80.dp),
+            ) {
                 items(viewModel.leads) { lead ->
                     CarbonTile(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                         Column(modifier = Modifier.padding(12.dp)) {
