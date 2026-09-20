@@ -107,6 +107,24 @@ Hub data reset nightly via `pg_cron`).
 
 ## Open items — honest, not yet done
 
+- ~~Two separate login pages (aorms.in/login vs. identity.aorms.in)~~
+  **Resolved 2026-09-20** — explicit user direction ("keep one page[,]
+  improve security"), user chose identity.aorms.in as the surviving
+  page. `aorms.in/login` now redirects there; a new reverse bridge
+  (`bridgeOfficeHubToIdentity()` in `lib/actions/platform.ts`) means an
+  Office-Hub-only password now also works on the unified page, symmetric
+  to the pre-existing Platform-password-works-at-Office-Hub bridge. Both
+  bridges share the same no-privilege-escalation invariant (a bridged
+  account always gets the safe default: `PENDING` role on the Office Hub
+  side, `BASIC` level with no admin-capable column on the Platform
+  side). Verified live end-to-end against production data, including a
+  real pre-existing-divergent-account case (the public demo account
+  already had a separate, independently-created Platform account from
+  2026-09-10 — correctly detected and linked, not silently merged).
+  "Continue with Google" still only establishes a Platform session — a
+  known, smaller follow-up, not done in this pass (the shared PKCE
+  callback it uses also serves password-reset links, so bridging it
+  needs to distinguish those cases first).
 - **AORMS V2 frozen architecture + lightweight master plan (2026-09-20)**
   — [AORMS-V2-DEVELOPER-GUIDELINES.md](AORMS-V2-DEVELOPER-GUIDELINES.md)
   is the canonical, user-authored spec ("FROZEN ARCHITECTURE" — do not
