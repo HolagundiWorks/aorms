@@ -11,6 +11,7 @@ import { PlatformAuthCta } from "../../../components/aorms/platform/PlatformAuth
 import { PurchaseIdentityButton } from "../../../components/aorms/platform/PurchaseIdentityButton";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { IdentityPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
+import { portalUrl } from "../../../lib/platform/subdomains";
 
 // 2026-09-13: PRO is no longer free/automatic at 100 hours — see
 // migration 0018's header. It's now something a Studio grants to one of
@@ -143,7 +144,7 @@ export default async function IdentityPage() {
               <Stack gap={4}>
                 <p className="cds--type-body-01">
                   This login is a Company (ConnectDeX) account — a separate identity from AORMS-U-, by design. Head to
-                  the <NextLink href="/connectdex">ConnectDeX Portal</NextLink> instead, or sign out and sign in with an
+                  the <NextLink href={portalUrl("connectdex")}>ConnectDeX Portal</NextLink> instead, or sign out and sign in with an
                   AORMS-U- Identity account.
                 </p>
               </Stack>
@@ -380,7 +381,7 @@ export default async function IdentityPage() {
 
             <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
               Supply materials or interior finishes instead? That&apos;s the{" "}
-              <NextLink href="/connectdex">ConnectDeX Portal</NextLink>, not this one.
+              <NextLink href={portalUrl("connectdex")}>ConnectDeX Portal</NextLink>, not this one.
             </p>
           </Stack>
         </Column>

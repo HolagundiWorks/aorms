@@ -17,6 +17,7 @@ import { ProductCard, type Product } from "../../../../components/aorms/platform
 import { AddProductForm } from "../../../../components/aorms/platform/company/AddProductForm";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { ConnectDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
+import { portalUrl } from "../../../../lib/platform/subdomains";
 
 type AccountEmbed = { id: string; full_name: string; public_id: string } | null;
 
@@ -195,7 +196,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
           className="cds--type-body-01"
           style={{ marginTop: "-1rem", marginBottom: "1.5rem", color: "var(--cds-text-secondary)" }}
         >
-          <NextLink href="/identity">← Back to My AORMS Identity</NextLink>
+          <NextLink href={portalUrl("identity")}>← Back to My AORMS Identity</NextLink>
         </p>
 
         <Stack gap={6}>
