@@ -33,6 +33,12 @@ CLAUDE.md § Launch status); `web/` is the in-progress replacement. This doc
 prepares `web/` to be deployable, which is a prerequisite for eventually
 cutting traffic over — it does not itself perform that cutover.
 
+**Stale-doc correction (2026-09-20):** this was true when written. `web/`
+became the live production site at aorms.in on 2026-09-09 (see `CLAUDE.md`'s
+own dated correction on this exact point). The rest of this doc's
+deployment mechanics may still be accurate/current — only this specific
+claim is stale.
+
 ## Required environment variables
 
 Copy `web/.env.example` and fill in every value for the target environment;

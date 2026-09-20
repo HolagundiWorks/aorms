@@ -1,5 +1,12 @@
 # Phase 9 repo audit — Library sub-domains, HR recruitment, firm-issued Tenders
 
+> **⚠ Historical draft — the migration this audits is complete and
+> `web/` has been production since 2026-09-09.** This was a draft audit
+> written mid-migration (2026-09-04), never adopted as a roadmap change.
+> Specific facts recorded here may still be accurate as historical
+> record, but for current status see `docs/esti/ROADMAP.md`'s Status/
+> Open Items sections, not this file.
+
 **Status:** Draft audit, not yet reviewed against a Phase 9 implementation.
 **This phase does not exist in the migration spec or `ROADMAP-CLOUD.md`**,
 same as [Phase 8](./NEXTJS-MIGRATION-PHASE8-AUDIT.md) — defined here at

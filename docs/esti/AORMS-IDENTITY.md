@@ -27,6 +27,14 @@ A person's professional identity is **theirs**, not the firm's. AORMS models thr
 unique ID carries certifications + growth across companies — change firms, keep the ID
 and the track record.
 
+> **Stale-doc correction (2026-09-20):** this describes the pre-2026-09-14
+> design. See
+> [AORMS-PLATFORM-ARCHITECTURE.md](AORMS-PLATFORM-ARCHITECTURE.md)'s
+> 2026-09-14 correction: identity is now modeled as three separate identity
+> tables (`accounts`, `platform_staff`, `company_accounts`), not one single
+> portable `AORMS-U-` table as originally described here. That doc is the
+> current, corrected model.
+
 | Account type | Who | Where they act | Unique ID |
 |---|---|---|---|
 | **Platform admin** | Holagundi/AORMS team only | `/platform-admin` (products, plans, licences) | — (internal) |

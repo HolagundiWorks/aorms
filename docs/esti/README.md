@@ -12,6 +12,13 @@ This directory is the **single source of truth**. Superseded specs are deleted
 outright, not archived (policy since 2026-09-04) — there is no `archived/`
 folder to check for older guidance; if a doc is here, it's current.
 
+**Stale-doc correction (2026-09-20):** "if a doc is here, it's current" no
+longer holds. As of this date, multiple files in this directory are marked
+historical/superseded via an in-file warning banner instead of being
+deleted — several are still referenced by `CLAUDE.md` or hold historical
+detail worth keeping. Check each file's own top-of-file banner (if any)
+before trusting it as current.
+
 **Platform north-star:** [AORMS-OFFICE-SYSTEM.md](AORMS-OFFICE-SYSTEM.md).
 
 ## Read first

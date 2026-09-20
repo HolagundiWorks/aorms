@@ -1,5 +1,14 @@
 # AORMS — VPS Deployment Guide
 
+> **⚠ Historical — describes the retired VPS-deployed stack.** As of
+> 2026-09-09 the live product is `web/` (Next.js + Supabase), deployed on
+> Hostinger; the old `frontend`/`backend`/PostgreSQL/VPS stack this
+> document describes is not deployed anywhere (VPS subscription
+> cancelled, confirmed 2026-09-20 — see `docs/esti/ROADMAP.md`'s Open
+> items). Kept for historical reference only — do not treat anything
+> below as current, and do not redeploy `backend` from this repo state
+> (see `CLAUDE.md`'s Dev/verify loop section for why).
+
 Complete, start-to-finish guide for deploying AORMS on a fresh Ubuntu VPS. The
 installer (`deploy/install.sh`) does everything — Docker, nginx, TLS, seeding,
 auto-start. You only provision the box, point DNS, and run the installer.

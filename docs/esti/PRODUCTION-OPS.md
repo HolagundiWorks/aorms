@@ -1,5 +1,14 @@
 # Production operations checklist
 
+> **⚠ Historical — describes the retired VPS-deployed stack.** As of
+> 2026-09-09 the live product is `web/` (Next.js + Supabase), deployed on
+> Hostinger; the old `frontend`/`backend`/PostgreSQL/VPS stack this
+> document describes is not deployed anywhere (VPS subscription
+> cancelled, confirmed 2026-09-20 — see `docs/esti/ROADMAP.md`'s Open
+> items). Kept for historical reference only — do not treat anything
+> below as current, and do not redeploy `backend` from this repo state
+> (see `CLAUDE.md`'s Dev/verify loop section for why).
+
 Use this before declaring a VPS instance production-ready.
 
 > **Runtime split:** development uses **Podman** (`podman compose up`) with `compose.yaml`.

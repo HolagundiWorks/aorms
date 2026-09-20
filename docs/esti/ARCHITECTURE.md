@@ -63,6 +63,12 @@ One installation represents one firm. Portal records are scoped to the firm's
 projects; there is no tenant column. A future hosted multi-tenant product would
 require a separate architecture decision and migration.
 
+**Stale-doc correction (2026-09-20):** this described the old
+`frontend`/`backend` stack. `web/` (the live product) is now multi-tenant
+as of 2026-09-19 — RLS + a `firm_id` column scope every one of ~98 tenant
+tables. See [ROADMAP.md](ROADMAP.md)'s "real multi-tenancy" entry (§
+History, 2026-09-19) for the current model.
+
 ### Hybrid TypeScript And Python
 
 TypeScript is authoritative. Python is used where its document/data libraries

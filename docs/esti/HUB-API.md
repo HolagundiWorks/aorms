@@ -10,6 +10,13 @@
 > currently drives it. Implementation: `backend/src/modules/sync/*`,
 > `backend/src/licensing-platform/routes/v1.ts`,
 > `backend/src/modules/license/consumer.ts`.
+>
+> **Stale-doc correction (2026-09-20):** "still present and wired live" is
+> no longer true. `backend`'s Postgres/Drizzle dependencies were removed
+> entirely (2026-09-05) — `backend` does not run, is not deployed, and must
+> not be redeployed from this repo state until its production role is
+> resolved (see `CLAUDE.md` § Dev / verify loop). Nothing in this doc's
+> backend-sync claims is current; treat it as historical only.
 
 **Version tag:** `2026-08` (matches `@esti/contracts` `0.1.0`).
 

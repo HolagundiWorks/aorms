@@ -1,5 +1,13 @@
 # HCW UX — KPI instrument
 
+> **⚠ Superseded — `@hcw/ui-kit` is retired, not reimplemented.**
+> `CLAUDE.md`'s own UI section already lists `@hcw/ui-kit` under
+> "Removed (retired, not reimplemented)" — `web/`, the live product, is
+> pure `@carbon/react` (IBM Carbon Design System v11), with no
+> neumorphism, glass, or soft-surface styling. This document describes
+> the retired kit's own design language and does not apply to `web/`.
+> Kept for historical reference only.
+
 **Status:** Measurement companion to the framework · **Adopted:** 2026-07-21  
 **Parent:** [HCW-UX.md](../HCW-UX.md) · framework KPIs in [HCW-UX-FRAMEWORK.md](../HCW-UX-FRAMEWORK.md) · process Evaluate/Improve in [HCW-UX-PROCESS.md](../HCW-UX-PROCESS.md)
 

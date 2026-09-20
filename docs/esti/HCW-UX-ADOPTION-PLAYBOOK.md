@@ -1,5 +1,13 @@
 # HCW UX — Product adoption playbook
 
+> **⚠ Superseded — `@hcw/ui-kit` is retired, not reimplemented.**
+> `CLAUDE.md`'s own UI section already lists `@hcw/ui-kit` under
+> "Removed (retired, not reimplemented)" — `web/`, the live product, is
+> pure `@carbon/react` (IBM Carbon Design System v11), with no
+> neumorphism, glass, or soft-surface styling. This document describes
+> the retired kit's own design language and does not apply to `web/`.
+> Kept for historical reference only.
+
 **Status:** Canonical consumer recipe · **Adopted:** 2026-07-22 · **Kit:** ≥1.4.3  
 **Closes kit halves of:** V2 (telemetry wiring) · voice/fatigue adoption · DesignOps pointers  
 **Parent:** [HCW-UX.md](../HCW-UX.md)

@@ -1,5 +1,12 @@
 # Phase 6 repo audit — Advanced processing (PDF/DWG, Python worker)
 
+> **⚠ Historical draft — the migration this audits is complete and
+> `web/` has been production since 2026-09-09.** This was a draft audit
+> written mid-migration (2026-09-04), never adopted as a roadmap change.
+> Specific facts recorded here may still be accurate as historical
+> record, but for current status see `docs/esti/ROADMAP.md`'s Status/
+> Open Items sections, not this file.
+
 **Status:** ✅ Functionally complete, drawings included. Hosting-topology
 question RESOLVED (2026-09-05, sourced — see the new section below);
 worker/db.py + storage.py ported for every domain with a Supabase table;

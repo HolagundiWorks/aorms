@@ -10,6 +10,12 @@
 > and Proposals (`/office/proposals`, `fees:manage`) are **top-level routes, not project
 > tabs**; the project's cost surface is the **Estimation** tab (`fees:manage`). The
 > capability ranks below remain the implementation source of truth.
+>
+> **Stale-doc correction (2026-09-20):** this ladder describes the old
+> `backend`'s `permissions.ts`, which isn't deployed. `web/` (the live
+> product) has its own, separate permissions/capability system —
+> `web/lib/auth/rank.ts`'s `ROLE_RANK`/`hasRank()`, plus Postgres's
+> `has_capability()`. Do not treat this document as canonical for `web/`.
 
 ---
 

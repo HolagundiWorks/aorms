@@ -1,5 +1,15 @@
 # HCW-UI-Kit → IBM Carbon Design System — migration & roadmap
 
+> **⚠ Historical — this migration plan is for `frontend/` (the old React
+> SPA), which is not deployed anywhere (VPS decommissioned, confirmed
+> 2026-09-20 — see `docs/esti/ROADMAP.md`'s Open items).** `web/` — the
+> actual live product at aorms.in — was built on `@carbon/react` from
+> day one and has zero MUI/`@hcw/ui-kit` imports; it never needed this
+> migration. `CLAUDE.md`'s own UI section previously cited this file as
+> "canonical" before this correction was made — see `CLAUDE.md`'s UI
+> section for the current, corrected framing. Kept here for historical
+> reference only.
+
 **Status:** ✅ **ACTIVE** (2026-09-03) · **Created:** 2026-08-02 · **Owner:** web-first platform  
 **Updated:** 2026-09-03 — product direction **shifted to Carbon only**. Web-first hub + portals.
 Waves 0–2 foundation delivered (2026-08). **Wave 3 in progress** (app MUI→Carbon conversion).

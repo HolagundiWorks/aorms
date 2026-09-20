@@ -175,3 +175,9 @@ letters, contracts, invoices) per the landing order in
 (numbering → shared business logic → proposals → letters/contracts →
 invoices) — confirm against the roadmap's current state before starting,
 since it may have moved since this line was written.
+
+**Stale-doc correction (2026-09-20):** this phase-sequencing claim is long
+stale. The migration is now far past Phase 3 — `web/` is live in
+production, genuinely multi-tenant (since 2026-09-19), with dozens of
+features shipped since. See [ROADMAP.md](./ROADMAP.md)'s Status section for
+the actual current state before assuming anything about "next" work here.

@@ -10,6 +10,12 @@ staff sign in through the web SPA at `/login` — no desktop apps, no per-app
 subdomains. Firm clients/consultants/contractors use **firm-branded portals**.
 License control plane stays on **admin.aorms.in**.
 
+> **Stale-doc correction (2026-09-20):** `admin.aorms.in` is listed under
+> "Removed" in `CLAUDE.md`'s Product naming section ("licence manager, not
+> applicable to web-only model"). The actual admin/licensing surface is
+> `/admin/*` inside `web/`'s own `(platform)` route group, gated by
+> `is_platform_admin()`/the `is_admin` column — not a separate subdomain.
+
 ---
 
 ## Surfaces (`AORMS_SURFACES`)

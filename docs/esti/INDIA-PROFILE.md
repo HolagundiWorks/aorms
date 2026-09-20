@@ -14,6 +14,13 @@ in the UI, and never exposed as options.
 ## Fixed Firm Profile
 
 - **One firm only.** No multi-company, no multi-tenant, no tenant column.
+
+  **Stale-doc correction (2026-09-20):** this was true for the old
+  `frontend`/`backend` stack. `web/` (the live product) became genuinely
+  multi-tenant on 2026-09-19 — RLS + a `firm_id` column on ~98 tables, with
+  every policy checking `firm_id = current_firm_id()`. See
+  [ROADMAP.md](ROADMAP.md)'s "real multi-tenancy" entry (§ History,
+  2026-09-19) for the current model.
 - **COA registration number is a mandatory firm Legal ID.** Architecture
   practice in India requires the principal to be registered with the Council of
   Architecture; the COA number is stored as the firm's primary Legal ID and is

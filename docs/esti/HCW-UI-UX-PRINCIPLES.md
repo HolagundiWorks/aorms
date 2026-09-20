@@ -1,5 +1,13 @@
 # HCW-UI-UX — UX principles
 
+> **⚠ Superseded — `@hcw/ui-kit` is retired, not reimplemented.**
+> `CLAUDE.md`'s own UI section already lists `@hcw/ui-kit` under
+> "Removed (retired, not reimplemented)" — `web/`, the live product, is
+> pure `@carbon/react` (IBM Carbon Design System v11), with no
+> neumorphism, glass, or soft-surface styling. This document describes
+> the retired kit's own design language and does not apply to `web/`.
+> Kept for historical reference only.
+
 **Human Centric Works** (*HCW*) is the product UX philosophy behind **HCW-UI-Kit**
 (`@hcw/ui-kit`). This document is the **canonical UX authority** — *why* we build
 interfaces the way we do. For *how* (tokens, layers, components, SCSS), see

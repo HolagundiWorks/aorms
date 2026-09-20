@@ -1,5 +1,13 @@
 # AORMS — page structure, colours, elements & tokens
 
+> **⚠ Superseded — `@hcw/ui-kit` is retired, not reimplemented.**
+> `CLAUDE.md`'s own UI section already lists `@hcw/ui-kit` under
+> "Removed (retired, not reimplemented)" — `web/`, the live product, is
+> pure `@carbon/react` (IBM Carbon Design System v11), with no
+> neumorphism, glass, or soft-surface styling. This document describes
+> the retired kit's own design language and does not apply to `web/`.
+> Kept for historical reference only.
+
 **Status:** Canonical · **Adopted:** 2026-08-06 · **Updated:** 2026-08-09 · **Owner:** HCW  
 **Reference UI:** platform landing (`Landing.tsx` + `MarketingNeuFrame`) — final language for marketing, staff apps, and portals. Staff taskbar + ActionDock clearance share firm-portal chrome tokens (`PORTAL_CHROME`).
 

@@ -7,6 +7,13 @@ next rebuild. The current production codebase (`backend` Fastify/tRPC,
 and unchanged until this migration is executed; nothing here is implemented
 yet. See [ROADMAP-CLOUD.md](./ROADMAP-CLOUD.md) for migration sequencing and
 [ROADMAP-LOCAL.md](./ROADMAP-LOCAL.md) for how this environment verifies it.
+
+> **Stale-doc correction (2026-09-20):** this migration is now executed.
+> `web/` has been the live production site at aorms.in since 2026-09-09, and
+> the old `backend`/`frontend` stack is decommissioned, not "live and
+> unchanged." This document's target-architecture description may still be
+> a useful historical spec of what was built, but its "not yet implemented"
+> framing is stale — see [ROADMAP.md](./ROADMAP.md) for current status.
 **Target deployment:** Hostinger Managed App Hosting
 **Target users:** ~100 concurrent/registered users
 **Application type:** Architecture / Engineering ERP

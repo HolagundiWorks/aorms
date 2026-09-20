@@ -29,8 +29,10 @@
   Shared risk/opportunity/phase-gate enums it held that the kept
   `projectPrecon` (Studio pre-construction R&O) feature depends on were
   extracted into `packages/contracts/src/project-precon.ts` first. Historical
-  design doc: docs/esti/AORMS-CONSULTANCY-OPERATING-MODEL-AND-ARCHITECTURE.md
-  (superseded, kept for history only).
+  design doc `docs/esti/AORMS-CONSULTANCY-OPERATING-MODEL-AND-ARCHITECTURE.md`
+  no longer exists in the repo (confirmed via a 2026-09-20 documentation
+  audit — this pointer was already a dead link, not just stale content;
+  fixed here rather than left pointing nowhere).
 
 **Architecture:**
 - Web-first SPA only (no desktop apps)
@@ -175,6 +177,17 @@ the full account.
 
 ## Launch status (2026-09-04)
 
+**Stale-doc correction (2026-09-20): this whole table describes the old
+`frontend/`'s `VITE_MARKETING_ONLY` gate mechanism, not `web/`.** A later
+correction elsewhere in this file already flagged this section as
+"likely stale, not yet re-verified" — this entry is that re-verification.
+`web/` has no `VITE_MARKETING_ONLY` gate at all; `/login` is `web/`'s own
+real, live sign-in page (has been since the 2026-09-09 cutover, not
+"coming soon"), and the old `frontend`/VPS stack this table describes is
+confirmed decommissioned (VPS subscription cancelled — see
+`docs/esti/ROADMAP.md`'s Open Items). Kept below for historical
+reference only.
+
 **aorms.in ships landing + blog.** Office hub login going live soon (web-only, no desktop).
 
 | Rule | Detail |
@@ -217,13 +230,22 @@ VPS: [`docs/esti/VPS-INSTALL.md`](docs/esti/VPS-INSTALL.md) ·
 
 **Public surfaces:**
 
+**Stale-doc correction (2026-09-20):** `app.aorms.in` (below) does not
+exist — confirmed via a live `hosting_listWebsitesV1` call against the
+real Hostinger account this session, which returns exactly 4 websites:
+`aorms.in`, `identity.aorms.in`, `connectdex.aorms.in`,
+`sysdex.aorms.in`. The Office Hub SPA (authenticated) is served directly
+from `aorms.in` itself (e.g. `/dashboard`, `/pulse`), not a separate
+`app.` subdomain — this table describes the old `frontend/`'s intended
+subdomain split, never actually provisioned for `web/`.
+
 | Path / host | Role |
 | --- | --- |
 | `/` · **aorms.in** | Office hub landing page |
 | `/blog` | Office management + best practices articles |
 | `/login` | Office hub web login (SSO gate) |
 | `/wiki*` | Redirect → `/` (no wiki surfaces) |
-| **app.aorms.in** | Office hub SPA (authenticated users only) |
+| ~~app.aorms.in~~ | Does not exist — see correction above |
 
 **Removed:**
 - ❌ `/downloads` — no installers (web-only)
@@ -253,6 +275,22 @@ index only if Ask ESTI should see it (wiki is not a public marketing surface).
 | Update landing.tsx for office benefits; remove allied app CTAs | Mention architects, consultants, PMC services as separate products |
 
 ## UI / design system — IBM Carbon Design System (active 2026-09-04)
+
+**Stale-doc correction (2026-09-20): the "Migration status" pointer below
+describes a migration for `frontend/` (the old React SPA), which is not
+deployed anywhere — its VPS was decommissioned (subscription cancelled,
+confirmed this date; see `docs/esti/ROADMAP.md`'s Open Items). That
+migration will not resume; tracking it as "in progress" is no longer
+accurate.** The **governing rule itself — pure Carbon, no MUI, no
+`@hcw/ui-kit`, no neumorphism/glass — is still fully correct and is what
+`web/` (the actual live product) already is**: `web/` was built on
+`@carbon/react` from day one and has zero MUI/kit imports today (`grep
+-n "@mui\|@hcw" web/package.json` — no matches), so it never needed the
+migration below at all. Only trust the "Migration status" paragraph and
+its linked docs (`CARBON-MIGRATION.md`, `CARBON-PHASE1-STATUS.md`,
+`CARBON-MIGRATION-WAVE3-PLAN.md` — all now banner-marked historical) as
+a record of the old `frontend/`'s own unfinished migration, not as
+`web/`'s status.
 
 > **🎯 CANONICAL (2026-09):** **IBM Carbon Design System v11** — web-only, pure Carbon.
 > Whole frontend — app screens, portals, and public landing / marketing pages.

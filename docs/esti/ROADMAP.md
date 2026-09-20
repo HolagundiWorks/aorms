@@ -28,19 +28,28 @@ stale status tables at the top of the file.
 
 ---
 
-## Status (2026-09-10)
+## Status (2026-09-20)
 
 **`web/` is the live production site at `aorms.in`**, deployed on
 Hostinger Managed App Hosting — not the old VPS stack, which this
 document no longer tracks as "current" (see the cut-content note above).
 The cutover happened 2026-09-09; the old `frontend`/`backend`/PostgreSQL/
-VPS stack's own status is retired, not tracked here going forward.
+VPS stack's own status is retired, not tracked here going forward, and is
+now confirmed fully decommissioned (see Open Items below — VPS
+subscription cancelled, VM suspended).
 
 Three real, distinct-but-connected systems now make up what "AORMS" is:
 
 1. **AORMS Office Hub** (`web/app/(app)/*`) — the product: clients,
    projects, proposals, invoicing, estimation/BBS, team/HR, knowledge
-   bank, ESTI AI. Single-tenant per deployment.
+   bank, ESTI AI. **Genuinely multi-tenant as of 2026-09-19** (RLS +
+   `firm_id` on ~98 tables, session-based tenant resolution, switchable
+   active firm) — this replaces an earlier "single-tenant per
+   deployment" design that older entries in the History section below
+   still describe; see the 2026-09-19 "real multi-tenancy" History entry
+   for the full account. Do not trust "single-tenant" claims elsewhere
+   in this file's History section as current — they were accurate only
+   up to that date.
 2. **AORMS Platform** (`web/app/(platform)/*`, a separate Supabase
    project) — portable personal identity (`AORMS-U-`), Studio accounts
    for architecture practices (`AORMS-S-`), and Company accounts for
@@ -105,40 +114,52 @@ Hub data reset nightly via `pg_cron`).
   [LIGHTWEIGHT-ARCHITECTURE-PLAN.md](LIGHTWEIGHT-ARCHITECTURE-PLAN.md)
   tracks build status against it phase by phase (events, workflow engine,
   connector modes, AI provider abstraction, Esti tool layer, Google Drive
-  all live and verified this pass; Desktop Agent, WhatsApp channel, RAG
-  over Drive, CAD automation still ahead). Hostinger deploy is now
-  authorized (387 tools, confirmed live against all 4 deployed
+  live and verified; WhatsApp/Drive/AI-connector credentials relocated to
+  `aorms-platform` same day, see the connector-relocation entry below;
+  Desktop Agent, RAG over Drive, CAD automation still ahead). Hostinger
+  deploy is authorized (387 tools, confirmed live against all 4 deployed
   subdomains). Real remaining blockers: Desktop Agent distribution/
   signing decisions, Supabase org still free-plan (2-project cap).
-- **Events system + connector modes (2026-09-20)** — first slice of a
-  deliberately lightweight event/workflow architecture (plain Postgres
-  table, not Kafka/Redis — the explicit direction at this scale). Live
-  and verified: `events` table + triggers on 4 real writes
-  (task.created/completed, document.uploaded, project.created), plus
-  `emit_event()`/`mark_event_processed()` for future callers. Also
-  formalizes the 3 database connector modes (AORMS-managed default /
-  Customer Supabase / Customer API) on the `tenant_databases` registry —
-  resolves the earlier "every firm needs its own DB" direction as one
-  optional mode, not mandatory. No workflow engine consumes events yet;
-  that's the next slice. Full design:
-  [EVENTS-AND-CONNECTOR-MODES.md](EVENTS-AND-CONNECTOR-MODES.md).
-- **Database-per-tenant architecture pivot (2026-09-19, in progress)** —
-  direction changed from the RLS-based shared-database multi-tenancy
-  (still live, migrations 0053-0068) to each Studio getting its own
-  dedicated database, with identity/licensing/support/admin staying
-  shared in `aorms-platform`. Registry table (`tenant_databases`) and a
-  Supabase-project provisioning script are live; the real blocker is a
-  hosting decision only the account owner can make (this org is capped at
-  2 free-plan Supabase projects — a third needs a paid plan) plus an
-  auth-handoff design (Supabase JWTs are project-scoped, so per-tenant
-  databases need per-tenant sessions). Full design, tradeoffs, and staged
-  rollout: [DATABASE-PER-TENANT-ARCHITECTURE.md](DATABASE-PER-TENANT-ARCHITECTURE.md).
-  `createClient()` in `web/lib/supabase/server.ts` deliberately NOT yet
-  changed — see that doc's § Why connection routing isn't flipped yet.
-- **Razorpay live test-mode payment** — the checkout flow is built,
-  migrated, and RLS-verified against a real signed-up account, but no
-  actual test-mode payment has been run end-to-end yet (needs Razorpay
-  test keys).
+- **Tenant-isolation model, clarified (reconciles two entries that used
+  to read as contradictory — fixed 2026-09-20):** the Office Hub's
+  **live, default** tenant isolation is RLS + `firm_id` inside the
+  shared `aorms-web` project (migrations 0053-0068, generalized to every
+  remaining table 2026-09-19 — see that dated History entry). A
+  **separate, optional** per-Studio dedicated-database mode
+  (`tenant_databases` registry + a Supabase-project provisioning script,
+  `platform/supabase/migrations/0034`-`0035`) also exists for Studios
+  that want their own database instead — this is Connector Mode B
+  (`customer_supabase`) in
+  [EVENTS-AND-CONNECTOR-MODES.md](EVENTS-AND-CONNECTOR-MODES.md)'s
+  3-mode registry, not the primary architecture and not something every
+  Studio needs. Earlier entries in this file describing "the
+  database-per-tenant pivot" as *the* direction, in progress, with RLS
+  multi-tenancy as a stopgap, have it backwards relative to where things
+  landed — RLS is the default and done; per-tenant DB is the optional
+  extra, still real but genuinely optional. Full design/tradeoffs for
+  the optional mode:
+  [DATABASE-PER-TENANT-ARCHITECTURE.md](DATABASE-PER-TENANT-ARCHITECTURE.md).
+  `createClient()` in `web/lib/supabase/server.ts` is NOT tenant-aware
+  (doesn't route to a Studio's own dedicated DB even when one exists) —
+  real, still open, blocked on an auth-handoff design (Supabase JWTs are
+  project-scoped, so per-tenant DBs need per-tenant sessions) plus a
+  hosting decision only the account owner can make (2-project free-plan
+  cap).
+- ~~Connector configuration (Drive/WhatsApp/AI models) built firm_id-
+  keyed on aorms-web~~ **Resolved 2026-09-20**: relocated to
+  `aorms-platform`, studio_id-keyed — see
+  [AORMS-V2-DEVELOPER-GUIDELINES.md](AORMS-V2-DEVELOPER-GUIDELINES.md)'s
+  "Connector configuration lives on the Platform" section for the
+  pattern and full reasoning. Also fixed in the same pass: a broken FK
+  in the pre-existing `ai_model_connectors` migration that had silently
+  never applied to the live database since it shipped 2026-09-13, and a
+  role-hierarchy gap (`SITE_SUPERVISOR` excluded from `is_office_staff()`
+  — see that dated History entry).
+- **Razorpay live test-mode payment (open since first flagged, still
+  unresolved as of 2026-09-20)** — the checkout flow is built, migrated,
+  and RLS-verified against a real signed-up account, but no actual
+  test-mode payment has been run end-to-end yet. Blocked on real
+  Razorpay test keys, which only the account owner can provide.
 - ~~Demo account seed data~~ **Resolved, confirmed 2026-09-20**: the
   `demo@aorms.in` (VIEWER) login already exists live, with real seeded
   data (24 clients, 16 projects, 60 tasks, 8 invoices) — this is the
@@ -150,18 +171,35 @@ Hub data reset nightly via `pg_cron`).
   otherwise without actually checking `app/page.tsx` first. Verified
   end-to-end this time by actually signing in with those exact printed
   credentials against production.
-- **Landing page product screenshots** — flagged in a review pass
-  (2026-09-10) as the single highest-impact remaining gap: the page is
-  entirely text/tiles, no screenshot of the actual product anywhere.
-  Not yet actioned.
-- **No Content-Security-Policy** — deliberately deferred (see
-  `next.config.mjs`'s own comment): six route groups, dynamic Supabase
-  asset URLs, and Server Actions throughout make a wrong CSP fail
-  silently rather than loudly. Needs a page-by-page browser-verified
-  pass, not a guess.
-- **No readiness/dependency health check** — `/api/health` is a pure
-  liveness check only; nothing yet distinguishes "process is up" from
-  "Supabase is reachable."
+- ~~Landing page product screenshots~~ **Resolved 2026-09-20**: flagged
+  in a review pass (2026-09-10, reconfirmed 2026-09-14) as the single
+  highest-impact remaining gap — the page was entirely text/tiles, no
+  screenshot of the actual product anywhere. Fixed: 3 real screenshots
+  (Pulse dashboard, Tasks board, Projects list) captured live against
+  production via a headless Playwright session signed in with the demo
+  credentials, added as a gallery in the `#live-demo` section right
+  above the existing demo-credentials CTA.
+- **Content-Security-Policy — shipped in Report-Only mode, not yet
+  enforcing (last checked 2026-09-14, not reverified since).** Not the
+  "nothing built yet" state an earlier version of this entry implied:
+  built from what the app actually loads (Razorpay checkout, Supabase
+  Storage, self-hosted fonts), and the Report-Only rollout already
+  caught and fixed one real issue (Next.js App Router's own inline
+  hydration scripts, via `'unsafe-inline'` in `script-src`). **Known
+  unresolved issue as of the 2026-09-14 entry**: `aorms.in` was
+  intermittently/persistently serving the pre-fix header despite the fix
+  being committed and pushed well before — a Hostinger deploy-serving
+  issue, not a code defect (see that dated History entry for the exact
+  commit hash and verification). Do not flip to enforcing until the live
+  header is reconfirmed to include `'unsafe-inline'` in `script-src` —
+  that reconfirmation hasn't happened since 2026-09-14.
+- **No readiness/dependency health check (deliberate, not an oversight —
+  see `web/app/api/health/route.ts`'s own comment)** — `/api/health` is a
+  pure liveness check only, on purpose: conflating "process is up" with
+  "Supabase is reachable" would let a transient Supabase blip restart a
+  perfectly fine app process. A readiness check is real, easy future
+  work if Hostinger's monitoring ever actually needs one — nothing today
+  calls for it, so it isn't built speculatively.
 - ~~Old VPS stack decommission status unconfirmed~~ **Resolved
   2026-09-20**: checked Hostinger directly rather than assuming.
   `VPS_getVirtualMachinesV1` shows exactly one VM
@@ -174,10 +212,16 @@ Hub data reset nightly via `pg_cron`).
   running, not costing money); the VM record itself is just Hostinger's
   normal post-cancellation retention, not something worth deleting
   without a reason to.
-- **Full authenticated Office Hub flow not re-verified in production** —
-  the cutover verification covered routing, headers, and the public
-  surface; a real signed-in session against production Supabase data
-  hasn't been walked through since.
+- ~~Full authenticated Office Hub flow not re-verified in production~~
+  **Resolved 2026-09-20**: the original cutover verification (2026-09-09)
+  covered routing, headers, and the public surface only. This pass
+  signed into production as the real demo account and clicked through
+  Pulse, Tasks, Projects, a project detail page, Invoices, and Clients —
+  real seeded data rendering correctly, no console errors, RLS behaving
+  as expected (VIEWER role correctly saw an empty Invoices table). Not
+  exhaustive (didn't touch every module — HR, Estimation, Knowledge Bank,
+  Tender Management weren't clicked through this pass), but the core
+  authenticated flow is confirmed live and working, not just assumed.
 - ~~Carbon Design System migration (Wave 3+)~~ **Moot as of 2026-09-20,
   not because it finished — because what it was migrating isn't live
   anymore.** The 8-tranche Wave 3 plan was for `frontend/` (the old
@@ -233,14 +277,30 @@ Hub data reset nightly via `pg_cron`).
 
 ## History — Next.js/Supabase migration & cloud build log
 
-Full spec: [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md).
+**Reading note (added 2026-09-20):** this section is a dated, append-only
+build log — entries below are mostly in chronological order but not
+strictly (a few later insertions landed out of sequence; dates on each
+entry are the source of truth, not position in the file). It also
+predates a lot of ground truth that changed after it was written —
+notably, every "single-tenant per deployment" claim below was accurate
+only up to 2026-09-19 (see Status above), and the paragraph immediately
+below ("the current production stack stays live and unchanged") describes
+the state *before* the migration finished, not now. For current status,
+always prefer Status/What's live now/Open Items above over anything in
+this section — History is a record of how things got built, not a
+second source of truth for what's true today.
 
-**Target:** Next.js + TypeScript + Carbon Design System + Supabase, replacing
-the current React SPA + tRPC + Fastify + raw PostgreSQL + Python worker stack.
-Deployment target moves from the VPS (`compose.prod.yaml`) to Hostinger
-Managed App Hosting; Supabase replaces self-hosted PostgreSQL/auth/storage.
-**The current production stack stays live and unchanged** until a phase below
-is merged and verified — the `web/` package is new, additive code; nothing in
+Full spec: [NEXTJS-SUPABASE-MIGRATION.md](./NEXTJS-SUPABASE-MIGRATION.md)
+(itself now a historical record of the target spec, not a "not yet
+implemented" plan — see that file's own 2026-09-20 correction note).
+
+**Target (historical — achieved 2026-09-09, see Status above):** Next.js +
+TypeScript + Carbon Design System + Supabase, replacing
+the old React SPA + tRPC + Fastify + raw PostgreSQL + Python worker stack.
+Deployment target moved from the VPS (`compose.prod.yaml`) to Hostinger
+Managed App Hosting; Supabase replaced self-hosted PostgreSQL/auth/storage.
+Below this point, "the current production stack stays live and unchanged"
+describes the state *while the migration was in progress*, not now — nothing in
 `frontend`/`backend` has been touched by this migration yet.
 
 | Item | Status |
@@ -5484,4 +5544,4 @@ Four commits (`2724bea5`, `d8b87aac`, `4e2ad3c7`, `d431e019`), all `tsc
 
 ---
 
-**Last updated:** 2026-09-13
+**Last updated:** 2026-09-20

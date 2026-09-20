@@ -44,6 +44,12 @@ recovery, revision control, site supervision, and GST on one spine.
 | Fragmented external access | Client / consultant / contractor / site portals |
 | Install / per-app login friction | Web-only, one login, no installers · one Standard licence · storage + AI usage |
 
+**Stale-doc correction (2026-09-20):** "one Standard licence · storage + AI
+usage" is stale. The actual current AORMS Platform licensing model is
+BASIC/PRO, seat-based — see
+[SYSDEX-PORTAL-AUDIT-2026-09-14.md](SYSDEX-PORTAL-AUDIT-2026-09-14.md) for
+the accurate current model.
+
 ---
 
 ## 3. Competitive snapshot

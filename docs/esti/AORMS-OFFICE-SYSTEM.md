@@ -256,6 +256,14 @@ docker compose up
 - ✅ Wave 5 (landing + marketing pages → Carbon)
 - ✅ Wave 6 (decommission MUI + HCW kit)
 
+**Stale-doc correction (2026-09-20):** these waves tracked the Carbon
+migration for `frontend/` (the old React SPA), which is not deployed
+anywhere — the VPS stack is decommissioned. The migration was never
+actually completed on `frontend/`, and finishing it is now moot since
+nothing serves traffic from that codebase. `web/` (the live product) was
+built on stock `@carbon/react` from day one and never needed this
+migration.
+
 **Q1 2027:**
 - Office hub v2.0 (Carbon Design System live)
 - ESTI AI agent (local inference integration)

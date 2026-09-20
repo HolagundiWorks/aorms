@@ -1,5 +1,13 @@
 # HCW Kit — AI Knowledge Base
 
+> **⚠ Superseded — `@hcw/ui-kit` is retired, not reimplemented.**
+> `CLAUDE.md`'s own UI section already lists `@hcw/ui-kit` under
+> "Removed (retired, not reimplemented)" — `web/`, the live product, is
+> pure `@carbon/react` (IBM Carbon Design System v11), with no
+> neumorphism, glass, or soft-surface styling. This document describes
+> the retired kit's own design language and does not apply to `web/`.
+> Kept for historical reference only.
+
 **Status:** Canonical for AI agents · **Owner:** Human Centric Works (HCW) · **Adopted:** 2026-07-11
 
 This document is the operating knowledge base for any AI agent auditing, maintaining,

@@ -1,5 +1,15 @@
 # Phase 1: Readiness — Status Report (2026-09-04)
 
+> **⚠ Historical — this migration plan is for `frontend/` (the old React
+> SPA), which is not deployed anywhere (VPS decommissioned, confirmed
+> 2026-09-20 — see `docs/esti/ROADMAP.md`'s Open items).** `web/` — the
+> actual live product at aorms.in — was built on `@carbon/react` from
+> day one and has zero MUI/`@hcw/ui-kit` imports; it never needed this
+> migration. `CLAUDE.md`'s own UI section previously cited this file as
+> "canonical" before this correction was made — see `CLAUDE.md`'s UI
+> section for the current, corrected framing. Kept here for historical
+> reference only.
+
 **Week:** 1 of 7  
 **Status:** 50% complete — Adapters done, audit and decisions pending  
 

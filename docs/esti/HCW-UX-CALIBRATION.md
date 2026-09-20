@@ -1,5 +1,13 @@
 # HCW UX — Calibration & predictive hypotheses (V3)
 
+> **⚠ Superseded — `@hcw/ui-kit` is retired, not reimplemented.**
+> `CLAUDE.md`'s own UI section already lists `@hcw/ui-kit` under
+> "Removed (retired, not reimplemented)" — `web/`, the live product, is
+> pure `@carbon/react` (IBM Carbon Design System v11), with no
+> neumorphism, glass, or soft-surface styling. This document describes
+> the retired kit's own design language and does not apply to `web/`.
+> Kept for historical reference only.
+
 **Status:** Research · explanatory heuristics shipped in kit · **Adopted:** 2026-07-22  
 **Kit:** `estimateOrientMultiplier` / `isLoadRisk` in `src/calibration.ts`  
 **Parent:** [HCW-UX-KPI-INSTRUMENT.md](HCW-UX-KPI-INSTRUMENT.md) · [VALIDATION-PROTOCOL.md](../hcw-kit/11-audits/VALIDATION-PROTOCOL.md)

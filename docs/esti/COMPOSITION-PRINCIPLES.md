@@ -1,5 +1,13 @@
 # AORMS — composition principles
 
+> **⚠ Superseded — `@hcw/ui-kit` is retired, not reimplemented.**
+> `CLAUDE.md`'s own UI section already lists `@hcw/ui-kit` under
+> "Removed (retired, not reimplemented)" — `web/`, the live product, is
+> pure `@carbon/react` (IBM Carbon Design System v11), with no
+> neumorphism, glass, or soft-surface styling. This document describes
+> the retired kit's own design language and does not apply to `web/`.
+> Kept for historical reference only.
+
 **Status:** Canonical · **Adopted:** 2026-08-07 · **Owner:** HCW  
 **Applies to:** Landing, dashboards (Studio Intelligence), marketing shells, staff stage pages, portals.  
 **Chrome SoT:** [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) · **UX laws:** [HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md) · **Index:** [HCW-UX.md](../HCW-UX.md)

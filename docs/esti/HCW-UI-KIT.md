@@ -1,5 +1,13 @@
 # HCW-UI-Kit — the layered design system
 
+> **⚠ Superseded — `@hcw/ui-kit` is retired, not reimplemented.**
+> `CLAUDE.md`'s own UI section already lists `@hcw/ui-kit` under
+> "Removed (retired, not reimplemented)" — `web/`, the live product, is
+> pure `@carbon/react` (IBM Carbon Design System v11), with no
+> neumorphism, glass, or soft-surface styling. This document describes
+> the retired kit's own design language and does not apply to `web/`.
+> Kept for historical reference only.
+
 **UX principles (why):** **[HCW-UI-UX-PRINCIPLES.md](HCW-UI-UX-PRINCIPLES.md)** — laws,
 spatial roles, dock contract, a11y, and screen review checklist. **This document (how):**
 tokens, layers, components, and SCSS. **Live showcase:** `/design-system` on the public site.
