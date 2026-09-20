@@ -130,10 +130,17 @@ Hub data reset nightly via `pg_cron`).
   with both sessions live, confirmed via `/identity` showing the same
   account's real Studio. A second bug was found and fixed in this same
   verification pass — see the cookie-domain entry below.
-  "Continue with Google" still only establishes a Platform session — a
-  known, smaller follow-up, not done in this pass (the shared PKCE
-  callback it uses also serves password-reset links, so bridging it
-  needs to distinguish those cases first).
+  ~~"Continue with Google" still only establishes a Platform session~~
+  **Resolved 2026-09-20** — the distinguishing signal the follow-up
+  needed already existed: `adminTriggerPasswordReset`'s reset email sets
+  `next=/platform-reset-password` explicitly, while Google OAuth's
+  `redirectTo` carries no `next` at all. `platform-auth-callback/route.ts`
+  now runs the same best-effort `bridgeIdentityToOfficeHub()` +
+  `resolveSignInDestination()` `platformSignIn()`'s password path already
+  used, gated on `next` not being the reset path — the reset flow itself
+  is untouched (early return before any bridge logic). Verified via
+  `tsc`/`eslint`/a real `next build`, not click-tested against a live
+  Google consent screen (no OAuth test environment available this pass).
 - **Production deploy outage, ~7 hours, self-inflicted and self-found
   (2026-09-20)** — every build from `d71ab491` (mobile API salvage)
   through `2ba20b27` (landing page trim) failed on Hostinger, confirmed
