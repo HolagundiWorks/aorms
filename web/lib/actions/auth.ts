@@ -25,7 +25,7 @@ export type AuthActionState = { error: string } | null;
  * Returns a redirect path, or null to mean "proceed with roleHome() as
  * before" (unchanged behavior for every account that isn't multi-studio).
  */
-async function resolveSignInDestination(
+export async function resolveSignInDestination(
   supabase: Awaited<ReturnType<typeof createClient>>,
   webUserId: string,
   platformPublicId: string | null | undefined,
@@ -142,36 +142,44 @@ export async function signIn(_prev: AuthActionState, formData: FormData): Promis
  * and `admin.createUser` on an email that already exists fails cleanly
  * with `code: 'email_exists'` rather than silently succeeding twice.
  */
-async function signInWithIdentity(email: string, password: string): Promise<AuthActionState> {
-  // Verify the password against the Platform — this also signs the
-  // browser into the Platform's own session as a side effect (the same
-  // email+password now works across Office Hub AND every Platform
-  // portal), matching "one personal, portable account" being the
-  // Platform's own stated design, not an accidental side channel.
-  const platform = await createPlatformClient();
-  const { data: platformAuth, error: platformError } = await platform.auth.signInWithPassword({ email, password });
-  if (platformError || !platformAuth.user) {
-    // Same message Supabase's own aorms-web check would have given for a
-    // wrong password — doesn't reveal which of the two systems, if
-    // either, recognizes this email.
-    return { error: "Invalid login credentials" };
-  }
+export type OfficeHubBridgeResult = { webUserId: string; isNewUser: boolean } | { error: string };
 
-  const platformService = createPlatformServiceRoleClient();
-  const { data: platformAccount } = await platformService
-    .from("accounts")
-    .select("id, public_id, full_name")
-    .eq("id", platformAuth.user.id)
-    .maybeSingle();
-  if (!platformAccount) {
-    // A real Platform session (Company Account or platform-staff-only —
-    // see the 2026-09-14 Company/ConnectDeX identity split) but not a
-    // Studio/Identity account. Neither has any Office Hub relationship —
-    // a Company Account in particular is a deliberately separate login by
-    // this same day's own design.
-    return { error: "This AORMS Identity account can't sign into Office Hub — it isn't a Studio/Identity account." };
-  }
-
+/**
+ * Establishes (or reuses) an aorms-web session for an ALREADY-verified
+ * Platform Identity account — refactored 2026-09-20 out of the body of
+ * signInWithIdentity() below, when the single unified login page
+ * (identity.aorms.in/platform-login, see lib/actions/platform.ts's
+ * platformSignIn()) needed the exact same bridge without re-checking a
+ * password it already checked itself. Every safety property from this
+ * function's original design is unchanged, just no longer bound to one
+ * page's Server Action:
+ *
+ * `public.profiles.role` defaults to `'ASSOCIATE'` — a real staff role
+ * with genuine internal access — the moment a new `auth.users` row is
+ * created (`handle_new_user()`'s trigger). A naive "create the user,
+ * you're in" flow would silently hand ANY Identity account holder real
+ * staff access to a firm's private Office Hub data. The profile a
+ * brand-new bridge gets is immediately downgraded to `'PENDING'`
+ * (migration `0049_pending_role_for_identity_signin.sql`) — `roleHome()`
+ * treats it as "no portal" the same as any role outside its explicit
+ * allowlists, and every RLS policy/`is_office_staff()` in this schema
+ * allowlists roles explicitly rather than excluding them. An
+ * OWNER/PARTNER must explicitly promote a PENDING profile via `/users`
+ * before it can see anything — "bridge" means "a real row now exists to
+ * promote", never "real access was granted."
+ *
+ * Session-bootstrap mechanism: Supabase Auth sessions are per-project, so
+ * a password verified against `aorms-platform` can't itself authenticate
+ * against `aorms-web` — there is no shared credential store to check
+ * against. Standard federated-login pattern instead: `admin.
+ * generateLink()` + `auth.verifyOtp()` mints a real aorms-web session
+ * server-side, with no password of this project's own ever being set or
+ * known by the person signing in.
+ */
+export async function bridgeIdentityToOfficeHub(
+  email: string,
+  platformAccount: { id: string; public_id: string; full_name: string },
+): Promise<OfficeHubBridgeResult> {
   const webService = createServiceRoleClient();
   const { data: createdUser, error: createErr } = await webService.auth.admin.createUser({
     email,
@@ -229,9 +237,9 @@ async function signInWithIdentity(email: string, password: string): Promise<Auth
 
   // Multi-tenancy (migration 0055) — resolve which firm this Platform
   // account gets into. Only ever auto-provisions/joins when there's
-  // exactly one unambiguous Studio; zero or two-or-more always defer
-  // (0 → the existing "not available yet" sign-out below; 2+ → the
-  // picker via resolveSignInDestination(), never guessed here).
+  // exactly one unambiguous Studio; zero or two-or-more always defer to
+  // the caller's own destination-resolution logic.
+  const platformService = createPlatformServiceRoleClient();
   const { count: existingMembershipCount } = await supabase
     .from("profile_firm_memberships")
     .select("id", { count: "exact", head: true })
@@ -268,9 +276,54 @@ async function signInWithIdentity(email: string, password: string): Promise<Auth
     }
   }
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", webUserId).maybeSingle();
+  return { webUserId, isNewUser };
+}
 
-  const destination = await resolveSignInDestination(supabase, webUserId, platformAccount.public_id);
+/**
+ * Kept for backward compatibility — the page that used to call this
+ * (`aorms.in/login`) now redirects to the unified login at
+ * `identity.aorms.in/platform-login` (see app/(auth)/login/page.tsx),
+ * which calls `bridgeIdentityToOfficeHub()` above directly. This wrapper
+ * still works identically for any stale cached page or bookmarked form
+ * post that reaches `signIn()` directly.
+ */
+async function signInWithIdentity(email: string, password: string): Promise<AuthActionState> {
+  // Verify the password against the Platform — this also signs the
+  // browser into the Platform's own session as a side effect (the same
+  // email+password now works across Office Hub AND every Platform
+  // portal), matching "one personal, portable account" being the
+  // Platform's own stated design, not an accidental side channel.
+  const platform = await createPlatformClient();
+  const { data: platformAuth, error: platformError } = await platform.auth.signInWithPassword({ email, password });
+  if (platformError || !platformAuth.user) {
+    // Same message Supabase's own aorms-web check would have given for a
+    // wrong password — doesn't reveal which of the two systems, if
+    // either, recognizes this email.
+    return { error: "Invalid login credentials" };
+  }
+
+  const platformService = createPlatformServiceRoleClient();
+  const { data: platformAccount } = await platformService
+    .from("accounts")
+    .select("id, public_id, full_name")
+    .eq("id", platformAuth.user.id)
+    .maybeSingle();
+  if (!platformAccount) {
+    // A real Platform session (Company Account or platform-staff-only —
+    // see the 2026-09-14 Company/ConnectDeX identity split) but not a
+    // Studio/Identity account. Neither has any Office Hub relationship —
+    // a Company Account in particular is a deliberately separate login by
+    // this same day's own design.
+    return { error: "This AORMS Identity account can't sign into Office Hub — it isn't a Studio/Identity account." };
+  }
+
+  const bridged = await bridgeIdentityToOfficeHub(email, platformAccount);
+  if ("error" in bridged) return bridged;
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", bridged.webUserId).maybeSingle();
+
+  const destination = await resolveSignInDestination(supabase, bridged.webUserId, platformAccount.public_id);
   if (destination) redirect(destination);
 
   const home = roleHome(profile?.role);

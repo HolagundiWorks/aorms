@@ -35,6 +35,8 @@ import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/acco
 import { checkRateLimit, rateLimitIdentifier } from "../security/rate-limit";
 import { validatePassword } from "../security/password-policy";
 import { toSafeErrorMessage } from "../security/safe-error";
+import { bridgeIdentityToOfficeHub, resolveSignInDestination } from "./auth";
+import { roleHome } from "../auth/role-home";
 
 export type PlatformActionState = { error: string } | null;
 
@@ -75,6 +77,142 @@ export async function platformSignUp(
   redirect(await currentPortalHome());
 }
 
+export type PlatformBridgeResult =
+  | { platformAccountId: string; platformPublicId: string; isNewAccount: boolean }
+  | { error: string };
+
+/**
+ * The reverse of auth.ts's `bridgeIdentityToOfficeHub()` — establishes
+ * (or, since this always creates a brand-new account, more precisely
+ * "provisions") an aorms-platform session for an ALREADY-verified Office
+ * Hub account. Built 2026-09-20 when `identity.aorms.in/platform-login`
+ * became the one unified login page for both systems (explicit user
+ * direction: "confusion with login page aorms.in/login and
+ * identity.aorms.in, keep one page[,] improve security") — before this,
+ * an Office-Hub-only password (never linked to a personal AORMS Identity)
+ * simply didn't work here at all, which was the actual confusion.
+ *
+ * Same safety shape as the forward bridge: a freshly created `accounts`
+ * row defaults to `level = 'BASIC'` and has no admin-related column at
+ * all (admin status lives only in `platform_staff`, which has no
+ * self-serve grant path — confirmed against the live schema before
+ * writing this) — so "a matching Identity account now exists" can never
+ * mean "elevated Platform access was granted," the same invariant the
+ * forward bridge relies on for Office Hub roles.
+ */
+export async function bridgeOfficeHubToIdentity(email: string, webUserId: string): Promise<PlatformBridgeResult> {
+  const webService = createWebServiceRoleClient();
+  const platformService = createPlatformServiceRoleClient();
+
+  // Idempotency check — without this, every sign-in after the first for
+  // the same Office-Hub-only account would fail: the bridged Platform
+  // account has a random, unknown password, so the platform-password
+  // check in platformSignIn() below always falls through to here again,
+  // and a naive unconditional createUser() would hit email_exists on its
+  // own previously-created account and wrongly report it as a foreign
+  // account with a different password. If this profile is already linked
+  // (profiles.platform_public_id set — by this bridge or any other path),
+  // reuse that account instead of trying to create a new one.
+  const { data: webProfile } = await webService.from("profiles").select("platform_public_id").eq("id", webUserId).maybeSingle();
+  let account: { id: string; public_id: string } | null = null;
+  if (webProfile?.platform_public_id) {
+    const { data: linkedAccount } = await platformService
+      .from("accounts")
+      .select("id, public_id")
+      .eq("public_id", webProfile.platform_public_id)
+      .maybeSingle();
+    account = linkedAccount ?? null;
+  }
+
+  let isNewAccount = false;
+  if (!account) {
+    const { data: createdAccount, error: createErr } = await platformService.auth.admin.createUser({
+      email,
+      // Never surfaced to anyone — this account signs in via its Office
+      // Hub password from here on, same pattern bridgeIdentityToOfficeHub()
+      // already uses in the other direction.
+      password: crypto.randomUUID() + crypto.randomUUID(),
+      email_confirm: true,
+    });
+
+    if (createErr) {
+      if (createErr.code === "email_exists") {
+        // A Platform account already exists for this email, and it's NOT
+        // the one linked to this Office Hub profile (the lookup above
+        // would have found it otherwise) — a genuinely different,
+        // foreign account. A clear, actionable message, not a generic
+        // "invalid credentials" one, since this person does have real
+        // Platform access, just not with the password they just typed.
+        return { error: "This email already has an AORMS Identity account with a different password — use that password, or reset it." };
+      }
+      return { error: "Couldn't sign in — please try again." };
+    }
+
+    const { data: newAccount } = await platformService.from("accounts").select("id, public_id").eq("id", createdAccount.user.id).maybeSingle();
+    if (!newAccount) {
+      return { error: "Couldn't finish setting up your account — please try again." };
+    }
+    account = newAccount;
+    isNewAccount = true;
+  }
+
+  const { data: linkData, error: linkErr } = await platformService.auth.admin.generateLink({ type: "magiclink", email });
+  if (linkErr || !linkData.properties.hashed_token) {
+    return { error: "Couldn't sign in — please try again." };
+  }
+
+  const platform = await createPlatformClient();
+  const { error: verifyErr } = await platform.auth.verifyOtp({ token_hash: linkData.properties.hashed_token, type: "magiclink" });
+  if (verifyErr) {
+    return { error: "Couldn't sign in — please try again." };
+  }
+
+  if (isNewAccount) {
+    // Link the Office Hub profile to this brand-new Identity, but only
+    // ever fill a blank link — same "never overwrite" carefulness the
+    // forward bridge uses.
+    await webService.from("profiles").update({ platform_public_id: account.public_id }).eq("id", webUserId).is("platform_public_id", null);
+
+    // Audit-logged (unlike the rest of this file's platform-side
+    // mutations — see this file's own header comment on why those don't
+    // call write_audit) because this one writes to web/'s own profiles
+    // table, same reasoning linkPlatformIdentity() above already
+    // documents, and because a brand-new Identity account materializing
+    // from an Office Hub login is exactly the kind of cross-system event
+    // worth a traceable record, not silent.
+    const webSupabase = await createWebClient();
+    await webSupabase.rpc("write_audit", {
+      p_entity: "profile",
+      p_entity_id: webUserId,
+      p_action: "UPDATE",
+      p_before: null,
+      p_after: { platform_public_id: account.public_id, source: "bridgeOfficeHubToIdentity" },
+    });
+  }
+
+  return { platformAccountId: account.id, platformPublicId: account.public_id, isNewAccount };
+}
+
+/**
+ * The one unified login — identity.aorms.in/platform-login, reachable
+ * identically on every portal subdomain and the main domain (see
+ * lib/platform/subdomains.ts's SHARED_PREFIXES). `aorms.in/login`
+ * redirects here now (app/(auth)/login/page.tsx) rather than running its
+ * own separate page. Tries the Platform password first (the common
+ * case), then falls back to an Office-Hub-only password (the
+ * `bridgeOfficeHubToIdentity()` reverse bridge above) — symmetric to how
+ * the old `aorms.in/login` already fell back from Office Hub to Platform
+ * (auth.ts's `bridgeIdentityToOfficeHub()`). Whichever password matches,
+ * the OTHER system's session is established too when there's a plausible
+ * reason to (an existing or newly-bridged account), so one sign-in here
+ * carries across both systems — that's the actual fix for "confusion
+ * between two login pages," not just picking one URL to keep.
+ *
+ * One rate-limit check covers the whole attempt (not one per system) —
+ * an attacker gets exactly 8 tries per 15 minutes against a given email
+ * here, the same budget `platformSignIn` always had, not double it by
+ * probing each backend separately.
+ */
 export async function platformSignIn(
   _prev: PlatformActionState,
   formData: FormData,
@@ -92,8 +230,72 @@ export async function platformSignIn(
   if (!rateLimit.ok) return { error: `Too many attempts — try again in ${rateLimit.retryAfterSeconds}s.` };
 
   const supabase = await createPlatformClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: toSafeErrorMessage(error) };
+  const { data: platformAuth, error: platformError } = await supabase.auth.signInWithPassword({ email, password });
+
+  let webUserId: string | null = null;
+  let platformPublicId: string | null = null;
+
+  if (!platformError && platformAuth.user) {
+    // Platform password matched — the common, primary path.
+    const platformService = createPlatformServiceRoleClient();
+    const { data: account } = await platformService
+      .from("accounts")
+      .select("id, public_id, full_name")
+      .eq("id", platformAuth.user.id)
+      .maybeSingle();
+
+    if (account) {
+      platformPublicId = account.public_id;
+      // Best-effort bridge into Office Hub too, so navigating there later
+      // doesn't need a second sign-in. Not fatal to this sign-in if it
+      // fails: Platform access is real either way, Office Hub is a bonus,
+      // not a requirement.
+      const bridged = await bridgeIdentityToOfficeHub(email, account);
+      if (!("error" in bridged)) webUserId = bridged.webUserId;
+    }
+    // else: a real Platform session (Company Account or platform-staff-
+    // only), but not a Studio/Identity account — no Office Hub bridge
+    // attempted, same "deliberately separate" reasoning
+    // bridgeIdentityToOfficeHub's own other caller already documents.
+    // Falls through to destination resolution below with webUserId still
+    // null, landing on this portal's own home.
+  } else {
+    // Platform password didn't match. Try it as an Office-Hub-only
+    // password instead, so an existing Office Hub account that never
+    // created a personal AORMS Identity still works on this one unified
+    // login page.
+    const webSupabase = await createWebClient();
+    const { data: webAuth, error: webError } = await webSupabase.auth.signInWithPassword({ email, password });
+    if (webError || !webAuth.user) {
+      // Same message either system would give for a wrong password —
+      // doesn't reveal which one, if either, recognizes this email.
+      return { error: "Invalid login credentials" };
+    }
+
+    webUserId = webAuth.user.id;
+    const bridged = await bridgeOfficeHubToIdentity(email, webUserId);
+    if ("error" in bridged) return bridged;
+    platformPublicId = bridged.platformPublicId;
+  }
+
+  // Destination resolution — prefers a specific Office Hub firm when
+  // there's exactly one unambiguous one (the more useful destination for
+  // day-to-day work), the studio picker when there's real ambiguity, and
+  // falls back to the current portal's own home otherwise. Deliberately
+  // does NOT sign the caller out and error just because Office Hub has no
+  // firm for them, unlike auth.ts's signInWithIdentity() (kept for
+  // backward compat, see its own header) — that page's whole purpose was
+  // reaching Office Hub specifically, so "no firm" was a real dead end
+  // there. Here, Platform access with zero Office Hub relevance is a
+  // completely normal, valid outcome, not an error.
+  if (webUserId) {
+    const webSupabase = await createWebClient();
+    const { data: profile } = await webSupabase.from("profiles").select("role").eq("id", webUserId).maybeSingle();
+    const destination = await resolveSignInDestination(webSupabase, webUserId, platformPublicId);
+    if (destination) redirect(destination);
+    const home = roleHome(profile?.role);
+    if (home) redirect(home);
+  }
 
   redirect(await currentPortalHome());
 }

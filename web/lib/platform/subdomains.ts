@@ -42,6 +42,7 @@ export const PORTAL_OWNED_PREFIXES: Record<PortalKey, string[]> = {
  * happens to resolve to, and both need to work there unchanged.
  */
 export const SHARED_PREFIXES = [
+  "/login",
   "/platform-login",
   "/platform-signup",
   "/support",
