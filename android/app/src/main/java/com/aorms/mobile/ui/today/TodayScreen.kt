@@ -1,5 +1,7 @@
 package com.aorms.mobile.ui.today
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,15 +9,19 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,8 +40,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.aorms.mobile.data.TaskRow
 import com.aorms.mobile.ui.tasks.NewTaskSheet
+import com.aorms.mobile.ui.theme.CarbonTile
 
-private data class Kpi(val label: String, val value: Long, val accent: Color)
+private data class Kpi(val key: String, val label: String, val value: Long, val accent: Color)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +60,15 @@ fun TodayScreen(viewModel: TodayViewModel) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            FloatingActionButton(onClick = { viewModel.showNewTask = true }) {
+            // Carbon has no floating-action-button pattern at all (it's a
+            // desktop/web design system) — the nearest Carbon-styled
+            // equivalent this session settled on is a flat, square,
+            // zero-elevation primary-colored button in the FAB's usual
+            // position, not a literal Carbon component (none exists).
+            FloatingActionButton(
+                onClick = { viewModel.showNewTask = true },
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp, pressedElevation = 0.dp, focusedElevation = 0.dp, hoveredElevation = 0.dp),
+            ) {
                 Icon(Icons.Default.Add, contentDescription = "Add task")
             }
         },
@@ -104,12 +119,19 @@ fun TodayScreen(viewModel: TodayViewModel) {
                     modifier = Modifier.padding(top = 28.dp, bottom = 4.dp),
                 )
                 Text(
-                    "Same six numbers as the web app's Pulse dashboard.",
+                    "Same six numbers as the web app's Pulse dashboard — tap a tile for detail.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
                 PulseGrid(viewModel)
+                if (viewModel.expandedKpi != null) {
+                    KpiDetailPanel(
+                        label = KPI_LABELS[viewModel.expandedKpi] ?: "",
+                        loading = viewModel.kpiDetailLoading,
+                        rows = viewModel.kpiDetailRows,
+                    )
+                }
             }
         }
     }
@@ -135,7 +157,7 @@ private fun SectionHeader(label: String, warning: Boolean = false) {
 
 @Composable
 private fun TaskAgendaRow(task: TaskRow, projectTitle: String?, onDone: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+    CarbonTile(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -156,38 +178,93 @@ private fun TaskAgendaRow(task: TaskRow, projectTitle: String?, onDone: () -> Un
     }
 }
 
+private val KPI_LABELS = mapOf(
+    "critical" to "Critical",
+    "blocked" to "Blocked tasks",
+    "openGaps" to "Open gaps",
+    "lowConfidence" to "Low confidence",
+    "projectsAtRisk" to "Projects at risk",
+    "openRevisions" to "Open revisions",
+)
+
 /** Same six tiles/colors as the old ui.dashboard.DashboardScreen — plain
  * Column-of-Rows, not LazyVerticalGrid, since this composable is itself
  * inside a LazyColumn item and a nested lazy grid there needs an
- * awkward fixed-height workaround this small, fixed 3x2 set doesn't need. */
+ * awkward fixed-height workaround this small, fixed 3x2 set doesn't need.
+ * Each tile is clickable (2026-09-20, explicit user request: "on clicking
+ * kpi tiles expand and show detail") — toggles TodayViewModel.expandedKpi,
+ * rendered as a single shared detail panel below the whole grid rather
+ * than inline per-tile, so tapping a tile never reflows the grid itself. */
 @Composable
 private fun PulseGrid(viewModel: TodayViewModel) {
     val kpis = listOf(
-        Kpi("Critical", viewModel.critical, Color(0xFFDA1E28)),
-        Kpi("Blocked tasks", viewModel.blocked, Color(0xFFFF832B)),
-        Kpi("Open gaps", viewModel.openGaps, Color(0xFFF1C21B)),
-        Kpi("Low confidence", viewModel.lowConfidence, Color(0xFFFF832B)),
-        Kpi("Projects at risk", viewModel.projectsAtRisk, Color(0xFFDA1E28)),
-        Kpi("Open revisions", viewModel.openRevisions, Color(0xFF0F62FE)),
+        Kpi("critical", "Critical", viewModel.critical, Color(0xFFDA1E28)),
+        Kpi("blocked", "Blocked tasks", viewModel.blocked, Color(0xFFFF832B)),
+        Kpi("openGaps", "Open gaps", viewModel.openGaps, Color(0xFFF1C21B)),
+        Kpi("lowConfidence", "Low confidence", viewModel.lowConfidence, Color(0xFFFF832B)),
+        Kpi("projectsAtRisk", "Projects at risk", viewModel.projectsAtRisk, Color(0xFFDA1E28)),
+        Kpi("openRevisions", "Open revisions", viewModel.openRevisions, Color(0xFF0F62FE)),
     )
-    Column(modifier = Modifier.padding(bottom = 24.dp)) {
+    Column(modifier = Modifier.padding(bottom = 8.dp)) {
         kpis.chunked(2).forEach { pair ->
             Row(modifier = Modifier.fillMaxWidth()) {
                 pair.forEach { kpi ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(0.5f).padding(6.dp).aspectRatio(1.6f),
+                    val selected = viewModel.expandedKpi == kpi.key
+                    CarbonTile(
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .padding(6.dp)
+                            .aspectRatio(1.6f)
+                            .clickable { viewModel.toggleKpi(kpi.key) },
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        border = if (selected) BorderStroke(2.dp, kpi.accent) else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                     ) {
                         Column(
                             modifier = Modifier.fillMaxSize().padding(12.dp),
                             verticalArrangement = Arrangement.SpaceBetween,
                         ) {
-                            Text(
-                                if (viewModel.loading) "…" else kpi.value.toString(),
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = kpi.accent,
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text(
+                                    if (viewModel.loading) "…" else kpi.value.toString(),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    color = kpi.accent,
+                                )
+                                Icon(
+                                    if (selected) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                    contentDescription = if (selected) "Collapse" else "Expand",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            }
                             Text(kpi.label, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun KpiDetailPanel(label: String, loading: Boolean, rows: List<KpiDetailRow>) {
+    CarbonTile(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(label, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(bottom = 8.dp))
+            when {
+                loading -> CircularProgressIndicator(modifier = Modifier.size(20.dp).padding(vertical = 8.dp))
+                rows.isEmpty() -> Text(
+                    "Nothing here right now.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                else -> rows.forEach { row ->
+                    Column(modifier = Modifier.padding(vertical = 6.dp)) {
+                        Text(row.primary, style = MaterialTheme.typography.bodyMedium)
+                        row.secondary?.let {
+                            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }

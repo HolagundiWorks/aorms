@@ -15,6 +15,12 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+/** Uniform row shape for every KPI tile's expanded detail list — each
+ * Repository query below has its own real row type, mapped down to this
+ * common (primary, secondary) pair so TodayScreen renders all six the
+ * same way instead of six bespoke list composables. */
+data class KpiDetailRow(val primary: String, val secondary: String?)
+
 /**
  * "Today" — the app's home screen (2026-09-20 redesign, explicit user
  * request: the default screen should answer "what do I need to deal
@@ -43,10 +49,24 @@ class TodayViewModel : ViewModel() {
     var projectsAtRisk by mutableStateOf(0L)
     var openRevisions by mutableStateOf(0L)
 
+    // Pulse KPI drill-down — which tile (if any) is expanded, its detail
+    // rows, and a per-tile cache so collapsing/re-expanding the same tile
+    // doesn't re-fetch. Cache is intentionally session-only (cleared by a
+    // fresh load()), not persisted — this is a live "what's happening
+    // right now" view, not something that should show stale data after
+    // a pull-to-refresh-style reload.
+    var expandedKpi by mutableStateOf<String?>(null)
+    var kpiDetailLoading by mutableStateOf(false)
+    var kpiDetailRows by mutableStateOf<List<KpiDetailRow>>(emptyList())
+    private val kpiDetailCache = mutableMapOf<String, List<KpiDetailRow>>()
+
     fun load() {
         val user = Supa.auth.currentUserOrNull() ?: return
         userName = user.email ?: ""
         loading = true
+        kpiDetailCache.clear()
+        expandedKpi = null
+        kpiDetailRows = emptyList()
         val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
         viewModelScope.launch {
             runCatching {
@@ -94,4 +114,50 @@ class TodayViewModel : ViewModel() {
     }
 
     fun projectTitle(projectId: String?): String? = projects.firstOrNull { it.id == projectId }?.title
+
+    /** Toggle a Pulse tile's expanded detail — collapses if it's already
+     * open, otherwise expands and loads (or reuses the cached) rows. */
+    fun toggleKpi(key: String) {
+        if (expandedKpi == key) {
+            expandedKpi = null
+            return
+        }
+        expandedKpi = key
+        kpiDetailCache[key]?.let {
+            kpiDetailRows = it
+            return
+        }
+        kpiDetailRows = emptyList()
+        kpiDetailLoading = true
+        viewModelScope.launch {
+            val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+            val rows = runCatching {
+                when (key) {
+                    "critical" -> Repository.criticalTaskDetails().map {
+                        KpiDetailRow(it.title, listOfNotNull(it.projectOffices?.title, it.dueDate?.let { d -> "due $d" }).joinToString(" · ").ifBlank { null })
+                    }
+                    "blocked" -> Repository.blockedTaskDetails().map {
+                        KpiDetailRow(it.tasks?.title ?: "Untitled task", it.dependsOn?.title?.let { t -> "Blocked by $t" })
+                    }
+                    "openGaps" -> Repository.missingParamDetails().map {
+                        KpiDetailRow(it.tasks?.title ?: "Untitled task", it.description)
+                    }
+                    "lowConfidence" -> Repository.lowConfidenceTaskDetails().map {
+                        KpiDetailRow(it.title, it.projectOffices?.title)
+                    }
+                    "projectsAtRisk" -> Repository.projectsAtRiskDetails(today).map { KpiDetailRow(it.title, null) }
+                    "openRevisions" -> Repository.openRevisionDetails().map {
+                        KpiDetailRow(it.title, listOfNotNull(it.projectOffices?.title, it.state).joinToString(" · ").ifBlank { null })
+                    }
+                    else -> emptyList()
+                }
+            }.getOrElse {
+                error = it.toUserMessage()
+                emptyList()
+            }
+            kpiDetailCache[key] = rows
+            if (expandedKpi == key) kpiDetailRows = rows
+            kpiDetailLoading = false
+        }
+    }
 }

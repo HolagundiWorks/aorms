@@ -72,7 +72,9 @@ object Repository {
         }.countOrNull() ?: 0L
 
     /** A project counts "at risk" if it has an open task that's overdue, CRITICAL band, or blocked on another — same three signals as getProjectsAtRiskCount() in lib/pulse/queries.ts. */
-    suspend fun pulseProjectsAtRiskCount(today: String): Long {
+    suspend fun pulseProjectsAtRiskCount(today: String): Long = atRiskProjectIds(today).size.toLong()
+
+    private suspend fun atRiskProjectIds(today: String): Set<String> {
         val openTasks = Supa.db.from("tasks").select(Columns.list("project_id, due_date, priority_score")) {
             filter { neq("status", "DONE") }
         }.decodeList<RiskTaskRow>()
@@ -94,7 +96,68 @@ object Repository {
         for (d in blockedProjects) {
             d.tasks?.projectId?.let { atRisk.add(it) }
         }
-        return atRisk.size.toLong()
+        return atRisk
+    }
+
+    // ---- Pulse KPI drill-down (2026-09-20, explicit user request: "on
+    // clicking kpi tiles expand and show detail") — a small, capped detail
+    // list per tile, mirroring the same tables/filters as the six count
+    // queries above, and (where a web equivalent exists) lib/pulse/
+    // queries.ts's own getTopPriorityTasks/getBlockedTasks/
+    // getOpenMissingParams/getLowConfidenceTasks. ----
+
+    suspend fun criticalTaskDetails(limit: Long = 5): List<TaskDetailRow> =
+        Supa.db.from("tasks").select(Columns.raw("id, title, due_date, project_offices(title)")) {
+            filter {
+                neq("status", "DONE")
+                gte("priority_score", 70)
+            }
+            order("priority_score", Order.DESCENDING)
+            limit(limit)
+        }.decodeList()
+
+    suspend fun lowConfidenceTaskDetails(limit: Long = 5): List<TaskDetailRow> =
+        Supa.db.from("tasks").select(Columns.raw("id, title, due_date, project_offices(title)")) {
+            filter {
+                neq("status", "DONE")
+                lt("confidence_score", 60)
+            }
+            order("confidence_score", Order.ASCENDING)
+            limit(limit)
+        }.decodeList()
+
+    suspend fun blockedTaskDetails(limit: Long = 5): List<BlockedTaskDetailRow> =
+        Supa.db.from("task_dependencies").select(
+            Columns.raw("id, tasks!task_dependencies_task_id_fkey(title), depends_on:tasks!task_dependencies_depends_on_task_id_fkey(title)"),
+        ) {
+            filter {
+                eq("dependency_type", "BLOCKS")
+                eq("status", "OPEN")
+            }
+            order("created_at", Order.DESCENDING)
+            limit(limit)
+        }.decodeList()
+
+    suspend fun missingParamDetails(limit: Long = 5): List<MissingParamDetailRow> =
+        Supa.db.from("task_missing_params").select(Columns.raw("id, parameter_type, description, tasks(title)")) {
+            filter { eq("status", "OPEN") }
+            order("created_at", Order.DESCENDING)
+            limit(limit)
+        }.decodeList()
+
+    suspend fun openRevisionDetails(limit: Long = 5): List<DecisionDetailRow> =
+        Supa.db.from("decisions").select(Columns.raw("id, title, state, project_offices(title)")) {
+            filter { isIn("state", listOf("OPEN", "CLIENT_REVIEW")) }
+            order("created_at", Order.DESCENDING)
+            limit(limit)
+        }.decodeList()
+
+    suspend fun projectsAtRiskDetails(today: String, limit: Int = 5): List<RiskProjectRow> {
+        val ids = atRiskProjectIds(today).toList().take(limit)
+        if (ids.isEmpty()) return emptyList()
+        return Supa.db.from("project_offices").select(Columns.list("id, title")) {
+            filter { isIn("id", ids) }
+        }.decodeList()
     }
 
     // ---- Profile / firm switching ----

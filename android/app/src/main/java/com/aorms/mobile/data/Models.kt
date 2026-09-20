@@ -147,6 +147,51 @@ data class BlockedDepProjectRow(val tasks: ProjectIdHolder? = null)
 @Serializable
 data class ProjectIdHolder(@SerialName("project_id") val projectId: String? = null)
 
+// ---- Pulse KPI drill-down rows (2026-09-20) ----
+
+@Serializable
+data class ProjectTitleHolder(val title: String? = null)
+
+@Serializable
+data class TaskTitleHolder(val title: String? = null)
+
+@Serializable
+data class TaskDetailRow(
+    val id: String,
+    val title: String,
+    @SerialName("due_date") val dueDate: String? = null,
+    @SerialName("project_offices") val projectOffices: ProjectTitleHolder? = null,
+)
+
+@Serializable
+data class BlockedTaskDetailRow(
+    val id: String,
+    val tasks: TaskTitleHolder? = null,
+    @SerialName("depends_on") val dependsOn: TaskTitleHolder? = null,
+)
+
+@Serializable
+data class MissingParamDetailRow(
+    val id: String,
+    @SerialName("parameter_type") val parameterType: String,
+    val description: String,
+    val tasks: TaskTitleHolder? = null,
+)
+
+@Serializable
+data class DecisionDetailRow(
+    val id: String,
+    val title: String,
+    val state: String,
+    @SerialName("project_offices") val projectOffices: ProjectTitleHolder? = null,
+)
+
+@Serializable
+data class RiskProjectRow(
+    val id: String,
+    val title: String,
+)
+
 // ---- Profile / firm switching (no AORMS Identity — plain login/logout only) ----
 
 @Serializable

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.aorms.mobile.ui.theme.CarbonTile
 
 @Composable
 fun AccountScreen(viewModel: AccountViewModel) {
@@ -36,7 +36,7 @@ fun AccountScreen(viewModel: AccountViewModel) {
         Text("Account", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(16.dp))
 
-        Card(modifier = Modifier.fillMaxWidth()) {
+        CarbonTile(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(viewModel.profile?.fullName?.ifBlank { viewModel.email } ?: viewModel.email, style = MaterialTheme.typography.titleMedium)
                 Text(viewModel.email, style = MaterialTheme.typography.bodyMedium)
@@ -60,7 +60,7 @@ fun AccountScreen(viewModel: AccountViewModel) {
 
         viewModel.firms.forEach { membership ->
             val isActive = membership.firmId == viewModel.profile?.firmId
-            Card(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+            CarbonTile(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,

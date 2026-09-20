@@ -10,9 +10,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.aorms.mobile.ui.theme.CarbonTile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +47,10 @@ fun LeadsScreen(viewModel: LeadsViewModel) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            FloatingActionButton(onClick = { viewModel.showNewLead = true }) {
+            FloatingActionButton(
+                onClick = { viewModel.showNewLead = true },
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp, pressedElevation = 0.dp, focusedElevation = 0.dp, hoveredElevation = 0.dp),
+            ) {
                 Icon(Icons.Default.Add, contentDescription = "New lead")
             }
         },
@@ -57,7 +61,7 @@ fun LeadsScreen(viewModel: LeadsViewModel) {
             }
             LazyColumn(modifier = Modifier.fillMaxSize().padding(12.dp)) {
                 items(viewModel.leads) { lead ->
-                    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                    CarbonTile(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(lead.clientName, style = MaterialTheme.typography.titleMedium)
                             Text(
