@@ -163,16 +163,24 @@ silently declared complete:** subdomain-based routing
 (`<slug>.aorms.in`) — session-based tenant resolution achieves real data
 isolation without it, and `studios.subdomain_slug`'s existing DNS-inert
 reservation is untouched; a separate Supabase project per firm — ruled out
-by this org's 2-project free-tier cap; full firm-scoping of the ~10 shared
-query helpers in `lib/dashboard/queries.ts`/`lib/pulse/queries.ts` (they're
-designed for session-bound callers where RLS already scopes them
-correctly — only `app/api/pulse/snapshot-kpis/route.ts`'s service-role
-cron call bypasses that, and only its own inline counts were fixed, not
-the helpers themselves); Storage bucket isolation for
-`web/lib/drawings/upload.ts` (content-hash-addressed keys, no
-Storage-level RLS found anywhere); and the Python worker's own
+by this org's 2-project free-tier cap; and the Python worker's own
 firm-awareness (its job payloads don't carry `firm_id` yet — outside
-`web/`'s repo scope to fix). See `docs/esti/ROADMAP.md`'s dated entry for
+`web/`'s repo scope to fix).
+
+**Resolved 2026-09-20** (this entry used to also list these as open —
+see `docs/esti/ROADMAP.md`'s dated "Multi-tenancy service-role sweep"
+entry for the full account): the ~10 shared query helpers in
+`lib/dashboard/queries.ts`/`lib/pulse/queries.ts` now take an optional
+trailing `firmId` and `app/api/pulse/snapshot-kpis/route.ts` passes it —
+real bug, real live impact once a second firm existed, now fixed. Storage
+bucket isolation for `web/lib/drawings/upload.ts` was assessed, not
+skipped: both `esti-documents` and `esti-site-inspections` are private
+buckets with no listing endpoint anywhere in the codebase, every read
+goes through a signed URL minted only after an RLS-scoped row lookup
+already succeeded, so two firms colliding on a content-identical file's
+hash-addressed key is deduplicated storage for provably-identical bytes,
+not a cross-firm leak — no firm-namespaced re-keying needed. See
+`docs/esti/ROADMAP.md`'s dated entry for
 the full account.
 
 ## Launch status (2026-09-04)

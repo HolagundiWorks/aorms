@@ -174,6 +174,36 @@ Hub data reset nightly via `pg_cron`).
   fixed (`9c3c0e56`), and re-verified end-to-end live: sign-in now
   correctly redirects all the way to `aorms.in/pulse` with both sessions
   intact.
+- **Multi-tenancy service-role sweep — one real bug found and fixed, rest
+  confirmed already correct (2026-09-20).** Re-audited every service-role
+  caller flagged in the multi-tenancy build-out
+  (`app/api/pulse/snapshot-kpis/route.ts`, `.../recompute/route.ts`,
+  `app/api/mobile/inspections/route.ts`, `app/api/razorpay/webhook/
+  route.ts`, `lib/rag/ingest.ts`, `reset_demo_data()`) now that a second
+  firm genuinely exists in production, not just as a theoretical risk.
+  Found one real, live bug: `snapshot-kpis`'s 10 shared query helpers
+  (`lib/dashboard/queries.ts`, `lib/pulse/queries.ts`) had no firm filter
+  at all — designed for session-bound callers where RLS scopes rows
+  automatically, they silently returned the same cross-firm totals for
+  every firm's KPI snapshot row once a second firm existed. Fixed: each
+  helper now takes an optional trailing `firmId`. Every other flagged
+  path was already correctly firm-scoped (`reset_demo_data()`'s 0067
+  hotfix, `lib/rag/ingest.ts`'s required `firmId` param, `mobile/
+  inspections`'s bearer-client inserts) or genuinely doesn't need
+  firm-scoping (`razorpay/webhook` operates on the separate
+  `aorms-platform` project's own `studio_id`/`account_id`-scoped tables,
+  not Office Hub `firm_id` at all — a unique `razorpay_order_id` already
+  identifies exactly one row regardless of tenant). Also assessed the
+  Storage-bucket content-hash-collision concern this plan flagged as an
+  open question: not a real leak — both `esti-documents` and
+  `esti-site-inspections` buckets are private with no listing endpoint
+  anywhere in the codebase, every read goes through a signed URL minted
+  only after an RLS-scoped row lookup already succeeded, and two firms
+  colliding on a content-identical file's storage key just means they
+  share deduplicated storage for provably-identical bytes — no
+  cross-firm information disclosure. Left as-is rather than adding
+  firm-namespaced storage keys, which would need a live re-keying
+  migration for real security value this doesn't actually have.
 - **Content-Security-Policy flipped to enforcing, but Hostinger's edge
   CDN silently overwrites it in production (2026-09-20)** —
   `next.config.mjs`'s `buildCspHeader()` ran in Report-Only mode since
