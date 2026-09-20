@@ -34,19 +34,25 @@ export default async function SelectStudioPage() {
             </div>
 
             {firms.length > 0 ? (
-              <Stack gap={3}>
-                {firms.map((f) => (
-                  <SwitchFirmTile key={f.firmId} firmId={f.firmId} name={f.name} role={f.role} />
-                ))}
-              </Stack>
+              <div style={{ maxHeight: "45vh", overflowY: "auto" }}>
+                <Stack gap={3}>
+                  {firms.map((f) => (
+                    <SwitchFirmTile key={f.firmId} firmId={f.firmId} name={f.name} role={f.role} />
+                  ))}
+                </Stack>
+              </div>
             ) : null}
 
             {joinable.length > 0 ? (
               <Stack gap={3}>
                 <p className="cds--type-heading-compact-02">Available to set up</p>
-                {joinable.map((s) => (
-                  <JoinStudioTile key={s.publicId} publicId={s.publicId} name={s.name} />
-                ))}
+                <div style={{ maxHeight: "45vh", overflowY: "auto" }}>
+                  <Stack gap={3}>
+                    {joinable.map((s) => (
+                      <JoinStudioTile key={s.publicId} publicId={s.publicId} name={s.name} />
+                    ))}
+                  </Stack>
+                </div>
               </Stack>
             ) : null}
 
