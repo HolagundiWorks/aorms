@@ -99,9 +99,14 @@ export default async function IdentityProfilePage() {
             title="My Profile"
             description="Professional info, credentials, and your work history — carries with your portable AORMS Identity."
             actions={
-              <Tag type="cool-gray" size="md">
-                {account.public_id}
-              </Tag>
+              <Stack gap={4} orientation="horizontal" style={{ alignItems: "center" }}>
+                <NextLink href="/identity/profile/resume" className="cds--type-body-01">
+                  View as Resume / CV →
+                </NextLink>
+                <Tag type="cool-gray" size="md">
+                  {account.public_id}
+                </Tag>
+              </Stack>
             }
           />
 

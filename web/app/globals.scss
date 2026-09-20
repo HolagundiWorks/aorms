@@ -492,3 +492,13 @@ body {
 .cds--tag.cds--layout--size-sm .cds--tag__close-icon {
   border-radius: 0;
 }
+
+// AORMS Identity resume/CV view (app/(platform)/identity/profile/resume) —
+// app chrome (portal header, back/print controls) has no place on a
+// printed or exported CV, so it's marked with this class and hidden only
+// under @media print rather than removed from the page entirely.
+@media print {
+  .aorms-print-hide {
+    display: none !important;
+  }
+}
