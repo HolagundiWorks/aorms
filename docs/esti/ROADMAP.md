@@ -117,14 +117,63 @@ Hub data reset nightly via `pg_cron`).
   bridges share the same no-privilege-escalation invariant (a bridged
   account always gets the safe default: `PENDING` role on the Office Hub
   side, `BASIC` level with no admin-capable column on the Platform
-  side). Verified live end-to-end against production data, including a
-  real pre-existing-divergent-account case (the public demo account
-  already had a separate, independently-created Platform account from
-  2026-09-10 — correctly detected and linked, not silently merged).
+  side). **Correction to this entry's own earlier draft**: it originally
+  claimed "verified live end-to-end against production data" based on a
+  local-dev test against the same live Supabase projects — real data,
+  but not actually production, and production turned out to be broken
+  at the time for an unrelated reason (see the deploy-outage entry
+  below). Re-verified against the real deployed site once that was
+  fixed: real pre-existing-divergent-account case (the public demo
+  account already had a separate, independently-created Platform
+  account from 2026-09-10 — correctly detected and linked, not silently
+  merged) followed by a clean second sign-in landing on `aorms.in/pulse`
+  with both sessions live, confirmed via `/identity` showing the same
+  account's real Studio. A second bug was found and fixed in this same
+  verification pass — see the cookie-domain entry below.
   "Continue with Google" still only establishes a Platform session — a
   known, smaller follow-up, not done in this pass (the shared PKCE
   callback it uses also serves password-reset links, so bridging it
   needs to distinguish those cases first).
+- **Production deploy outage, ~7 hours, self-inflicted and self-found
+  (2026-09-20)** — every build from `d71ab491` (mobile API salvage)
+  through `2ba20b27` (landing page trim) failed on Hostinger, confirmed
+  via `hosting_analyseFailedNode_jsBuildV1`, not assumed: `app/api/
+  mobile/inspections/route.ts` exported a plain constant,
+  `INSPECTIONS_BUCKET`, alongside its `POST` handler. Next.js App Router
+  route files may only export specific names (HTTP-verb handlers plus a
+  short allowlist) — enforced by `next build` itself via generated route
+  types, which `tsc --noEmit` against the project's own tsconfig does
+  **not** replicate. Every `tsc --noEmit` pass across five commits that
+  turn reported clean because of exactly this gap; only a real `next
+  build` surfaces it. Production kept serving the last-known-good build
+  (`b6b0469a`) the whole time — never down, just stale — which is how
+  this went unnoticed until a live login test on the newly-deployed
+  login-consolidation feature failed and the build history was checked
+  directly rather than assumed healthy. Fixed by dropping the one
+  `export` keyword (`2e9235c7`); the standing verification bar for any
+  future Next.js route-handler change in this repo is now a real `next
+  build --webpack` (the exact command Hostinger runs, confirmed via
+  `package.json`'s own `build` script), not `tsc --noEmit` alone.
+- **Office Hub session cookie wasn't scoped across subdomains
+  (2026-09-20, found immediately after the outage above, while
+  re-verifying the login consolidation against the now-fixed
+  production)** — signing in at the unified login worked completely
+  server-side (both sessions genuinely established, confirmed by
+  decoding both JWT cookies) but the page never redirected, and
+  `aorms.in/pulse` still bounced to login afterward. Root cause:
+  `lib/supabase/server.ts` (and its `client.ts`/`middleware.ts`
+  counterparts) never set a cookie `domain`, so the Office Hub session
+  cookie defaulted to host-only — scoped to whichever subdomain was
+  current when it was written (`identity.aorms.in`, now that sign-in can
+  happen there), invisible on a later request to `aorms.in`. Never a
+  problem before the login consolidation, since Office Hub sign-in
+  always happened at `aorms.in` itself. `lib/platform/server.ts` already
+  carried the identical fix, dated 2026-09-10, for the mirror-image
+  reason (Platform portals split across subdomains) — applied the same
+  `cookieOptions.domain = ".aorms.in"` pattern (production only) here,
+  fixed (`9c3c0e56`), and re-verified end-to-end live: sign-in now
+  correctly redirects all the way to `aorms.in/pulse` with both sessions
+  intact.
 - **AORMS V2 frozen architecture + lightweight master plan (2026-09-20)**
   — [AORMS-V2-DEVELOPER-GUIDELINES.md](AORMS-V2-DEVELOPER-GUIDELINES.md)
   is the canonical, user-authored spec ("FROZEN ARCHITECTURE" — do not
