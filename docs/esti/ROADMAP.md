@@ -413,6 +413,25 @@ Hub data reset nightly via `pg_cron`).
   entry above: this was cleanup work for `frontend`/`backend`, which
   aren't deployed. Not worth reverifying file-by-file for a codebase
   nothing serves traffic from.
+- **VIEWER write-access RLS bug — fixed on 35 tables (2026-09-20,
+  `web/supabase/migrations/0081`), branch not yet merged to `main`.**
+  See the dated History entry below for the full account. Two narrower
+  follow-ups deliberately left undecided rather than bundled in: (1)
+  whether `leaves`/`attendance`/`team_memberships` should require the
+  stricter `hr:manage` capability instead of the general `write` one
+  they were fixed to (would additionally block ASSOCIATE/SENIOR editing
+  a colleague's HR record, not just VIEWER); (2) whether `audit_log`
+  accepting unvalidated, self-reported action content from any staff
+  member is an acceptable limitation or a real tamper-integrity gap.
+- **`clients` RLS fix from an earlier session was never actually
+  committed, despite being reported as done.** A prior session's own
+  notes claimed a `web/supabase/migrations/0082_clients_write_requires_
+  capability.sql` had been "written, not yet applied" — the file did
+  not exist anywhere in the repo when this session checked. Recreated
+  as part of the same `0081` migration above rather than trusting the
+  earlier claim. Flagging the discrepancy itself, in case other
+  "written, not yet applied" claims from that same session window are
+  also unverified.
 
 ### Q1 2027+ (forward-looking, unchanged from prior roadmap)
 
@@ -5689,6 +5708,79 @@ hit repeatedly (`0037`/web `0072`/`0074`) on each new trigger function.
 
 Four commits (`2724bea5`, `d8b87aac`, `4e2ad3c7`, `d431e019`), all `tsc
 --noEmit`/`eslint` clean, pushed to `main`.
+
+### VIEWER write-access RLS bug closed across 35 policies, not just `clients` (2026-09-20)
+
+Triggered by a QA report: VIEWER role could create client records via
+`/clients`. Root cause — `"clients: staff create"`'s `with check` used
+`is_office_staff()` instead of `has_capability('write')`.
+`is_office_staff()` (0001, extended by 0078 above) answers "can this
+role see staff data" and **deliberately includes VIEWER and
+SITE_SUPERVISOR** — it was never meant to gate writes. The write-side
+convention used consistently from roughly migration 0011 onward is
+`has_capability('write')` (rank ≥ 40, ASSOCIATE+; VIEWER is rank 20,
+SITE_SUPERVISOR's only grant is `site_portal` — `0002_capability_helper.
+sql`). `web/` has no app-layer authorization at all (`grep -rn
+"requireCapability\|hasCapability" web/lib/actions` turns up nothing
+outside `ai.ts`/`bbs.ts`/`pmc-steel-certs.ts`) — RLS is the *only*
+enforcement boundary, so this was a real, directly-exploitable hole via
+a plain PostgREST/supabase-js call on every affected table, not just a
+defense-in-depth gap.
+
+Audited every `is_office_staff()`-gated write policy in `web/supabase/
+migrations/` (accounting for later `alter policy` rewrites through the
+multi-tenancy series) and found the identical mistake on 34 more
+tables. Fixed in one migration, `web/supabase/migrations/
+0081_write_policies_require_capability.sql`: `project_offices` (create/
+update), `phases`, `tasks` — the core objects most exploitable exactly
+like `clients` was — plus `approvals`, `assignments`, `attendance`,
+`clients` (recreating the fix; a prior session's own migration for it
+had never actually been committed, despite claiming otherwise),
+`contractor_submissions`, `contractors`, `contracts`, `cpi_responses`,
+`decisions`, `document_issues`, `drawings`, `leads`, `leaves`,
+`lessons_learned`, `letters`, `mom_actions`, `moms`,
+`office_templates`, `po_items`, `project_briefs`, `purchase_orders`,
+`site_inspection_reports`/`site_inspection_photos`, `spec_catalog_items`/
+`spec_catalog_versions`, `spec_items`, `spec_sheets`,
+`task_dependencies`, `task_missing_params`, `team_memberships`,
+`transmittal_items`, `transmittals`. Every table's `staff read` (SELECT)
+policy was left untouched, still on `is_office_staff()` — VIEWER/
+SITE_SUPERVISOR keeping read access is intended and unaffected, since
+permissive policies OR together.
+
+Explicitly **not** touched — audited and confirmed intentional from
+each table's own migration-header comments, not overlooked: `audit_log`
+(`"staff insert"` is deliberately insert-only for any authenticated
+staff action via `write_audit()`, itself `security invoker`); `ai_runs`
+(self-logging of ESTI Ask usage, read-only Q&A available to all office
+staff by design); `ai_devices` (migration 0043's own comment frames
+device registration as "a staff decision" with no rank carve-out —
+also not live yet on `aorms-web`).
+
+Applied live against `aorms-web` (`fyedovpqjwbslrughwdv`) via the
+Supabase MCP and verified with real RLS-simulated queries rather than
+just eyeballing the SQL: a real VIEWER profile's insert into `clients`
+and into `project_offices` both now raise `42501` (row-level security
+violation); the same queries as a real ASSOCIATE profile still succeed.
+`get_advisors` (security) showed no new findings after the change.
+Committed (`3dad4639`) on `claude/wonderful-mahavira-4665e3`, not yet
+merged to `main`.
+
+**Two follow-up decisions deliberately left open, not silently
+bundled in** (each flagged as its own session-spawned task rather than
+decided unilaterally, since both are bigger behavioral changes than
+"fix the clients-class bug"):
+- Whether `leaves`/`attendance`/`team_memberships` should use the
+  stricter `hr:manage` capability (rank 80, matching `packages/
+  contracts/src/permissions.ts`'s "team + HR + payroll operations"
+  definition) instead of `write` (rank 40) — using `write` already
+  closes the VIEWER hole, but leaves ASSOCIATE/SENIOR able to create/
+  edit/approve *any* colleague's leave or attendance record, not just
+  their own.
+- Whether `audit_log`'s insert-only, unvalidated-content design (any
+  staff member can log a fabricated action/before/after with no way to
+  ever correct it) is an acceptable limitation of a lightweight audit
+  trail or a real integrity gap worth closing with a trigger.
 
 ---
 
