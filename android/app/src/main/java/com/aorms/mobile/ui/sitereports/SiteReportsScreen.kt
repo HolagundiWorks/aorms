@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.aorms.mobile.data.ProjectOption
 import com.aorms.mobile.ui.theme.CarbonTile
@@ -153,7 +154,10 @@ private fun NewSiteReportSheet(
     var subject by remember { mutableStateOf("") }
     var body by remember { mutableStateOf("") }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    // Carbon has no rounded edges — Material3's ModalBottomSheet default
+    // shape isn't reached by the theme's Shapes override (2026-09-20
+    // UI-audit fix).
+    ModalBottomSheet(onDismissRequest = onDismiss, shape = RectangleShape) {
         Column(modifier = Modifier.padding(20.dp).fillMaxWidth()) {
             val sheetTitle = when (tab) {
                 0 -> "New progress report"

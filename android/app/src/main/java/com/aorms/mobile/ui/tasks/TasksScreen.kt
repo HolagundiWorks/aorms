@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.aorms.mobile.data.ProjectOption
 import com.aorms.mobile.ui.theme.CarbonTile
@@ -121,7 +122,10 @@ fun NewTaskSheet(
     var selectedProject by remember { mutableStateOf<ProjectOption?>(null) }
     var priorityExpanded by remember { mutableStateOf(false) }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    // Carbon has no rounded edges — Material3's ModalBottomSheet default
+    // shape isn't reached by the theme's Shapes override (2026-09-20
+    // UI-audit fix).
+    ModalBottomSheet(onDismissRequest = onDismiss, shape = RectangleShape) {
         Column(modifier = Modifier.padding(20.dp).fillMaxWidth()) {
             Text("New task", style = MaterialTheme.typography.titleLarge)
             OutlinedTextField(

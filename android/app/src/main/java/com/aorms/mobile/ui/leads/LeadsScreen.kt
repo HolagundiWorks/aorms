@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.aorms.mobile.ui.theme.CarbonTile
 
@@ -98,7 +99,11 @@ private fun NewLeadSheet(
     var city by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    // Carbon has no rounded edges (Theme.kt's CarbonShapes) — Material3's
+    // ModalBottomSheet has its own hardcoded rounded-top-corners default
+    // that the theme's Shapes override doesn't reach, so it needs its own
+    // explicit shape here (2026-09-20 UI-audit fix).
+    ModalBottomSheet(onDismissRequest = onDismiss, shape = RectangleShape) {
         Column(modifier = Modifier.padding(20.dp).fillMaxWidth()) {
             Text("New lead", style = MaterialTheme.typography.titleLarge)
             OutlinedTextField(
