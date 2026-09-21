@@ -7,6 +7,22 @@ that doc tracks phase-by-phase build status against this spec, and is
 kept in sync with it rather than duplicating its content. Do not redesign
 this architecture without explicit approval.
 
+> **Partially superseded (2026-09-21).** §§ 7–11 (Google Drive as
+> document repository / folder mapping / database architecture / tenant
+> isolation / customer-owned-database option) and § 29/§ 31
+> (data-ownership principle / product modes) described a
+> customer-can-bring-their-own-Drive/DB/AI model. That model is reversed:
+> **AORMS now runs one AORMS-managed Supabase project and one
+> AORMS-managed Google Drive structure per firm** — no BYO-database or
+> BYO-Drive mode. See
+> [ESTI-AI-DATA-ARCHITECTURE.md](ESTI-AI-DATA-ARCHITECTURE.md) for
+> current canon on database/Drive/Esti architecture, including the
+> `company_id` → `firm_id` terminology fix (`company` already means
+> something else — see that doc's § 0). **All other sections here (§§
+> 1–6, 12–28, 30, 32–33 — identity, modular monolith, AI-provider
+> abstraction, WhatsApp, events, workflow engine, RAG split, non-negotiable
+> dev rules) are unaffected and remain in force.**
+
 ## 1. Core product principle
 
 AORMS is an Architecture Practice Operating System, not simply an ERP.
