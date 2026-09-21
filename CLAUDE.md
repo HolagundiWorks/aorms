@@ -573,11 +573,19 @@ branch before starting anything that could overlap — not just at hand-off.
   `is_office_staff()`), and the known-vulnerable `staff create`/`staff
   update` policies were present pre-fix and verifiably changed to
   `has_capability('write')` post-fix via the same API. `aorms-platform`
-  (`qbgbnhthchhbammzeebg`) is unaffected and unchanged. Whatever produced
-  this second rebuild is untracked — if you're the one who did it,
-  please add the actual dated account here the way 2026-09-09's rebuild
-  was documented above; until then, treat `aenacjqhmjlppmwodpar` as the
-  live ref and the one above as historical only.
+  (`qbgbnhthchhbammzeebg`) is unaffected and unchanged.
+  **Account added (2026-09-21):** see
+  [ROADMAP.md](docs/esti/ROADMAP.md)'s dated "`aorms-web` deleted and
+  rebuilt clean a second time" History entry for the reconstructed
+  account (accumulated messy QA test data prompted a clean delete +
+  rebuild rather than row-by-row cleanup, same pattern as 2026-09-09's
+  rebuild; all migrations reapplied and verified — 111 tables; `.env`
+  and all 4 Hostinger production sites redeployed against the new
+  project; `demo@aorms.in` re-bootstrapped) — flagged there as this
+  session's own reconstruction, not independently re-verified against
+  live infrastructure, since the rebuild itself left no commit or note
+  of its own. Treat `aenacjqhmjlppmwodpar` as the live ref and
+  `fyedovpqjwbslrughwdv` as historical only.
 - **Supabase migrations**: write a new numbered `.sql` file under
   `web/supabase/migrations/`, then apply it via the Supabase Management API
   (`POST https://api.supabase.com/v1/projects/{ref}/database/query`, authed

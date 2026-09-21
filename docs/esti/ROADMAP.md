@@ -319,6 +319,22 @@ Hub data reset nightly via `pg_cron`).
   project-scoped, so per-tenant DBs need per-tenant sessions) plus a
   hosting decision only the account owner can make (2-project free-plan
   cap).
+  **Correction (2026-09-21): the "separate, optional" framing above is
+  itself now superseded.** [ESTI-AI-DATA-ARCHITECTURE.md](ESTI-AI-DATA-ARCHITECTURE.md)
+  (frozen 2026-09-21, see the dated History entry below) makes the
+  one-shared-project-with-RLS model the **only** standing model, not one
+  of two live options — it explicitly reverses
+  [DATABASE-PER-TENANT-ARCHITECTURE.md](DATABASE-PER-TENANT-ARCHITECTURE.md)'s
+  per-Studio-database direction rather than treating it as a
+  still-available Connector Mode B. That doc is kept in the repo "as a
+  historical record of that explored and abandoned direction, not as
+  live guidance" (its own new banner's wording) — the `tenant_databases`
+  registry / `provision-tenant-db.mjs` code this paragraph describes is
+  dormant, not deleted, but do not treat it as a live per-firm option
+  when answering "does AORMS support per-Studio databases" going
+  forward. The `createClient()` non-tenant-awareness gap above is now
+  moot for the same reason: there's no longer a second mode for it to
+  need to route to.
 - ~~Connector configuration (Drive/WhatsApp/AI models) built firm_id-
   keyed on aorms-web~~ **Resolved 2026-09-20**: relocated to
   `aorms-platform`, studio_id-keyed — see
@@ -446,6 +462,29 @@ Hub data reset nightly via `pg_cron`).
   earlier claim. Flagging the discrepancy itself, in case other
   "written, not yet applied" claims from that same session window are
   also unverified.
+- **Resolved 2026-09-21: the whole VIEWER write-access thread above is
+  now merged to `main` and, as far as the `is_office_staff()`-for-write
+  bug class goes, closed.** Full final picture, reconciling the entries
+  above with what actually shipped (see the dated History entries below
+  for the blow-by-blow): the bug was fixed **incrementally across five
+  migrations, by two different sessions/branches that overlapped**, not
+  in the single `0081` migration this thread originally described —
+  `clients` (`0082`, 2026-09-20), `contractors` (`0083`, 2026-09-21),
+  `project_offices`/`phases`/`tasks` (`0084`, 2026-09-21, closing the
+  exact three tables `0082`/`0083` had each flagged as an explicit,
+  deliberately out-of-scope follow-up), and a 32-table sweep of
+  everything else (`0085`, renumbered on merge from this thread's own
+  `0081`, commit `3dad4639`) — merged `84d0875c`. `0085`'s redundant
+  re-statements of the `clients`/`project_offices`/`phases`/`tasks`
+  policies (written before its branch knew `0082`/`0084` already existed
+  on `main`) are harmless — `alter policy` is idempotent per statement,
+  not a conflict. Every table's `is_office_staff()`-gated *read* policy
+  is unaffected throughout (VIEWER/SITE_SUPERVISOR keep read access, by
+  design). The two follow-up decisions this thread flagged are
+  genuinely **still open, not resolved by the merge**: whether
+  `leaves`/`attendance`/`team_memberships` should use `hr:manage`
+  instead of `write`, and whether `audit_log`'s unvalidated
+  self-reported content is an acceptable limitation.
 
 ### Q1 2027+ (forward-looking, unchanged from prior roadmap)
 
@@ -5771,14 +5810,19 @@ staff by design); `ai_devices` (migration 0043's own comment frames
 device registration as "a staff decision" with no rank carve-out —
 also not live yet on `aorms-web`).
 
-Applied live against `aorms-web` (`fyedovpqjwbslrughwdv`) via the
-Supabase MCP and verified with real RLS-simulated queries rather than
-just eyeballing the SQL: a real VIEWER profile's insert into `clients`
-and into `project_offices` both now raise `42501` (row-level security
-violation); the same queries as a real ASSOCIATE profile still succeed.
-`get_advisors` (security) showed no new findings after the change.
-Committed (`3dad4639`) on `claude/wonderful-mahavira-4665e3`, not yet
-merged to `main`.
+Applied live against `aorms-web` (ref recorded at the time as
+`fyedovpqjwbslrughwdv` — see the 2026-09-21 rebuild entry below for why
+that ref is now stale for *every* entry in this file, not just this one)
+via the Supabase MCP and verified with real RLS-simulated queries rather
+than just eyeballing the SQL: a real VIEWER profile's insert into
+`clients` and into `project_offices` both now raise `42501` (row-level
+security violation); the same queries as a real ASSOCIATE profile still
+succeed. `get_advisors` (security) showed no new findings after the
+change. Committed (`3dad4639`) on `claude/wonderful-mahavira-4665e3`.
+**Merged to `main` 2026-09-21** (`84d0875c`), renumbered `0081` → `0085`
+— see the dated History entry below for the merge reconciliation and
+the Open Items entry above for the final closed-out picture across all
+five migrations.
 
 **Two follow-up decisions deliberately left open, not silently
 bundled in** (each flagged as its own session-spawned task rather than
@@ -5795,6 +5839,246 @@ decided unilaterally, since both are bigger behavioral changes than
   staff member can log a fabricated action/before/after with no way to
   ever correct it) is an acceptable limitation of a lightweight audit
   trail or a real integrity gap worth closing with a trigger.
+
+### Clients VIEWER escalation + cross-tenant firm-settings/invoice leak closed (2026-09-20)
+
+The first of several live-QA-driven fix passes this build cycle used a
+new two-subagent pipeline (`.claude/agents/aorms-qa-tester.md` +
+`.claude/agents/aorms-developer.md` — QA tests the live app and files
+structured bug reports, a separate developer session root-causes and
+fixes, QA re-verifies) run repeatedly and successfully through the rest
+of this section's entries. These agent definitions are **not** committed
+to the repo (`.claude/` is gitignored, confirmed via `git check-ignore`)
+— local-only tooling, not something a fresh clone gets automatically.
+
+Two real bugs found: (1) VIEWER could create client records —
+`"clients: staff create"`'s `with check` used `is_office_staff()`
+instead of `has_capability('write')`, the same bug class documented in
+full in the "VIEWER write-access RLS bug" entry further below (this was
+the original report that started that whole thread); migration `0082`
+fixed it, though the Supabase Management API token needed to apply it
+live wasn't available until later the same session. (2) `/firm-settings`
+and invoice creation both broke for any profile belonging to 2+ firms —
+an unscoped `.from("firms").select()` returns every firm a profile has
+ever belonged to (migration `0055`'s additive RLS policy is
+per-membership, not per-active-firm), so `.maybeSingle()` either threw
+("Could not load firm settings: JSON object requested, multiple (or no)
+rows returned" — the exact error QA hit trying to create an invoice) or
+silently returned a *different* firm's company data instead of the
+signed-in user's active one. Fixed with a new `getActiveFirmId()`
+helper (`web/lib/firm/current.ts`) that resolves the truly-active firm
+via `profiles.firm_id`, applied everywhere the unscoped pattern had been
+copied: `/firm-settings` itself, invoice creation
+(`lib/actions/invoices.ts`), the header's company name
+(`app/(app)/layout.tsx`), plan-cap resolution
+(`lib/platform/firm-studio.ts`), AI draft prompts (`lib/actions/ai.ts`),
+and PDF letterhead generation (`lib/jobs/firm.ts`). Also wired a "mark
+done" action directly onto `/tasks` (`app/(app)/tasks/page.tsx`) — it
+previously only existed on the Pulse dashboard widget, a real usability
+gap QA flagged while testing the same page.
+
+Committed `34143883`, `tsc`/`eslint` clean.
+
+### Sign-out session gap, fabricated licence stats, role-label mix-up, mobile sidebar, CSV-import gating, and a second VIEWER escalation (2026-09-21)
+
+Five more real bugs from the same QA pipeline, run against the freshly
+rebuilt `aorms-web` database (see the rebuild entry below).
+
+- **Identity Portal sign-out cleared only one of two session cookies**
+  (Platform vs. Office Hub) — a signed-out user's session stayed valid
+  on whichever side wasn't cleared. Fixed both directions, plus a
+  sibling gap in the failed-bridge sign-in path. (This fix turned out to
+  be incomplete — see the follow-up entry immediately below, found by
+  QA's own re-test.)
+- **Licence Management showed every plan's usage *limit* text as if it
+  were live usage** — every FREE-tier studio displayed the same "2
+  active projects, 3 clients, 3 contractors" regardless of its real
+  data. Fixed to compute real per-studio counts.
+- **A three-way role-label mismatch** — the same account/studio showed
+  "OWNER" in one place, "MEMBER" in another, "Administrator" in a
+  third. Investigated rather than assumed cosmetic: a genuine bug (one
+  earlier partial fix never reached every surface), not three
+  legitimate concepts. Partially fixed here (a shared resolution +
+  label mapping); the Studio detail page's own Members table still had
+  the bug — see the Identity Portal entry further below, found the same
+  day when a second QA pass hit it again.
+- **Mobile sidebar wasn't collapsing to a real hamburger drawer** — a
+  desktop-only Carbon `isRail` prop was applied unconditionally, so
+  "collapsed" still rendered a persistent 256px panel on narrow
+  viewports. Fixed with proper breakpoint gating.
+- Added a loading indicator for an occasional slow first
+  project-creation request — root cause (suspected cross-project
+  Supabase connection cold-start) not fully confirmed, flagged rather
+  than guessed at further.
+
+While auditing the Import CSV panel's role-gating for the `clients`
+VIEWER fix (it remained visible to VIEWER even after the "Create
+client" button was hidden), found the identical gap was never gated at
+all on `/contractors` and `/consultants` — fixed both. That audit
+surfaced a **second, independent instance of the VIEWER write-escalation
+bug class**: `"contractors: staff write"` still checked
+`is_office_staff()` instead of `has_capability('write')`, the same shape
+`0082` had just closed for `clients`. Migration `0083` closes it,
+confirmed live via a direct RLS policy check before and after;
+`consultants` was already correct. `project_offices`/`phases`/`tasks`
+were deliberately left unaudited in this pass — see `0083`'s own header
+comment and the follow-up entry below that closed them two commits
+later.
+
+Committed `788a70ab`.
+
+### Sign-out race condition and stale post-auth page cache (2026-09-21)
+
+QA's re-test of the sign-out fix above found it worked 3 of 4 times, not
+reliably: `auth-js`'s `admin.signOut()` can re-throw a genuine but
+intermittent network error instead of returning it as `{error}`, and the
+unguarded `await client.auth.signOut()` call let that throw abort the
+Server Action before the *second* project's session was ever cleared.
+Added `signOutSafely()` (`lib/actions/auth.ts`): every sign-out attempt
+now retries once and always runs both clients' sign-out regardless of
+whether the first one failed. Confirmed reliably fixed via a 5/5
+repeated live re-test.
+
+Separately, QA saw stale data on the first page load right after
+sign-in three separate times (old licence stats, an old role label, the
+Import CSV panel not yet hidden for VIEWER) that self-corrected on a
+manual reload — a different bug with the same "auth transition" theme:
+Next.js's client Router Cache can serve a pre-sign-in RSC payload for a
+route that was prefetched before the transition. Fixed with
+`revalidatePath("/", "layout")` before every post-auth redirect in
+`signIn()`, `signInWithIdentity()`, `signOut()`, `platformSignIn()`, and
+`platformSignOut()`. Confirmed via a 3/3 repeated live re-test.
+
+Committed `1acdcb3e`.
+
+### `aorms-web` deleted and rebuilt clean a second time — new ref `aenacjqhmjlppmwodpar` (2026-09-20, account reconstructed 2026-09-21)
+
+**This entry exists to answer the request CLAUDE.md's own § Dev/verify
+loop correction left open** ("if you're the one who did it, please add
+the actual dated account here") — the ref change was discovered
+indirectly, via a Supabase Management API call made for an unrelated
+reason (applying migration `0084`), with no contemporaneous commit or
+note recording why or how the rebuild happened. What's independently
+verifiable from the repo/API and already recorded in CLAUDE.md: the
+project actually named `aorms-web` now has ref **`aenacjqhmjlppmwodpar`**
+(`ap-south-1`), created **2026-09-20T13:48:02Z** — superseding the
+2026-09-09 rebuild's ref, `fyedovpqjwbslrughwdv`, which is now stale
+everywhere it's cited in this file's older History entries (not
+corrected line-by-line; treat any `fyedovpqjwbslrughwdv` reference above
+this entry as historical, current ref is `aenacjqhmjlppmwodpar`).
+Confirmed genuinely the live project, not a same-named decoy: it has
+`public.project_offices` with exactly the expected post-multitenancy
+schema (`firm_id`, `current_firm_id()`, `is_office_staff()`), and the
+known-vulnerable `staff create`/`staff update` policies were present
+pre-fix and verifiably changed to `has_capability('write')` post-fix via
+the same API. `aorms-platform` (`qbgbnhthchhbammzeebg`) is unaffected
+and unchanged throughout.
+
+The rest of this account — **why** the rebuild happened and what else it
+touched — is this session's own reconstruction, not independently
+re-verified against live infrastructure in this documentation pass (no
+Supabase/Hostinger API credentials available while writing this entry):
+the previous `aorms-web` project had accumulated messy QA test data
+after the extended live-QA fix cycle this section documents, and was
+deleted and rebuilt clean rather than manually cleaned up row-by-row —
+consistent with the same "delete and rebuild rather than patch" pattern
+the 2026-09-09 rebuild in this file's Dev/verify loop history already
+used once. All 83+ migrations under `web/supabase/migrations/` at the
+time (86 files on disk as of this writing, `0001`-`0085` with a few
+historical renumbering gaps/dupes — see the migration-renumbering note
+in the VIEWER-RLS History entry below) were reapplied in one clean pass
+and verified (111 tables, RLS confirmed present on every expected
+table). `web/.env` and all 4 Hostinger production sites (`aorms.in`,
+`identity.aorms.in`, `connectdex.aorms.in`, `sysdex.aorms.in`) had their
+Supabase env vars updated and were rebuilt/redeployed against the new
+project. The `demo@aorms.in` public-demo account (VIEWER role — see
+"What's live now" above) was re-bootstrapped and used to provision a
+fresh "Demo Architecture Studio" firm as OWNER; its email was confirmed
+via the Supabase Auth Admin API (not a real deliverable mailbox — zero
+Hostinger mailboxes/inbound logs for "demo@" exist), the same technique
+used for the account's original 2026-09-09 setup.
+
+**If you're the session that actually performed this rebuild**, please
+correct this entry with the real account rather than leaving the
+reconstruction above as the record of truth.
+
+### Identity Portal header nav unreachable at every viewport; role-label bug's last surviving surface fixed (2026-09-21)
+
+QA found the Identity Portal's own header nav (Identity/Licences links)
+was invisible at every viewport tested — Carbon's `HeaderNavigation`
+only switches to `display: block` above its `lg` breakpoint (1056px),
+higher than the 1024px "desktop" width this had been tested at, and no
+hamburger/`SideNav` fallback existed below that. Fixed by making
+`.cds--header__nav` unconditionally visible, rather than adopting
+Carbon's `SideNav` pattern — `app/(platform)/layout.tsx` already
+documents "no `SideNav` here" as this portal group's deliberate design,
+and `SideNav` defaults to a permanent sidebar above `lg` that would have
+duplicated the working horizontal nav rather than actually fixing the
+gap below it.
+
+Also closed the last surviving surface of the three-way role-label
+mismatch flagged in the entry above: the Studio detail page's Members
+table was never touched by the earlier `getFirmRoleForStudio()` fix
+(`788a70ab`) and still read the raw, coarser Platform-only
+`studio_memberships.role` column directly. Applied the same resolution
+there, plus a shared `ROLE_LABEL` mapping so the Office Hub role
+displays consistently everywhere — no more raw enum value in one place
+and a friendly label in another.
+
+Committed `b19ac28a`.
+
+### VIEWER write-access RLS sweep merged to `main` (2026-09-21)
+
+A second, parallel audit session had independently found the same
+`is_office_staff()`-for-write bug class on 32 tables beyond
+`clients`/`contractors`/`project_offices` (already fixed individually by
+this point — see the entries above), committed as `3dad4639` on
+`claude/wonderful-mahavira-4665e3` with its own migration
+`0081_write_policies_require_capability.sql`. Reviewed and merged
+(`84d0875c`): renumbered that branch's `0081` → `0085`, since `main` had
+since gained real `0081`-`0084` migrations of its own from a different
+branch point (`provision_firm_requires_platform_identity`, `clients`,
+`contractors`, `project_offices` — the last two independently closing
+the same bug class `0085`'s own `contractors` and
+`project_offices`/`phases`/`tasks` entries also cover). The overlap is
+harmless — `alter policy` is idempotent per statement, not a conflict —
+and is exactly what the correction already recorded inline in the Open
+Items entry above and the History entry further above describes in
+full. See those two entries for the complete final picture (which
+tables, which migrations, what's still open) rather than repeating it
+here.
+
+### ESTI AI / Supabase / Google Drive architecture frozen (2026-09-21)
+
+Added [ESTI-AI-DATA-ARCHITECTURE.md](ESTI-AI-DATA-ARCHITECTURE.md) as
+the canonical reference for how AORMS structured data, Google Drive
+documents, and the closed-domain Esti AI layer relate: **Supabase is the
+single source of truth for structured data** (one shared `aorms-web`
+project, `firm_id`-scoped RLS — no per-firm database, reversing
+`DATABASE-PER-TENANT-ARCHITECTURE.md`'s explored direction, see the
+Open Items correction above), **Google Drive is the firm's
+document/export repository** (with a document/revision register staying
+in Postgres, unchanged from the existing Drive work), and **Esti is
+restricted to a domain-gated, evidence-pack-driven retrieval-then-explain
+pattern** with no direct database or internet access. This is also the
+formal decision of record superseding an earlier-session discussion
+(not implemented, no code exists for it) about splitting some AORMS data
+onto Neon while keeping auth on Supabase — that idea is superseded by
+"one AORMS-managed Supabase project + Drive per firm," not carried
+forward as a live option.
+
+Reconciles with, rather than duplicates, two existing docs: fixes the
+`company_id`/`companies` terminology this content originally used to
+`firm_id`/`firms` (the live multi-tenancy column — `company` already
+means something else, ConnectDeX material suppliers, see the new doc's
+§ 0), and supersedes `DATABASE-PER-TENANT-ARCHITECTURE.md` in full plus
+`AORMS-V2-DEVELOPER-GUIDELINES.md` §§ 7-11/29/31 (both now carry banners
+pointing to the new canon; their other, non-conflicting sections are
+explicitly left in force — see each doc's own banner for exactly what's
+and isn't superseded). CLAUDE.md's ESTI AI section already links the new
+doc (`73a11b24`).
+
+Committed `73a11b24`, merged `5bad27c9`.
 
 ---
 
