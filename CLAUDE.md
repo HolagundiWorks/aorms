@@ -383,7 +383,12 @@ the live implementation: a read-only Q&A mode only (no draft-generation
 modes yet, see `docs/esti/NEXTJS-MIGRATION-PHASE7-AUDIT.md`), calling
 Ollama's plain HTTP API directly (ported `callOllamaChat`/`checkOllamaHealth`,
 no drizzle dependency). Every call is recorded in `ai_runs` (migration
-`0010`, already live). Canon: `docs/esti/PRODUCTION-OPS.md` § ESTI AI. (The
+`0010`, already live). Canon: `docs/esti/PRODUCTION-OPS.md` § ESTI AI ·
+[`docs/esti/ESTI-AI-DATA-ARCHITECTURE.md`](docs/esti/ESTI-AI-DATA-ARCHITECTURE.md)
+(2026-09-21, frozen — closed-domain Esti, Evidence Pack pattern, Supabase
+as source of truth, Google Drive as document repository; supersedes
+`DATABASE-PER-TENANT-ARCHITECTURE.md` and part of
+`AORMS-V2-DEVELOPER-GUIDELINES.md`). (The
 old "desktop-only Ollama" docs — `LOCAL-FIRST.md`, `AORMS-SUITE.md` § AI —
 were deleted 2026-09 with the rest of `docs/esti/archived/`; this was the
 stale claim they left behind.)

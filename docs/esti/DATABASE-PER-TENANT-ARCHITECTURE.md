@@ -1,5 +1,15 @@
 # Database-per-tenant architecture (2026-09-19)
 
+> **Superseded (2026-09-21) — historical record only, not live guidance.**
+> The direction explored in this whole document (each firm gets its own
+> dedicated Supabase project) was reversed: the standing model is one
+> shared `aorms-web` project, RLS-isolated by `firm_id`, staying that way
+> rather than moving toward per-tenant databases. See
+> [ESTI-AI-DATA-ARCHITECTURE.md](ESTI-AI-DATA-ARCHITECTURE.md) § 2 for
+> current canon. Kept here only so the `tenant_databases`
+> registry/`provision-tenant-db.mjs` work already shipped isn't a mystery
+> to a future reader — that code is dormant, not deleted.
+
 ## Why this doc exists, and how it relates to the RLS multi-tenancy work
 
 Earlier in this same build cycle, AORMS shipped **real multi-tenancy** via
