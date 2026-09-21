@@ -26,16 +26,32 @@ const STATUS_TAG: Record<string, "green" | "blue" | "gray" | "purple" | "teal"> 
   ARCHIVED: "gray",
 };
 
+// Same set as app/(app)/clients/page.tsx's and app/(app)/contractors/page.tsx's
+// own WRITE_TIER_ROLES (mirrored from lib/actions/clients.ts) — gates the
+// "Create project" trigger the same way Clients/Contractors now do (found
+// by live QA 2026-09-21: this page never gated its write UI at all, the
+// same class of bug 0082/0083 fixed for clients/contractors). The real
+// authorization boundary is the RLS/Server Action fix in
+// lib/actions/projects.ts and migration
+// 0084_project_offices_write_requires_capability.sql — this is the
+// matching defense-in-depth UI fix.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function ProjectsPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [{ data: projects, error }, { data: clients }] = await Promise.all([
+  const [{ data: projects, error }, { data: clients }, { data: myProfile }] = await Promise.all([
     supabase
       .from("project_offices")
       .select("id, ref, title, project_type, work_type, status, city, client_id, clients(name)")
       .order("created_at", { ascending: false }),
     supabase.from("clients").select("id, name").order("name"),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = projects ?? [];
   const activeCount = rows.filter((p) => p.status === "ACTIVE").length;
@@ -43,16 +59,18 @@ export default async function ProjectsPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="Create project" description="Start a new project office.">
-        <AddProjectForm clients={clients ?? []} />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="Create project" description="Start a new project office.">
+          <AddProjectForm clients={clients ?? []} />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
       <Grid>
       <Column sm={4} md={8} lg={16}>
         <PageHeader
           title="Projects"
           description="Project offices — phases, tasks, and delivery live under each project."
-          actions={<ContextPanelTrigger size="sm">Create project</ContextPanelTrigger>}
+          actions={canWrite ? <ContextPanelTrigger size="sm">Create project</ContextPanelTrigger> : undefined}
         />
 
         <div

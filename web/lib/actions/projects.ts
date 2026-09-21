@@ -7,6 +7,22 @@ import { checkPlanCap } from "../platform/firm-studio";
 
 export type ProjectActionState = { error: string } | null;
 
+/**
+ * Roles with `has_capability('write')` (rank >= 40, or an explicit
+ * allow-list role — see web/supabase/migrations/0002_capability_helper.sql)
+ * — same set web/lib/actions/clients.ts's WRITE_TIER_ROLES uses. Mirrored
+ * here as an explicit, friendly-error check in the Server Action (defense
+ * in depth): the real authorization boundary is RLS
+ * ("project_offices: staff create"/"project_offices: staff update", fixed
+ * in migration 0084_project_offices_write_requires_capability.sql to check
+ * has_capability('write') instead of the too-broad is_office_staff(),
+ * which incorrectly included VIEWER — found by live QA 2026-09-21, the
+ * same class of bug 0082/0083 fixed for clients/contractors). Without
+ * this app-level check, a VIEWER's submit would fail on the INSERT with a
+ * raw RLS-denial error instead of a clear message.
+ */
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export async function createProjectRecord(
   _prev: ProjectActionState,
   formData: FormData,
@@ -32,6 +48,22 @@ export async function createProjectRecord(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Server-side role check (2026-09-21 — VIEWER-can-create-projects bug
+  // found by live QA, mirroring the 2026-09-20 clients bug fixed in
+  // migration 0082): the actual authorization boundary is RLS
+  // ("project_offices: staff create", fixed in migration
+  // 0084_project_offices_write_requires_capability.sql to check
+  // has_capability('write') instead of the too-broad is_office_staff(),
+  // which incorrectly included VIEWER). This app-level check is defense
+  // in depth, and turns what would otherwise be a raw RLS-denial error
+  // into a clear message.
+  const { data: authProfile } = user
+    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  if (!authProfile || !WRITE_TIER_ROLES.has(authProfile.role)) {
+    return { error: "You don't have permission to create projects — contact a firm owner or partner." };
+  }
 
   // Was a random placeholder (draftRef()) before Phase 10 — next_ref() existed
   // since migration 0003 but this action predated it and was never switched
