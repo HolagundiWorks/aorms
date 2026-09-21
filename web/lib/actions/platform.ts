@@ -35,7 +35,7 @@ import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/acco
 import { checkRateLimit, rateLimitIdentifier } from "../security/rate-limit";
 import { validatePassword } from "../security/password-policy";
 import { toSafeErrorMessage } from "../security/safe-error";
-import { bridgeIdentityToOfficeHub, resolveSignInDestination } from "./auth";
+import { bridgeIdentityToOfficeHub, resolveSignInDestination, signOutSafely } from "./auth";
 import { roleHome } from "../auth/role-home";
 
 export type PlatformActionState = { error: string } | null;
@@ -288,6 +288,15 @@ export async function platformSignIn(
   // reaching Office Hub specifically, so "no firm" was a real dead end
   // there. Here, Platform access with zero Office Hub relevance is a
   // completely normal, valid outcome, not an error.
+  // Purge the client Router Cache before landing anywhere post-sign-in —
+  // every exit path below redirects, so one call here covers all of them.
+  // See auth.ts's signIn() for the full mechanism (2026-09-21 QA's "first
+  // load after sign-in shows stale data, reload is correct" pattern) — a
+  // Next.js static-shell prefetch left over from before this sign-in can
+  // otherwise serve stale, pre-auth content on the first post-sign-in nav
+  // click. Must run before any redirect() below, since redirect() throws.
+  revalidatePath("/", "layout");
+
   if (webUserId) {
     const webSupabase = await createWebClient();
     const { data: profile } = await webSupabase.from("profiles").select("role").eq("id", webUserId).maybeSingle();
@@ -334,7 +343,7 @@ export async function signInWithGoogle(): Promise<never> {
 
 export async function platformSignOut(): Promise<void> {
   const supabase = await createPlatformClient();
-  await supabase.auth.signOut();
+  const webSupabase = await createWebClient();
 
   // B1 fix (2026-09-20 QA) — the unified login (platformSignIn() above,
   // and auth.ts's bridgeIdentityToOfficeHub()) can establish an Office Hub
@@ -346,9 +355,23 @@ export async function platformSignOut(): Promise<void> {
   // /identity page — sign-out looked successful (redirected to the signed-
   // out home) but the real session never cleared. Mirrored in auth.ts's
   // signOut() for the reverse direction.
-  const webSupabase = await createWebClient();
-  await webSupabase.auth.signOut();
+  //
+  // 2026-09-21 QA re-test: that fix still failed intermittently (~1-in-4),
+  // reproducing the ORIGINAL bug exactly. Root cause was this function's
+  // two bare `await ...auth.signOut()` calls, not the mirroring itself —
+  // see signOutSafely()'s own header comment (auth.ts) for the precise
+  // mechanism: a transient network failure calling ONE project's Auth
+  // server throws (not returns {error}) out of the SDK, which used to
+  // abort this whole action before the OTHER project's signOut() call
+  // ever ran and before redirect(). Both are now independent.
+  await signOutSafely(() => supabase.auth.signOut(), "Platform");
+  await signOutSafely(() => webSupabase.auth.signOut(), "Office Hub");
 
+  // Purge the client Router Cache so a page reached right after this
+  // redirect (or a subsequent navigation in this tab) can't serve a
+  // pre-sign-out RSC payload for a route previously prefetched while
+  // still signed in. Must run before redirect().
+  revalidatePath("/", "layout");
   redirect(await currentPortalHome());
 }
 

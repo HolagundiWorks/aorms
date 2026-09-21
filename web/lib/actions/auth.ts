@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { createServiceRoleClient } from "../supabase/service";
 import { createClient as createPlatformClient } from "../platform/server";
@@ -88,11 +89,32 @@ export async function signIn(_prev: AuthActionState, formData: FormData): Promis
     .maybeSingle();
 
   const destination = await resolveSignInDestination(supabase, data.user.id, profile?.platform_public_id);
+  // Purge the client Router Cache before landing anywhere post-sign-in —
+  // 2026-09-21 QA found a real "first load after sign-in shows stale
+  // data, reload is correct" pattern (Licence Management stats, a role
+  // label, the Clients Import CSV panel's VIEWER gating) affecting pages
+  // reached via a nav <Link> after this redirect, not this redirect's own
+  // destination. Next.js prefetches and caches static-shell route
+  // segments client-side for up to staleTimes.static (5 min default) —
+  // a Link hovered/prefetched before this sign-in (e.g. a stale prefetch
+  // left over from a previous session in the same tab) can serve that
+  // cached, pre-sign-in RSC payload on the very next click, until a hard
+  // reload bypasses the client cache entirely. `revalidatePath('/',
+  // 'layout')` is next/cache's own documented fix for exactly this case
+  // ("purges the Client Cache, and invalidates all cached data") — must
+  // run before any redirect() below, since redirect() throws and nothing
+  // after it executes.
+  revalidatePath("/", "layout");
   if (destination) redirect(destination);
 
   const home = roleHome(profile?.role);
   if (!home) {
-    await supabase.auth.signOut();
+    // signOutSafely() (defined below, hoisted — a function declaration)
+    // so a transient network throw here can't leave this corrective
+    // sign-out half-done either. Only one client involved on this branch,
+    // but it's the same auth-js throw-vs-{error} gap signOutSafely's own
+    // header documents.
+    await signOutSafely(() => supabase.auth.signOut(), "Office Hub");
     return { error: "This account's portal isn't available yet — contact your firm for access." };
   }
 
@@ -143,6 +165,49 @@ export async function signIn(_prev: AuthActionState, formData: FormData): Promis
  * with `code: 'email_exists'` rather than silently succeeding twice.
  */
 export type OfficeHubBridgeResult = { webUserId: string; isNewUser: boolean } | { error: string };
+
+/**
+ * Best-effort, resilient sign-out for ONE Supabase auth client. Used
+ * everywhere this codebase needs to clear more than one project's session
+ * in a single action (signOut() and signInWithIdentity() below,
+ * platform.ts's platformSignOut()) — the real bug this fixes (2026-09-21
+ * QA re-test of the 2026-09-20 B1 fix, ~1-in-4 repro): auth-js's
+ * `admin.signOut()` catches and returns AuthErrors as `{error}`, but
+ * RE-THROWS any other exception instead (GoTrueAdminApi.signOut() —
+ * `catch (error) { if (isAuthError(error)) return {data:null,error}; throw
+ * error; }`), which is exactly what a genuine transient network failure
+ * (DNS blip, connection reset, a cold Supabase Auth REST call timing out)
+ * looks like. A bare, unguarded `await client.auth.signOut()` (the
+ * previous code here and in platform.ts) let that throw escape the whole
+ * Server Action: the exception aborted execution before the OTHER
+ * project's `auth.signOut()` call ever ran, before cookies were mutated
+ * for either client's storage adapter, and before `redirect()` — leaving
+ * both sessions (or the second one, depending on call order) fully live
+ * while the action itself failed silently from the caller's point of view.
+ * This reproduces the *exact* originally-reported symptom, not a new one:
+ * "looks signed out, one project's cookie is still valid." Every call site
+ * now attempts BOTH sign-outs unconditionally (one failing can't skip the
+ * other), retries once on a genuine throw (a transient blip is worth one
+ * immediate retry), and logs rather than silently swallowing a persistent
+ * failure — the caller still proceeds to redirect either way, since
+ * trapping the user on a broken sign-out page is worse than a logged,
+ * best-effort session clear.
+ */
+export async function signOutSafely(signOut: () => Promise<{ error: { message: string } | null }>, label: string): Promise<void> {
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      const { error } = await signOut();
+      if (!error) return;
+      if (attempt === 2) {
+        console.error(`[signOutSafely] ${label} sign-out returned an error after retry — its session may not be fully cleared:`, error.message);
+      }
+    } catch (err) {
+      if (attempt === 2) {
+        console.error(`[signOutSafely] ${label} sign-out threw after retry — its session may not be fully cleared:`, err);
+      }
+    }
+  }
+}
 
 /**
  * Establishes (or reuses) an aorms-web session for an ALREADY-verified
@@ -324,6 +389,10 @@ async function signInWithIdentity(email: string, password: string): Promise<Auth
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", bridged.webUserId).maybeSingle();
 
   const destination = await resolveSignInDestination(supabase, bridged.webUserId, platformAccount.public_id);
+  // See the matching comment in signIn() above — purges the client Router
+  // Cache so a page reached via a post-sign-in nav <Link> can't serve a
+  // stale pre-sign-in prefetch. Must run before any redirect() below.
+  revalidatePath("/", "layout");
   if (destination) redirect(destination);
 
   const home = roleHome(profile?.role);
@@ -332,9 +401,11 @@ async function signInWithIdentity(email: string, password: string): Promise<Auth
     // session at line ~297 (platform.auth.signInWithPassword) before ever
     // reaching here. Signing out only the just-bridged web session would
     // leave that Platform session live and valid, the same "looks signed
-    // out but isn't" gap platformSignOut()/signOut() were fixed for.
-    await supabase.auth.signOut();
-    await platform.auth.signOut();
+    // out but isn't" gap platformSignOut()/signOut() were fixed for. Uses
+    // signOutSafely() (see its own header) so one client throwing can't
+    // skip the other.
+    await signOutSafely(() => supabase.auth.signOut(), "Office Hub");
+    await signOutSafely(() => platform.auth.signOut(), "Platform");
     return { error: "Signed in with your AORMS Identity — this account's Office Hub portal isn't available yet — contact your firm for access." };
   }
 
@@ -343,16 +414,24 @@ async function signInWithIdentity(email: string, password: string): Promise<Auth
 
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
-  await supabase.auth.signOut();
-
-  // Mirror of platformSignOut()'s B1 fix (lib/actions/platform.ts) — the
-  // unified login can establish a Platform (aorms-platform) session
-  // alongside this Office Hub one (platformSignIn()'s bridge, or this
-  // file's own bridgeIdentityToOfficeHub()). Clear both here too, or a
-  // visitor who signs out of the Office Hub still holds a live Platform
-  // session that the Identity Portal would keep honoring.
   const platformSupabase = await createPlatformClient();
-  await platformSupabase.auth.signOut();
 
+  // 2026-09-21 QA re-test found the 2026-09-20 B1 fix (mirrored sign-out
+  // of both projects) still failed intermittently (~1-in-4): a bare
+  // `await supabase.auth.signOut()` let a transient network throw from
+  // ONE client's call abort this whole function before the OTHER client's
+  // signOut() ever ran and before redirect() — see signOutSafely()'s own
+  // header comment for the exact mechanism (auth-js's admin.signOut()
+  // rethrows non-AuthError failures instead of returning {error}). Both
+  // calls are now independent: one failing can never skip the other.
+  await signOutSafely(() => supabase.auth.signOut(), "Office Hub");
+  await signOutSafely(() => platformSupabase.auth.signOut(), "Platform");
+
+  // Purge the client Router Cache so a page reached right after this
+  // redirect (or a subsequent navigation in this tab) can't serve a
+  // pre-sign-out RSC payload for a route previously prefetched while
+  // still signed in — same next/cache mechanism as signIn()'s comment
+  // above, other direction. Must run before redirect().
+  revalidatePath("/", "layout");
   redirect("/login");
 }
