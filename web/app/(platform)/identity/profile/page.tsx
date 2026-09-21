@@ -74,7 +74,7 @@ export default async function IdentityProfilePage() {
       .select("id, kind, title, issuer, issued_on, file_key")
       .eq("account_id", account.id)
       .order("created_at", { ascending: false }),
-    getWorkHistory(account.id),
+    getWorkHistory(account.id, account.public_id),
   ]);
 
   const photoUrl = profileDetails?.photo_key ? await getSignedFileUrl(profileDetails.photo_key) : null;

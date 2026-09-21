@@ -1,12 +1,56 @@
 import NextLink from "next/link";
 import { Column, Grid, Stack, Tag, Tile } from "@carbon/react";
 import { createClient as createWebClient } from "../../../lib/supabase/server";
+import { createServiceRoleClient as createWebServiceRoleClient } from "../../../lib/supabase/service";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
 import { UpgradeLicenceButton } from "../../../components/aorms/platform/UpgradeLicenceButton";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { IdentityPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
 
 type StudioEmbed = { id: string; name: string; public_id: string } | null;
+
+/**
+ * B2 fix (2026-09-20 QA) — the FREE-plan usage line used to be a bare
+ * hardcoded string ("1 team member, 2 active projects, 3 clients, 3
+ * contractors") that happened to equal PLAN_CAPS.FREE/STUDIO_MEMBER_CAP.FREE
+ * (lib/platform/firm-studio.ts, lib/actions/platform.ts) — i.e. it always
+ * showed the *limit*, worded so it read as live usage, identically for
+ * every FREE studio regardless of that studio's real data. Real per-studio
+ * usage: team members from this studio's own ACTIVE memberships (Platform
+ * project), and active projects/clients/contractors from the Office Hub
+ * firm this studio is linked to (`firms.platform_studio_public_id` —
+ * unique 1:1, migration 0053's own constraint) via a service-role read
+ * (this browser tab has no Office Hub session for that firm to scope RLS
+ * off of). "Active projects" reuses the exact same definition already
+ * used to enforce this cap (lib/actions/projects.ts:
+ * `not("status", "in", "(ARCHIVED,COMPLETED)")`) rather than inventing a
+ * second one.
+ */
+async function getStudioUsage(
+  studioId: string,
+  studioPublicId: string,
+  platformService: ReturnType<typeof createPlatformServiceRoleClient>,
+): Promise<{ teamMembers: number; activeProjects: number; clients: number; contractors: number } | null> {
+  const webService = createWebServiceRoleClient();
+
+  const { data: firm } = await webService.from("firms").select("id").eq("platform_studio_public_id", studioPublicId).maybeSingle();
+
+  const [{ count: teamMembers }, { count: activeProjects }, { count: clients }, { count: contractors }] = await Promise.all([
+    platformService.from("studio_memberships").select("id", { count: "exact", head: true }).eq("studio_id", studioId).eq("status", "ACTIVE"),
+    firm
+      ? webService.from("project_offices").select("id", { count: "exact", head: true }).eq("firm_id", firm.id).not("status", "in", "(ARCHIVED,COMPLETED)")
+      : Promise.resolve({ count: 0 }),
+    firm ? webService.from("clients").select("id", { count: "exact", head: true }).eq("firm_id", firm.id) : Promise.resolve({ count: 0 }),
+    firm ? webService.from("contractors").select("id", { count: "exact", head: true }).eq("firm_id", firm.id) : Promise.resolve({ count: 0 }),
+  ]);
+
+  return {
+    teamMembers: teamMembers ?? 0,
+    activeProjects: activeProjects ?? 0,
+    clients: clients ?? 0,
+    contractors: contractors ?? 0,
+  };
+}
 
 function isLicenceActive(expiresAt: string | null): boolean {
   return !expiresAt || new Date(expiresAt) > new Date();
@@ -120,6 +164,18 @@ export default async function LicencesPage() {
     enterpriseStartingAtPaise: planPricingRows?.find((p) => p.plan === "ENTERPRISE")?.base_price_paise ?? 0,
   };
 
+  // B2 fix — only FREE-plan studios show a usage line at all (paid tiers
+  // show seats-included instead), so only fetch real usage for those,
+  // not every studio this account belongs to.
+  const freeStudios = (memberships ?? [])
+    .map((m) => (Array.isArray(m.studios) ? m.studios[0] : m.studios) as StudioEmbed)
+    .filter((s): s is NonNullable<StudioEmbed> => !!s)
+    .filter((s) => (licences ?? []).find((l) => l.studio_id === s.id)?.plan === "FREE");
+
+  const usageByStudioId = new Map(
+    await Promise.all(freeStudios.map(async (s) => [s.id, await getStudioUsage(s.id, s.public_id, platformService)] as const)),
+  );
+
   return (
     <>
       <IdentityPortalHeader />
@@ -135,6 +191,10 @@ export default async function LicencesPage() {
             const isOwner = m.role === "OWNER";
             const active = licence ? isLicenceActive(licence.expires_at) : false;
             const planTag = licence ? (PLAN_TAG[licence.plan] ?? { label: licence.plan, type: "gray" as const }) : null;
+            const usage = licence?.plan === "FREE" ? usageByStudioId.get(studio.id) : null;
+            const usageLabel = usage
+              ? `${usage.teamMembers} team member${usage.teamMembers === 1 ? "" : "s"}, ${usage.activeProjects} active project${usage.activeProjects === 1 ? "" : "s"}, ${usage.clients} client${usage.clients === 1 ? "" : "s"}, ${usage.contractors} contractor${usage.contractors === 1 ? "" : "s"}`
+              : "Usage unavailable";
 
             return (
               <Tile key={studio.id}>
@@ -156,9 +216,7 @@ export default async function LicencesPage() {
                         </Tag>
                       </Stack>
                       <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                        {licence.plan === "FREE"
-                          ? "1 team member, 2 active projects, 3 clients, 3 contractors"
-                          : `${licence.seats} PRO seat${licence.seats === 1 ? "" : "s"} included`}
+                        {licence.plan === "FREE" ? usageLabel : `${licence.seats} PRO seat${licence.seats === 1 ? "" : "s"} included`}
                         {licence.expires_at ? ` · expires ${new Date(licence.expires_at).toLocaleDateString()}` : " · no expiry"}
                       </p>
                       {isOwner && licence.plan !== "ENTERPRISE" && (

@@ -328,7 +328,13 @@ async function signInWithIdentity(email: string, password: string): Promise<Auth
 
   const home = roleHome(profile?.role);
   if (!home) {
+    // Sibling of the B1 fix — this function establishes a real Platform
+    // session at line ~297 (platform.auth.signInWithPassword) before ever
+    // reaching here. Signing out only the just-bridged web session would
+    // leave that Platform session live and valid, the same "looks signed
+    // out but isn't" gap platformSignOut()/signOut() were fixed for.
     await supabase.auth.signOut();
+    await platform.auth.signOut();
     return { error: "Signed in with your AORMS Identity — this account's Office Hub portal isn't available yet — contact your firm for access." };
   }
 
@@ -338,5 +344,15 @@ async function signInWithIdentity(email: string, password: string): Promise<Auth
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
+
+  // Mirror of platformSignOut()'s B1 fix (lib/actions/platform.ts) — the
+  // unified login can establish a Platform (aorms-platform) session
+  // alongside this Office Hub one (platformSignIn()'s bridge, or this
+  // file's own bridgeIdentityToOfficeHub()). Clear both here too, or a
+  // visitor who signs out of the Office Hub still holds a live Platform
+  // session that the Identity Portal would keep honoring.
+  const platformSupabase = await createPlatformClient();
+  await platformSupabase.auth.signOut();
+
   redirect("/login");
 }

@@ -39,6 +39,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
+import { getFirmRoleForStudio } from "../platform/firm-studio";
 import { matchesClaimedType } from "../security/file-signature";
 import { toSafeErrorMessage } from "../security/safe-error";
 
@@ -242,8 +243,16 @@ export type WorkHistoryEntry = {
  * straight from `studio_memberships`, which already records exactly
  * this (join date, leave date, role) the moment someone joins/leaves a
  * Studio elsewhere in the app. Nothing here is manually entered.
+ *
+ * B3 fix (2026-09-20 QA) — `role` now prefers the linked Office Hub firm
+ * role (getFirmRoleForStudio(), see its own header comment) over the raw
+ * Platform `studio_memberships.role`, same reasoning and fallback as
+ * app/(platform)/identity/page.tsx's Studios list: the Platform column is
+ * only a coarse Studio-object-administrator flag, not this person's real
+ * firm title, and showing it unqualified as "role" here read as
+ * inconsistent with what /users shows for the same person/firm.
  */
-export async function getWorkHistory(accountId: string): Promise<WorkHistoryEntry[]> {
+export async function getWorkHistory(accountId: string, accountPublicId: string): Promise<WorkHistoryEntry[]> {
   const platformService = createPlatformServiceRoleClient();
   const { data } = await platformService
     .from("studio_memberships")
@@ -251,20 +260,23 @@ export async function getWorkHistory(accountId: string): Promise<WorkHistoryEntr
     .eq("account_id", accountId)
     .order("created_at", { ascending: false });
 
-  return (data ?? [])
-    .map((m) => {
+  const entries = await Promise.all(
+    (data ?? []).map(async (m) => {
       const studio = (Array.isArray(m.studios) ? m.studios[0] : m.studios) as { id: string; name: string; public_id: string } | null;
       if (!studio) return null;
+      const firmRole = await getFirmRoleForStudio(studio.public_id, accountPublicId);
       return {
         membershipId: m.id,
         studioId: studio.id,
         studioName: studio.name,
         studioPublicId: studio.public_id,
-        role: m.role,
+        role: firmRole ?? m.role,
         startedAt: m.activated_at ?? m.created_at,
         endedAt: m.left_at,
         isCurrent: m.status === "ACTIVE",
       };
-    })
-    .filter((entry): entry is WorkHistoryEntry => entry !== null);
+    }),
+  );
+
+  return entries.filter((entry): entry is WorkHistoryEntry => entry !== null);
 }

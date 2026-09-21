@@ -11,6 +11,14 @@ import { ProvisionPortalLoginForm } from "../../../components/aorms/ProvisionPor
 import { inviteConsultantLogin } from "../../../lib/actions/portal-invites";
 import { importConsultantsCsv } from "../../../lib/actions/consultants";
 
+// Same set as app/(app)/clients/page.tsx's own WRITE_TIER_ROLES — gates
+// the "Add consultant" trigger and CSV import bar for VIEWER the same way
+// Clients now does (2026-09-20 QA pass: this page never gated its write UI
+// at all). `consultants`' own RLS write policy already correctly requires
+// `has_capability('write')` (migration 0021), so unlike /contractors this
+// is a pure UI-consistency fix, not closing a server-side gap.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 /**
  * Consultants directory — the staff-facing side of migration 0021, which
  * only built the Collaborator Portal's read/submit side. `consultants` had
@@ -30,6 +38,7 @@ export default async function ConsultantsPage() {
     supabase.from("profiles").select("consultant_id").not("consultant_id", "is", null),
   ]);
   const isOwner = myProfile?.role === "OWNER";
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
   const loginedIds = new Set((withLogin ?? []).map((p) => p.consultant_id));
 
   const rows = consultants ?? [];
@@ -38,9 +47,11 @@ export default async function ConsultantsPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New consultant" description="Add an external consultant to the directory.">
-        <AddConsultantForm />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New consultant" description="Add an external consultant to the directory.">
+          <AddConsultantForm />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
@@ -52,15 +63,17 @@ export default async function ConsultantsPage() {
                   {isOwner ? "Invite a consultant to the Collaborator Portal below." : "Only the firm owner can provision portal logins."}
                 </>
               }
-              actions={<ContextPanelTrigger size="sm">Add consultant</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Add consultant</ContextPanelTrigger> : undefined}
             />
 
-            <ImportExportBar
-              title="Consultants"
-              exportHref="/api/consultants/export"
-              templateHref="/api/consultants/import-template"
-              importAction={importConsultantsCsv}
-            />
+            {canWrite && (
+              <ImportExportBar
+                title="Consultants"
+                exportHref="/api/consultants/export"
+                templateHref="/api/consultants/import-template"
+                importAction={importConsultantsCsv}
+              />
+            )}
 
             <div
               style={{

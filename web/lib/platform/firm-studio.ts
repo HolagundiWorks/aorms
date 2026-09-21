@@ -1,4 +1,5 @@
 import { createClient as createWebClient } from "../supabase/server";
+import { createServiceRoleClient as createWebServiceRoleClient } from "../supabase/service";
 import { getActiveFirmId } from "../firm/current";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "./service";
 
@@ -68,6 +69,47 @@ export const PLAN_CAPS: Record<string, { client: number | null; contractor: numb
   PROFESSIONAL: { client: null, contractor: null, project: null },
   ENTERPRISE: { client: null, contractor: null, project: null },
 };
+
+/**
+ * B3 fix (2026-09-20 QA) — resolves the Office Hub firm role
+ * (`profile_firm_memberships.role`) for a Platform account's membership in
+ * a given Studio, when that Studio is linked to an Office Hub firm
+ * (`firms.platform_studio_public_id`) and this Platform account is linked
+ * to an Office Hub profile (`profiles.platform_public_id`). Used by the
+ * Identity Portal (app/(platform)/identity/page.tsx, resume/page.tsx via
+ * getWorkHistory()) in place of the Platform-side `studio_memberships.role`
+ * alone — that column is only a coarse OWNER (Studio creator, permanent —
+ * see createStudio() in lib/actions/platform.ts) / MEMBER (everyone else,
+ * no promotion path — see joinStudio()'s own comment there) distinction
+ * about who administers the Platform Studio *object*. Migration 0055's own
+ * header comment documents this as genuinely different from, and
+ * deliberately allowed to diverge from, a person's real Office Hub firm
+ * role (OWNER/PARTNER/ASSOCIATE/…, promotable via /users) — "a person can
+ * be OWNER of their own studio and, separately, ASSOCIATE... in a firm
+ * that invited them." Office Hub's role is the one actually enforced by
+ * RLS throughout the app (current_app_role()), so it's the authoritative
+ * "what is this person's role at this firm" answer for display purposes;
+ * showing the Platform-only tag as if it were that answer is what QA
+ * flagged as an inconsistency. Returns null when no linked firm/profile/
+ * membership resolves (e.g. a Studio never onboarded to Office Hub) —
+ * callers fall back to the Platform-side role in that case.
+ */
+export async function getFirmRoleForStudio(studioPublicId: string, platformPublicId: string): Promise<string | null> {
+  const webService = createWebServiceRoleClient();
+  const { data: firm } = await webService.from("firms").select("id").eq("platform_studio_public_id", studioPublicId).maybeSingle();
+  if (!firm) return null;
+
+  const { data: profile } = await webService.from("profiles").select("id").eq("platform_public_id", platformPublicId).maybeSingle();
+  if (!profile) return null;
+
+  const { data: membership } = await webService
+    .from("profile_firm_memberships")
+    .select("role")
+    .eq("profile_id", profile.id)
+    .eq("firm_id", firm.id)
+    .maybeSingle();
+  return membership?.role ?? null;
+}
 
 export async function checkPlanCap(
   currentCount: number,

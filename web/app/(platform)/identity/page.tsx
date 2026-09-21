@@ -12,6 +12,7 @@ import { PurchaseIdentityButton } from "../../../components/aorms/platform/Purch
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { IdentityPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
 import { portalUrl } from "../../../lib/platform/subdomains";
+import { getFirmRoleForStudio } from "../../../lib/platform/firm-studio";
 
 // 2026-09-13: PRO is no longer free/automatic at 100 hours — see
 // migration 0018's header. It's now something a Studio grants to one of
@@ -220,6 +221,23 @@ export default async function IdentityPage() {
     .neq("status", "LEFT")
     .order("created_at", { ascending: true });
 
+  // B3 fix — the "role" shown per studio used to be the Platform-side
+  // studio_memberships.role alone (see getFirmRoleForStudio()'s own header
+  // for why that's a different, coarser concept than the Office Hub firm
+  // role /users shows). Resolve the real firm role per studio and prefer
+  // it; fall back to the Platform role only when no Office Hub link
+  // resolves (e.g. this Studio was never onboarded to Office Hub).
+  const roleByStudioId = new Map(
+    await Promise.all(
+      (memberships ?? []).map(async (m) => {
+        const studio = (Array.isArray(m.studios) ? m.studios[0] : m.studios) as StudioEmbed;
+        if (!studio) return [m.id, m.role] as const;
+        const firmRole = await getFirmRoleForStudio(studio.public_id, account!.public_id);
+        return [m.id, firmRole ?? m.role] as const;
+      }),
+    ),
+  );
+
   const { data: identityLicence } = await platformService
     .from("identity_licences")
     .select("plan")
@@ -338,6 +356,7 @@ export default async function IdentityPage() {
                     {(memberships ?? []).map((m) => {
                       const studio = (Array.isArray(m.studios) ? m.studios[0] : m.studios) as StudioEmbed;
                       if (!studio) return null;
+                      const displayRole = roleByStudioId.get(m.id) ?? m.role;
                       return (
                         <Tile key={m.id}>
                           <Stack gap={3} orientation="horizontal" style={{ alignItems: "center", justifyContent: "space-between" }}>
@@ -349,8 +368,8 @@ export default async function IdentityPage() {
                                 {studio.public_id}
                               </span>
                               <div>
-                                <Tag type={m.role === "OWNER" ? "purple" : "gray"} size="sm">
-                                  {m.role}
+                                <Tag type={displayRole === "OWNER" ? "purple" : "gray"} size="sm">
+                                  {displayRole}
                                 </Tag>
                               </div>
                             </div>

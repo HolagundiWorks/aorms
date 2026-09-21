@@ -310,6 +310,19 @@ body {
   // breakpoint-down rule. Below `lg` the nav is always a dismissible overlay
   // (backdrop via `--side-nav__overlay`), so the icon-rail concept doesn't
   // apply there — force back to the existing 0-width-closed behavior.
+  //
+  // 2026-09-20 correction (QA bug B5): this rule alone was never enough —
+  // it only covers `.cds--side-nav--rail:not(.cds--side-nav--expanded)`,
+  // the *closed* rail state. The *open* mobile state
+  // (`.cds--side-nav--rail.cds--side-nav--expanded`, back when `isRail`
+  // was passed unconditionally) rendered at Carbon's normal 256px
+  // `--side-nav--expanded` width — a persistent panel, not an overlay —
+  // squeezing content into a narrow column with truncated labels. Fixed
+  // at the source instead: AppShell.tsx's `isRail` prop is now itself
+  // `false` below `lg` (tracked via `matchMedia`, see its own header
+  // comment), so `.cds--side-nav--rail` is never applied on a mobile
+  // viewport in the first place and this rule is now just a defensive
+  // fallback, not the primary mechanism.
   .cds--side-nav--rail:not(.cds--side-nav--expanded) {
     inline-size: 0 !important;
   }

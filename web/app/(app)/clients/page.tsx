@@ -64,13 +64,15 @@ export default async function ClientsPage() {
               actions={canWrite ? <ContextPanelTrigger size="sm">Create client</ContextPanelTrigger> : undefined}
             />
 
-            <ImportExportBar
-              title="Clients"
-              exportHref="/api/clients/export"
-              templateHref="/api/clients/import-template"
-              importAction={importClientsCsv}
-              notes="Type must be Individual, Company, or Architect firm (blank defaults to Individual)."
-            />
+            {canWrite && (
+              <ImportExportBar
+                title="Clients"
+                exportHref="/api/clients/export"
+                templateHref="/api/clients/import-template"
+                importAction={importClientsCsv}
+                notes="Type must be Individual, Company, or Architect firm (blank defaults to Individual)."
+              />
+            )}
 
             <div
               style={{

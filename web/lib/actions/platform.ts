@@ -335,6 +335,20 @@ export async function signInWithGoogle(): Promise<never> {
 export async function platformSignOut(): Promise<void> {
   const supabase = await createPlatformClient();
   await supabase.auth.signOut();
+
+  // B1 fix (2026-09-20 QA) — the unified login (platformSignIn() above,
+  // and auth.ts's bridgeIdentityToOfficeHub()) can establish an Office Hub
+  // (aorms-web) session alongside this Platform one from a single sign-in.
+  // Clearing only the Platform cookie here left that second session fully
+  // valid: identity/page.tsx's own "Office-Hub-link" fallback (see its
+  // header comment) would then read that still-live web session, resolve
+  // profiles.platform_public_id, and keep rendering the fully authenticated
+  // /identity page — sign-out looked successful (redirected to the signed-
+  // out home) but the real session never cleared. Mirrored in auth.ts's
+  // signOut() for the reverse direction.
+  const webSupabase = await createWebClient();
+  await webSupabase.auth.signOut();
+
   redirect(await currentPortalHome());
 }
 

@@ -20,6 +20,21 @@ import { ProvisionPortalLoginForm } from "../../../components/aorms/ProvisionPor
 import { inviteContractorLogin } from "../../../lib/actions/portal-invites";
 import { importContractorsCsv } from "../../../lib/actions/contractors";
 
+// Same set as app/(app)/clients/page.tsx's own WRITE_TIER_ROLES (mirrored
+// from lib/actions/clients.ts) — gates the "Add contractor" trigger and
+// CSV import bar for VIEWER the same way Clients now does (found by the
+// same 2026-09-20 QA pass: this page never gated its write UI at all).
+// Note: unlike `clients`, `contractors`' own RLS write policy ("contractors:
+// staff write", migration 0012, altered by 0059) still gates on
+// `is_office_staff()` rather than `has_capability('write')` — that
+// migration's own header comment says this was "confirmed from the
+// routers directly" against the old backend's actual behavior, not an
+// oversight, so it's left untouched here rather than silently changed
+// alongside an unrelated UI fix; flagged separately for a security review
+// rather than half-fixed. This UI gate is a defense-in-depth/consistency
+// fix on top, not a claim that VIEWER is blocked server-side too.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function ContractorsPage() {
   const supabase = await createClient();
   const {
@@ -32,6 +47,7 @@ export default async function ContractorsPage() {
     supabase.from("profiles").select("contractor_id").not("contractor_id", "is", null),
   ]);
   const isOwner = myProfile?.role === "OWNER";
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
   const loginedIds = new Set((withLogin ?? []).map((p) => p.contractor_id));
 
   const rows = contractors ?? [];
@@ -40,9 +56,11 @@ export default async function ContractorsPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New contractor" description="Add an empanelled contractor to the directory.">
-        <AddContractorForm />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New contractor" description="Add an empanelled contractor to the directory.">
+          <AddContractorForm />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
@@ -54,16 +72,18 @@ export default async function ContractorsPage() {
                   {isOwner ? "Invite a contractor to a tender-bidding portal login below." : "Only the firm owner can provision portal logins."}
                 </>
               }
-              actions={<ContextPanelTrigger size="sm">Add contractor</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Add contractor</ContextPanelTrigger> : undefined}
             />
 
-            <ImportExportBar
-              title="Contractors"
-              exportHref="/api/contractors/export"
-              templateHref="/api/contractors/import-template"
-              importAction={importContractorsCsv}
-              notes="Category must be one of: Civil, Structural steel, MEP, Electrical, Plumbing, HVAC, Interior, Facade, Waterproofing, Flooring, Painting, Landscape, General, Other (blank defaults to General)."
-            />
+            {canWrite && (
+              <ImportExportBar
+                title="Contractors"
+                exportHref="/api/contractors/export"
+                templateHref="/api/contractors/import-template"
+                importAction={importContractorsCsv}
+                notes="Category must be one of: Civil, Structural steel, MEP, Electrical, Plumbing, HVAC, Interior, Facade, Waterproofing, Flooring, Painting, Landscape, General, Other (blank defaults to General)."
+              />
+            )}
 
             <div
               style={{

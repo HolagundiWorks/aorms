@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ComponentType } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -228,6 +228,22 @@ function isActiveHref(pathname: string, href: string): boolean {
  * below-`lg` override (`--side-nav--rail`'s 48px has no breakpoint gate of
  * its own, unlike `--side-nav--ux`'s, so without that override rail width
  * would also apply on mobile where the nav is meant to be an overlay).
+ *
+ * 2026-09-20 correction (QA bug B5): the claim above — "rail is disabled
+ * below lg, see globals.scss" — was only half true. globals.scss's
+ * override only forced the *closed* rail state to 0 width; it never
+ * covered the mobile-open case, so `isRail` being passed unconditionally
+ * meant a mobile viewport's "expanded" nav rendered as
+ * `.cds--side-nav--rail.cds--side-nav--expanded` — the same persistent
+ * 256px panel desktop's collapsed-rail-hover-preview uses, not a proper
+ * overlay — squeezing page content into a narrow column with truncated
+ * labels. `isRail` is now itself viewport-conditional (`isRailViewport`
+ * below, via `matchMedia("(min-width: 66rem)")`, the same `lg` threshold):
+ * true only above `lg`, where the icon-rail concept applies at all; false
+ * below it, so mobile gets Carbon's own default `--side-nav--ux`
+ * dismissible-overlay behavior instead. `sideNavExpanded` also now
+ * defaults closed the first time a mobile viewport is detected (a
+ * hamburger menu should start closed, not cover the screen on load).
  */
 export function AppShell({
   children,
@@ -275,6 +291,40 @@ export function AppShell({
   // resets it to 0 since this app never uses Carbon's separate `isRail`
   // persistent-icon-rail mode the unconditional 48px assumes.
   const [sideNavExpanded, setSideNavExpanded] = useState(true);
+
+  // B5 fix (2026-09-20 QA) — `isRail` below used to be passed
+  // unconditionally, on every viewport including mobile. Carbon's rail
+  // mode (`.cds--side-nav--rail`) is a desktop-only concept — a
+  // persistently docked icon rail that expands on hover — and forcing it
+  // below the `lg` breakpoint (66rem, the same threshold globals.scss's
+  // own `@media (max-width: 65.9375rem)` override already targets) opted
+  // the nav out of Carbon's default dismissible-overlay mobile behavior
+  // entirely: at 375px the nav rendered as a persistent, non-overlay
+  // `.cds--side-nav--rail.cds--side-nav--expanded` panel — which Carbon
+  // styles at the same 256px `.cds--side-nav--expanded` width as the full
+  // desktop nav (@carbon/styles' own ui-shell/side-nav/_side-nav.scss) —
+  // pushing content into a narrow column with mid-word-truncated labels,
+  // instead of collapsing to a true hamburger-triggered overlay. Tracked
+  // via `matchMedia` rather than CSS alone since `isRail` is a React prop
+  // Carbon uses to choose which classes to render in the first place, not
+  // something a stylesheet can override after the fact. SSR has no
+  // viewport info, so the initial value assumes desktop (matching the
+  // unconditional `isRail` this replaces) and corrects on mount.
+  const [isRailViewport, setIsRailViewport] = useState(true);
+
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 66rem)");
+    setIsRailViewport(mql.matches);
+    // Default the nav closed the moment we learn this is actually a
+    // mobile viewport — a hamburger menu should start closed, not cover
+    // the whole screen on first load. Only forced once, on mount, so a
+    // later resize across the breakpoint doesn't fight a manual toggle.
+    if (!mql.matches) setSideNavExpanded(false);
+
+    const onChange = (e: MediaQueryListEvent) => setIsRailViewport(e.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
 
   // Closes the nav after any link click. Above the ~66rem breakpoint the
   // nav's own CSS ignores `expanded` and stays fixed-open regardless (see
@@ -329,7 +379,7 @@ export function AppShell({
       <SideNav
         aria-label="Side navigation"
         expanded={sideNavExpanded}
-        isRail
+        isRail={isRailViewport}
         onOverlayClick={() => setSideNavExpanded(false)}
         onSideNavBlur={() => setSideNavExpanded(false)}
       >

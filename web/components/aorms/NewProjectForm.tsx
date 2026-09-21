@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 import {
   Button,
   Form,
+  InlineLoading,
   InlineNotification,
   Select,
   SelectItem,
@@ -80,9 +81,22 @@ export function NewProjectForm({ clients, onSuccess }: { clients: ClientOption[]
             placeholder="Project-specific, if different from the client's own"
           />
         </FormGrid>
-        <Button type="submit" disabled={pending}>
-          {pending ? "Creating…" : "Create project"}
-        </Button>
+        <Stack gap={3} orientation="horizontal" style={{ alignItems: "center" }}>
+          <Button type="submit" disabled={pending}>
+            {pending ? "Creating…" : "Create project"}
+          </Button>
+          {/* B4 (2026-09-20 QA) — a first-project-after-sign-in submission
+              can occasionally take 20-25s (createProjectRecord() is the
+              only creation action, besides clients/contractors, that also
+              round-trips to the separate aorms-platform project via
+              checkPlanCap()/getFirmStudio() — a plausible cold-start cost
+              tasks/invoices never pay, though not confirmed against live
+              production timing). The disabled-button/"Creating…" pattern
+              every other form in this app uses can read as a stall over a
+              wait that long — an explicit spinner makes "still working"
+              unambiguous regardless of the exact cause. */}
+          {pending && <InlineLoading description="Creating project — this can take a little longer the first time…" />}
+        </Stack>
       </Stack>
     </Form>
   );
