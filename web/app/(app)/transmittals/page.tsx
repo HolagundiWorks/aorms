@@ -19,16 +19,31 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateTransmittalPdf } from "../../../lib/actions/transmittals";
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and migration 0085_write_policies_require_capability.sql's
+// "transmittals: staff write" policy). Gates the "Add transmittal"
+// trigger the same way Clients/Contractors/Projects already gate their
+// own create triggers — found missing here by a 2026-09-21 sweep of every
+// /app/(app)/*/page.tsx with an unguarded ContextPanelTrigger after the
+// same class of bug was confirmed live on Tasks/Leads/Letters.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function TransmittalsPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [{ data: transmittals, error }, { data: projects }] = await Promise.all([
+  const [{ data: transmittals, error }, { data: projects }, { data: myProfile }] = await Promise.all([
     supabase
       .from("transmittals")
       .select("id, ref, recipient, purpose, channel, date_issued, acknowledged_at, pdf_status, project_offices(title)")
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = transmittals ?? [];
   const acknowledgedCount = rows.filter((t) => t.acknowledged_at).length;
@@ -36,16 +51,18 @@ export default async function TransmittalsPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New transmittal" description="Track a drawing/document issue.">
-        <AddTransmittalForm projects={projects ?? []} />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New transmittal" description="Track a drawing/document issue.">
+          <AddTransmittalForm projects={projects ?? []} />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Transmittals"
               description="Drawing-issue tracking with client/consultant acknowledgment."
-              actions={<ContextPanelTrigger size="sm">Add transmittal</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Add transmittal</ContextPanelTrigger> : undefined}
             />
 
             <div

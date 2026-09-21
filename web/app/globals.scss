@@ -385,9 +385,22 @@ body {
 // row instead of forcing the whole header to overflow; `overflow-x: auto`
 // gives SysDeX's own longer link list a horizontal scrollbar on genuinely
 // narrow viewports instead of wrapping the header's fixed 48px height.
+// `min-inline-size: 7.5rem` (not `0`) — QA re-check, 2026-09-21: at 375px
+// wide, `0` let every OTHER header flex child (HeaderName, and — once
+// signed in — the greeting/avatar/Sign-out block, none of which shrink
+// below their own content size, Carbon's own flex default) squeeze this
+// nav down to a real, measured 30.84px, well under one link's own tap
+// target and confirmed by direct click test to be genuinely unclickable,
+// not just visually tight. A hard floor here means the nav can never
+// collapse to a sliver again on any of this header's 3 portals (Identity,
+// ConnectDeX, SysDeX — same shared component), even for a longer portal
+// name or a signed-in user this session's own greeting/avatar fix below
+// doesn't fully compensate for; `overflow-x: auto` (unchanged) still
+// carries the rest via internal scroll, same as it already did for
+// SysDeX's own longer link list.
 .cds--header__nav {
   display: block;
-  min-inline-size: 0;
+  min-inline-size: 7.5rem;
   overflow-x: auto;
 }
 
@@ -398,8 +411,33 @@ body {
 // row, pushing more of the nav behind the scroll fix above than
 // necessary. Portal name + nav + sign-in/greeting stay, since those are
 // either functional or the header's own identity, not decoration.
+//
+// **2026-09-21 QA re-check — this alone was not enough.** QA found the
+// nav still unreachable at 375px even with the tagline already hidden:
+// `.cds--header__nav` computed to a real 30.84px wide (confirmed live,
+// signed in as `demo@aorms.in` on Identity Portal — see
+// `aorms-platform-greeting` below for the fix and the re-measured
+// numbers). The tagline was never the only problem — once signed in, the
+// greeting text (`Good afternoon, AORMS` etc., PlatformShellHeader.tsx)
+// scales with the user's own name and was the actual dominant consumer of
+// the row, not the tagline (already hidden by this same rule, yet the
+// nav was still squeezed). Kept as its own rule since it's a distinct
+// element with its own justification, not merged into the block below.
 @media (max-width: 30rem) {
   .aorms-platform-tagline {
+    display: none;
+  }
+
+  // Purely decorative once signed in — the avatar initials + Sign out
+  // stay, so identity and the sign-out action are both still visibly
+  // present without this text. Confirmed live: hiding it alone took the
+  // Identity Portal's nav from an unusable 30.84px up to ~163px at
+  // 375px wide (both "Identity" and "Licences" links fully or almost
+  // fully within the visible/tappable area, the rest of "Licences"
+  // reachable via the nav's own existing overflow-x scroll) — the
+  // primary fix for the QA-reported unclickable nav, not a cosmetic
+  // trim.
+  .aorms-platform-greeting {
     display: none;
   }
 }

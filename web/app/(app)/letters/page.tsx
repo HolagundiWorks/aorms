@@ -17,16 +17,31 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateLetterPdf } from "../../../lib/actions/letters";
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and web/lib/actions/letters.ts's own copy of this set). Gates the "Add
+// letter" trigger the same way Clients/Contractors/Projects already gate
+// their own create triggers — found missing here by live QA 2026-09-21
+// (a VIEWER saw a fully-interactive "Add letter" button/form; the RLS
+// write policy already blocks the underlying INSERT, this is the
+// matching UI-level fix).
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function LettersPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [{ data: letters, error }, { data: projects }] = await Promise.all([
+  const [{ data: letters, error }, { data: projects }, { data: myProfile }] = await Promise.all([
     supabase
       .from("letters")
       .select("id, ref, recipient, subject, date_letter, pdf_status, project_offices(title)")
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = letters ?? [];
   const readyCount = rows.filter((l) => l.pdf_status === "READY").length;
@@ -34,16 +49,18 @@ export default async function LettersPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New letter" description="Add a correspondence record.">
-        <AddLetterForm projects={projects ?? []} />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New letter" description="Add a correspondence record.">
+          <AddLetterForm projects={projects ?? []} />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Letters"
               description="Office correspondence register."
-              actions={<ContextPanelTrigger size="sm">Add letter</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Add letter</ContextPanelTrigger> : undefined}
             />
 
             <div

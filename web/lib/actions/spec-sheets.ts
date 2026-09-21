@@ -8,6 +8,18 @@ import { toSafeErrorMessage } from "../security/safe-error";
 
 export type SpecSheetActionState = { error: string } | null;
 
+/**
+ * Roles with `has_capability('write')` (rank >= 40, or an explicit
+ * allow-list role) — same set web/lib/actions/clients.ts's WRITE_TIER_ROLES
+ * uses, mirrored here as an explicit, friendly-error check in the Server
+ * Action (defense in depth): the real authorization boundary is RLS
+ * (`spec_sheets`/`spec_items: staff write`, migration
+ * 0085_write_policies_require_capability.sql). Added 2026-09-21 in the
+ * same sweep that found the matching UI gap on `/spec-sheets`' "Add spec
+ * sheet" trigger.
+ */
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export async function createSpecSheetRecord(
   _prev: SpecSheetActionState,
   formData: FormData,
@@ -19,6 +31,15 @@ export async function createSpecSheetRecord(
   if (!title) return { error: "Title is required." };
 
   const supabase = await createClient();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  const { data: authProfile } = authUser
+    ? await supabase.from("profiles").select("role").eq("id", authUser.id).maybeSingle()
+    : { data: null };
+  if (!authProfile || !WRITE_TIER_ROLES.has(authProfile.role)) {
+    return { error: "You don't have permission to add spec sheets — contact a firm owner or partner." };
+  }
 
   const { data: refData, error: refError } = await supabase.rpc("next_ref", {
     p_scope: "specsheet",
@@ -74,6 +95,15 @@ export async function createSpecItemRecord(
   if (!item) return { error: "Item is required." };
 
   const supabase = await createClient();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  const { data: authProfile } = authUser
+    ? await supabase.from("profiles").select("role").eq("id", authUser.id).maybeSingle()
+    : { data: null };
+  if (!authProfile || !WRITE_TIER_ROLES.has(authProfile.role)) {
+    return { error: "You don't have permission to add spec items — contact a firm owner or partner." };
+  }
 
   const { data: inserted, error } = await supabase
     .from("spec_items")

@@ -40,13 +40,27 @@ const BAND_TAG: Record<PriorityBand, "red" | "magenta" | "purple" | "blue" | "gr
   BACKLOG: "gray",
 };
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and web/lib/actions/tasks.ts's own copy of this set). Gates the "Add
+// task" trigger the same way Clients/Contractors/Projects already gate
+// their own create triggers — found missing here by live QA 2026-09-21
+// (a VIEWER saw a fully-interactive "Add task" button/form; the RLS
+// write policy already blocks the underlying INSERT, this is the
+// matching UI-level fix).
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function TasksPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const [
     { data: tasks, error },
     { data: projects },
     { data: assignees },
+    { data: myProfile },
   ] = await Promise.all([
     supabase
       .from("tasks")
@@ -56,7 +70,9 @@ export default async function TasksPage() {
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
     supabase.from("profiles").select("id, full_name").order("full_name"),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = tasks ?? [];
   const inProgressCount = rows.filter((t) => t.status === "IN_PROGRESS").length;
@@ -65,16 +81,18 @@ export default async function TasksPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New task" description="Add a task to the office-wide list.">
-        <AddTaskForm projects={projects ?? []} assignees={assignees ?? []} />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New task" description="Add a task to the office-wide list.">
+          <AddTaskForm projects={projects ?? []} assignees={assignees ?? []} />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Tasks"
               description="Office-wide task list across all projects."
-              actions={<ContextPanelTrigger size="sm">Add task</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Add task</ContextPanelTrigger> : undefined}
             />
 
             <div

@@ -17,16 +17,31 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and migration 0085_write_policies_require_capability.sql's "approvals:
+// staff write" policy). Gates the "Log approval" trigger the same way
+// Clients/Contractors/Projects already gate their own create triggers —
+// found missing here by a 2026-09-21 sweep of every /app/(app)/*/page.tsx
+// with an unguarded ContextPanelTrigger after the same class of bug was
+// confirmed live on Tasks/Leads/Letters.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function ApprovalsPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [{ data: approvals, error }, { data: projects }] = await Promise.all([
+  const [{ data: approvals, error }, { data: projects }, { data: myProfile }] = await Promise.all([
     supabase
       .from("approvals")
       .select("id, entity_type, title, recipient, channel, status, sent_date, response_date, project_offices(title)")
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = approvals ?? [];
   const pendingCount = rows.filter((a) => a.status === "SENT").length;
@@ -34,16 +49,18 @@ export default async function ApprovalsPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New approval" description="Log something sent for client/authority sign-off.">
-        <AddApprovalForm projects={projects ?? []} />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New approval" description="Log something sent for client/authority sign-off.">
+          <AddApprovalForm projects={projects ?? []} />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Approvals"
               description="What was issued to a client or authority for sign-off, with channel and response status."
-              actions={<ContextPanelTrigger size="sm">Log approval</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Log approval</ContextPanelTrigger> : undefined}
             />
 
             <div

@@ -20,29 +20,45 @@ const KIND_LABEL: Record<string, string> = {
  * Phase 4's own flagged gap ("office_templates" not built) — the table
  * existed with RLS the whole time, no UI at all until now.
  */
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and migration 0085_write_policies_require_capability.sql's
+// "office_templates: staff write" policy). Gates the "Add template"
+// trigger the same way Clients/Contractors/Projects already gate their
+// own create triggers — found missing here by a 2026-09-21 sweep of every
+// /app/(app)/*/page.tsx with an unguarded ContextPanelTrigger after the
+// same class of bug was confirmed live on Tasks/Leads/Letters.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function OfficeTemplatesPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const { data: templates, error } = await supabase
-    .from("office_templates")
-    .select("id, kind, title, tags")
-    .order("updated_at", { ascending: false });
+  const [{ data: templates, error }, { data: myProfile }] = await Promise.all([
+    supabase.from("office_templates").select("id, kind, title, tags").order("updated_at", { ascending: false }),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+  ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = templates ?? [];
   const kindCount = new Set(rows.map((t) => t.kind)).size;
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New template" description="Add reusable office document boilerplate.">
-        <AddOfficeTemplateForm />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New template" description="Add reusable office document boilerplate.">
+          <AddOfficeTemplateForm />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Office Templates"
               description="Reusable boilerplate for letters, scope of work, COA fee proposals, contracts, and meeting minutes."
-              actions={<ContextPanelTrigger size="sm">Add template</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Add template</ContextPanelTrigger> : undefined}
             />
 
             <div

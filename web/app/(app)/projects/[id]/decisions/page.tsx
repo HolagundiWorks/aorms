@@ -16,6 +16,16 @@ function formatCostDelta(paise: number): string {
   return `${sign}₹${rupees.toLocaleString("en-IN")}`;
 }
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and migration 0085_write_policies_require_capability.sql's "decisions:
+// staff write" policy). Gates the "Add decision" trigger the same way
+// Clients/Contractors/Projects already gate their own create triggers —
+// found missing here by a 2026-09-21 sweep of every /app/(app)/*/page.tsx
+// with an unguarded ContextPanelTrigger after the same class of bug was
+// confirmed live on Tasks/Leads/Letters.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function ProjectDecisionsPage({
   params,
 }: {
@@ -23,15 +33,24 @@ export default async function ProjectDecisionsPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [{ data: project, error: projectError }, { data: decisions, error: decisionsError }] = await Promise.all([
+  const [
+    { data: project, error: projectError },
+    { data: decisions, error: decisionsError },
+    { data: myProfile },
+  ] = await Promise.all([
     supabase.from("project_offices").select("id, ref, title").eq("id", id).maybeSingle(),
     supabase
       .from("decisions")
       .select("id, title, rationale, state, revision_category, revision_source, impact, owner_name, review_deadline, cost_delta_paise")
       .eq("project_id", id)
       .order("created_at", { ascending: false }),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   if (projectError) {
     return (
@@ -56,9 +75,11 @@ export default async function ProjectDecisionsPage({
     // "Add decision" panel opens left of this content, not over it — the
     // register below stays visible and interactive the whole time.
     <ContextPanelLayout>
-      <ContextPanel title="Add decision" description="Log a new CRIF decision or revision.">
-        <AddDecisionForm projectId={project.id} />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="Add decision" description="Log a new CRIF decision or revision.">
+          <AddDecisionForm projectId={project.id} />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
@@ -91,9 +112,11 @@ export default async function ProjectDecisionsPage({
               <KpiTile label="Locked" value={lockedCount} icon={Locked} />
             </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
-              <ContextPanelTrigger size="sm">Add decision</ContextPanelTrigger>
-            </div>
+            {canWrite && (
+              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
+                <ContextPanelTrigger size="sm">Add decision</ContextPanelTrigger>
+              </div>
+            )}
 
             {decisionsError ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

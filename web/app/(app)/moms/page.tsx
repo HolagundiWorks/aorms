@@ -17,16 +17,31 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and migration 0085_write_policies_require_capability.sql's "moms: staff
+// write" policy). Gates the "Add minutes" trigger the same way
+// Clients/Contractors/Projects already gate their own create triggers —
+// found missing here by a 2026-09-21 sweep of every /app/(app)/*/page.tsx
+// with an unguarded ContextPanelTrigger after the same class of bug was
+// confirmed live on Tasks/Leads/Letters.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function MomsPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [{ data: moms, error }, { data: projects }] = await Promise.all([
+  const [{ data: moms, error }, { data: projects }, { data: myProfile }] = await Promise.all([
     supabase
       .from("moms")
       .select("id, ref, title, meeting_date, venue, status, project_offices(title)")
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = moms ?? [];
   const draftCount = rows.filter((m) => m.status === "DRAFT").length;
@@ -34,16 +49,18 @@ export default async function MomsPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New minutes" description="Add meeting minutes for a project.">
-        <AddMomForm projects={projects ?? []} />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New minutes" description="Add meeting minutes for a project.">
+          <AddMomForm projects={projects ?? []} />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Meeting Minutes"
               description="MOMs — minutes of meeting, per project."
-              actions={<ContextPanelTrigger size="sm">Add minutes</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Add minutes</ContextPanelTrigger> : undefined}
             />
 
             <div

@@ -29,16 +29,31 @@ function formatInr(paise: number | null): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
 }
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and migration 0085_write_policies_require_capability.sql's
+// "purchase_orders: staff write" policy). Gates the "Create PO" trigger
+// the same way Clients/Contractors/Projects already gate their own create
+// triggers — found missing here by a 2026-09-21 sweep of every
+// /app/(app)/*/page.tsx with an unguarded ContextPanelTrigger after the
+// same class of bug was confirmed live on Tasks/Leads/Letters.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function PurchaseOrdersPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [{ data: pos, error }, { data: projects }] = await Promise.all([
+  const [{ data: pos, error }, { data: projects }, { data: myProfile }] = await Promise.all([
     supabase
       .from("purchase_orders")
       .select("id, ref, vendor, title, status, total_paise, date_po, project_offices(title)")
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = pos ?? [];
   const issuedCount = rows.filter((po) => po.status === "ISSUED").length;
@@ -46,16 +61,18 @@ export default async function PurchaseOrdersPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New purchase order" description="Create a project purchase order.">
-        <AddPurchaseOrderForm projects={projects ?? []} />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New purchase order" description="Create a project purchase order.">
+          <AddPurchaseOrderForm projects={projects ?? []} />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Purchase Orders"
               description="Simple quantity × rate procurement, per project."
-              actions={<ContextPanelTrigger size="sm">Create PO</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Create PO</ContextPanelTrigger> : undefined}
             />
 
             <div

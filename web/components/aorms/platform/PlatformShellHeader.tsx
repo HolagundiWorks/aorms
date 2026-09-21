@@ -89,7 +89,21 @@ export async function PlatformShellHeader({
       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginLeft: "auto", paddingRight: "1rem" }}>
         {signedIn ? (
           <>
-            <span className="cds--type-body-compact-01" style={{ whiteSpace: "nowrap" }}>
+            {/* aorms-platform-greeting: hidden below ~480px (globals.scss),
+                same reasoning as aorms-platform-tagline above — this text is
+                genuinely optional (the avatar + Sign out stay, so identity
+                and the sign-out action are both still present) and its
+                length scales with the signed-in user's own name, so on a
+                narrow phone it was the single biggest, least bounded
+                consumer of the header row's width. Confirmed live, 2026-09-21
+                QA re-check: at 375px this alone took `.cds--header__nav`
+                (the functional Identity/Licences links) from a 30.84px
+                unusable sliver up to ~163px, both links fully or almost
+                fully visible/tappable without it. */}
+            <span
+              className="cds--type-body-compact-01 aorms-platform-greeting"
+              style={{ whiteSpace: "nowrap" }}
+            >
               {greeting}, {firstName}
             </span>
             <span

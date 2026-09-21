@@ -8,9 +8,25 @@ import { RemoveLineItemButton } from "../../../../components/aorms/RemoveLineIte
 import { IssueMomButton } from "../../../../components/aorms/IssueMomButton";
 import { removeMomAction } from "../../../../lib/actions/moms";
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and migration 0085_write_policies_require_capability.sql's "moms: staff
+// write"/"mom_actions: staff write" policies). Gates the always-visible
+// "Add action item" form the same way the parent /moms list page gates
+// its own "Add minutes" trigger — found missing here by the same
+// 2026-09-21 sweep.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function MomDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: myProfile } = user
+    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const { data: mom, error: momError } = await supabase
     .from("moms")
@@ -74,7 +90,7 @@ export default async function MomDetailPage({ params }: { params: Promise<{ id: 
         <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Action items
         </h2>
-        <NewMomActionForm momId={mom.id} />
+        {canWrite && <NewMomActionForm momId={mom.id} />}
 
         {actionsError ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

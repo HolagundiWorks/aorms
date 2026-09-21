@@ -15,29 +15,45 @@ import { SetActiveVersionButton } from "../../../components/aorms/SetActiveVersi
  * `/spec-sheets` (a project's own spec documents) — this is the firm's
  * versioned reference catalogue those documents pick items from.
  */
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and migration 0085_write_policies_require_capability.sql's
+// "spec_catalog_versions: staff write" policy). Gates the "New version"
+// trigger the same way Clients/Contractors/Projects already gate their
+// own create triggers — found missing here by a 2026-09-21 sweep of every
+// /app/(app)/*/page.tsx with an unguarded ContextPanelTrigger after the
+// same class of bug was confirmed live on Tasks/Leads/Letters.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function SpecCatalogPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const { data: versions, error } = await supabase
-    .from("spec_catalog_versions")
-    .select("id, label, description, active")
-    .order("label", { ascending: false });
+  const [{ data: versions, error }, { data: myProfile }] = await Promise.all([
+    supabase.from("spec_catalog_versions").select("id, label, description, active").order("label", { ascending: false }),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+  ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = versions ?? [];
   const activeCount = rows.filter((v) => v.active).length;
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New catalogue version" description="Start a new spec catalogue version.">
-        <AddSpecCatalogVersionForm />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New catalogue version" description="Start a new spec catalogue version.">
+          <AddSpecCatalogVersionForm />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Spec Catalog"
               description="Versioned material specification catalogue — category/item/make/specification/finish rows that project spec sheets pick from. Only one version is active at a time."
-              actions={<ContextPanelTrigger size="sm">New version</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">New version</ContextPanelTrigger> : undefined}
             />
 
             <div

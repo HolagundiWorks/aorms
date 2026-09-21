@@ -15,16 +15,31 @@ import { PageHeader } from "../../../components/aorms/PageHeader";
  * genuinely cross-cutting change, flagged not attempted — see
  * lib/actions/document-issues.ts's header comment).
  */
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and migration 0085_write_policies_require_capability.sql's
+// "document_issues: staff insert" policy). Gates the "Log issue" trigger
+// the same way Clients/Contractors/Projects already gate their own create
+// triggers — found missing here by a 2026-09-21 sweep of every
+// /app/(app)/*/page.tsx with an unguarded ContextPanelTrigger after the
+// same class of bug was confirmed live on Tasks/Leads/Letters.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function DocumentIssuesPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [{ data: issues, error }, { data: projects }] = await Promise.all([
+  const [{ data: issues, error }, { data: projects }, { data: myProfile }] = await Promise.all([
     supabase
       .from("document_issues")
       .select("id, entity_type, ref, version_no, revision_note, impact_note, issued_at, project_offices(title)")
       .order("issued_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = issues ?? [];
   const entityTypeCount = new Set(rows.map((i) => i.entity_type)).size;
@@ -37,16 +52,18 @@ export default async function DocumentIssuesPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="Log document issue" description="Record a cross-entity revision/issue.">
-        <AddDocumentIssueForm projects={projects ?? []} />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="Log document issue" description="Record a cross-entity revision/issue.">
+          <AddDocumentIssueForm projects={projects ?? []} />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Document Issues"
               description="Cross-entity revision/issue register — drawings, transmittals, invoices, and every other issued document, in one place."
-              actions={<ContextPanelTrigger size="sm">Log issue</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Log issue</ContextPanelTrigger> : undefined}
             />
 
             <div

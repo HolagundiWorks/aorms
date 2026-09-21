@@ -6,6 +6,20 @@ import { toSafeErrorMessage } from "../security/safe-error";
 
 export type TaskActionState = { error: string } | null;
 
+/**
+ * Roles with `has_capability('write')` (rank >= 40, or an explicit
+ * allow-list role) — same set web/lib/actions/clients.ts's WRITE_TIER_ROLES
+ * uses, mirrored here as an explicit, friendly-error check in the Server
+ * Action (defense in depth): the real authorization boundary is RLS
+ * (`tasks: staff write`, migration 0085_write_policies_require_capability.sql).
+ * Added 2026-09-21 (QA finding: `/tasks`' "Add task" button was visible and
+ * fully interactive for a VIEWER — the RLS policy already blocked the
+ * INSERT, but a VIEWER's submit would have failed with a raw RLS-denial
+ * error instead of a clear message, and the button/form shouldn't have
+ * been reachable at all).
+ */
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export async function createTaskRecord(
   _prev: TaskActionState,
   formData: FormData,
@@ -25,6 +39,12 @@ export async function createTaskRecord(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { data: authProfile } = user
+    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  if (!authProfile || !WRITE_TIER_ROLES.has(authProfile.role)) {
+    return { error: "You don't have permission to add tasks — contact a firm owner or partner." };
+  }
 
   const { data: inserted, error } = await supabase
     .from("tasks")

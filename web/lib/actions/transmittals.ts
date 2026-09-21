@@ -8,6 +8,18 @@ import { toSafeErrorMessage } from "../security/safe-error";
 
 export type TransmittalActionState = { error: string } | null;
 
+/**
+ * Roles with `has_capability('write')` (rank >= 40, or an explicit
+ * allow-list role) — same set web/lib/actions/clients.ts's WRITE_TIER_ROLES
+ * uses, mirrored here as an explicit, friendly-error check in the Server
+ * Action (defense in depth): the real authorization boundary is RLS
+ * (`transmittals`/`transmittal_items: staff write`, migration
+ * 0085_write_policies_require_capability.sql). Added 2026-09-21 in the
+ * same sweep that found the matching UI gap on `/transmittals`' "Add
+ * transmittal" trigger.
+ */
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export async function createTransmittalRecord(
   _prev: TransmittalActionState,
   formData: FormData,
@@ -27,6 +39,12 @@ export async function createTransmittalRecord(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { data: authProfile } = user
+    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  if (!authProfile || !WRITE_TIER_ROLES.has(authProfile.role)) {
+    return { error: "You don't have permission to add transmittals — contact a firm owner or partner." };
+  }
 
   const { data: refData, error: refError } = await supabase.rpc("next_ref", {
     p_scope: "transmittal",
@@ -115,6 +133,16 @@ export async function addTransmittalItemRecord(
   if (!Number.isInteger(copies) || copies < 1) return { error: "Copies must be a whole number ≥ 1." };
 
   const supabase = await createClient();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  const { data: authProfile } = authUser
+    ? await supabase.from("profiles").select("role").eq("id", authUser.id).maybeSingle()
+    : { data: null };
+  if (!authProfile || !WRITE_TIER_ROLES.has(authProfile.role)) {
+    return { error: "You don't have permission to add transmittal items — contact a firm owner or partner." };
+  }
+
   const { data: inserted, error } = await supabase
     .from("transmittal_items")
     .insert({

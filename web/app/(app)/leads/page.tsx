@@ -18,13 +18,30 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { LeadStatusSelect } from "../../../components/aorms/LeadStatusSelect";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and web/lib/actions/leads.ts's own copy of this set). Gates the "Add
+// lead" trigger the same way Clients/Contractors/Projects already gate
+// their own create triggers — found missing here by live QA 2026-09-21
+// (a VIEWER saw a fully-interactive "Add lead" button/form; the RLS
+// write policy already blocks the underlying INSERT, this is the
+// matching UI-level fix).
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function LeadsPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const { data: leads, error } = await supabase
-    .from("leads")
-    .select("id, ref, client_name, lead_source, project_type, city, status, converted_project_id")
-    .order("created_at", { ascending: false });
+  const [{ data: leads, error }, { data: myProfile }] = await Promise.all([
+    supabase
+      .from("leads")
+      .select("id, ref, client_name, lead_source, project_type, city, status, converted_project_id")
+      .order("created_at", { ascending: false }),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+  ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = leads ?? [];
   // Distinct from status === "QUALIFIED" (one stage in the pipeline,
@@ -41,16 +58,18 @@ export default async function LeadsPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New lead" description="Log an inbound enquiry.">
-        <AddLeadForm />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New lead" description="Log an inbound enquiry.">
+          <AddLeadForm />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Leads"
               description="Inbound enquiries, before a client or project exists — the start of the Project OS lead-to-activation pipeline."
-              actions={<ContextPanelTrigger size="sm">Add lead</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Add lead</ContextPanelTrigger> : undefined}
             />
 
             <div

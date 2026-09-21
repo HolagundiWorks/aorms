@@ -14,6 +14,18 @@ import { toSafeErrorMessage } from "../security/safe-error";
 
 export type SpecCatalogActionState = { error: string } | null;
 
+/**
+ * Roles with `has_capability('write')` (rank >= 40, or an explicit
+ * allow-list role) — same set web/lib/actions/clients.ts's WRITE_TIER_ROLES
+ * uses, mirrored here as an explicit, friendly-error check in the Server
+ * Action (defense in depth): the real authorization boundary is RLS
+ * (`spec_catalog_versions`/`spec_catalog_items: staff write`, migration
+ * 0085_write_policies_require_capability.sql). Added 2026-09-21 in the
+ * same sweep that found the matching UI gap on `/spec-catalog`'s "New
+ * version" trigger.
+ */
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export async function createSpecCatalogVersion(
   _prev: SpecCatalogActionState,
   formData: FormData,
@@ -24,6 +36,16 @@ export async function createSpecCatalogVersion(
   if (!label) return { error: "Label is required." };
 
   const supabase = await createClient();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  const { data: authProfile } = authUser
+    ? await supabase.from("profiles").select("role").eq("id", authUser.id).maybeSingle()
+    : { data: null };
+  if (!authProfile || !WRITE_TIER_ROLES.has(authProfile.role)) {
+    return { error: "You don't have permission to add spec catalogue versions — contact a firm owner or partner." };
+  }
+
   const { data: inserted, error } = await supabase
     .from("spec_catalog_versions")
     .insert({ label, description })
@@ -85,6 +107,15 @@ export async function addSpecCatalogItem(
   if (!item) return { error: "Item is required." };
 
   const supabase = await createClient();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  const { data: authProfile } = authUser
+    ? await supabase.from("profiles").select("role").eq("id", authUser.id).maybeSingle()
+    : { data: null };
+  if (!authProfile || !WRITE_TIER_ROLES.has(authProfile.role)) {
+    return { error: "You don't have permission to add catalogue items — contact a firm owner or partner." };
+  }
 
   const { data: last } = await supabase
     .from("spec_catalog_items")

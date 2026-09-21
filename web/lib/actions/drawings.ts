@@ -10,6 +10,17 @@ import { toSafeErrorMessage } from "../security/safe-error";
 export type { DrawingActionState };
 
 /**
+ * Roles with `has_capability('write')` (rank >= 40, or an explicit
+ * allow-list role) — same set web/lib/actions/clients.ts's WRITE_TIER_ROLES
+ * uses, mirrored here as an explicit, friendly-error check in the Server
+ * Action (defense in depth): the real authorization boundary is RLS
+ * (`drawings: staff write`, migration 0085_write_policies_require_capability.sql).
+ * Added 2026-09-21 in the same sweep that found the matching UI gap on
+ * `/drawings`' "Add drawing" trigger.
+ */
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
+/**
  * Port of backend/src/modules/drawing/upload.ts — the Phase 4 audit's own
  * flagged gap ("NOT ported here: the upload path itself... becomes a
  * Next.js Route Handler, not a table") and the reason drawings was the one
@@ -38,6 +49,16 @@ export async function uploadDrawing(
   formData: FormData,
 ): Promise<DrawingActionState> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: authProfile } = user
+    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  if (!authProfile || !WRITE_TIER_ROLES.has(authProfile.role)) {
+    return { error: "You don't have permission to add drawings — contact a firm owner or partner." };
+  }
+
   const result = await uploadDrawingCore(supabase, formData);
   if (!result) revalidatePath("/drawings");
   return result;

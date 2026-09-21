@@ -28,16 +28,31 @@ function formatInr(paise: number | null): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
 }
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and migration 0085_write_policies_require_capability.sql's "contracts:
+// staff write" policy). Gates the "Add contract" trigger the same way
+// Clients/Contractors/Projects already gate their own create triggers —
+// found missing here by a 2026-09-21 sweep of every /app/(app)/*/page.tsx
+// with an unguarded ContextPanelTrigger after the same class of bug was
+// confirmed live on Tasks/Leads/Letters.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function ContractsPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [{ data: contracts, error }, { data: projects }] = await Promise.all([
+  const [{ data: contracts, error }, { data: projects }, { data: myProfile }] = await Promise.all([
     supabase
       .from("contracts")
       .select("id, ref, title, party, contract_type, value_paise, status, project_offices(title)")
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const rows = contracts ?? [];
   const activeCount = rows.filter((c) => c.status === "ACTIVE").length;
@@ -45,16 +60,18 @@ export default async function ContractsPage() {
 
   return (
     <ContextPanelLayout>
-      <ContextPanel title="New contract" description="Add a contract or agreement record.">
-        <AddContractForm projects={projects ?? []} />
-      </ContextPanel>
+      {canWrite && (
+        <ContextPanel title="New contract" description="Add a contract or agreement record.">
+          <AddContractForm projects={projects ?? []} />
+        </ContextPanel>
+      )}
       <ContextPanelContent>
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Contracts"
               description="Contract / agreement register — clients, consultants, vendors."
-              actions={<ContextPanelTrigger size="sm">Add contract</ContextPanelTrigger>}
+              actions={canWrite ? <ContextPanelTrigger size="sm">Add contract</ContextPanelTrigger> : undefined}
             />
 
             <div

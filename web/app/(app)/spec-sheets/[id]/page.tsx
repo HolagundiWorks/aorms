@@ -15,6 +15,14 @@ import { GeneratePdfButton } from "../../../../components/aorms/GeneratePdfButto
 import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { generateSpecSheetPdf } from "../../../../lib/actions/spec-sheets";
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and migration 0085_write_policies_require_capability.sql's
+// "spec_items: staff write" policy). Gates the always-visible "Add item"
+// form the same way the parent /spec-sheets list page gates its own "Add
+// spec sheet" trigger — found missing here by the same 2026-09-21 sweep.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function SpecSheetDetailPage({
   params,
 }: {
@@ -22,15 +30,20 @@ export default async function SpecSheetDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [{ data: sheet, error: sheetError }, { data: items, error: itemsError }] = await Promise.all([
+  const [{ data: sheet, error: sheetError }, { data: items, error: itemsError }, { data: myProfile }] = await Promise.all([
     supabase.from("spec_sheets").select("id, ref, title, status, pdf_status").eq("id", id).maybeSingle(),
     supabase
       .from("spec_items")
       .select("id, category, item, make, specification, finish")
       .eq("spec_sheet_id", id)
       .order("sort_order"),
+    user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   if (sheetError) {
     return (
@@ -60,7 +73,7 @@ export default async function SpecSheetDetailPage({
           Items
         </h2>
 
-        <NewSpecItemForm specSheetId={sheet.id} />
+        {canWrite && <NewSpecItemForm specSheetId={sheet.id} />}
 
         {itemsError ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

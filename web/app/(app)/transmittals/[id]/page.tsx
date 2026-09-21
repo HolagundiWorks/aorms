@@ -7,9 +7,25 @@ import { RemoveLineItemButton } from "../../../../components/aorms/RemoveLineIte
 import { GeneratePdfButton } from "../../../../components/aorms/GeneratePdfButton";
 import { generateTransmittalPdf, removeTransmittalItem } from "../../../../lib/actions/transmittals";
 
+// Roles with has_capability('write') (rank >= 40, or an explicit
+// allow-list role — see web/supabase/migrations/0002_capability_helper.sql
+// and migration 0085_write_policies_require_capability.sql's
+// "transmittal_items: staff write" policy). Gates the always-visible "Add
+// document" form the same way the parent /transmittals list page gates
+// its own "Add transmittal" trigger — found missing here by the same
+// 2026-09-21 sweep.
+const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
+
 export default async function TransmittalDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: myProfile } = user
+    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
   const { data: transmittal, error: transmittalError } = await supabase
     .from("transmittals")
@@ -62,7 +78,7 @@ export default async function TransmittalDetailPage({ params }: { params: Promis
         <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
           Documents
         </h2>
-        <NewTransmittalItemForm transmittalId={transmittal.id} drawings={drawings ?? []} />
+        {canWrite && <NewTransmittalItemForm transmittalId={transmittal.id} drawings={drawings ?? []} />}
 
         {itemsError ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
