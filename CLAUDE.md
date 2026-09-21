@@ -554,6 +554,25 @@ branch before starting anything that could overlap — not just at hand-off.
   unaffected throughout, still the two-project split this repo has used
   since 2026-09-07. See [ROADMAP.md](docs/esti/ROADMAP.md)'s
   own dated entry for the full account.
+- **Stale-doc correction (2026-09-21): the `aorms-web` ref above
+  (`fyedovpqjwbslrughwdv`) is stale.** While applying migration `0084`
+  (VIEWER write-escalation fix on `project_offices`, found by live QA
+  against production aorms.in), a Management API `GET
+  /v1/projects` call with a fresh personal access token showed the
+  project actually named `aorms-web` now has ref **`aenacjqhmjlppmwodpar`**
+  (`ap-south-1`, created 2026-09-20T13:48:02Z) — one day before this
+  correction, and with no session or doc in this repo recording a second
+  rebuild. Confirmed this is genuinely the live project, not a
+  same-named decoy: it has `public.project_offices` with exactly the
+  expected post-multitenancy schema (`firm_id`, `current_firm_id()`,
+  `is_office_staff()`), and the known-vulnerable `staff create`/`staff
+  update` policies were present pre-fix and verifiably changed to
+  `has_capability('write')` post-fix via the same API. `aorms-platform`
+  (`qbgbnhthchhbammzeebg`) is unaffected and unchanged. Whatever produced
+  this second rebuild is untracked — if you're the one who did it,
+  please add the actual dated account here the way 2026-09-09's rebuild
+  was documented above; until then, treat `aenacjqhmjlppmwodpar` as the
+  live ref and the one above as historical only.
 - **Supabase migrations**: write a new numbered `.sql` file under
   `web/supabase/migrations/`, then apply it via the Supabase Management API
   (`POST https://api.supabase.com/v1/projects/{ref}/database/query`, authed
