@@ -13,6 +13,7 @@ import { PageHeader } from "../../../components/aorms/PageHeader";
 import { IdentityPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
 import { portalUrl } from "../../../lib/platform/subdomains";
 import { getFirmRoleForStudio } from "../../../lib/platform/firm-studio";
+import { ROLE_LABEL } from "../../../lib/auth/rank";
 
 // 2026-09-13: PRO is no longer free/automatic at 100 hours — see
 // migration 0018's header. It's now something a Studio grants to one of
@@ -368,8 +369,19 @@ export default async function IdentityPage() {
                                 {studio.public_id}
                               </span>
                               <div>
+                                {/* QA finding (2026-09-21): this Tag showed the
+                                    raw `profile_firm_memberships.role` enum
+                                    value ("OWNER") while the Office Hub header
+                                    shows the same value through ROLE_LABEL
+                                    ("Administrator") — same underlying B3 role
+                                    resolution above, just missing the human-
+                                    readable mapping Office Hub already applies
+                                    (lib/auth/rank.ts). Falls back to the raw
+                                    value only for a role this table doesn't
+                                    know (shouldn't happen — ROLE_LABEL is
+                                    exhaustive over every app_role). */}
                                 <Tag type={displayRole === "OWNER" ? "purple" : "gray"} size="sm">
-                                  {displayRole}
+                                  {ROLE_LABEL[displayRole] ?? displayRole}
                                 </Tag>
                               </div>
                             </div>

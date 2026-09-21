@@ -358,6 +358,52 @@ body {
   margin-block-start: 3rem;
 }
 
+// AORMS Platform portal nav unreachable below Carbon's `lg` breakpoint
+// (QA finding, 2026-09-21 — "Identity Portal's own nav is unreachable by
+// real users"). `HeaderNavigation` (PlatformShellHeader.tsx — the only
+// place this app uses it, across all three Platform portals) renders
+// Carbon's `.cds--header__nav`, which @carbon/styles' own ui-shell/
+// header/_header.scss sets `display: none` by default and only flips to
+// `display: block` at Carbon's own `lg` breakpoint (66rem / 1056px).
+// Confirmed via `document.querySelectorAll('nav a')`: the nav and its
+// links exist in the DOM at both 1024px and 375px, `offsetParent ===
+// null` at both — 1024px is itself below Carbon's 1056px `lg` threshold,
+// so even a "desktop" viewport hid it, and there was no
+// `HeaderMenuButton`/`SideNav` fallback anywhere in PlatformShellHeader.tsx
+// to reach it below that width either (unlike Office Hub's own
+// AppShell.tsx, which pairs a collapsible `HeaderMenuButton` with a
+// `SideNav` for exactly this). Not adopting that same heavier pattern
+// here on purpose: these three portals' own nav is short (2-11 links,
+// most SysDeX ones `superAdminOnly`), `app/(platform)/layout.tsx` already
+// documents "no SideNav here" as a deliberate simplicity choice for this
+// portal group, and Carbon's own `SideNav` defaults to a *permanent*
+// 256px sidebar above `lg` (`isPersistent` defaults `true`) — adding one
+// here would visually duplicate the horizontal nav these portals already
+// render correctly above 1056px, not just fix the gap below it. Simplest
+// correct fix: keep `.cds--header__nav` visible at every width instead.
+// `min-inline-size: 0` lets it actually shrink inside the header's flex
+// row instead of forcing the whole header to overflow; `overflow-x: auto`
+// gives SysDeX's own longer link list a horizontal scrollbar on genuinely
+// narrow viewports instead of wrapping the header's fixed 48px height.
+.cds--header__nav {
+  display: block;
+  min-inline-size: 0;
+  overflow-x: auto;
+}
+
+// Give the now-always-visible nav more breathing room on genuinely narrow
+// phones (~480px and below) by dropping the purely decorative portal
+// tagline (PlatformShellHeader.tsx) — it was competing with the
+// functional Identity/Licences links for the same fixed-height header
+// row, pushing more of the nav behind the scroll fix above than
+// necessary. Portal name + nav + sign-in/greeting stay, since those are
+// either functional or the header's own identity, not decoration.
+@media (max-width: 30rem) {
+  .aorms-platform-tagline {
+    display: none;
+  }
+}
+
 // Blog post prose (app/blog/[slug]/page.tsx, 2026-09-10) — `marked`-rendered
 // markdown has no styling of its own (plain h1-h6/p/ul/a/strong/em/code),
 // and Carbon's own type classes aren't applied automatically to raw HTML

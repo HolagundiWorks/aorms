@@ -18,6 +18,8 @@ import { AddContactForm } from "../../../../components/aorms/platform/AddContact
 import { ContactRow } from "../../../../components/aorms/platform/ContactRow";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { IdentityPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
+import { getFirmRoleForStudio } from "../../../../lib/platform/firm-studio";
+import { ROLE_LABEL } from "../../../../lib/auth/rank";
 
 type AccountEmbed = { id: string; full_name: string; public_id: string } | null;
 
@@ -125,6 +127,34 @@ export default async function StudioDetailPage({
 
   const proAssignedCount = (memberships ?? []).filter((m) => !!m.pro_assigned_at).length;
 
+  // QA finding (2026-09-21) — this table's read-only Role tag (below) used
+  // to show `m.role` straight off `studio_memberships` unconditionally:
+  // the coarse Platform-side OWNER (studio creator, permanent)/MEMBER (no
+  // promotion path) distinction — see getFirmRoleForStudio()'s own header
+  // for why that's a genuinely different concept from a person's real
+  // Office Hub firm role. identity/page.tsx's Studios list already
+  // resolves and prefers the Office Hub firm role for exactly this kind
+  // of read-only display (the B3 fix, 2026-09-20) — this page, a sibling
+  // "same fact, different screen" display, was never updated to match,
+  // so the same account/studio could show e.g. "OWNER" (Office Hub role,
+  // via ROLE_LABEL "Administrator") on /identity and "MEMBER" (raw
+  // Platform role) here. Resolved the same way, per row, and falls back
+  // to the Platform role only when no Office Hub link resolves. Does NOT
+  // touch the OWNER-only editable path (`MembershipRoleSelect` below) —
+  // that dropdown mutates the real `studio_memberships.role` column
+  // directly and must keep showing/editing that actual value, not a
+  // different concept it can't write to.
+  const firmRoleByMembershipId = new Map(
+    await Promise.all(
+      (memberships ?? []).map(async (m) => {
+        const acc = (Array.isArray(m.accounts) ? m.accounts[0] : m.accounts) as AccountEmbed;
+        if (!acc?.public_id) return [m.id, null] as const;
+        const firmRole = await getFirmRoleForStudio(studio.public_id, acc.public_id);
+        return [m.id, firmRole] as const;
+      }),
+    ),
+  );
+
   const isOwner = (memberships ?? []).some(
     (m) => m.account_id === currentAccountId && m.role === "OWNER" && m.status === "ACTIVE",
   );
@@ -189,9 +219,14 @@ export default async function StudioDetailPage({
                         {isOwner ? (
                           <MembershipRoleSelect membershipId={m.id} role={m.role} />
                         ) : (
-                          <Tag type={m.role === "OWNER" ? "purple" : "gray"} size="sm">
-                            {m.role}
-                          </Tag>
+                          (() => {
+                            const displayRole = firmRoleByMembershipId.get(m.id) ?? m.role;
+                            return (
+                              <Tag type={displayRole === "OWNER" ? "purple" : "gray"} size="sm">
+                                {ROLE_LABEL[displayRole] ?? displayRole}
+                              </Tag>
+                            );
+                          })()
                         )}
                       </TableCell>
                       <TableCell>

@@ -57,8 +57,14 @@ export async function PlatformShellHeader({
       <HeaderName href={homeHref} prefix="">
         {portalName}
       </HeaderName>
+      {/* aorms-platform-tagline: hidden below ~480px (globals.scss) once
+          the nav-visibility fix below made `.cds--header__nav` compete for
+          the same header row on narrow phones — this purely decorative
+          text was crowding the functional Identity/Licences links into a
+          narrower, more-scrolled nav than necessary. Never hidden above
+          that width. */}
       <span
-        className="cds--type-helper-text-01"
+        className="cds--type-helper-text-01 aorms-platform-tagline"
         style={{ color: "var(--cds-text-secondary)", marginLeft: "0.75rem", whiteSpace: "nowrap" }}
       >
         {tagline}
