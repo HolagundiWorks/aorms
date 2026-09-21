@@ -86,11 +86,35 @@ export async function createLead(_prev: ActionState, formData: FormData): Promis
 export async function setLeadStatus(leadId: string, status: LeadStatus): Promise<{ error?: string }> {
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: authProfile } = user
+    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  if (!authProfile || !WRITE_TIER_ROLES.has(authProfile.role)) {
+    return { error: "You don't have permission to change lead status — contact a firm owner or partner." };
+  }
+
   const { data: before } = await supabase.from("leads").select("status, converted_project_id").eq("id", leadId).maybeSingle();
   if (before?.converted_project_id) return { error: "A converted lead cannot change status." };
 
-  const { error } = await supabase.from("leads").update({ status, updated_at: new Date().toISOString() }).eq("id", leadId);
+  // .select("id") + checking the returned rows, not just `error`: a
+  // VIEWER-role update that RLS blocks matches zero rows and returns
+  // `error: null` (Supabase/PostgREST's normal behavior for an RLS-denied
+  // UPDATE, not a thrown error) — without this check the action reports
+  // success while silently changing nothing, exactly the "dropdown
+  // reverts on reload with no error shown" bug found by live QA
+  // 2026-09-21. The WRITE_TIER_ROLES check above already covers the
+  // known VIEWER case with a clear message; this is the backstop for any
+  // other RLS-denied path (e.g. a stale/cross-firm lead id).
+  const { data: updated, error } = await supabase
+    .from("leads")
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq("id", leadId)
+    .select("id");
   if (error) return { error: toSafeErrorMessage(error) };
+  if (!updated || updated.length === 0) return { error: "Could not update this lead's status." };
 
   await supabase.rpc("write_audit", {
     p_entity: "lead",

@@ -400,7 +400,7 @@ body {
 // SysDeX's own longer link list.
 .cds--header__nav {
   display: block;
-  min-inline-size: 7.5rem;
+  min-inline-size: 11rem;
   overflow-x: auto;
 }
 
@@ -423,6 +423,17 @@ body {
 // the row, not the tagline (already hidden by this same rule, yet the
 // nav was still squeezed). Kept as its own rule since it's a distinct
 // element with its own justification, not merged into the block below.
+//
+// **Follow-up, same date:** with the greeting hidden, "Identity" +
+// "Licences" fit and are clickable (confirmed live, re-tested with a
+// screenshot and an actual click-through to /licences) — but at exactly
+// 375px the tail of "Licences" sits flush against the avatar circle with
+// no breathing room, since `.cds--header__nav`'s `min-inline-size: 7.5rem`
+// (120px) is narrower than both labels' natural combined width (~150-
+// 180px) once you also count the divider under the active tab. Bumped to
+// `11rem` (176px) below, comfortably covering both link labels on a
+// 375px-wide phone without needing the `overflow-x: auto` scroll at all
+// in the common case (it stays as a fallback for SysDeX's longer list).
 @media (max-width: 30rem) {
   .aorms-platform-tagline {
     display: none;
