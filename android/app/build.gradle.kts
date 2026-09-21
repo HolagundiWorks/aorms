@@ -21,8 +21,8 @@ android {
         // Points at the same aorms-web project the Next.js app uses, so
         // every table/RLS policy this session built is reused as-is —
         // no separate backend for this app at all.
-        buildConfigField("String", "SUPABASE_URL", "\"https://fyedovpqjwbslrughwdv.supabase.co\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"sb_publishable_ZA97ShzbvL6xLozs0qpBvA_ay7VlW9x\"")
+        buildConfigField("String", "SUPABASE_URL", "\"https://aenacjqhmjlppmwodpar.supabase.co\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlbmFjanFobWpscHBtd29kcGFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTIwODIsImV4cCI6MjEwNTQ4ODA4Mn0.0YGtqKcXNaS7w-4jc5HSWt3IDHSDRM3outgUqiBVREI\"")
     }
 
     buildTypes {

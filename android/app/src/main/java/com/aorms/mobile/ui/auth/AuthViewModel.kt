@@ -9,6 +9,7 @@ import com.aorms.mobile.data.Supa
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.exceptions.HttpRequestException
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -33,6 +34,8 @@ class AuthViewModel : ViewModel() {
                     this.email = this@AuthViewModel.email
                     this.password = this@AuthViewModel.password
                 }
+            } catch (e: HttpRequestException) {
+                error = "Can't reach the server — check your connection"
             } catch (e: Exception) {
                 error = "Invalid login credentials"
             } finally {
