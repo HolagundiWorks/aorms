@@ -38,6 +38,14 @@ data class NewTask(
     val status: String = "TODO",
     val priority: String = "MEDIUM",
     @SerialName("due_date") val dueDate: String? = null,
+    // Bug fix (2026-09-21): the New Task sheet is a quick-capture flow with
+    // no assignee picker, so a task created here always ended up with a
+    // null assignee_id — invisible from the creator's own "my tasks" query
+    // (Repository.myTasks filters `assignee_id = <current user>`), even
+    // though the row was really inserted (confirmed via the web app's
+    // office-wide /tasks table). Default to self-assignment, same as any
+    // quick-add flow would reasonably do until a real assignee picker exists.
+    @SerialName("assignee_id") val assigneeId: String? = null,
 )
 
 @Serializable

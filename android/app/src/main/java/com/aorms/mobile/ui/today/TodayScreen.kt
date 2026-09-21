@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -151,7 +151,8 @@ fun TodayScreen(viewModel: TodayViewModel) {
     if (viewModel.showNewTask) {
         NewTaskSheet(
             projects = viewModel.projects,
-            onDismiss = { viewModel.showNewTask = false },
+            error = viewModel.error,
+            onDismiss = { viewModel.showNewTask = false; viewModel.error = null },
             onCreate = { title, projectId, priority, dueDate -> viewModel.createTask(title, projectId, priority, dueDate) },
         )
     }
@@ -221,7 +222,22 @@ private val KPI_LABELS = mapOf(
  * separate, already-documented Kotlin/Compose-BOM version-mismatch
  * compiler bug in this project (see the commit that first worked around
  * it) — computing an explicit `Dp` width up front sidesteps both issues
- * without touching the project's pinned dependency versions. */
+ * without touching the project's pinned dependency versions.
+ *
+ * Fixed `Modifier.height(TILE_HEIGHT)` instead of `Modifier.aspectRatio(1.6f)`
+ * (2026-09-21 fix, real bug found live on device: in landscape the FAB
+ * covered the "Blocked tasks" tile's expand chevron). Root cause: an
+ * aspect-ratio-derived height scales with tile *width*, and landscape's
+ * much wider `tileWidth` (half the screen width, which is now the long
+ * edge) blew the first row's tile height up to ~2x its portrait size —
+ * tall enough that the first KPI row extended into the FAB's fixed
+ * bottom-right position within this screen's own (short, landscape)
+ * content area, without needing to scroll. A fixed height is independent
+ * of width, so it doesn't balloon in landscape, and it keeps portrait's
+ * existing look (chosen close to portrait's old aspect-ratio-derived
+ * height). */
+private val TILE_HEIGHT = 112.dp
+
 @Composable
 private fun PulseGrid(viewModel: TodayViewModel) {
     val kpis = listOf(
@@ -244,7 +260,7 @@ private fun PulseGrid(viewModel: TodayViewModel) {
                             modifier = Modifier
                                 .width(tileWidth)
                                 .padding(vertical = 6.dp)
-                                .aspectRatio(1.6f)
+                                .height(TILE_HEIGHT)
                                 .clickable { viewModel.toggleKpi(kpi.key) },
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                             border = if (selected) BorderStroke(2.dp, kpi.accent) else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),

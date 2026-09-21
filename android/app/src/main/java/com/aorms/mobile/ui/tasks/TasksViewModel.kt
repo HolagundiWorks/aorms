@@ -44,9 +44,12 @@ class TasksViewModel : ViewModel() {
             error = "Title is required."
             return
         }
+        val userId = Supa.auth.currentUserOrNull()?.id
         viewModelScope.launch {
             runCatching {
-                Repository.createTask(NewTask(title = title, projectId = projectId, priority = priority, dueDate = dueDate))
+                Repository.createTask(
+                    NewTask(title = title, projectId = projectId, priority = priority, dueDate = dueDate, assigneeId = userId),
+                )
             }.onSuccess {
                 showNewTask = false
             }.onFailure {

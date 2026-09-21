@@ -121,7 +121,8 @@ fun SiteReportsScreen(viewModel: SiteReportsViewModel) {
         NewSiteReportSheet(
             tab = viewModel.tab,
             projects = viewModel.projects,
-            onDismiss = { viewModel.showNewSheet = false },
+            error = viewModel.error,
+            onDismiss = { viewModel.showNewSheet = false; viewModel.error = null },
             onCreateProgress = { pid, start, end, narrative, pct -> viewModel.createProgressReport(pid, start, end, narrative, pct) },
             onCreateSnag = { pid, loc, trade, desc -> viewModel.createSnag(pid, loc, trade, desc) },
             onCreateInstruction = { pid, subject, body -> viewModel.createInstruction(pid, subject, body) },
@@ -129,11 +130,19 @@ fun SiteReportsScreen(viewModel: SiteReportsViewModel) {
     }
 }
 
+/** [error] renders INSIDE this sheet's own Column, not via the parent Scaffold's
+ * SnackbarHost (2026-09-21 fix, same root cause/fix as ui.tasks.NewTaskSheet /
+ * ui.leads.NewLeadSheet): a `ModalBottomSheet` renders in its own separate
+ * window/surface above the Scaffold, so a Snackbar hosted in the Scaffold is
+ * always covered and invisible while the sheet is open — this one surfaces via
+ * create-failure errors (e.g. network) rather than blank-field validation, but
+ * it's the identical architectural bug. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NewSiteReportSheet(
     tab: Int,
     projects: List<ProjectOption>,
+    error: String? = null,
     onDismiss: () -> Unit,
     onCreateProgress: (String, String, String, String?, Int?) -> Unit,
     onCreateSnag: (String, String?, String?, String) -> Unit,
@@ -165,6 +174,14 @@ private fun NewSiteReportSheet(
                 else -> "New site instruction"
             }
             Text(sheetTitle, style = MaterialTheme.typography.titleLarge)
+            error?.let {
+                Text(
+                    it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
 
             ExposedDropdownMenuBox(
                 expanded = projectExpanded,

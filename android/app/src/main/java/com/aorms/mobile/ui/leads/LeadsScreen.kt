@@ -82,15 +82,22 @@ fun LeadsScreen(viewModel: LeadsViewModel) {
 
     if (viewModel.showNewLead) {
         NewLeadSheet(
-            onDismiss = { viewModel.showNewLead = false },
+            error = viewModel.error,
+            onDismiss = { viewModel.showNewLead = false; viewModel.error = null },
             onCreate = { name, source, city, phone -> viewModel.createLead(name, source, city, phone) },
         )
     }
 }
 
+/** [error] renders INSIDE this sheet's own Column, not via the parent Scaffold's
+ * SnackbarHost (2026-09-21 fix, same root cause/fix as ui.tasks.NewTaskSheet):
+ * a `ModalBottomSheet` renders in its own separate window/surface above the
+ * Scaffold, so a Snackbar hosted in the Scaffold is always covered and
+ * invisible while the sheet is open. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NewLeadSheet(
+    error: String? = null,
     onDismiss: () -> Unit,
     onCreate: (String, String, String?, String?) -> Unit,
 ) {
@@ -106,6 +113,14 @@ private fun NewLeadSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, shape = RectangleShape) {
         Column(modifier = Modifier.padding(20.dp).fillMaxWidth()) {
             Text("New lead", style = MaterialTheme.typography.titleLarge)
+            error?.let {
+                Text(
+                    it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
             OutlinedTextField(
                 value = clientName,
                 onValueChange = { clientName = it },

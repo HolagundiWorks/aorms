@@ -101,17 +101,24 @@ fun TasksScreen(viewModel: TasksViewModel) {
     if (viewModel.showNewTask) {
         NewTaskSheet(
             projects = viewModel.projects,
-            onDismiss = { viewModel.showNewTask = false },
+            error = viewModel.error,
+            onDismiss = { viewModel.showNewTask = false; viewModel.error = null },
             onCreate = { title, projectId, priority, dueDate -> viewModel.createTask(title, projectId, priority, dueDate) },
         )
     }
 }
 
-/** Shared with ui.today.TodayScreen's own "+ Add task" quick action — same create-task form, one definition. */
+/** Shared with ui.today.TodayScreen's own "+ Add task" quick action — same create-task form, one definition.
+ *
+ * [error] renders INSIDE this sheet's own Column, not via the parent Scaffold's
+ * SnackbarHost (2026-09-21 fix, real bug found live on device): a `ModalBottomSheet`
+ * renders in its own separate window/surface above the Scaffold, so a Snackbar
+ * hosted in the Scaffold is always covered and invisible while the sheet is open. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewTaskSheet(
     projects: List<ProjectOption>,
+    error: String? = null,
     onDismiss: () -> Unit,
     onCreate: (String, String?, String, String?) -> Unit,
 ) {
@@ -128,6 +135,14 @@ fun NewTaskSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, shape = RectangleShape) {
         Column(modifier = Modifier.padding(20.dp).fillMaxWidth()) {
             Text("New task", style = MaterialTheme.typography.titleLarge)
+            error?.let {
+                Text(
+                    it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
