@@ -6256,6 +6256,36 @@ submission. No code changes were needed this pass; this closes out the
 verification the fix always needed but couldn't get until the build
 environment existed.
 
+### QA re-verification of Office Expenses/Reconciliation + Android fix — one new bug found and fixed (2026-09-25)
+
+Re-ran QA against both features above the day after they shipped, to
+confirm nothing regressed. **Web (Office Expenses / Cash Book +
+Reconciliation): all testable checks passed** — `/accounts` still loads,
+the Amount-field append bug stayed fixed, the full DRAFT→SUBMITTED→
+AUDITED→CLOSED lifecycle and the Reject path both still transition
+correctly, the Cash Book tab filter still works, and reconcile CSV
+upload/parse still works (the known Label-clearing cosmetic bug on a
+failed submission was re-confirmed unchanged, not worse — still not a
+data-loss issue, still not fixed, still the documented follow-up from
+the 2026-09-24 entry above). VIEWER-role write-blocking couldn't be
+re-tested (no credentials available this pass) — flagged as blocked,
+not guessed at. **Android** couldn't be re-verified either: the device
+disconnected between session start and the actual test steps — a
+connectivity gap, not a finding, and not treated as one.
+
+**One new, real bug found**: the "Cash total" KPI tile on `/accounts`
+summed every CASH-payment-method expense regardless of status, while
+the adjacent "Closed total" tile correctly filters to `status ===
+"CLOSED"` — so a rejected (or still-draft) cash expense inflated the
+tile as if that cash had actually gone out. Caught live: after
+rejecting two cash expenses (₹500 + ₹750, neither ever paid), "Cash
+total" showed ₹1,250 instead of ₹0. Fixed same pass in
+`web/app/(app)/accounts/page.tsx` — `cashTotalPaise` now filters to
+`status === "CLOSED"`, mirroring `closedTotalPaise`'s existing filter
+exactly. Re-verified live against a local dev server signed in as the
+same `demo@aorms.in` account that produced the bad reading: with both
+cash expenses still REJECTED, "Cash total" now correctly reads ₹0.
+
 ---
 
 ## Support & questions
@@ -6281,4 +6311,4 @@ environment existed.
 
 ---
 
-**Last updated:** 2026-09-24
+**Last updated:** 2026-09-25

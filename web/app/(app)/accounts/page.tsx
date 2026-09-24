@@ -163,7 +163,7 @@ export default async function AccountsPage() {
 
   const closedTotalPaise = rows.filter((r) => r.status === "CLOSED").reduce((sum, r) => sum + r.amount_paise, 0);
   const pendingRecoveryCount = rows.filter((r) => r.recovery_status === "PENDING").length;
-  const cashTotalPaise = cashRows.reduce((sum, r) => sum + r.amount_paise, 0);
+  const cashTotalPaise = cashRows.filter((r) => r.status === "CLOSED").reduce((sum, r) => sum + r.amount_paise, 0);
 
   return (
     <ContextPanelLayout>
