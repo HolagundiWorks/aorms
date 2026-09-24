@@ -6225,6 +6225,37 @@ now" section's existing "reconciliation, cash book" wording (above, under
 Invoicing & Finance) needed no text change, since it now correctly
 describes reality for the first time.
 
+### Android Site Reports blank-project validation — fix verified live, closing out a build stuck across multiple sessions (2026-09-24)
+
+Commit `df94aa2e` (Site Reports create buttons silently no-op with no
+project selected) had been fixed in source days ago but never actually
+verified on a real device — every prior attempt hit a structural
+blocker: no JDK and no Android SDK installed anywhere on this machine,
+across multiple sessions/subagents. A QA pass this session reproduced
+the still-present bug on a real device and correctly diagnosed it as a
+**stale APK** (`lastUpdateTime` three days before the fix commit), not a
+code defect — the fix had simply never been built and installed.
+
+With the user's explicit direct consent ("yes, download it"), set up a
+full Android build environment from scratch on this machine: downloaded
+and extracted JDK 17.0.20.1 (a prior session's extraction turned out to
+be corrupted — missing `jlink`/`jar`/etc — re-downloaded clean), and
+Android cmdline-tools with `platform-tools`, `platforms;android-36`,
+`build-tools;36.0.0`. Pointed `android/local.properties` (gitignored,
+per-machine) at the new SDK, built a debug APK, uninstalled the stale
+app first (different debug keystores across past builds caused an
+`INSTALL_FAILED_UPDATE_INCOMPATIBLE` signature mismatch otherwise), and
+installed the fresh build.
+
+Verified live end-to-end: signed in as `demo@aorms.in` on-device, opened
+Site → each of the three sub-tabs (Progress, Snags, Instructions) in
+turn, opened the FAB's New-item sheet, left **Project** unselected, and
+submitted. All three now show **"Project is required."** inline instead
+of the old silent no-op — confirmed with a screenshot after each
+submission. No code changes were needed this pass; this closes out the
+verification the fix always needed but couldn't get until the build
+environment existed.
+
 ---
 
 ## Support & questions
@@ -6250,4 +6281,4 @@ describes reality for the first time.
 
 ---
 
-**Last updated:** 2026-09-20
+**Last updated:** 2026-09-24
