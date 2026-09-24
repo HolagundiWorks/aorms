@@ -804,16 +804,19 @@ GST rates, SAC codes)
 - `invoices` — GST invoicing (`invoice:manage`/`invoice:delete`); `reconcile` —
   financial reconciliation (OLD `backend`/`worker` stack, dead code — see
   "Dev / verify loop" above); `purchaseOrders` — PO management. **Also now
-  live in `web/`** (2026-09-24, faithful port of this same tRPC namespace's
-  logic plus `worker/esti_worker/jobs/reconcile.py`'s matching algorithm —
-  ROADMAP.md's own dated History entry had claimed this was already live
-  in `web/` when it wasn't; the gap is now closed): schema
-  `web/supabase/migrations/0087_reconcile.sql`, matching logic
+  live in `web/`, fully live-verified** (2026-09-24, faithful port of this
+  same tRPC namespace's logic plus `worker/esti_worker/jobs/reconcile.py`'s
+  matching algorithm — ROADMAP.md's own dated History entry had claimed
+  this was already live in `web/` when it wasn't; the gap is now closed):
+  schema `web/supabase/migrations/0087_reconcile.sql`, matching logic
   `web/lib/reconcile/match.ts`, Server Actions `web/lib/actions/
   reconcile.ts`, UI `web/app/(app)/reconcile/page.tsx` +
-  `web/app/(app)/reconcile/[id]/page.tsx`. See ROADMAP.md's dated entry
-  for what's verified (build-clean) vs. not yet (no live Supabase apply,
-  no live browser check).
+  `web/app/(app)/reconcile/[id]/page.tsx`. Migration applied and RLS
+  policies confirmed against the live `aorms-web` project, the matching
+  algorithm's `toPaise`/`matchLine` logic verified via 16 standalone test
+  cases, and a live browser QA pass run the same day — see ROADMAP.md's
+  dated entry for the full account (incl. two minor bugs found: one fixed
+  same pass, one left as a documented low-priority follow-up).
 - `permits` — building permit tracking; `approvals` — internal approval workflows
 - `transmittals` — document transmittals; `letters` / `contracts` — office
   documents (both exported from `backend/src/modules/office/router.ts`)
@@ -931,17 +934,22 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
   freeform canvas items, layers, discussion; `ProjectMoodboard.tsx`)
 - `accounts` / `expenses` — office cash book and project costing expenses
   (OLD `backend`/`worker` stack, dead code — see "Dev / verify loop"
-  above). **Also now live in `web/`** (2026-09-24, faithful port of this
-  same tRPC namespace's business logic — ROADMAP.md's own dated History
-  entry had claimed this was already live in `web/` when it wasn't; the
-  gap is now closed): schema `web/supabase/migrations/
+  above). **Also now live in `web/`, fully live-verified** (2026-09-24,
+  faithful port of this same tRPC namespace's business logic — ROADMAP.md's
+  own dated History entry had claimed this was already live in `web/` when
+  it wasn't; the gap is now closed): schema `web/supabase/migrations/
   0086_accounts_and_expenses.sql` (chart-of-accounts `accounts` +
   DRAFT→SUBMITTED→AUDITED/REJECTED→CLOSED `expenses`, billable-recovery
   sub-state), Server Actions `web/lib/actions/expenses.ts`, receipt
   upload `web/lib/receipts/upload.ts`, UI `web/app/(app)/accounts/
-  page.tsx` (Office Expenses / Cash Book tabs). See ROADMAP.md's dated
-  entry for what's verified (build-clean) vs. not yet (no live Supabase
-  apply, no live browser check).
+  page.tsx` (Office Expenses / Cash Book tabs). Migrations applied and
+  RLS policies confirmed against the live `aorms-web` project, receipt
+  buckets created, and a full expense lifecycle (create → submit → audit
+  → close → mark recovered) click-tested live the same day, alongside a
+  broader QA pass (VIEWER correctly blocked, cross-firm isolation held) —
+  see ROADMAP.md's dated entry for the full account (incl. two minor bugs
+  found: one fixed same pass, one left as a documented low-priority
+  follow-up).
 - `system` — release metadata (owner-only)
 - `marketing` — landing visit counter
 - `specCatalog` — specification material catalogue (Knowledge Bank)
