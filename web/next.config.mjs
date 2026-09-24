@@ -92,6 +92,27 @@ const nextConfig = {
     remotePatterns: [{ protocol: "https", hostname: "*.supabase.co" }],
   },
   experimental: {
+    // 2026-09-24 PageSpeed audit ("Reduce unused JavaScript" — the landing
+    // page ships the entire `@carbon/react` barrel, since that package's
+    // own `package.json` marks `es/index.js`/`lib/index.js` as having side
+    // effects, which blocks webpack tree-shaking at that file). Two fixes
+    // were tried and both broke the real production build, so neither
+    // shipped — noted here so this isn't silently re-attempted later
+    // without re-checking:
+    // 1. `optimizePackageImports: ["@carbon/react"]` here — `next build
+    //    --webpack` failed prerendering `/admin/studios` with "Could not
+    //    find the module ... in the React Server Consumer Manifest," a
+    //    Next/webpack bug in how that option rewrites this package's
+    //    Server-Component Table primitives (`Table`/`TableHead`/
+    //    `TableRow`/...) across the RSC boundary.
+    // 2. Deep component-file imports (`@carbon/react/es/components/
+    //    Button/Button`, etc.) in the landing page's own files instead of
+    //    the barrel, avoiding the Table bug entirely — broke a *different*
+    //    way: `next build` failed page-data collection for `/` with
+    //    `TypeError: (0, x.createContext) is not a function`, a dual-
+    //    package/interop hazard from bypassing the package's own `es`
+    //    entry point. Confirmed via the actual `next build --webpack`
+    //    command CLAUDE.md requires, not assumed from source review.
     // Server Actions default to a 1MB body — too small for the drawings
     // upload Server Action (DRAWING_MAX_BYTES is 25MB, matching the old
     // backend's Fastify multipart route). Matches that cap exactly rather

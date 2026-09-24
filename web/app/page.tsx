@@ -128,7 +128,14 @@ export default async function LandingPage() {
     <MotionRoot>
     <div style={{ minHeight: "100vh", background: "var(--cds-background)", color: "var(--cds-text-primary)" }}>
       <LandingHeader />
-      <div style={{ maxWidth: PAGE_MAX, margin: "0 auto", padding: "0 1rem" }}>
+      {/* PageSpeed Insights accessibility audit (2026-09-23 report):
+          "Document does not have a main landmark" — this page previously had
+          no <main> at all, just a plain <div> for every section between the
+          header and footer. Wraps exactly the primary-content sections
+          (everything between LandingHeader and the page's own <footer> below,
+          which is already its own landmark) — no visual/layout change, this
+          element carries no styling of its own. */}
+      <main style={{ maxWidth: PAGE_MAX, margin: "0 auto", padding: "0 1rem" }}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
 
         {/* 1. Hero (spec §4-5) — visual stacked full-width below the
@@ -830,13 +837,20 @@ export default async function LandingPage() {
           </MotionReveal>
         </section>
 
-        {/* 15. Footer (spec §28) — 5 columns: Product/Solutions/
-            Resources/Company/Account. */}
-        <footer style={{ padding: "3rem 0", borderTop: "1px solid var(--cds-border-subtle)" }}>
+      </main>
+
+      {/* 15. Footer (spec §28) — 5 columns: Product/Solutions/
+          Resources/Company/Account. Its own landmark, deliberately outside
+          <main> above (kept the same maxWidth wrapper style so this is a
+          pure landmark split, no visual change). */}
+      <footer style={{ maxWidth: PAGE_MAX, margin: "0 auto", padding: "3rem 1rem", borderTop: "1px solid var(--cds-border-subtle)" }}>
           <Grid>
             <Column sm={4} md={8} lg={4} style={{ marginBottom: "1.5rem" }}>
-              {/* Plain <img>, not next/image — a static marketing asset, no optimization needed */}
-              <img src="/aorms-logo.png" alt="AORMS" style={{ height: "24px", width: "auto" }} />
+              {/* Plain <img>, not next/image — a static marketing asset, no
+                  optimization needed. Explicit width/height (2026-09-24
+                  PageSpeed audit) match the source file's real 816×216
+                  intrinsic ratio at this 24px display height. */}
+              <img src="/aorms-logo.png" alt="AORMS" width={91} height={24} style={{ height: "24px", width: "auto" }} />
               <p className="cds--type-body-01" style={{ marginTop: "0.75rem", maxWidth: 300, color: "var(--cds-text-secondary)" }}>
                 {AORMS_PLATFORM.tagline} Developed by {HUMAN_CENTRIC_WORKS.legalName}.
               </p>
@@ -940,8 +954,7 @@ export default async function LandingPage() {
               </p>
             </Column>
           </Grid>
-        </footer>
-      </div>
+      </footer>
     </div>
     </MotionRoot>
   );

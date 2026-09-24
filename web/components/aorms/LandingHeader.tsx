@@ -54,8 +54,13 @@ export function LandingHeader() {
         }}
       >
         <Link href="/" aria-label="AORMS home" style={{ display: "flex", alignItems: "center", gap: "0.75rem", textDecoration: "none" }}>
-          {/* Plain <img>, not next/image — a fixed brand asset. */}
-          <img src="/aorms-logo.png" alt="AORMS" style={{ height: "24px", width: "auto" }} />
+          {/* Plain <img>, not next/image — a fixed brand asset. Explicit
+              width/height (2026-09-24 PageSpeed audit: "Image elements do
+              not have explicit width and height") match the source file's
+              real 816×216 intrinsic ratio at this 24px display height, so
+              the browser can reserve the right box before the image loads
+              instead of only learning it from the `style` height. */}
+          <img src="/aorms-logo.png" alt="AORMS" width={91} height={24} style={{ height: "24px", width: "auto" }} />
           <span
             className="cds--type-caption-01 landing-header-subtitle"
             style={{ color: "var(--cds-text-secondary)", borderLeft: "1px solid var(--cds-border-subtle)", paddingLeft: "0.75rem" }}
