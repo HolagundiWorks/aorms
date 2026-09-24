@@ -6178,6 +6178,53 @@ uploads can succeed. This file's own "What's live now" section is
 deliberately NOT updated by this entry — that's for whoever completes
 the live verification above.
 
+**Live verification completed, same date.** Migrations `0086`/`0087`
+applied to the live `aorms-web` project via the Management API — verified
+directly: `accounts` (1 RLS policy), `expenses` (4 policies), `reconcile`
+(1 policy), `ensure_default_accounts()`/`settle_reconcile_batch()` both
+present. Both Storage buckets created via the Storage API. Full expense
+lifecycle click-tested live as OWNER (`demo@aorms.in`): created an OFFICE/
+CASH expense → Submit → Approve → Close, with the Closed-total and
+Cash-total KPI tiles updating correctly at each step. The reconciliation
+matching algorithm (`lib/reconcile/match.ts`) was verified directly via a
+16-case standalone test (Node's native TypeScript execution, not the
+Next.js app) covering every debit-sign format (leading minus, accounting
+parens, trailing minus, `Dr` suffix), all five match-type resolutions
+(`ref_amount`/`ref`/`amount`/`amount_ambiguous`/`none`), and the short-ref
+false-positive guard — all passed. A follow-up QA pass then confirmed:
+VIEWER is completely blocked from both surfaces (the narrower `finance:ops`
+capability, not just the generic write-tier gate most of this schema
+uses); a PROJECT-scope BILLABLE expense correctly sets `recovery_status
+=PENDING` on creation and offers "Mark recovered" only once CLOSED;
+the Cash Book tab correctly filters to `payment_method=CASH` while Office
+Expenses shows all methods; the Reject path lands cleanly on `REJECTED`
+with no further transitions offered; and cross-firm isolation holds (a
+second firm's `/accounts` showed zero leakage from the first, each firm
+independently sequencing its own `EXP/2026-27/0001`).
+
+Two minor, non-blocking bugs found by that QA pass: the Amount (₹) field
+defaulted to a literal `"0"` rather than a placeholder, so typing into it
+without first selecting-all appended to the "0" instead of replacing it
+(`web/components/aorms/NewExpenseForm.tsx` — fixed same pass, `defaultValue
+="0"` → `placeholder="0"`). The reconcile upload form's Label field was
+found to clear itself after a failed submission (e.g. label filled, file
+omitted) even though it's a plain uncontrolled input with no `defaultValue`
+tied to component state — traced as far as confirming it's **not** the
+Server Action's own `revalidatePath("/reconcile")` call (that line sits
+after the validation-error early return, so it never runs on this path);
+the remaining plausible cause is Next.js Server Actions' own implicit
+route-refresh behavior interacting with `ContextPanel`'s `if (!open) return
+null` conditional-unmount pattern (`web/components/aorms/ContextPanel.tsx`)
+in a way not fully isolated in this pass. Left as a documented, low-
+priority follow-up (cosmetic — re-typing one field, no data loss) rather
+than shipping a speculative fix for a framework-level interaction that
+would need live back-and-forth debugging to actually confirm.
+
+`/accounts` and `/reconcile` are now genuinely live — this "What's live
+now" section's existing "reconciliation, cash book" wording (above, under
+Invoicing & Finance) needed no text change, since it now correctly
+describes reality for the first time.
+
 ---
 
 ## Support & questions

@@ -74,7 +74,12 @@ export function NewExpenseForm({
               <SelectItem key={a.id} value={a.id} text={`${a.code} — ${a.name}`} />
             ))}
           </Select>
-          <TextInput id="amount" name="amount" labelText="Amount (₹)" type="number" step="any" defaultValue="0" />
+          {/* No defaultValue="0" — QA found typing into a pre-filled "0" number
+              input appends rather than replaces (browser positions the cursor
+              at click point, not select-all), producing "02500" for a typed
+              "2500". A placeholder reads the same to the eye at rest but never
+              needs the user to clear anything first. */}
+          <TextInput id="amount" name="amount" labelText="Amount (₹)" type="number" step="any" placeholder="0" />
           <TextInput id="expenseDate" name="expenseDate" labelText="Expense date" type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
           <TextInput id="payee" name="payee" labelText="Payee" />
         </FormGrid>
