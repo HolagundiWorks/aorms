@@ -6080,6 +6080,104 @@ doc (`73a11b24`).
 
 Committed `73a11b24`, merged `5bad27c9`.
 
+### Office Expenses / Cash Book + bank-statement reconciliation built — were claimed live, weren't (2026-09-24)
+
+Live QA against this file's own "What's live now" section found it
+claiming "reconciliation, cash book" already existed in `web/` — neither
+did. `/accounts` 404'd, and no `reconcile`/`expenses`/`accounts` table,
+route, or Server Action existed anywhere in the repo. Both features
+existed once in the OLD `backend`/`worker` stack, which is dead code not
+redeployed from this repo (see CLAUDE.md's "Dev / verify loop" callout on
+why `backend` can't be rebuilt from this repo state) — this entry is a
+faithful port of that proven business logic (`worker/esti_worker/jobs/
+reconcile.py`'s matching algorithm; the old `accounts`/`expenses` cash-
+book model) into `web/`'s own conventions (Supabase RLS, Server Actions,
+Carbon), not a from-scratch design. Two architecture decisions were
+already made going in and not re-litigated: reconciliation parsing/
+matching runs synchronously inside a Server Action (no job queue, no
+reviving the Python worker), and upload accepts both CSV and XLSX (added
+the `xlsx` npm package to `web/`, server-side parsing only).
+
+**Shipped:**
+- `web/supabase/migrations/0086_accounts_and_expenses.sql` — `accounts`
+  (system-seeded chart of accounts, `public.ensure_default_accounts()`
+  security-definer RPC seeds MAIN/OFFICE_EXPENSE/CASH/PROJECT_EXPENSE on
+  a firm's first expense) and `expenses` (DRAFT → SUBMITTED → AUDITED/
+  REJECTED → CLOSED, with a separate billable-recovery sub-state:
+  NA/PENDING/INVOICED/WRITTEN_OFF). One deliberate tightening beyond the
+  reviewed plan's literal RLS text: the "staff update draft" policy's
+  `with check` restricts the new row's `status` to `DRAFT`/`SUBMITTED`
+  (not a bare mirror of its own `using` clause), so a plain write-tier
+  caller can advance a draft to submitted but can never jump straight to
+  AUDITED/CLOSED/REJECTED via a direct PostgREST call — that transition
+  only exists on the separate finance-ops-gated policy. This is exactly
+  the "`using` constrains the old row, `with check` leaves the new row's
+  key columns unconstrained" bug class this same roadmap's own VIEWER-
+  escalation entries already found and fixed elsewhere on this schema
+  (see the 2026-09-20/21 entries above) — caught by applying that same
+  scrutiny to a brand-new policy before it ever shipped, rather than
+  after a live report.
+- `web/supabase/migrations/0087_reconcile.sql` — `reconcile` (one row per
+  uploaded bank statement, uniform `finance:ops` gate) and
+  `public.settle_reconcile_batch()`, a security-definer RPC that applies
+  every matched, unsettled line in a batch to its invoice's running paid
+  total (flips ISSUED → PAID once fully paid), writes an audit-log entry,
+  and marks each line settled so re-running settle on the same batch
+  never double-applies it.
+- `web/lib/reconcile/match.ts` — direct TypeScript port of
+  `reconcile.py`'s column-alias resolution, debit/credit paise parsing
+  (accounting parens, trailing `Dr`, trailing minus), and the ref/amount/
+  ambiguous match-type logic.
+- `web/lib/actions/expenses.ts`, `web/lib/actions/reconcile.ts`,
+  `web/lib/receipts/upload.ts` — Server Actions, following
+  `lib/actions/purchase-orders.ts`'s WRITE_TIER_ROLES defense-in-depth
+  pattern and `lib/actions/moms.ts`'s atomic guarded-transition pattern
+  exactly. Receipt upload reuses `lib/security/file-signature.ts`'s
+  existing magic-byte sniffing (already covers JPEG/PNG/WebP/PDF, no
+  extension needed) and `lib/drawings/upload.ts`'s division-of-labor
+  pattern (caller-scoped client authorizes, service-role client only
+  writes the already-authorized Storage object) against a new
+  `esti-receipts` bucket; reconciliation uploads use a new
+  `esti-reconcile` bucket the same way. Both buckets still need to be
+  created via the Storage API (like `esti-documents`/`esti-site-
+  inspections` before them) — not a SQL migration, so nothing in this
+  migration pair creates them.
+- `web/app/(app)/accounts/page.tsx` (Office Expenses / Cash Book — same
+  table, a Cash Book tab filters to `payment_method = 'CASH'`) and
+  `web/app/(app)/reconcile/page.tsx` + `web/app/(app)/reconcile/[id]/
+  page.tsx` (batch list + detail/remap/settle), plus
+  `web/app/api/reconcile/[id]/export/route.ts` for the CSV line export —
+  a `GET`-only route handler, not a Server Action, matching every other
+  export in this app (`app/api/clients/export/route.ts` etc.) and
+  avoiding the exact "bare `export const` in a route-handler file passes
+  `tsc` but fails `next build`" trap CLAUDE.md's own standing rule warns
+  about (hit once for real, during this same pass — see Verification
+  below).
+- `web/components/aorms/AppShell.tsx` — added "Office Expenses" and
+  "Reconciliation" to the existing Accounts nav group, alongside
+  Invoices/Financial Reports.
+
+**Verification actually performed this pass:** `node node_modules/next/
+dist/bin/next build --webpack` — clean, all four new routes present in
+the route table (`/accounts`, `/reconcile`, `/reconcile/[id]`, `/api/
+reconcile/[id]/export`). This caught a real bug the same way CLAUDE.md's
+own standing rule predicts: an early draft exported a bare `const
+RECONCILE_BUCKET` from `lib/actions/reconcile.ts` (a `"use server"`
+file) — passed `tsc --noEmit` and `eslint` clean, failed `next build`
+with "Only async functions are allowed to be exported in a 'use server'
+file," fixed by simply not exporting it (nothing outside that file used
+it). `npx tsc --noEmit` and `eslint` on every new/changed file are also
+clean. **Not verified this pass, explicitly left for the coordinating
+session:** migrations `0086`/`0087` have NOT been applied to the live
+`aorms-web` Supabase project (no Management API access from this
+session's environment) — no live RLS-policy check, no real-row smoke
+test, no live browser click-through of `/accounts` or `/reconcile`. The
+two new Storage buckets (`esti-receipts`, `esti-reconcile`) also still
+need to be created live via the Storage API before receipt/statement
+uploads can succeed. This file's own "What's live now" section is
+deliberately NOT updated by this entry — that's for whoever completes
+the live verification above.
+
 ---
 
 ## Support & questions

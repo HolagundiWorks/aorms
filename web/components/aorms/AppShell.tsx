@@ -123,6 +123,8 @@ const GROUPS: NavGroup[] = [
     items: [
       { href: "/invoices", label: "Invoices" },
       { href: "/reports", label: "Financial Reports" },
+      { href: "/accounts", label: "Office Expenses" },
+      { href: "/reconcile", label: "Reconciliation" },
     ],
   },
   {

@@ -724,6 +724,46 @@ branch before starting anything that could overlap — not just at hand-off.
   and check every UPDATE/ALL policy on the table, not just the one
   you're already looking at.
 
+## Process — check against existing documentation before implementing (2026-09-24)
+
+**Before starting work on any new request that touches architecture, a
+feature's live/not-live status, or a decision this repo has already made
+once, check it against `CLAUDE.md`/`ROADMAP.md`/the relevant doc first —
+don't just start coding from the request alone.** The sequence:
+
+1. **Check against existing documentation.** Read the relevant section(s)
+   of `CLAUDE.md`, `docs/esti/ROADMAP.md`, and any other doc the request
+   touches (architecture docs, module maps, the frontend routes table).
+   This repo's docs are kept current and dated specifically so this check
+   is cheap and reliable — use it.
+2. **Surface differences, don't silently pick one.** If the request
+   conflicts with what's documented (asks for something already decided
+   against, assumes something is live that isn't, or contradicts a stated
+   architecture decision), say so plainly before proceeding — this is
+   exactly the pattern that caught the `/accounts` cash-book gap (QA found
+   the route 404s and the feature doesn't exist anywhere in `web/`, while
+   `ROADMAP.md` claimed it was live) and the earlier stale Supabase-ref
+   claims. A silent mismatch compounds; a surfaced one gets resolved once.
+3. **Resolve the architectural question explicitly**, with the user where
+   it's a real scope/direction decision (build vs. defer, correct-the-doc
+   vs. build-the-feature) — this repo's own history (the Neon/Supabase
+   split discussion, the per-tenant-database exploration that got
+   reversed) shows these decisions are cheap to make explicitly and
+   expensive to leave implicit.
+4. **Document the resolution** — a dated entry in `ROADMAP.md`'s History
+   (what was decided and why) and/or a correction banner on whatever doc
+   was stale, matching the existing stale-doc-correction convention
+   throughout this file (search `Stale-doc correction` for the pattern).
+5. **Clean up and update documentation** — fix any other claims the
+   resolution makes newly stale, the same pass, not a follow-up.
+6. **Then implement.** Not before — a resolved, documented decision is
+   what the implementation should match, not the other way around.
+
+This isn't a call for ceremony on trivial requests (a one-line bug fix
+doesn't need an architecture review) — it's for anything where "is this
+already decided, and does the codebase already match the docs" is a real
+question worth 60 seconds to check before writing code.
+
 ## Conventions
 
 - Money is stored/handled in integer **paise**; format with `formatINR` /
@@ -762,7 +802,18 @@ GST rates, SAC codes)
  (`setClientApproval`). *(The separate `feeProposals` namespace + thin `esti_proposal`
  were merged here — migration 0116.)*
 - `invoices` — GST invoicing (`invoice:manage`/`invoice:delete`); `reconcile` —
-  financial reconciliation; `purchaseOrders` — PO management
+  financial reconciliation (OLD `backend`/`worker` stack, dead code — see
+  "Dev / verify loop" above); `purchaseOrders` — PO management. **Also now
+  live in `web/`** (2026-09-24, faithful port of this same tRPC namespace's
+  logic plus `worker/esti_worker/jobs/reconcile.py`'s matching algorithm —
+  ROADMAP.md's own dated History entry had claimed this was already live
+  in `web/` when it wasn't; the gap is now closed): schema
+  `web/supabase/migrations/0087_reconcile.sql`, matching logic
+  `web/lib/reconcile/match.ts`, Server Actions `web/lib/actions/
+  reconcile.ts`, UI `web/app/(app)/reconcile/page.tsx` +
+  `web/app/(app)/reconcile/[id]/page.tsx`. See ROADMAP.md's dated entry
+  for what's verified (build-clean) vs. not yet (no live Supabase apply,
+  no live browser check).
 - `permits` — building permit tracking; `approvals` — internal approval workflows
 - `transmittals` — document transmittals; `letters` / `contracts` — office
   documents (both exported from `backend/src/modules/office/router.ts`)
@@ -879,6 +930,18 @@ computed KPIs, Action Center, health modules (`dashboard.home` bundles the offic
 - `moodboard` — AStudio project mood board canvas (`esti_moodboard*`; board CRUD +
   freeform canvas items, layers, discussion; `ProjectMoodboard.tsx`)
 - `accounts` / `expenses` — office cash book and project costing expenses
+  (OLD `backend`/`worker` stack, dead code — see "Dev / verify loop"
+  above). **Also now live in `web/`** (2026-09-24, faithful port of this
+  same tRPC namespace's business logic — ROADMAP.md's own dated History
+  entry had claimed this was already live in `web/` when it wasn't; the
+  gap is now closed): schema `web/supabase/migrations/
+  0086_accounts_and_expenses.sql` (chart-of-accounts `accounts` +
+  DRAFT→SUBMITTED→AUDITED/REJECTED→CLOSED `expenses`, billable-recovery
+  sub-state), Server Actions `web/lib/actions/expenses.ts`, receipt
+  upload `web/lib/receipts/upload.ts`, UI `web/app/(app)/accounts/
+  page.tsx` (Office Expenses / Cash Book tabs). See ROADMAP.md's dated
+  entry for what's verified (build-clean) vs. not yet (no live Supabase
+  apply, no live browser check).
 - `system` — release metadata (owner-only)
 - `marketing` — landing visit counter
 - `specCatalog` — specification material catalogue (Knowledge Bank)
