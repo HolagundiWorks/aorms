@@ -41,6 +41,14 @@ class SiteReportsViewModel : ViewModel() {
     }
 
     fun createProgressReport(projectId: String, periodStart: String, periodEnd: String, narrative: String?, pct: Int?) {
+        if (projectId.isBlank()) {
+            error = "Project is required."
+            return
+        }
+        if (periodStart.isBlank() || periodEnd.isBlank()) {
+            error = "Period start and end are required."
+            return
+        }
         viewModelScope.launch {
             runCatching {
                 Repository.createProgressReport(
@@ -56,6 +64,14 @@ class SiteReportsViewModel : ViewModel() {
     }
 
     fun createSnag(projectId: String, location: String?, trade: String?, description: String) {
+        if (projectId.isBlank()) {
+            error = "Project is required."
+            return
+        }
+        if (description.isBlank()) {
+            error = "Description is required."
+            return
+        }
         viewModelScope.launch {
             runCatching { Repository.createSnag(location, trade, description, projectId) }
                 .onSuccess { showNewSheet = false }
@@ -65,6 +81,14 @@ class SiteReportsViewModel : ViewModel() {
     }
 
     fun createInstruction(projectId: String, subject: String, body: String?) {
+        if (projectId.isBlank()) {
+            error = "Project is required."
+            return
+        }
+        if (subject.isBlank()) {
+            error = "Subject is required."
+            return
+        }
         viewModelScope.launch {
             runCatching { Repository.createSiteInstruction(subject, body, projectId) }
                 .onSuccess { showNewSheet = false }

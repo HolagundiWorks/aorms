@@ -134,9 +134,16 @@ fun SiteReportsScreen(viewModel: SiteReportsViewModel) {
  * SnackbarHost (2026-09-21 fix, same root cause/fix as ui.tasks.NewTaskSheet /
  * ui.leads.NewLeadSheet): a `ModalBottomSheet` renders in its own separate
  * window/surface above the Scaffold, so a Snackbar hosted in the Scaffold is
- * always covered and invisible while the sheet is open — this one surfaces via
- * create-failure errors (e.g. network) rather than blank-field validation, but
- * it's the identical architectural bug. */
+ * always covered and invisible while the sheet is open.
+ *
+ * A second, distinct bug (also fixed 2026-09-21, found by QA re-verification
+ * on the Progress sub-tab): all three Create buttons below guarded their
+ * callback behind `selectedProject?.let { ... }`, so leaving "Project"
+ * unselected silently no-op'd the button — the create function (and its
+ * blank-field validation in SiteReportsViewModel) never even ran, so no
+ * error was ever produced to display. Buttons now always invoke the create
+ * callback (passing "" when no project is selected) so the ViewModel's own
+ * blank-field checks run and surface a visible error here. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NewSiteReportSheet(
@@ -214,9 +221,7 @@ private fun NewSiteReportSheet(
                     OutlinedTextField(narrative, { narrative = it }, label = { Text("Narrative") }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
                     Button(
                         onClick = {
-                            selectedProject?.let {
-                                onCreateProgress(it.id, periodStart, periodEnd, narrative.ifBlank { null }, pct.toIntOrNull())
-                            }
+                            onCreateProgress(selectedProject?.id ?: "", periodStart, periodEnd, narrative.ifBlank { null }, pct.toIntOrNull())
                         },
                         modifier = Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 24.dp),
                     ) { Text("Create progress report") }
@@ -226,7 +231,7 @@ private fun NewSiteReportSheet(
                     OutlinedTextField(trade, { trade = it }, label = { Text("Trade") }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
                     OutlinedTextField(description, { description = it }, label = { Text("Description") }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
                     Button(
-                        onClick = { selectedProject?.let { onCreateSnag(it.id, location.ifBlank { null }, trade.ifBlank { null }, description) } },
+                        onClick = { onCreateSnag(selectedProject?.id ?: "", location.ifBlank { null }, trade.ifBlank { null }, description) },
                         modifier = Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 24.dp),
                     ) { Text("Log snag") }
                 }
@@ -234,7 +239,7 @@ private fun NewSiteReportSheet(
                     OutlinedTextField(subject, { subject = it }, label = { Text("Subject") }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
                     OutlinedTextField(body, { body = it }, label = { Text("Instruction") }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
                     Button(
-                        onClick = { selectedProject?.let { onCreateInstruction(it.id, subject, body.ifBlank { null }) } },
+                        onClick = { onCreateInstruction(selectedProject?.id ?: "", subject, body.ifBlank { null }) },
                         modifier = Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 24.dp),
                     ) { Text("Issue instruction") }
                 }
