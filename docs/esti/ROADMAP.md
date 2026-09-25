@@ -6437,6 +6437,69 @@ confirmed the "A statement file is required" error appeared — and
 critically, the Label field **kept its typed value** instead of
 reverting to the placeholder.
 
+### Three Search Console indexing issues found and fixed, via a real Coverage export (2026-09-25/26)
+
+User supplied a genuine Google Search Console Coverage export
+(`aorms.in-Coverage-2026-09-25.zip`) asking why pages aren't indexed.
+The export only gives aggregate counts per exclusion reason, not the
+actual URLs, so this was scoped to what could be verified independently
+against the live site rather than guessed from the reason names alone:
+
+- **`robots.txt`'s disallow list was missing `/accounts`, `/ai-devices`,
+  `/reconcile`** — three authenticated routes added after the list was
+  last updated (the first two by the office-expenses build on
+  2026-09-24, `/ai-devices` earlier and simply missed). Confirmed live
+  via `curl -I` that all three 307-redirect to login when hit
+  unauthenticated, then confirmed the gap was real (not a
+  misread) via an exact diff: every `web/app/(app)/*/page.tsx`
+  directory name against every string in the disallow array — exactly
+  3 of 51 routes were missing, no more, no fewer. These three were
+  reachable and crawlable by Googlebot, hitting the auth redirect on
+  every attempt — direct, ongoing contributor to the "Page with
+  redirect" bucket (21 pages in the export).
+- **`sitemap.xml` submitted `/login`**, which unconditionally
+  `redirect()`s to `identity.aorms.in/platform-login` in production
+  (`web/app/(auth)/login/page.tsx`, a deliberate 2026-09-20 decision —
+  see that dated entry above). Submitting a URL that immediately
+  redirects is textbook "Page with redirect" — the real destination was
+  already listed separately in the same sitemap, so the redirecting
+  entry was just redundant noise. Removed.
+- **`www.aorms.in` served the entire site directly as a real `200`**,
+  confirmed via `curl -I` — not a redirect to the apex domain at all.
+  Hostinger's DNS/hosting resolves both hostnames to the same app, and
+  nothing before this told one to defer to the other; every page was
+  reachable at two distinct URLs, deduplicated only by each page's own
+  `<link rel="canonical">` tag (confirmed present and correctly
+  self-referencing `https://aorms.in/...` on the pages checked) rather
+  than an actual host-level redirect. This is almost certainly the
+  "Alternative page with proper canonical tag" bucket (15 pages — close
+  to the site's entire indexable page count). Added a permanent
+  (308) `www` → apex redirect in `proxy.ts`, following the exact same
+  pattern (`portalRedirectUrl`, production-only gate) the existing
+  portal-subdomain redirects already use — not a new mechanism.
+
+All three verified live post-deploy: `www.aorms.in/` and
+`www.aorms.in/blog` both now 308 to the matching `aorms.in` path
+(path preserved, not just the homepage); `robots.txt` serves all three
+new `Disallow` lines; `sitemap.xml` no longer contains the `/login`
+entry. `tsc --noEmit`, `eslint .`, and a full `next build --webpack`
+all clean before deploy.
+
+**Explicitly not chased further, disclosed rather than guessed at**:
+the export's "Not found (404)" bucket (7 pages) and "Crawled —
+currently not indexed" bucket (14 pages, Google's own quality/
+relevance judgment, not something a code change controls directly).
+The Coverage export gives no per-URL list, only the aggregate reason
+counts — every sitemap URL and every recent blog post was individually
+curl-checked and all returned real `200`s, so the current sitemap
+itself isn't the source of the 404s; the most likely explanation is
+residual history from the pre-2026-09-09 frontend→web cutover (old
+pages that genuinely no longer exist, which Google ages out of the
+report over the following weeks as a normal, expected process, not a
+bug) — but that's inference, not confirmed against real URLs. Chasing
+it further needs the actual per-URL list from Search Console's own
+Pages report, which isn't in this export.
+
 ---
 
 ## Support & questions
@@ -6462,4 +6525,4 @@ reverting to the placeholder.
 
 ---
 
-**Last updated:** 2026-09-25
+**Last updated:** 2026-09-26
