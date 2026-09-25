@@ -6297,6 +6297,64 @@ exactly. Re-verified live against a local dev server signed in as the
 same `demo@aorms.in` account that produced the bad reading: with both
 cash expenses still REJECTED, "Cash total" now correctly reads ₹0.
 
+### Reconcile upload Label-clearing bug — root-caused and fixed, plus a local-dev-only CSP/hydration finding (2026-09-25)
+
+The Label-clearing bug flagged as a documented follow-up in the
+2026-09-24 entry above (Label field visually reverts after a failed
+reconcile upload) is now root-caused and fixed, not left open. Cause:
+React's built-in `<form action={fn}>` resets every **uncontrolled**
+field once the action's promise resolves — including a validation-error
+return like `{ error: "A statement file is required." }`, since the
+action itself never threw. `uploadReconcileBatch()` returning that
+error object still counts as the action "succeeding" from React's own
+point of view, so React reset the form's uncontrolled inputs, wiping
+whatever the user had typed into Label. Fixed in
+`web/components/aorms/NewReconcileBatchForm.tsx` by making `label` a
+controlled input (`value`/`onChange` bound to component state) — a
+controlled value survives the native reset because React re-asserts it
+on the next render; the state is deliberately cleared on a real
+successful upload instead. `next build --webpack` and `eslint` both
+clean.
+
+**Verification took a detour that surfaced a separate, real finding,
+not itself fixed this pass**: attempting to reproduce the bug against
+the local dev server (`next dev --webpack`) via the browser tool found
+that **no client-side click interaction works at all** in local dev
+under a CSP-enforcing browser — confirmed via a console error,
+`Uncaught EvalError: ... violates ... script-src ... 'unsafe-eval' is
+not an allowed source`, thrown inside webpack's dev-mode Fast Refresh
+runtime. `next.config.mjs`'s CSP (added 2026-09-14, see that dated
+entry) sets `script-src 'self' 'unsafe-inline' https://checkout.
+razorpay.com https://cdn.razorpay.com` with no `'unsafe-eval'` and no
+`NODE_ENV`-based exemption for dev — but `next dev --webpack`'s default
+`eval` devtool wraps every module's code in a real `eval()` call for
+fast rebuilds, which that CSP now blocks outright in any browser that
+enforces it (this repo's own browser-automation tool does; a real
+Chrome/Firefox with default settings would too). Client-side React
+hydration/event handlers never attach as a result — only genuine native
+`<form>` submissions (progressive enhancement, no JS required) still
+work, which is why the sign-in form worked in this same session's
+testing but a plain `onClick`-driven `ContextPanelTrigger` button did
+not. **Worked around, not fixed**: verified this specific fix against
+**production** instead (same approach the QA re-verification pass used
+for the Cash-total fix) rather than chasing the CSP gap — see below for
+the live production check. **Flagged as a separate task, not
+investigated further here**: if this is genuinely still true today,
+every "live browser click-through" verification against local dev
+recorded anywhere in this file from 2026-09-14 onward may have silently
+been reading only server-rendered HTML and native-form-submission
+results, not real client interactivity — worth an explicit local-dev
+`'unsafe-eval'` exemption (e.g. gated on `process.env.NODE_ENV !==
+"production"`) as its own fix, verified independently, not folded into
+this one.
+
+Verified live on **production** (aorms.in), post-deploy: signed in as
+`demo@aorms.in`, opened the reconcile upload panel, typed a Label,
+submitted with no file attached (the exact failure this bug needs),
+confirmed the "A statement file is required" error appeared — and
+critically, the Label field **kept its typed value** instead of
+reverting to the placeholder.
+
 ---
 
 ## Support & questions
