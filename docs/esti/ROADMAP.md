@@ -6269,9 +6269,20 @@ failed submission was re-confirmed unchanged, not worse — still not a
 data-loss issue, still not fixed, still the documented follow-up from
 the 2026-09-24 entry above). VIEWER-role write-blocking couldn't be
 re-tested (no credentials available this pass) — flagged as blocked,
-not guessed at. **Android** couldn't be re-verified either: the device
-disconnected between session start and the actual test steps — a
-connectivity gap, not a finding, and not treated as one.
+not guessed at. **Android** couldn't be re-verified in that same pass:
+the device disconnected between session start and the actual test
+steps — a connectivity gap, not a finding, and not treated as one.
+
+**Android leg completed same day, once reconnected**: `adb kill-server`/
+`start-server` brought the device (`R9ZN608PGKD`) back as authorized;
+confirmed the installed build was still the fresh one from the
+2026-09-24 fix-verification pass (`firstInstallTime`/`lastUpdateTime`
+both `2026-09-24 20:51:12`, i.e. after the fix commit, not a stale
+pre-fix APK). Signed in as `demo@aorms.in` (session had logged out),
+re-ran all three Site Reports sub-tabs exactly as before: Progress,
+Snags, and Instructions each still show **"Project is required."**
+when Project is left unselected and the create button is tapped — no
+regression, all three still fixed.
 
 **One new, real bug found**: the "Cash total" KPI tile on `/accounts`
 summed every CASH-payment-method expense regardless of status, while
