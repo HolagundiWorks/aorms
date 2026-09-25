@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Button, FileUploader, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { uploadReconcileBatch, type ReconcileActionState } from "../../lib/actions/reconcile";
 import { FormGrid } from "./FormGrid";
@@ -9,10 +9,18 @@ const initialState: ReconcileActionState = null;
 
 export function NewReconcileBatchForm({ onSuccess }: { onSuccess?: () => void }) {
   const [state, formAction, pending] = useActionState(uploadReconcileBatch, initialState);
+  // Controlled, not just defaultValue: React's built-in <form action={fn}>
+  // resets every uncontrolled field once the action's promise resolves —
+  // including a validation-error return like "file is required", since the
+  // action itself didn't throw. That wiped this label on every failed
+  // submission. A controlled value survives the reset because React
+  // re-asserts it from state on the next render.
+  const [label, setLabel] = useState("");
 
   const prevPending = useRef(pending);
   useEffect(() => {
     if (prevPending.current && !pending && !state?.error) {
+      setLabel("");
       onSuccess?.();
     }
     prevPending.current = pending;
@@ -24,7 +32,15 @@ export function NewReconcileBatchForm({ onSuccess }: { onSuccess?: () => void })
         {state?.error && (
           <InlineNotification kind="error" title="Could not upload statement" subtitle={state.error} hideCloseButton lowContrast />
         )}
-        <TextInput id="label" name="label" labelText="Label" placeholder="e.g. HDFC current a/c — Sep 2026" required />
+        <TextInput
+          id="label"
+          name="label"
+          labelText="Label"
+          placeholder="e.g. HDFC current a/c — Sep 2026"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          required
+        />
         <FileUploader
           id="file"
           name="file"
