@@ -34,7 +34,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/connectdex-partners`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
     { url: `${base}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/legal`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${base}/login`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    // `${base}/login` deliberately NOT listed (2026-09-25 Search Console
+    // audit, found by cross-checking this file against web/app/(auth)/
+    // login/page.tsx): it's a pure redirect() to the identity.aorms.in URL
+    // right below, in every environment that matters for indexing
+    // (NODE_ENV === "production") — submitting a URL that immediately
+    // redirects tells Google to index a page that isn't one, which is
+    // exactly what Search Console's Coverage report flags as "Page with
+    // redirect". List the real destination once, not the redirect twice.
     // Moved off the main domain onto their own subdomain (2026-09-10, see
     // lib/platform/subdomains.ts) — identity.aorms.in is the canonical
     // host these render at now, even though platform-login/-signup are

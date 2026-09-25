@@ -40,6 +40,8 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       // (platform) stay crawlable on purpose. Re-check this list whenever a
       // new top-level route segment is added.
       disallow: [
+        "/accounts",
+        "/ai-devices",
         "/ai-runs",
         "/approvals",
         "/audit-log",
@@ -74,6 +76,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         "/proposals",
         "/purchase-orders",
         "/rate-books",
+        "/reconcile",
         "/reports",
         "/site-instructions",
         "/snags",

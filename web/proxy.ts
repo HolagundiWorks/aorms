@@ -63,6 +63,29 @@ function portalRedirectUrl(hostname: string, pathname: string, search: string): 
   return target;
 }
 
+/**
+ * 2026-09-25 SEO fix, found via a Search Console Coverage export:
+ * `www.aorms.in` was serving the entire site directly (a real `200`, not
+ * a redirect) — Hostinger's DNS/hosting resolves both hostnames to this
+ * same app, and nothing redirected one to the other. Every page was
+ * reachable at two distinct URLs, deduplicated only by each page's own
+ * `<link rel="canonical">` tag rather than an actual host-level redirect —
+ * exactly what Search Console's "Alternative page with proper canonical
+ * tag" bucket was reporting for close to the site's whole page count. A
+ * permanent redirect to the apex domain is the standard fix: pick one
+ * canonical host and stop serving the other's content at all, rather than
+ * relying on Google to keep deduplicating it on every crawl. Production
+ * only, same gate every other host-based redirect in this file uses —
+ * there's no `www.` DNS entry to collide with locally.
+ */
+function redirectWwwToApex(request: NextRequest): NextResponse | null {
+  if (process.env.NODE_ENV !== "production") return null;
+  const hostname = (request.headers.get("host") ?? "").split(":")[0];
+  if (hostname !== `www.${ROOT_DOMAIN}`) return null;
+  const { pathname, search } = request.nextUrl;
+  return NextResponse.redirect(portalRedirectUrl(ROOT_DOMAIN, pathname, search), 308);
+}
+
 function routePortalSubdomains(request: NextRequest): NextResponse | null {
   if (process.env.NODE_ENV !== "production") return null;
 
@@ -90,6 +113,9 @@ function routePortalSubdomains(request: NextRequest): NextResponse | null {
 }
 
 export async function proxy(request: NextRequest) {
+  const wwwRedirect = redirectWwwToApex(request);
+  if (wwwRedirect) return wwwRedirect;
+
   const routed = routePortalSubdomains(request);
   if (routed) return routed;
 
