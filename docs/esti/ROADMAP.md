@@ -144,14 +144,62 @@ Hub data reset nightly via `pg_cron`).
   (found and worked around one real, pre-existing `Modifier.weight()`
   Kotlin/Compose-BOM version-mismatch compiler bug along the way — see
   the commit for detail); not click-tested on a device/emulator, none
-  available in this environment. **Explicitly NOT started**: mobile
-  Projects view, Meetings/Esti-transcription (needs new AI capability),
-  Approvals mobile surface, Documents mobile viewer, mobile Esti
-  contextual commands, Quick Capture FAB, notifications, and the
-  Home/Projects/Tasks/+/More bottom-nav restructure (still Today/Tasks/
-  Leads/Site/Account today) — each is its own scoped follow-up, not
-  attempted in this pass per explicit user confirmation to start with
-  Today only.
+  available in this environment. **Explicitly NOT started (at the
+  time)**: mobile Projects view, Meetings/Esti-transcription (needs new
+  AI capability), Approvals mobile surface, Documents mobile viewer,
+  mobile Esti contextual commands, Quick Capture FAB, notifications, and
+  the Home/Projects/Tasks/+/More bottom-nav restructure (still Today/
+  Tasks/Leads/Site/Account today) — each is its own scoped follow-up,
+  not attempted in this pass per explicit user confirmation to start
+  with Today only.
+  **Second slice shipped 2026-09-25: mobile Projects view ("view + act,
+  not administer").** Checked the web app's own project-status control
+  before scoping "act" (the standing check-docs-first process rule) —
+  it's gated by an activation-gate state machine (DNA capture required
+  for some transitions, `ACTIVE` only reachable via a separate gate
+  flow), exactly the "workflow administration" this IA spec says to
+  keep off mobile. Surfaced to the user; resolved via AskUserQuestion:
+  v1's "act" is quick-adding a task to a project from its own detail
+  view, reusing the exact same `createTask` flow Today/Tasks already
+  have — no new workflow logic. New "Projects" bottom-nav tab (between
+  Today and Tasks): a list of every project visible to the firm (ref,
+  title, status, client, city — `Repository.projectsFull()`, a richer
+  sibling of the existing `projects()` picker query), tapping a project
+  expands its detail **in place** (same expand-in-place idiom
+  `TodayViewModel.expandedKpi` already established, keyed by project id
+  instead of a KPI key, since this app has no argument-based detail nav
+  routes anywhere yet) showing type/work-type/city, its phases (new
+  `phasesForProject()` query against `phases`, ordered by
+  `sort_order`), and its open-task count (new
+  `openTaskCountForProject()`, same shape as the existing
+  `myOpenTaskCount`, just filtered by `project_id` instead of
+  `assignee_id`). A "+ Add task" button in the expanded panel opens the
+  *existing*, already-shared `NewTaskSheet` (Today and Tasks both
+  already use it) — extended with one new optional parameter,
+  `initialProject`, so it opens pre-selected to the project you're
+  looking at; fully backward-compatible, Today/Tasks' own call sites
+  are unaffected. New models: `ProjectRow`, `PhaseRow`,
+  `ClientNameHolder` (the last matching this codebase's existing
+  to-one-FK-embed-decodes-as-a-single-object convention, e.g.
+  `ProjectTitleHolder`/`TaskTitleHolder`, not a new one). **Verified
+  live on a real device this time** (JDK/Android SDK toolchain already
+  set up earlier this session): a stale incremental Kotlin compilation
+  cache produced a wall of spurious "unresolved reference" errors
+  across unrelated, untouched files on the first build attempt —
+  confirmed as a stale-cache artifact, not a real code issue, via a
+  clean rebuild succeeding with zero errors; installed on the connected
+  device and clicked through the full flow — list renders real seeded
+  project data, tapping a project expands its detail with real phases/
+  open-task-count data, "+ Add task" opens the sheet pre-filled to that
+  exact project, creating a real task succeeded and the open-task count
+  updated in place (0 → 1) without a full screen reload, and the new
+  task appeared correctly on the Tasks tab. Test task deleted via the
+  Supabase Management API afterward. **Explicitly NOT in this pass**
+  (all genuinely "administer", matching this entry's own "keep off
+  mobile" list): creating/editing a project, changing project status,
+  editing phases, anything BOQ/estimation/tender/HR-adjacent — still
+  open, along with everything else this entry's original "Explicitly
+  NOT started" list flagged and hasn't been picked up yet.
 - ~~Two separate login pages (aorms.in/login vs. identity.aorms.in)~~
   **Resolved 2026-09-20** — explicit user direction ("keep one page[,]
   improve security"), user chose identity.aorms.in as the surviving

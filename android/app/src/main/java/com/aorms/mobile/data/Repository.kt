@@ -183,6 +183,32 @@ object Repository {
             .select(Columns.list("id, ref, title")) { order("title", Order.ASCENDING) }
             .decodeList()
 
+    // ---- Projects (mobile Projects view — 2026-09-25) ----
+
+    /** Richer than [projects] — same columns as the web app's own
+     * /projects list page, for the mobile Projects tab. */
+    suspend fun projectsFull(): List<ProjectRow> =
+        Supa.db.from("project_offices")
+            .select(Columns.list("id, ref, title, project_type, work_type, status, city, clients(name)")) {
+                order("created_at", Order.DESCENDING)
+            }.decodeList()
+
+    suspend fun phasesForProject(projectId: String): List<PhaseRow> =
+        Supa.db.from("phases")
+            .select(Columns.list("id, code, label, sort_order")) {
+                filter { eq("project_id", projectId) }
+                order("sort_order", Order.ASCENDING)
+            }.decodeList()
+
+    suspend fun openTaskCountForProject(projectId: String): Long =
+        Supa.db.from("tasks").select {
+            filter {
+                eq("project_id", projectId)
+                neq("status", "DONE")
+            }
+            count(io.github.jan.supabase.postgrest.query.Count.EXACT)
+        }.countOrNull() ?: 0L
+
     // ---- Tasks ----
 
     suspend fun myTasks(userId: String): List<TaskRow> =

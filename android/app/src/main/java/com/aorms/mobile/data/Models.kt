@@ -19,6 +19,33 @@ data class ProjectOption(
 )
 
 @Serializable
+data class ClientNameHolder(val name: String? = null)
+
+/** Richer than [ProjectOption] (which stays a lightweight id/ref/title
+ * picker shape used by task/lead/site-report forms) — this is the row
+ * shape for the mobile Projects list/detail screen, same columns the web
+ * app's own `/projects` page selects. */
+@Serializable
+data class ProjectRow(
+    val id: String,
+    val ref: String,
+    val title: String,
+    @SerialName("project_type") val projectType: String? = null,
+    @SerialName("work_type") val workType: String? = null,
+    val status: String,
+    val city: String? = null,
+    val clients: ClientNameHolder? = null,
+)
+
+@Serializable
+data class PhaseRow(
+    val id: String,
+    val code: String,
+    val label: String,
+    @SerialName("sort_order") val sortOrder: Int? = null,
+)
+
+@Serializable
 data class TaskRow(
     val id: String,
     val title: String,

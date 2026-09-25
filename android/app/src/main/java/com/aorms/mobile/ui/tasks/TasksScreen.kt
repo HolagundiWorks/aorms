@@ -119,6 +119,11 @@ fun TasksScreen(viewModel: TasksViewModel) {
 fun NewTaskSheet(
     projects: List<ProjectOption>,
     error: String? = null,
+    // Pre-selects the project picker (2026-09-25, mobile Projects view's
+    // "+ Add task" action, launched from a specific project's own detail
+    // panel) — defaults to null so Today/Tasks' own call sites, which have
+    // no project context to pre-fill from, are unaffected.
+    initialProject: ProjectOption? = null,
     onDismiss: () -> Unit,
     onCreate: (String, String?, String, String?) -> Unit,
 ) {
@@ -126,7 +131,7 @@ fun NewTaskSheet(
     var priority by remember { mutableStateOf("MEDIUM") }
     var dueDate by remember { mutableStateOf("") }
     var projectExpanded by remember { mutableStateOf(false) }
-    var selectedProject by remember { mutableStateOf<ProjectOption?>(null) }
+    var selectedProject by remember { mutableStateOf(initialProject) }
     var priorityExpanded by remember { mutableStateOf(false) }
 
     // Carbon has no rounded edges — Material3's ModalBottomSheet default

@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.HorizontalDivider
@@ -36,6 +37,8 @@ import com.aorms.mobile.ui.today.TodayScreen
 import com.aorms.mobile.ui.today.TodayViewModel
 import com.aorms.mobile.ui.leads.LeadsScreen
 import com.aorms.mobile.ui.leads.LeadsViewModel
+import com.aorms.mobile.ui.projects.ProjectsScreen
+import com.aorms.mobile.ui.projects.ProjectsViewModel
 import com.aorms.mobile.ui.sitereports.SiteReportsScreen
 import com.aorms.mobile.ui.sitereports.SiteReportsViewModel
 import com.aorms.mobile.ui.tasks.TasksScreen
@@ -46,6 +49,7 @@ private data class BottomDest(val route: String, val label: String, val icon: an
 
 private val BOTTOM_DESTS = listOf(
     BottomDest("today", "Today", Icons.Default.CheckCircle),
+    BottomDest("projects", "Projects", Icons.Default.Folder),
     BottomDest("tasks", "Tasks", Icons.AutoMirrored.Filled.Assignment),
     BottomDest("leads", "Leads", Icons.Default.PersonAdd),
     BottomDest("reports", "Site", Icons.Default.Warning),
@@ -97,6 +101,7 @@ private fun AuthenticatedApp() {
     ) { padding ->
         NavHost(navController = navController, startDestination = "today", modifier = Modifier.padding(padding)) {
             composable("today") { TodayScreen(viewModel<TodayViewModel>()) }
+            composable("projects") { ProjectsScreen(viewModel<ProjectsViewModel>()) }
             composable("tasks") { TasksScreen(viewModel<TasksViewModel>()) }
             composable("leads") { LeadsScreen(viewModel<LeadsViewModel>()) }
             composable("reports") { SiteReportsScreen(viewModel<SiteReportsViewModel>()) }
