@@ -200,6 +200,40 @@ Hub data reset nightly via `pg_cron`).
   editing phases, anything BOQ/estimation/tender/HR-adjacent — still
   open, along with everything else this entry's original "Explicitly
   NOT started" list flagged and hasn't been picked up yet.
+  **Third slice shipped same day: mobile Approvals view ("its own
+  one-tap surface").** Deliberately narrow, same reasoning as the
+  Projects view's own act-scope decision: logging a *new*
+  approval-for-sign-off record (the web app's "Log approval" flow)
+  stays web-only — that's a creation/administer flow, not a one-tap
+  response. This screen only does the "respond" half: a flat list of
+  every approval (new `Repository.approvals()`, mirrors the web
+  `/approvals` page's own column set — title, project, entity type,
+  recipient, channel, status, sent date), with **Approve**/
+  **Revisions**/**Reject** one-tap buttons shown only on items still
+  `SENT` (awaiting a response) — calling the same
+  `updateApprovalStatus` write path the web app's own status control
+  uses (`has_capability('write')`-gated RLS, no new capability). New
+  "Approve" bottom-nav tab (named short, not "Approvals" — see below).
+  **One real UI bug found and fixed live on device, not just built**:
+  adding a 7th bottom-nav item shrank every tab's available width
+  enough that "Approvals" wrapped to two lines, visibly uneven next to
+  the other six single-line labels — confirmed via an on-device
+  screenshot, not assumed; shortened to "Approve" (same length as
+  "Account", which was already rendering fine at this width) and
+  re-verified clean on one line. **Verified live end-to-end**: this
+  firm's `approvals` table was genuinely empty (confirmed via the
+  screen's own correct "No approvals logged yet." empty state, not a
+  bug), so a real temporary `SENT` row was inserted via the Supabase
+  Management API — rendered correctly with all three action buttons
+  fitting comfortably on one row (the row layout was a real, if
+  unconfirmed, risk going in — glad this one turned out fine rather
+  than needing a second fix), tapping **Approve** flipped the status to
+  `APPROVED` live and the action buttons correctly disappeared
+  (matching the "only show on SENT" rule), confirmed via a second
+  screenshot. Test row deleted afterward. **Explicitly NOT in this
+  pass**: logging new approvals from mobile, editing an existing
+  approval's own fields (recipient/channel/etc.) — both genuinely
+  "administer," stay web-only.
 - ~~Two separate login pages (aorms.in/login vs. identity.aorms.in)~~
   **Resolved 2026-09-20** — explicit user direction ("keep one page[,]
   improve security"), user chose identity.aorms.in as the surviving

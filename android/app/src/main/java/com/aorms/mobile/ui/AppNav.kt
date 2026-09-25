@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Warning
@@ -30,6 +31,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.aorms.mobile.data.Supa
 import com.aorms.mobile.ui.account.AccountScreen
+import com.aorms.mobile.ui.approvals.ApprovalsScreen
+import com.aorms.mobile.ui.approvals.ApprovalsViewModel
 import com.aorms.mobile.ui.account.AccountViewModel
 import com.aorms.mobile.ui.auth.AuthScreen
 import com.aorms.mobile.ui.auth.AuthViewModel
@@ -51,6 +54,12 @@ private val BOTTOM_DESTS = listOf(
     BottomDest("today", "Today", Icons.Default.CheckCircle),
     BottomDest("projects", "Projects", Icons.Default.Folder),
     BottomDest("tasks", "Tasks", Icons.AutoMirrored.Filled.Assignment),
+    // "Approvals" wraps to two lines in the bottom nav once a 7th item
+    // pushes every item's available width down (2026-09-25 UI fix, found
+    // live on device) — "Approve" is the same length as "Account", which
+    // renders fine at this width, so it was the shortest label that still
+    // reads clearly rather than an unrelated abbreviation.
+    BottomDest("approvals", "Approve", Icons.Default.CheckCircleOutline),
     BottomDest("leads", "Leads", Icons.Default.PersonAdd),
     BottomDest("reports", "Site", Icons.Default.Warning),
     BottomDest("account", "Account", Icons.Default.AccountCircle),
@@ -103,6 +112,7 @@ private fun AuthenticatedApp() {
             composable("today") { TodayScreen(viewModel<TodayViewModel>()) }
             composable("projects") { ProjectsScreen(viewModel<ProjectsViewModel>()) }
             composable("tasks") { TasksScreen(viewModel<TasksViewModel>()) }
+            composable("approvals") { ApprovalsScreen(viewModel<ApprovalsViewModel>()) }
             composable("leads") { LeadsScreen(viewModel<LeadsViewModel>()) }
             composable("reports") { SiteReportsScreen(viewModel<SiteReportsViewModel>()) }
             composable("account") { AccountScreen(viewModel<AccountViewModel>()) }

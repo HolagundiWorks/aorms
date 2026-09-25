@@ -276,6 +276,20 @@ object Repository {
         )
     }
 
+    // ---- Approvals ----
+
+    suspend fun approvals(): List<ApprovalRow> =
+        Supa.db.from("approvals")
+            .select(Columns.list("id, entity_type, title, recipient, channel, status, sent_date, project_offices(title)")) {
+                order("created_at", Order.DESCENDING)
+            }.decodeList()
+
+    suspend fun updateApprovalStatus(id: String, status: String) {
+        Supa.db.from("approvals").update(ApprovalStatusPatch(status)) {
+            filter { eq("id", id) }
+        }
+    }
+
     suspend fun nextLeadRef(): String = nextRef("lead", "LDR")
 
     /** Calls the same next_ref() Postgres function the web app's Server Actions use for gap-free per-firm numbering. */

@@ -160,6 +160,23 @@ data class NewSiteInstruction(
     val body: String? = null,
 )
 
+// ---- Approvals (mobile Approvals view — 2026-09-25) ----
+
+@Serializable
+data class ApprovalRow(
+    val id: String,
+    @SerialName("entity_type") val entityType: String,
+    val title: String,
+    val recipient: String? = null,
+    val channel: String,
+    val status: String,
+    @SerialName("sent_date") val sentDate: String? = null,
+    @SerialName("project_offices") val projectOffices: ProjectTitleHolder? = null,
+)
+
+@Serializable
+data class ApprovalStatusPatch(val status: String)
+
 @Serializable
 data class NextRefArgs(
     @SerialName("p_scope") val scope: String,
