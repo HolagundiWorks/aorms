@@ -10,7 +10,7 @@ export default tseslint.config(
       "**/.next/**",
       "htdocs/**",
       "worker/**",
-      "**/*.config.{js,ts}",
+      "**/*.config.{js,mjs,ts}",
     ],
   },
   js.configs.recommended,

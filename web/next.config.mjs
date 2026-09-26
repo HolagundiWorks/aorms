@@ -41,13 +41,24 @@
 // it doesn't depend on `this` binding, which Next's config loader isn't
 // guaranteed to preserve.
 function buildCspHeader(reportOnly) {
+  // 2026-09-25 — `next dev --webpack`'s default "eval" devtool wraps every
+  // webpack module in a real eval() call for fast rebuilds (Fast Refresh);
+  // without 'unsafe-eval' a CSP-enforcing browser throws EvalError inside
+  // webpack's own runtime and NO client-side interactivity works at all
+  // (click handlers, React event delegation — only native <form> submits
+  // survive as progressive-enhancement fallback). This CSP had no dev
+  // exemption since it was added 2026-09-14, so any real browser with
+  // default settings opening localhost today saw the same total breakage.
+  // A real `next build` never needs eval at runtime, so production is
+  // unaffected — gate strictly on NODE_ENV, never on `reportOnly`.
+  const isDev = process.env.NODE_ENV !== "production";
   const directives = [
     "default-src 'self'",
     // cdn.razorpay.com: Razorpay's own risk-detection bundle, loaded by
     // checkout.razorpay.com's checkout script itself (not code this app
     // calls directly) — seen live in Report-Only mode on every page that
     // loads Razorpay checkout, added here rather than left to fail closed.
-    "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://cdn.razorpay.com",
+    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://checkout.razorpay.com https://cdn.razorpay.com`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https://*.supabase.co",
     "font-src 'self'",

@@ -402,7 +402,10 @@ Hub data reset nightly via `pg_cron`).
   browser), but the hardening itself isn't live. A support-ticket draft
   was handed to the user rather than guessing further or touching the
   live HTTPS-redirect setting without confirmation — see the user's own
-  follow-up once Hostinger responds.
+  follow-up once Hostinger responds. **Re-confirmed unchanged 2026-09-26**
+  (see that dated History entry) — ticket status still unknown, a
+  `<meta>`-tag CSP workaround was identified but deliberately not shipped,
+  still open.
 - **AORMS V2 frozen architecture + lightweight master plan (2026-09-20)**
   — [AORMS-V2-DEVELOPER-GUIDELINES.md](AORMS-V2-DEVELOPER-GUIDELINES.md)
   is the canonical, user-authored spec ("FROZEN ARCHITECTURE" — do not
@@ -6539,6 +6542,116 @@ report over the following weeks as a normal, expected process, not a
 bug) — but that's inference, not confirmed against real URLs. Chasing
 it further needs the actual per-URL list from Search Console's own
 Pages report, which isn't in this export.
+
+---
+
+### Local-dev CSP `'unsafe-eval'` exemption — the fix flagged above, done (2026-09-25)
+
+Picked up the follow-up flagged in the entry directly above: added a
+`NODE_ENV`-gated `'unsafe-eval'` to `script-src` in
+`web/next.config.mjs`'s `buildCspHeader()` — present only when
+`process.env.NODE_ENV !== "production"`, so `next build`'s production
+output is byte-for-byte unaffected (the ternary evaluates to the same
+empty string it always did whenever `NODE_ENV === "production"`). A
+companion `eslint.config.js` fix widened the ignored-configs glob from
+`**/*.config.{js,ts}` to `**/*.config.{js,mjs,ts}` — `next.config.mjs`
+is `.mjs`, so without this ESLint would try to lint it directly.
+
+Verified live against a real CSP-enforcing browser on `next dev
+--webpack`: `fetch()` of the page confirmed `script-src` now includes
+`'unsafe-eval'` in dev; the console showed **zero** errors (previously
+an `Uncaught EvalError` from webpack's Fast Refresh runtime); and,
+critically, a genuine `onClick`-driven button (Pulse's "Recompute now")
+fired correctly — the button's own pending-state text changed and a
+"Rendering…" toast appeared, proof real React event handlers are
+attached again, not just native `<form>` progressive-enhancement
+fallback. Confirmed via a **separate** live fetch against production
+(`aorms.in`) that the deployed CSP is unaffected by this change (no
+redeploy was part of this pass — the check compares this fix's code
+path, not a before/after of the live site).
+
+**Sanity pass requested alongside this fix, completed, nothing found:**
+searched this file for every "local dev server" / "dev server" click-
+or-interaction verification dated 2026-09-14 (when the CSP was added)
+or later, to see whether any prior click-through claim had silently only
+exercised the native-form-submission fallback. None did — every local-
+dev-server verification in that date range either predates the CSP
+(the file's History section is chronological; entries mentioning "local
+dev server" at lines ~3782/3867/4485/4639 are all dated 2026-09-09–13,
+before the CSP existed at all) or is this same 2026-09-25 session's own
+work (the Cash-total KPI re-check two entries above reads an already-
+server-rendered value, needing no client JS; the CSP-discovery entry
+itself). Every other "click-through"/"click-tested live" claim dated
+2026-09-14+ either explicitly says **production** (the identity/portal/
+admin-dashboard passes), uses `curl` rather than a browser, or doesn't
+specify environment at all (the 2026-09-14 landing-page/pricing entry) —
+none of those claim local dev specifically, so none need re-verification
+on this account.
+
+**Separate finding surfaced in passing, not investigated further
+here — flagged as its own task:** a live fetch against production
+(`aorms.in`) during this verification returned `Content-Security-
+Policy: upgrade-insecure-requests` — none of `buildCspHeader()`'s actual
+directives (script-src/style-src/connect-src/frame-ancestors/etc.) were
+present, even though every other header `next.config.mjs` sets
+(X-Frame-Options, HSTS, Permissions-Policy, COOP) came through correctly
+and matched. This doesn't affect the dev fix above (which is scoped to
+`NODE_ENV`, not this header's delivery), but if it reproduces it would
+mean the strict CSP the 2026-09-14/09-20 hardening passes recorded as
+"flipped to enforcing" and verified isn't actually reaching production
+browsers — worth its own investigation into whether Hostinger's `hcdn`
+edge is stripping/replacing the header, not assumed here.
+
+**Note added 2026-09-26, on merge:** this fix and its writeup were made
+in a sibling session working in a separate worktree
+(`claude/sleepy-leakey-ca79ec`, "Add unsafe-eval CSP exemption for next
+dev") but left uncommitted there. Discovered, verified against this
+branch's own `next.config.mjs` (identical on `main` and every other
+branch — confirmed via `git show <ref>:web/next.config.mjs` across
+`main`, `origin/main`, and `claude/sleepy-leakey-ca79ec`'s own committed
+HEAD, none of which had it), and merged here rather than re-implemented,
+since the existing fix and verification were already correct.
+
+### Production CSP override, re-checked one day later — still reproducing, still open (2026-09-26)
+
+Followed up on the "flagged as its own task" finding directly above.
+**Reproduced identically, nothing has changed in the 6 days since
+2026-09-20** (see that dated entry earlier in this section for the
+original discovery): two separate live fetches against
+`https://aorms.in/` (once relative, once absolute, both `cache:
+no-store`) and a bare `curl -sI` against both `/` and `/pulse` all
+returned exactly `content-security-policy: upgrade-insecure-requests`,
+confirmed non-cached (`x-hcdn-cache-status: DYNAMIC`), with every other
+custom header (`X-Frame-Options`, `Permissions-Policy`,
+`Cross-Origin-Opener-Policy`, etc.) passing through unmodified.
+Re-confirmed this is not an app-code regression: `next.config.mjs`'s
+`buildCspHeader()` is the only place in `web/` that sets
+`Content-Security-Policy` (`grep -ri "content-security-policy\|csp"`
+across `web/` outside `next.config.mjs` and its own comments returns
+nothing), and `proxy.ts` (this repo's Next-16 middleware equivalent)
+never touches response headers itself — it only redirects or calls
+`updateSession()` for auth-cookie refresh. The fact that every *other*
+header in the same `headers()` array survives while only
+`Content-Security-Policy` is swapped for a fixed, minimal value stays
+the strongest evidence this is Hostinger's `hcdn` edge specifically
+normalizing/overwriting that one header, not a proxy.ts/middleware bug
+or a stale deploy — same conclusion as 2026-09-20, now independently
+reproduced rather than just re-read.
+
+**Deliberately not investigated or fixed further this pass, on direct
+instruction:** whether the 2026-09-20 Hostinger support ticket was ever
+actually sent or answered is unknown — no draft or reply is saved
+anywhere in this repo, and the Hostinger MCP connector isn't authorized
+in this environment, so it can't be checked from here. A viable code-side
+workaround was identified but **not implemented**: a `<meta
+http-equiv="Content-Security-Policy">` tag in `app/layout.tsx`'s `<head>`
+would likely survive, since Hostinger's edge appears to rewrite only the
+HTTP response header, not the HTML body — it can't carry
+`frame-ancestors` (unsupported in the meta-tag form of CSP), but
+`X-Frame-Options: DENY` already covers that gap redundantly. Explicitly
+declined for this pass — no production change was made. Next step is
+still the same as 2026-09-20's: resolve the Hostinger ticket, or decide
+to ship the meta-tag workaround, whichever the account owner prefers.
 
 ---
 
