@@ -10,6 +10,11 @@ supabase = "3.2.6"
 ktorClientOkhttp = "3.0.1"
 kotlinxSerializationJson = "1.7.3"
 kotlinxCoroutines = "1.9.0"
+# Already resolved transitively via ktor-client-okhttp's own engine
+# dependency (confirmed 4.12.0 in the local Gradle cache) -- declared
+# directly here so app code can import okhttp3.* itself, for the one
+# raw multipart upload (Site Inspections) nothing else in this app needs.
+okhttp = "4.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -28,6 +33,7 @@ supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom", version
 supabase-postgrest = { group = "io.github.jan-tennert.supabase", name = "postgrest-kt" }
 supabase-auth = { group = "io.github.jan-tennert.supabase", name = "auth-kt" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktorClientOkhttp" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 

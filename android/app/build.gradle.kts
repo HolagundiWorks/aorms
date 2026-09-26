@@ -23,6 +23,13 @@ android {
         // no separate backend for this app at all.
         buildConfigField("String", "SUPABASE_URL", "\"https://aenacjqhmjlppmwodpar.supabase.co\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlbmFjanFobWpscHBtd29kcGFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTIwODIsImV4cCI6MjEwNTQ4ODA4Mn0.0YGtqKcXNaS7w-4jc5HSWt3IDHSDRM3outgUqiBVREI\"")
+        // First thing in this app that isn't a direct Supabase call — the
+        // Site Inspections photo upload goes through the Next.js app's own
+        // Route Handler (web/app/api/mobile/inspections/route.ts), since
+        // Storage has no client-writable RLS policy at all in this schema;
+        // every upload anywhere in this codebase goes through a server-side
+        // service-role client. That route lives on this domain, not Supabase's.
+        buildConfigField("String", "WEB_BASE_URL", "\"https://aorms.in\"")
     }
 
     buildTypes {
@@ -64,6 +71,7 @@ dependencies {
     implementation(libs.supabase.postgrest)
     implementation(libs.supabase.auth)
     implementation(libs.ktor.client.okhttp)
+    implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
 }

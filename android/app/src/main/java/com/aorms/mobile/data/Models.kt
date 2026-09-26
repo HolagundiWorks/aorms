@@ -101,6 +101,37 @@ data class NewLead(
     val notes: String? = null,
 )
 
+// ---- Site Inspections (mobile photo capture — 2026-09-26) ----
+// Uploaded via web/app/api/mobile/inspections/route.ts, not a direct
+// Postgrest insert — that route is the only path that can also write the
+// esti-site-inspections Storage bucket (no storage.objects RLS policy
+// exists for any bucket in this schema; every upload in this codebase
+// goes through a server-side service-role client). Listing is a plain
+// Postgrest read, same as every other Site Reports sub-tab.
+
+@Serializable
+data class SiteInspectionReportRow(
+    val id: String,
+    val ref: String,
+    @SerialName("project_offices") val projectOffices: ProjectTitleHolder? = null,
+    @SerialName("visit_date") val visitDate: String,
+    val summary: String,
+    @SerialName("issues_found") val issuesFound: Boolean = false,
+    @SerialName("follow_up_required") val followUpRequired: Boolean = false,
+    val status: String,
+)
+
+@Serializable
+data class SiteInspectionUploadResult(
+    val id: String,
+    val ref: String,
+    @SerialName("photosUploaded") val photosUploaded: Int,
+    @SerialName("photosSubmitted") val photosSubmitted: Int,
+)
+
+@Serializable
+data class MobileApiError(val error: String)
+
 @Serializable
 data class ProgressReportRow(
     val id: String,

@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -39,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.aorms.mobile.data.ProjectOption
 import com.aorms.mobile.ui.theme.CarbonTile
 
-private val TABS = listOf("Progress", "Snags", "Instructions")
+private val TABS = listOf("Progress", "Snags", "Instructions", "Inspections")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,11 +55,25 @@ fun SiteReportsScreen(viewModel: SiteReportsViewModel) {
         }
     }
 
+    // rememberSaveable, not a ViewModel field — see NewInspectionSheet's
+    // own comment: launching the camera can get this process killed, and
+    // only Activity-SavedStateRegistry-backed state (rememberSaveable)
+    // survives that, not a plain ViewModel property.
+    var showNewInspection by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(viewModel.inspectionSubmitted) {
+        if (viewModel.inspectionSubmitted) {
+            showNewInspection = false
+            viewModel.inspectionSubmitted = false
+        }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { viewModel.showNewSheet = true },
+                onClick = {
+                    if (viewModel.tab == 3) showNewInspection = true else viewModel.showNewSheet = true
+                },
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp, pressedElevation = 0.dp, focusedElevation = 0.dp, hoveredElevation = 0.dp),
             ) {
                 Icon(Icons.Default.Add, contentDescription = "New site report")
@@ -101,13 +116,36 @@ fun SiteReportsScreen(viewModel: SiteReportsViewModel) {
                             }
                         }
                     }
-                    else -> LazyColumn(modifier = Modifier.padding(12.dp), contentPadding = PaddingValues(bottom = 80.dp)) {
+                    2 -> LazyColumn(modifier = Modifier.padding(12.dp), contentPadding = PaddingValues(bottom = 80.dp)) {
                         items(viewModel.instructions) { s ->
                             CarbonTile(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                                 Column(modifier = Modifier.padding(12.dp)) {
                                     Text(s.subject, style = MaterialTheme.typography.titleMedium)
                                     Text(s.ref, style = MaterialTheme.typography.bodySmall)
                                     s.body?.let { Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp)) }
+                                }
+                            }
+                        }
+                    }
+                    else -> LazyColumn(modifier = Modifier.padding(12.dp), contentPadding = PaddingValues(bottom = 80.dp)) {
+                        items(viewModel.inspections) { r ->
+                            CarbonTile(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(r.ref, style = MaterialTheme.typography.titleMedium)
+                                    Text(
+                                        listOfNotNull(r.projectOffices?.title, r.visitDate).joinToString(" · "),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    Text(r.summary, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+                                    Text(
+                                        listOfNotNull(
+                                            if (r.issuesFound) "Issues found" else null,
+                                            if (r.followUpRequired) "Follow-up required" else null,
+                                            r.status,
+                                        ).joinToString(" · "),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
                                 }
                             }
                         }
@@ -126,6 +164,18 @@ fun SiteReportsScreen(viewModel: SiteReportsViewModel) {
             onCreateProgress = { pid, start, end, narrative, pct -> viewModel.createProgressReport(pid, start, end, narrative, pct) },
             onCreateSnag = { pid, loc, trade, desc -> viewModel.createSnag(pid, loc, trade, desc) },
             onCreateInstruction = { pid, subject, body -> viewModel.createInstruction(pid, subject, body) },
+        )
+    }
+
+    if (showNewInspection) {
+        NewInspectionSheet(
+            projects = viewModel.projects,
+            error = viewModel.error,
+            submitting = viewModel.submittingInspection,
+            onDismiss = { showNewInspection = false; viewModel.error = null },
+            onSubmit = { projectId, summary, issuesFound, followUpRequired, followUpNotes, photos ->
+                viewModel.submitInspection(projectId, summary, issuesFound, followUpRequired, followUpNotes, photos)
+            },
         )
     }
 }

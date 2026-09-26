@@ -1,10 +1,19 @@
 package com.aorms.mobile.data
 
+import com.aorms.mobile.BuildConfig
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 
 /**
  * Thin wrapper over Postgrest calls — every read/write here is scoped by
@@ -305,4 +314,67 @@ object Repository {
         val args = Json.encodeToJsonElement(NextRefArgs.serializer(), NextRefArgs(scope = scope, defaultPrefix = defaultPrefix)).jsonObject
         return Supa.db.rpc("next_ref", args).decodeAs()
     }
+
+    // ---- Site Inspections ----
+
+    suspend fun siteInspectionReports(): List<SiteInspectionReportRow> =
+        Supa.db.from("site_inspection_reports")
+            .select(Columns.list("id, ref, project_offices(title), visit_date, summary, issues_found, follow_up_required, status")) {
+                order("visit_date", Order.DESCENDING)
+            }.decodeList()
+
+    /**
+     * The one upload in this app that isn't a direct Postgrest call —
+     * Storage has no client-writable RLS policy anywhere in this schema
+     * (confirmed live: zero policies on storage.objects), so this goes
+     * through web/app/api/mobile/inspections/route.ts's own bearer-
+     * authenticated Route Handler instead, which does the real work
+     * (RLS-scoped insert, then a service-role Storage write per photo)
+     * exactly like lib/drawings/upload.ts does for the web app itself.
+     */
+    suspend fun uploadSiteInspection(
+        projectId: String,
+        summary: String,
+        issuesFound: Boolean,
+        followUpRequired: Boolean,
+        followUpNotes: String?,
+        photos: List<File>,
+    ): SiteInspectionUploadResult {
+        val token = Supa.auth.currentAccessTokenOrNull() ?: error("Not signed in.")
+
+        val bodyBuilder = MultipartBody.Builder().setType(MultipartBody.FORM)
+            .addFormDataPart("projectId", projectId)
+            .addFormDataPart("summary", summary)
+            .addFormDataPart("issuesFound", issuesFound.toString())
+            .addFormDataPart("followUpRequired", followUpRequired.toString())
+        followUpNotes?.let { bodyBuilder.addFormDataPart("followUpNotes", it) }
+        photos.forEach { file ->
+            bodyBuilder.addFormDataPart("photos", file.name, file.asRequestBody("image/jpeg".toMediaType()))
+        }
+
+        val request = Request.Builder()
+            .url("${BuildConfig.WEB_BASE_URL}/api/mobile/inspections")
+            .header("Authorization", "Bearer $token")
+            .post(bodyBuilder.build())
+            .build()
+
+        val responseText = withContext(Dispatchers.IO) {
+            AppHttp.client.newCall(request).execute().use { response ->
+                val text = response.body?.string().orEmpty()
+                if (!response.isSuccessful) {
+                    val message = runCatching { Json.decodeFromString(MobileApiError.serializer(), text).error }.getOrNull()
+                    error(message ?: "Upload failed (HTTP ${response.code}).")
+                }
+                text
+            }
+        }
+        return Json.decodeFromString(SiteInspectionUploadResult.serializer(), responseText)
+    }
+}
+
+/** One shared OkHttp client for the app (standard practice — connection
+ * pooling, not a new client per call) — used only for the one endpoint
+ * this app calls outside Supabase itself, see uploadSiteInspection above. */
+private object AppHttp {
+    val client = OkHttpClient()
 }

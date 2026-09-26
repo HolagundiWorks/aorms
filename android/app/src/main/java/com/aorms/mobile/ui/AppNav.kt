@@ -17,8 +17,12 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Column
@@ -77,9 +81,34 @@ fun AormsApp() {
     val authViewModel: AuthViewModel = viewModel()
     val sessionStatus by authViewModel.sessionStatus.collectAsState()
 
-    when (sessionStatus) {
-        is SessionStatus.Authenticated -> AuthenticatedApp()
-        else -> AuthScreen(authViewModel)
+    // 2026-09-27 fix, root-caused live on device: launching an external
+    // Activity (confirmed via the Site Inspections camera capture, but
+    // this applies to any app resume) reliably discarded the whole
+    // AuthenticatedApp() subtree — its NavController's back stack and
+    // every nav-scoped ViewModel — even though the process/Activity
+    // itself never died (confirmed via lifecycle logging: same PID, no
+    // onCreate/onDestroy at all). Root cause: Supabase Auth's own
+    // sessionStatus flow re-emits SessionStatus.Initializing while it
+    // re-validates the stored session on resume, and the old `when`
+    // below treated anything that wasn't literally Authenticated as
+    // "log the user out," tearing down and rebuilding AuthenticatedApp()
+    // from scratch on every such blip. `hasAuthenticated` remembers a
+    // real prior Authenticated result across a transient Initializing
+    // tick, so only a genuine NotAuthenticated/RefreshFailure (an actual
+    // sign-out or expired session) bounces to the login screen.
+    var hasAuthenticated by remember { mutableStateOf(false) }
+    LaunchedEffect(sessionStatus) {
+        when (sessionStatus) {
+            is SessionStatus.Authenticated -> hasAuthenticated = true
+            is SessionStatus.NotAuthenticated, is SessionStatus.RefreshFailure -> hasAuthenticated = false
+            is SessionStatus.Initializing -> Unit // keep whatever hasAuthenticated already was
+        }
+    }
+
+    if (sessionStatus is SessionStatus.Authenticated || (hasAuthenticated && sessionStatus is SessionStatus.Initializing)) {
+        AuthenticatedApp()
+    } else {
+        AuthScreen(authViewModel)
     }
 }
 
