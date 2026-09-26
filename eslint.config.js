@@ -48,6 +48,18 @@ export default tseslint.config(
     },
   },
   {
+    // Service worker (web/public/sw.js) — runs in the ServiceWorkerGlobalScope,
+    // not a browser window or Node: `self` is that global scope itself, not
+    // an undefined reference. No config anywhere in this repo declared that
+    // scope, so eslint:recommended's `no-undef` flagged every `self` use.
+    files: ["**/public/sw.js"],
+    languageOptions: {
+      globals: {
+        self: "readonly",
+      },
+    },
+  },
+  {
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
