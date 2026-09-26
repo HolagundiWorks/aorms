@@ -6403,6 +6403,60 @@ confirmed the "A statement file is required" error appeared — and
 critically, the Label field **kept its typed value** instead of
 reverting to the placeholder.
 
+### Local-dev CSP `'unsafe-eval'` exemption — the fix flagged above, done (2026-09-25)
+
+Picked up the follow-up flagged in the entry directly above: added a
+`NODE_ENV`-gated `'unsafe-eval'` to `script-src` in
+`web/next.config.mjs`'s `buildCspHeader()` — present only when
+`process.env.NODE_ENV !== "production"`, so `next build`'s production
+output is byte-for-byte unaffected (the ternary evaluates to the same
+empty string it always did whenever `NODE_ENV === "production"`).
+
+Verified live against a real CSP-enforcing browser on `next dev
+--webpack`: `fetch()` of the page confirmed `script-src` now includes
+`'unsafe-eval'` in dev; the console showed **zero** errors (previously
+an `Uncaught EvalError` from webpack's Fast Refresh runtime); and,
+critically, a genuine `onClick`-driven button (Pulse's "Recompute now")
+fired correctly — the button's own pending-state text changed and a
+"Rendering…" toast appeared, proof real React event handlers are
+attached again, not just native `<form>` progressive-enhancement
+fallback. Confirmed via a **separate** live fetch against production
+(`aorms.in`) that the deployed CSP is unaffected by this change (no
+redeploy was part of this pass — the check compares this fix's code
+path, not a before/after of the live site).
+
+**Sanity pass requested alongside this fix, completed, nothing found:**
+searched this file for every "local dev server" / "dev server" click-
+or-interaction verification dated 2026-09-14 (when the CSP was added)
+or later, to see whether any prior click-through claim had silently only
+exercised the native-form-submission fallback. None did — every local-
+dev-server verification in that date range either predates the CSP
+(the file's History section is chronological; entries mentioning "local
+dev server" at lines ~3782/3867/4485/4639 are all dated 2026-09-09–13,
+before the CSP existed at all) or is this same 2026-09-25 session's own
+work (the Cash-total KPI re-check two entries above reads an already-
+server-rendered value, needing no client JS; the CSP-discovery entry
+itself). Every other "click-through"/"click-tested live" claim dated
+2026-09-14+ either explicitly says **production** (the identity/portal/
+admin-dashboard passes), uses `curl` rather than a browser, or doesn't
+specify environment at all (the 2026-09-14 landing-page/pricing entry) —
+none of those claim local dev specifically, so none need re-verification
+on this account.
+
+**Separate finding surfaced in passing, not investigated further
+here — flagged as its own task:** a live fetch against production
+(`aorms.in`) during this verification returned `Content-Security-
+Policy: upgrade-insecure-requests` — none of `buildCspHeader()`'s actual
+directives (script-src/style-src/connect-src/frame-ancestors/etc.) were
+present, even though every other header `next.config.mjs` sets
+(X-Frame-Options, HSTS, Permissions-Policy, COOP) came through correctly
+and matched. This doesn't affect the dev fix above (which is scoped to
+`NODE_ENV`, not this header's delivery), but if it reproduces it would
+mean the strict CSP the 2026-09-14/09-20 hardening passes recorded as
+"flipped to enforcing" and verified isn't actually reaching production
+browsers — worth its own investigation into whether Hostinger's `hcdn`
+edge is stripping/replacing the header, not assumed here.
+
 ---
 
 ## Support & questions
