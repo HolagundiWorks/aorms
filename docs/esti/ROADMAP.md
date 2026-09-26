@@ -274,6 +274,84 @@ Hub data reset nightly via `pg_cron`).
   field correctly, and tapping the share icon opened Android's real
   native share sheet with the exact expected formatted text preview.
   Test row deleted afterward.
+  **Fifth slice shipped 2026-09-27: Site → Inspections photo capture,
+  plus a real app-wide bug fix found along the way.** Research before
+  building found the obvious backend already existed and had simply
+  never been wired up: `web/app/api/mobile/inspections/route.ts`
+  (shipped 2026-09-19, bearer-authenticated, multipart) inserts a
+  `site_inspection_reports` row via the caller's own RLS-scoped
+  session, then uploads each photo to the private
+  `esti-site-inspections` bucket via a service-role client — the
+  *only* way any client can write Storage in this schema (confirmed
+  live: zero RLS policies exist on `storage.objects` at all). This
+  pass just gave the Android app a way to call it: new "Inspections"
+  tab on the existing Site screen (a 4th `TabRow` tab, not a new
+  bottom-nav destination — sidesteps the width problem the
+  Approvals/Documents slices already had to fix twice, and fits the
+  IA better besides), a read-only list plus a capture sheet (project,
+  summary, issues/follow-up flags, repeatable camera capture →
+  Submit). First camera/runtime-permission/raw-HTTP-outside-Supabase
+  use anywhere in this app — new `CAMERA` permission + a
+  `FileProvider` entry (`res/xml/file_paths.xml`), a new
+  `WEB_BASE_URL` BuildConfig field (this app now talks to the Next.js
+  app's own domain too, not just Supabase directly), and `okhttp`
+  promoted from a transitive dependency (already pulled in by the
+  Supabase SDK's own `ktor-client-okhttp` engine, confirmed `4.12.0`)
+  to a direct one, used for the one raw multipart POST this feature
+  needs.
+
+  **A real, app-wide bug was found and fixed while verifying this,
+  not something specific to the new feature**: launching the camera
+  reliably discarded the *entire* authenticated app's state — its
+  navigation back stack and every screen's own ViewModel, wiping any
+  in-progress form on any tab — even though the process/Activity
+  itself never died (confirmed via temporary lifecycle logging: same
+  PID throughout, `onCreate`/`onDestroy` never fired even once across
+  the whole camera round-trip). Root-caused to `AppNav.kt`'s
+  `AormsApp()`: Supabase Auth's own `sessionStatus` flow re-emits
+  `Initializing` while it silently re-validates the stored session on
+  every app resume from background, and the `when` block there treated
+  anything short of literally `Authenticated` as a sign-out, tearing
+  down and rebuilding the whole authenticated composable tree (and
+  therefore its `NavController` + every nav-scoped `ViewModel`) from
+  scratch on every such blip — this was happening on **every** app
+  resume, not just camera returns, silently discarding whatever the
+  user was doing on any screen. Fixed by remembering a prior real
+  `Authenticated` result across a transient `Initializing` tick, so
+  only a genuine `NotAuthenticated`/`RefreshFailure` (an actual
+  sign-out or truly expired session) still bounces to the login
+  screen. Also made the sheet's own fields `rememberSaveable` (not
+  just `remember`) as separate, defense-in-depth robustness for a
+  genuine process-death case — distinct from, and not a substitute
+  for, the `sessionStatus` fix above.
+
+  **Second infrastructure gap found and fixed along the way**: the
+  first real upload attempts failed silently (photo count came back
+  as "0 of 1 uploaded", with no error). Traced via a temporary
+  server-side diagnostic log (removed once root-caused) to the
+  signature check actually *passing* — the real failure was one step
+  later: the `esti-site-inspections` Storage bucket didn't exist on
+  the current `aorms-web` project at all. Storage buckets aren't part
+  of the SQL migration history (created via the Storage API originally,
+  per that route's own comment) — only the DB tables/RLS survived this
+  project's own documented rebuilds; the bucket itself was silently
+  lost and nobody had re-created it since. Recreated it directly via
+  the Management API (private, 10MB limit, `image/jpeg|png|webp`,
+  matching the original documented spec).
+
+  **Verified fully live, through the real app, not just curl**: a
+  complete capture-through-upload run on-device — camera permission
+  grant, photo capture (confirmed via pulling the actual file and
+  checking its magic bytes: genuine `FF D8 FF` JPEG), form state
+  surviving the camera round-trip intact, successful submission
+  landing a real `site_inspection_reports` row and a real
+  `site_inspection_photos` row pointing at a real object in the
+  now-existing bucket — confirmed via direct query, then cleaned up.
+  **Explicitly out of scope for this pass, not an oversight**: voice
+  capture (no audio column/table or backend endpoint exists anywhere
+  in this schema — a new capability on the scale of Meetings' own
+  already-deferred "needs new AI capability" note, not a small
+  addition here).
 - ~~Two separate login pages (aorms.in/login vs. identity.aorms.in)~~
   **Resolved 2026-09-20** — explicit user direction ("keep one page[,]
   improve security"), user chose identity.aorms.in as the surviving
@@ -6691,4 +6769,4 @@ to ship the meta-tag workaround, whichever the account owner prefers.
 
 ---
 
-**Last updated:** 2026-09-26
+**Last updated:** 2026-09-27
