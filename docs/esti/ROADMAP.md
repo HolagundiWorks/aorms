@@ -6509,6 +6509,19 @@ branch — confirmed via `git show <ref>:web/next.config.mjs` across
 HEAD, none of which had it), and merged here rather than re-implemented,
 since the existing fix and verification were already correct.
 
+**Correction, minutes later (2026-09-26):** the sibling session
+committed its own copy independently (`5ac74350`, PR #70) about 2.5
+minutes after this branch's merge commit (`cae90f9c`, 20:38:44 vs.
+20:41:08 IST) — a genuine race between the two sessions checking the
+same worktree, not this entry rescuing abandoned work as first written
+above. It was an accurate description at the moment it was checked; it
+became stale mid-merge. Content is byte-identical between the two
+commits' `next.config.mjs`; PR #70 was closed as superseded rather than
+merged, since `main` already had the fix by then (and `main`'s version
+of `eslint.config.js` is the more complete one regardless — see the
+next paragraph). No functional conflict, no action needed on either
+branch.
+
 ### Production CSP override, re-checked one day later — still reproducing, still open (2026-09-26)
 
 Followed up on the "flagged as its own task" finding directly above.
