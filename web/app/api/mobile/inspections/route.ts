@@ -98,7 +98,19 @@ export async function POST(request: Request) {
   const uploadedKeys: string[] = [];
   for (const photo of photos) {
     const claimedType = photo.type in PHOTO_EXTENSION_BY_TYPE ? photo.type : "image/jpeg";
-    if (!(await matchesClaimedType(photo, claimedType))) {
+    const matched = await matchesClaimedType(photo, claimedType);
+    // TEMPORARY diagnostic (2026-09-27) — investigating a live 0-of-1
+    // photo upload rejection. Remove once root-caused.
+    const headBuf = Buffer.from(await photo.slice(0, 16).arrayBuffer());
+    console.log("[mobile-inspections-diag]", {
+      name: photo.name,
+      type: photo.type,
+      size: photo.size,
+      claimedType,
+      matched,
+      headHex: headBuf.toString("hex"),
+    });
+    if (!matched) {
       continue; // not a real photo — skip rather than fail the whole report
     }
     const buf = Buffer.from(await photo.arrayBuffer());
