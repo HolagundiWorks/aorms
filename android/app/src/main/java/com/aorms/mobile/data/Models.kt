@@ -177,6 +177,23 @@ data class ApprovalRow(
 @Serializable
 data class ApprovalStatusPatch(val status: String)
 
+// ---- Document Issues register (mobile Documents view — 2026-09-26) ----
+// Append-only, like audit_log (no update/delete RLS policy) — mobile is
+// genuinely "consume only" here: view + share, no logging-a-new-issue
+// form in this pass (an explicit scope decision, not an oversight).
+
+@Serializable
+data class DocumentIssueRow(
+    val id: String,
+    @SerialName("entity_type") val entityType: String,
+    val ref: String,
+    @SerialName("version_no") val versionNo: Int,
+    @SerialName("revision_note") val revisionNote: String? = null,
+    @SerialName("impact_note") val impactNote: String? = null,
+    @SerialName("issued_at") val issuedAt: String? = null,
+    @SerialName("project_offices") val projectOffices: ProjectTitleHolder? = null,
+)
+
 @Serializable
 data class NextRefArgs(
     @SerialName("p_scope") val scope: String,

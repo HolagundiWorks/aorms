@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CheckCircleOutline
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Warning
@@ -33,6 +34,8 @@ import com.aorms.mobile.data.Supa
 import com.aorms.mobile.ui.account.AccountScreen
 import com.aorms.mobile.ui.approvals.ApprovalsScreen
 import com.aorms.mobile.ui.approvals.ApprovalsViewModel
+import com.aorms.mobile.ui.documents.DocumentsScreen
+import com.aorms.mobile.ui.documents.DocumentsViewModel
 import com.aorms.mobile.ui.account.AccountViewModel
 import com.aorms.mobile.ui.auth.AuthScreen
 import com.aorms.mobile.ui.auth.AuthViewModel
@@ -61,6 +64,10 @@ private val BOTTOM_DESTS = listOf(
     // reads clearly rather than an unrelated abbreviation.
     BottomDest("approvals", "Approve", Icons.Default.CheckCircleOutline),
     BottomDest("leads", "Leads", Icons.Default.PersonAdd),
+    // Short label, not "Documents" (2026-09-25's "Approve" wrapping fix
+    // already found the pattern: adding another item shrinks every item's
+    // available width, and a longer label is what breaks first).
+    BottomDest("documents", "Docs", Icons.Default.Description),
     BottomDest("reports", "Site", Icons.Default.Warning),
     BottomDest("account", "Account", Icons.Default.AccountCircle),
 )
@@ -91,8 +98,9 @@ private fun AuthenticatedApp() {
                     val backStackEntry by navController.currentBackStackEntryAsState()
                     val currentDestination = backStackEntry?.destination
                     BOTTOM_DESTS.forEach { dest ->
+                        val selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true
                         NavigationBarItem(
-                            selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true,
+                            selected = selected,
                             onClick = {
                                 navController.navigate(dest.route) {
                                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -102,6 +110,16 @@ private fun AuthenticatedApp() {
                             },
                             icon = { Icon(dest.icon, contentDescription = dest.label) },
                             label = { Text(dest.label) },
+                            // 2026-09-26 fix, found live on device: 8 flat
+                            // items is past the point where shortening one
+                            // more label helps — "Projects"/"Approve"/
+                            // "Account" all wrapped to two lines at this
+                            // width, not just the newest addition. Material3's
+                            // standard fix for a many-item bar: only the
+                            // selected tab shows its label; others are
+                            // icon-only, which is what frees the width every
+                            // label actually needs.
+                            alwaysShowLabel = selected,
                         )
                     }
                 }
@@ -114,6 +132,7 @@ private fun AuthenticatedApp() {
             composable("tasks") { TasksScreen(viewModel<TasksViewModel>()) }
             composable("approvals") { ApprovalsScreen(viewModel<ApprovalsViewModel>()) }
             composable("leads") { LeadsScreen(viewModel<LeadsViewModel>()) }
+            composable("documents") { DocumentsScreen(viewModel<DocumentsViewModel>()) }
             composable("reports") { SiteReportsScreen(viewModel<SiteReportsViewModel>()) }
             composable("account") { AccountScreen(viewModel<AccountViewModel>()) }
         }

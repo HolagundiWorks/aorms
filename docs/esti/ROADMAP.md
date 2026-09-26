@@ -234,6 +234,46 @@ Hub data reset nightly via `pg_cron`).
   pass**: logging new approvals from mobile, editing an existing
   approval's own fields (recipient/channel/etc.) — both genuinely
   "administer," stay web-only.
+  **Fourth slice shipped 2026-09-26: mobile Documents view ("consume
+  only — view/approve/share").** Real scope question surfaced before
+  building, not guessed at: the obvious candidate (`drawings`, the DXF
+  register) turned out to have no simple "view the file" action even on
+  the web app itself — only a DXF→SVG/issue-PDF pipeline depending on a
+  job-queue gateway whose deployment is unverified (see CLAUDE.md's own
+  flagged risk). Asked the user via AskUserQuestion; resolved: backed
+  by the **Document Issues register** (`document_issues`) instead — a
+  flat, cross-entity revision/issue log (letters, contracts, proposals,
+  transmittals, inspections, spec-sheets, MoMs), append-only by RLS
+  design (no update/delete policy, same as `audit_log`), pure text/
+  metadata, zero job-queue or file-rendering risk. New "Docs" bottom-nav
+  tab: a read-only list (new `Repository.documentIssues()`, mirrors the
+  web `/document-issues` page's own column set) plus a native Android
+  share-sheet action per row (`Intent.ACTION_SEND`, plain text summary)
+  — genuinely "consume only," no logging-a-new-issue form in this pass
+  (stays web-only, same "act, not administer" discipline as Projects/
+  Approvals). **A second, more structural UI bug found and fixed live,
+  not just the same one-off label-length fix as the Approvals slice**:
+  adding an 8th bottom-nav item pushed every item's available width
+  down far enough that *three* labels wrapped at once
+  ("Projects"/"Approve"/"Account", not just the newest addition) —
+  confirmed via an on-device screenshot. Recognized this as the actual
+  scaling limit of a flat, always-labeled `NavigationBar` rather than
+  keep shortening labels one at a time; fixed properly with Material3's
+  standard pattern for a many-item bar (`alwaysShowLabel = selected` —
+  only the active tab shows its label, others render icon-only),
+  re-verified clean with all 8 icons rendering unambiguously. **Also
+  found and fixed in passing**: a pre-existing `.gitignore` rule
+  (`documents/`, meant for an unrelated root-level scratch folder)
+  matched at any depth with no leading slash, silently swallowing the
+  new `ui/documents/` package from `git status` entirely — anchored to
+  `/documents/` so it only excludes the root-level folder it was
+  actually written for. **Verified live end-to-end**: empty state
+  confirmed correct (this firm's `document_issues` table was genuinely
+  empty, not an error), then a real temporary row (a TRANSMITTAL
+  revision) inserted via the Supabase Management API rendered every
+  field correctly, and tapping the share icon opened Android's real
+  native share sheet with the exact expected formatted text preview.
+  Test row deleted afterward.
 - ~~Two separate login pages (aorms.in/login vs. identity.aorms.in)~~
   **Resolved 2026-09-20** — explicit user direction ("keep one page[,]
   improve security"), user chose identity.aorms.in as the surviving

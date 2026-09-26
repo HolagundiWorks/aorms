@@ -290,6 +290,14 @@ object Repository {
         }
     }
 
+    // ---- Document Issues (read-only on mobile) ----
+
+    suspend fun documentIssues(): List<DocumentIssueRow> =
+        Supa.db.from("document_issues")
+            .select(Columns.list("id, entity_type, ref, version_no, revision_note, impact_note, issued_at, project_offices(title)")) {
+                order("issued_at", Order.DESCENDING)
+            }.decodeList()
+
     suspend fun nextLeadRef(): String = nextRef("lead", "LDR")
 
     /** Calls the same next_ref() Postgres function the web app's Server Actions use for gap-free per-firm numbering. */
