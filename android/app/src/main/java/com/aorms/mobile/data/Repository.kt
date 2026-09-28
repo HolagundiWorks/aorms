@@ -13,7 +13,9 @@ import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 /**
  * Thin wrapper over Postgrest calls — every read/write here is scoped by
@@ -369,6 +371,43 @@ object Repository {
             }
         }
         return Json.decodeFromString(SiteInspectionUploadResult.serializer(), responseText)
+    }
+
+    /**
+     * Mobile Esti — contextual commands, not a chatbot (2026-09-27). Fixed
+     * command enum ("TODAY_FOCUS" / "PROJECT_SUMMARY"), never a free-text
+     * question from this app — web/app/api/mobile/esti/route.ts enforces
+     * that server-side too. A longer read timeout than the shared
+     * `AppHttp.client` default (10s) — that default is fine for the single
+     * multipart upload above, but an LLM tool-calling loop can genuinely
+     * take longer than that.
+     */
+    suspend fun askEsti(command: String, projectId: String? = null): String {
+        val token = Supa.auth.currentAccessTokenOrNull() ?: error("Not signed in.")
+
+        val bodyJson = Json.encodeToJsonElement(
+            EstiCommandRequest.serializer(),
+            EstiCommandRequest(command = command, projectId = projectId),
+        ).jsonObject.toString()
+
+        val request = Request.Builder()
+            .url("${BuildConfig.WEB_BASE_URL}/api/mobile/esti")
+            .header("Authorization", "Bearer $token")
+            .post(bodyJson.toRequestBody("application/json".toMediaType()))
+            .build()
+
+        val longClient = AppHttp.client.newBuilder().readTimeout(60, TimeUnit.SECONDS).build()
+        val responseText = withContext(Dispatchers.IO) {
+            longClient.newCall(request).execute().use { response ->
+                val text = response.body?.string().orEmpty()
+                if (!response.isSuccessful) {
+                    val message = runCatching { Json.decodeFromString(MobileApiError.serializer(), text).error }.getOrNull()
+                    error(message ?: "Esti request failed (HTTP ${response.code}).")
+                }
+                text
+            }
+        }
+        return Json.decodeFromString(EstiAnswerResult.serializer(), responseText).output
     }
 }
 

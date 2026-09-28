@@ -8,6 +8,7 @@ import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 import { roleHome } from "../auth/role-home";
 import { checkRateLimit, rateLimitIdentifier } from "../security/rate-limit";
+import { stampSessionStart, clearSessionStart } from "../supabase/session-cap";
 
 export type AuthActionState = { error: string } | null;
 
@@ -105,7 +106,10 @@ export async function signIn(_prev: AuthActionState, formData: FormData): Promis
   // run before any redirect() below, since redirect() throws and nothing
   // after it executes.
   revalidatePath("/", "layout");
-  if (destination) redirect(destination);
+  if (destination) {
+    await stampSessionStart();
+    redirect(destination);
+  }
 
   const home = roleHome(profile?.role);
   if (!home) {
@@ -118,6 +122,7 @@ export async function signIn(_prev: AuthActionState, formData: FormData): Promis
     return { error: "This account's portal isn't available yet — contact your firm for access." };
   }
 
+  await stampSessionStart();
   redirect(home);
 }
 
@@ -393,7 +398,10 @@ async function signInWithIdentity(email: string, password: string): Promise<Auth
   // Cache so a page reached via a post-sign-in nav <Link> can't serve a
   // stale pre-sign-in prefetch. Must run before any redirect() below.
   revalidatePath("/", "layout");
-  if (destination) redirect(destination);
+  if (destination) {
+    await stampSessionStart();
+    redirect(destination);
+  }
 
   const home = roleHome(profile?.role);
   if (!home) {
@@ -409,6 +417,7 @@ async function signInWithIdentity(email: string, password: string): Promise<Auth
     return { error: "Signed in with your AORMS Identity — this account's Office Hub portal isn't available yet — contact your firm for access." };
   }
 
+  await stampSessionStart();
   redirect(home);
 }
 
@@ -426,6 +435,7 @@ export async function signOut(): Promise<void> {
   // calls are now independent: one failing can never skip the other.
   await signOutSafely(() => supabase.auth.signOut(), "Office Hub");
   await signOutSafely(() => platformSupabase.auth.signOut(), "Platform");
+  await clearSessionStart();
 
   // Purge the client Router Cache so a page reached right after this
   // redirect (or a subsequent navigation in this tab) can't serve a

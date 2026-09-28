@@ -60,6 +60,11 @@ class TodayViewModel : ViewModel() {
     var kpiDetailRows by mutableStateOf<List<KpiDetailRow>>(emptyList())
     private val kpiDetailCache = mutableMapOf<String, List<KpiDetailRow>>()
 
+    // Esti — contextual command, not a chatbot (2026-09-27): one canned
+    // question, re-tappable to refresh (overwrites the prior answer).
+    var estiLoading by mutableStateOf(false)
+    var estiAnswer by mutableStateOf<String?>(null)
+
     fun load() {
         val user = Supa.auth.currentUserOrNull() ?: return
         userName = user.email ?: ""
@@ -161,6 +166,17 @@ class TodayViewModel : ViewModel() {
             kpiDetailCache[key] = rows
             if (expandedKpi == key) kpiDetailRows = rows
             kpiDetailLoading = false
+        }
+    }
+
+    fun askEstiFocus() {
+        estiAnswer = null
+        estiLoading = true
+        viewModelScope.launch {
+            runCatching { Repository.askEsti("TODAY_FOCUS") }
+                .onSuccess { estiAnswer = it }
+                .onFailure { error = it.toUserMessage() }
+            estiLoading = false
         }
     }
 }

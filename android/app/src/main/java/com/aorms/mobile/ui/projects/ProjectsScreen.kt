@@ -75,6 +75,9 @@ fun ProjectsScreen(viewModel: ProjectsViewModel) {
                             phases = viewModel.phases,
                             openTaskCount = viewModel.openTaskCount,
                             onAddTask = { viewModel.showNewTaskFor = project },
+                            estiLoading = viewModel.estiLoadingProjectId == project.id,
+                            estiAnswer = viewModel.estiAnswers[project.id],
+                            onAskEsti = { viewModel.askEstiAboutProject(project.id) },
                         )
                     }
                 }
@@ -126,6 +129,9 @@ private fun ProjectDetailPanel(
     phases: List<PhaseRow>,
     openTaskCount: Long,
     onAddTask: () -> Unit,
+    estiLoading: Boolean,
+    estiAnswer: String?,
+    onAskEsti: () -> Unit,
 ) {
     CarbonTile(modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -159,6 +165,20 @@ private fun ProjectDetailPanel(
 
             Button(onClick = onAddTask, modifier = Modifier.padding(top = 16.dp)) {
                 Text("+ Add task")
+            }
+
+            // Esti — contextual command, not a chatbot (2026-09-27):
+            // scoped to this project, no free-text input.
+            Button(onClick = onAskEsti, enabled = !estiLoading, modifier = Modifier.padding(top = 8.dp)) {
+                Text("Ask Esti about this project")
+            }
+            when {
+                estiLoading -> CircularProgressIndicator(modifier = Modifier.size(20.dp).padding(top = 8.dp))
+                estiAnswer != null -> Text(
+                    estiAnswer,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
             }
         }
     }

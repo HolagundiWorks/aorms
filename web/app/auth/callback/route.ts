@@ -28,6 +28,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "../../../lib/supabase/server";
 import { safeNextPath } from "../../../lib/security/safe-next-path";
+import { stampSessionStartOnResponse } from "../../../lib/supabase/session-cap";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aorms.in";
 
@@ -43,7 +44,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${SITE_URL}${next}`);
+      // Same absolute-session-cap stamp signIn()/platformSignIn() set on
+      // every other path that establishes a real Office Hub session — see
+      // session-cap.ts's header. This is a genuine third entry point
+      // (password-reset/invite-accept links), easy to miss and exactly
+      // the kind of gap that would otherwise force-logout a user one
+      // request after they sign in this way, once the cap enforcement in
+      // middleware.ts is live.
+      const redirectResponse = NextResponse.redirect(`${SITE_URL}${next}`);
+      stampSessionStartOnResponse(redirectResponse);
+      return redirectResponse;
     }
   }
 

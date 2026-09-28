@@ -5,6 +5,7 @@ import { Button, Column, Form, Grid, InlineNotification, PasswordInput, Stack, T
 import { ArrowRight } from "@carbon/icons-react";
 import NextLink from "next/link";
 import { platformSignUp, signInWithGoogle, type PlatformActionState } from "../../../lib/actions/platform";
+import { TurnstileWidget } from "../../../components/aorms/security/TurnstileWidget";
 
 export default function PlatformSignUpPage() {
   const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(platformSignUp, null);
@@ -51,6 +52,7 @@ export default function PlatformSignUpPage() {
               autoComplete="new-password"
               required
             />
+            <TurnstileWidget action="signup" />
             {state?.error ? (
               <InlineNotification kind="error" title="Sign-up failed" subtitle={state.error} lowContrast hideCloseButton />
             ) : null}

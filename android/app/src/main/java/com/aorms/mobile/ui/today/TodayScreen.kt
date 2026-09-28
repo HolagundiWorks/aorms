@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -144,6 +145,12 @@ fun TodayScreen(viewModel: TodayViewModel) {
                         rows = viewModel.kpiDetailRows,
                     )
                 }
+
+                EstiFocusPanel(
+                    loading = viewModel.estiLoading,
+                    answer = viewModel.estiAnswer,
+                    onAsk = { viewModel.askEstiFocus() },
+                )
             }
         }
     }
@@ -290,6 +297,29 @@ private fun PulseGrid(viewModel: TodayViewModel) {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+/** Esti — one contextual command, not a chatbot (2026-09-27): no
+ * free-text input, just a button that asks a fixed, studio-wide question
+ * and shows the answer inline. Re-tappable to refresh. */
+@Composable
+private fun EstiFocusPanel(loading: Boolean, answer: String?, onAsk: () -> Unit) {
+    CarbonTile(modifier = Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 16.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text("Esti", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(bottom = 8.dp))
+            Button(onClick = onAsk, enabled = !loading) {
+                Text("What needs my attention?")
+            }
+            when {
+                loading -> CircularProgressIndicator(modifier = Modifier.size(20.dp).padding(top = 12.dp))
+                answer != null -> Text(
+                    answer,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 12.dp),
+                )
             }
         }
     }

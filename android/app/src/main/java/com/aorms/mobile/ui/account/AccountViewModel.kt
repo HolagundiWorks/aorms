@@ -1,5 +1,6 @@
 package com.aorms.mobile.ui.account
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.aorms.mobile.data.FirmMembershipRow
 import com.aorms.mobile.data.MyProfile
 import com.aorms.mobile.data.Repository
+import com.aorms.mobile.data.SessionCap
 import com.aorms.mobile.data.Supa
 import com.aorms.mobile.data.toUserMessage
 import kotlinx.coroutines.launch
@@ -51,7 +53,8 @@ class AccountViewModel : ViewModel() {
         }
     }
 
-    fun signOut() {
+    fun signOut(context: Context) {
         viewModelScope.launch { Supa.auth.signOut() }
+        SessionCap.clear(context)
     }
 }

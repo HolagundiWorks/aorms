@@ -33,6 +33,8 @@ import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aorms.in";
 import { createOrder, verifyPaymentSignature } from "../platform/razorpay";
 import { applyCapturedConnectDexPayment } from "../platform/connectdex-payment";
 import { toSafeErrorMessage } from "../security/safe-error";
@@ -127,6 +129,7 @@ export async function adminInviteConnectDexApplication(applicationId: string): P
 
   const { data: invited, error: inviteError } = await platformService.auth.admin.inviteUserByEmail(application.email, {
     data: { full_name: application.contact_name, account_kind: "company" },
+    redirectTo: `${SITE_URL}/platform-auth-callback?next=${encodeURIComponent("/platform-reset-password?mode=invite")}`,
   });
   if (inviteError) return { error: toSafeErrorMessage(inviteError) };
 

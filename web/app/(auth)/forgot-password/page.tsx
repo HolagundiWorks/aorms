@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { ArrowRight } from "@carbon/icons-react";
 import { requestPasswordReset, type PasswordActionState } from "../../../lib/actions/password-reset";
+import { TurnstileWidget } from "../../../components/aorms/security/TurnstileWidget";
 
 export default function ForgotPasswordPage() {
   const [state, formAction, pending] = useActionState<PasswordActionState, FormData>(requestPasswordReset, null);
@@ -34,6 +35,7 @@ export default function ForgotPasswordPage() {
         ) : (
           <>
             <TextInput id="email" name="email" labelText="Email" type="email" autoComplete="email" required />
+            <TurnstileWidget action="reset" />
             {state?.error ? (
               <InlineNotification kind="error" title="Couldn't send reset link" subtitle={state.error} lowContrast hideCloseButton />
             ) : null}

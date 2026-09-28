@@ -21,6 +21,7 @@ import { roleHome } from "../auth/role-home";
 import { checkRateLimit, rateLimitIdentifier } from "../security/rate-limit";
 import { validatePassword } from "../security/password-policy";
 import { toSafeErrorMessage } from "../security/safe-error";
+import { verifyTurnstileToken } from "../security/turnstile";
 
 export type PasswordActionState = { error: string } | { success: true } | null;
 
@@ -38,6 +39,12 @@ export async function requestPasswordReset(_prev: PasswordActionState, formData:
     windowMs: 60 * 60 * 1000,
   });
   if (!rateLimit.ok) return { error: `Too many requests — try again in ${rateLimit.retryAfterSeconds}s.` };
+
+  const captchaToken = String(formData.get("cf-turnstile-response") ?? "");
+  // Manual verification, not Supabase's native captcha config — see
+  // lib/security/turnstile.ts's header for why aorms-web can't use the
+  // native gate here without breaking platformSignIn()'s fallback path.
+  if (!(await verifyTurnstileToken(captchaToken))) return { error: "Verification failed — please try again." };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {

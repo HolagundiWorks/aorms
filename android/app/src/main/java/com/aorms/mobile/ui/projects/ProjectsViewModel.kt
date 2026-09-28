@@ -41,6 +41,14 @@ class ProjectsViewModel : ViewModel() {
 
     var showNewTaskFor by mutableStateOf<ProjectRow?>(null)
 
+    // Esti — contextual command, not a chatbot (2026-09-27): scoped to
+    // whichever project is expanded. Keyed cache, same idiom as
+    // phasesCache/openTaskCountCache above; re-tapping overwrites the
+    // cached answer rather than appending, since a fresh answer is what
+    // "refresh" should mean here.
+    var estiLoadingProjectId by mutableStateOf<String?>(null)
+    var estiAnswers by mutableStateOf<Map<String, String>>(emptyMap())
+
     fun load() {
         loading = true
         viewModelScope.launch {
@@ -106,6 +114,16 @@ class ProjectsViewModel : ViewModel() {
             }.onFailure {
                 error = it.toUserMessage()
             }
+        }
+    }
+
+    fun askEstiAboutProject(projectId: String) {
+        estiLoadingProjectId = projectId
+        viewModelScope.launch {
+            runCatching { Repository.askEsti("PROJECT_SUMMARY", projectId) }
+                .onSuccess { estiAnswers = estiAnswers + (projectId to it) }
+                .onFailure { error = it.toUserMessage() }
+            estiLoadingProjectId = null
         }
     }
 }

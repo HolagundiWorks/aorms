@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aorms.mobile.ui.theme.CarbonTile
@@ -26,6 +27,7 @@ import com.aorms.mobile.ui.theme.CarbonTile
 @Composable
 fun AccountScreen(viewModel: AccountViewModel) {
     LaunchedEffect(Unit) { viewModel.load() }
+    val context = LocalContext.current.applicationContext
 
     Column(
         modifier = Modifier
@@ -93,7 +95,7 @@ fun AccountScreen(viewModel: AccountViewModel) {
         HorizontalDivider()
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { viewModel.signOut() },
+            onClick = { viewModel.signOut(context) },
             colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
             modifier = Modifier.fillMaxWidth(),
         ) {

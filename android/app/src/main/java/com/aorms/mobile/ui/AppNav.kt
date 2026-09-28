@@ -17,16 +17,22 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -34,7 +40,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.aorms.mobile.data.SessionCap
 import com.aorms.mobile.data.Supa
+import kotlinx.coroutines.delay
 import com.aorms.mobile.ui.account.AccountScreen
 import com.aorms.mobile.ui.approvals.ApprovalsScreen
 import com.aorms.mobile.ui.approvals.ApprovalsViewModel
@@ -102,6 +110,33 @@ fun AormsApp() {
             is SessionStatus.Authenticated -> hasAuthenticated = true
             is SessionStatus.NotAuthenticated, is SessionStatus.RefreshFailure -> hasAuthenticated = false
             is SessionStatus.Initializing -> Unit // keep whatever hasAuthenticated already was
+        }
+    }
+
+    // Absolute session cap (2026-09-28) — mobile equivalent of web's
+    // cookie-based 24h cap (session-cap.ts); see SessionCap.kt's own
+    // header for why this exists client-side rather than via Supabase's
+    // native `sessions_timebox` (Pro-plan-gated, unavailable). Checked on
+    // ON_RESUME (the natural mobile equivalent of a fresh page load,
+    // where web's middleware enforces this) plus a coarse 15-minute
+    // fallback loop for the rare case of the app staying foregrounded
+    // continuously past the cap without ever resuming.
+    val context = LocalContext.current.applicationContext
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val currentAuthViewModel = rememberUpdatedState(authViewModel)
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && SessionCap.isExpired(context)) {
+                currentAuthViewModel.value.signOut(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(15 * 60 * 1000L)
+            if (SessionCap.isExpired(context)) currentAuthViewModel.value.signOut(context)
         }
     }
 

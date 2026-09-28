@@ -43,6 +43,7 @@ import { createServiceRoleClient as createPlatformServiceRoleClient } from "../.
 import { bridgeIdentityToOfficeHub, resolveSignInDestination } from "../../../lib/actions/auth";
 import { roleHome } from "../../../lib/auth/role-home";
 import { safeNextPath } from "../../../lib/security/safe-next-path";
+import { stampSessionStartOnResponse } from "../../../lib/supabase/session-cap";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aorms.in";
 const RESET_PASSWORD_PATH = "/platform-reset-password";
@@ -78,10 +79,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         if (!("error" in bridged)) {
           const webSupabase = await createWebClient();
           const destination = await resolveSignInDestination(webSupabase, bridged.webUserId, account.public_id);
-          if (destination) return NextResponse.redirect(`${SITE_URL}${destination}`);
+          if (destination) {
+            const redirectResponse = NextResponse.redirect(`${SITE_URL}${destination}`);
+            stampSessionStartOnResponse(redirectResponse);
+            return redirectResponse;
+          }
           const { data: profile } = await webSupabase.from("profiles").select("role").eq("id", bridged.webUserId).maybeSingle();
           const home = roleHome(profile?.role);
-          if (home) return NextResponse.redirect(`${SITE_URL}${home}`);
+          if (home) {
+            const redirectResponse = NextResponse.redirect(`${SITE_URL}${home}`);
+            stampSessionStartOnResponse(redirectResponse);
+            return redirectResponse;
+          }
         }
       }
 

@@ -37,6 +37,7 @@ import { validatePassword } from "../security/password-policy";
 import { toSafeErrorMessage } from "../security/safe-error";
 import { bridgeIdentityToOfficeHub, resolveSignInDestination, signOutSafely } from "./auth";
 import { roleHome } from "../auth/role-home";
+import { stampSessionStart, clearSessionStart } from "../supabase/session-cap";
 
 export type PlatformActionState = { error: string } | null;
 
@@ -56,6 +57,7 @@ export async function platformSignUp(
   const fullName = String(formData.get("fullName") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const captchaToken = String(formData.get("cf-turnstile-response") ?? "");
 
   if (!fullName) return { error: "Full name is required." };
   if (!email || !password) return { error: "Email and password are required." };
@@ -70,7 +72,7 @@ export async function platformSignUp(
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: { data: { full_name: fullName }, captchaToken },
   });
   if (error) return { error: toSafeErrorMessage(error) };
 
@@ -219,6 +221,7 @@ export async function platformSignIn(
 ): Promise<PlatformActionState> {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
+  const captchaToken = String(formData.get("cf-turnstile-response") ?? "");
 
   // Rate-limited per IP+email so one mistyped password from a real user
   // never blocks them from trying a different account from the same
@@ -230,7 +233,7 @@ export async function platformSignIn(
   if (!rateLimit.ok) return { error: `Too many attempts — try again in ${rateLimit.retryAfterSeconds}s.` };
 
   const supabase = await createPlatformClient();
-  const { data: platformAuth, error: platformError } = await supabase.auth.signInWithPassword({ email, password });
+  const { data: platformAuth, error: platformError } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken } });
 
   let webUserId: string | null = null;
   let platformPublicId: string | null = null;
@@ -301,9 +304,15 @@ export async function platformSignIn(
     const webSupabase = await createWebClient();
     const { data: profile } = await webSupabase.from("profiles").select("role").eq("id", webUserId).maybeSingle();
     const destination = await resolveSignInDestination(webSupabase, webUserId, platformPublicId);
-    if (destination) redirect(destination);
+    if (destination) {
+      await stampSessionStart();
+      redirect(destination);
+    }
     const home = roleHome(profile?.role);
-    if (home) redirect(home);
+    if (home) {
+      await stampSessionStart();
+      redirect(home);
+    }
   }
 
   redirect(await currentPortalHome());
@@ -366,6 +375,7 @@ export async function platformSignOut(): Promise<void> {
   // ever ran and before redirect(). Both are now independent.
   await signOutSafely(() => supabase.auth.signOut(), "Platform");
   await signOutSafely(() => webSupabase.auth.signOut(), "Office Hub");
+  await clearSessionStart();
 
   // Purge the client Router Cache so a page reached right after this
   // redirect (or a subsequent navigation in this tab) can't serve a

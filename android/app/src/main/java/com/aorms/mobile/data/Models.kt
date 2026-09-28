@@ -132,6 +132,17 @@ data class SiteInspectionUploadResult(
 @Serializable
 data class MobileApiError(val error: String)
 
+// ---- Mobile Esti (contextual commands, not a chatbot — 2026-09-27) ----
+// web/app/api/mobile/esti/route.ts wraps the same runAgenticChat plumbing
+// askEsti (web's own header agent) uses — fixed command enum, no free-text
+// question from this app.
+
+@Serializable
+data class EstiCommandRequest(val command: String, val projectId: String? = null)
+
+@Serializable
+data class EstiAnswerResult(val output: String)
+
 @Serializable
 data class ProgressReportRow(
     val id: String,
