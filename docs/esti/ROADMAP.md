@@ -6865,8 +6865,8 @@ task library existed anywhere in `web/` — nothing already decided against.
 
 **Open:** migration `0088` is written but **not applied** to `aorms-web`; apply +
 live-verify (RLS, generator, drag-drop in a browser) before merge. Generated
-tasks all start on the chosen start date (no dependency sequencing yet —
-deadlines are dragged on the calendar); `tasks.depends_on_id` exists for that.
+tasks originally all started on the chosen date — sequencing was added the same
+day (see "Task sequencing" entry below).
 Tasks are assigned to `profiles`, so the sidebar shows profiles, not
 `team_members`. Unit-level checks of the estimate/overload maths passed; ESLint
 was not run (not installed in the cloud session).
@@ -6913,6 +6913,25 @@ Knowledge Bank group is relabelled "Knowledge Portal"; the Tasks board was not r
 duplicate floor name on task cards removed. Verified in a headless browser at 1440px and
 390px (no horizontal overflow). Not audited: pages behind login beyond the shell, KPI tiles
 and Tasks board (no test credentials in this session) — a full per-page audit is still open.
+
+### Task sequencing — generated library tasks now chain (2026-09-30)
+
+Closes the "no dependency sequencing" open item from the Kanban entry above.
+`task_templates.depends_on_code` (migration `0090`, applied to `aorms-web`) lets a library
+entry "run after" another; the starter library ships defaults (brief → concept plan →
+design development → working-drawing plans → electrical/furniture/sections → details →
+schedules → tender package). `planTasks()` now schedules in dependency order: a per-floor
+task waits for the *same floor's* prerequisite, a project-wide task waits for the *last*
+floor to finish, and a dependent starts the next working day after its prerequisite's due
+date. Generated rows record the real link in `tasks.depends_on_id` (ids pre-generated so
+siblings reference each other in one insert). A prerequisite that wasn't selected is ignored
+and a cycle is broken rather than looped; the library form rejects self/circular rules.
+Board: a "Waiting on prerequisite" tag while the prerequisite isn't done, and a warning
+(not a block) when a task is started early. Library page: "Runs after" column + field;
+generator preview shows start → due and "after …". The live demo firm's existing tasks were
+linked by the same rules. Verified: `tsc` clean; scheduler checked on a 2-floor project
+(e.g. GF plan 9–15 Oct → GF electrical 16–20 Oct → sections after the last floor plan),
+unselected-prerequisite and cycle cases. Not click-tested in the browser.
 
 ## Support & questions
 
