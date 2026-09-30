@@ -6832,6 +6832,45 @@ to ship the meta-tag workaround, whichever the account owner prefers.
 
 ---
 
+### Kanban task board + scale-based task libraries built (2026-09-30)
+
+Checked against CLAUDE.md/ROADMAP first: `/tasks` was a plain table (only a
+"Mark done" action), and no Kanban, calendar scheduling, overload alerting or
+task library existed anywhere in `web/` — nothing already decided against.
+
+**Built (branch `claude/loving-ptolemy-a0vxj0`, not yet live-verified):**
+- `/tasks` is now a **Board** (To do · In progress · Completed — `BLOCKED`
+  tasks sit in In progress with a red tag) and a **Calendar** (month grid), via
+  `components/aorms/tasks/TaskBoard.tsx`. Native HTML5 drag-and-drop, optimistic
+  with revert on server refusal; each card also has an overflow "Move to…" menu
+  as a non-drag fallback. Sidebar lists team members: drag a person onto a task
+  to assign (or a task onto a person / the "unassign" zone); drag a task onto a
+  calendar day to set its deadline, onto "No deadline" to clear it. Write-tier
+  roles only; others get a read-only board.
+- **Alerts** (`lib/tasks/workload.ts`): per-person overload uses earliest-
+  deadline-first feasibility — cumulative open hours vs. working hours left to
+  each deadline at 6 productive h/day, Mon–Fri (`lib/tasks/dates.ts`) — so three
+  "small" tasks all due Friday are caught. Per-task tags: Overdue, Short deadline
+  (≤2 working days), At risk. Assigning someone into overload raises a warning.
+- **Task library** (`/tasks/library`, migration `0088_task_libraries.sql`):
+  `task_templates` = formula `(base_hours + hours_per_100sqm × area/100) × complexity`,
+  clamped to min/max. Entries are per-project or per-floor; area basis is the
+  floor's own area, built-up, site, or fixed. Generator expands chosen entries/
+  bundles against a project's built-up area + per-floor areas into tasks with
+  hours and due dates (start + working days), bundled to the project
+  (`tasks.template_id/floor_label/area_sqm`). `project_offices` gained
+  `built_up_area_sqm`, `floor_count`. Starter library for an architecture
+  practice in `lib/tasks/starter-library.ts` — first-pass norms, to be tuned to
+  the practice's own actuals.
+
+**Open:** migration `0088` is written but **not applied** to `aorms-web`; apply +
+live-verify (RLS, generator, drag-drop in a browser) before merge. Generated
+tasks all start on the chosen start date (no dependency sequencing yet —
+deadlines are dragged on the calendar); `tasks.depends_on_id` exists for that.
+Tasks are assigned to `profiles`, so the sidebar shows profiles, not
+`team_members`. Unit-level checks of the estimate/overload maths passed; ESLint
+was not run (not installed in the cloud session).
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,
