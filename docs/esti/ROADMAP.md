@@ -6933,6 +6933,35 @@ linked by the same rules. Verified: `tsc` clean; scheduler checked on a 2-floor 
 (e.g. GF plan 9–15 Oct → GF electrical 16–20 Oct → sections after the last floor plan),
 unselected-prerequisite and cycle cases. Not click-tested in the browser.
 
+### "Architectural Operating System" presentation layer — phases 1–5 built (2026-09-30)
+
+Governance first, per the repo's own check-docs-first rule: the pure-Carbon rule in CLAUDE.md
+forbade this, so a dated exception was written into CLAUDE.md (Carbon stays the component/
+a11y/grid foundation; AORMS adds tokens + a few presentation components; orange = activity
+only) *before* building. **Built:** (1) tokens in `globals.scss` — ink primary/tertiary
+buttons, Radiant Orange `#FF4F18` only on active side-nav item, selected tab, progress fills
+and "Active" counts; (2) schedule-style tables app-wide (transparent thead/tbody, 2px ink
+header rule, 1px row rules, uppercase compact headers, tabular numerals; `aorms-num` for
+right-aligned monospaced numeric columns, applied to Estimate items); (3) project hub — the
+project **Overview** page now leads with a phase strip (the project's own phases, else the
+commercial lifecycle), a generated plan drawing, scale facts (site / built-up / floors /
+tasks done) and a module-link row (tasks, drawings, estimates, tenders, snags, meetings,
+approvals, fees, invoiced, team, activity) replacing the old two KPI-tile grids; (4)
+`/projects` defaults to **Boards** — `ProjectCard`s with a `PlanGlyph` (SVG derived from the
+project's real built-up/site area and floor count: footprint, structural grid, dimension
+strings; "NO SCALE DATA" when empty), status, task-progress line — with `?view=schedule` for
+the table; `BigStat` large-numeral strip; (5) motion via the existing `MotionRoot` +
+`MotionStagger` (reduced-motion respected). **Design note:** in this repo "Project DNA" is the
+pre-sales risk-scoring form, not a hub, so the hub was built on Overview and DNA left alone.
+**Not built (need sign-off):** horizontal sliding-panel navigation (changes routing/deep
+links/back button), renaming the tagline to "Architectural Operating System" (touches SEO and
+marketing), the Pulse home re-composition (left rail of numerals + Today agenda), per-module
+grammars beyond Projects/Tasks, real drawing thumbnails (needs the DXF→SVG pipeline). Verified:
+`tsc` clean; components, tokens and tables rendered and screenshotted in headless Chromium at
+1440px and 390px (no horizontal overflow). Not verified against live data: the Overview hub and
+Boards page themselves (server pages — no test login in this session); the orange active-nav
+rule (selector targets Carbon's `--current` class, not exercised in the preview).
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,
