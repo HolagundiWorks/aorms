@@ -28,6 +28,7 @@
 @use "@carbon/react/scss/components/data-table";
 @use "@carbon/react/scss/components/tag";
 @use "@carbon/react/scss/components/select";
+@use "@carbon/react/scss/components/search"; // TaskBoard filter bar
 @use "@carbon/react/scss/components/notification";
 @use "@carbon/react/scss/components/tile";
 @use "@carbon/react/scss/components/tabs";
@@ -675,6 +676,23 @@ a.cds--side-nav__link[aria-current="page"]::before {
   font-size: 1.5rem;
   font-weight: 300;
   font-variant-numeric: tabular-nums;
+}
+
+// Task filter bar: one row that wraps, each control ~11rem.
+.aorms-task-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+  margin-block-end: 0.5rem;
+}
+
+.aorms-task-filter-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-block-end: 1rem;
 }
 
 // Task board responsiveness (2026-09-30 UI audit). The board is three
