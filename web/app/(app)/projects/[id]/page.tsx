@@ -18,6 +18,9 @@ import { ActivationGate } from "../../../../components/aorms/ActivationGate";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../../components/aorms/ContextPanel";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { KpiTile } from "../../../../components/aorms/KpiTile";
+import { PlanGlyph } from "../../../../components/aorms/PlanGlyph";
+import { PhaseStrip } from "../../../../components/aorms/PhaseStrip";
+import Link from "next/link";
 import { getActivationGate } from "../../../../lib/actions/activation";
 
 export default async function ProjectDetailPage({
@@ -40,11 +43,15 @@ export default async function ProjectDetailPage({
     { data: invoiceTotals },
     { count: teamCount },
     { count: activityCount },
+    { count: estimatesCount },
+    { count: tendersCount },
+    { count: snagsCount },
+    { count: doneTaskCount },
   ] = await Promise.all([
     supabase
       .from("project_offices")
       .select(
-        "id, ref, title, project_type, work_type, status, city, contact_email, contact_phone, clients(name, email, phone, contact_person)",
+        "id, ref, title, project_type, work_type, status, city, contact_email, contact_phone, site_area_sqm, built_up_area_sqm, floor_count, current_phase_id, clients(name, email, phone, contact_person)",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -70,6 +77,10 @@ export default async function ProjectDetailPage({
     supabase.from("invoices").select("grand_total_paise").eq("project_id", id),
     supabase.from("assignments").select("id", { count: "exact", head: true }).eq("project_id", id),
     supabase.from("audit_log").select("id", { count: "exact", head: true }).eq("entity", "project").eq("entity_id", id),
+    supabase.from("estimates").select("id", { count: "exact", head: true }).eq("project_id", id),
+    supabase.from("tenders").select("id", { count: "exact", head: true }).eq("project_id", id),
+    supabase.from("snags").select("id", { count: "exact", head: true }).eq("project_id", id),
+    supabase.from("tasks").select("id", { count: "exact", head: true }).eq("project_id", id).eq("status", "DONE"),
   ]);
 
   if (projectError) {
@@ -99,6 +110,30 @@ export default async function ProjectDetailPage({
   const totalInvoicedPaise = (invoiceTotals ?? []).reduce((sum, i) => sum + (i.grand_total_paise ?? 0), 0);
   const formatInr = (paise: number) => `₹${(paise / 100).toLocaleString("en-IN")}`;
 
+  const totalTasks = (openTaskCount ?? 0) + (doneTaskCount ?? 0);
+  // Phase strip: the project's own phases when it has any (current one from
+  // current_phase_id); otherwise the commercial lifecycle.
+  const LIFECYCLE = ["Enquiry", "Proposal", "Active", "Completed"];
+  const lifecycleIndex = Math.max(0, ["ENQUIRY", "PROPOSAL", "ACTIVE", "COMPLETED"].indexOf(project.status));
+  const hasPhases = (phases ?? []).length > 0;
+  const phaseSteps = hasPhases ? (phases ?? []).map((ph) => ph.label) : LIFECYCLE;
+  const phaseCurrent = hasPhases
+    ? Math.max(0, (phases ?? []).findIndex((ph) => ph.id === project.current_phase_id))
+    : lifecycleIndex;
+  const moduleLinks = [
+    { name: "Tasks", href: "/tasks", value: `${openTaskCount ?? 0} open` },
+    { name: "Drawings", href: "/drawings", value: documentsCount ?? 0 },
+    { name: "Estimates", href: "/estimates", value: estimatesCount ?? 0 },
+    { name: "Tenders", href: "/tenders", value: tendersCount ?? 0 },
+    { name: "Site snags", href: "/snags", value: snagsCount ?? 0 },
+    { name: "Meetings", href: "/moms", value: meetingsCount ?? 0 },
+    { name: "Approvals", href: "/approvals", value: approvalsCount ?? 0 },
+    { name: "Fees", href: "/proposals", value: formatInr(totalFeesPaise) },
+    { name: "Invoiced", href: "/invoices", value: formatInr(totalInvoicedPaise) },
+    { name: "Team", href: "/team-members", value: teamCount ?? 0 },
+    { name: "Activity", href: "/audit-log", value: activityCount ?? 0 },
+  ];
+
   return (
     <ContextPanelLayout>
       <ContextPanel title="Add phase" description="Add a delivery phase to this project.">
@@ -120,6 +155,47 @@ export default async function ProjectDetailPage({
               actions={<ProjectStatusSelect projectId={project.id} status={project.status} />}
             />
 
+            {/* Project hub (2026-09-30, "Architectural Operating System"):
+                the project as the primary spatial object — where it is in
+                its life, its scale as a drawing, and one row linking out to
+                everything attached to it. */}
+            <PhaseStrip steps={phaseSteps} currentIndex={phaseCurrent} />
+
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 20rem) minmax(0, 1fr)", gap: "2rem", marginBottom: "0.5rem" }} className="aorms-hub-head">
+              <div style={{ color: "var(--aorms-ink)" }}>
+                <PlanGlyph seed={project.ref} builtUpSqm={project.built_up_area_sqm} siteSqm={project.site_area_sqm} floors={project.floor_count} height={140} />
+              </div>
+              <div className="aorms-facts" style={{ alignSelf: "end" }}>
+                <div>
+                  <span className="aorms-bigstat__label">Site</span>
+                  <span className="aorms-facts__figure">{project.site_area_sqm ? `${Math.round(project.site_area_sqm).toLocaleString("en-IN")} m²` : "—"}</span>
+                </div>
+                <div>
+                  <span className="aorms-bigstat__label">Built-up</span>
+                  <span className="aorms-facts__figure">{project.built_up_area_sqm ? `${Math.round(project.built_up_area_sqm).toLocaleString("en-IN")} m²` : "—"}</span>
+                </div>
+                <div>
+                  <span className="aorms-bigstat__label">Floors</span>
+                  <span className="aorms-facts__figure">{project.floor_count ? (project.floor_count === 1 ? "G" : `G+${project.floor_count - 1}`) : "—"}</span>
+                </div>
+                <div>
+                  <span className="aorms-bigstat__label">Tasks done</span>
+                  <span className="aorms-facts__figure">
+                    {totalTasks ? `${Math.round(((doneTaskCount ?? 0) / totalTasks) * 100)}%` : "—"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <nav className="aorms-module-links" aria-label="Project record">
+              {moduleLinks.map((m) => (
+                <Link key={m.name} href={m.href} className="aorms-module-link">
+                  <span className="aorms-module-link__name">{m.name}</span>
+                  <span className="aorms-module-link__value">{m.value}</span>
+                </Link>
+              ))}
+            </nav>
+
             <div
               style={{
                 display: "grid",
@@ -132,28 +208,6 @@ export default async function ProjectDetailPage({
               <KpiTile label="Open tasks" value={openTaskCount ?? 0} icon={ListChecked} />
               <KpiTile label="Decisions logged" value={(decisionStates ?? []).length} icon={Task} />
               <KpiTile label="Awaiting client" value={decisionsAwaitingClient} icon={Time} />
-            </div>
-
-            {/* "One project, one operating record" (2026-09-15) — the
-                rest of what this project's record actually is: meetings,
-                documents, approvals, fees, invoices, team, and activity,
-                each a real count from that field's own table, one click
-                from its own module rather than a second search. */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, 9rem)",
-                gap: "1rem",
-                marginBottom: "2rem",
-              }}
-            >
-              <KpiTile label="Meetings" value={meetingsCount ?? 0} icon={Calendar} href="/moms" />
-              <KpiTile label="Documents" value={documentsCount ?? 0} icon={Document} href="/drawings" />
-              <KpiTile label="Approvals" value={approvalsCount ?? 0} icon={CheckmarkOutline} href="/approvals" />
-              <KpiTile label="Fees" value={formatInr(totalFeesPaise)} icon={CurrencyRupee} href="/proposals" />
-              <KpiTile label="Invoices" value={formatInr(totalInvoicedPaise)} icon={Wallet} href="/invoices" />
-              <KpiTile label="Team" value={teamCount ?? 0} icon={UserMultiple} href="/team-members" />
-              <KpiTile label="Activity" value={activityCount ?? 0} icon={Activity} href="/audit-log" />
             </div>
 
             {/* Client + project contact (migration 0044) — the project

@@ -151,9 +151,9 @@ export default async function EstimateDetailPage({
                 <TableRow>
                   <TableHeader>Description</TableHeader>
                   <TableHeader>Unit</TableHeader>
-                  <TableHeader>Quantity</TableHeader>
-                  <TableHeader>Rate</TableHeader>
-                  <TableHeader>Amount</TableHeader>
+                  <TableHeader className="aorms-num">Quantity</TableHeader>
+                  <TableHeader className="aorms-num">Rate</TableHeader>
+                  <TableHeader className="aorms-num">Amount</TableHeader>
                   <TableHeader>Measurements</TableHeader>
                 </TableRow>
               </TableHead>
@@ -162,9 +162,9 @@ export default async function EstimateDetailPage({
                   <TableRow key={it.id}>
                     <TableCell>{it.description}</TableCell>
                     <TableCell>{it.unit}</TableCell>
-                    <TableCell>{it.quantity}</TableCell>
-                    <TableCell>{formatInr(it.rate_paise)}</TableCell>
-                    <TableCell>{formatInr(it.amount_paise)}</TableCell>
+                    <TableCell className="aorms-num">{it.quantity}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(it.rate_paise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(it.amount_paise)}</TableCell>
                     <TableCell>
                       <Link href={`/estimates/${estimate.id}/items/${it.id}`}>Measure →</Link>
                     </TableCell>

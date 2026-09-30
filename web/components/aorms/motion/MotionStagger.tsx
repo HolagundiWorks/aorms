@@ -30,9 +30,9 @@ const item = {
   visible: { opacity: 1, y: 0, transition: standardTransition },
 };
 
-export function MotionStagger({ children }: { children: ReactNode }) {
+export function MotionStagger({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <motion.div variants={container} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
+    <motion.div className={className} variants={container} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
       {Children.map(children, (child) => (
         <motion.div variants={item}>{child}</motion.div>
       ))}

@@ -354,6 +354,296 @@ body {
   max-inline-size: 100%;
 }
 
+// ── Architectural Operating System presentation layer (2026-09-30) ───────
+// Carbon stays underneath (see CLAUDE.md's dated exception). This layer sets
+// the visual grammar: white/black = structure, Radiant Orange = ACTIVITY only
+// (active nav, current tab, progress, selection), 1px rules not grey slabs,
+// tabular numerals in schedules.
+:root {
+  --aorms-orange: #ff4f18;
+  --aorms-orange-wash: rgba(255, 79, 24, 0.12);
+  --aorms-ink: #161616;
+  --aorms-rule: #c6c6c6;
+  // Primary buttons are structure (ink), not activity (orange) and not stock
+  // Carbon blue — "don't make every button orange".
+  --cds-button-primary: #161616;
+  --cds-button-primary-hover: #393939;
+  --cds-button-primary-active: #525252;
+  --cds-button-tertiary: #161616;
+  --cds-button-tertiary-hover: #161616;
+  --cds-button-tertiary-active: #393939;
+}
+
+// Orange = where you are: the active side-nav item, the selected tab, and
+// progress fills. (Focus rings stay Carbon blue — accessibility, not brand.)
+.cds--side-nav__link--current::before,
+.cds--side-nav__menu-item .cds--side-nav__link--current::before,
+a.cds--side-nav__link[aria-current="page"]::before {
+  background-color: var(--aorms-orange) !important;
+}
+
+.cds--side-nav__link--current,
+.cds--side-nav__menu-item .cds--side-nav__link[aria-current="page"] {
+  background-color: var(--aorms-orange-wash) !important;
+}
+
+.cds--tabs .cds--tabs__nav-item--selected:not(.cds--tabs__nav-item--disabled) {
+  border-block-end: 2px solid var(--aorms-orange);
+}
+
+.cds--progress-bar__bar {
+  background-color: var(--aorms-orange);
+}
+
+// Schedule-style tables: thin rules, compact uppercase headers with a strong
+// rule beneath, tabular numerals. Applied to every Carbon data table so the
+// whole product reads as a technical schedule, not an accounting SaaS grid.
+.cds--data-table {
+  font-variant-numeric: tabular-nums;
+}
+
+.cds--data-table thead,
+.cds--data-table tbody,
+.cds--data-table thead th,
+.cds--data-table thead tr,
+.cds--data-table tbody tr,
+.cds--data-table tbody td {
+  background: transparent !important;
+}
+
+.cds--data-table thead th {
+  border-block-end: 2px solid var(--aorms-ink);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+}
+
+.cds--data-table tbody td {
+  border-block-start: 1px solid var(--aorms-rule);
+  border-block-end: 0;
+}
+
+.cds--data-table tbody tr:hover td {
+  background: var(--aorms-orange-wash) !important;
+}
+
+// Numeric schedule columns: right-aligned, monospaced. Put
+// `className="aorms-num"` on a TableHeader/TableCell.
+.aorms-num {
+  text-align: end !important;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+// Large-numeral KPI (BigStat.tsx) — numbers as the loudest thing on the page.
+.aorms-bigstat {
+  display: grid;
+  gap: 0.25rem;
+  padding-block-start: 0.75rem;
+  border-block-start: 1px solid var(--aorms-ink);
+  min-inline-size: 7rem;
+}
+
+.aorms-bigstat__value {
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.aorms-bigstat__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-bigstat--active .aorms-bigstat__value {
+  color: var(--aorms-orange);
+}
+
+.aorms-bigstat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem 3rem;
+  margin-block-end: 2rem;
+}
+
+// Project board cards (ProjectCard.tsx).
+.aorms-project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.aorms-project-card {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--aorms-rule);
+  background: var(--cds-background);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 120ms ease;
+}
+
+.aorms-project-card:hover,
+.aorms-project-card:focus-visible {
+  border-color: var(--aorms-ink);
+}
+
+.aorms-project-card__plan {
+  color: var(--aorms-ink);
+  border-block-end: 1px solid var(--aorms-rule);
+  padding-block-end: 0.75rem;
+}
+
+.aorms-project-card__ref {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: var(--cds-text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.aorms-project-card__phase {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.aorms-progress-line {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+}
+
+.aorms-progress-line__track {
+  flex: 1;
+  block-size: 2px;
+  background: var(--aorms-rule);
+  position: relative;
+}
+
+.aorms-progress-line__fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  background: var(--aorms-orange);
+}
+
+// Phase strip (PhaseStrip.tsx) — brief / feasibility / design … as datum marks.
+.aorms-phase-strip {
+  display: flex;
+  margin-block-end: 1.5rem;
+  border-block-start: 1px solid var(--aorms-ink);
+}
+
+.aorms-phase-strip__step {
+  flex: 1;
+  min-inline-size: 0;
+  padding-block-start: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+  position: relative;
+}
+
+.aorms-phase-strip__step::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -5px;
+  inset-inline-start: 0;
+  inline-size: 9px;
+  block-size: 9px;
+  border: 1px solid var(--aorms-ink);
+  background: var(--cds-background);
+  border-radius: 50%;
+}
+
+.aorms-phase-strip__step--done::before {
+  background: var(--aorms-ink);
+}
+
+.aorms-phase-strip__step--current {
+  color: var(--aorms-ink);
+}
+
+.aorms-phase-strip__step--current::before {
+  background: var(--aorms-orange);
+  border-color: var(--aorms-orange);
+}
+
+// Hub facts (project overview): label over a large figure, separated by rules.
+.aorms-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  border-block: 1px solid var(--aorms-rule);
+  margin-block-end: 1.5rem;
+}
+
+.aorms-facts > div {
+  padding: 0.75rem 1rem 0.75rem 0;
+  display: grid;
+  gap: 0.125rem;
+}
+
+.aorms-facts__figure {
+  font-size: 1.75rem;
+  font-weight: 300;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 42rem) {
+  .aorms-hub-head {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+// Module link row on the project hub.
+.aorms-module-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  border-block-start: 1px solid var(--aorms-rule);
+  margin-block-end: 2rem;
+}
+
+.aorms-module-link {
+  display: grid;
+  gap: 0.125rem;
+  padding: 0.75rem 0.75rem 0.75rem 0;
+  border-block-end: 1px solid var(--aorms-rule);
+  color: inherit;
+  text-decoration: none;
+}
+
+.aorms-module-link:hover .aorms-module-link__name {
+  color: var(--aorms-orange);
+}
+
+.aorms-module-link__name {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-module-link__value {
+  font-size: 1.5rem;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+}
+
 // Task board responsiveness (2026-09-30 UI audit). The board is three
 // columns + a 16rem team sidebar; the calendar is a 7-column month grid.
 // Below `lg` the sidebar drops under the board, below `md` the columns stack

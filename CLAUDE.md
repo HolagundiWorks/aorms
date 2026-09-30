@@ -340,6 +340,25 @@ a record of the old `frontend/`'s own unfinished migration, not as
 > migrate screens incrementally. Wave 6 removes MUI + the kit. **Exit criteria per
 > wave:** typecheck + lint green; visual baselines re-captured (Playwright).
 
+> **Exception granted 2026-09-30 — the "Architectural Operating System"
+> presentation layer.** The user approved (after a written proposal) a
+> custom visual layer *on top of* Carbon, for `web/` only: **Carbon stays
+> the component/accessibility/grid foundation** (forms, tables, modals,
+> tabs, UI Shell — still stock `@carbon/react`), and AORMS adds an
+> architectural identity through theme tokens and a small set of
+> presentation components — `BigStat` (large-numeral KPI), `PlanGlyph`
+> (generated floor-plan SVG), `PhaseStrip`, `ProjectCard`, schedule-style
+> table CSS, restrained `motion`. Rules for that layer: white/black =
+> structure, **Radiant Orange `#FF4F18` = activity only** (active nav,
+> current tab, progress, selected item — never decoration, never body
+> text, never every button); thin 1px rules instead of grey cards;
+> tabular/monospaced numerals in schedules; motion only via
+> `lib/motion/tokens.ts` with `reducedMotion="user"`. Not an exception:
+> no MUI, no neumorphism/glass, no bespoke replacements for a Carbon
+> component that already exists. Not yet approved/built: horizontal
+> sliding-panel navigation (changes routing/deep links) and renaming the
+> product tagline to "Architectural Operating System".
+
 **Starter template:** new Carbon screens follow the recipe in CARBON-MIGRATION.md
 § 3 Wave 3 (tranche 1):
 1. Swap kit → `../carbon/adapters` (StatusDot/DataState/ConfirmModal/PageBreadcrumb).
