@@ -44,7 +44,7 @@ export default async function AdminDashboardPage() {
         <Grid>
           <Column sm={4} md={8} lg={16}>
             <PageHeader title="Admin" description="SysDeX — support staff view." />
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 11rem)", gap: "1rem", marginBottom: "2rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9rem)", gap: "1rem", marginBottom: "2rem" }}>
               <KpiTile label="Open HelpDeX tickets" value={openTicketCount ?? 0} icon={Chat} />
             </div>
             <NextLink href="/admin/helpdesk" className="cds--type-body-01">
@@ -93,7 +93,7 @@ export default async function AdminDashboardPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, 11rem)",
+            gridTemplateColumns: "repeat(auto-fill, 9rem)",
             gap: "1rem",
             marginBottom: "2rem",
           }}

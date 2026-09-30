@@ -208,10 +208,10 @@ export function TaskBoard({
         </ContentSwitcher>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 16rem", gap: "1rem", alignItems: "start" }}>
+      <div className="aorms-task-layout">
         <div style={{ minWidth: 0 }}>
           {view === "board" ? (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "1rem" }}>
+            <div className="aorms-task-columns">
               {COLUMNS.map((col) => {
                 const items = tasks.filter((t) => col.statuses.includes(t.status));
                 return (
@@ -231,7 +231,7 @@ export function TaskBoard({
                     style={{
                       background: overColumn === col.key ? "var(--cds-layer-hover-01)" : "var(--cds-layer-01)",
                       outline: overColumn === col.key ? "2px dashed var(--cds-focus)" : "none",
-                      minHeight: "24rem",
+                      minHeight: "12rem",
                       padding: "0.75rem",
                     }}
                   >
@@ -420,9 +420,9 @@ function TaskCard({
           </OverflowMenu>
         )}
       </div>
-      {(task.project_title || task.floor_label) && (
+      {(task.project_title || (task.floor_label && !task.title.includes(task.floor_label))) && (
         <div className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)", marginTop: "0.25rem" }}>
-          {[task.project_title, task.floor_label].filter(Boolean).join(" · ")}
+          {[task.project_title, task.floor_label && !task.title.includes(task.floor_label) ? task.floor_label : null].filter(Boolean).join(" · ")}
         </div>
       )}
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem", marginTop: "0.5rem" }}>
@@ -519,7 +519,8 @@ function CalendarView({
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>{undated.map(chip)}</div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: "1px", background: "var(--cds-border-subtle-01)" }}>
+      <div style={{ overflowX: "auto" }}>
+      <div className="aorms-task-calendar">
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
           <div key={d} className="cds--type-label-01" style={{ background: "var(--cds-layer-01)", padding: "0.25rem 0.5rem" }}>{d}</div>
         ))}
@@ -556,6 +557,7 @@ function CalendarView({
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

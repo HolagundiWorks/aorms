@@ -123,7 +123,7 @@ export default async function ProjectDetailPage({
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, 11rem)",
+                gridTemplateColumns: "repeat(auto-fill, 9rem)",
                 gap: "1rem",
                 marginBottom: "2rem",
               }}
@@ -142,7 +142,7 @@ export default async function ProjectDetailPage({
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, 11rem)",
+                gridTemplateColumns: "repeat(auto-fill, 9rem)",
                 gap: "1rem",
                 marginBottom: "2rem",
               }}
