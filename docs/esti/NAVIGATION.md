@@ -183,6 +183,37 @@ doc's tab/facet structure onto it 1:1 would misrepresent what's actually
 built. Its sidebar (`web/components/aorms/AppShell.tsx`) is the source of
 truth for its own IA — a flat 39-link list until 2026-09-06, now grouped:
 
+> **Correction (2026-09-30) — the table below is the 2026-09-06 grouping and is
+> stale.** The office hub's navigation is now defined in one place,
+> [`web/lib/shell/nav-data.ts`](../../web/lib/shell/nav-data.ts) (pure data: `NAV_TOP`,
+> `NAV_GROUPS`; icons stay in `AppShell.tsx`), and follows the **drawing-set sheet
+> system** (HCWorks title-sheet direction): every entry has a *positional* sheet
+> number — top-level `00`–`03`, groups `04`–`12`, pages inside a group `GG.NN`.
+> Numbers are computed from order, never stored, so reordering the nav renumbers
+> the set. The side nav is a permanent icon rail that expands on hover (no toggle).
+> Current index (generated from `nav-data.ts`):
+>
+> | Sheet | Section | Pages (sheet no.) |
+> |---|---|---|
+> | 00 | **Pulse** (hub) | /pulse |
+> | 01 | **Projects** | /projects |
+> | 02 | **Leads** | /leads |
+> | 03 | **Tasks** | /tasks |
+> | 04 | **Site** | Snags (04.01) · Site Instructions (04.02) · Progress Reports (04.03) · BBS (04.04) · Milestones (04.05) · Work Packages (04.06) · Steel Certification (04.07) · RA Bills (04.08) · Approvals (04.09) |
+> | 05 | **Estimation & Tech** | Rate Books (05.01) · Estimates (05.02) · Take-off (05.03) · Spec Sheets (05.04) · Drawings (05.05) · Meeting Minutes (05.06) · Document Issues (05.07) |
+> | 06 | **Third Parties** | Clients (06.01) · Contractors (06.02) · Consultants (06.03) |
+> | 07 | **Tender Management** | Tenders (07.01) |
+> | 08 | **Office** | Proposals (08.01) · Letters (08.02) · Contracts (08.03) · Transmittals (08.04) · Purchase Orders (08.05) · Office Templates (08.06) |
+> | 09 | **Accounts** | Invoices (09.01) · Financial Reports (09.02) · Office Expenses (09.03) · Reconciliation (09.04) |
+> | 10 | **HR** | Team Members (10.01) · Teams (10.02) · Payslips (10.03) · Job Applications (10.04) |
+> | 11 | **Knowledge Bank** | Master Plans (11.01) · Standards (11.02) · Compliance (11.03) · Spec Catalog (11.04) · Lessons Learned (11.05) · Knowledge Portal (11.06) |
+> | 12 | **Admin** | Workload (12.01) · Audit Log (12.02) · Users (12.03) · Firm Settings (12.04) · Esti Devices (12.05) |
+>
+> Each nav page also gets a `SheetMark` above its title (`AORMS-04.03 / SITE /
+> PROGRESS REPORTS`), an optional "The result" line (`PageHeader result=…`), and
+> a drawing `TitleBlock` (Office · System · Section · Drawing · Sheet · Date) at
+> the foot. See ROADMAP.md's 2026-09-30 sheet-system entries.
+
 | Top-level (no group) | Group | Sub-items |
 |---|---|---|
 | Dashboard · Leads · Clients · Projects · Tasks | **Office** | Proposals · Letters · Contracts · Transmittals · Tenders · Purchase Orders |

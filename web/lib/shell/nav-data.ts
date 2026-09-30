@@ -34,7 +34,7 @@ export const NAV_GROUPS: NavGroupData[] = [
     ],
   },
   {
-    title: "Estimation & Technical",
+    title: "Estimation & Tech",
     items: [
       { href: "/rate-books", label: "Rate Books" },
       { href: "/estimates", label: "Estimates" },
