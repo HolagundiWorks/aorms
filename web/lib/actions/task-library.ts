@@ -30,6 +30,7 @@ export async function loadStarterLibrary(): Promise<{ error?: string; added?: nu
     classification: e.classification ?? null,
     difficulty_coefficient: e.difficulty_coefficient ?? 3,
     sequence: e.sequence,
+    depends_on_code: e.depends_on_code ?? null,
   }));
   if (rows.length === 0) return { added: 0 };
   const { error } = await supabase.from("task_templates").insert(rows);
@@ -53,6 +54,7 @@ export async function saveTaskTemplate(_prev: LibraryActionState, formData: Form
   const perHundred = num("hoursPer100sqm") ?? 0;
   const minHours = num("minHours");
   const maxHours = num("maxHours");
+  const dependsOnCode = String(formData.get("dependsOnCode") ?? "").trim().toUpperCase() || null;
 
   if (!code || !title) return { error: "Code and title are required." };
   if (!["PROJECT", "PER_FLOOR"].includes(scope)) return { error: "Invalid scope." };
@@ -60,6 +62,7 @@ export async function saveTaskTemplate(_prev: LibraryActionState, formData: Form
   if (scope === "PROJECT" && areaBasis === "FLOOR") areaBasis = "BUILT_UP";
   if (![baseHours, perHundred].every((n) => Number.isFinite(n) && n >= 0)) return { error: "Hours must be zero or more." };
   if (minHours != null && maxHours != null && minHours > maxHours) return { error: "Minimum hours can't exceed maximum." };
+  if (dependsOnCode === code) return { error: "An entry can't run after itself." };
 
   const row = {
     code,
@@ -72,9 +75,21 @@ export async function saveTaskTemplate(_prev: LibraryActionState, formData: Form
     min_hours: minHours,
     max_hours: maxHours,
     work_type: String(formData.get("workType") ?? "").trim() || null,
+    depends_on_code: dependsOnCode,
   };
 
   const supabase = await createClient();
+  if (dependsOnCode) {
+    const { data: prereq } = await supabase.from("task_templates").select("code, depends_on_code").eq("code", dependsOnCode).maybeSingle();
+    if (!prereq) return { error: `No library entry with code ${dependsOnCode}.` };
+    // Walk the chain so an edit can't create a cycle (A after B after … after A).
+    let cursor: string | null = prereq.depends_on_code;
+    for (let i = 0; cursor && i < 50; i++) {
+      if (cursor === code) return { error: "That would create a circular dependency between library entries." };
+      const { data: next } = await supabase.from("task_templates").select("depends_on_code").eq("code", cursor).maybeSingle();
+      cursor = next?.depends_on_code ?? null;
+    }
+  }
   const { error } = id
     ? await supabase.from("task_templates").update(row).eq("id", id)
     : await supabase.from("task_templates").insert(row);
@@ -146,10 +161,16 @@ export async function generateProjectTasks(input: GenerateInput): Promise<{ erro
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Pre-generate row ids so each task's depends_on_id can point at a sibling
+  // inserted in the same statement (Postgres checks the FK at statement end).
+  const idByKey = new Map(planned.map((p) => [p.key, crypto.randomUUID()] as const));
+
   const { data: inserted, error } = await supabase
     .from("tasks")
     .insert(
       planned.map((p) => ({
+        id: idByKey.get(p.key),
+        depends_on_id: p.dependsOnKey ? idByKey.get(p.dependsOnKey) ?? null : null,
         title: p.title,
         project_id: input.projectId,
         assignee_id: input.assigneeId,

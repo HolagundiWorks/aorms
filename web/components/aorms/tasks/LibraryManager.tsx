@@ -50,6 +50,7 @@ export function LibraryManager({ templates, canWrite }: { templates: TaskTemplat
               <TableHeader>Sized by</TableHeader>
               <TableHeader>Formula (hours)</TableHeader>
               <TableHeader>Range</TableHeader>
+              <TableHeader>Runs after</TableHeader>
               {canWrite && <TableHeader>Actions</TableHeader>}
             </TableRow>
           </TableHead>
@@ -62,6 +63,7 @@ export function LibraryManager({ templates, canWrite }: { templates: TaskTemplat
                 <TableCell>{AREA_LABEL[t.area_basis]}</TableCell>
                 <TableCell>{t.base_hours} + {t.hours_per_100sqm} / 100 m²</TableCell>
                 <TableCell>{t.min_hours ?? "—"} – {t.max_hours ?? "—"}</TableCell>
+                <TableCell>{t.depends_on_code ?? "—"}</TableCell>
                 {canWrite && (
                   <TableCell>
                     <Button size="sm" kind="ghost" onClick={() => edit(t)}>Edit</Button>
@@ -103,6 +105,12 @@ export function LibraryManager({ templates, canWrite }: { templates: TaskTemplat
               <TextInput id="tpl-rate" name="hoursPer100sqm" type="number" step="0.1" min={0} labelText="Hours per 100 m²" defaultValue={editing?.hours_per_100sqm ?? 0} />
               <TextInput id="tpl-min" name="minHours" type="number" step="0.5" min={0} labelText="Minimum hours" defaultValue={editing?.min_hours ?? ""} />
               <TextInput id="tpl-max" name="maxHours" type="number" step="0.5" min={0} labelText="Maximum hours" defaultValue={editing?.max_hours ?? ""} />
+              <Select id="tpl-after" name="dependsOnCode" labelText="Runs after" defaultValue={editing?.depends_on_code ?? ""} helperText="Generated tasks wait for this entry to finish">
+                <SelectItem value="" text="— (starts on the start date)" />
+                {templates.filter((t) => t.id !== editing?.id).map((t) => (
+                  <SelectItem key={t.id} value={t.code} text={`${t.code} — ${t.title}`} />
+                ))}
+              </Select>
               <Select id="tpl-worktype" name="workType" labelText="Work type" defaultValue={editing?.work_type ?? ""}>
                 <SelectItem value="" text="—" />
                 <SelectItem value="DESIGN_COMMUNICATION" text="Design communication" />

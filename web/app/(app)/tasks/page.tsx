@@ -33,7 +33,7 @@ export default async function TasksPage() {
     supabase
       .from("tasks")
       .select(
-        "id, title, status, priority, due_date, estimated_hours, assignee_id, floor_label, project_offices(title)",
+        "id, title, status, priority, due_date, estimated_hours, assignee_id, floor_label, depends_on_id, project_offices(title)",
       )
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
@@ -102,6 +102,7 @@ export default async function TasksPage() {
                     assignee_id: t.assignee_id,
                     project_title: project?.title ?? null,
                     floor_label: t.floor_label,
+                    depends_on_id: t.depends_on_id,
                   };
                 })}
                 people={(assignees ?? []).map((a) => ({ id: a.id, name: a.full_name ?? "Unnamed" }))}

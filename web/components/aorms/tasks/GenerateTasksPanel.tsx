@@ -182,7 +182,8 @@ export function GenerateTasksPanel({
                   <td style={{ padding: "0.25rem 0.5rem 0.25rem 0" }}>{p.title}</td>
                   <td style={{ padding: "0.25rem" }}>{p.areaSqm ? `${p.areaSqm} m²` : "—"}</td>
                   <td style={{ padding: "0.25rem" }}><Tag size="sm" type="gray">{p.estimatedHours}h</Tag></td>
-                  <td style={{ padding: "0.25rem" }}>due {p.dueDate}</td>
+                  <td style={{ padding: "0.25rem" }}>{p.startDate} → {p.dueDate}</td>
+                  <td style={{ padding: "0.25rem", color: "var(--cds-text-secondary)" }}>{p.dependsOnTitle ? `after ${p.dependsOnTitle}` : ""}</td>
                 </tr>
               ))}
             </tbody>

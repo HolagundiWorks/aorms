@@ -26,6 +26,7 @@ export type BoardTask = {
   assignee_id: string | null;
   project_title: string | null;
   floor_label: string | null;
+  depends_on_id?: string | null;
 };
 export type Person = { id: string; name: string };
 
@@ -127,9 +128,21 @@ export function TaskBoard({
     [tasks, patch],
   );
 
+  const byId = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
+  // The prerequisite task, when this one is chained behind an unfinished task.
+  const blockerOf = (t: BoardTask) => {
+    const dep = t.depends_on_id ? byId.get(t.depends_on_id) : undefined;
+    return dep && dep.status !== "DONE" ? dep : undefined;
+  };
+
   const moveToColumn = (id: string, col: Column) => {
     const t = tasks.find((x) => x.id === id);
     if (!t || col.statuses.includes(t.status)) return;
+    const blocker = blockerOf(t);
+    if (blocker && col.key !== "TODO") {
+      // Allowed (offices overlap work), but say so.
+      setNotice({ kind: "warning", text: `"${t.title}" is meant to follow "${blocker.title}", which isn't completed yet.` });
+    }
     void mutate(id, { status: col.key }, () => updateTaskStatus(id, col.key));
   };
 
@@ -244,6 +257,7 @@ export function TaskBoard({
                           key={t.id}
                           task={t}
                           alert={t.status === "DONE" ? undefined : alerts.get(t.id)}
+                          waitingOn={t.status === "DONE" ? undefined : blockerOf(t)?.title}
                           assigneeName={t.assignee_id ? personName.get(t.assignee_id) ?? "Unknown" : null}
                           canWrite={canWrite}
                           dropActive={overTask === t.id}
@@ -369,6 +383,7 @@ export function TaskBoard({
 function TaskCard({
   task,
   alert,
+  waitingOn,
   assigneeName,
   canWrite,
   dropActive,
@@ -378,6 +393,7 @@ function TaskCard({
 }: {
   task: BoardTask;
   alert?: TaskAlert;
+  waitingOn?: string;
   assigneeName: string | null;
   canWrite: boolean;
   dropActive: boolean;
@@ -428,6 +444,7 @@ function TaskCard({
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem", marginTop: "0.5rem" }}>
         {task.status === "BLOCKED" && <Tag size="sm" type="red">Blocked</Tag>}
         {alert && <Tag size="sm" type={ALERT_TAG[alert]}>{ALERT_LABEL[alert]}</Tag>}
+        {waitingOn && <Tag size="sm" type="cyan" title={`Waiting on: ${waitingOn}`}>Waiting on prerequisite</Tag>}
         {task.due_date && <Tag size="sm" type="outline">Due {fmtDate(task.due_date)}</Tag>}
         {task.estimated_hours != null && <Tag size="sm" type="gray">{task.estimated_hours}h</Tag>}
         <Tag size="sm" type={assigneeName ? "blue" : "gray"}>{assigneeName ?? "Unassigned"}</Tag>
