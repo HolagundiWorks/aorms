@@ -1,4 +1,5 @@
 import { addDays } from "./dates";
+import { formatTaskRef } from "./ref";
 
 /** Task filter + sort model for the board/calendar. Pure so it can be tested and shared with the URL. */
 export type DatePreset = "any" | "overdue" | "today" | "week" | "month" | "none" | "range";
@@ -35,6 +36,7 @@ export type FilterableTask = {
   project_id?: string | null;
   project_title?: string | null;
   created_at?: string | null;
+  seq?: number | null;
 };
 
 const PRIORITY_RANK: Record<string, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
@@ -67,7 +69,7 @@ export function matchesFilters(t: FilterableTask, f: TaskFilters, today: string)
   if (f.priority && t.priority !== f.priority) return false;
   if (!matchesDate(t.due_date, f, today)) return false;
   const q = f.q.trim().toLowerCase();
-  if (q && !`${t.title} ${t.project_title ?? ""}`.toLowerCase().includes(q)) return false;
+  if (q && !`${t.title} ${t.project_title ?? ""} ${formatTaskRef(t.seq) ?? ""}`.toLowerCase().includes(q)) return false;
   return true;
 }
 

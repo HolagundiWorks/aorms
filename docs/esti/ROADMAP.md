@@ -7063,6 +7063,42 @@ component against a local mock PostgREST with realistic data (desktop + 390px, n
 steps: project cover sheet refinement, record IDs (`TASK-0184` etc. — needs a numbering scheme),
 login screen.
 
+### Sheet system, steps 3–5 + wrap-up: cover sheet, task IDs, login (2026-09-30)
+
+Completed the HCWorks title-sheet redesign (run autonomously, pushed at each checkpoint). PRs #78
+(sheet numbers/marks/result lines/title block) and #79 (Pulse "00 / The office" hub) merged first.
+- **Nav label:** "Estimation & Technical" → "Estimation & Tech" (the sheet number made it truncate);
+  updated in `nav-data.ts`, `AppShell.tsx`, and the ESTI prompt's nav description.
+- **Project cover sheet:** the project Overview now leads with a ruled cover block — Client,
+  Location, Type, Work, Status, Started (only fields the record has) — above the existing phase
+  strip / plan drawing / scale facts / module links; header description dropped (the cover block
+  carries it) and "The result: A coordinated project record." added.
+- **Record IDs — scoped after checking what exists.** Projects, tenders, snags, estimates, MOMs,
+  invoices, etc. already carry refs from `next_ref()` (`TND/2026-27/0001` style); **tasks had none**.
+  So only tasks got an ID: migration `0091_task_seq.sql` adds `tasks.seq` (per-firm, backfilled in
+  creation order, unique per firm) assigned by a `before insert` trigger under a per-firm advisory
+  lock, displayed as **`TASK-0184`** (`lib/tasks/ref.ts`) on board cards and searchable from the
+  task filter bar. Deliberately *not* `next_ref()`: no financial-year reset, no override table — a
+  task number is an identifier, not a document number. Applied to `aorms-web` and live-tested in a
+  rolled-back transaction: a 3-row batch insert (the library generator's path) got consecutive
+  numbers 25–27, zero duplicates, zero nulls across 24 backfilled tasks. **Not built:** drawing
+  numbers (`DWG-A-204`) — drawings carry user-entered numbers already and inventing a second scheme
+  would conflict with real CAD sheet numbering.
+- **Login** (`/platform-login`, the one unified sign-in): sheet mark `AORMS-00 / Sign in`, light-weight
+  heading, "The result: Your office, open on today's work.", and a three-cell title-block footer
+  (System · Access · Session). Behaviour untouched (Google sign-in, Turnstile, credential
+  prompt, server action). Also fixed two pre-existing layout flaws: the form sat flush top-left at
+  wide widths (Grid/Column → a centred 30rem column with padding) and the Google button was capped
+  at half width by Carbon's `max-inline-size`. The "24 H CAP" cell mirrors `SESSION_CAP_SECONDS`
+  (`lib/supabase/session-cap.ts`) as static text — update both if the cap changes.
+- **Docs:** NAVIGATION.md gained a dated correction + the generated sheet index (its old table was
+  stale); CLAUDE.md's design exception already covers the layer.
+Verified: `tsc` clean, full `next build` (see PR), login rendered at 1200px/390px (no overflow),
+migration live-tested. Not verified against live data/sessions: the project cover sheet, task IDs
+on the real board. **Redesign status:** all five steps done; what remains is per-module visual
+grammar beyond Projects/Tasks/Pulse (Drawings browser, Tender comparison matrix, Site timeline,
+Accounts ledger) and real drawing thumbnails — each a separate scoped effort.
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,

@@ -18,6 +18,7 @@ import {
 import { ChevronLeft, ChevronRight, UserAvatar } from "@carbon/icons-react";
 import { assignTask, setTaskDueDate, updateTaskStatus } from "../../../lib/actions/tasks";
 import { addDays } from "../../../lib/tasks/dates";
+import { formatTaskRef } from "../../../lib/tasks/ref";
 import { analyzeAssignee, isOpen, taskAlerts, type TaskAlert } from "../../../lib/tasks/workload";
 import {
   DEFAULT_FILTERS,
@@ -44,6 +45,7 @@ export type BoardTask = {
   depends_on_id?: string | null;
   project_id?: string | null;
   created_at?: string | null;
+  seq?: number | null;
 };
 export type Person = { id: string; name: string };
 export type ProjectOption = { id: string; title: string };
@@ -260,7 +262,7 @@ export function TaskBoard({
         <Search
           size="md"
           labelText="Search tasks"
-          placeholder="Search tasks"
+          placeholder="Search tasks or ID"
           value={filters.q}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilter("q", e.target.value)}
           onClear={() => setFilter("q", "")}
@@ -541,6 +543,7 @@ function TaskCard({
         borderLeft: `3px solid ${alert ? "var(--cds-support-error)" : "transparent"}`,
       }}
     >
+      {task.seq != null && <div className="aorms-hub__ref" style={{ marginBottom: "0.125rem" }}>{formatTaskRef(task.seq)}</div>}
       <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem" }}>
         <span className="cds--type-body-compact-01" style={{ fontWeight: 600 }}>{task.title}</span>
         {canWrite && (

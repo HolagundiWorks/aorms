@@ -39,7 +39,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
     supabase
       .from("tasks")
       .select(
-        "id, title, status, priority, due_date, estimated_hours, assignee_id, project_id, created_at, floor_label, depends_on_id, project_offices(title)",
+        "id, title, status, priority, due_date, estimated_hours, assignee_id, project_id, created_at, seq, floor_label, depends_on_id, project_offices(title)",
       )
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
@@ -112,6 +112,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
                     depends_on_id: t.depends_on_id,
                     project_id: t.project_id,
                     created_at: t.created_at,
+                    seq: t.seq,
                   };
                 })}
                 people={(assignees ?? []).map((a) => ({ id: a.id, name: a.full_name ?? "Unnamed" }))}
