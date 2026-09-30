@@ -855,6 +855,200 @@ a.cds--side-nav__link[aria-current="page"]::before {
   text-transform: uppercase;
 }
 
+// Projects browser: image cards (name on hover) + lines + pins.
+.aorms-pbrowser__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-block-end: 1.25rem;
+}
+
+.aorms-pbrowser__heading {
+  margin-block-end: 0.75rem;
+  padding-block-end: 0.5rem;
+  border-block-end: 1px solid var(--aorms-rule);
+}
+
+.aorms-pcard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 1.5rem 1rem;
+}
+
+.aorms-pcard {
+  position: relative;
+  min-inline-size: 0;
+}
+
+.aorms-pcard__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.aorms-pcard__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--cds-layer);
+  border: 1px solid var(--aorms-rule);
+}
+
+.aorms-pcard__media > img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 240ms ease;
+}
+
+.aorms-pcard__plan {
+  inline-size: 100%;
+  block-size: 100%;
+  display: grid;
+  place-items: center;
+  padding: 0.75rem;
+  color: var(--aorms-ink);
+}
+
+// The name appears on hover / keyboard focus — kept in the DOM (opacity only)
+// so screen readers always get it.
+.aorms-pcard__veil {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  padding: 1rem;
+  background: linear-gradient(to top, rgba(22, 22, 22, 0.85), rgba(22, 22, 22, 0.15) 70%, transparent);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.aorms-pcard__link:hover .aorms-pcard__veil,
+.aorms-pcard__link:focus-visible .aorms-pcard__veil {
+  opacity: 1;
+}
+
+.aorms-pcard__link:hover .aorms-pcard__media > img,
+.aorms-pcard__link:focus-visible .aorms-pcard__media > img {
+  transform: scale(1.03);
+}
+
+.aorms-pcard__link:focus-visible {
+  outline: 2px solid var(--cds-focus);
+  outline-offset: 2px;
+}
+
+.aorms-pcard__name {
+  font-size: 1.125rem;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.aorms-pcard__meta {
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
+}
+
+.aorms-pcard__cap {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding-block-start: 0.5rem;
+}
+
+// Touch screens have no hover: show the name permanently.
+@media (hover: none) {
+  .aorms-pcard__veil {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aorms-pcard__media > img,
+  .aorms-pcard__veil {
+    transition: none;
+  }
+
+  .aorms-pcard__link:hover .aorms-pcard__media > img {
+    transform: none;
+  }
+}
+
+.aorms-pin {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--cds-icon-secondary);
+  cursor: pointer;
+}
+
+.aorms-pin:hover {
+  color: var(--aorms-ink);
+}
+
+.aorms-pin:focus-visible {
+  outline: 2px solid var(--cds-focus);
+}
+
+.aorms-pin.is-pinned {
+  color: var(--aorms-orange);
+}
+
+.aorms-pin--card {
+  position: absolute;
+  inset-block-start: 0.5rem;
+  inset-inline-end: 0.5rem;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--aorms-ink);
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.aorms-pin--card.is-pinned,
+.aorms-pcard:hover .aorms-pin--card,
+.aorms-pin--card:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .aorms-pin--card {
+    opacity: 1;
+  }
+}
+
+.aorms-pline__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.aorms-pline__thumb {
+  inline-size: 3rem;
+  block-size: 2.25rem;
+  flex: none;
+  background: var(--cds-layer);
+  border: 1px solid var(--aorms-rule);
+  overflow: hidden;
+}
+
+.aorms-pline__thumb > img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 // Module link row on the project hub.
 .aorms-module-links {
   display: grid;

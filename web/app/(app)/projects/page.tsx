@@ -1,33 +1,12 @@
-import Link from "next/link";
-import {
-  Button,
-  Column,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Tag,
-} from "@carbon/react";
+import { cookies } from "next/headers";
+import { Column, Grid } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { AddProjectForm } from "../../../components/aorms/AddProjectForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { BigStat } from "../../../components/aorms/BigStat";
-import { ProjectCard } from "../../../components/aorms/ProjectCard";
-import { MotionRoot } from "../../../components/aorms/motion/MotionRoot";
-import { MotionStagger } from "../../../components/aorms/motion/MotionStagger";
+import { ProjectsBrowser, VIEW_COOKIE, type ProjectsView } from "../../../components/aorms/ProjectsBrowser";
+import { signCoverUrls } from "../../../lib/projects/covers";
 import { PageHeader } from "../../../components/aorms/PageHeader";
-
-const STATUS_TAG: Record<string, "green" | "blue" | "gray" | "purple" | "teal"> = {
-  ENQUIRY: "gray",
-  PROPOSAL: "purple",
-  ACTIVE: "green",
-  ON_HOLD: "blue",
-  COMPLETED: "teal",
-  ARCHIVED: "gray",
-};
 
 // Same set as app/(app)/clients/page.tsx's and app/(app)/contractors/page.tsx's
 // own WRITE_TIER_ROLES (mirrored from lib/actions/clients.ts) — gates the
@@ -41,21 +20,26 @@ const STATUS_TAG: Record<string, "green" | "blue" | "gray" | "purple" | "teal"> 
 const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
 
 export default async function ProjectsPage({ searchParams }: { searchParams: Promise<{ view?: string }> }) {
-  const { view } = await searchParams;
-  const scheduleView = view === "schedule";
+  const { view: viewParam } = await searchParams;
+  // ?view= wins (and keeps the old ?view=schedule link working); otherwise the
+  // cookie the browser component writes; otherwise cards.
+  const cookieView = (await cookies()).get(VIEW_COOKIE)?.value;
+  const initialView: ProjectsView =
+    viewParam === "lines" || viewParam === "schedule" ? "lines" : viewParam === "cards" ? "cards" : cookieView === "lines" ? "lines" : "cards";
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: projects, error }, { data: clients }, { data: myProfile }, { data: taskRows }] = await Promise.all([
+  const [{ data: projects, error }, { data: clients }, { data: myProfile }, { data: taskRows }, { data: pinRows }] = await Promise.all([
     supabase
       .from("project_offices")
-      .select("id, ref, title, project_type, work_type, status, city, client_id, built_up_area_sqm, site_area_sqm, floor_count, clients(name)")
+      .select("id, ref, title, project_type, work_type, status, city, client_id, built_up_area_sqm, site_area_sqm, floor_count, cover_image_key, clients(name)")
       .order("created_at", { ascending: false }),
     supabase.from("clients").select("id, name").order("name"),
     user ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
     supabase.from("tasks").select("project_id, status").not("project_id", "is", null),
+    supabase.from("project_pins").select("project_id"),
   ]);
   const canWrite = !!myProfile && WRITE_TIER_ROLES.has(myProfile.role);
 
@@ -72,6 +56,9 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
     if (t.status === "DONE") c.done += 1;
     taskTally.set(t.project_id, c);
   }
+  const pinnedIds = new Set((pinRows ?? []).map((r) => r.project_id));
+  // Signed URLs only for covers the RLS-scoped query above already returned.
+  const coverUrls = await signCoverUrls(rows.map((p) => p.cover_image_key));
   const clientNameOf = (p: (typeof rows)[number]) =>
     (Array.isArray(p.clients) ? p.clients[0]?.name : (p.clients as { name: string } | null)?.name) ?? null;
 
@@ -98,86 +85,30 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
           <BigStat value={enquiryCount} label="Enquiry" />
         </div>
 
-        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
-          <Button href="/projects" kind={scheduleView ? "tertiary" : "primary"} size="sm">Boards</Button>
-          <Button href="/projects?view=schedule" kind={scheduleView ? "primary" : "tertiary"} size="sm">Schedule</Button>
-        </div>
-
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load projects: {error.message}
           </p>
-        ) : !scheduleView ? (
-          rows.length === 0 ? (
-            <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>No projects yet.</p>
-          ) : (
-            <MotionRoot>
-              <MotionStagger className="aorms-project-grid">
-                {rows.map((p) => (
-                  <ProjectCard
-                    key={p.id}
-                    p={{
-                      id: p.id,
-                      ref: p.ref,
-                      title: p.title,
-                      status: p.status,
-                      clientName: clientNameOf(p),
-                      city: p.city,
-                      builtUpSqm: p.built_up_area_sqm,
-                      siteSqm: p.site_area_sqm,
-                      floors: p.floor_count,
-                      tasksDone: taskTally.get(p.id)?.done ?? 0,
-                      tasksTotal: taskTally.get(p.id)?.total ?? 0,
-                    }}
-                  />
-                ))}
-              </MotionStagger>
-            </MotionRoot>
-          )
         ) : (
-          <Table aria-label="Projects">
-            <TableHead>
-              <TableRow>
-                <TableHeader>Ref</TableHeader>
-                <TableHeader>Title</TableHeader>
-                <TableHeader>Client</TableHeader>
-                <TableHeader>Type</TableHeader>
-                <TableHeader>Work type</TableHeader>
-                <TableHeader>City</TableHeader>
-                <TableHeader>Status</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(projects ?? []).map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell>{p.ref}</TableCell>
-                  <TableCell>
-                    <Link href={`/projects/${p.id}`}>{p.title}</Link>
-                  </TableCell>
-                  <TableCell>
-                    {(Array.isArray(p.clients) ? p.clients[0]?.name : (p.clients as { name: string } | null)?.name) ?? "—"}
-                  </TableCell>
-                  <TableCell>{p.project_type}</TableCell>
-                  <TableCell>{p.work_type}</TableCell>
-                  <TableCell>{p.city ?? "—"}</TableCell>
-                  <TableCell>
-                    <Tag type={STATUS_TAG[p.status] ?? "gray"} size="sm">
-                      {p.status ?? "—"}
-                    </Tag>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {(projects ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      No projects yet.
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <ProjectsBrowser
+            initialView={initialView}
+            projects={rows.map((p) => ({
+              id: p.id,
+              ref: p.ref,
+              title: p.title,
+              status: p.status,
+              clientName: clientNameOf(p),
+              city: p.city,
+              projectType: p.project_type,
+              builtUpSqm: p.built_up_area_sqm,
+              siteSqm: p.site_area_sqm,
+              floors: p.floor_count,
+              tasksDone: taskTally.get(p.id)?.done ?? 0,
+              tasksTotal: taskTally.get(p.id)?.total ?? 0,
+              coverUrl: p.cover_image_key ? (coverUrls.get(p.cover_image_key) ?? null) : null,
+              pinned: pinnedIds.has(p.id),
+            }))}
+          />
         )}
       </Column>
       </Grid>
