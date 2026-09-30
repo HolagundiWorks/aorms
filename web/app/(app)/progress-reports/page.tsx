@@ -47,6 +47,7 @@ export default async function ProgressReportsPage() {
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Progress Reports"
+              result="Site progress anyone can verify."
               description="Periodic project progress narrative and completion percentages."
               actions={<ContextPanelTrigger size="sm">Add report</ContextPanelTrigger>}
             />

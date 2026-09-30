@@ -57,6 +57,7 @@ export default async function LessonsPage() {
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Lessons Learned"
+              result="Information that can be reused."
               description="Firm-wide knowledge captured per project."
               actions={canWrite ? <ContextPanelTrigger size="sm">Add lesson</ContextPanelTrigger> : undefined}
             />

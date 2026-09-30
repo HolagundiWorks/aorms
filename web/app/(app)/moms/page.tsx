@@ -59,6 +59,7 @@ export default async function MomsPage() {
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Meeting Minutes"
+              result="Decisions that can be acted upon."
               description="MOMs — minutes of meeting, per project."
               actions={canWrite ? <ContextPanelTrigger size="sm">Add minutes</ContextPanelTrigger> : undefined}
             />

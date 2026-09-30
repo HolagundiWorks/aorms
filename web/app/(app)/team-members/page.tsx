@@ -62,6 +62,7 @@ export default async function TeamMembersPage() {
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Team Members"
+              result="A team that is known and reachable."
               description="Firm roster. Adding a team member is owner-only, matching the current backend's own gate."
               actions={isOwner ? <ContextPanelTrigger size="sm">Add team member</ContextPanelTrigger> : undefined}
             />

@@ -59,6 +59,7 @@ export default async function ApprovalsPage() {
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Approvals"
+              result="Sign-offs on the record."
               description="What was issued to a client or authority for sign-off, with channel and response status."
               actions={canWrite ? <ContextPanelTrigger size="sm">Log approval</ContextPanelTrigger> : undefined}
             />

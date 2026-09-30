@@ -65,6 +65,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Tasks"
+              result="Work that is assigned, dated and finishable."
               description="Drag tasks between columns, drop people onto tasks to assign, and drag deadlines on the calendar."
               actions={
                 <>
