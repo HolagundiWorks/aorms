@@ -165,7 +165,11 @@ export function ProjectsBrowser({ projects, initialView }: { projects: BrowserPr
         </span>
       </div>
 
-      {error && <InlineNotification kind="error" title="Couldn't update pin" subtitle={error} lowContrast onCloseButtonClick={() => setError(null)} />}
+      {error && (
+        <div style={{ marginBlockEnd: "1rem" }}>
+          <InlineNotification kind="error" title="Couldn't update pin" subtitle={error} lowContrast onCloseButtonClick={() => setError(null)} />
+        </div>
+      )}
 
       {projects.length === 0 ? (
         <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>No projects yet.</p>

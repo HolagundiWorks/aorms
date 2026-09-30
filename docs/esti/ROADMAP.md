@@ -7135,6 +7135,40 @@ entry covers the follow-up request.
   structure (PageHeader + KpiTile row + table) at 1440px and 390px (rail x=112/w=176, content x=320, no
   overflow) and a full `next build`; **not** verified page-by-page against live data (45 pages, no test
   login) — expect a few with unusual structure to need a tweak.
+### Projects: image cards, cards/lines view, pinned projects (2026-09-30)
+
+Requested: HCWorks-style project cards with images, project name on hover, a cards/lines switch, and
+pinning. **Checked HCWorks first:** its "Selected works" is a single-column alternating image/text
+layout with titles always visible (and its projects are software repos), not a hover grid — so this
+follows the explicit spec (image grid, name on hover), not a copy of that page.
+- **Cards view (default):** 4:3 image cards in an auto-fill grid; hovering or keyboard-focusing a
+  card fades in a dark gradient with the project **name**, client/city and task progress. The name is
+  always in the DOM (opacity only) so screen readers get it; touch devices (`hover: none`) show it
+  permanently; reduced-motion users get no zoom/fade. Projects without an image fall back to the
+  generated `PlanGlyph` drawing. A ref + status caption sits under each card.
+- **Lines view:** a compact schedule table (pin, ref, project with thumbnail, client, type, city,
+  tasks done/total, status). Replaces the old Boards/Schedule toggle; `?view=schedule` still works.
+- **View is remembered** in a cookie (`aorms_projects_view`) the server page reads, so it renders in the
+  right layout with no flash. `?view=cards|lines` overrides it.
+- **Pins are personal** (each person's own "keep these on top"), not firm-wide: new table
+  `project_pins (profile_id, project_id, firm_id)` with own-rows-only RLS — migration
+  `0092_project_covers_and_pins.sql`. Pinning needs no write capability (it's a preference, not an
+  edit to the project) but the insert policy requires the project to be visible to the caller, so pin
+  inserts can't probe other firms' project IDs. Pinned projects form a "Pinned" group above "All
+  projects" in cards, and sort first in lines; optimistic with revert + message on failure.
+- **Cover images:** `project_offices.cover_image_key` + a private `project-covers` bucket
+  (`<project_id>/<sha256>.<ext>`). Same pattern as receipts/documents: uploads go through a Server
+  Action that authorizes first (write-tier role, RLS-scoped project read, then RLS-gated update),
+  validates type + magic bytes + 5MB (JPEG/PNG/WebP), and stores via the service role; reads use
+  1-hour signed URLs minted only for keys the caller's RLS query returned (the existing CSP already
+  allows `*.supabase.co` images). Set/replace/remove from the project Overview page (write-tier roles
+  only); a replaced or removed image's old object is deleted best-effort.
+- **Verified:** `tsc`, full `next build` (see PR), and the browser component rendered at desktop/390px
+  with stand-in images — hover reveal (opacity 0→1), pin ordering, lines view + pinned marks, view
+  cookie, the failed-pin error path reverting cleanly. Migration applied to `aorms-web` (3 policies,
+  RLS on, private bucket, column present). **Not verified:** a real upload/signed-URL round trip and a
+  real pin write against the live database (no test login in this session) — the first real use is the
+  test; images are served as-is (no server-side resize), so very large photos cost bandwidth.
 
 ## Support & questions
 
