@@ -47,7 +47,7 @@ export default async function SiteInstructionsPage() {
               actions={<ContextPanelTrigger size="sm">Issue instruction</ContextPanelTrigger>}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

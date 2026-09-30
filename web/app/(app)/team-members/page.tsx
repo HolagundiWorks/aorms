@@ -79,7 +79,7 @@ export default async function TeamMembersPage() {
               </div>
             )}
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

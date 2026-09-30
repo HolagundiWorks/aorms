@@ -52,7 +52,7 @@ export default async function PayslipsPage() {
               actions={<ContextPanelTrigger size="sm">Add payslip</ContextPanelTrigger>}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

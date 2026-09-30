@@ -92,7 +92,7 @@ export default async function UsersPage() {
               actions={isOwner ? <ContextPanelTrigger size="sm">Invite staff member</ContextPanelTrigger> : undefined}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

@@ -212,7 +212,7 @@ export default async function ProjectDetailPage({
               ))}
             </nav>
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

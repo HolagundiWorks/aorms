@@ -52,7 +52,7 @@ export default async function ProgressReportsPage() {
               actions={<ContextPanelTrigger size="sm">Add report</ContextPanelTrigger>}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

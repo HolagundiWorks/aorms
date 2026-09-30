@@ -64,7 +64,7 @@ export default async function ApprovalsPage() {
               actions={canWrite ? <ContextPanelTrigger size="sm">Log approval</ContextPanelTrigger> : undefined}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

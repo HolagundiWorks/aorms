@@ -61,7 +61,7 @@ export default async function OfficeTemplatesPage() {
               actions={canWrite ? <ContextPanelTrigger size="sm">Add template</ContextPanelTrigger> : undefined}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

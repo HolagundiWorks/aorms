@@ -64,7 +64,7 @@ export default async function MomsPage() {
               actions={canWrite ? <ContextPanelTrigger size="sm">Add minutes</ContextPanelTrigger> : undefined}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

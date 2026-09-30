@@ -22,11 +22,11 @@ export function TitleBlock({ companyName }: { companyName: string }) {
   }, []);
 
   if (!sheet) return null;
-  const parts = [sheet.section, sheet.page !== sheet.section ? sheet.page : null, `AORMS-${sheet.sheet}`, date].filter(Boolean);
+  const extra = [companyName || null, sheet.section, sheet.page !== sheet.section ? sheet.page : null].filter(Boolean);
   return (
     <p className="aorms-sheet-footer aorms-print-hide" aria-label="Sheet reference">
-      {companyName && <span className="aorms-sheet-footer__office">{companyName} / </span>}
-      {parts.join(" / ")}
+      <span className="aorms-sheet-footer__extra">{extra.join(" / ")} / </span>
+      {[`AORMS-${sheet.sheet}`, date].filter(Boolean).join(" / ")}
     </p>
   );
 }

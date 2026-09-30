@@ -7099,6 +7099,43 @@ on the real board. **Redesign status:** all five steps done; what remains is per
 grammar beyond Projects/Tasks/Pulse (Drawings browser, Tender comparison matrix, Site timeline,
 Accounts ledger) and real drawing thumbnails — each a separate scoped effort.
 
+### Kanban rework, floating sheet footer, Instructions toggle, Pulse layout on every screen (2026-09-30)
+
+PR #81 (project image cards / cards-lines view / pins / cover images) was open when this began; this
+entry covers the follow-up request.
+- **Title block removed → floating sheet footer.** The bordered block at the foot of every page is gone;
+  the same real fields (office / section / drawing / sheet / date) are now one faint line fixed beside the
+  AORMS mark at **50% opacity**, non-interactive and hidden in print. On small screens it collapses to
+  just `AORMS-GG.NN / date`. (`TitleBlock.tsx` keeps its name; `.aorms-titleblock` CSS deleted.)
+- **Kanban reworked** (`TaskBoard.tsx`): the team is now a **horizontal people strip** above the board
+  instead of a cramped right-hand column, so the board gets the full width. Each person chip shows
+  avatar, open count + hours, a thin load line (red + "overloaded" when over capacity), is draggable onto
+  a card to assign, clickable to filter (orange outline), keyboard-operable; an "Unassigned" drop chip
+  clears the assignee. Columns are ruled, show a two-digit count + total hours, and scroll on their own
+  (page no longer grows). Cards are rebuilt: mono `TASK-0184` + priority label, title, project · floor, flag
+  tags only when there is something to flag (blocked / at risk / overdue / waiting), and a footer of due
+  date (red when overdue), hours and an assignee avatar. Priority reads as the left border (critical red,
+  high ink). The three stacked alert banners became **one slim "Attention" line**. The Board/Calendar
+  switch moved onto the status row. Drag/drop, filters, the "Move to…" fallback menu all unchanged.
+- **Instructions toggle** — last entry of the side panel (`Instructions · On/Off`, info icon, orange when
+  on). Every "how to use" note carries `.aorms-instruction`: page descriptions, "The result" lines, the
+  context-panel descriptions, drag-and-drop hints. **Default is ON** (that was the existing behaviour);
+  turning it off hides them all via `[data-instructions="off"]` on the content area. Remembered in a cookie
+  (`aorms_instructions`) read by `(app)/layout.tsx`, so it is right on first paint. Verified: off persists
+  across reload through the server-read cookie.
+- **Pulse layout on every screen.** *Assumption: "the pls layout" = the Pulse layout (left rail of large
+  numerals beside the working area); confirm.* Implemented as **one marker class** — `.aorms-rail-kpis` on
+  the KPI row of 45 `(app)` pages (Pulse itself and the platform admin excluded) — plus CSS using `:has()`:
+  when that row is a direct child of the page column, the header spans the top and the row becomes an 11rem
+  left rail (sticky), KPI tiles restyled as large numerals with rule separators (status stripe and trend
+  kept); below `lg` the rail becomes a wrapping row above the page. A page where the row is nested deeper
+  just keeps its normal tile grid; only the first KPI row on a page becomes the rail. Revert = delete the
+  CSS block. **Not applied:** pages with no KPI row (they have nothing to put in a rail), and the project
+  Overview keeps its own hub composition. Verified in headless Chromium on a page built with the real
+  structure (PageHeader + KpiTile row + table) at 1440px and 390px (rail x=112/w=176, content x=320, no
+  overflow) and a full `next build`; **not** verified page-by-page against live data (45 pages, no test
+  login) — expect a few with unusual structure to need a tweak.
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,

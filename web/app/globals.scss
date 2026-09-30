@@ -1204,6 +1204,83 @@ a.cds--side-nav__link[aria-current="page"]::before {
   }
 }
 
+// ── Pulse layout on every screen (2026-09-30) ────────────────────────────
+// Any page whose KPI row carries `.aorms-rail-kpis` as a DIRECT child of its
+// content column gets the Pulse layout: the page header spans the top and the
+// KPI row becomes a left rail of large numerals beside the rest of the page.
+// Pure CSS via :has() — no per-page restructuring, and a page where the row is
+// nested deeper simply keeps its normal tile grid. Only the first KPI row on a
+// page becomes the rail. Below `lg` the rail is a wrapping row above the page.
+@media (min-width: 66rem) {
+  div:has(> .aorms-rail-kpis) {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    column-gap: 2rem;
+    align-items: start;
+  }
+
+  div:has(> .aorms-rail-kpis) > * {
+    grid-column: 2;
+    min-inline-size: 0;
+  }
+
+  div:has(> .aorms-rail-kpis) > :first-child:not(.aorms-rail-kpis) {
+    grid-column: 1 / -1;
+  }
+
+  div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) {
+    grid-column: 1;
+    grid-row: 2 / span 40;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 1.5rem !important;
+    margin: 0 !important;
+    position: sticky;
+    inset-block-start: 4rem;
+  }
+}
+
+// Rail tiles read as large numerals (same look as BigStat), not boxed tiles.
+div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) .cds--tile {
+  // !important: KpiTile sets its size/border inline.
+  inline-size: auto !important;
+  block-size: auto !important;
+  min-inline-size: 0 !important;
+  padding: 0.75rem 0 0 !important;
+  border: 0 !important;
+  border-block-start: 1px solid var(--aorms-ink) !important;
+  background: transparent !important;
+  gap: 0.25rem !important;
+}
+
+div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) .cds--tile p.cds--type-heading-03 {
+  font-size: 1.75rem;
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) .cds--tile p.cds--type-helper-text-01:not([class*="trend"]) {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+@media (max-width: 65.9375rem) {
+  div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 1rem 2rem !important;
+  }
+
+  div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) > * {
+    flex: 0 0 auto;
+    min-inline-size: 7.5rem;
+  }
+}
+
 // One-line alert strip above the board.
 .aorms-alertline {
   display: flex;
@@ -1252,8 +1329,9 @@ a.cds--side-nav__link[aria-current="page"]::before {
   pointer-events: none;
 }
 
+// Small screens: only the sheet number and date (the rest is in the page header).
 @media (max-width: 42rem) {
-  .aorms-sheet-footer .aorms-sheet-footer__office {
+  .aorms-sheet-footer .aorms-sheet-footer__extra {
     display: none;
   }
 }

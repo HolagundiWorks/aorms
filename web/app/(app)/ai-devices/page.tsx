@@ -67,7 +67,7 @@ export default async function AiDevicesPage() {
               actions={<ContextPanelTrigger size="sm">Register device</ContextPanelTrigger>}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

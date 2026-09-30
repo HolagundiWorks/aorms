@@ -41,7 +41,7 @@ export default async function RateBooksPage() {
               actions={<ContextPanelTrigger size="sm">New rate book</ContextPanelTrigger>}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

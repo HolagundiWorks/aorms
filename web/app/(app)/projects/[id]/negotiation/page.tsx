@@ -62,7 +62,7 @@ export default async function NegotiationPage({
           actions={<ContextPanelTrigger size="sm">Add round</ContextPanelTrigger>}
         />
 
-        <div
+        <div className="aorms-rail-kpis"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, 9rem)",

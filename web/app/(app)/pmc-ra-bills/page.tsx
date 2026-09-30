@@ -49,7 +49,7 @@ export default async function PmcRaBillsPage() {
           actions={<ContextPanelTrigger size="sm">New RA bill</ContextPanelTrigger>}
         />
 
-        <div
+        <div className="aorms-rail-kpis"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, 9rem)",

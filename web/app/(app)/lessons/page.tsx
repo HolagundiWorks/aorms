@@ -62,7 +62,7 @@ export default async function LessonsPage() {
               actions={canWrite ? <ContextPanelTrigger size="sm">Add lesson</ContextPanelTrigger> : undefined}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

@@ -28,7 +28,7 @@ export default async function TeamsPage() {
               actions={<ContextPanelTrigger size="sm">Add team</ContextPanelTrigger>}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

@@ -45,7 +45,7 @@ export default async function PmcMilestonesPage() {
           actions={<ContextPanelTrigger size="sm">New milestone</ContextPanelTrigger>}
         />
 
-        <div
+        <div className="aorms-rail-kpis"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, 9rem)",
