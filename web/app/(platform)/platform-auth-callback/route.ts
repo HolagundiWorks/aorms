@@ -58,7 +58,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error && data.user) {
-      if (next === RESET_PASSWORD_PATH || !data.user.email) {
+      // `next` may carry a query (`?mode=invite` for a ConnectDeX invite), so compare the path only.
+      if (next.split("?")[0] === RESET_PASSWORD_PATH || !data.user.email) {
         return NextResponse.redirect(`${SITE_URL}${next}`);
       }
 
