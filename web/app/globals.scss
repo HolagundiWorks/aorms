@@ -729,6 +729,115 @@ a.cds--side-nav__link[aria-current="page"]::before {
   white-space: nowrap;
 }
 
+// Hub sheet (Pulse) — "00 / THE OFFICE": three ruled columns.
+.aorms-hub {
+  margin-block-end: 2rem;
+  border-block-start: 2px solid var(--aorms-ink);
+  padding-block-start: 1rem;
+}
+
+.aorms-hub__head {
+  display: grid;
+  gap: 0.25rem;
+  margin-block-end: 1.25rem;
+}
+
+.aorms-hub__cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 2rem;
+}
+
+.aorms-hub__col {
+  border-block-start: 1px solid var(--aorms-rule);
+  padding-block-start: 0.75rem;
+  min-inline-size: 0;
+}
+
+.aorms-hub__list {
+  margin: 0.5rem 0 0;
+}
+
+.aorms-hub__list > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-block: 0.375rem;
+  border-block-end: 1px solid var(--aorms-rule);
+  font-size: 0.875rem;
+}
+
+.aorms-hub__list dt a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.aorms-hub__list dt a:hover {
+  color: var(--aorms-orange);
+}
+
+.aorms-hub__list dd {
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.aorms-hub__active {
+  color: var(--aorms-orange);
+}
+
+.aorms-hub__ref {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: var(--cds-text-secondary);
+  white-space: nowrap;
+}
+
+.aorms-hub__meetings,
+.aorms-hub__attention {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  font-size: 0.875rem;
+}
+
+.aorms-hub__meetings li {
+  padding-block: 0.25rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.aorms-hub__attention li {
+  border-block-end: 1px solid var(--aorms-rule);
+}
+
+.aorms-hub__attention a {
+  display: flex;
+  gap: 0.75rem;
+  padding-block: 0.5rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.aorms-hub__attention a:hover span:last-child {
+  color: var(--aorms-orange);
+}
+
+.aorms-hub__attention em {
+  display: block;
+  font-style: normal;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+}
+
+@media (max-width: 65.9375rem) {
+  .aorms-hub__cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 // Module link row on the project hub.
 .aorms-module-links {
   display: grid;
