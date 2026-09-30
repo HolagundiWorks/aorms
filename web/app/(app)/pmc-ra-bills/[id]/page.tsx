@@ -62,8 +62,8 @@ export default async function PmcRaBillDetailPage({
                 <TableHeader>Description</TableHeader>
                 <TableHeader>Unit</TableHeader>
                 <TableHeader>Qty (this period)</TableHeader>
-                <TableHeader>Rate</TableHeader>
-                <TableHeader>Amount</TableHeader>
+                <TableHeader className="aorms-num">Rate</TableHeader>
+                <TableHeader className="aorms-num">Amount</TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -72,8 +72,8 @@ export default async function PmcRaBillDetailPage({
                   <TableCell>{l.description}</TableCell>
                   <TableCell>{l.unit ?? "—"}</TableCell>
                   <TableCell>{l.this_qty}</TableCell>
-                  <TableCell>{formatInr(l.rate_paise)}</TableCell>
-                  <TableCell>{formatInr(l.amount_paise)}</TableCell>
+                  <TableCell className="aorms-num">{formatInr(l.rate_paise)}</TableCell>
+                  <TableCell className="aorms-num">{formatInr(l.amount_paise)}</TableCell>
                 </TableRow>
               ))}
               {(lines ?? []).length === 0 && (

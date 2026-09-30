@@ -6962,6 +6962,17 @@ grammars beyond Projects/Tasks, real drawing thumbnails (needs the DXF→SVG pip
 Boards page themselves (server pages — no test login in this session); the orange active-nav
 rule (selector targets Carbon's `--current` class, not exercised in the preview).
 
+**Follow-up (2026-09-30): PR #74 merged; Pulse strip + money columns.** Pulse gained a
+large-numeral studio strip (Projects, Open tasks in orange, Critical, Ready to bill for
+finance roles) from values the page already computes — the tabbed KPI tiles and widgets are
+untouched; a full Pulse re-composition stays un-built. The numeric-column style (`aorms-num`:
+right-aligned, monospaced, tabular) was applied to money columns in 16 list/detail tables
+(invoices, payslips, purchase orders, proposals, rate books, reports, contracts, accounts,
+RA bills, reconcile, consultants, team members, negotiation). Headers were matched by text
+from a fixed list, so a money column whose header isn't in that list is right-aligned in the
+body but left-aligned in the header — a cosmetic mismatch to fix as found. `tsc` clean; not
+viewed against live data.
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,

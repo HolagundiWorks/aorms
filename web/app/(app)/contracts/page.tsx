@@ -100,7 +100,7 @@ export default async function ContractsPage() {
                     <TableHeader>Party</TableHeader>
                     <TableHeader>Type</TableHeader>
                     <TableHeader>Project</TableHeader>
-                    <TableHeader>Value</TableHeader>
+                    <TableHeader className="aorms-num">Value</TableHeader>
                     <TableHeader>Status</TableHeader>
                   </TableRow>
                 </TableHead>
@@ -116,7 +116,7 @@ export default async function ContractsPage() {
                         <TableCell>{c.party}</TableCell>
                         <TableCell>{c.contract_type}</TableCell>
                         <TableCell>{project?.title ?? "—"}</TableCell>
-                        <TableCell>{formatInr(c.value_paise)}</TableCell>
+                        <TableCell className="aorms-num">{formatInr(c.value_paise)}</TableCell>
                         <TableCell>
                           <Tag type={STATUS_TAG[c.status] ?? "gray"} size="sm">
                             {c.status}

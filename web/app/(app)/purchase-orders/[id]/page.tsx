@@ -94,9 +94,9 @@ export default async function PurchaseOrderDetailPage({ params }: { params: Prom
                 <TableRow>
                   <TableHeader>Description</TableHeader>
                   <TableHeader>Unit</TableHeader>
-                  <TableHeader>Qty</TableHeader>
-                  <TableHeader>Rate</TableHeader>
-                  <TableHeader>Amount</TableHeader>
+                  <TableHeader className="aorms-num">Qty</TableHeader>
+                  <TableHeader className="aorms-num">Rate</TableHeader>
+                  <TableHeader className="aorms-num">Amount</TableHeader>
                   <TableHeader>Actions</TableHeader>
                 </TableRow>
               </TableHead>
@@ -106,8 +106,8 @@ export default async function PurchaseOrderDetailPage({ params }: { params: Prom
                     <TableCell>{it.description}</TableCell>
                     <TableCell>{it.unit ?? "—"}</TableCell>
                     <TableCell>{it.qty}</TableCell>
-                    <TableCell>{formatInr(it.rate_paise)}</TableCell>
-                    <TableCell>{formatInr(it.amount_paise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(it.rate_paise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(it.amount_paise)}</TableCell>
                     <TableCell>
                       <RemoveLineItemButton action={removePoItem.bind(null, it.id, po.id)} />
                     </TableCell>

@@ -63,7 +63,7 @@ export default async function ConsultantDetailPage({ params }: { params: Promise
                 <TableHeader>Project</TableHeader>
                 <TableHeader>Scope</TableHeader>
                 <TableHeader>Agreed fee</TableHeader>
-                <TableHeader>Paid</TableHeader>
+                <TableHeader className="aorms-num">Paid</TableHeader>
                 <TableHeader>Status</TableHeader>
                 <TableHeader>Record payment</TableHeader>
               </TableRow>
@@ -77,8 +77,8 @@ export default async function ConsultantDetailPage({ params }: { params: Promise
                   <TableRow key={e.id}>
                     <TableCell>{project?.title ?? "—"}</TableCell>
                     <TableCell>{e.scope ?? "—"}</TableCell>
-                    <TableCell>{formatInr(e.agreed_fee_paise)}</TableCell>
-                    <TableCell>{formatInr(e.paid_paise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(e.agreed_fee_paise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(e.paid_paise)}</TableCell>
                     <TableCell>
                       <EngagementStatusSelect engagementId={e.id} consultantId={consultant.id} status={e.status} />
                     </TableCell>

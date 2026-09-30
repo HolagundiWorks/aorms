@@ -116,7 +116,7 @@ export default async function TeamMembersPage() {
                       <TableCell>{m.role}</TableCell>
                       <TableCell>{m.job_title ?? "—"}</TableCell>
                       <TableCell>{m.employment_type}</TableCell>
-                      <TableCell>{formatInr(m.monthly_salary_paise)}</TableCell>
+                      <TableCell className="aorms-num">{formatInr(m.monthly_salary_paise)}</TableCell>
                       <TableCell>
                         <Tag type={m.active ? "green" : "gray"} size="sm">
                           {m.active ? "Active" : "Inactive"}

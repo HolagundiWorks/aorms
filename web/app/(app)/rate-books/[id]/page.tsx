@@ -74,7 +74,7 @@ export default async function RateBookDetailPage({
                 <TableHeader>Code</TableHeader>
                 <TableHeader>Description</TableHeader>
                 <TableHeader>Unit</TableHeader>
-                <TableHeader>Rate</TableHeader>
+                <TableHeader className="aorms-num">Rate</TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -83,7 +83,7 @@ export default async function RateBookDetailPage({
                   <TableCell>{it.item_code ?? "—"}</TableCell>
                   <TableCell>{it.description}</TableCell>
                   <TableCell>{it.unit}</TableCell>
-                  <TableCell>{formatInr(it.rate_paise)}</TableCell>
+                  <TableCell className="aorms-num">{formatInr(it.rate_paise)}</TableCell>
                 </TableRow>
               ))}
               {(items ?? []).length === 0 && (

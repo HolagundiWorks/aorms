@@ -85,7 +85,7 @@ function ExpensesTable({
           <TableHeader>Scope / Project</TableHeader>
           <TableHeader>Payee</TableHeader>
           <TableHeader>Account</TableHeader>
-          <TableHeader>Amount</TableHeader>
+          <TableHeader className="aorms-num">Amount</TableHeader>
           <TableHeader>Status</TableHeader>
           <TableHeader>Recovery</TableHeader>
           <TableHeader>Actions</TableHeader>
@@ -103,7 +103,7 @@ function ExpensesTable({
               <TableCell>{row.scope === "PROJECT" ? project?.title ?? "—" : "Office"}</TableCell>
               <TableCell>{row.payee ?? "—"}</TableCell>
               <TableCell>{account?.name ?? "—"}</TableCell>
-              <TableCell>{formatInr(row.amount_paise)}</TableCell>
+              <TableCell className="aorms-num">{formatInr(row.amount_paise)}</TableCell>
               <TableCell>
                 <Tag type={STATUS_TAG[row.status] ?? "gray"} size="sm">
                   {row.status}

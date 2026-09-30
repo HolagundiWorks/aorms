@@ -73,7 +73,7 @@ export default async function PmcRaBillsPage() {
                 <TableHeader>Bill no</TableHeader>
                 <TableHeader>Project</TableHeader>
                 <TableHeader>Period</TableHeader>
-                <TableHeader>Gross</TableHeader>
+                <TableHeader className="aorms-num">Gross</TableHeader>
                 <TableHeader>Status</TableHeader>
               </TableRow>
             </TableHead>
@@ -90,7 +90,7 @@ export default async function PmcRaBillsPage() {
                     <TableCell>
                       {b.period_start} – {b.period_end}
                     </TableCell>
-                    <TableCell>{formatInr(b.gross_paise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(b.gross_paise)}</TableCell>
                     <TableCell>
                       <RaBillStatusSelect billId={b.id} status={b.status} />
                     </TableCell>
