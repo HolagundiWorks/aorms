@@ -61,6 +61,7 @@ export default async function InvoicesPage() {
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Invoices"
+              result="Fees billed and recovered on time."
               description="GST invoicing — CGST/SGST/IGST, place of supply, and s.194J TDS computed automatically."
               actions={<ContextPanelTrigger size="sm">Create invoice</ContextPanelTrigger>}
             />

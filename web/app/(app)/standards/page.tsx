@@ -38,6 +38,7 @@ export default async function StandardsPage() {
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Standards Library"
+              result="Information that can be reused."
               description="Design standards by discipline, with attached reference files."
               actions={<ContextPanelTrigger size="sm">Add standard</ContextPanelTrigger>}
             />

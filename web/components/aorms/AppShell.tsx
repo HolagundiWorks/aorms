@@ -40,9 +40,9 @@ import { HeaderUserMenu } from "./HeaderUserMenu";
 import { BrandWatermark } from "./BrandWatermark";
 import { FloatingAskPulse } from "./pulse/FloatingAskPulse";
 import { getInitials } from "../../lib/shell/identity";
+import { NAV_GROUPS, NAV_TOP, groupSheet, itemSheet, topSheet } from "../../lib/shell/nav-data";
+import { TitleBlock } from "./TitleBlock";
 
-type NavLeaf = { href: string; label: string };
-type NavGroup = { title: string; icon: ComponentType; items: NavLeaf[] };
 
 /**
  * Top-level items (always visible, no group) — 2026-09-14 remediation
@@ -61,144 +61,24 @@ type NavGroup = { title: string; icon: ComponentType; items: NavLeaf[] };
  * pulse/heartbeat glyph is arguably the more apt icon for a page
  * literally named Pulse anyway.
  */
-const TOP_LEVEL: (NavLeaf & { icon: ComponentType })[] = [
-  { href: "/pulse", label: "Pulse", icon: Activity },
-  { href: "/projects", label: "Projects", icon: FolderDetails },
-  { href: "/leads", label: "Leads", icon: UserFollow },
-  { href: "/tasks", label: "Tasks", icon: Task },
-];
+const TOP_ICONS: Record<string, ComponentType> = {
+  "/pulse": Activity,
+  "/projects": FolderDetails,
+  "/leads": UserFollow,
+  "/tasks": Task,
+};
 
-/**
- * Group order (2026-09-30 UI/UX audit — hierarchy): groups now run from the
- * day-to-day project workflow outward — Site and Estimation & Technical (the
- * work itself, previously buried second-to-last) → Third Parties, Tender
- * Management, Office and Accounts (commercial) → HR (people) → Knowledge Bank
- * (reference) → Admin (configuration, last). The "Knowledge Bank" page inside
- * the Knowledge Bank group is relabelled "Knowledge Portal" so a group and its
- * own child no longer share a name.
- *
- * Grouped by domain. 2026-09-14 remediation (attached IA brief §3-14):
- * restructured around the brief's own target hierarchy — Site, Third
- * Parties, Accounts, HR, Tender Management, Knowledge Bank, in that
- * order, each either a rename of an existing group (Delivery -> Site,
- * Finance -> Accounts, People -> HR, Library -> Knowledge Bank) or new
- * (Third Parties pools Clients/Contractors/Consultants under one group
- * per the brief's own "a third party should be capable of having more
- * than one role" model — see § 9; genuinely consolidating the *nav*
- * position, not the underlying data model, which stays three separate
- * tables per clients/contractors/consultants.sql — a real schema
- * unification is a bigger, separate change not attempted here. Tender
- * Management pulls /tenders out of Office, its own group per the brief
- * even though nothing else in that brief's fuller Tender Management
- * structure — BOQ, rate analysis, bid comparison — exists as separate
- * pages yet). Office/Estimation & Technical/Admin keep their existing
- * shape and move after the brief's own 8 primary groups — every one of
- * their pages is real, working functionality the brief doesn't address,
- * not deleted or force-fit into an ill-suited category; "Vendors" from
- * the brief's own Third Parties structure isn't added here either — no
- * vendors table/pages exist yet, that's new-entity work, not a nav move
- * (see docs/esti/ROADMAP.md's own dated entry for this as a disclosed
- * follow-up).
- */
-const GROUPS: NavGroup[] = [
-  {
-    title: "Site",
-    icon: DeliveryIcon,
-    items: [
-      { href: "/snags", label: "Snags" },
-      { href: "/site-instructions", label: "Site Instructions" },
-      { href: "/progress-reports", label: "Progress Reports" },
-      { href: "/bbs", label: "BBS" },
-      { href: "/pmc-milestones", label: "Milestones" },
-      { href: "/pmc-packages", label: "Work Packages" },
-      { href: "/pmc-steel-certs", label: "Steel Certification" },
-      { href: "/pmc-ra-bills", label: "RA Bills" },
-      { href: "/approvals", label: "Approvals" },
-    ],
-  },
-  {
-    title: "Estimation & Technical",
-    icon: Ruler,
-    items: [
-      { href: "/rate-books", label: "Rate Books" },
-      { href: "/estimates", label: "Estimates" },
-      { href: "/takeoff", label: "Take-off" },
-      { href: "/spec-sheets", label: "Spec Sheets" },
-      { href: "/drawings", label: "Drawings" },
-      { href: "/moms", label: "Meeting Minutes" },
-      { href: "/document-issues", label: "Document Issues" },
-    ],
-  },
-  {
-    title: "Third Parties",
-    icon: Building,
-    items: [
-      { href: "/clients", label: "Clients" },
-      { href: "/contractors", label: "Contractors" },
-      { href: "/consultants", label: "Consultants" },
-    ],
-  },
-  {
-    title: "Tender Management",
-    icon: RequestQuote,
-    items: [{ href: "/tenders", label: "Tenders" }],
-  },
-  {
-    title: "Office",
-    icon: Document,
-    items: [
-      { href: "/proposals", label: "Proposals" },
-      { href: "/letters", label: "Letters" },
-      { href: "/contracts", label: "Contracts" },
-      { href: "/transmittals", label: "Transmittals" },
-      { href: "/purchase-orders", label: "Purchase Orders" },
-      { href: "/office-templates", label: "Office Templates" },
-    ],
-  },
-  {
-    title: "Accounts",
-    icon: Currency,
-    items: [
-      { href: "/invoices", label: "Invoices" },
-      { href: "/reports", label: "Financial Reports" },
-      { href: "/accounts", label: "Office Expenses" },
-      { href: "/reconcile", label: "Reconciliation" },
-    ],
-  },
-  {
-    title: "HR",
-    icon: Group,
-    items: [
-      { href: "/team-members", label: "Team Members" },
-      { href: "/teams", label: "Teams" },
-      { href: "/payslips", label: "Payslips" },
-      { href: "/job-applications", label: "Job Applications" },
-    ],
-  },
-  {
-    title: "Knowledge Bank",
-    icon: Book,
-    items: [
-      { href: "/master-plans", label: "Master Plans" },
-      { href: "/standards", label: "Standards" },
-      { href: "/compliance", label: "Compliance" },
-      { href: "/spec-catalog", label: "Spec Catalog" },
-      { href: "/lessons", label: "Lessons Learned" },
-      { href: "/knowledge-bank", label: "Knowledge Portal" },
-    ],
-  },
-  {
-    title: "Admin",
-    icon: Settings,
-    items: [
-      { href: "/workload", label: "Workload" },
-      { href: "/audit-log", label: "Audit Log" },
-      { href: "/users", label: "Users" },
-      { href: "/firm-settings", label: "Firm Settings" },
-      { href: "/ai-devices", label: "Esti Devices" },
-    ],
-  },
-];
+const GROUP_ICONS: Record<string, ComponentType> = {
+  "Site": DeliveryIcon,
+  "Estimation & Technical": Ruler,
+  "Third Parties": Building,
+  "Tender Management": RequestQuote,
+  "Office": Document,
+  "Accounts": Currency,
+  "HR": Group,
+  "Knowledge Bank": Book,
+  "Admin": Settings,
+};
 
 /** A route is "active" for a link at exactly itself, and for a group's
  * expand/highlight state at itself or any of its own sub-pages (so /projects/[id]
@@ -352,24 +232,31 @@ export function AppShell({
         onOverlayClick={() => setMobileOpen(false)}
       >
         <SideNavItems>
-          {TOP_LEVEL.map((item) => (
+          {NAV_TOP.map((item, i) => (
             <SideNavLink
               key={item.href}
               as={NextLink}
               href={item.href}
-              renderIcon={item.icon}
+              renderIcon={TOP_ICONS[item.href]}
               isActive={isActiveHref(pathname, item.href)}
               onClick={collapseNav}
             >
+              <span className="aorms-sheet-no">{topSheet(i)}</span>
               {item.label}
             </SideNavLink>
           ))}
-          {GROUPS.map((group) => {
+          {NAV_GROUPS.map((group, gi) => {
             const groupIsActive = group.items.some((item) => isActiveHref(pathname, item.href));
             return (
-              <SideNavMenu key={group.title} title={group.title} renderIcon={group.icon} defaultExpanded={groupIsActive}>
-                {group.items.map((item) => (
+              <SideNavMenu
+                key={group.title}
+                title={`${groupSheet(gi)}\u2002${group.title}`}
+                renderIcon={GROUP_ICONS[group.title]}
+                defaultExpanded={groupIsActive}
+              >
+                {group.items.map((item, ii) => (
                   <SideNavMenuItem key={item.href} as={NextLink} href={item.href} isActive={isActiveHref(pathname, item.href)} onClick={collapseNav}>
+                    <span className="aorms-sheet-no">{itemSheet(gi, ii)}</span>
                     {item.label}
                   </SideNavMenuItem>
                 ))}
@@ -378,7 +265,10 @@ export function AppShell({
           })}
         </SideNavItems>
       </SideNav>
-      <Content>{children}</Content>
+      <Content>
+        {children}
+        <TitleBlock companyName={companyName} />
+      </Content>
       <FloatingAskPulse projects={projects} />
       <BrandWatermark />
     </PomodoroProvider>

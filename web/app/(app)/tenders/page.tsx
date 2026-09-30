@@ -50,6 +50,7 @@ export default async function TendersPage() {
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Tenders"
+              result="A comparable procurement decision."
               description="Firm-issued project tenders — distinct from the AProc work-package tendering module, ported as the two separate systems they are today."
               actions={<ContextPanelTrigger size="sm">Issue tender</ContextPanelTrigger>}
             />

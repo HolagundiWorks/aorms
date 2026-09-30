@@ -20,21 +20,27 @@
  * *name* (e.g. the Decisions page passing the project's title) is not,
  * so this stays opt-in per call site rather than assumed.
  */
+import { SheetMark } from "./SheetMark";
+
 export function PageHeader({
   eyebrow,
   eyebrowMono,
   title,
   description,
+  result,
   actions,
 }: {
   eyebrow?: string;
   eyebrowMono?: boolean;
   title: string;
   description?: React.ReactNode;
+  /** "The result" — what this sheet leaves you with (HCWorks pattern): one outcome-first line. */
+  result?: string;
   actions?: React.ReactNode;
 }) {
   return (
     <div style={{ marginBottom: "1.75rem" }}>
+      <SheetMark />
       {eyebrow && (
         <p
           className={eyebrowMono ? "cds--type-caption-01 cds--type-mono" : "cds--type-caption-01"}
@@ -52,6 +58,12 @@ export function PageHeader({
       {description && (
         <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", maxWidth: "42rem" }}>
           {description}
+        </p>
+      )}
+      {result && (
+        <p className="aorms-result">
+          <span className="aorms-result__label">The result</span>
+          {result}
         </p>
       )}
     </div>

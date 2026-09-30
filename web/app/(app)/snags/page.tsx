@@ -42,6 +42,7 @@ export default async function SnagsPage() {
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Snags"
+              result="Resolved site conditions."
               description="Site defect register. Photo attachments aren't wired up yet."
               actions={<ContextPanelTrigger size="sm">Add snag</ContextPanelTrigger>}
             />

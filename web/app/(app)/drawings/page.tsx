@@ -69,6 +69,7 @@ export default async function DrawingsPage() {
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Drawings"
+              result="A controlled drawing register."
               description="DXF register with worker-driven takeoff and revision chaining."
               actions={canWrite ? <ContextPanelTrigger size="sm">Add drawing</ContextPanelTrigger> : undefined}
             />

@@ -766,6 +766,7 @@ export default async function PulsePage() {
       <Column sm={4} md={8} lg={16}>
         <PageHeader
           title="Pulse"
+          result="A clear picture of the office today."
           description="What needs your attention today — office KPIs, pending approvals, and ESTI's deterministic task-prediction scoring, all computed from real project data."
           actions={<RecomputeButton />}
         />

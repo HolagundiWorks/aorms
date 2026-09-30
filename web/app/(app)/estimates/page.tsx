@@ -50,6 +50,7 @@ export default async function EstimatesPage() {
       <Column sm={4} md={8} lg={16}>
         <PageHeader
           title="Estimates"
+          result="A measurable cost plan."
           description="Priced BOQ against a rate book, with contingency + GST rollup."
           actions={<ContextPanelTrigger size="sm">New estimate</ContextPanelTrigger>}
         />

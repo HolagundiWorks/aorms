@@ -7023,6 +7023,28 @@ filter, sort, search, URL round-trip, reset, and no mobile overflow; logic unit-
 verified against live data. Also confirmed in production: `/api/ready` returns `ready` (both
 Supabase projects OK) after PR #76 deployed.
 
+### Sheet system, step 1 of the HCWorks title-sheet redesign (2026-09-30)
+
+Checked hcworks.in first (numbered 00–07 sections, a large question per section, a "The result"
+closer, horizontal rules, repeated contact line). **Built:** (1) `lib/shell/nav-data.ts` is now the
+single source for the nav (the AppShell arrays moved there; icons stay in AppShell) and assigns
+**positional sheet numbers** — Pulse `00` (the hub), Projects `01`, Leads `02`, Tasks `03`, then
+groups `04`–`12`, and pages inside a group `GG.NN` (e.g. Progress Reports `04.03`). Numbers are
+positional, not stored: reordering the nav renumbers the set. Shown in the side nav (mono, muted).
+(2) `SheetMark` — `AORMS-04.03 / SITE / PROGRESS REPORTS` with a 1px ink rule above every
+`PageHeader` (automatic, from the URL; nothing on non-nav routes). (3) `PageHeader` gained an
+optional `result` prop — an orange "The result" label plus one outcome-first line — applied to 15
+modules (Projects "A coordinated project record.", Estimates "A measurable cost plan.", Tenders
+"A comparable procurement decision.", Meetings "Decisions that can be acted upon.", …). (4)
+`TitleBlock` — a bordered drawing title block at the foot of every nav page: Office, System,
+Section, Drawing, Sheet, Date. **Deliberately omitted:** Revision and Status — the app has no
+revision concept for a page, and a hard-coded "REV 01 / LIVE" would be decoration presented as
+data. Verified in headless Chromium (desktop + 390px, no overflow, hover-expanded nav shows the
+numbers, orange active item); `tsc` clean. Not verified on real pages/data. **Next steps, in
+order:** Hub narrative on Pulse (attention list + today agenda), project cover sheet refinement,
+record IDs (`TASK-0184`, `DWG-A-204` — needs a numbering scheme on top of `numbering_patterns`),
+login screen.
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,

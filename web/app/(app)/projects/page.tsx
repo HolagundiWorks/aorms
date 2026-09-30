@@ -87,6 +87,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
       <Column sm={4} md={8} lg={16}>
         <PageHeader
           title="Projects"
+          result="A coordinated project record."
           description="Project offices — phases, tasks, and delivery live under each project."
           actions={canWrite ? <ContextPanelTrigger size="sm">Create project</ContextPanelTrigger> : undefined}
         />

@@ -643,6 +643,92 @@ a.cds--side-nav__link[aria-current="page"]::before {
   }
 }
 
+// Sheet system (HCWorks title-sheet direction): positional sheet numbers in
+// the nav, a sheet reference above each page title, "The result" closing line,
+// and a drawing title block at the foot of the page.
+.aorms-sheet-no {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--cds-text-secondary);
+  margin-inline-end: 0.625rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.aorms-sheet-mark {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+  margin-block-end: 0.5rem;
+  padding-block-end: 0.5rem;
+  border-block-end: 1px solid var(--aorms-ink);
+}
+
+.aorms-result {
+  margin-block-start: 0.75rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  font-size: 0.875rem;
+  max-inline-size: 42rem;
+}
+
+.aorms-result__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--aorms-orange);
+  white-space: nowrap;
+}
+
+.aorms-titleblock {
+  margin-block-start: 4rem;
+  margin-inline-start: auto;
+  inline-size: min(22rem, 100%);
+  border: 1px solid var(--aorms-ink);
+  font-size: 0.6875rem;
+}
+
+.aorms-titleblock dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.aorms-titleblock dl > div {
+  padding: 0.375rem 0.625rem;
+  border-block-end: 1px solid var(--aorms-rule);
+  border-inline-end: 1px solid var(--aorms-rule);
+}
+
+.aorms-titleblock dl > div:nth-child(2n) {
+  border-inline-end: 0;
+}
+
+.aorms-titleblock dl > div:nth-last-child(-n + 2) {
+  border-block-end: 0;
+}
+
+.aorms-titleblock dt {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-titleblock dd {
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 // Module link row on the project hub.
 .aorms-module-links {
   display: grid;

@@ -58,6 +58,7 @@ export default async function ProposalsPage() {
           <Column sm={4} md={8} lg={16}>
             <PageHeader
               title="Proposals"
+              result="A fee agreed before work begins."
               description="COA fee proposals and scope agreements."
               actions={<ContextPanelTrigger size="sm">Create proposal</ContextPanelTrigger>}
             />
