@@ -6871,6 +6871,18 @@ Tasks are assigned to `profiles`, so the sidebar shows profiles, not
 `team_members`. Unit-level checks of the estimate/overload maths passed; ESLint
 was not run (not installed in the cloud session).
 
+### Kanban task board follow-up: merged, live, demo seeded (2026-09-30)
+
+PR #71 merged to `main`; migrations `0088` (task libraries) and `0089` (demo showcase
+function, hooked onto the end of `reset_demo_data()`) applied to `aorms-web`. **Finding:**
+the live demo is `demo@aorms.in` (firm "Demo Architecture Studio"); the five Aurelia staff
+accounts `reset_demo_data()` needs don't exist in the rebuilt project, so the nightly reset
+is a no-op there and `0089`'s function never runs. The live demo firm was seeded directly
+instead (one-off SQL, not in a migration): the 15-entry starter library, three `DEMO-SHOW-*`
+projects with built-up/floor areas, and ~18 library-generated tasks across the demo owner,
+the QA viewer and unassigned. Only two profiles exist in that firm, so the team sidebar is
+thin until more staff are created.
+
 ### Calculator fixes, compact KPI tiles, hover-rail sidebar, UI/UX audit pass (2026-09-30)
 
 **Calculator** (`lib/calc/dimensional-calc.ts`, `HeaderCalculator.tsx`) — the evaluator
