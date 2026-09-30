@@ -70,7 +70,7 @@ const TOP_ICONS: Record<string, ComponentType> = {
 
 const GROUP_ICONS: Record<string, ComponentType> = {
   "Site": DeliveryIcon,
-  "Estimation & Technical": Ruler,
+  "Estimation & Tech": Ruler,
   "Third Parties": Building,
   "Tender Management": RequestQuote,
   "Office": Document,

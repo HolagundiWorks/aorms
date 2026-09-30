@@ -51,7 +51,7 @@ export default async function ProjectDetailPage({
     supabase
       .from("project_offices")
       .select(
-        "id, ref, title, project_type, work_type, status, city, contact_email, contact_phone, site_area_sqm, built_up_area_sqm, floor_count, current_phase_id, clients(name, email, phone, contact_person)",
+        "id, ref, title, project_type, work_type, status, city, contact_email, contact_phone, state, district, site_address, date_start, site_area_sqm, built_up_area_sqm, floor_count, current_phase_id, clients(name, email, phone, contact_person)",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -146,12 +146,7 @@ export default async function ProjectDetailPage({
               eyebrow={project.ref}
               eyebrowMono
               title={project.title}
-              description={
-                <>
-                  {clientName ?? "No client"} · {project.project_type} · {project.work_type}
-                  {project.city ? ` · ${project.city}` : ""}
-                </>
-              }
+              result="A coordinated project record."
               actions={<ProjectStatusSelect projectId={project.id} status={project.status} />}
             />
 
@@ -160,6 +155,27 @@ export default async function ProjectDetailPage({
                 its life, its scale as a drawing, and one row linking out to
                 everything attached to it. */}
             <PhaseStrip steps={phaseSteps} currentIndex={phaseCurrent} />
+
+            {/* Cover sheet block (2026-09-30): the project's identity fields as
+                ruled label/value pairs, like the head of an architectural
+                title sheet. Only fields the record actually has are shown. */}
+            <dl className="aorms-cover">
+              {[
+                ["Client", clientName],
+                ["Location", [project.city, project.state].filter(Boolean).join(", ") || null],
+                ["Type", project.project_type],
+                ["Work", project.work_type],
+                ["Status", project.status?.replaceAll("_", " ")],
+                ["Started", project.date_start ? new Date(project.date_start + "T00:00:00Z").toLocaleDateString("en-GB", { timeZone: "UTC", day: "2-digit", month: "short", year: "numeric" }).toUpperCase() : null],
+              ]
+                .filter(([, v]) => v)
+                .map(([k, v]) => (
+                  <div key={k as string}>
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </div>
+                ))}
+            </dl>
 
             <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 20rem) minmax(0, 1fr)", gap: "2rem", marginBottom: "0.5rem" }} className="aorms-hub-head">
               <div style={{ color: "var(--aorms-ink)" }}>

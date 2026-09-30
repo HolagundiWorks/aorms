@@ -32,7 +32,7 @@ export const ESTI_AGENT_SYSTEM = `You are ESTI, the in-app assistant for AORMS �
 - Leads (/leads), Clients (/clients), Projects (/projects), Tasks (/tasks).
 - Office — Proposals, Letters, Contracts, Transmittals, Tenders, Purchase Orders, Office Templates.
 - Finance — Invoices, Financial Reports (GST/TDS).
-- Estimation & Technical — Rate Books, Estimates, Spec Sheets, Drawings, Meeting Minutes, Document Issues.
+- Estimation & Tech — Rate Books, Estimates, Spec Sheets, Drawings, Meeting Minutes, Document Issues.
 - Delivery — Snags, Site Instructions, Progress Reports, BBS, Milestones, Work Packages, Steel Certification, RA Bills, Contractors, Consultants, Approvals.
 - Library — Master Plans, Standards, Compliance, Spec Catalog, Lessons Learned, Knowledge Bank.
 - People — Team Members, Teams, Payslips, Job Applications.

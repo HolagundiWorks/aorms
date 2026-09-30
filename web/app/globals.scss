@@ -838,6 +838,35 @@ a.cds--side-nav__link[aria-current="page"]::before {
   }
 }
 
+// Project cover sheet: ruled label/value pairs.
+.aorms-cover {
+  margin: 0 0 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  border-block: 1px solid var(--aorms-ink);
+}
+
+.aorms-cover > div {
+  padding: 0.5rem 1rem 0.5rem 0;
+  min-inline-size: 0;
+}
+
+.aorms-cover dt {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-cover dd {
+  margin: 0.125rem 0 0;
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 // Module link row on the project hub.
 .aorms-module-links {
   display: grid;
