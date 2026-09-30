@@ -91,7 +91,10 @@ export async function updateTaskStatus(taskId: string, status: string): Promise<
   if (!TASK_STATUSES.includes(status)) return { error: "Invalid status." };
 
   const supabase = await createClient();
-  const { error } = await supabase.from("tasks").update({ status }).eq("id", taskId);
+  const { error } = await supabase
+    .from("tasks")
+    .update({ status, completed_at: status === "DONE" ? new Date().toISOString() : null })
+    .eq("id", taskId);
   if (error) return { error: toSafeErrorMessage(error) };
 
   await supabase.rpc("write_audit", {
@@ -106,4 +109,35 @@ export async function updateTaskStatus(taskId: string, status: string): Promise<
   revalidatePath("/tasks");
   revalidatePath("/pulse");
   return {};
+}
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+async function updateTaskFields(taskId: string, fields: Record<string, unknown>): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("tasks").update(fields).eq("id", taskId).select("id");
+  if (error) return { error: toSafeErrorMessage(error) };
+  // RLS filters a forbidden update to zero rows rather than erroring.
+  if (!data?.length) return { error: "You don't have permission to change this task." };
+  await supabase.rpc("write_audit", {
+    p_entity: "task",
+    p_entity_id: taskId,
+    p_action: "UPDATE",
+    p_before: null,
+    p_after: fields,
+  });
+  revalidatePath("/tasks");
+  revalidatePath("/pulse");
+  return {};
+}
+
+/** Kanban drop onto a person — assignee_id null unassigns. */
+export async function assignTask(taskId: string, assigneeId: string | null): Promise<{ error?: string }> {
+  return updateTaskFields(taskId, { assignee_id: assigneeId });
+}
+
+/** Calendar drop onto a day — dueDate null clears the deadline. */
+export async function setTaskDueDate(taskId: string, dueDate: string | null): Promise<{ error?: string }> {
+  if (dueDate !== null && !ISO_DATE.test(dueDate)) return { error: "Invalid date." };
+  return updateTaskFields(taskId, { due_date: dueDate });
 }
