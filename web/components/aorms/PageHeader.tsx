@@ -56,12 +56,12 @@ export function PageHeader({
         {actions}
       </div>
       {description && (
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", maxWidth: "42rem" }}>
+        <p className="cds--type-body-01 aorms-instruction" style={{ color: "var(--cds-text-secondary)", maxWidth: "42rem" }}>
           {description}
         </p>
       )}
       {result && (
-        <p className="aorms-result">
+        <p className="aorms-result aorms-instruction">
           <span className="aorms-result__label">The result</span>
           {result}
         </p>

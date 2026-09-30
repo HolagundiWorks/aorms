@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { INSTRUCTIONS_COOKIE } from "../../lib/shell/preferences";
 import { createClient } from "../../lib/supabase/server";
 import { AppShell } from "../../components/aorms/AppShell";
 import { roleHome } from "../../lib/auth/role-home";
@@ -64,6 +66,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // portal bounce case either.
   if (home && home !== "/pulse") redirect(home);
 
+  const instructionsOn = (await cookies()).get(INSTRUCTIONS_COOKIE)?.value !== "off";
+
   return (
     <>
       <UsageHeartbeat />
@@ -75,6 +79,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         istHour={getIstHour()}
         projects={projects ?? []}
         hasMultipleStudios={hasMultipleStudios}
+        initialInstructions={instructionsOn}
       >
         {children}
       </AppShell>
