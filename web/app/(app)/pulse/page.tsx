@@ -20,6 +20,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { hasRank } from "../../../lib/auth/rank";
 import { KpiTile as Kpi, type KpiStatus } from "../../../components/aorms/KpiTile";
 import { BigStat } from "../../../components/aorms/BigStat";
+import { HubSheet } from "../../../components/aorms/pulse/HubSheet";
 import { ProjectCard } from "../../../components/aorms/ProjectCard";
 import { MotionRoot } from "../../../components/aorms/motion/MotionRoot";
 import { MotionStagger } from "../../../components/aorms/motion/MotionStagger";
@@ -786,6 +787,7 @@ export default async function PulsePage() {
             {showFinancials && <BigStat value={formatInr(readyToBill.total)} label="Ready to bill" href="/invoices" />}
           </aside>
           <div className="aorms-pulse-main">
+            <HubSheet />
 
         {/* Today's Brief + Action Queue, as two separate Tiles side by
             side (2026-09-14 UI-polish request; briefly one merged Tile,

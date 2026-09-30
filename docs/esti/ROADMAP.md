@@ -7045,6 +7045,24 @@ order:** Hub narrative on Pulse (attention list + today agenda), project cover s
 record IDs (`TASK-0184`, `DWG-A-204` — needs a numbering scheme on top of `numbering_patterns`),
 login screen.
 
+### Sheet system, step 2: "00 / The office" hub on Pulse (2026-09-30)
+
+PR #78 (sheet numbers, sheet marks, "The result" lines, title block) merged. Step 2: `HubSheet`
+(`components/aorms/pulse/HubSheet.tsx`, a server component) now opens the Pulse working area — a
+ruled "What is happening?" sheet with three columns: **Projects** (counts by lifecycle status),
+**Today** (date in IST; meetings held today, tasks due, overdue, decisions with the client,
+approvals awaiting, open snags — each links to its filtered view — plus today's meetings listed
+with project ref) and **Attention** (up to six specific items: overdue tasks by priority, blocked
+tasks, decisions awaiting client — each a `ref · title · reason` row linking to the exact view that
+resolves it, e.g. `/tasks?date=overdue&project=…`, reusing the task filters). Every figure is a real
+count from the caller's RLS-scoped session; nothing estimated. The existing Today's Brief, Next-up
+queue, Active projects, KPI tabs and widgets stay below, unchanged. Verified by rendering the real
+component against a local mock PostgREST with realistic data (desktop + 390px, no overflow) and
+`tsc`; not verified against live data. Known limits: meetings carry a date but no time, so
+"today" lists titles without times; "Attention" is capped at six on purpose. Remaining redesign
+steps: project cover sheet refinement, record IDs (`TASK-0184` etc. — needs a numbering scheme),
+login screen.
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,
