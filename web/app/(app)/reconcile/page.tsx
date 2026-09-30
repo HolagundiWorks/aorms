@@ -134,7 +134,7 @@ export default async function ReconcilePage() {
                       <TableCell>
                         {batch.matched_count ?? 0} / {batch.row_count ?? 0}
                       </TableCell>
-                      <TableCell>{formatInr(batch.matched_credit_paise)}</TableCell>
+                      <TableCell className="aorms-num">{formatInr(batch.matched_credit_paise)}</TableCell>
                       <TableCell>
                         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                           <Link href={`/reconcile/${batch.id}`}>View</Link>

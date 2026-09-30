@@ -94,7 +94,7 @@ export default async function NegotiationPage({
               {(rounds ?? []).map((r) => (
                 <TableRow key={r.id}>
                   <TableCell>{r.round_no}</TableCell>
-                  <TableCell>{formatInr(r.fee_change_paise)}</TableCell>
+                  <TableCell className="aorms-num">{formatInr(r.fee_change_paise)}</TableCell>
                   <TableCell>{r.discount_requested_pct}%</TableCell>
                   <TableCell>{r.conversion_probability}%</TableCell>
                   <TableCell>

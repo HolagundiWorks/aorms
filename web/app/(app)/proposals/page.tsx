@@ -88,7 +88,7 @@ export default async function ProposalsPage() {
                     <TableHeader>Project</TableHeader>
                     <TableHeader>Category</TableHeader>
                     <TableHeader>Fee basis</TableHeader>
-                    <TableHeader>Fee</TableHeader>
+                    <TableHeader className="aorms-num">Fee</TableHeader>
                     <TableHeader>Status</TableHeader>
                     <TableHeader>Client approval</TableHeader>
                     <TableHeader>PDF</TableHeader>
@@ -105,7 +105,7 @@ export default async function ProposalsPage() {
                         <TableCell>{project?.title ?? "—"}</TableCell>
                         <TableCell>{p.work_category}</TableCell>
                         <TableCell>{p.fee_basis}</TableCell>
-                        <TableCell>{formatInr(p.fee_paise)}</TableCell>
+                        <TableCell className="aorms-num">{formatInr(p.fee_paise)}</TableCell>
                         <TableCell>
                           <Tag type={STATUS_TAG[p.status] ?? "gray"} size="sm">
                             {p.status}

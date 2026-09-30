@@ -224,7 +224,7 @@ export default async function ReportsPage({
                 <TableRow>
                   <TableHeader>Month</TableHeader>
                   <TableHeader>Invoices</TableHeader>
-                  <TableHeader>Taxable</TableHeader>
+                  <TableHeader className="aorms-num">Taxable</TableHeader>
                   <TableHeader>CGST</TableHeader>
                   <TableHeader>SGST</TableHeader>
                   <TableHeader>IGST</TableHeader>
@@ -238,13 +238,13 @@ export default async function ReportsPage({
                   <TableRow key={p.period}>
                     <TableCell>{p.period}</TableCell>
                     <TableCell>{p.count}</TableCell>
-                    <TableCell>{formatInr(p.taxablePaise)}</TableCell>
-                    <TableCell>{formatInr(p.cgstPaise)}</TableCell>
-                    <TableCell>{formatInr(p.sgstPaise)}</TableCell>
-                    <TableCell>{formatInr(p.igstPaise)}</TableCell>
-                    <TableCell>{formatInr(p.gstTotalPaise)}</TableCell>
-                    <TableCell>{formatInr(p.compositionLevyPaise)}</TableCell>
-                    <TableCell>{formatInr(p.invoiceTotalPaise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(p.taxablePaise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(p.cgstPaise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(p.sgstPaise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(p.igstPaise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(p.gstTotalPaise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(p.compositionLevyPaise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(p.invoiceTotalPaise)}</TableCell>
                   </TableRow>
                 ))}
                 <TableRow>
@@ -275,7 +275,7 @@ export default async function ReportsPage({
                   <TableHeader>Invoices</TableHeader>
                   <TableHeader>Gross (taxable)</TableHeader>
                   <TableHeader>TDS deducted</TableHeader>
-                  <TableHeader>Net receivable</TableHeader>
+                  <TableHeader className="aorms-num">Net receivable</TableHeader>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -285,9 +285,9 @@ export default async function ReportsPage({
                     <TableRow key={p.period}>
                       <TableCell>{p.period}</TableCell>
                       <TableCell>{p.tdsCount}</TableCell>
-                      <TableCell>{formatInr(p.tdsTaxablePaise)}</TableCell>
-                      <TableCell>{formatInr(p.tdsPaise)}</TableCell>
-                      <TableCell>{formatInr(p.netReceivablePaise)}</TableCell>
+                      <TableCell className="aorms-num">{formatInr(p.tdsTaxablePaise)}</TableCell>
+                      <TableCell className="aorms-num">{formatInr(p.tdsPaise)}</TableCell>
+                      <TableCell className="aorms-num">{formatInr(p.netReceivablePaise)}</TableCell>
                     </TableRow>
                   ))}
                 {totals.tdsCount === 0 ? (

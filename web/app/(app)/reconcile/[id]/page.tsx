@@ -127,7 +127,7 @@ export default async function ReconcileDetailPage({ params }: { params: Promise<
                 <TableRow>
                   <TableHeader>Date</TableHeader>
                   <TableHeader>Description</TableHeader>
-                  <TableHeader>Amount</TableHeader>
+                  <TableHeader className="aorms-num">Amount</TableHeader>
                   <TableHeader>Match</TableHeader>
                   <TableHeader>Matched invoice</TableHeader>
                   <TableHeader>Settled</TableHeader>
@@ -138,7 +138,7 @@ export default async function ReconcileDetailPage({ params }: { params: Promise<
                   <TableRow key={line.row}>
                     <TableCell>{line.date ?? "—"}</TableCell>
                     <TableCell>{line.description}</TableCell>
-                    <TableCell>{formatInr(line.amountPaise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(line.amountPaise)}</TableCell>
                     <TableCell>
                       <Tag type={MATCH_TYPE_TAG[line.matchType] ?? "gray"} size="sm">
                         {line.matchType.replace(/_/g, " ")}

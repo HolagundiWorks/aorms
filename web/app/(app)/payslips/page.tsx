@@ -75,8 +75,8 @@ export default async function PayslipsPage() {
                   <TableRow>
                     <TableHeader>Member</TableHeader>
                     <TableHeader>Month</TableHeader>
-                    <TableHeader>Gross</TableHeader>
-                    <TableHeader>Deductions</TableHeader>
+                    <TableHeader className="aorms-num">Gross</TableHeader>
+                    <TableHeader className="aorms-num">Deductions</TableHeader>
                     <TableHeader>Net</TableHeader>
                     <TableHeader>Status</TableHeader>
                     <TableHeader>PDF</TableHeader>
@@ -89,9 +89,9 @@ export default async function PayslipsPage() {
                       <TableRow key={p.id}>
                         <TableCell>{member?.name ?? "—"}</TableCell>
                         <TableCell>{p.month}</TableCell>
-                        <TableCell>{formatInr(p.gross_paise)}</TableCell>
-                        <TableCell>{formatInr(p.deductions_paise)}</TableCell>
-                        <TableCell>{formatInr(p.net_paise)}</TableCell>
+                        <TableCell className="aorms-num">{formatInr(p.gross_paise)}</TableCell>
+                        <TableCell className="aorms-num">{formatInr(p.deductions_paise)}</TableCell>
+                        <TableCell className="aorms-num">{formatInr(p.net_paise)}</TableCell>
                         <TableCell>
                           {p.paid ? (
                             <Tag type="green" size="sm">

@@ -100,7 +100,7 @@ export default async function PurchaseOrdersPage() {
                     <TableHeader>Title</TableHeader>
                     <TableHeader>Vendor</TableHeader>
                     <TableHeader>Project</TableHeader>
-                    <TableHeader>Total</TableHeader>
+                    <TableHeader className="aorms-num">Total</TableHeader>
                     <TableHeader>Status</TableHeader>
                   </TableRow>
                 </TableHead>
@@ -117,7 +117,7 @@ export default async function PurchaseOrdersPage() {
                         <TableCell>{po.title ?? "—"}</TableCell>
                         <TableCell>{po.vendor ?? "—"}</TableCell>
                         <TableCell>{project?.title ?? "—"}</TableCell>
-                        <TableCell>{formatInr(po.total_paise)}</TableCell>
+                        <TableCell className="aorms-num">{formatInr(po.total_paise)}</TableCell>
                         <TableCell>
                           <Tag type={STATUS_TAG[po.status] ?? "gray"} size="sm">
                             {po.status}

@@ -91,12 +91,12 @@ export default async function InvoicesPage() {
                 <TableHeader>Project</TableHeader>
                 <TableHeader>Client</TableHeader>
                 <TableHeader>Kind</TableHeader>
-                <TableHeader>Taxable</TableHeader>
-                <TableHeader>GST</TableHeader>
-                <TableHeader>TDS</TableHeader>
-                <TableHeader>Grand total</TableHeader>
-                <TableHeader>Net receivable</TableHeader>
-                <TableHeader>Paid</TableHeader>
+                <TableHeader className="aorms-num">Taxable</TableHeader>
+                <TableHeader className="aorms-num">GST</TableHeader>
+                <TableHeader className="aorms-num">TDS</TableHeader>
+                <TableHeader className="aorms-num">Grand total</TableHeader>
+                <TableHeader className="aorms-num">Net receivable</TableHeader>
+                <TableHeader className="aorms-num">Paid</TableHeader>
                 <TableHeader>Status</TableHeader>
                 <TableHeader>PDF</TableHeader>
               </TableRow>
@@ -115,12 +115,12 @@ export default async function InvoicesPage() {
                     <TableCell>{project?.title ?? "—"}</TableCell>
                     <TableCell>{client?.name ?? "—"}</TableCell>
                     <TableCell>{inv.document_kind}</TableCell>
-                    <TableCell>{formatInr(inv.taxable_paise)}</TableCell>
-                    <TableCell>{formatInr(inv.gst_total_paise)}</TableCell>
-                    <TableCell>{formatInr(inv.tds_paise)}</TableCell>
-                    <TableCell>{formatInr(inv.grand_total_paise)}</TableCell>
-                    <TableCell>{formatInr(inv.net_receivable_paise)}</TableCell>
-                    <TableCell>{formatInr(inv.paid_paise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(inv.taxable_paise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(inv.gst_total_paise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(inv.tds_paise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(inv.grand_total_paise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(inv.net_receivable_paise)}</TableCell>
+                    <TableCell className="aorms-num">{formatInr(inv.paid_paise)}</TableCell>
                     <TableCell>
                       <Tag type={STATUS_TAG[inv.status] ?? "gray"} size="sm">
                         {inv.status}

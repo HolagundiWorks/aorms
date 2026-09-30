@@ -19,6 +19,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { hasRank } from "../../../lib/auth/rank";
 import { KpiTile as Kpi, type KpiStatus } from "../../../components/aorms/KpiTile";
+import { BigStat } from "../../../components/aorms/BigStat";
 import { getKpiTrends } from "../../../lib/pulse/kpi-trend";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { DashboardWidget, EmptyRow, WidgetRow, MASONRY_PANEL_STYLE } from "../../../components/aorms/dashboard/DashboardWidget";
@@ -745,6 +746,17 @@ export default async function PulsePage() {
           description="What needs your attention today — office KPIs, pending approvals, and ESTI's deterministic task-prediction scoring, all computed from real project data."
           actions={<RecomputeButton />}
         />
+
+        {/* Studio strip (2026-09-30, "Architectural Operating System"): the
+            four numbers an architect scans first, as large numerals. Same
+            values the tabbed KPI tiles below already compute — not new
+            queries. Orange marks the live-work count only. */}
+        <div className="aorms-bigstat-row">
+          <BigStat value={projectCount ?? 0} label="Projects" href="/projects" />
+          <BigStat value={openTaskCount ?? 0} label="Open tasks" active href="/tasks" />
+          <BigStat value={criticalPulseCount} label="Critical" />
+          {showFinancials && <BigStat value={formatInr(readyToBill.total)} label="Ready to bill" href="/invoices" />}
+        </div>
 
         {/* Today's Brief + Action Queue, as two separate Tiles side by
             side (2026-09-14 UI-polish request; briefly one merged Tile,
