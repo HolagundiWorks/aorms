@@ -7,6 +7,7 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { TaskBoard } from "../../../components/aorms/tasks/TaskBoard";
 import { todayISO } from "../../../lib/tasks/dates";
+import { filtersFromParams } from "../../../lib/tasks/filter";
 
 // Roles with has_capability('write') (rank >= 40, or an explicit
 // allow-list role — see web/supabase/migrations/0002_capability_helper.sql
@@ -18,7 +19,12 @@ import { todayISO } from "../../../lib/tasks/dates";
 // matching UI-level fix).
 const WRITE_TIER_ROLES = new Set(["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"]);
 
-export default async function TasksPage() {
+export default async function TasksPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const sp = await searchParams;
+  const first = (k: string) => {
+    const v = sp[k];
+    return Array.isArray(v) ? v[0] : v;
+  };
   const supabase = await createClient();
   const {
     data: { user },
@@ -33,7 +39,7 @@ export default async function TasksPage() {
     supabase
       .from("tasks")
       .select(
-        "id, title, status, priority, due_date, estimated_hours, assignee_id, floor_label, depends_on_id, project_offices(title)",
+        "id, title, status, priority, due_date, estimated_hours, assignee_id, project_id, created_at, floor_label, depends_on_id, project_offices(title)",
       )
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
@@ -103,9 +109,14 @@ export default async function TasksPage() {
                     project_title: project?.title ?? null,
                     floor_label: t.floor_label,
                     depends_on_id: t.depends_on_id,
+                    project_id: t.project_id,
+                    created_at: t.created_at,
                   };
                 })}
                 people={(assignees ?? []).map((a) => ({ id: a.id, name: a.full_name ?? "Unnamed" }))}
+                projects={projects ?? []}
+                currentUserId={user?.id ?? null}
+                initialFilters={filtersFromParams(first)}
                 canWrite={canWrite}
                 today={todayISO()}
               />

@@ -7008,6 +7008,21 @@ Verified: `tsc` clean and a full `next build`. Not verified: the Pulse layout, p
 slide and invite redirect against live data/sessions (no test login; invite flow needs a real
 emailed link).
 
+### Tasks: filters, sorting and shareable views (2026-09-30)
+
+`/tasks` board and calendar gained a filter/sort bar (`lib/tasks/filter.ts`, pure and tested):
+text search (title + project), **project**, **person** (Me / Unassigned / anyone), **priority**,
+**due date** (overdue, today, next 7 days, this month, no deadline, custom from–to) and **sort**
+(priority, soonest due, largest effort, recently added, title). "My tasks" quick toggle; clicking a
+person in the team sidebar filters to them; "Showing X of Y" + Reset. Filters live in the URL
+(`?project=…&date=week&sort=due`, only non-defaults) so a view is bookmarkable and survives reload;
+the server page parses the same params. Deliberately **not** filtered: overload alerts and the team
+load bars — overload is a fact about a person, not about the current view. Sort is stable (ties fall
+back to priority, then due date, undated last). Verified in headless Chromium with mock data: each
+filter, sort, search, URL round-trip, reset, and no mobile overflow; logic unit-checked. Not
+verified against live data. Also confirmed in production: `/api/ready` returns `ready` (both
+Supabase projects OK) after PR #76 deployed.
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,
