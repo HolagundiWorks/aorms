@@ -647,7 +647,7 @@ export default async function PulsePage() {
   ]);
 
   const pulseKpis = (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9.5rem)", gap: "1rem" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9rem)", gap: "1rem" }}>
       <Kpi
         label="Critical"
         value={criticalPulseCount}
@@ -670,7 +670,7 @@ export default async function PulsePage() {
   );
 
   const financeKpis = showFinancials ? (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9.5rem)", gap: "1rem" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9rem)", gap: "1rem" }}>
       <Kpi label="Ready to bill" value={formatInr(readyToBill.total)} icon={CurrencyRupee} trend={kpiTrends.finance_ready_to_bill} />
       <Kpi
         label="Awaiting payment"
@@ -684,14 +684,14 @@ export default async function PulsePage() {
   ) : null;
 
   const teamKpis = (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9.5rem)", gap: "1rem" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9rem)", gap: "1rem" }}>
       <Kpi label="Absent today" value={absences.length} status={absentStatus} icon={User} trend={kpiTrends.team_absent_today} />
       <Kpi label="Open tasks" value={openTaskCount ?? 0} icon={ListChecked} trend={kpiTrends.team_open_tasks} />
     </div>
   );
 
   const othersKpis = (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9.5rem)", gap: "1rem" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 9rem)", gap: "1rem" }}>
       <Kpi label="Clients" value={clientCount ?? 0} icon={UserMultiple} trend={kpiTrends.others_clients} />
       <Kpi label="Projects" value={projectCount ?? 0} icon={FolderDetails} trend={kpiTrends.others_projects} />
       <Kpi label="Proposals" value={proposalCount ?? 0} icon={DocumentRequirements} trend={kpiTrends.others_proposals} />

@@ -2,7 +2,7 @@
 
 /**
  * Office-wide floating calculator — header trigger + panel, pure stock
- * Carbon components (Popover/TextInput/Toggle/Tag) per this project's Pure
+ * Carbon components (Popover/TextInput/Toggle/Button) per this project's Pure
  * Carbon governance, which the user did NOT waive for the calculator (only
  * for Pomodoro). The arithmetic itself (safeEval/tokenizer/unit
  * conversions) is ported verbatim from the old frontend's
@@ -10,8 +10,8 @@
  * file's docstring.
  */
 
-import { useState } from "react";
-import { HeaderGlobalAction, Popover, PopoverContent, TextInput, Toggle } from "@carbon/react";
+import { useEffect, useRef, useState } from "react";
+import { Button, HeaderGlobalAction, Popover, PopoverContent, TextInput, Toggle } from "@carbon/react";
 import { Calculator as CalculatorIcon } from "@carbon/icons-react";
 import {
   formatResult,
@@ -25,6 +25,27 @@ export function HeaderCalculator() {
   const [open, setOpen] = useState(false);
   const [expr, setExpr] = useState("");
   const [outputUnit, setOutputUnit] = useState<CalcOutputUnit>("metric");
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Alt+C toggles the calculator from anywhere (documented in NAVIGATION.md).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.altKey && !e.ctrlKey && !e.metaKey && e.code === "KeyC") {
+        e.preventDefault();
+        setOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Focus the expression field when the panel opens (not on mount — the
+  // popover content is always in the DOM, so autoFocus would steal focus
+  // on every page load).
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
 
   const result = safeEval(expr);
   const incomplete = isIncompleteCalcExpr(expr);
@@ -42,7 +63,7 @@ export function HeaderCalculator() {
   return (
     <Popover open={open} onRequestClose={() => setOpen(false)} align="bottom-end" caret>
       <HeaderGlobalAction
-        aria-label="Calculator"
+        aria-label="Calculator (Alt+C)"
         isActive={open}
         onClick={() => setOpen((o) => !o)}
       >
@@ -60,7 +81,12 @@ export function HeaderCalculator() {
               heading). Stacking the heading above the Toggle's own native
               label avoids fighting that layout entirely. Found live: "Output
               unit — metric or imperial" rendered on top of "Calculator". */}
-          <span className="cds--type-heading-compact-01">Calculator</span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span className="cds--type-heading-compact-01">Calculator</span>
+            <Button kind="ghost" size="sm" onClick={() => { setExpr(""); inputRef.current?.focus(); }} disabled={!expr}>
+              Clear
+            </Button>
+          </div>
           <Toggle
             id="calc-output-unit"
             size="sm"
@@ -73,6 +99,8 @@ export function HeaderCalculator() {
 
           <div
             className="cds--type-heading-04"
+            role="status"
+            aria-live="polite"
             style={{
               minHeight: "3rem",
               display: "flex",
@@ -94,6 +122,9 @@ export function HeaderCalculator() {
 
           <TextInput
             id="calc-expr"
+            ref={inputRef}
+            autoComplete="off"
+            spellCheck={false}
             labelText="Expression"
             hideLabel
             // Length + length, not the old length + area example
@@ -111,10 +142,11 @@ export function HeaderCalculator() {
             onChange={(e) => setExpr(e.target.value)}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === "Enter" && result !== null) setExpr(formatResultForInput(result, outputUnit));
+              if (e.key === "Escape") setOpen(false);
             }}
           />
           <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-            Bare numbers = metres. Suffix with &apos; &quot; ft in m2 m3 ft2 ft3 to mix units.
+            Bare numbers = metres. Units: m cm mm &apos; &quot; ft in m2 m3 ft2 ft3. Length × length = area, area × length = volume. Enter reuses the result · Esc closes.
           </p>
         </div>
       </PopoverContent>

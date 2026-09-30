@@ -184,7 +184,7 @@ export default async function AccountsPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, 11rem)",
+                gridTemplateColumns: "repeat(auto-fill, 9rem)",
                 gap: "1rem",
                 marginBottom: "2rem",
               }}

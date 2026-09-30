@@ -112,27 +112,26 @@ export function KpiTile({
 }) {
   const TrendIcon = trend ? TREND_ICON[trend.direction] : null;
 
+  // Compact tile (2026-09-30, explicit request: "reduce the size of KPI
+  // tile to 50% of current size"). Was a 1:1 square at ~11rem (176px);
+  // now 5.5rem (88px) tall — exactly half the height — and 9rem wide.
+  // Width is 82% rather than 50% on purpose: a rupee value like
+  // "₹41,87,000" would truncate at 5.5rem. Anatomy: full-width value over a 1-line label (+ icon at the right) (2 lines when there is no trend row), the
+  // status stripe across the top, and — only when present — a trend line.
+  // Status text stays available to screen readers via a visually-hidden
+  // span, and to sighted users via the stripe's tooltip.
   const card = (
     <Tile
       style={{
-        aspectRatio: "1",
-        minWidth: "9rem",
+        inlineSize: "9rem",
+        blockSize: "5.5rem",
+        padding: "0.5rem 0.75rem",
         border: "1px solid var(--cds-border-subtle)",
-        // Fixed rows (icon / value+label / trend-or-status), not
-        // flex+space-between (2026-09-14 fix, found live: a label that
-        // wraps to 2 lines vs. one that fits on 1 made space-between
-        // redistribute the surrounding gaps differently per tile, so the
-        // icon and bottom row visibly shifted position from one KPI card
-        // to its neighbor in the same row). Every tile now has the exact
-        // same 3-row skeleton regardless of its own content length — see
-        // the fixed-height icon/bottom rows and the 2-line-clamped label
-        // below, all sized so nothing ever depends on this tile's own
-        // text length to determine layout.
-        display: "grid",
-        gridTemplateRows: "1.25rem 1fr 1.25rem",
-        rowGap: "0.375rem",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        gap: "0.125rem",
         position: "relative",
-        paddingTop: status ? "1.25rem" : undefined,
         overflow: "hidden",
       }}
     >
@@ -150,43 +149,43 @@ export function KpiTile({
           }}
         />
       )}
-      <div style={{ color: "var(--cds-icon-secondary)" }} aria-hidden>
-        {Icon && <Icon size={20} />}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", minHeight: 0 }}>
-        {/* heading-04 (2026-09-14, explicit request: "reduce the text
-            height of... the numbers/amount") — was heading-05 (32px),
-            which a longer rupee value ("₹41,87,000") could barely fit on
-            one line inside a ~120px-wide square tile even with the
-            ellipsis fallback below. heading-04 still reads as the
-            card's clear focal number (still the largest text in the
-            tile) while giving long values real room before truncating. */}
-        <p
-          className="cds--type-heading-04 cds--type-semibold"
-          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-          title={String(value)}
+      {status && (
+        <span
+          style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }}
         >
-          {value}
-        </p>
-        {/* Fixed 2-line-tall regardless of actual length — a short label
-            ("Active") and a long one ("Total inferences served") both
-            reserve identical space, so the row above/below never moves. */}
+          {STATUS_LABEL[status]}
+        </span>
+      )}
+      <p
+        className="cds--type-heading-03 cds--type-semibold"
+        style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}
+        title={String(value)}
+      >
+        {value}
+      </p>
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "0.25rem", minWidth: 0 }}>
         <p
-          className="cds--type-body-01"
+          className="cds--type-helper-text-01"
           style={{
             color: "var(--cds-text-secondary)",
-            marginTop: "0.25rem",
             display: "-webkit-box",
-            WebkitLineClamp: 2,
+            WebkitLineClamp: trend ? 1 : 2,
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
+            lineHeight: "1rem",
+            minWidth: 0,
           }}
           title={label}
         >
           {label}
         </p>
+        {Icon && (
+          <span style={{ color: "var(--cds-icon-secondary)", flex: "none", display: "flex" }} aria-hidden>
+            <Icon size={16} />
+          </span>
+        )}
       </div>
-      {trend ? (
+      {trend && (
         <p
           className="cds--type-helper-text-01"
           style={{
@@ -196,23 +195,15 @@ export function KpiTile({
             gap: "0.25rem",
             overflow: "hidden",
             whiteSpace: "nowrap",
+            lineHeight: "1rem",
           }}
         >
-          {TrendIcon ? <TrendIcon size={14} /> : <ArrowRight size={14} />}
+          {TrendIcon ? <TrendIcon size={12} /> : <ArrowRight size={12} />}
           <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
             {trend.value}
             {trend.label ? ` ${trend.label}` : ""}
           </span>
         </p>
-      ) : status ? (
-        <p
-          className="cds--type-helper-text-01"
-          style={{ color: STATUS_COLOR[status], overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-        >
-          {STATUS_LABEL[status]}
-        </p>
-      ) : (
-        <span aria-hidden />
       )}
     </Tile>
   );

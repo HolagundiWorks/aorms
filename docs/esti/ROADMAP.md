@@ -6871,6 +6871,49 @@ Tasks are assigned to `profiles`, so the sidebar shows profiles, not
 `team_members`. Unit-level checks of the estimate/overload maths passed; ESLint
 was not run (not installed in the cloud session).
 
+### Kanban task board follow-up: merged, live, demo seeded (2026-09-30)
+
+PR #71 merged to `main`; migrations `0088` (task libraries) and `0089` (demo showcase
+function, hooked onto the end of `reset_demo_data()`) applied to `aorms-web`. **Finding:**
+the live demo is `demo@aorms.in` (firm "Demo Architecture Studio"); the five Aurelia staff
+accounts `reset_demo_data()` needs don't exist in the rebuilt project, so the nightly reset
+is a no-op there and `0089`'s function never runs. The live demo firm was seeded directly
+instead (one-off SQL, not in a migration): the 15-entry starter library, three `DEMO-SHOW-*`
+projects with built-up/floor areas, and ~18 library-generated tasks across the demo owner,
+the QA viewer and unassigned. Only two profiles exist in that firm, so the team sidebar is
+thin until more staff are created.
+
+### Calculator fixes, compact KPI tiles, hover-rail sidebar, UI/UX audit pass (2026-09-30)
+
+**Calculator** (`lib/calc/dimensional-calc.ts`, `HeaderCalculator.tsx`) — the evaluator
+carried real bugs from the old-frontend port, found by testing it against ~35 cases:
+unary minus failed (`-5+3`, `3*-2`); `%` was a bare ÷100 (`200+10%` gave 200.1 — now 220);
+length × length stayed a length (now area); area × length stayed an area (now volume,
+as the docstring always claimed); area ÷ length, volume ÷ length/area and length ÷ length
+returned the wrong dimension; `m`/`cm`/`mm` suffixes weren't accepted (`5m` sat forever
+as "incomplete"); thousands commas and `.5m` failed. UI: input focuses on open, Alt+C
+toggles it (was documented in NAVIGATION.md, never wired), Esc closes, Clear button,
+`role=status` result. All cases re-verified after the rewrite.
+
+**KPI tile** — 176px square → 88px tall × 144px wide (half the height; width is 82%, not
+50%, because a rupee value like ₹41,87,000 truncates below ~9rem). All 49 KPI grids updated.
+
+**Sidebar** — desktop is now a permanent 48px icon rail that expands on hover/focus as an
+overlay; no toggle/close button on desktop (mobile keeps a hamburger that never shows a
+"close" state). Root cause of "content width not getting set": the nav started expanded and
+Carbon pushes content to 256px whenever it is expanded, so hover reflowed the page — content
+margin is now pinned to 3rem in every nav state (verified: nav 48→256px on hover, content
+left edge stays at 48px).
+
+**UI/UX audit fixes** — nav group order now runs day-to-day work outward (Site, Estimation &
+Technical → Third Parties, Tender Management, Office, Accounts → HR → Knowledge Bank →
+Admin; core project work was buried second-to-last); the "Knowledge Bank" page inside the
+Knowledge Bank group is relabelled "Knowledge Portal"; the Tasks board was not responsive
+(16rem sidebar + 3 columns overflowed phones — now stacks, calendar scrolls sideways);
+duplicate floor name on task cards removed. Verified in a headless browser at 1440px and
+390px (no horizontal overflow). Not audited: pages behind login beyond the shell, KPI tiles
+and Tasks board (no test credentials in this session) — a full per-page audit is still open.
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,

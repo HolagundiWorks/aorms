@@ -328,6 +328,72 @@ body {
   }
 }
 
+// Desktop side-nav rail + content width (2026-09-30). AppShell.tsx keeps the
+// nav as a permanent 48px icon rail that expands on hover as an OVERLAY.
+// Carbon's own rules push the content to 256px whenever the nav carries
+// `--side-nav--expanded` (which hover adds), so hovering reflowed the whole
+// page, and the nav also used to start expanded — the content's left edge
+// and width were never stable. Pin the content to the rail width in every nav
+// state, size it explicitly, and give the hover-expanded panel an edge so it
+// reads as floating above the page.
+@media (min-width: 66rem) {
+  .cds--side-nav ~ .cds--content,
+  .cds--side-nav.cds--side-nav--expanded ~ .cds--content {
+    margin-inline-start: 3rem !important;
+    inline-size: calc(100% - 3rem);
+  }
+
+  .cds--side-nav--rail.cds--side-nav--expanded {
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.cds--content {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+// Task board responsiveness (2026-09-30 UI audit). The board is three
+// columns + a 16rem team sidebar; the calendar is a 7-column month grid.
+// Below `lg` the sidebar drops under the board, below `md` the columns stack
+// and the calendar scrolls sideways instead of crushing seven tiny columns.
+.aorms-task-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16rem;
+  gap: 1rem;
+  align-items: start;
+}
+
+.aorms-task-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.aorms-task-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--cds-border-subtle-01);
+}
+
+@media (max-width: 65.9375rem) {
+  .aorms-task-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 42rem) {
+  .aorms-task-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .aorms-task-calendar {
+    min-inline-size: 42rem;
+  }
+}
+
 // AORMS Platform portal header-overlap fix (found live, 2026-09-14 —
 // user report: "the shell content is overlapping with header"). Every
 // (platform)/* page renders `<PortalHeader />` (a Carbon `Header`,

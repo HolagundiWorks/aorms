@@ -69,6 +69,14 @@ const TOP_LEVEL: (NavLeaf & { icon: ComponentType })[] = [
 ];
 
 /**
+ * Group order (2026-09-30 UI/UX audit — hierarchy): groups now run from the
+ * day-to-day project workflow outward — Site and Estimation & Technical (the
+ * work itself, previously buried second-to-last) → Third Parties, Tender
+ * Management, Office and Accounts (commercial) → HR (people) → Knowledge Bank
+ * (reference) → Admin (configuration, last). The "Knowledge Bank" page inside
+ * the Knowledge Bank group is relabelled "Knowledge Portal" so a group and its
+ * own child no longer share a name.
+ *
  * Grouped by domain. 2026-09-14 remediation (attached IA brief §3-14):
  * restructured around the brief's own target hierarchy — Site, Third
  * Parties, Accounts, HR, Tender Management, Knowledge Bank, in that
@@ -109,12 +117,42 @@ const GROUPS: NavGroup[] = [
     ],
   },
   {
+    title: "Estimation & Technical",
+    icon: Ruler,
+    items: [
+      { href: "/rate-books", label: "Rate Books" },
+      { href: "/estimates", label: "Estimates" },
+      { href: "/takeoff", label: "Take-off" },
+      { href: "/spec-sheets", label: "Spec Sheets" },
+      { href: "/drawings", label: "Drawings" },
+      { href: "/moms", label: "Meeting Minutes" },
+      { href: "/document-issues", label: "Document Issues" },
+    ],
+  },
+  {
     title: "Third Parties",
     icon: Building,
     items: [
       { href: "/clients", label: "Clients" },
       { href: "/contractors", label: "Contractors" },
       { href: "/consultants", label: "Consultants" },
+    ],
+  },
+  {
+    title: "Tender Management",
+    icon: RequestQuote,
+    items: [{ href: "/tenders", label: "Tenders" }],
+  },
+  {
+    title: "Office",
+    icon: Document,
+    items: [
+      { href: "/proposals", label: "Proposals" },
+      { href: "/letters", label: "Letters" },
+      { href: "/contracts", label: "Contracts" },
+      { href: "/transmittals", label: "Transmittals" },
+      { href: "/purchase-orders", label: "Purchase Orders" },
+      { href: "/office-templates", label: "Office Templates" },
     ],
   },
   {
@@ -138,11 +176,6 @@ const GROUPS: NavGroup[] = [
     ],
   },
   {
-    title: "Tender Management",
-    icon: RequestQuote,
-    items: [{ href: "/tenders", label: "Tenders" }],
-  },
-  {
     title: "Knowledge Bank",
     icon: Book,
     items: [
@@ -151,32 +184,7 @@ const GROUPS: NavGroup[] = [
       { href: "/compliance", label: "Compliance" },
       { href: "/spec-catalog", label: "Spec Catalog" },
       { href: "/lessons", label: "Lessons Learned" },
-      { href: "/knowledge-bank", label: "Knowledge Bank" },
-    ],
-  },
-  {
-    title: "Office",
-    icon: Document,
-    items: [
-      { href: "/proposals", label: "Proposals" },
-      { href: "/letters", label: "Letters" },
-      { href: "/contracts", label: "Contracts" },
-      { href: "/transmittals", label: "Transmittals" },
-      { href: "/purchase-orders", label: "Purchase Orders" },
-      { href: "/office-templates", label: "Office Templates" },
-    ],
-  },
-  {
-    title: "Estimation & Technical",
-    icon: Ruler,
-    items: [
-      { href: "/rate-books", label: "Rate Books" },
-      { href: "/estimates", label: "Estimates" },
-      { href: "/takeoff", label: "Take-off" },
-      { href: "/spec-sheets", label: "Spec Sheets" },
-      { href: "/drawings", label: "Drawings" },
-      { href: "/moms", label: "Meeting Minutes" },
-      { href: "/document-issues", label: "Document Issues" },
+      { href: "/knowledge-bank", label: "Knowledge Portal" },
     ],
   },
   {
@@ -202,50 +210,19 @@ function isActiveHref(pathname: string, href: string): boolean {
 }
 
 /**
- * The shell's side nav has exactly one authoritative piece of state
- * (`sideNavExpanded` below) — never duplicated or tracked separately
- * anywhere else in the tree. It's a plain boolean at runtime because
- * that's all Carbon's own `SideNav` prop takes, but it actually means one
- * of four distinct states once combined with the viewport width (Carbon's
- * own `lg` = 66rem breakpoint, via `isPersistent`/`--side-nav--ux` below):
+ * Side nav states (2026-09-30 redesign; the old four-state table — with a
+ * desktop expand/collapse toggle — is gone):
  *
- *   expanded       — sideNavExpanded=true  above lg  (full 256px width,
- *                    labels + icons)
- *   collapsed      — sideNavExpanded=false above lg  (icon rail, 48px —
- *                    `isRail` below; temporarily re-expands on hover/
- *                    focus via Carbon's own internal hover state, then
- *                    collapses back on mouse-leave/blur)
- *   mobile-open    — sideNavExpanded=true  at/below lg (dismissible
- *                    overlay, backdrop visible, full width — rail is
- *                    disabled below lg, see globals.scss)
- *   mobile-closed  — sideNavExpanded=false at/below lg (nav is 0-width,
- *                    off-canvas)
+ *   desktop (>= lg, 66rem) — always the 48px icon rail. Hover / keyboard focus
+ *                            expands it to 256px as an overlay (content does
+ *                            not move); leaving collapses it. No toggle button.
+ *   mobile  (<  lg)        — off-canvas overlay, opened by the header
+ *                            hamburger (`mobileOpen`), closed by the backdrop
+ *                            or by picking a link. `isRail` is false here
+ *                            (QA B5: rail mode on mobile rendered a persistent
+ *                            256px panel instead of an overlay).
  *
- * 2026-09-13 correction: this used to say "there is no icon rail mode in
- * this app" and treated collapsed/expanded as reading identically on
- * desktop by design — reported back live as "side panel is not collapsing
- * into icons," i.e. that reading was wrong, not a deliberate choice the
- * user wanted. `isRail` (Carbon's own prop for exactly this) is now set
- * below; see globals.scss's own comment for why it needs an explicit
- * below-`lg` override (`--side-nav--rail`'s 48px has no breakpoint gate of
- * its own, unlike `--side-nav--ux`'s, so without that override rail width
- * would also apply on mobile where the nav is meant to be an overlay).
- *
- * 2026-09-20 correction (QA bug B5): the claim above — "rail is disabled
- * below lg, see globals.scss" — was only half true. globals.scss's
- * override only forced the *closed* rail state to 0 width; it never
- * covered the mobile-open case, so `isRail` being passed unconditionally
- * meant a mobile viewport's "expanded" nav rendered as
- * `.cds--side-nav--rail.cds--side-nav--expanded` — the same persistent
- * 256px panel desktop's collapsed-rail-hover-preview uses, not a proper
- * overlay — squeezing page content into a narrow column with truncated
- * labels. `isRail` is now itself viewport-conditional (`isRailViewport`
- * below, via `matchMedia("(min-width: 66rem)")`, the same `lg` threshold):
- * true only above `lg`, where the icon-rail concept applies at all; false
- * below it, so mobile gets Carbon's own default `--side-nav--ux`
- * dismissible-overlay behavior instead. `sideNavExpanded` also now
- * defaults closed the first time a mobile viewport is detected (a
- * hamburger menu should start closed, not cover the screen on load).
+ * The content-margin rules that pin this live in globals.scss.
  */
 export function AppShell({
   children,
@@ -292,63 +269,53 @@ export function AppShell({
   // 65.9375rem)` override right below the ContextPanel mobile rules, which
   // resets it to 0 since this app never uses Carbon's separate `isRail`
   // persistent-icon-rail mode the unconditional 48px assumes.
-  const [sideNavExpanded, setSideNavExpanded] = useState(true);
+  //
+  // 2026-09-30 redesign (explicit request: "the sidebar on hover extends and
+  // collapses by default, no close button, and the width of content is not
+  // getting set"). Desktop (>= lg, 66rem): the nav is ALWAYS the 48px icon
+  // rail; hovering or keyboard-focusing it expands it to full width as an
+  // overlay (Carbon's own rail behaviour) and it collapses again on leave.
+  // There is no toggle/close button on desktop, and `sideNavExpanded` no
+  // longer exists — the only state is `mobileOpen`, used below lg where the
+  // nav is an off-canvas overlay opened by the header hamburger and closed by
+  // tapping the backdrop or a link. The content margin is pinned to the rail
+  // width in globals.scss, so hovering the nav never reflows the page (it
+  // used to jump to 256px, and the nav also started expanded, which is why
+  // the content width looked unset).
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  // B5 fix (2026-09-20 QA) — `isRail` below used to be passed
-  // unconditionally, on every viewport including mobile. Carbon's rail
-  // mode (`.cds--side-nav--rail`) is a desktop-only concept — a
-  // persistently docked icon rail that expands on hover — and forcing it
-  // below the `lg` breakpoint (66rem, the same threshold globals.scss's
-  // own `@media (max-width: 65.9375rem)` override already targets) opted
-  // the nav out of Carbon's default dismissible-overlay mobile behavior
-  // entirely: at 375px the nav rendered as a persistent, non-overlay
-  // `.cds--side-nav--rail.cds--side-nav--expanded` panel — which Carbon
-  // styles at the same 256px `.cds--side-nav--expanded` width as the full
-  // desktop nav (@carbon/styles' own ui-shell/side-nav/_side-nav.scss) —
-  // pushing content into a narrow column with mid-word-truncated labels,
-  // instead of collapsing to a true hamburger-triggered overlay. Tracked
-  // via `matchMedia` rather than CSS alone since `isRail` is a React prop
-  // Carbon uses to choose which classes to render in the first place, not
-  // something a stylesheet can override after the fact. SSR has no
-  // viewport info, so the initial value assumes desktop (matching the
-  // unconditional `isRail` this replaces) and corrects on mount.
+  // `isRail` is viewport-conditional (QA bug B5, 2026-09-20): Carbon's rail is
+  // a desktop-only concept; below lg it must be the default dismissible
+  // overlay. SSR has no viewport info, so assume desktop and correct on mount.
   const [isRailViewport, setIsRailViewport] = useState(true);
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 66rem)");
     setIsRailViewport(mql.matches);
-    // Default the nav closed the moment we learn this is actually a
-    // mobile viewport — a hamburger menu should start closed, not cover
-    // the whole screen on first load. Only forced once, on mount, so a
-    // later resize across the breakpoint doesn't fight a manual toggle.
-    if (!mql.matches) setSideNavExpanded(false);
-
-    const onChange = (e: MediaQueryListEvent) => setIsRailViewport(e.matches);
+    const onChange = (e: MediaQueryListEvent) => {
+      setIsRailViewport(e.matches);
+      if (e.matches) setMobileOpen(false);
+    };
     mql.addEventListener("change", onChange);
     return () => mql.removeEventListener("change", onChange);
   }, []);
 
-  // Closes the nav after any link click. Above the ~66rem breakpoint the
-  // nav's own CSS ignores `expanded` and stays fixed-open regardless (see
-  // the comment on the state above) — so this call is a no-op on desktop
-  // and only actually does anything below that breakpoint, where the nav
-  // is a dismissible overlay: without it, tapping a link left the overlay
-  // sitting open over the newly-navigated page until the user separately
-  // clicked the overlay backdrop or the menu button. Real bug, not
-  // cosmetic — found live (nav didn't auto-collapse after navigating).
+  // Below lg, close the overlay after any link click so it doesn't sit over
+  // the newly-navigated page. A no-op on desktop (the rail collapses itself
+  // when the pointer leaves).
   function collapseNav() {
-    setSideNavExpanded(false);
+    setMobileOpen(false);
   }
 
   return (
     <PomodoroProvider>
       <Header aria-label="AORMS">
-        <HeaderMenuButton
-          aria-label={sideNavExpanded ? "Close menu" : "Open menu"}
-          isActive={sideNavExpanded}
-          isCollapsible
-          onClick={() => setSideNavExpanded((v) => !v)}
-        />
+        {/* Mobile-only opener. Desktop has no toggle at all (the rail
+            expands on hover). Never shows an X/"Close" state — the overlay
+            closes via its backdrop or by choosing a link. */}
+        {!isRailViewport && (
+          <HeaderMenuButton aria-label="Open navigation" isActive={false} onClick={() => setMobileOpen(true)} />
+        )}
         {/* AORMS logo/wordmark removed from the header entirely
             (2026-09-14, explicit request, same day as adding it) — the
             header now leads with the firm's own name instead
@@ -380,10 +347,9 @@ export function AppShell({
       </Header>
       <SideNav
         aria-label="Side navigation"
-        expanded={sideNavExpanded}
+        expanded={!isRailViewport && mobileOpen}
         isRail={isRailViewport}
-        onOverlayClick={() => setSideNavExpanded(false)}
-        onSideNavBlur={() => setSideNavExpanded(false)}
+        onOverlayClick={() => setMobileOpen(false)}
       >
         <SideNavItems>
           {TOP_LEVEL.map((item) => (
