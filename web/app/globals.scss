@@ -609,6 +609,39 @@ a.cds--side-nav__link[aria-current="page"]::before {
   }
 }
 
+// Pulse studio workspace: left rail of numerals + working area.
+.aorms-pulse-layout {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.aorms-pulse-rail {
+  display: grid;
+  gap: 1.5rem;
+  position: sticky;
+  inset-block-start: 4rem;
+}
+
+.aorms-pulse-main {
+  min-inline-size: 0;
+}
+
+@media (max-width: 65.9375rem) {
+  .aorms-pulse-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .aorms-pulse-rail {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+  }
+}
+
 // Module link row on the project hub.
 .aorms-module-links {
   display: grid;

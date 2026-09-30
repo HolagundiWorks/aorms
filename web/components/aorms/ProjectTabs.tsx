@@ -23,7 +23,7 @@ import { Tab, TabList, Tabs, type TabProps } from "@carbon/react";
  */
 const LinkTab = Tab as unknown as React.ComponentType<Omit<TabProps, "as"> & { as: typeof Link; href: string }>;
 
-const TABS: { slug: string; label: string }[] = [
+export const TABS: { slug: string; label: string }[] = [
   { slug: "", label: "Overview" },
   { slug: "brief", label: "Project Brief" },
   { slug: "cpi", label: "CPI" },

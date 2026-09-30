@@ -636,7 +636,8 @@ Android business logic anywhere.
   at all (Hostinger's edge overwrites it), so "flip to enforcing" landed
   but isn't functionally in effect yet. Kept struck through rather than
   deleted so the history of what was checked/when isn't lost.
-- **No readiness/dependency health check (deliberate, not an oversight —
+- ~~**No readiness/dependency health check**~~ **Built 2026-09-30:** `/api/ready`
+  (dependency-aware; `/api/health` stays pure liveness). Original note — (deliberate, not an oversight —
   see `web/app/api/health/route.ts`'s own comment)** — `/api/health` is a
   pure liveness check only, on purpose: conflating "process is up" with
   "Supabase is reachable" would let a transient Supabase blip restart a
@@ -745,8 +746,10 @@ Android business logic anywhere.
 - **Supabase config/security audit (2026-09-28) — one gap fixed, two
   found and deliberately left open.** Full account in the dated History
   entry; summary here since these are genuinely still open:
-  - **ConnectDeX company-invite acceptance is broken end-to-end.**
-    `lib/actions/connectdex.ts`'s `inviteUserByEmail()` call omits
+  - ~~**ConnectDeX company-invite acceptance is broken end-to-end.**~~
+    **Resolved (see the 2026-09-30 entry "Navigation transitions, Pulse workspace…"
+    — `redirectTo` + `?mode=invite` page already existed; two remaining gaps
+    fixed).** Original note: `lib/actions/connectdex.ts`'s `inviteUserByEmail()` call omits
     `redirectTo` entirely, and no page anywhere is built to receive a
     company invite and let the owner set a password (confirmed via a
     repo-wide grep). Needs a real invite-acceptance page — not
@@ -6972,6 +6975,38 @@ RA bills, reconcile, consultants, team members, negotiation). Headers were match
 from a fixed list, so a money column whose header isn't in that list is right-aligned in the
 body but left-aligned in the header — a cosmetic mismatch to fix as found. `tsc` clean; not
 viewed against live data.
+
+### Navigation transitions, Pulse workspace, ConnectDeX invite gaps, readiness check (2026-09-30)
+
+Took up the four items left after the presentation-layer work:
+- **Horizontal sliding panels — built as a transition layer, not a routing change.** Every
+  project tab stays its own server-rendered URL (deep links, back button, SSR untouched);
+  `projects/[id]/template.tsx` + `PanelSlide` slide the new tab's content in from the side it
+  sits on (right for a later tab, left for an earlier one), tab strip fixed above. Uses
+  `lib/motion/tokens.ts`; reduced-motion users get an instant swap. A true single-page
+  sliding board that replaces navigation remains un-built on purpose (it would change
+  routing for every module).
+- **Tagline — deliberately not renamed.** The public site already reads "Architecture
+  Practice Operating System" in the title, OpenGraph, Twitter card and `AORMS_PLATFORM.
+  expansion` (2026-09-14 landing rebuild); "Architectural Operating System" would drop
+  "Practice" from copy and keyword set (`architecture practice …`) for no positioning gain.
+  It stays the name of the *design language* (CLAUDE.md exception), not the marketing line.
+- **Pulse workspace.** `/pulse` now has a left rail of large numerals (Projects, Open tasks,
+  Critical, Blocked, Ready to bill for finance roles — each links to its module) beside the
+  working area: today's brief + queue, a new **Active projects** board (up to 4 `ProjectCard`s
+  with plan drawing + task progress), then the existing KPI tabs/widgets unchanged. Stacks
+  above lg.
+- **ConnectDeX invite acceptance — already mostly built** (the roadmap item was stale:
+  `redirectTo`, `/platform-reset-password?mode=invite` and the callback existed from
+  2026-09-28). Two real gaps fixed: after setting a password a company account was sent to
+  `/identity` (which a company has no Identity for) — now `/connectdex`; and the callback only
+  matched the bare reset path, not `…?mode=invite`.
+- **Readiness check.** `/api/ready` probes each Supabase project's Auth health endpoint with a
+  3s timeout, returns 200 `ready` or 503 `degraded` with per-dependency status only (no URLs
+  or keys). Point alerting at it; restarts stay on `/api/health`.
+Verified: `tsc` clean and a full `next build`. Not verified: the Pulse layout, project tab
+slide and invite redirect against live data/sessions (no test login; invite flow needs a real
+emailed link).
 
 ## Support & questions
 

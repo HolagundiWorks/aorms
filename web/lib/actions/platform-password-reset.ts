@@ -23,6 +23,7 @@
  */
 import { redirect } from "next/navigation";
 import { createClient } from "../platform/server";
+import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 import { validatePassword } from "../security/password-policy";
 import { toSafeErrorMessage } from "../security/safe-error";
 
@@ -53,5 +54,14 @@ export async function updatePlatformPassword(
   const { error } = await supabase.auth.updateUser({ password });
   if (error) return { error: toSafeErrorMessage(error) };
 
-  redirect("/identity");
+  // A ConnectDeX company invitee (company_accounts row, minted by
+  // handle_new_platform_account() for account_kind "company") has no AORMS
+  // Identity — landing them on /identity dead-ends. Send them to their own
+  // portal; everyone else keeps the existing /identity destination.
+  const { data: companyAccount } = await createPlatformServiceRoleClient()
+    .from("company_accounts")
+    .select("id")
+    .eq("id", user.id)
+    .maybeSingle();
+  redirect(companyAccount ? "/connectdex" : "/identity");
 }

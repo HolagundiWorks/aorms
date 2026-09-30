@@ -20,6 +20,9 @@ import { createClient } from "../../../lib/supabase/server";
 import { hasRank } from "../../../lib/auth/rank";
 import { KpiTile as Kpi, type KpiStatus } from "../../../components/aorms/KpiTile";
 import { BigStat } from "../../../components/aorms/BigStat";
+import { ProjectCard } from "../../../components/aorms/ProjectCard";
+import { MotionRoot } from "../../../components/aorms/motion/MotionRoot";
+import { MotionStagger } from "../../../components/aorms/motion/MotionStagger";
 import { getKpiTrends } from "../../../lib/pulse/kpi-trend";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { DashboardWidget, EmptyRow, WidgetRow, MASONRY_PANEL_STYLE } from "../../../components/aorms/dashboard/DashboardWidget";
@@ -738,6 +741,26 @@ export default async function PulsePage() {
     </Tile>
   );
 
+  // Active-project boards for the studio workspace (2026-09-30).
+  const { data: activeProjects } = await supabase
+    .from("project_offices")
+    .select("id, ref, title, status, city, built_up_area_sqm, site_area_sqm, floor_count, clients(name)")
+    .eq("status", "ACTIVE")
+    .order("created_at", { ascending: false })
+    .limit(4);
+  const activeIds = (activeProjects ?? []).map((p) => p.id);
+  const { data: activeTaskRows } = activeIds.length
+    ? await supabase.from("tasks").select("project_id, status").in("project_id", activeIds)
+    : { data: [] as { project_id: string | null; status: string }[] };
+  const activeTally = new Map<string, { done: number; total: number }>();
+  for (const t of activeTaskRows ?? []) {
+    if (!t.project_id) continue;
+    const c = activeTally.get(t.project_id) ?? { done: 0, total: 0 };
+    c.total += 1;
+    if (t.status === "DONE") c.done += 1;
+    activeTally.set(t.project_id, c);
+  }
+
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
@@ -747,16 +770,21 @@ export default async function PulsePage() {
           actions={<RecomputeButton />}
         />
 
-        {/* Studio strip (2026-09-30, "Architectural Operating System"): the
-            four numbers an architect scans first, as large numerals. Same
-            values the tabbed KPI tiles below already compute — not new
-            queries. Orange marks the live-work count only. */}
-        <div className="aorms-bigstat-row">
-          <BigStat value={projectCount ?? 0} label="Projects" href="/projects" />
-          <BigStat value={openTaskCount ?? 0} label="Open tasks" active href="/tasks" />
-          <BigStat value={criticalPulseCount} label="Critical" />
-          {showFinancials && <BigStat value={formatInr(readyToBill.total)} label="Ready to bill" href="/invoices" />}
-        </div>
+        {/* Studio workspace (2026-09-30, "Architectural Operating System"):
+            a left rail of large numerals — the numbers an architect scans
+            first, each a link into its module — beside the working area
+            (today's brief + queue, active project boards, then the existing
+            KPI tabs and widgets, unchanged). Stacks above the content below
+            lg. Orange marks the live-work count only. */}
+        <div className="aorms-pulse-layout">
+          <aside className="aorms-pulse-rail" aria-label="Studio at a glance">
+            <BigStat value={projectCount ?? 0} label="Projects" href="/projects" />
+            <BigStat value={openTaskCount ?? 0} label="Open tasks" active href="/tasks" />
+            <BigStat value={criticalPulseCount} label="Critical" />
+            <BigStat value={blockedTasksCount} label="Blocked" href="/tasks" />
+            {showFinancials && <BigStat value={formatInr(readyToBill.total)} label="Ready to bill" href="/invoices" />}
+          </aside>
+          <div className="aorms-pulse-main">
 
         {/* Today's Brief + Action Queue, as two separate Tiles side by
             side (2026-09-14 UI-polish request; briefly one merged Tile,
@@ -775,6 +803,37 @@ export default async function PulsePage() {
             <ActionQueue items={topPriorities} />
           </Column>
         </Grid>
+
+        {(activeProjects ?? []).length > 0 && (
+          <section aria-label="Active projects" style={{ marginBottom: "1.5rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.75rem" }}>
+              <h2 className="aorms-bigstat__label">Active projects</h2>
+              <a href="/projects" className="cds--type-helper-text-01">All projects →</a>
+            </div>
+            <MotionRoot>
+              <MotionStagger className="aorms-project-grid">
+                {(activeProjects ?? []).map((p) => (
+                  <ProjectCard
+                    key={p.id}
+                    p={{
+                      id: p.id,
+                      ref: p.ref,
+                      title: p.title,
+                      status: p.status,
+                      clientName: (Array.isArray(p.clients) ? p.clients[0]?.name : (p.clients as { name: string } | null)?.name) ?? null,
+                      city: p.city,
+                      builtUpSqm: p.built_up_area_sqm,
+                      siteSqm: p.site_area_sqm,
+                      floors: p.floor_count,
+                      tasksDone: activeTally.get(p.id)?.done ?? 0,
+                      tasksTotal: activeTally.get(p.id)?.total ?? 0,
+                    }}
+                  />
+                ))}
+              </MotionStagger>
+            </MotionRoot>
+          </section>
+        )}
 
         {/* KPI tabs — Pulse / Finance / Team / Others. Three tiles carry a
             green/amber/red health status (KpiTile.tsx's `status` prop);
@@ -796,6 +855,8 @@ export default async function PulsePage() {
           myWork={myWorkPanel}
           activity={activityPanel}
         />
+          </div>
+        </div>
       </Column>
     </Grid>
   );

@@ -355,9 +355,12 @@ a record of the old `frontend/`'s own unfinished migration, not as
 > tabular/monospaced numerals in schedules; motion only via
 > `lib/motion/tokens.ts` with `reducedMotion="user"`. Not an exception:
 > no MUI, no neumorphism/glass, no bespoke replacements for a Carbon
-> component that already exists. Not yet approved/built: horizontal
-> sliding-panel navigation (changes routing/deep links) and renaming the
-> product tagline to "Architectural Operating System".
+> component that already exists. Decisions (2026-09-30): horizontal panel
+> navigation is a **transition layer only** (`PanelSlide`) — routes stay real,
+> server-rendered, deep-linkable; a SPA-style board replacing navigation is
+> not approved. "Architectural Operating System" names this *design language*;
+> the public tagline stays "Architecture Practice Operating System" (already
+> live in title/OG/Twitter/hero — do not rename without checking SEO).
 
 **Starter template:** new Carbon screens follow the recipe in CARBON-MIGRATION.md
 § 3 Wave 3 (tranche 1):
