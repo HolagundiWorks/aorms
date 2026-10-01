@@ -69,7 +69,7 @@ export async function HubSheet() {
 
       <div className="aorms-hub__cols">
         <div className="aorms-hub__col">
-          <h3 className="aorms-bigstat__label">Projects</h3>
+          <h2 className="aorms-bigstat__label">Projects</h2>
           <dl className="aorms-hub__list">
             {STATUS_ORDER.filter(([k]) => byStatus.get(k)).map(([k, label]) => (
               <div key={k}>
@@ -87,7 +87,7 @@ export async function HubSheet() {
         </div>
 
         <div className="aorms-hub__col">
-          <h3 className="aorms-bigstat__label">Today · {dateLabel}</h3>
+          <h2 className="aorms-bigstat__label">Today · {dateLabel}</h2>
           <dl className="aorms-hub__list">
             {todayRows.map(([label, n, href]) => (
               <div key={label}>
@@ -108,7 +108,7 @@ export async function HubSheet() {
         </div>
 
         <div className="aorms-hub__col">
-          <h3 className="aorms-bigstat__label">Attention</h3>
+          <h2 className="aorms-bigstat__label">Attention</h2>
           {attention.length === 0 ? (
             <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>Nothing needs attention right now.</p>
           ) : (

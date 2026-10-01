@@ -764,7 +764,7 @@ export default async function PulsePage() {
             {showFinancials && <BigStat value={formatInr(readyToBill.total)} label="Ready to bill" href="/invoices" />}
             {/* Today's brief — live, below the numerals (not an instruction, so the Instructions toggle never hides it). */}
             <div className="aorms-rail-brief aorms-rail-brief--live">
-              <h3 className="aorms-bigstat__label">Today&apos;s brief</h3>
+              <h2 className="aorms-bigstat__label">Today&apos;s brief</h2>
               <p>
                 <Suspense fallback="Gathering today's brief…">
                   <PulseBrief />

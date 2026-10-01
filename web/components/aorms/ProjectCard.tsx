@@ -39,7 +39,7 @@ export function ProjectCard({ p }: { p: ProjectCardData }) {
           {[p.clientName, p.city].filter(Boolean).join(" · ") || "—"}
         </div>
       </div>
-      <div className="aorms-project-card__phase" style={{ color: p.status === "ACTIVE" ? "var(--aorms-orange)" : undefined }}>
+      <div className="aorms-project-card__phase" style={{ color: p.status === "ACTIVE" ? "var(--aorms-orange-text)" : undefined }}>
         {STATUS_LABEL[p.status] ?? p.status}
       </div>
       <div className="aorms-progress-line" title={pct === null ? "No tasks yet" : `${p.tasksDone} of ${p.tasksTotal} tasks done`}>

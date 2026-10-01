@@ -24,9 +24,9 @@ export function TitleBlock({ companyName }: { companyName: string }) {
   if (!sheet) return null;
   const extra = [...new Set([sheet.office ?? (companyName || null), sheet.section, sheet.page].filter((x): x is string => !!x))];
   return (
-    <p className="aorms-sheet-footer aorms-print-hide" aria-label="Sheet reference">
+    <footer className="aorms-sheet-footer aorms-print-hide" aria-label="Sheet reference">
       <span className="aorms-sheet-footer__extra">{extra.join(" / ")} / </span>
       {[`AORMS-${sheet.sheet}`, date].filter(Boolean).join(" / ")}
-    </p>
+    </footer>
   );
 }
