@@ -16,6 +16,9 @@ type ProductRow = {
   companies: CompanyEmbed | CompanyEmbed[];
 };
 
+const PAGE_SIZE = 24;
+const MAX_WINDOW = 500;
+
 const CATEGORY_LABELS: Record<string, string> = {
   BUILDING_MATERIAL: "Building material",
   INTERIOR_MATERIAL: "Interior material",
@@ -45,11 +48,12 @@ function formatInr(paise: number): string {
 export default async function MaterialsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; category?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; page?: string }>;
 }) {
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const category = sp.category ?? "";
+  const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
 
   const webSupabase = await createWebClient();
   const {
@@ -95,10 +99,14 @@ export default async function MaterialsPage({
     .schema("connectdex")
     .from("products")
     .select("id, name, category, sku, mrp_paise, companies(id, name, public_id, city, state)");
-  if (q) query = query.ilike("name", `%${q}%`);
+  // Escape LIKE wildcards so a search for "50%" or "a_b" matches literally.
+  if (q) query = query.ilike("name", `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
   if (category) query = query.eq("category", category);
 
-  const { data: products, error } = await query.order("created_at", { ascending: false });
+  // Bounded window (2026-10-01 audit R5): ranking is done in JS, so fetch at most
+  // MAX_WINDOW newest matches, rank them, then page the result. Narrow the search
+  // to see older products.
+  const { data: products, error } = await query.order("created_at", { ascending: false }).limit(MAX_WINDOW);
   if (error) throw new Error(error.message);
 
   const rows = (products ?? []) as ProductRow[];
@@ -113,7 +121,11 @@ export default async function MaterialsPage({
     if (referenceState && company.state && company.state.toLowerCase() === referenceState.toLowerCase()) return 1;
     return 2;
   };
-  const sorted = [...rows].sort((a, b) => tier(a) - tier(b));
+  const ranked = [...rows].sort((a, b) => tier(a) - tier(b));
+  const pageCount = Math.max(1, Math.ceil(ranked.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const sorted = ranked.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const pageHref = (n: number) => `/materials?${new URLSearchParams({ ...(q ? { q } : {}), ...(category ? { category } : {}), page: String(n) })}`;
 
   return (
     <>
@@ -191,6 +203,16 @@ export default async function MaterialsPage({
             </p>
           )}
         </Stack>
+        {pageCount > 1 && (
+          <nav aria-label="Pagination" style={{ display: "flex", gap: "1rem", alignItems: "center", marginTop: "1.5rem" }}>
+            {currentPage > 1 && <NextLink href={pageHref(currentPage - 1)}>Previous</NextLink>}
+            <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+              Page {currentPage} of {pageCount}
+              {ranked.length >= MAX_WINDOW ? ` · showing the ${MAX_WINDOW} newest matches — narrow your search to see more` : ""}
+            </span>
+            {currentPage < pageCount && <NextLink href={pageHref(currentPage + 1)}>Next</NextLink>}
+          </nav>
+        )}
       </Column>
     </Grid>
     </>

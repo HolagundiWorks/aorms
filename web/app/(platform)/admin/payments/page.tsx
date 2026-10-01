@@ -3,6 +3,7 @@ import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../../lib/
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
+import { Pager, parsePage, pageRange } from "../../../../components/aorms/platform/Pager";
 import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 
 const STATUS_TAG: Record<string, "gray" | "cyan" | "green" | "red" | "magenta"> = {
@@ -21,16 +22,18 @@ const STATUS_TAG: Record<string, "gray" | "cyan" | "green" | "red" | "magenta"> 
  * in-app button). Links to the raw Razorpay order/payment id so an admin
  * can cross-reference Razorpay's own dashboard.
  */
-export default async function AdminPaymentsPage() {
+export default async function AdminPaymentsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const page = parsePage((await searchParams).page);
   const account = await getCurrentPlatformSessionAccount();
   if (!isSuperAdmin(account)) return <AdminAccessDenied title="Payments" />;
 
   const platformService = createPlatformServiceRoleClient();
-  const { data: payments } = await platformService
+  const [from, to] = pageRange(page);
+  const { data: payments, count } = await platformService
     .from("payments")
-    .select("id, plan, seats, amount_paise, status, razorpay_order_id, razorpay_payment_id, created_at, studios(name, public_id)")
+    .select("id, plan, seats, amount_paise, status, razorpay_order_id, razorpay_payment_id, created_at, studios(name, public_id)", { count: "exact" })
     .order("created_at", { ascending: false })
-    .limit(200);
+    .range(from, to);
 
   return (
     <>
@@ -83,6 +86,7 @@ export default async function AdminPaymentsPage() {
             )}
           </TableBody>
         </Table>
+        <Pager basePath="/admin/payments" page={page} total={count ?? 0} />
       </Column>
     </Grid>
     </>

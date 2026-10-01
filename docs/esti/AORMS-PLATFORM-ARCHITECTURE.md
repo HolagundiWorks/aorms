@@ -8,6 +8,11 @@ inconsistently. Read this before adding any new page under
 `app/(platform)/*` — it exists specifically so "where does this feature
 go" has one answer instead of being re-decided ad hoc each time.
 
+> **Stale-doc correction (2026-10-01):** the `aorms-web` ref in the table below
+> (`fyedovpqjwbslrughwdv`) is historical — the live project is
+> `aenacjqhmjlppmwodpar` (see CLAUDE.md). Current audit of all three portals:
+> [PLATFORMS-AUDIT-2026-10-01.md](PLATFORMS-AUDIT-2026-10-01.md).
+
 ## The two systems — do not conflate them
 
 | | **AORMS Office Hub** | **AORMS Platform** |
