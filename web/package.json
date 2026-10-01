@@ -2,7 +2,7 @@
   "name": "@esti/web",
   "version": "0.0.0",
   "private": true,
-  "description": "AORMS \u2014 Next.js + Carbon + Supabase target stack (migration in progress). See docs/esti/NEXTJS-SUPABASE-MIGRATION.md.",
+  "description": "AORMS — Next.js + Carbon + Supabase target stack (migration in progress). See docs/esti/NEXTJS-SUPABASE-MIGRATION.md.",
   "type": "module",
   "engines": {
     "node": ">=20.9.0"
@@ -25,6 +25,7 @@
     "marked": "^18.0.5",
     "motion": "^13.3.0",
     "next": "^16.3.6",
+    "nodemailer": "^10.0.13",
     "papaparse": "^5.7.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -36,6 +37,7 @@
     "@eslint/js": "^9.39.5",
     "@next/eslint-plugin-next": "^16.3.8",
     "@types/node": "^26.1.1",
+    "@types/nodemailer": "^8.0.2",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
