@@ -5,6 +5,7 @@ import { createServiceRoleClient as createPlatformServiceRoleClient } from "../.
 import { portalUrl } from "../../../../lib/platform/subdomains";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
+import { Pager, pageRange, parsePage } from "../../../../components/aorms/platform/Pager";
 import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 
 /**
@@ -46,19 +47,26 @@ import { SysDexPortalHeader } from "../../../../components/aorms/platform/Portal
  */
 const STUDIO_MEMBER_CAP_DISPLAY: Record<string, number | null> = { FREE: 1, STUDIO: 10, PROFESSIONAL: 25, ENTERPRISE: null };
 
-export default async function AdminStudiosPage() {
+export default async function AdminStudiosPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const page = parsePage((await searchParams).page);
+  const [from, to] = pageRange(page);
   const account = await getCurrentPlatformSessionAccount();
   if (!isSuperAdmin(account)) return <AdminAccessDenied title="Studios" />;
 
   const platformService = createPlatformServiceRoleClient();
-  const [{ data: studios }, { data: memberships }, { data: licences }] = await Promise.all([
-    platformService
-      .from("studios")
-      .select("id, name, public_id, city, state, created_at")
-      .order("created_at", { ascending: false }),
-    platformService.from("studio_memberships").select("studio_id").eq("status", "ACTIVE"),
-    platformService.from("licences").select("studio_id, plan"),
-  ]);
+  const { data: studios, count: studioTotal } = await platformService
+    .from("studios")
+    .select("id, name, public_id, city, state, created_at", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
+  // Aggregates only for the studios on this page.
+  const pageIds = (studios ?? []).map((s) => s.id);
+  const [{ data: memberships }, { data: licences }] = pageIds.length
+    ? await Promise.all([
+        platformService.from("studio_memberships").select("studio_id").eq("status", "ACTIVE").in("studio_id", pageIds),
+        platformService.from("licences").select("studio_id, plan").in("studio_id", pageIds),
+      ])
+    : [{ data: [] as { studio_id: string }[] }, { data: [] as { studio_id: string; plan: string }[] }];
 
   const memberCountByStudio = new Map<string, number>();
   for (const m of memberships ?? []) {
@@ -122,6 +130,7 @@ export default async function AdminStudiosPage() {
               )}
             </TableBody>
           </Table>
+          <Pager basePath="/admin/studios" page={page} total={studioTotal ?? 0} />
         </Column>
       </Grid>
     </>

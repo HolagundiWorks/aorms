@@ -7293,12 +7293,12 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 
 **P1 — correctness and scale**
 - [x] Materials: escape, bound, page · [x] `pg_trgm` + category indexes (0043, applied) · [ ] SQL-side nearest-first ranking
-- [x] SysDeX Logs/Payments paged · [x] Users (Identity accounts) paged + server search · [ ] Studios/Companies/Licences/Helpdesk paged + server search
+- [x] SysDeX Logs/Payments paged · [x] Users (Identity accounts) paged + server search · [x] Studios/Companies/Licences paged (50/page; aggregates only for the page) · [ ] Helpdesk paged · [ ] server search on those lists
 - [x] Shared rate-limit store: `public.rate_limit_buckets` + `rate_limit_hit()` (0045, applied, live-tested in a rolled-back block); `checkRateLimitShared` used by all 4 auth callers, falls back to in-memory if the store is unreachable
 - [ ] Split `lib/actions/platform.ts` (1,183 lines) by domain; test that every action gates
 - [ ] Collapse sequential service-role waterfalls (identity / materials / studio pages)
-- [ ] Error monitoring + Razorpay-webhook failure alerting
-- [x] Unit tests for `web/` (vitest, `npm test`, in CI): Razorpay HMAC verification, portal routing table, rate limiter, pager helpers — 15 tests · [ ] auth-gate and licence-payment-application tests · [ ] e2e
+- [x] Error reporting: `instrumentation.ts` `onRequestError` + `lib/observability.ts` (structured JSON to stderr; optional `ALERT_WEBHOOK_URL` Slack-style alert). No vendor SDK — swap for Sentry if a DSN appears. **Money-path fixes found while wiring this:** (a) the Razorpay webhook wrote its dedup row *before* processing, so a processing failure turned Razorpay's retry into a dropped "replay" — now wrapped, dedup row removed on failure, 500 + alert; (b) the three `applyCaptured*` functions marked the payment CAPTURED first and ignored entitlement-update errors (a paid licence could stay unextended with the payment "done") — now claim-then-apply, release the claim and throw on failure; client fast-paths catch and report. 4 new unit tests (fake Supabase)
+- [x] Unit tests for `web/` (vitest, `npm test`, in CI): Razorpay HMAC verification, portal routing table, rate limiter, pager helpers — 15 tests · [x] auth-gate test (every exported `admin*` Server Action must call an admin gate — structural, fails CI if one is added without) and licence/identity payment-application tests (38 tests total) · [ ] e2e
 
 **P2 — product**
 - [x] Licence-expiry reminder emails (T30/T7/T0): `GET /api/cron/licence-reminders` (Bearer `CRON_SECRET`), dedup table `licence_reminders` (0048, applied), emails the Studio owner. **Needs ops setup:** set `SMTP_*` + `CRON_SECRET` in Hostinger env and add a daily Hostinger cron job; until then it does nothing. [ ] grace state, [ ] renew CTA in the email beyond the link

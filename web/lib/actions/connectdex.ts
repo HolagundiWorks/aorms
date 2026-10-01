@@ -37,6 +37,7 @@ import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/acco
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aorms.in";
 import { createOrder, verifyPaymentSignature } from "../platform/razorpay";
 import { applyCapturedConnectDexPayment } from "../platform/connectdex-payment";
+import { reportError } from "../observability";
 import { toSafeErrorMessage } from "../security/safe-error";
 import { logStaffAction } from "../platform/staff-audit";
 
@@ -417,7 +418,12 @@ export async function confirmConnectDexPaymentClientSide(orderId: string, paymen
     return null;
   }
 
-  await applyCapturedConnectDexPayment(platformService, { ...payment, razorpay_payment_id: paymentId });
+  try {
+    await applyCapturedConnectDexPayment(platformService, { ...payment, razorpay_payment_id: paymentId });
+  } catch (e) {
+    await reportError("connectdex-payment-confirm", e, { orderId });
+    return { error: "Payment received but we couldn't activate the company yet — it will be applied automatically; contact support if it doesn't appear." };
+  }
   revalidatePath(`/companies/${payment.company_id}`);
   return null;
 }

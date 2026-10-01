@@ -7,6 +7,7 @@ import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAc
 import { ConnectDexActionButton } from "../../../../components/aorms/platform/company/ConnectDexActionButton";
 import { SetCompanyTierForm } from "../../../../components/aorms/platform/company/SetCompanyTierForm";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
+import { Pager, pageRange, parsePage } from "../../../../components/aorms/platform/Pager";
 import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 import { portalUrl } from "../../../../lib/platform/subdomains";
 
@@ -57,16 +58,23 @@ const COMPANY_MEMBER_CAP_DISPLAY: Record<string, number | null> = { BASE_LINE: 3
  * "used / cap" against `COMPANY_MEMBER_CAP_DISPLAY` so the plan's real
  * user limit is visible here, not just enforced silently at join time.
  */
-export default async function AdminCompaniesPage() {
+export default async function AdminCompaniesPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const page = parsePage((await searchParams).page);
+  const [from, to] = pageRange(page);
   const account = await getCurrentPlatformSessionAccount();
   if (!isSuperAdmin(account)) return <AdminAccessDenied title="Companies" />;
 
   const platformService = createPlatformServiceRoleClient();
   const cx = platformService.schema("connectdex");
-  const [{ data: companies }, { data: memberships }] = await Promise.all([
-    cx.from("companies").select("id, name, public_id, city, state, status, tier, created_at").order("created_at", { ascending: false }),
-    cx.from("company_memberships").select("company_id").eq("status", "ACTIVE"),
-  ]);
+  const { data: companies, count: companyTotal } = await cx
+    .from("companies")
+    .select("id, name, public_id, city, state, status, tier, created_at", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
+  const pageIds = (companies ?? []).map((c) => c.id);
+  const { data: memberships } = pageIds.length
+    ? await cx.from("company_memberships").select("company_id").eq("status", "ACTIVE").in("company_id", pageIds)
+    : { data: [] as { company_id: string }[] };
 
   const memberCountByCompany = new Map<string, number>();
   for (const m of memberships ?? []) {
@@ -143,6 +151,7 @@ export default async function AdminCompaniesPage() {
               )}
             </TableBody>
           </Table>
+          <Pager basePath="/admin/companies" page={page} total={companyTotal ?? 0} />
         </Column>
       </Grid>
     </>

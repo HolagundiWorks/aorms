@@ -31,19 +31,36 @@ const LICENCE_PERIOD_DAYS = 365;
 export async function applyCapturedPayment(
   platformService: ReturnType<typeof createServiceRoleClient>,
   payment: { id: string; studio_id: string; plan: string; seats: number; razorpay_payment_id: string },
-): Promise<void> {
-  await platformService
+): Promise<boolean> {
+  // Claim first (2026-10-01 audit): flip to CAPTURED only if it isn't already, so the
+  // webhook and the client fast-path can't both extend the licence. If the entitlement
+  // write then fails, release the claim and throw so the caller/Razorpay retries — the
+  // old order marked CAPTURED, ignored errors, and could leave a paid licence unextended
+  // with the payment already "done".
+  const { data: claimed, error: claimError } = await platformService
     .from("payments")
     .update({ status: "CAPTURED", razorpay_payment_id: payment.razorpay_payment_id, updated_at: new Date().toISOString() })
-    .eq("id", payment.id);
+    .eq("id", payment.id)
+    .neq("status", "CAPTURED")
+    .select("id");
+  if (claimError) throw new Error(`payment claim failed: ${claimError.message}`);
+  if (!claimed || claimed.length === 0) return false;
 
-  const { data: licence } = await platformService.from("licences").select("expires_at").eq("studio_id", payment.studio_id).maybeSingle();
-  const currentExpiry = licence?.expires_at ? new Date(licence.expires_at) : null;
-  const base = currentExpiry && currentExpiry > new Date() ? currentExpiry : new Date();
-  const newExpiry = new Date(base.getTime() + LICENCE_PERIOD_DAYS * 24 * 60 * 60 * 1000);
+  try {
+    const { data: licence, error: readError } = await platformService.from("licences").select("expires_at").eq("studio_id", payment.studio_id).maybeSingle();
+    if (readError) throw new Error(readError.message);
+    const currentExpiry = licence?.expires_at ? new Date(licence.expires_at) : null;
+    const base = currentExpiry && currentExpiry > new Date() ? currentExpiry : new Date();
+    const newExpiry = new Date(base.getTime() + LICENCE_PERIOD_DAYS * 24 * 60 * 60 * 1000);
 
-  await platformService
-    .from("licences")
-    .update({ plan: payment.plan, seats: payment.seats, expires_at: newExpiry.toISOString() })
-    .eq("studio_id", payment.studio_id);
+    const { error: updateError } = await platformService
+      .from("licences")
+      .update({ plan: payment.plan, seats: payment.seats, expires_at: newExpiry.toISOString() })
+      .eq("studio_id", payment.studio_id);
+    if (updateError) throw new Error(updateError.message);
+    return true;
+  } catch (e) {
+    await platformService.from("payments").update({ status: "AUTHORIZED", updated_at: new Date().toISOString() }).eq("id", payment.id);
+    throw new Error(`licence not extended, payment released for retry: ${e instanceof Error ? e.message : String(e)}`);
+  }
 }

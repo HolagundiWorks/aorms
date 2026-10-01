@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { reportError } from "../../../../lib/observability";
 import { verifyWebhookSignature } from "../../../../lib/platform/razorpay";
 import { createServiceRoleClient } from "../../../../lib/platform/service";
 import { applyCapturedPayment } from "../../../../lib/platform/licence-payment";
@@ -69,11 +70,11 @@ export async function POST(request: Request) {
   // error; Razorpay should stop retrying) without touching the business
   // logic below at all. Additive to that logic's own status!=='CAPTURED'
   // idempotency check, not a replacement for it.
+  let dedupKey: string | null = null;
   if (paymentId && (event.event === "payment.captured" || event.event === "payment.failed")) {
     const dedupService = createServiceRoleClient();
-    const { error: dedupError } = await dedupService
-      .from("razorpay_webhook_events")
-      .insert({ dedup_key: `${event.event}:${paymentId}` });
+    dedupKey = `${event.event}:${paymentId}`;
+    const { error: dedupError } = await dedupService.from("razorpay_webhook_events").insert({ dedup_key: dedupKey });
     if (dedupError) {
       // 23505 = unique_violation — a genuine replay, not a real error.
       if (dedupError.code === "23505") return NextResponse.json({ ok: true, replay: true });
@@ -84,64 +85,74 @@ export async function POST(request: Request) {
     }
   }
 
-  if (event.event === "payment.captured" && orderId && paymentId) {
-    const platformService = createServiceRoleClient();
-    const { data: licenceRow } = await platformService
-      .from("payments")
-      .select("id, studio_id, plan, seats, status")
-      .eq("razorpay_order_id", orderId)
-      .maybeSingle();
-
-    // Idempotent against confirmPaymentClientSide's own fast path — if
-    // that already applied this payment, skip re-applying it (would
-    // otherwise double-extend expires_at).
-    if (licenceRow) {
-      if (licenceRow.status !== "CAPTURED") {
-        await applyCapturedPayment(platformService, { ...licenceRow, razorpay_payment_id: paymentId });
-      }
-    } else {
-      const { data: connectDexRow } = await platformService
-        .schema("connectdex")
-        .from("connectdex_payments")
-        .select("id, company_id, status")
+  // Process inside try/catch (2026-10-01 audit): the dedup row above is written BEFORE
+  // the business logic, so a failure here used to leave the row behind and Razorpay's
+  // retry would then be dropped as a "replay" — a captured payment never applied. On
+  // failure: remove the dedup row, report/alert, and return 500 so Razorpay retries.
+  try {
+    if (event.event === "payment.captured" && orderId && paymentId) {
+      const platformService = createServiceRoleClient();
+      const { data: licenceRow } = await platformService
+        .from("payments")
+        .select("id, studio_id, plan, seats, status")
         .eq("razorpay_order_id", orderId)
         .maybeSingle();
-      if (connectDexRow) {
-        if (connectDexRow.status !== "CAPTURED") {
-          await applyCapturedConnectDexPayment(platformService, { ...connectDexRow, razorpay_payment_id: paymentId });
+
+      // Idempotent against confirmPaymentClientSide's own fast path — if
+      // that already applied this payment, skip re-applying it (would
+      // otherwise double-extend expires_at).
+      if (licenceRow) {
+        if (licenceRow.status !== "CAPTURED") {
+          await applyCapturedPayment(platformService, { ...licenceRow, razorpay_payment_id: paymentId });
         }
       } else {
-        const { data: identityRow } = await platformService
-          .from("identity_payments")
-          .select("id, account_id, status")
+        const { data: connectDexRow } = await platformService
+          .schema("connectdex")
+          .from("connectdex_payments")
+          .select("id, company_id, status")
           .eq("razorpay_order_id", orderId)
           .maybeSingle();
-        if (identityRow && identityRow.status !== "CAPTURED") {
-          await applyCapturedIdentityPayment(platformService, { ...identityRow, razorpay_payment_id: paymentId });
+        if (connectDexRow) {
+          if (connectDexRow.status !== "CAPTURED") {
+            await applyCapturedConnectDexPayment(platformService, { ...connectDexRow, razorpay_payment_id: paymentId });
+          }
+        } else {
+          const { data: identityRow } = await platformService
+            .from("identity_payments")
+            .select("id, account_id, status")
+            .eq("razorpay_order_id", orderId)
+            .maybeSingle();
+          if (identityRow && identityRow.status !== "CAPTURED") {
+            await applyCapturedIdentityPayment(platformService, { ...identityRow, razorpay_payment_id: paymentId });
+          }
         }
       }
-    }
-  } else if (event.event === "payment.failed" && orderId) {
-    const platformService = createServiceRoleClient();
-    const { data: failedLicenceRows } = await platformService
-      .from("payments")
-      .update({ status: "FAILED", updated_at: new Date().toISOString() })
-      .eq("razorpay_order_id", orderId)
-      .select("id");
-    if (!failedLicenceRows || failedLicenceRows.length === 0) {
-      const { data: failedConnectDexRows } = await platformService
-        .schema("connectdex")
-        .from("connectdex_payments")
+    } else if (event.event === "payment.failed" && orderId) {
+      const platformService = createServiceRoleClient();
+      const { data: failedLicenceRows } = await platformService
+        .from("payments")
         .update({ status: "FAILED", updated_at: new Date().toISOString() })
         .eq("razorpay_order_id", orderId)
         .select("id");
-      if (!failedConnectDexRows || failedConnectDexRows.length === 0) {
-        await platformService
-          .from("identity_payments")
+      if (!failedLicenceRows || failedLicenceRows.length === 0) {
+        const { data: failedConnectDexRows } = await platformService
+          .schema("connectdex")
+          .from("connectdex_payments")
           .update({ status: "FAILED", updated_at: new Date().toISOString() })
-          .eq("razorpay_order_id", orderId);
+          .eq("razorpay_order_id", orderId)
+          .select("id");
+        if (!failedConnectDexRows || failedConnectDexRows.length === 0) {
+          await platformService
+            .from("identity_payments")
+            .update({ status: "FAILED", updated_at: new Date().toISOString() })
+            .eq("razorpay_order_id", orderId);
+        }
       }
     }
+  } catch (e) {
+    if (dedupKey) await createServiceRoleClient().from("razorpay_webhook_events").delete().eq("dedup_key", dedupKey);
+    await reportError("razorpay-webhook", e, { event: event.event, orderId, paymentId });
+    return NextResponse.json({ error: "Processing failed — will retry" }, { status: 500 });
   }
 
   // Always 200 for a signature-verified, recognized request — Razorpay

@@ -24,6 +24,7 @@ import { getCurrentPlatformAccount, getCurrentPlatformSessionAccount, isSuperAdm
 import { createOrder, verifyPaymentSignature } from "../platform/razorpay";
 import { applyCapturedPayment } from "../platform/licence-payment";
 import { applyCapturedIdentityPayment } from "../platform/identity-payment";
+import { reportError } from "../observability";
 import { toSafeErrorMessage } from "../security/safe-error";
 import { logStaffAction } from "../platform/staff-audit";
 
@@ -227,7 +228,12 @@ export async function confirmPaymentClientSide(orderId: string, paymentId: strin
     return null;
   }
 
-  await applyCapturedPayment(platformService, { ...payment, razorpay_payment_id: paymentId });
+  try {
+    await applyCapturedPayment(platformService, { ...payment, razorpay_payment_id: paymentId });
+  } catch (e) {
+    await reportError("licence-payment-confirm", e, { orderId });
+    return { error: "Payment received but we couldn't update your licence yet — it will be applied automatically; contact support if it doesn't appear." };
+  }
   revalidatePath("/licences");
   return null;
 }
@@ -254,7 +260,12 @@ export async function confirmIdentityPaymentClientSide(orderId: string, paymentI
     return null;
   }
 
-  await applyCapturedIdentityPayment(platformService, { ...payment, razorpay_payment_id: paymentId });
+  try {
+    await applyCapturedIdentityPayment(platformService, { ...payment, razorpay_payment_id: paymentId });
+  } catch (e) {
+    await reportError("identity-payment-confirm", e, { orderId });
+    return { error: "Payment received but we couldn't verify your identity yet — it will be applied automatically; contact support if it doesn't appear." };
+  }
   revalidatePath("/identity");
   return null;
 }

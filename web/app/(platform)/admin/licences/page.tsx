@@ -4,6 +4,7 @@ import { createServiceRoleClient as createPlatformServiceRoleClient } from "../.
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { UpdateLicenceForm } from "../../../../components/aorms/platform/UpdateLicenceForm";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
+import { Pager, pageRange, parsePage } from "../../../../components/aorms/platform/Pager";
 import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 
 function isLicenceActive(expiresAt: string | null): boolean {
@@ -17,15 +18,19 @@ function isLicenceActive(expiresAt: string | null): boolean {
  * (lib/actions/platform-payments.ts), gated by both an app-level is_admin
  * check and the "licences: admin update" RLS policy.
  */
-export default async function AdminLicencesPage() {
+export default async function AdminLicencesPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const page = parsePage((await searchParams).page);
+  const [from, to] = pageRange(page);
   const account = await getCurrentPlatformSessionAccount();
   if (!isSuperAdmin(account)) return <AdminAccessDenied title="Licences" />;
 
   const platformService = createPlatformServiceRoleClient();
-  const { data: licences } = await platformService
+  const { data: licences, count: licenceTotal } = await platformService
     .from("licences")
-    .select("studio_id, plan, seats, expires_at, studios(name, public_id)")
-    .order("expires_at", { ascending: true, nullsFirst: false });
+    .select("studio_id, plan, seats, expires_at, studios(name, public_id)", { count: "exact" })
+    .order("expires_at", { ascending: true, nullsFirst: false })
+    .order("studio_id")
+    .range(from, to);
 
   return (
     <>
@@ -73,6 +78,7 @@ export default async function AdminLicencesPage() {
             </p>
           )}
         </Stack>
+        <Pager basePath="/admin/licences" page={page} total={licenceTotal ?? 0} />
       </Column>
     </Grid>
     </>
