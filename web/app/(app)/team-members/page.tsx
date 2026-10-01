@@ -18,6 +18,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -99,7 +100,7 @@ export default async function TeamMembersPage() {
                 Couldn&apos;t load team members: {error.message}
               </p>
             ) : (
-              <Table aria-label="Team members" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Team members" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Name</TableHeader>
@@ -137,7 +138,7 @@ export default async function TeamMembersPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

@@ -17,6 +17,7 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RaBillStatusSelect } from "../../../components/aorms/RaBillStatusSelect";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -68,7 +69,7 @@ export default async function PmcRaBillsPage() {
             Couldn&apos;t load bills: {error.message}
           </p>
         ) : (
-          <Table aria-label="RA bills" className="aorms-table-spaced">
+          <><TableToolbar /><Table aria-label="RA bills" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
                 <TableHeader>Ref</TableHeader>
@@ -109,7 +110,7 @@ export default async function PmcRaBillsPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table></>
         )}
       </Column>
       </Grid>

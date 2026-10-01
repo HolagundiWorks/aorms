@@ -17,6 +17,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 const STATUS_TAG: Record<string, "cool-gray" | "green"> = {
   DRAFT: "cool-gray",
@@ -69,7 +70,7 @@ export default async function BbsPage() {
                 Couldn&apos;t load BBS schedules: {error.message}
               </p>
             ) : (
-              <Table aria-label="BBS schedules" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="BBS schedules" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Ref</TableHeader>
@@ -108,7 +109,7 @@ export default async function BbsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

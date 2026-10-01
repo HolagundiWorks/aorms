@@ -7,6 +7,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 export default async function TeamsPage() {
   const supabase = await createClient();
@@ -46,7 +47,7 @@ export default async function TeamsPage() {
                 Couldn&apos;t load teams: {error.message}
               </p>
             ) : (
-              <Table aria-label="Teams" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Teams" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Name</TableHeader>
@@ -72,7 +73,7 @@ export default async function TeamsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

@@ -18,6 +18,7 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateProposalPdf } from "../../../lib/actions/proposals";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -84,7 +85,7 @@ export default async function ProposalsPage() {
                 Couldn&apos;t load proposals: {error.message}
               </p>
             ) : (
-              <Table aria-label="Proposals" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Proposals" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Ref</TableHeader>
@@ -131,7 +132,7 @@ export default async function ProposalsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

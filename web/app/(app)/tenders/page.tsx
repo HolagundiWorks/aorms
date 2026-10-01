@@ -17,6 +17,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "purple" | "green" | "red"> = {
   DRAFT: "gray",
@@ -75,7 +76,7 @@ export default async function TendersPage() {
                 Couldn&apos;t load tenders: {error.message}
               </p>
             ) : (
-              <Table aria-label="Tenders" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Tenders" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Title</TableHeader>
@@ -115,7 +116,7 @@ export default async function TendersPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

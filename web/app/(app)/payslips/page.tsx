@@ -19,6 +19,7 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generatePayslipPdf } from "../../../lib/actions/payslips";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -72,7 +73,7 @@ export default async function PayslipsPage() {
                 Couldn&apos;t load payslips: {error.message}
               </p>
             ) : (
-              <Table aria-label="Payslips" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Payslips" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Member</TableHeader>
@@ -119,7 +120,7 @@ export default async function PayslipsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

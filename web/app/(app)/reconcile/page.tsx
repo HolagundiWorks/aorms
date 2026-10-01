@@ -18,6 +18,7 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SettleReconcileButton } from "../../../components/aorms/SettleReconcileButton";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 // has_capability('finance:ops') — migration 0087_reconcile.sql's
 // "reconcile: finance ops" policy is a single, uniform gate (no read/
@@ -106,7 +107,7 @@ export default async function ReconcilePage() {
                 Couldn&apos;t load reconciliation batches: {error.message}
               </p>
             ) : (
-              <Table aria-label="Reconciliation batches" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Reconciliation batches" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Ref</TableHeader>
@@ -158,7 +159,7 @@ export default async function ReconcilePage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

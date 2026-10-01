@@ -7202,6 +7202,29 @@ PR #81 (projects cards/pins/images, Kanban rework, floating footer, Instructions
   they mirror the same three-line change, and the SysDeX/Identity pages behind sign-in. Parity gaps by design:
   portals without KPI rows have no rail; sign-in pages have no header so no toggle (they honour the cookie).
 
+### One toolbar, rail brief on every screen, Pulse trimmed (2026-10-01)
+
+Follow-up to PRs #81/#82 (both live — confirmed in production):
+- **Pulse:** the *Active projects* board is gone; *Today's brief* moved from under the title into the **left
+  rail below the numerals** (still live, still not hidden by the Instructions toggle).
+- **Brief in the rail on every screen:** `RailBrief` now sits directly under the KPIs on 42 rail pages — the
+  page's description, moved out of the header (CSS hides the header copy only when the rail is active, so
+  nothing is lost where a KPI row can't become a rail). 4 pages with JSX descriptions keep theirs in the header.
+- **Projects uses the KPI rail** (its BigStat row now carries the rail marker + a Brief).
+- **One list toolbar:** `ListToolbar` = `[ search ][ filters ][ sort ][ view ]` + a status line, in one
+  component with a fixed order. Projects (status/type filters, 5 sorts, Cards/Lines) and Tasks (project/person/
+  priority/due-date filters, 5 sorts, Board/Calendar) were rebuilt on it; `TableToolbar` adds the same bar —
+  search, Status filter, sort by any column — before the table on **47 top-level list screens** (48 tables).
+  `TableToolbar` is DOM-driven because those screens render rows on the server: filtering toggles row
+  `display`, sorting re-appends the same row nodes (nothing created/destroyed). Verified in a real browser:
+  search, status filter, ₹-aware numeric sort (41,87,000 before 8,10,000), date sort, reset, Projects filters +
+  sort + Cards→Lines, Tasks toolbar, no mobile overflow.
+- **Not done / honest limits:** the platform-portal tables (SysDeX etc.) don't have the toolbar yet; detail-page
+  tables (e.g. an estimate's items) deliberately don't; `TableToolbar` filter/sort is client-side over the rows
+  already on the page (no server pagination exists, so that is the whole list). Sort order resets on
+  navigation. Unit/DOM behaviour verified on a mock table, not on every real screen (no test login).
+- Guide updated: `AORMS-WEB-BRANDING-GUIDE.md` §§ 4.3, 7, 10.0, 10.1, 12, 13, 14, 15.
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,

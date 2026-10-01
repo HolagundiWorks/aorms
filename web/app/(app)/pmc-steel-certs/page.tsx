@@ -16,6 +16,7 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SteelCertStatusSelect } from "../../../components/aorms/SteelCertStatusSelect";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 export default async function PmcSteelCertsPage() {
   const supabase = await createClient();
@@ -65,7 +66,7 @@ export default async function PmcSteelCertsPage() {
             Couldn&apos;t load certificates: {error.message}
           </p>
         ) : (
-          <Table aria-label="Steel certificates" className="aorms-table-spaced">
+          <><TableToolbar /><Table aria-label="Steel certificates" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
                 <TableHeader>Ref</TableHeader>
@@ -106,7 +107,7 @@ export default async function PmcSteelCertsPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table></>
         )}
       </Column>
       </Grid>

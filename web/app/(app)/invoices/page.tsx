@@ -17,6 +17,7 @@ import { DownloadPdfLink } from "../../../components/aorms/DownloadPdfLink";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -87,7 +88,7 @@ export default async function InvoicesPage() {
             Couldn&apos;t load invoices: {error.message}
           </p>
         ) : (
-          <Table aria-label="Invoices" className="aorms-table-spaced">
+          <><TableToolbar /><Table aria-label="Invoices" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
                 <TableHeader>Ref</TableHeader>
@@ -145,7 +146,7 @@ export default async function InvoicesPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table></>
         )}
           </Column>
         </Grid>

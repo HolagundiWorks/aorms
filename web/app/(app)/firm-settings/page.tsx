@@ -19,6 +19,7 @@ import { removeNumberingPatternRecord } from "../../../lib/actions/numbering";
 import { LinkFirmStudioForm } from "../../../components/aorms/platform/LinkFirmStudioForm";
 import { getFirmStudio } from "../../../lib/platform/firm-studio";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 /**
  * Firm Settings — the caller's own `firms` row (one per Studio as of
@@ -214,7 +215,7 @@ export default async function FirmSettingsPage() {
           </p>
         ) : (
           <>
-            <Table aria-label="Numbering overrides" className="aorms-table-spaced">
+            <><TableToolbar /><Table aria-label="Numbering overrides" className="aorms-table-spaced">
               <TableHead>
                 <TableRow>
                   <TableHeader>Scope</TableHeader>
@@ -246,7 +247,7 @@ export default async function FirmSettingsPage() {
                   </TableRow>
                 )}
               </TableBody>
-            </Table>
+            </Table></>
           </>
         )}
       </Column>

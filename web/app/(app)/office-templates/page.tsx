@@ -7,6 +7,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 const KIND_LABEL: Record<string, string> = {
   LETTER: "Letter",
@@ -80,7 +81,7 @@ export default async function OfficeTemplatesPage() {
                 Couldn&apos;t load templates: {error.message}
               </p>
             ) : (
-              <Table aria-label="Office templates" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Office templates" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Kind</TableHeader>
@@ -112,7 +113,7 @@ export default async function OfficeTemplatesPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

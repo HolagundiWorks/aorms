@@ -17,6 +17,7 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateLetterPdf } from "../../../lib/actions/letters";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 // Roles with has_capability('write') (rank >= 40, or an explicit
 // allow-list role — see web/supabase/migrations/0002_capability_helper.sql
@@ -83,7 +84,7 @@ export default async function LettersPage() {
                 Couldn&apos;t load letters: {error.message}
               </p>
             ) : (
-              <Table aria-label="Letters" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Letters" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Ref</TableHeader>
@@ -122,7 +123,7 @@ export default async function LettersPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

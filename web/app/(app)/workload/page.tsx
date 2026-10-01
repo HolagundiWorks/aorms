@@ -1,6 +1,7 @@
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag, Tile } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 /**
  * Task counts by assignee — a slice of the current backend's workload
@@ -47,7 +48,7 @@ export default async function WorkloadPage() {
             </p>
           </Tile>
         ) : (
-          <Table aria-label="Workload by assignee">
+          <><TableToolbar /><Table aria-label="Workload by assignee">
             <TableHead>
               <TableRow>
                 <TableHeader>Assignee</TableHeader>
@@ -82,7 +83,7 @@ export default async function WorkloadPage() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </Table></>
         )}
       </Column>
     </Grid>

@@ -8,6 +8,7 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SetActiveVersionButton } from "../../../components/aorms/SetActiveVersionButton";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 /**
  * Spec Catalog (Library → Specification) — CLAUDE.md's own module map
@@ -75,7 +76,7 @@ export default async function SpecCatalogPage() {
                 Couldn&apos;t load versions: {error.message}
               </p>
             ) : (
-              <Table aria-label="Spec catalog versions" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Spec catalog versions" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Label</TableHeader>
@@ -109,7 +110,7 @@ export default async function SpecCatalogPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

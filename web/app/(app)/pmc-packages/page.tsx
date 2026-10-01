@@ -17,6 +17,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "purple" | "green" | "red"> = {
   DRAFT: "gray",
@@ -75,7 +76,7 @@ export default async function PmcPackagesPage() {
             Couldn&apos;t load packages: {error.message}
           </p>
         ) : (
-          <Table aria-label="Work packages" className="aorms-table-spaced">
+          <><TableToolbar /><Table aria-label="Work packages" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
                 <TableHeader>Ref</TableHeader>
@@ -114,7 +115,7 @@ export default async function PmcPackagesPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table></>
         )}
       </Column>
       </Grid>

@@ -7,6 +7,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { RegisterDeviceForm } from "../../../components/aorms/ai-devices/RegisterDeviceForm";
 import { RemoveDeviceButton } from "../../../components/aorms/ai-devices/RemoveDeviceButton";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 /**
  * Esti Mobile Inference — device monitoring (2026-09-13), Phase A of the
@@ -89,7 +90,7 @@ export default async function AiDevicesPage() {
                 Couldn&apos;t load devices: {error.message}
               </p>
             ) : (
-              <Table aria-label="Esti devices">
+              <><TableToolbar /><Table aria-label="Esti devices">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Device</TableHeader>
@@ -145,7 +146,7 @@ export default async function AiDevicesPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

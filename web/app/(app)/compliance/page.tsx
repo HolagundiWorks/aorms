@@ -17,6 +17,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { ComplianceForm } from "../../../components/aorms/ComplianceForm";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { complianceFields, type ComplianceTable } from "../../../lib/compliance-fields";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 const SECTIONS: { table: ComplianceTable; label: string; columns: string[] }[] = [
   { table: "compliance_far", label: "FAR", columns: ["zone", "plot_type", "far", "ground_coverage_pct", "max_height_m"] },
@@ -61,7 +62,7 @@ export default async function CompliancePage() {
                         Couldn&apos;t load rows: {error.message}
                       </p>
                     ) : (
-                      <Table aria-label={s.label} size="sm">
+                      <><TableToolbar /><Table aria-label={s.label} size="sm">
                         <TableHead>
                           <TableRow>
                             {s.columns.map((c) => (
@@ -87,7 +88,7 @@ export default async function CompliancePage() {
                             </TableRow>
                           )}
                         </TableBody>
-                      </Table>
+                      </Table></>
                     )}
                   </div>
                 </TabPanel>

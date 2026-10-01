@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 /**
  * Project take-off — project picker. See lib/takeoff/formulas.ts and
@@ -35,7 +36,7 @@ export default async function TakeoffPage() {
             Couldn&apos;t load projects: {error.message}
           </p>
         ) : (
-          <Table aria-label="Projects" className="aorms-table-spaced">
+          <><TableToolbar /><Table aria-label="Projects" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
                 <TableHeader>Ref</TableHeader>
@@ -63,7 +64,7 @@ export default async function TakeoffPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table></>
         )}
       </Column>
     </Grid>

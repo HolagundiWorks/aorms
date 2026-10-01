@@ -17,6 +17,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 // Roles with has_capability('write') (rank >= 40, or an explicit
 // allow-list role — see web/supabase/migrations/0002_capability_helper.sql
@@ -84,7 +85,7 @@ export default async function MomsPage() {
                 Couldn&apos;t load minutes: {error.message}
               </p>
             ) : (
-              <Table aria-label="Meeting Minutes" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Meeting Minutes" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Ref</TableHeader>
@@ -127,7 +128,7 @@ export default async function MomsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

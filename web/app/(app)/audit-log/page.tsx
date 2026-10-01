@@ -12,6 +12,7 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 /**
  * Page-level OWNER-only gate — the current backend's audit.list procedure is
@@ -65,7 +66,7 @@ export default async function AuditLogPage() {
             Couldn&apos;t load the audit log: {error.message}
           </p>
         ) : (
-          <Table aria-label="Audit log">
+          <><TableToolbar /><Table aria-label="Audit log">
             <TableHead>
               <TableRow>
                 <TableHeader>When</TableHeader>
@@ -106,7 +107,7 @@ export default async function AuditLogPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table></>
         )}
       </Column>
     </Grid>

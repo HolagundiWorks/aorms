@@ -23,6 +23,7 @@ import { ExpenseRowActions } from "../../../components/aorms/ExpenseRowActions";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 // Roles with has_capability('write') — see migration
 // 0086_accounts_and_expenses.sql's "expenses: staff create draft" /
@@ -77,7 +78,7 @@ function ExpensesTable({
   projectInvoices: { id: string; ref: string; project_id: string }[];
 }) {
   return (
-    <Table aria-label="Expenses" className="aorms-table-spaced">
+    <><TableToolbar /><Table aria-label="Expenses" className="aorms-table-spaced">
       <TableHead>
         <TableRow>
           <TableHeader>Ref</TableHeader>
@@ -136,7 +137,7 @@ function ExpensesTable({
           </TableRow>
         )}
       </TableBody>
-    </Table>
+    </Table></>
   );
 }
 

@@ -17,6 +17,7 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateSiteInstructionPdf } from "../../../lib/actions/site-instructions";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 export default async function SiteInstructionsPage() {
   const supabase = await createClient();
@@ -67,7 +68,7 @@ export default async function SiteInstructionsPage() {
                 Couldn&apos;t load instructions: {error.message}
               </p>
             ) : (
-              <Table aria-label="Site instructions" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Site instructions" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Ref</TableHeader>
@@ -110,7 +111,7 @@ export default async function SiteInstructionsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

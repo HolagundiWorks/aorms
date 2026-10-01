@@ -17,6 +17,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red" | "purple"> = {
   DRAFT: "gray",
@@ -71,7 +72,7 @@ export default async function KnowledgeBankPage() {
                 Couldn&apos;t load sources: {error.message}
               </p>
             ) : (
-              <Table aria-label="Knowledge bank sources" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Knowledge bank sources" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Title</TableHeader>
@@ -105,7 +106,7 @@ export default async function KnowledgeBankPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

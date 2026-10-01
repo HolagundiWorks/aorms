@@ -17,6 +17,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 export default async function RateBooksPage() {
   const supabase = await createClient();
@@ -60,7 +61,7 @@ export default async function RateBooksPage() {
                 Couldn&apos;t load rate books: {error.message}
               </p>
             ) : (
-              <Table aria-label="Rate Books" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Rate Books" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Name</TableHeader>
@@ -94,7 +95,7 @@ export default async function RateBooksPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>
