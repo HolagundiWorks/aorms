@@ -7170,6 +7170,38 @@ follows the explicit spec (image grid, name on hover), not a copy of that page.
   real pin write against the live database (no test login in this session) — the first real use is the
   test; images are served as-is (no server-side resize), so very large photos cost bandwidth.
 
+### UI/UX guide rewritten; sheet system extended to every portal; Pulse live brief (2026-10-01)
+
+PR #81 (projects cards/pins/images, Kanban rework, floating footer, Instructions toggle, Pulse rail on
+45 screens) merged first. Then:
+- **Pulse heading:** the boilerplate description + "The result" under *Pulse* were replaced by a **live daily
+  brief** — `PulseBrief` renders `briefSentence()` (e.g. *Thursday — 2 tasks overdue, 3 tasks due today and
+  2 meetings.*), only non-zero parts, most urgent first, or "nothing is due or waiting". It uses the new
+  `PageHeader summary` prop, which — unlike `description` — is **not** an instruction, so the Instructions
+  toggle never hides it. `lib/pulse/hub-data.ts` `getHubData()` (React `cache()`) now feeds both the brief and
+  the hub sheet: one set of queries per request. Sentence logic unit-checked for four cases.
+- **Documentation:** `docs/esti/AORMS-WEB-BRANDING-GUIDE.md` (the existing `web/` guide) was rewritten as the
+  canonical UI/UX rulebook — tokens and the orange rule, sheet system, instructions rule, shell, Pulse rail,
+  tables, page templates, component rules (hub, projects, tasks, calculator, auth), interaction/a11y rules,
+  do/don't checklist, portal-parity table, implementation index, change log. The four stale MUI-era docs now
+  point to it; `CLAUDE.md` § UI points to it and requires it be updated with any UI change.
+- **Same UI/UX on every surface** (user request: identity, SysDeX, ConnectDeX, company portal, client,
+  contractor, third-party): `lib/shell/nav-data.ts` now also defines portal sheet sets (`ID`/`CX`/`SX`/`CL`/
+  `CT`/`CB`, sign-in family `00…`), so `SheetMark` and the floating footer work everywhere. The three platform
+  portals' shared layout and the client/contractor/collaborator layouts gained the footer + AORMS mark, an
+  `InstructionsScope`, and an **Instructions toggle** in the header (same cookie as the Hub's side-panel entry,
+  so the preference follows the person); `PortalHeaderName` dropped its header logo to match the Hub. All six
+  sign-in-family pages (login, signup, set/reset password, forgot password, studio picker) share a new
+  `AuthHead` and a centred 30rem column — which also fixed the old Grid/Column version sitting flush
+  top-left. 31 portal pages gained "The result" lines; SysDeX dashboard KPI rows carry the rail marker;
+  platform pages get 4.5rem top clearance for the sheet mark.
+- **Verified:** `tsc`, full `next build`, and the platform pages rendered in headless Chromium (login, signup,
+  forgot-password, licences, admin, support): correct sheet marks (`AORMS-00.01`, `AORMS-ID-02`, `AORMS-SX-01`),
+  floating footers, "The result" lines, toggle present where a header exists, no horizontal overflow, no
+  console errors. **Not verified:** the Client/Contractor/Collaborator layouts (role-gated; no test sessions) —
+  they mirror the same three-line change, and the SysDeX/Identity pages behind sign-in. Parity gaps by design:
+  portals without KPI rows have no rail; sign-in pages have no header so no toggle (they honour the cookie).
+
 ## Support & questions
 
 - **Deploying / what's live now?** See Status and What's live now above,

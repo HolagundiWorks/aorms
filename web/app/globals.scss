@@ -1612,7 +1612,8 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 // structure entirely, already handled correctly via real `cds--content`
 // usage there).
 .cds--header ~ .cds--css-grid {
-  margin-block-start: 3rem;
+  // 3rem clears the fixed header; the extra 1.5rem gives the sheet mark room (2026-10-01).
+  margin-block-start: 4.5rem;
 }
 
 // AORMS Platform portal nav unreachable below Carbon's `lg` breakpoint
