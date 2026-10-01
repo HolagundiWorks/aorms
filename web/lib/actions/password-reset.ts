@@ -18,7 +18,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "../supabase/server";
 import { roleHome } from "../auth/role-home";
-import { checkRateLimit, rateLimitIdentifier } from "../security/rate-limit";
+import { checkRateLimitShared, rateLimitIdentifier } from "../security/rate-limit";
 import { validatePassword } from "../security/password-policy";
 import { toSafeErrorMessage } from "../security/safe-error";
 import { verifyTurnstileToken } from "../security/turnstile";
@@ -34,7 +34,7 @@ export async function requestPasswordReset(_prev: PasswordActionState, formData:
   // Rate-limited per IP+email — a reset-request flood is both a spam
   // vector (unsolicited emails to a real address) and an enumeration
   // probe if timing/response ever differed by account existence.
-  const rateLimit = checkRateLimit("requestPasswordReset", `${await rateLimitIdentifier()}:${email.toLowerCase()}`, {
+  const rateLimit = await checkRateLimitShared("requestPasswordReset", `${await rateLimitIdentifier()}:${email.toLowerCase()}`, {
     max: 5,
     windowMs: 60 * 60 * 1000,
   });

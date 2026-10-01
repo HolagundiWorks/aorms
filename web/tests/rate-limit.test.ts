@@ -21,3 +21,15 @@ describe("checkRateLimit", () => {
     expect(checkRateLimit("x", a, opts).ok).toBe(false);
   });
 });
+
+import { checkRateLimitShared } from "../lib/security/rate-limit";
+
+describe("checkRateLimitShared", () => {
+  it("falls back to the in-memory limiter when the shared store is unreachable", async () => {
+    // No Supabase env in the test process → the RPC path throws → fallback applies.
+    const id = `s-${Math.random()}`;
+    const opts = { max: 1, windowMs: 60_000 };
+    expect((await checkRateLimitShared("fallback", id, opts)).ok).toBe(true);
+    expect((await checkRateLimitShared("fallback", id, opts)).ok).toBe(false);
+  });
+});

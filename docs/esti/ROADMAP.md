@@ -7294,7 +7294,7 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 **P1 — correctness and scale**
 - [x] Materials: escape, bound, page · [x] `pg_trgm` + category indexes (0043, applied) · [ ] SQL-side nearest-first ranking
 - [x] SysDeX Logs/Payments paged · [ ] Accounts/Studios/Companies/Licences/Helpdesk paged + server search
-- [ ] Shared rate-limit store (before >1 instance)
+- [x] Shared rate-limit store: `public.rate_limit_buckets` + `rate_limit_hit()` (0045, applied, live-tested in a rolled-back block); `checkRateLimitShared` used by all 4 auth callers, falls back to in-memory if the store is unreachable
 - [ ] Split `lib/actions/platform.ts` (1,183 lines) by domain; test that every action gates
 - [ ] Collapse sequential service-role waterfalls (identity / materials / studio pages)
 - [ ] Error monitoring + Razorpay-webhook failure alerting

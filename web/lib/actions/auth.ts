@@ -7,7 +7,7 @@ import { createServiceRoleClient } from "../supabase/service";
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 import { roleHome } from "../auth/role-home";
-import { checkRateLimit, rateLimitIdentifier } from "../security/rate-limit";
+import { checkRateLimitShared, rateLimitIdentifier } from "../security/rate-limit";
 import { stampSessionStart, clearSessionStart } from "../supabase/session-cap";
 
 export type AuthActionState = { error: string } | null;
@@ -64,7 +64,7 @@ export async function signIn(_prev: AuthActionState, formData: FormData): Promis
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
-  const rateLimit = checkRateLimit("signIn", `${await rateLimitIdentifier()}:${email.toLowerCase()}`, {
+  const rateLimit = await checkRateLimitShared("signIn", `${await rateLimitIdentifier()}:${email.toLowerCase()}`, {
     max: 8,
     windowMs: 15 * 60 * 1000,
   });
