@@ -126,7 +126,7 @@ export default async function LandingPage() {
 
   return (
     <MotionRoot>
-    <div style={{ minHeight: "100vh", background: "var(--cds-background)", color: "var(--cds-text-primary)" }}>
+    <div className="aorms-landing" style={{ minHeight: "100vh", background: "var(--cds-background)", color: "var(--cds-text-primary)" }}>
       <LandingHeader />
       {/* PageSpeed Insights accessibility audit (2026-09-23 report):
           "Document does not have a main landmark" — this page previously had
@@ -147,12 +147,12 @@ export default async function LandingPage() {
             TodaysBriefingPanel component/data — this only changes the
             hero's own column layout to match how that panel is shown
             there (full Grid width, one clean horizontal row). */}
-        <section id="top" style={{ padding: "clamp(2.5rem, 5vw, 4rem) 0" }}>
+        <section id="top" className="aorms-land-hero" style={{ padding: "clamp(2.5rem, 5vw, 4rem) 0" }}>
           <Grid>
             <Column sm={4} md={8} lg={11}>
               <MotionEnter step={0}>
                 <p
-                  className="cds--type-productive-heading-01"
+                  className="cds--type-productive-heading-01 aorms-land-eyebrow"
                   style={{ letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
                 >
                   {AORMS_PLATFORM.expansion.toUpperCase()}
@@ -195,7 +195,7 @@ export default async function LandingPage() {
           <Grid>
             <Column sm={4} md={8} lg={10}>
               <p
-                className="cds--type-productive-heading-01"
+                className="cds--type-productive-heading-01 aorms-land-eyebrow"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
               >
                 {PROBLEM.eyebrow}
@@ -296,7 +296,7 @@ export default async function LandingPage() {
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
               <p
-                className="cds--type-productive-heading-01"
+                className="cds--type-productive-heading-01 aorms-land-eyebrow"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
               >
                 {PULSE_SECTION.eyebrow}
@@ -346,7 +346,7 @@ export default async function LandingPage() {
           <Grid>
             <Column sm={4} md={4} lg={7}>
               <p
-                className="cds--type-productive-heading-01"
+                className="cds--type-productive-heading-01 aorms-land-eyebrow"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
               >
                 {FEE_RECOVERY.eyebrow}
@@ -382,7 +382,7 @@ export default async function LandingPage() {
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
               <p
-                className="cds--type-productive-heading-01"
+                className="cds--type-productive-heading-01 aorms-land-eyebrow"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
               >
                 {REVISION_MANAGEMENT.eyebrow}
@@ -411,7 +411,7 @@ export default async function LandingPage() {
           <Grid>
             <Column sm={4} md={8} lg={7}>
               <p
-                className="cds--type-productive-heading-01"
+                className="cds--type-productive-heading-01 aorms-land-eyebrow"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
               >
                 {PROJECT_RECORD.eyebrow}
@@ -448,7 +448,7 @@ export default async function LandingPage() {
           <Grid>
             <Column sm={4} md={8} lg={10}>
               <p
-                className="cds--type-productive-heading-01"
+                className="cds--type-productive-heading-01 aorms-land-eyebrow"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
               >
                 {AUTOMATION_SECTION.eyebrow}
@@ -490,7 +490,7 @@ export default async function LandingPage() {
           <Grid>
             <Column sm={4} md={8} lg={7}>
               <p
-                className="cds--type-productive-heading-01"
+                className="cds--type-productive-heading-01 aorms-land-eyebrow"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
               >
                 {ESTI_SECTION.eyebrow}
@@ -558,7 +558,7 @@ export default async function LandingPage() {
           <Grid>
             <Column sm={4} md={8} lg={10} style={{ marginBottom: "1.5rem" }}>
               <p
-                className="cds--type-productive-heading-01"
+                className="cds--type-productive-heading-01 aorms-land-eyebrow"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
               >
                 {CONTROL_SECTION.eyebrow}
@@ -677,7 +677,7 @@ export default async function LandingPage() {
           <Grid>
               <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
                 <p
-                  className="cds--type-productive-heading-01"
+                  className="cds--type-productive-heading-01 aorms-land-eyebrow"
                   style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
                 >
                   From the Blog
@@ -781,7 +781,7 @@ export default async function LandingPage() {
           <Grid>
             <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
               <p
-                className="cds--type-productive-heading-01"
+                className="cds--type-productive-heading-01 aorms-land-eyebrow"
                 style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
               >
                 RFI
