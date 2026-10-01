@@ -7288,8 +7288,8 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 - [ ] Make the `web` job a required check on `main` (repo setting — owner)
 - [ ] Add ESLint config to `web/` and add lint to the CI job
 - [ ] Staff MFA (Supabase TOTP, require `aal2` on `/admin/*`)
-- [ ] Activity-log gaps: triggers for tier/level/admin_role/pricing/staff changes + `actor_account_id`
-- [x] Default-privileges migration written (0041) · [ ] apply live + verify
+- [x] Activity-log gaps: migration 0042 applied live — triggers for company tier, account level, plan pricing, platform_staff + `actor_auth_id` (auth.uid(); NULL for service-role admin writes). Tier/level/pricing triggers verified with a rolled-back live test; staff trigger not live-tested. [ ] Pass verified staff id from admin Server Actions so service-role writes get an actor; [ ] show actor on SysDeX Logs
+- [x] Default-privileges migration 0041 — applied live to `aorms-platform` 2026-10-01, `pg_default_acl` verified (postgres/public + connectdex no longer grant to PUBLIC/anon/authenticated)
 
 **P1 — correctness and scale**
 - [x] Materials: escape, bound, page · [ ] `pg_trgm` index + SQL-side ranking

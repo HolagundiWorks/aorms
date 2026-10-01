@@ -11,8 +11,7 @@
 --   grant execute on function <schema>.<fn>(<args>) to authenticated;
 -- Trigger functions need nothing (triggers run as the function owner).
 --
--- NOT YET APPLIED to the live `aorms-platform` project — apply via the Management
--- API and verify with:
+-- APPLIED 2026-10-01 to the live `aorms-platform` project and verified with:
 --   select defaclnamespace::regnamespace, defaclacl from pg_default_acl;
 -- then create a throwaway function and confirm `proacl` has no anon/authenticated.
 alter default privileges for role postgres in schema public
