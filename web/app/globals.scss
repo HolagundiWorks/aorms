@@ -1556,14 +1556,14 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 
 @media (max-width: 65.9375rem) {
   div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) {
-    display: flex !important;
-    flex-wrap: wrap;
-    gap: 1rem 2rem !important;
+    // Two-up numerals instead of one tall column (2026-10-01 phone pass).
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.5rem !important;
   }
 
   div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) > * {
-    flex: 0 0 auto;
-    min-inline-size: 7.5rem;
+    min-inline-size: 0;
   }
 }
 
@@ -2041,4 +2041,41 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 .cds--header .aorms-sheet-no,
 .cds--side-nav .aorms-sheet-no {
   color: #8d8d8d;
+}
+
+// Phone/tablet pass (2026-10-01).
+@media (max-width: 42rem) {
+  // Carbon's own `.cds--header__name { display: flex }` ties on specificity and
+  // wins by source order, so the org name stayed visible and pushed the header
+  // actions (ESTI, calculator, user menu) off-screen. Qualify the selector.
+  .cds--header .aorms-header-org,
+  .cds--header .aorms-header-user-text {
+    display: none;
+  }
+
+  // The faint sheet reference text collides with page content on a phone.
+  .aorms-sheet-footer {
+    display: none;
+  }
+
+  // Keep the last row clear of the fixed AORMS mark / Ask-Esti button.
+  .cds--content {
+    padding-block-end: 5rem;
+  }
+}
+
+@media (max-width: 65.9375rem) {
+  // KPI numerals sit two-up instead of one tall column; the brief spans both.
+  .aorms-bigstat-row.aorms-rail-kpis .aorms-bigstat__value {
+    font-size: clamp(1.5rem, 7vw, 2.25rem);
+    overflow-wrap: anywhere;
+  }
+
+  .aorms-bigstat-row.aorms-rail-kpis > .aorms-rail-brief {
+    grid-column: 1 / -1;
+  }
+
+  .aorms-rail-kpis > .cds--tile {
+    inline-size: auto !important;
+  }
 }

@@ -507,6 +507,13 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-01 (mobile)** — checked at 360/390/768px: (1) header actions (ESTI,
+  calculator, Pomodoro, user menu) were pushed off-screen because Carbon's
+  `.cds--header__name` out-ranked `.aorms-header-org` — selector now qualified, so the
+  org name hides ≤42rem and the actions show; (2) KPI numerals two-up (fluid size)
+  instead of one tall column below the rail breakpoint; (3) floating sheet footer hidden
+  ≤42rem and content gets bottom padding so the fixed mark/Ask-Esti button never cover
+  the last row. No horizontal page overflow at any tested width.
 - **2026-10-01 (WCAG 2.2 AA audit)** — axe-core (wcag2a/aa, 2.1, 2.2 AA, best-practice)
   run against the Hub shell (desktop + 390px, rail hovered), Blog and Legal.
   Found and fixed: (1) **orange text 3.3:1 on white** → new `--aorms-orange-text`
