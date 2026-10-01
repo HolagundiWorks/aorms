@@ -507,6 +507,10 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-01 (black chrome)** — shell header and side nav render in Carbon's `g100`
+  theme (`#161616`, = `--aorms-ink`) on every shell (Hub, Platform, portals); page
+  content stays white. Done by re-scoping theme tokens on `.cds--header` /
+  `.cds--side-nav`, so children adapt automatically.
 - **2026-10-01 (landing)** — public landing page (`app/page.tsx`) adopts the same
   language via `.aorms-landing` (`globals.scss`): numbered section eyebrows
   (`00 /`, `01 /` … by CSS counter), ink rules between sections, light headings,

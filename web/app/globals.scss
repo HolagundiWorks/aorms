@@ -2022,3 +2022,19 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
     border-block-start: 1px solid var(--aorms-ink) !important;
   }
 }
+
+// Shell chrome is black (2026-10-01): header and side nav render in Carbon's
+// g100 theme (#161616 = --aorms-ink), page content stays white. Re-scoping the
+// theme tokens (not hard-coded colours) keeps every Carbon child — icons,
+// hover/focus states, popovers anchored in the header — legible automatically.
+.cds--header,
+.cds--side-nav {
+  @include theme.theme(themes.$g100);
+  background-color: var(--aorms-ink);
+  border-color: #393939;
+}
+
+.cds--header .aorms-sheet-no,
+.cds--side-nav .aorms-sheet-no {
+  color: #8d8d8d;
+}
