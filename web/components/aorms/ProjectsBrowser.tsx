@@ -161,7 +161,7 @@ export function ProjectsBrowser({ projects, initialView }: { projects: BrowserPr
           </div>
           <div className="aorms-pcard__cap">
             <span className="aorms-project-card__ref">{p.ref}</span>
-            <span className="aorms-project-card__phase" style={{ color: p.status === "ACTIVE" ? "var(--aorms-orange)" : undefined }}>
+            <span className="aorms-project-card__phase" style={{ color: p.status === "ACTIVE" ? "var(--aorms-orange-text)" : undefined }}>
               {STATUS_LABEL[p.status] ?? p.status}
             </span>
           </div>

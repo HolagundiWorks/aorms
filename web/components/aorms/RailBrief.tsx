@@ -10,11 +10,11 @@
 export function RailBrief({ children, result }: { children: React.ReactNode; result?: string }) {
   return (
     <div className="aorms-rail-brief aorms-instruction">
-      <h3 className="aorms-bigstat__label">Brief</h3>
+      <p className="aorms-bigstat__label">Brief</p>
       <p>{children}</p>
       {result && (
         <>
-          <h3 className="aorms-bigstat__label aorms-rail-brief__result-label">The result</h3>
+          <p className="aorms-bigstat__label aorms-rail-brief__result-label">The result</p>
           <p>{result}</p>
         </>
       )}

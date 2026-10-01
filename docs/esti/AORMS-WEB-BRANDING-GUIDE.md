@@ -507,6 +507,15 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-01 (WCAG 2.2 AA audit)** — axe-core (wcag2a/aa, 2.1, 2.2 AA, best-practice)
+  run against the Hub shell (desktop + 390px, rail hovered), Blog and Legal.
+  Found and fixed: (1) **orange text 3.3:1 on white** → new `--aorms-orange-text`
+  `#c2310a` (5.6:1) for every orange *text* use; `--aorms-orange` stays for fills,
+  rules and borders only; (2) **floating sheet footer** used `opacity: .5` (3.4:1) →
+  solid `#6f6f6f` (5.0:1), same look; it is now a `<footer>` landmark; (3) **heading
+  order** — rail "Brief"/"The result" labels are `<p>`, Pulse hub/brief and task
+  column/month labels are `<h2>`. Result: 0 violations. Rule going forward: never
+  use `--aorms-orange` for text; never fade text with `opacity`.
 - **2026-10-01 (black chrome)** — shell header and side nav render in Carbon's `g100`
   theme (`#161616`, = `--aorms-ink`) on every shell (Hub, Platform, portals); page
   content stays white. Done by re-scoping theme tokens on `.cds--header` /

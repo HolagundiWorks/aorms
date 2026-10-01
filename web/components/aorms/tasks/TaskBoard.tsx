@@ -443,7 +443,7 @@ export function TaskBoard({
                 }}
               >
                 <header className="aorms-kanban__head">
-                  <h3>{col.label}</h3>
+                  <h2>{col.label}</h2>
                   <span className="aorms-kanban__count">
                     {String(items.length).padStart(2, "0")}
                     {hours > 0 && <em>{Math.round(hours)}h</em>}
@@ -631,7 +631,7 @@ function CalendarView({
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
         <Button kind="ghost" size="sm" hasIconOnly renderIcon={ChevronLeft} iconDescription="Previous month" onClick={() => shiftMonth(-1)} />
-        <h3 className="cds--type-heading-compact-02" style={{ minWidth: "9rem", textAlign: "center" }}>{label}</h3>
+        <h2 className="cds--type-heading-compact-02" style={{ minWidth: "9rem", textAlign: "center" }}>{label}</h2>
         <Button kind="ghost" size="sm" hasIconOnly renderIcon={ChevronRight} iconDescription="Next month" onClick={() => shiftMonth(1)} />
         <Button kind="tertiary" size="sm" onClick={() => setMonth(today.slice(0, 7))}>Today</Button>
       </div>
