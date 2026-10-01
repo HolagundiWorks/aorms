@@ -179,6 +179,7 @@ nav has no sheet (no mark, no footer).
 ```
 SHEET MARK            AORMS-04.03 / SITE / PROGRESS REPORTS   ── 1px ink rule
 Title                 + actions (right)
+Description           how-to note — only on pages with no rail (otherwise it is the rail's Brief)
 THE RESULT  …         outcome line (instruction)
 ─────────────────
 [ KPI rail | page body ]        ← § 7
