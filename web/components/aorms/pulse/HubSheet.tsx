@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "../../../lib/supabase/server";
+import { getHubData } from "../../../lib/pulse/hub-data";
 
 /**
  * 00 / THE OFFICE — the Hub as an architect's working sheet rather than a KPI
@@ -23,34 +23,8 @@ const PRIORITY_RANK: Record<string, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2,
 type Attention = { key: string; ref: string; text: string; reason: string; href: string };
 
 export async function HubSheet() {
-  const supabase = await createClient();
-  const now = new Date();
-  const today = now.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD in IST
-  const dateLabel = now
-    .toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "long", year: "numeric" })
-    .toUpperCase();
-
-  const [{ data: projects }, { data: openTasks }, { data: meetings }, { data: clientReview }, { count: approvalsSent }, { count: openSnags }] =
-    await Promise.all([
-      supabase.from("project_offices").select("id, ref, status").is("archived_at", null),
-      supabase.from("tasks").select("id, title, status, priority, due_date, project_id").neq("status", "DONE").limit(1000),
-      supabase.from("moms").select("id, title, project_id").eq("meeting_date", today),
-      supabase.from("decisions").select("id, title, project_id").eq("state", "CLIENT_REVIEW").limit(20),
-      supabase.from("approvals").select("id", { count: "exact", head: true }).eq("status", "SENT"),
-      supabase.from("snags").select("id", { count: "exact", head: true }).eq("status", "OPEN"),
-    ]);
-
-  const projectRows = projects ?? [];
-  const refOf = new Map(projectRows.map((p) => [p.id, p.ref]));
-  const byStatus = new Map<string, number>();
-  for (const p of projectRows) byStatus.set(p.status, (byStatus.get(p.status) ?? 0) + 1);
-
-  const tasks = openTasks ?? [];
-  const dueToday = tasks.filter((t) => t.due_date === today).length;
-  const overdue = tasks.filter((t) => t.due_date && t.due_date < today);
-  const blocked = tasks.filter((t) => t.status === "BLOCKED");
-  const meetingRows = meetings ?? [];
-  const decisionRows = clientReview ?? [];
+  const { dateLabel, today, projectRows, refOf, byStatus, dueToday, overdue, blocked, meetings: meetingRows, decisions: decisionRows, approvalsSent, openSnags } =
+    await getHubData();
 
   const byPriority = (a: { priority: string }, b: { priority: string }) => (PRIORITY_RANK[a.priority] ?? 9) - (PRIORITY_RANK[b.priority] ?? 9);
   const attention: Attention[] = [
@@ -82,8 +56,8 @@ export async function HubSheet() {
     ["Tasks due", dueToday, "/tasks?date=today"],
     ["Overdue", overdue.length, "/tasks?date=overdue"],
     ["Decisions with client", decisionRows.length],
-    ["Approvals awaiting", approvalsSent ?? 0, "/approvals"],
-    ["Open snags", openSnags ?? 0, "/snags"],
+    ["Approvals awaiting", approvalsSent, "/approvals"],
+    ["Open snags", openSnags, "/snags"],
   ];
 
   return (

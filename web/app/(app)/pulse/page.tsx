@@ -21,6 +21,8 @@ import { hasRank } from "../../../lib/auth/rank";
 import { KpiTile as Kpi, type KpiStatus } from "../../../components/aorms/KpiTile";
 import { BigStat } from "../../../components/aorms/BigStat";
 import { HubSheet } from "../../../components/aorms/pulse/HubSheet";
+import { PulseBrief } from "../../../components/aorms/pulse/PulseBrief";
+import { Suspense } from "react";
 import { ProjectCard } from "../../../components/aorms/ProjectCard";
 import { MotionRoot } from "../../../components/aorms/motion/MotionRoot";
 import { MotionStagger } from "../../../components/aorms/motion/MotionStagger";
@@ -767,8 +769,11 @@ export default async function PulsePage() {
       <Column sm={4} md={8} lg={16}>
         <PageHeader
           title="Pulse"
-          result="A clear picture of the office today."
-          description="What needs your attention today — office KPIs, pending approvals, and ESTI's deterministic task-prediction scoring, all computed from real project data."
+          summary={
+            <Suspense fallback="Gathering today's brief…">
+              <PulseBrief />
+            </Suspense>
+          }
           actions={<RecomputeButton />}
         />
 

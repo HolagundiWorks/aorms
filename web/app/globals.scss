@@ -1475,6 +1475,14 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
   }
 }
 
+.aorms-summary {
+  max-inline-size: 48rem;
+  margin-block-start: 0.25rem;
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.4;
+}
+
 // One-line alert strip above the board.
 .aorms-alertline {
   display: flex;
