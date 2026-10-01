@@ -1,31 +1,20 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button, Column, Form, Grid, InlineNotification, PasswordInput, Stack, TextInput } from "@carbon/react";
+import { Button, Form, InlineNotification, PasswordInput, Stack, TextInput } from "@carbon/react";
 import { ArrowRight } from "@carbon/icons-react";
 import NextLink from "next/link";
 import { platformSignUp, signInWithGoogle, type PlatformActionState } from "../../../lib/actions/platform";
 import { TurnstileWidget } from "../../../components/aorms/security/TurnstileWidget";
+import { AuthHead } from "../../../components/aorms/AuthHead";
 
 export default function PlatformSignUpPage() {
   const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(platformSignUp, null);
 
   return (
-    <Grid>
-      <Column sm={4} md={6} lg={8} style={{ margin: "0 auto" }}>
+    <div className="aorms-auth">
         <Stack gap={6}>
-          <div>
-            {/* Link back to the landing page (2026-09-10) — same gap fixed
-                on /login and /platform-login, for consistency. */}
-            <NextLink href="/" aria-label="AORMS home" style={{ display: "inline-block", marginBottom: "1.5rem" }}>
-              {/* Plain <img>, not next/image — a fixed brand asset. */}
-              <img src="/aorms-logo.png" alt="AORMS" style={{ height: "28px", width: "auto" }} />
-            </NextLink>
-            <h1 className="cds--type-heading-04">Create your AORMS Platform account</h1>
-            <p className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
-              A portable personal account — one AORMS-U- handle across every studio and company you work with.
-            </p>
-          </div>
+          <AuthHead title={<>Create your AORMS Platform account</>} description={<>A portable personal account — one AORMS-U- handle across every studio and company you work with.</>} result="One identity, portable across every studio you work with." />
           {/* Google sign-in also creates the account on first use — no
               separate "sign up with Google" step (docs/esti/AORMS-V2-
               DEVELOPER-GUIDELINES.md § 5). */}
@@ -65,7 +54,6 @@ export default function PlatformSignUpPage() {
           </Stack>
         </Form>
         </Stack>
-      </Column>
-    </Grid>
+      </div>
   );
 }

@@ -361,6 +361,11 @@ a record of the old `frontend/`'s own unfinished migration, not as
 > not approved. "Architectural Operating System" names this *design language*;
 > the public tagline stays "Architecture Practice Operating System" (already
 > live in title/OG/Twitter/hero — do not rename without checking SEO).
+> **The full, current UI/UX rulebook is [`docs/esti/AORMS-WEB-BRANDING-GUIDE.md`](docs/esti/AORMS-WEB-BRANDING-GUIDE.md)**
+> (tokens, sheet system, Instructions toggle, Pulse rail, tables, components, portal
+> parity, do/don't checklist). Read it before building or changing any `web/` screen;
+> keep it updated in the same pass as any UI change. The rules apply identically to the
+> Office Hub, Identity/ConnectDeX/SysDeX, and the Client/Contractor/Collaborator portals.
 
 **Starter template:** new Carbon screens follow the recipe in CARBON-MIGRATION.md
 § 3 Wave 3 (tranche 1):

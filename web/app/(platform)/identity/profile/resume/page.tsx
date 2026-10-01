@@ -45,7 +45,7 @@ export default async function IdentityResumePage() {
         <IdentityPortalHeader />
         <Grid>
           <Column sm={4} md={8} lg={8}>
-            <PageHeader title="Resume / CV" description="Sign in to the AORMS Platform first." />
+            <PageHeader title="Resume / CV" result="A CV that stays current without effort." description="Sign in to the AORMS Platform first." />
             <NextLink href="/identity" className="cds--link">
               Back to AORMS Identity →
             </NextLink>
@@ -68,7 +68,7 @@ export default async function IdentityResumePage() {
         <IdentityPortalHeader />
         <Grid>
           <Column sm={4} md={8} lg={8}>
-            <PageHeader title="Resume / CV" description="This login isn't an AORMS Identity account." />
+            <PageHeader title="Resume / CV" result="A CV that stays current without effort." description="This login isn't an AORMS Identity account." />
           </Column>
         </Grid>
       </>
@@ -103,7 +103,7 @@ export default async function IdentityResumePage() {
         <Column sm={4} md={8} lg={10}>
           <div className="aorms-print-hide">
             <PageHeader
-              title="Resume / CV"
+              title="Resume / CV" result="A CV that stays current without effort."
               description="A read-only, printable view of your AORMS Identity profile."
               actions={
                 <Stack gap={4} orientation="horizontal">

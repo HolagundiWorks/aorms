@@ -20,7 +20,7 @@ export default async function CollabPortalHomePage() {
     <Grid>
       <Column sm={4} md={8} lg={16}>
         <PageHeader
-          title="Your engagements"
+          title="Your engagements" result="Information shared without chasing."
           description="Projects you're engaged on, agreed fee, and payments received."
         />
 

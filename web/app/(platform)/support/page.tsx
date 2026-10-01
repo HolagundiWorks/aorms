@@ -20,7 +20,7 @@ export default function SupportPage() {
           <img src="/aorms-logo.png" alt="AORMS" style={{ height: "28px", width: "auto" }} />
         </NextLink>
         <PageHeader
-          title="Contact HelpDeX"
+          title="Contact HelpDeX" result="A question answered."
           description="Tell us what's going on — a platform admin will review your request and follow up by email."
         />
         <SupportTicketForm />

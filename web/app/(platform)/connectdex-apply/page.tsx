@@ -17,7 +17,7 @@ export default function ConnectDexApplyPage() {
       <Grid>
         <Column sm={4} md={6} lg={8} style={{ margin: "0 auto" }}>
           <PageHeader
-            title="Apply to become a ConnectDeX Partner"
+            title="Apply to become a ConnectDeX Partner" result="A supplier profile specifiers can trust."
             description="Tell us about your business — a platform admin will review your application and follow up by email."
           />
           <ConnectDexApplyForm />

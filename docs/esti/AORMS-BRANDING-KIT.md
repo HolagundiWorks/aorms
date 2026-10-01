@@ -1,5 +1,7 @@
 # AORMS Branding Kit
 
+> **⚠ Superseded for `web/` — current UI/UX rules for `web/` (2026-10-01):** [`AORMS-WEB-BRANDING-GUIDE.md`](AORMS-WEB-BRANDING-GUIDE.md) — the old MUI/Urbanist/neumorphic language below does not apply to `web/`.
+
 > **⚠️ Live token values now ship from code (2026-07):** the canonical, executable
 > source of truth for colour/type/radius/surfaces is
 > **[`src/tokens.ts`](../../src/tokens.ts)**

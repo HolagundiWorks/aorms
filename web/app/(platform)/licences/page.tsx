@@ -130,7 +130,7 @@ export default async function LicencesPage() {
         <Grid>
           <Column sm={4} md={8} lg={8}>
             <PageHeader
-              title="Licence Management"
+              title="Licence Management" result="A licence position you can act on."
               description="Link your AORMS Identity first — licences belong to studios you're a member of."
             />
             <NextLink href="/identity">Go to My AORMS Identity →</NextLink>
@@ -181,7 +181,7 @@ export default async function LicencesPage() {
       <IdentityPortalHeader />
       <Grid>
       <Column sm={4} md={8} lg={10}>
-        <PageHeader title="Licence Management" description="Plan, seats, and expiry for every studio you belong to." />
+        <PageHeader title="Licence Management" result="A licence position you can act on." description="Plan, seats, and expiry for every studio you belong to." />
 
         <Stack gap={5}>
           {(memberships ?? []).map((m) => {

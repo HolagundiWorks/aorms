@@ -121,7 +121,7 @@ export default async function MaterialsPage({
       <Grid>
       <Column sm={4} md={8} lg={12}>
         <PageHeader
-          title="Material Catalogue"
+          title="Material Catalogue" result="Materials specifiers can find and compare."
           description={
             <>
               Browse products from every supplier Company on the AORMS Platform.

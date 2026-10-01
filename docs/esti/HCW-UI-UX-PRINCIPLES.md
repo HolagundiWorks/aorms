@@ -7,6 +7,8 @@
 > neumorphism, glass, or soft-surface styling. This document describes
 > the retired kit's own design language and does not apply to `web/`.
 > Kept for historical reference only.
+>
+> **Current UI/UX rules for `web/` (2026-10-01):** [`AORMS-WEB-BRANDING-GUIDE.md`](AORMS-WEB-BRANDING-GUIDE.md) — the canonical, up-to-date guide.
 
 **Human Centric Works** (*HCW*) is the product UX philosophy behind **HCW-UI-Kit**
 (`@hcw/ui-kit`). This document is the **canonical UX authority** — *why* we build

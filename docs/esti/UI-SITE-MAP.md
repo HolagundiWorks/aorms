@@ -7,6 +7,8 @@
 > neumorphism, glass, or soft-surface styling. This document describes
 > the retired kit's own design language and does not apply to `web/`.
 > Kept for historical reference only.
+>
+> **Current UI/UX rules for `web/` (2026-10-01):** [`AORMS-WEB-BRANDING-GUIDE.md`](AORMS-WEB-BRANDING-GUIDE.md) — the canonical, up-to-date guide.
 
 **Status:** Canonical inventory · **Updated:** 2026-08-09 · **Wave 1–8 chrome + UX audit W1–W2:** closed  
 **Canon:** [PAGE-STRUCTURE.md](PAGE-STRUCTURE.md) · [HCW-UI-KIT.md](HCW-UI-KIT.md) · [HCW-UX.md](../HCW-UX.md) · [AORMS-SURFACE-URLS.md](AORMS-SURFACE-URLS.md)

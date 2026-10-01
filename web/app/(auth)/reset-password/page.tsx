@@ -7,6 +7,7 @@ import { useActionState } from "react";
 import { Button, Form, InlineNotification, PasswordInput, Stack } from "@carbon/react";
 import { ArrowRight } from "@carbon/icons-react";
 import { updatePassword, type PasswordActionState } from "../../../lib/actions/password-reset";
+import { AuthHead } from "../../../components/aorms/AuthHead";
 
 /**
  * The completion half of both the recovery flow (§22) and invite
@@ -24,17 +25,9 @@ function ResetPasswordForm() {
   return (
     <Form action={formAction}>
       <Stack gap={6}>
-        <div>
-          <Link href="/" aria-label="AORMS home">
-            <img src="/aorms-logo.png" alt="AORMS" style={{ height: "28px", width: "auto", marginBottom: "1.5rem" }} />
-          </Link>
-          <h1 className="cds--type-heading-04">{isInvite ? "Set your password" : "Choose a new password"}</h1>
-          <p className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
-            {isInvite
+        <AuthHead title={<>{isInvite ? "Set your password" : "Choose a new password"}</>} description={<>{isInvite
               ? "Welcome to AORMS — set a password to finish activating your account."
-              : "Enter a new password for your AORMS account."}
-          </p>
-        </div>
+              : "Enter a new password for your AORMS account."}</>} result="A new password and you are back in." />
 
         <PasswordInput id="password" name="password" labelText="New password" autoComplete="new-password" required minLength={8} />
         <PasswordInput

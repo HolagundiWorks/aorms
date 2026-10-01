@@ -32,7 +32,7 @@ export default async function AdminLicencesPage() {
       <SysDexPortalHeader />
       <Grid>
       <Column sm={4} md={8} lg={10}>
-        <PageHeader title="Licences" description="Every studio's licence — override plan, seats, or expiry directly." />
+        <PageHeader title="Licences" result="Every licence position clear." description="Every studio's licence — override plan, seats, or expiry directly." />
 
         <Stack gap={5}>
           {(licences ?? []).map((l) => {

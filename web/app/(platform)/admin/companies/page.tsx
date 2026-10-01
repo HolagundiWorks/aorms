@@ -79,7 +79,7 @@ export default async function AdminCompaniesPage() {
       <Grid>
         <Column sm={4} md={8} lg={16}>
           <PageHeader
-            title="Companies"
+            title="Companies" result="Every supplier company, accounted for."
             description="Every material/interior-supplier Company on the AORMS Platform, any onboarding status. For reviewing pending applications, see ConnectDeX instead."
           />
 

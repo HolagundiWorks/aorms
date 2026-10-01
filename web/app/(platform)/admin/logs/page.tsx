@@ -54,7 +54,7 @@ export default async function AdminLogsPage() {
       <SysDexPortalHeader />
       <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader title="Activity Log" description="Every recorded platform event, most recent first — up to the last 200." />
+        <PageHeader title="Activity Log" result="Every platform event on the record." description="Every recorded platform event, most recent first — up to the last 200." />
 
         <Table aria-label="Activity log" className="aorms-table-spaced">
           <TableHead>
