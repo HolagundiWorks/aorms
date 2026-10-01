@@ -56,7 +56,7 @@ export default async function SpecCatalogPage() {
               actions={canWrite ? <ContextPanelTrigger size="sm">New version</ContextPanelTrigger> : undefined}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

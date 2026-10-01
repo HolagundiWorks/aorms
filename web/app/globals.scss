@@ -684,51 +684,6 @@ a.cds--side-nav__link[aria-current="page"]::before {
   white-space: nowrap;
 }
 
-.aorms-titleblock {
-  margin-block-start: 4rem;
-  margin-inline-start: auto;
-  inline-size: min(22rem, 100%);
-  border: 1px solid var(--aorms-ink);
-  font-size: 0.6875rem;
-}
-
-.aorms-titleblock dl {
-  margin: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-.aorms-titleblock dl > div {
-  padding: 0.375rem 0.625rem;
-  border-block-end: 1px solid var(--aorms-rule);
-  border-inline-end: 1px solid var(--aorms-rule);
-}
-
-.aorms-titleblock dl > div:nth-child(2n) {
-  border-inline-end: 0;
-}
-
-.aorms-titleblock dl > div:nth-last-child(-n + 2) {
-  border-block-end: 0;
-}
-
-.aorms-titleblock dt {
-  font-size: 0.5625rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--cds-text-secondary);
-}
-
-.aorms-titleblock dd {
-  margin: 0;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  text-transform: uppercase;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 // Hub sheet (Pulse) — "00 / THE OFFICE": three ruled columns.
 .aorms-hub {
   margin-block-end: 2rem;
@@ -900,6 +855,200 @@ a.cds--side-nav__link[aria-current="page"]::before {
   text-transform: uppercase;
 }
 
+// Projects browser: image cards (name on hover) + lines + pins.
+.aorms-pbrowser__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-block-end: 1.25rem;
+}
+
+.aorms-pbrowser__heading {
+  margin-block-end: 0.75rem;
+  padding-block-end: 0.5rem;
+  border-block-end: 1px solid var(--aorms-rule);
+}
+
+.aorms-pcard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 1.5rem 1rem;
+}
+
+.aorms-pcard {
+  position: relative;
+  min-inline-size: 0;
+}
+
+.aorms-pcard__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.aorms-pcard__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--cds-layer);
+  border: 1px solid var(--aorms-rule);
+}
+
+.aorms-pcard__media > img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 240ms ease;
+}
+
+.aorms-pcard__plan {
+  inline-size: 100%;
+  block-size: 100%;
+  display: grid;
+  place-items: center;
+  padding: 0.75rem;
+  color: var(--aorms-ink);
+}
+
+// The name appears on hover / keyboard focus — kept in the DOM (opacity only)
+// so screen readers always get it.
+.aorms-pcard__veil {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  padding: 1rem;
+  background: linear-gradient(to top, rgba(22, 22, 22, 0.85), rgba(22, 22, 22, 0.15) 70%, transparent);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.aorms-pcard__link:hover .aorms-pcard__veil,
+.aorms-pcard__link:focus-visible .aorms-pcard__veil {
+  opacity: 1;
+}
+
+.aorms-pcard__link:hover .aorms-pcard__media > img,
+.aorms-pcard__link:focus-visible .aorms-pcard__media > img {
+  transform: scale(1.03);
+}
+
+.aorms-pcard__link:focus-visible {
+  outline: 2px solid var(--cds-focus);
+  outline-offset: 2px;
+}
+
+.aorms-pcard__name {
+  font-size: 1.125rem;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.aorms-pcard__meta {
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
+}
+
+.aorms-pcard__cap {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding-block-start: 0.5rem;
+}
+
+// Touch screens have no hover: show the name permanently.
+@media (hover: none) {
+  .aorms-pcard__veil {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aorms-pcard__media > img,
+  .aorms-pcard__veil {
+    transition: none;
+  }
+
+  .aorms-pcard__link:hover .aorms-pcard__media > img {
+    transform: none;
+  }
+}
+
+.aorms-pin {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--cds-icon-secondary);
+  cursor: pointer;
+}
+
+.aorms-pin:hover {
+  color: var(--aorms-ink);
+}
+
+.aorms-pin:focus-visible {
+  outline: 2px solid var(--cds-focus);
+}
+
+.aorms-pin.is-pinned {
+  color: var(--aorms-orange);
+}
+
+.aorms-pin--card {
+  position: absolute;
+  inset-block-start: 0.5rem;
+  inset-inline-end: 0.5rem;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--aorms-ink);
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.aorms-pin--card.is-pinned,
+.aorms-pcard:hover .aorms-pin--card,
+.aorms-pin--card:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .aorms-pin--card {
+    opacity: 1;
+  }
+}
+
+.aorms-pline__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.aorms-pline__thumb {
+  inline-size: 3rem;
+  block-size: 2.25rem;
+  flex: none;
+  background: var(--cds-layer);
+  border: 1px solid var(--aorms-rule);
+  overflow: hidden;
+}
+
+.aorms-pline__thumb > img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 // Module link row on the project hub.
 .aorms-module-links {
   display: grid;
@@ -950,6 +1099,443 @@ a.cds--side-nav__link[aria-current="page"]::before {
   align-items: center;
   gap: 0.75rem;
   margin-block-end: 1rem;
+}
+
+// ── Kanban rework (2026-09-30) ───────────────────────────────────────────
+// Full-width board; the team is a horizontal strip above it (was a cramped
+// right-hand column). Columns scroll on their own so the page doesn't.
+.aorms-people {
+  margin-block-end: 1rem;
+}
+
+.aorms-people__hint {
+  color: var(--cds-text-secondary);
+  margin-block-end: 0.5rem;
+}
+
+.aorms-people__row {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-block-end: 0.25rem;
+}
+
+.aorms-person {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 0.5rem;
+  align-items: center;
+  flex: 0 0 auto;
+  min-inline-size: 11.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--aorms-rule);
+  background: var(--cds-background);
+  cursor: pointer;
+  position: relative;
+}
+
+.aorms-person > .aorms-avatar,
+.aorms-person--drop > svg {
+  grid-row: 1 / span 2;
+}
+
+.aorms-person:hover {
+  border-color: var(--aorms-ink);
+}
+
+.aorms-person:focus-visible {
+  outline: 2px solid var(--cds-focus);
+  outline-offset: 1px;
+}
+
+.aorms-person.is-active {
+  border-color: var(--aorms-orange);
+  box-shadow: inset 0 0 0 1px var(--aorms-orange);
+}
+
+.aorms-person.is-over {
+  border-inline-start: 3px solid var(--cds-support-error);
+}
+
+.aorms-person.is-drop {
+  background: var(--aorms-orange-wash);
+  border-color: var(--aorms-orange);
+}
+
+.aorms-person--drop {
+  border-style: dashed;
+  cursor: default;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-person__text {
+  display: grid;
+  min-inline-size: 0;
+}
+
+.aorms-person__name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aorms-person__meta {
+  font-size: 0.6875rem;
+  color: var(--cds-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.aorms-person__bar {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 2px;
+  background: var(--aorms-rule);
+}
+
+.aorms-person__bar > span {
+  display: block;
+  block-size: 100%;
+  background: var(--aorms-ink);
+}
+
+.aorms-person.is-over .aorms-person__bar > span {
+  background: var(--cds-support-error);
+}
+
+.aorms-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  background: var(--aorms-ink);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.aorms-avatar--md {
+  inline-size: 2rem;
+  block-size: 2rem;
+}
+
+.aorms-avatar--sm {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  font-size: 0.5625rem;
+}
+
+.aorms-avatar.is-empty {
+  background: transparent;
+  border: 1px dashed var(--cds-border-strong-01);
+}
+
+.aorms-kanban {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.aorms-kanban__col {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  border-block-start: 2px solid var(--aorms-ink);
+  background: var(--cds-layer);
+}
+
+.aorms-kanban__col.is-drop {
+  outline: 2px dashed var(--aorms-orange);
+  outline-offset: -2px;
+  background: var(--aorms-orange-wash);
+}
+
+.aorms-kanban__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.75rem 0.75rem 0.5rem;
+}
+
+.aorms-kanban__head h3 {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.aorms-kanban__count {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.aorms-kanban__count em {
+  font-style: normal;
+  font-size: 0.6875rem;
+  color: var(--cds-text-secondary);
+  margin-inline-start: 0.5rem;
+}
+
+.aorms-kanban__body {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  padding: 0 0.5rem 0.5rem;
+  max-block-size: calc(100vh - 21rem);
+  min-block-size: 10rem;
+  overflow-y: auto;
+}
+
+.aorms-kanban__empty {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-tcard {
+  display: grid;
+  gap: 0.375rem;
+  padding: 0.625rem 0.75rem;
+  background: var(--cds-background);
+  border: 1px solid var(--aorms-rule);
+  border-inline-start-width: 3px;
+  border-inline-start-color: var(--aorms-rule);
+}
+
+.aorms-tcard:hover {
+  border-color: var(--aorms-ink);
+}
+
+.aorms-tcard--critical {
+  border-inline-start-color: var(--cds-support-error);
+}
+
+.aorms-tcard--high {
+  border-inline-start-color: var(--aorms-ink);
+}
+
+.aorms-tcard.has-alert {
+  border-inline-start-color: var(--cds-support-error);
+}
+
+.aorms-tcard.is-drop {
+  outline: 2px solid var(--cds-focus);
+}
+
+.aorms-tcard.is-done {
+  opacity: 0.65;
+}
+
+.aorms-tcard__top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.aorms-tcard__priority {
+  margin-inline-end: auto;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-tcard__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.aorms-tcard__meta {
+  font-size: 0.75rem;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-tcard__flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.aorms-tcard__foot {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-block-start: 0.375rem;
+  border-block-start: 1px solid var(--aorms-rule);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.aorms-tcard__due.is-overdue {
+  color: var(--cds-support-error);
+  font-weight: 600;
+}
+
+.aorms-tcard__hours {
+  color: var(--cds-text-secondary);
+}
+
+.aorms-tcard__foot .aorms-avatar {
+  margin-inline-start: auto;
+}
+
+@media (max-width: 42rem) {
+  .aorms-kanban {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .aorms-kanban__body {
+    max-block-size: none;
+  }
+}
+
+// ── Pulse layout on every screen (2026-09-30) ────────────────────────────
+// Any page whose KPI row carries `.aorms-rail-kpis` as a DIRECT child of its
+// content column gets the Pulse layout: the page header spans the top and the
+// KPI row becomes a left rail of large numerals beside the rest of the page.
+// Pure CSS via :has() — no per-page restructuring, and a page where the row is
+// nested deeper simply keeps its normal tile grid. Only the first KPI row on a
+// page becomes the rail. Below `lg` the rail is a wrapping row above the page.
+@media (min-width: 66rem) {
+  div:has(> .aorms-rail-kpis) {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    column-gap: 2rem;
+    align-items: start;
+  }
+
+  div:has(> .aorms-rail-kpis) > * {
+    grid-column: 2;
+    min-inline-size: 0;
+  }
+
+  div:has(> .aorms-rail-kpis) > :first-child:not(.aorms-rail-kpis) {
+    grid-column: 1 / -1;
+  }
+
+  div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) {
+    grid-column: 1;
+    grid-row: 2 / span 40;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 1.5rem !important;
+    margin: 0 !important;
+    position: sticky;
+    inset-block-start: 4rem;
+  }
+}
+
+// Rail tiles read as large numerals (same look as BigStat), not boxed tiles.
+div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) .cds--tile {
+  // !important: KpiTile sets its size/border inline.
+  inline-size: auto !important;
+  block-size: auto !important;
+  min-inline-size: 0 !important;
+  padding: 0.75rem 0 0 !important;
+  border: 0 !important;
+  border-block-start: 1px solid var(--aorms-ink) !important;
+  background: transparent !important;
+  gap: 0.25rem !important;
+}
+
+div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) .cds--tile p.cds--type-heading-03 {
+  font-size: 1.75rem;
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) .cds--tile p.cds--type-helper-text-01:not([class*="trend"]) {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+@media (max-width: 65.9375rem) {
+  div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 1rem 2rem !important;
+  }
+
+  div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rail-kpis) > * {
+    flex: 0 0 auto;
+    min-inline-size: 7.5rem;
+  }
+}
+
+.aorms-summary {
+  max-inline-size: 48rem;
+  margin-block-start: 0.25rem;
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.4;
+}
+
+// One-line alert strip above the board.
+.aorms-alertline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  padding: 0.5rem 0.75rem;
+  border-inline-start: 3px solid var(--cds-support-warning);
+  background: var(--cds-layer);
+  font-size: 0.8125rem;
+}
+
+.aorms-alertline.is-error {
+  border-inline-start-color: var(--cds-support-error);
+}
+
+.aorms-alertline strong {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+// Instructions toggle (side panel): when off, every "how to use" note —
+// page descriptions, "The result" lines, drag/drop hints — is hidden.
+[data-instructions="off"] .aorms-instruction {
+  display: none !important;
+}
+
+// Floating sheet footer beside the AORMS mark (replaces the old title block).
+.aorms-sheet-footer {
+  position: fixed;
+  inset-inline-end: 6.25rem;
+  inset-block-end: 1rem;
+  z-index: 1;
+  max-inline-size: calc(100vw - 9rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  line-height: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--aorms-ink);
+  opacity: 0.5; // 50% transparency, like the mark it sits beside
+  pointer-events: none;
+}
+
+// Small screens: only the sheet number and date (the rest is in the page header).
+@media (max-width: 42rem) {
+  .aorms-sheet-footer .aorms-sheet-footer__extra {
+    display: none;
+  }
 }
 
 // Task board responsiveness (2026-09-30 UI audit). The board is three

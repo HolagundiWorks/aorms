@@ -85,7 +85,7 @@ export default async function ReconcilePage() {
               actions={<ContextPanelTrigger size="sm">Upload statement</ContextPanelTrigger>}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

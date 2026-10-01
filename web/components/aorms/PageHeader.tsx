@@ -28,6 +28,7 @@ export function PageHeader({
   title,
   description,
   result,
+  summary,
   actions,
 }: {
   eyebrow?: string;
@@ -36,6 +37,8 @@ export function PageHeader({
   description?: React.ReactNode;
   /** "The result" — what this sheet leaves you with (HCWorks pattern): one outcome-first line. */
   result?: string;
+  /** Live data line under the title (e.g. Pulse's daily brief). Unlike `description` it is NOT an instruction, so the Instructions toggle never hides it. */
+  summary?: React.ReactNode;
   actions?: React.ReactNode;
 }) {
   return (
@@ -55,13 +58,14 @@ export function PageHeader({
         </h1>
         {actions}
       </div>
+      {summary && <p className="aorms-summary">{summary}</p>}
       {description && (
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", maxWidth: "42rem" }}>
+        <p className="cds--type-body-01 aorms-instruction" style={{ color: "var(--cds-text-secondary)", maxWidth: "42rem" }}>
           {description}
         </p>
       )}
       {result && (
-        <p className="aorms-result">
+        <p className="aorms-result aorms-instruction">
           <span className="aorms-result__label">The result</span>
           {result}
         </p>

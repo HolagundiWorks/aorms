@@ -72,7 +72,7 @@ export default async function LeadsPage() {
               actions={canWrite ? <ContextPanelTrigger size="sm">Add lead</ContextPanelTrigger> : undefined}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

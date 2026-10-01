@@ -86,7 +86,7 @@ export function ContextPanel({
         <div>
           <h2 className="cds--type-heading-03 cds--type-semibold">{title}</h2>
           {description && (
-            <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginTop: "0.25rem" }}>
+            <p className="cds--type-body-01 aorms-instruction" style={{ color: "var(--cds-text-secondary)", marginTop: "0.25rem" }}>
               {description}
             </p>
           )}

@@ -181,7 +181,7 @@ export default async function AccountsPage() {
               actions={canWrite ? <ContextPanelTrigger size="sm">Record expense</ContextPanelTrigger> : undefined}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

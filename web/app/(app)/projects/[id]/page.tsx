@@ -21,6 +21,8 @@ import { KpiTile } from "../../../../components/aorms/KpiTile";
 import { PlanGlyph } from "../../../../components/aorms/PlanGlyph";
 import { PhaseStrip } from "../../../../components/aorms/PhaseStrip";
 import Link from "next/link";
+import { CoverImageControl } from "../../../../components/aorms/CoverImageControl";
+import { signCoverUrls } from "../../../../lib/projects/covers";
 import { getActivationGate } from "../../../../lib/actions/activation";
 
 export default async function ProjectDetailPage({
@@ -51,7 +53,7 @@ export default async function ProjectDetailPage({
     supabase
       .from("project_offices")
       .select(
-        "id, ref, title, project_type, work_type, status, city, contact_email, contact_phone, state, district, site_address, date_start, site_area_sqm, built_up_area_sqm, floor_count, current_phase_id, clients(name, email, phone, contact_person)",
+        "id, ref, title, project_type, work_type, status, city, contact_email, contact_phone, state, district, site_address, date_start, site_area_sqm, built_up_area_sqm, floor_count, cover_image_key, current_phase_id, clients(name, email, phone, contact_person)",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -96,6 +98,16 @@ export default async function ProjectDetailPage({
   }
 
   if (!project) notFound();
+
+  // Cover image: signed URL only after the RLS-scoped project read above
+  // succeeded; the upload control is shown to write-tier roles only (the
+  // Server Action re-checks and RLS is the real gate).
+  const coverUrl = project.cover_image_key ? ((await signCoverUrls([project.cover_image_key])).get(project.cover_image_key) ?? null) : null;
+  const {
+    data: { user: viewer },
+  } = await supabase.auth.getUser();
+  const { data: viewerProfile } = viewer ? await supabase.from("profiles").select("role").eq("id", viewer.id).maybeSingle() : { data: null };
+  const canEditCover = !!viewerProfile && ["OWNER", "PARTNER", "ACCOUNTANT", "HR_MANAGER", "SENIOR", "ASSOCIATE"].includes(viewerProfile.role);
 
   type ClientInfo = { name: string; email: string | null; phone: string | null; contact_person: string | null };
   const client: ClientInfo | null = Array.isArray(project.clients)
@@ -179,7 +191,16 @@ export default async function ProjectDetailPage({
 
             <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 20rem) minmax(0, 1fr)", gap: "2rem", marginBottom: "0.5rem" }} className="aorms-hub-head">
               <div style={{ color: "var(--aorms-ink)" }}>
-                <PlanGlyph seed={project.ref} builtUpSqm={project.built_up_area_sqm} siteSqm={project.site_area_sqm} floors={project.floor_count} height={140} />
+                {coverUrl ? (
+                  <div className="aorms-pcard__media" style={{ maxInlineSize: "20rem" }}>
+                    {/* Signed Supabase URL — plain <img>, not next/image. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={coverUrl} alt={`${project.title} cover`} />
+                  </div>
+                ) : (
+                  <PlanGlyph seed={project.ref} builtUpSqm={project.built_up_area_sqm} siteSqm={project.site_area_sqm} floors={project.floor_count} height={140} />
+                )}
+                {canEditCover && <CoverImageControl projectId={project.id} hasCover={!!project.cover_image_key} />}
               </div>
               <div className="aorms-facts" style={{ alignSelf: "end" }}>
                 <div>
@@ -212,7 +233,7 @@ export default async function ProjectDetailPage({
               ))}
             </nav>
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

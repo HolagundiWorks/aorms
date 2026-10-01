@@ -50,7 +50,7 @@ export default async function BbsPage() {
               actions={<ContextPanelTrigger size="sm">New schedule</ContextPanelTrigger>}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

@@ -66,7 +66,7 @@ export default async function DocumentIssuesPage() {
               actions={canWrite ? <ContextPanelTrigger size="sm">Log issue</ContextPanelTrigger> : undefined}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

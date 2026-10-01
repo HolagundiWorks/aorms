@@ -55,7 +55,7 @@ export default async function PmcPackagesPage() {
           actions={<ContextPanelTrigger size="sm">New package</ContextPanelTrigger>}
         />
 
-        <div
+        <div className="aorms-rail-kpis"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, 9rem)",

@@ -29,6 +29,7 @@ import {
   Group,
   Settings,
   RequestQuote,
+  Information,
 } from "@carbon/icons-react";
 import { PomodoroProvider } from "./pomodoro/PomodoroContext";
 import { HeaderPomodoro } from "./pomodoro/HeaderPomodoro";
@@ -42,6 +43,7 @@ import { FloatingAskPulse } from "./pulse/FloatingAskPulse";
 import { getInitials } from "../../lib/shell/identity";
 import { NAV_GROUPS, NAV_TOP, groupSheet, itemSheet, topSheet } from "../../lib/shell/nav-data";
 import { TitleBlock } from "./TitleBlock";
+import { INSTRUCTIONS_COOKIE } from "../../lib/shell/preferences";
 
 
 /**
@@ -112,6 +114,7 @@ export function AppShell({
   istHour,
   projects,
   hasMultipleStudios,
+  initialInstructions = true,
 }: {
   children: React.ReactNode;
   /** From firms.company_name (app/(app)/layout.tsx) — see OrganisationIdentity.tsx for the fallback when unset. */
@@ -126,6 +129,8 @@ export function AppShell({
   projects: { id: string; title: string }[];
   /** True when this profile belongs to more than one firm (profile_firm_memberships, migration 0055) — shows "Switch studio" in the user menu. */
   hasMultipleStudios?: boolean;
+  /** Whether "how to use" notes are shown (cookie-backed, read server-side so there is no flash). Defaults on. */
+  initialInstructions?: boolean;
 }) {
   const pathname = usePathname();
   // isPersistent (Carbon's default, left un-set here) means Carbon's own
@@ -163,6 +168,21 @@ export function AppShell({
   // used to jump to 256px, and the nav also started expanded, which is why
   // the content width looked unset).
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Instructions toggle (side panel): page descriptions, "The result" lines and
+  // drag/drop hints are all marked `.aorms-instruction` and hidden by CSS when
+  // this is off (see globals.scss). On by default — that is the existing
+  // behaviour — and remembered in a cookie the layout reads on the next request.
+  const [instructions, setInstructions] = useState(initialInstructions);
+  function toggleInstructions() {
+    const next = !instructions;
+    setInstructions(next);
+    try {
+      document.cookie = `${INSTRUCTIONS_COOKIE}=${next ? "on" : "off"}; path=/; max-age=31536000; samesite=lax`;
+    } catch {
+      /* cookies blocked — it still toggles for this visit */
+    }
+  }
 
   // `isRail` is viewport-conditional (QA bug B5, 2026-09-20): Carbon's rail is
   // a desktop-only concept; below lg it must be the default dismissible
@@ -263,12 +283,24 @@ export function AppShell({
               </SideNavMenu>
             );
           })}
+          {/* Instructions toggle — the last entry of the side panel. */}
+          <SideNavLink
+            href="#instructions"
+            renderIcon={Information}
+            isActive={instructions}
+            role="switch"
+            aria-checked={instructions}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              toggleInstructions();
+            }}
+          >
+            Instructions · {instructions ? "On" : "Off"}
+          </SideNavLink>
         </SideNavItems>
       </SideNav>
-      <Content>
-        {children}
-        <TitleBlock companyName={companyName} />
-      </Content>
+      <Content data-instructions={instructions ? "on" : "off"}>{children}</Content>
+      <TitleBlock companyName={companyName} />
       <FloatingAskPulse projects={projects} />
       <BrandWatermark />
     </PomodoroProvider>

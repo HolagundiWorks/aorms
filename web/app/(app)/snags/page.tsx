@@ -47,7 +47,7 @@ export default async function SnagsPage() {
               actions={<ContextPanelTrigger size="sm">Add snag</ContextPanelTrigger>}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

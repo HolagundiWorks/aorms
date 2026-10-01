@@ -211,8 +211,7 @@ truth for its own IA — a flat 39-link list until 2026-09-06, now grouped:
 >
 > Each nav page also gets a `SheetMark` above its title (`AORMS-04.03 / SITE /
 > PROGRESS REPORTS`), an optional "The result" line (`PageHeader result=…`), and
-> a drawing `TitleBlock` (Office · System · Section · Drawing · Sheet · Date) at
-> the foot. See ROADMAP.md's 2026-09-30 sheet-system entries.
+> a faint floating sheet footer beside the AORMS mark (office / section / drawing / sheet / date; 50% opacity; was a bordered title block until 2026-09-30). The last side-panel entry is an **Instructions** toggle (cookie-backed, default on) that hides every `.aorms-instruction` note. See ROADMAP.md's 2026-09-30 sheet-system entries.
 
 | Top-level (no group) | Group | Sub-items |
 |---|---|---|

@@ -7,7 +7,6 @@ import {
   InlineNotification,
   OverflowMenu,
   OverflowMenuItem,
-  ProgressBar,
   Search,
   Select,
   SelectItem,
@@ -229,32 +228,22 @@ export function TaskBoard({
             lowContrast
           />
         )}
-        {overloadedPeople.map((p) => {
-          const l = loads.get(p.id)!;
-          return (
-            <InlineNotification
-              key={p.id}
-              kind="warning"
-              hideCloseButton
-              lowContrast
-              title={`${p.name} is overloaded`}
-              subtitle={`${Math.ceil(l.shortfallHours)}h more work than they can finish by ${fmtDate(l.breakDate!)} (${Math.round(l.openHours)}h open in total). Reassign or extend a deadline.`}
-            />
-          );
-        })}
-        {(shortCount > 0 || overdueCount > 0) && (
-          <InlineNotification
-            kind={overdueCount ? "error" : "warning"}
-            hideCloseButton
-            lowContrast
-            title="Deadlines need attention"
-            subtitle={[
-              overdueCount ? `${overdueCount} overdue` : null,
-              shortCount ? `${shortCount} due within 2 working days` : null,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          />
+        {/* One slim alert line instead of a banner per person/deadline group —
+            the people strip below also flags overload on each person. */}
+        {(overloadedPeople.length > 0 || shortCount > 0 || overdueCount > 0) && (
+          <p className={`aorms-alertline${overdueCount ? " is-error" : ""}`} role="status">
+            <strong>Attention</strong>
+            {overdueCount > 0 && <span>{overdueCount} overdue</span>}
+            {shortCount > 0 && <span>{shortCount} due within 2 working days</span>}
+            {overloadedPeople.map((p) => {
+              const l = loads.get(p.id)!;
+              return (
+                <span key={p.id}>
+                  {p.name} +{Math.ceil(l.shortfallHours)}h over capacity by {fmtDate(l.breakDate!)}
+                </span>
+              );
+            })}
+          </p>
         )}
       </div>
 
@@ -311,6 +300,12 @@ export function TaskBoard({
         </Select>
       </div>
       <div className="aorms-task-filter-status" aria-live="polite">
+        <div style={{ inlineSize: "14rem" }}>
+          <ContentSwitcher size="sm" selectedIndex={view === "board" ? 0 : 1} onChange={(e) => setView(e.name as "board" | "calendar")}>
+            <Switch name="board" text="Board" />
+            <Switch name="calendar" text="Calendar" />
+          </ContentSwitcher>
+        </div>
         <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
           Showing {visible.length} of {tasks.length} tasks
           {filterCount > 0 ? ` · ${filterCount} filter${filterCount > 1 ? "s" : ""} on` : ""}
@@ -327,173 +322,151 @@ export function TaskBoard({
         )}
       </div>
 
-      <div style={{ maxWidth: "20rem", marginBottom: "1rem" }}>
-        <ContentSwitcher size="md" selectedIndex={view === "board" ? 0 : 1} onChange={(e) => setView(e.name as "board" | "calendar")}>
-          <Switch name="board" text="Board" />
-          <Switch name="calendar" text="Calendar" />
-        </ContentSwitcher>
-      </div>
-
-      <div className="aorms-task-layout">
-        <div style={{ minWidth: 0 }}>
-          {view === "board" ? (
-            <div className="aorms-task-columns">
-              {COLUMNS.map((col) => {
-                const items = visible.filter((t) => col.statuses.includes(t.status));
-                return (
-                  <section
-                    key={col.key}
-                    aria-label={col.label}
-                    onDragOver={(e) => {
-                      allowDrop(e);
-                      setOverColumn(col.key);
-                    }}
-                    onDragLeave={() => setOverColumn((c) => (c === col.key ? null : c))}
-                    onDrop={(e) => {
-                      setOverColumn(null);
-                      const d = readDrag(e);
-                      if (d?.kind === "task" && canWrite) moveToColumn(d.id, col);
-                    }}
-                    style={{
-                      background: overColumn === col.key ? "var(--cds-layer-hover-01)" : "var(--cds-layer-01)",
-                      outline: overColumn === col.key ? "2px dashed var(--cds-focus)" : "none",
-                      minHeight: "12rem",
-                      padding: "0.75rem",
-                    }}
-                  >
-                    <h3 className="cds--type-heading-compact-01" style={{ marginBottom: "0.75rem" }}>
-                      {col.label} <Tag size="sm" type="gray">{items.length}</Tag>
-                    </h3>
-                    <div style={{ display: "grid", gap: "0.5rem" }}>
-                      {items.map((t) => (
-                        <TaskCard
-                          key={t.id}
-                          task={t}
-                          alert={t.status === "DONE" ? undefined : alerts.get(t.id)}
-                          waitingOn={t.status === "DONE" ? undefined : blockerOf(t)?.title}
-                          assigneeName={t.assignee_id ? personName.get(t.assignee_id) ?? "Unknown" : null}
-                          canWrite={canWrite}
-                          dropActive={overTask === t.id}
-                          onDragOverCard={(on) => setOverTask(on ? t.id : null)}
-                          onAssignDrop={(personId) => assign(t.id, personId)}
-                          onMove={(c) => moveToColumn(t.id, c)}
-                        />
-                      ))}
-                      {items.length === 0 && (
-                        <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-                          {filterCount > 0 ? "No tasks match the filters." : canWrite ? "Drop a task here." : "Nothing here."}
-                        </p>
-                      )}
-                    </div>
-                  </section>
-                );
-              })}
+      {/* People strip (replaces the old right-hand team column, which squeezed
+          the board): drag a person onto a card to assign, click to filter, drop
+          a card on "Unassigned" to clear the assignee. */}
+      <section className="aorms-people" aria-label="Team">
+        <p className="aorms-instruction cds--type-helper-text-01 aorms-people__hint">
+          {canWrite ? "Drag a person onto a task to assign it · click a person to filter" : "Click a person to filter"}
+        </p>
+        <div className="aorms-people__row">
+          {people.map((p) => {
+            const l = loads.get(p.id)!;
+            const active = filters.assignee === p.id;
+            return (
+              <div
+                key={p.id}
+                role="button"
+                tabIndex={0}
+                draggable={canWrite}
+                aria-pressed={active}
+                title={active ? "Showing only this person — click to clear" : `${p.name}: ${l.openCount} open, ${Math.round(l.openHours)}h`}
+                className={`aorms-person${active ? " is-active" : ""}${l.overloaded ? " is-over" : ""}${overPerson === p.id ? " is-drop" : ""}`}
+                onClick={() => setFilter("assignee", active ? "" : p.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setFilter("assignee", active ? "" : p.id);
+                  }
+                }}
+                onDragStart={(e) => startDrag(e, { kind: "person", id: p.id })}
+                onDragOver={(e) => {
+                  allowDrop(e);
+                  setOverPerson(p.id);
+                }}
+                onDragLeave={() => setOverPerson((c) => (c === p.id ? null : c))}
+                onDrop={(e) => {
+                  setOverPerson(null);
+                  const d = readDrag(e);
+                  if (d?.kind === "task" && canWrite) assign(d.id, p.id);
+                }}
+              >
+                <Avatar name={p.name} />
+                <span className="aorms-person__text">
+                  <span className="aorms-person__name">{p.name}</span>
+                  <span className="aorms-person__meta">
+                    {l.openCount} open · {Math.round(l.openHours)}h{l.overloaded ? " · overloaded" : ""}
+                  </span>
+                </span>
+                <span className="aorms-person__bar" aria-hidden>
+                  <span style={{ inlineSize: `${Math.min(100, Math.round(l.utilisation * 100))}%` }} />
+                </span>
+              </div>
+            );
+          })}
+          {people.length === 0 && <p className="cds--type-helper-text-01">No team members yet.</p>}
+          {canWrite && (
+            <div
+              className={`aorms-person aorms-person--drop${overPerson === "__none" ? " is-drop" : ""}`}
+              onDragOver={(e) => {
+                allowDrop(e);
+                setOverPerson("__none");
+              }}
+              onDragLeave={() => setOverPerson((c) => (c === "__none" ? null : c))}
+              onDrop={(e) => {
+                setOverPerson(null);
+                const d = readDrag(e);
+                if (d?.kind === "task") assign(d.id, null);
+              }}
+            >
+              <UserAvatar size={20} aria-hidden />
+              <span className="aorms-person__text">
+                <span className="aorms-person__name">Unassigned</span>
+                <span className="aorms-person__meta">drop a task here</span>
+              </span>
             </div>
-          ) : (
-            <CalendarView
-              tasks={visible}
-              alerts={alerts}
-              today={today}
-              canWrite={canWrite}
-              overDay={overDay}
-              setOverDay={setOverDay}
-              onDrop={setDue}
-            />
           )}
         </div>
+      </section>
 
-        <aside aria-label="Team" style={{ background: "var(--cds-layer-01)", padding: "0.75rem" }}>
-          <h3 className="cds--type-heading-compact-01" style={{ marginBottom: "0.25rem" }}>Team</h3>
-          <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.75rem" }}>
-            {canWrite ? "Drag a person onto a task to assign it. Click a person to filter." : "Click a person to filter."}
-          </p>
-          <div style={{ display: "grid", gap: "0.5rem" }}>
-            {people.map((p) => {
-              const l = loads.get(p.id)!;
-              return (
-                <div
-                  key={p.id}
-                  draggable={canWrite}
-                  onClick={() => setFilter("assignee", filters.assignee === p.id ? "" : p.id)}
-                  aria-pressed={filters.assignee === p.id}
-                  title={filters.assignee === p.id ? "Showing only this person — click to clear" : "Click to show only this person's tasks"}
-                  onDragStart={(e) => startDrag(e, { kind: "person", id: p.id })}
-                  onDragOver={(e) => {
-                    allowDrop(e);
-                    setOverPerson(p.id);
-                  }}
-                  onDragLeave={() => setOverPerson((c) => (c === p.id ? null : c))}
-                  onDrop={(e) => {
-                    setOverPerson(null);
-                    const d = readDrag(e);
-                    if (d?.kind === "task" && canWrite) assign(d.id, p.id);
-                  }}
-                  style={{
-                    background: overPerson === p.id ? "var(--cds-layer-hover-02)" : "var(--cds-layer-02)",
-                    outline: filters.assignee === p.id ? "2px solid var(--aorms-orange)" : "none",
-                    padding: "0.5rem",
-                    cursor: canWrite ? "grab" : "default",
-                    borderLeft: `3px solid ${l.overloaded ? "var(--cds-support-error)" : "transparent"}`,
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <span
-                      aria-hidden
-                      style={{
-                        width: "2rem",
-                        height: "2rem",
-                        borderRadius: "50%",
-                        background: "var(--cds-background-inverse)",
-                        color: "var(--cds-text-inverse)",
-                        display: "grid",
-                        placeItems: "center",
-                        fontSize: "0.75rem",
-                        flex: "none",
-                      }}
-                    >
-                      {initials(p.name)}
-                    </span>
-                    <div style={{ minWidth: 0 }}>
-                      <div className="cds--type-body-compact-01" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {p.name}
-                      </div>
-                      <div className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-                        {l.openCount} open · {Math.round(l.openHours)}h
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ marginTop: "0.5rem" }}>
-                    <ProgressBar
-                      label={`${p.name} load`}
-                      hideLabel
-                      size="small"
-                      value={Math.min(100, Math.round(l.utilisation * 100))}
-                      max={100}
-                      status={l.overloaded ? "error" : "active"}
-                      helperText={l.overloaded ? "Overloaded" : `${Math.round(l.utilisation * 100)}% of next 2 weeks`}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-            {people.length === 0 && <p className="cds--type-helper-text-01">No team members yet.</p>}
-            {canWrite && (
-              <div
-                onDragOver={allowDrop}
-                onDrop={(e) => {
-                  const d = readDrag(e);
-                  if (d?.kind === "task") assign(d.id, null);
+      {view === "board" ? (
+        <div className="aorms-kanban">
+          {COLUMNS.map((col) => {
+            const items = visible.filter((t) => col.statuses.includes(t.status));
+            const hours = items.reduce((sum, t) => sum + (t.estimated_hours ?? 0), 0);
+            return (
+              <section
+                key={col.key}
+                aria-label={col.label}
+                className={`aorms-kanban__col${overColumn === col.key ? " is-drop" : ""}`}
+                onDragOver={(e) => {
+                  allowDrop(e);
+                  setOverColumn(col.key);
                 }}
-                className="cds--type-helper-text-01"
-                style={{ border: "1px dashed var(--cds-border-strong-01)", padding: "0.5rem", color: "var(--cds-text-secondary)" }}
+                onDragLeave={() => setOverColumn((c) => (c === col.key ? null : c))}
+                onDrop={(e) => {
+                  setOverColumn(null);
+                  const d = readDrag(e);
+                  if (d?.kind === "task" && canWrite) moveToColumn(d.id, col);
+                }}
               >
-                <UserAvatar size={16} style={{ verticalAlign: "text-bottom" }} /> Drop a task here to unassign
-              </div>
-            )}
-          </div>
-        </aside>
-      </div>
+                <header className="aorms-kanban__head">
+                  <h3>{col.label}</h3>
+                  <span className="aorms-kanban__count">
+                    {String(items.length).padStart(2, "0")}
+                    {hours > 0 && <em>{Math.round(hours)}h</em>}
+                  </span>
+                </header>
+                <div className="aorms-kanban__body">
+                  {items.map((t) => (
+                    <TaskCard
+                      key={t.id}
+                      task={t}
+                      alert={t.status === "DONE" ? undefined : alerts.get(t.id)}
+                      waitingOn={t.status === "DONE" ? undefined : blockerOf(t)?.title}
+                      assigneeName={t.assignee_id ? personName.get(t.assignee_id) ?? "Unknown" : null}
+                      today={today}
+                      canWrite={canWrite}
+                      dropActive={overTask === t.id}
+                      onDragOverCard={(on) => setOverTask(on ? t.id : null)}
+                      onAssignDrop={(personId) => assign(t.id, personId)}
+                      onMove={(c) => moveToColumn(t.id, c)}
+                    />
+                  ))}
+                  {items.length === 0 && (
+                    <p className="aorms-kanban__empty">
+                      {filterCount > 0 ? "No tasks match the filters." : <span className="aorms-instruction">{canWrite ? "Drop a task here." : "Nothing here."}</span>}
+                    </p>
+                  )}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      ) : (
+        <CalendarView tasks={visible} alerts={alerts} today={today} canWrite={canWrite} overDay={overDay} setOverDay={setOverDay} onDrop={setDue} />
+      )}
     </div>
+  );
+}
+
+const PRIORITY_LABEL: Record<string, string> = { CRITICAL: "Critical", HIGH: "High", MEDIUM: "Medium", LOW: "Low" };
+
+function Avatar({ name, size = "md" }: { name: string | null; size?: "sm" | "md" }) {
+  return (
+    <span className={`aorms-avatar aorms-avatar--${size}${name ? "" : " is-empty"}`} aria-hidden title={name ?? "Unassigned"}>
+      {name ? initials(name) : ""}
+    </span>
   );
 }
 
@@ -502,6 +475,7 @@ function TaskCard({
   alert,
   waitingOn,
   assigneeName,
+  today,
   canWrite,
   dropActive,
   onDragOverCard,
@@ -512,14 +486,18 @@ function TaskCard({
   alert?: TaskAlert;
   waitingOn?: string;
   assigneeName: string | null;
+  today: string;
   canWrite: boolean;
   dropActive: boolean;
   onDragOverCard: (on: boolean) => void;
   onAssignDrop: (personId: string | null) => void;
   onMove: (col: Column) => void;
 }) {
+  const floorExtra = task.floor_label && !task.title.includes(task.floor_label) ? task.floor_label : null;
+  const meta = [task.project_title, floorExtra].filter(Boolean).join(" · ");
+  const overdue = !!task.due_date && task.due_date < today && task.status !== "DONE";
   return (
-    <div
+    <article
       draggable={canWrite}
       onDragStart={(e) => startDrag(e, { kind: "task", id: task.id })}
       onDragOver={(e) => {
@@ -535,17 +513,12 @@ function TaskCard({
           onAssignDrop(d.id);
         }
       }}
-      style={{
-        background: dropActive ? "var(--cds-layer-hover-02)" : "var(--cds-layer-02)",
-        outline: dropActive ? "2px solid var(--cds-focus)" : "none",
-        padding: "0.75rem",
-        cursor: canWrite ? "grab" : "default",
-        borderLeft: `3px solid ${alert ? "var(--cds-support-error)" : "transparent"}`,
-      }}
+      className={`aorms-tcard aorms-tcard--${task.priority.toLowerCase()}${alert ? " has-alert" : ""}${dropActive ? " is-drop" : ""}${task.status === "DONE" ? " is-done" : ""}`}
+      style={{ cursor: canWrite ? "grab" : "default" }}
     >
-      {task.seq != null && <div className="aorms-hub__ref" style={{ marginBottom: "0.125rem" }}>{formatTaskRef(task.seq)}</div>}
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem" }}>
-        <span className="cds--type-body-compact-01" style={{ fontWeight: 600 }}>{task.title}</span>
+      <header className="aorms-tcard__top">
+        <span className="aorms-hub__ref">{formatTaskRef(task.seq) ?? "—"}</span>
+        <span className="aorms-tcard__priority">{PRIORITY_LABEL[task.priority] ?? task.priority}</span>
         {canWrite && (
           <OverflowMenu size="sm" flipped aria-label={`Move ${task.title}`}>
             {COLUMNS.map((c) => (
@@ -553,21 +526,22 @@ function TaskCard({
             ))}
           </OverflowMenu>
         )}
-      </div>
-      {(task.project_title || (task.floor_label && !task.title.includes(task.floor_label))) && (
-        <div className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)", marginTop: "0.25rem" }}>
-          {[task.project_title, task.floor_label && !task.title.includes(task.floor_label) ? task.floor_label : null].filter(Boolean).join(" · ")}
+      </header>
+      <h4 className="aorms-tcard__title">{task.title}</h4>
+      {meta && <p className="aorms-tcard__meta">{meta}</p>}
+      {(task.status === "BLOCKED" || alert || waitingOn) && (
+        <div className="aorms-tcard__flags">
+          {task.status === "BLOCKED" && <Tag size="sm" type="red">Blocked</Tag>}
+          {alert && <Tag size="sm" type={ALERT_TAG[alert]}>{ALERT_LABEL[alert]}</Tag>}
+          {waitingOn && <Tag size="sm" type="cyan" title={`Waiting on: ${waitingOn}`}>Waiting on prerequisite</Tag>}
         </div>
       )}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem", marginTop: "0.5rem" }}>
-        {task.status === "BLOCKED" && <Tag size="sm" type="red">Blocked</Tag>}
-        {alert && <Tag size="sm" type={ALERT_TAG[alert]}>{ALERT_LABEL[alert]}</Tag>}
-        {waitingOn && <Tag size="sm" type="cyan" title={`Waiting on: ${waitingOn}`}>Waiting on prerequisite</Tag>}
-        {task.due_date && <Tag size="sm" type="outline">Due {fmtDate(task.due_date)}</Tag>}
-        {task.estimated_hours != null && <Tag size="sm" type="gray">{task.estimated_hours}h</Tag>}
-        <Tag size="sm" type={assigneeName ? "blue" : "gray"}>{assigneeName ?? "Unassigned"}</Tag>
-      </div>
-    </div>
+      <footer className="aorms-tcard__foot">
+        <span className={`aorms-tcard__due${overdue ? " is-overdue" : ""}`}>{task.due_date ? fmtDate(task.due_date) : "No deadline"}</span>
+        {task.estimated_hours != null && <span className="aorms-tcard__hours">{task.estimated_hours}h</span>}
+        <Avatar name={assigneeName} size="sm" />
+      </footer>
+    </article>
   );
 }
 

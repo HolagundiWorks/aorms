@@ -75,7 +75,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
               }
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

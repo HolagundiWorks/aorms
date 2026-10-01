@@ -98,7 +98,7 @@ export default async function ProjectDecisionsPage({
 
             {/* Page-overview-in-numbers row, directly under the title/description
                 rather than buried at the bottom of a table. */}
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

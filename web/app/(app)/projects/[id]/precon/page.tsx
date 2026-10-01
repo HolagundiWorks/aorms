@@ -78,7 +78,7 @@ export default async function ProjectPreconPage({
           description="Studio design-stage risk and opportunity registers, plus phase gates — not construction readiness (that's AProc's own delivery-side tracking)."
         />
 
-        <div
+        <div className="aorms-rail-kpis"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, 9rem)",

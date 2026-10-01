@@ -55,7 +55,7 @@ export default async function EstimatesPage() {
           actions={<ContextPanelTrigger size="sm">New estimate</ContextPanelTrigger>}
         />
 
-        <div
+        <div className="aorms-rail-kpis"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, 9rem)",

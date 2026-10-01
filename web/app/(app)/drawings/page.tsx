@@ -74,7 +74,7 @@ export default async function DrawingsPage() {
               actions={canWrite ? <ContextPanelTrigger size="sm">Add drawing</ContextPanelTrigger> : undefined}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

@@ -63,7 +63,7 @@ export default async function ProposalsPage() {
               actions={<ContextPanelTrigger size="sm">Create proposal</ContextPanelTrigger>}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

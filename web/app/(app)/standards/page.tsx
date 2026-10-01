@@ -43,7 +43,7 @@ export default async function StandardsPage() {
               actions={<ContextPanelTrigger size="sm">Add standard</ContextPanelTrigger>}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",

@@ -65,7 +65,7 @@ export default async function TransmittalsPage() {
               actions={canWrite ? <ContextPanelTrigger size="sm">Add transmittal</ContextPanelTrigger> : undefined}
             />
 
-            <div
+            <div className="aorms-rail-kpis"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, 9rem)",
