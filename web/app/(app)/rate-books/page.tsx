@@ -16,6 +16,7 @@ import { AddRateBookForm } from "../../../components/aorms/AddRateBookForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 export default async function RateBooksPage() {
   const supabase = await createClient();
@@ -51,7 +52,8 @@ export default async function RateBooksPage() {
             >
               <KpiTile label="Total rate books" value={rows.length} icon={Book} />
               <KpiTile label="Open" value={openCount} icon={FolderOpen} />
-            </div>
+              <RailBrief>Firm-level, versioned item-code/unit/rate sets that price project estimates.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

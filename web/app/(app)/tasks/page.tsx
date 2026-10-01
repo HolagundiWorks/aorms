@@ -8,6 +8,7 @@ import { PageHeader } from "../../../components/aorms/PageHeader";
 import { TaskBoard } from "../../../components/aorms/tasks/TaskBoard";
 import { todayISO } from "../../../lib/tasks/dates";
 import { filtersFromParams } from "../../../lib/tasks/filter";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 // Roles with has_capability('write') (rank >= 40, or an explicit
 // allow-list role — see web/supabase/migrations/0002_capability_helper.sql
@@ -87,7 +88,8 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
               <KpiTile label="In progress" value={inProgressCount} icon={InProgress} />
               <KpiTile label="Blocked" value={blockedCount} icon={LockedAndBlocked} />
               <KpiTile label="Done" value={doneCount} icon={CheckmarkFilled} />
-            </div>
+              <RailBrief>Drag tasks between columns, drop people onto tasks to assign, and drag deadlines on the calendar.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

@@ -7,6 +7,7 @@ import { BigStat } from "../../../components/aorms/BigStat";
 import { ProjectsBrowser, VIEW_COOKIE, type ProjectsView } from "../../../components/aorms/ProjectsBrowser";
 import { signCoverUrls } from "../../../lib/projects/covers";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 // Same set as app/(app)/clients/page.tsx's and app/(app)/contractors/page.tsx's
 // own WRITE_TIER_ROLES (mirrored from lib/actions/clients.ts) — gates the
@@ -79,11 +80,12 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
           actions={canWrite ? <ContextPanelTrigger size="sm">Create project</ContextPanelTrigger> : undefined}
         />
 
-        <div className="aorms-bigstat-row">
+        <div className="aorms-rail-kpis">
           <BigStat value={rows.length} label="Projects" />
           <BigStat value={activeCount} label="Active" active />
           <BigStat value={enquiryCount} label="Enquiry" />
-        </div>
+          <RailBrief>Project offices — phases, tasks, and delivery live under each project.</RailBrief>
+</div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

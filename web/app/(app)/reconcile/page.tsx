@@ -17,6 +17,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SettleReconcileButton } from "../../../components/aorms/SettleReconcileButton";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 // has_capability('finance:ops') — migration 0087_reconcile.sql's
 // "reconcile: finance ops" policy is a single, uniform gate (no read/
@@ -97,7 +98,8 @@ export default async function ReconcilePage() {
               <KpiTile label="Ready" value={readyCount} icon={CheckmarkFilled} />
               <KpiTile label="Failed" value={failedCount} icon={WarningAltFilled} />
               <KpiTile label="Matched credit" value={formatInr(totalMatchedPaise)} icon={Money} />
-            </div>
+              <RailBrief>Bank-statement reconciliation.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

@@ -17,6 +17,7 @@ import { ImportExportBar } from "../../../components/aorms/ImportExportBar";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { importClientsCsv } from "../../../lib/actions/clients";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 // Roles with has_capability('write') (rank >= 40, or an explicit
 // allow-list role — see web/supabase/migrations/0002_capability_helper.sql
@@ -86,7 +87,8 @@ export default async function ClientsPage() {
               <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
               <KpiTile label="Individuals" value={individualCount} icon={User} />
               <KpiTile label="Cities" value={cityCount} icon={Location} />
-            </div>
+              <RailBrief>Client CRM — attach projects, invoices, and portal logins.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

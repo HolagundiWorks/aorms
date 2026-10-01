@@ -16,6 +16,7 @@ import { AddEstimateForm } from "../../../components/aorms/AddEstimateForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -66,7 +67,8 @@ export default async function EstimatesPage() {
           <KpiTile label="Total estimates" value={rows.length} icon={Calculator} />
           <KpiTile label="Draft" value={draftCount} icon={Edit} />
           <KpiTile label="Approved" value={approvedCount} icon={CheckmarkFilled} />
-        </div>
+          <RailBrief>Priced BOQ against a rate book, with contingency + GST rollup.</RailBrief>
+</div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

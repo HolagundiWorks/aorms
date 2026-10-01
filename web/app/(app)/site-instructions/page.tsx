@@ -16,6 +16,7 @@ import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateSiteInstructionPdf } from "../../../lib/actions/site-instructions";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 export default async function SiteInstructionsPage() {
   const supabase = await createClient();
@@ -58,7 +59,8 @@ export default async function SiteInstructionsPage() {
               <KpiTile label="Total instructions" value={rows.length} icon={Task} />
               <KpiTile label="Acknowledged" value={acknowledgedCount} icon={CheckmarkFilled} />
               <KpiTile label="Pending" value={pendingCount} icon={Time} />
-            </div>
+              <RailBrief>Formal instructions issued to contractors on site.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

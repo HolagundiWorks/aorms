@@ -23,9 +23,6 @@ import { BigStat } from "../../../components/aorms/BigStat";
 import { HubSheet } from "../../../components/aorms/pulse/HubSheet";
 import { PulseBrief } from "../../../components/aorms/pulse/PulseBrief";
 import { Suspense } from "react";
-import { ProjectCard } from "../../../components/aorms/ProjectCard";
-import { MotionRoot } from "../../../components/aorms/motion/MotionRoot";
-import { MotionStagger } from "../../../components/aorms/motion/MotionStagger";
 import { getKpiTrends } from "../../../lib/pulse/kpi-trend";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { DashboardWidget, EmptyRow, WidgetRow, MASONRY_PANEL_STYLE } from "../../../components/aorms/dashboard/DashboardWidget";
@@ -744,36 +741,11 @@ export default async function PulsePage() {
     </Tile>
   );
 
-  // Active-project boards for the studio workspace (2026-09-30).
-  const { data: activeProjects } = await supabase
-    .from("project_offices")
-    .select("id, ref, title, status, city, built_up_area_sqm, site_area_sqm, floor_count, clients(name)")
-    .eq("status", "ACTIVE")
-    .order("created_at", { ascending: false })
-    .limit(4);
-  const activeIds = (activeProjects ?? []).map((p) => p.id);
-  const { data: activeTaskRows } = activeIds.length
-    ? await supabase.from("tasks").select("project_id, status").in("project_id", activeIds)
-    : { data: [] as { project_id: string | null; status: string }[] };
-  const activeTally = new Map<string, { done: number; total: number }>();
-  for (const t of activeTaskRows ?? []) {
-    if (!t.project_id) continue;
-    const c = activeTally.get(t.project_id) ?? { done: 0, total: 0 };
-    c.total += 1;
-    if (t.status === "DONE") c.done += 1;
-    activeTally.set(t.project_id, c);
-  }
-
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
         <PageHeader
           title="Pulse"
-          summary={
-            <Suspense fallback="Gathering today's brief…">
-              <PulseBrief />
-            </Suspense>
-          }
           actions={<RecomputeButton />}
         />
 
@@ -790,6 +762,15 @@ export default async function PulsePage() {
             <BigStat value={criticalPulseCount} label="Critical" />
             <BigStat value={blockedTasksCount} label="Blocked" href="/tasks" />
             {showFinancials && <BigStat value={formatInr(readyToBill.total)} label="Ready to bill" href="/invoices" />}
+            {/* Today's brief — live, below the numerals (not an instruction, so the Instructions toggle never hides it). */}
+            <div className="aorms-rail-brief aorms-rail-brief--live">
+              <h3 className="aorms-bigstat__label">Today&apos;s brief</h3>
+              <p>
+                <Suspense fallback="Gathering today's brief…">
+                  <PulseBrief />
+                </Suspense>
+              </p>
+            </div>
           </aside>
           <div className="aorms-pulse-main">
             <HubSheet />
@@ -811,37 +792,6 @@ export default async function PulsePage() {
             <ActionQueue items={topPriorities} />
           </Column>
         </Grid>
-
-        {(activeProjects ?? []).length > 0 && (
-          <section aria-label="Active projects" style={{ marginBottom: "1.5rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.75rem" }}>
-              <h2 className="aorms-bigstat__label">Active projects</h2>
-              <a href="/projects" className="cds--type-helper-text-01">All projects →</a>
-            </div>
-            <MotionRoot>
-              <MotionStagger className="aorms-project-grid">
-                {(activeProjects ?? []).map((p) => (
-                  <ProjectCard
-                    key={p.id}
-                    p={{
-                      id: p.id,
-                      ref: p.ref,
-                      title: p.title,
-                      status: p.status,
-                      clientName: (Array.isArray(p.clients) ? p.clients[0]?.name : (p.clients as { name: string } | null)?.name) ?? null,
-                      city: p.city,
-                      builtUpSqm: p.built_up_area_sqm,
-                      siteSqm: p.site_area_sqm,
-                      floors: p.floor_count,
-                      tasksDone: activeTally.get(p.id)?.done ?? 0,
-                      tasksTotal: activeTally.get(p.id)?.total ?? 0,
-                    }}
-                  />
-                ))}
-              </MotionStagger>
-            </MotionRoot>
-          </section>
-        )}
 
         {/* KPI tabs — Pulse / Finance / Team / Others. Three tiles carry a
             green/amber/red health status (KpiTile.tsx's `status` prop);

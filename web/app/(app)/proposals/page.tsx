@@ -17,6 +17,7 @@ import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateProposalPdf } from "../../../lib/actions/proposals";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -75,7 +76,8 @@ export default async function ProposalsPage() {
               <KpiTile label="Sent" value={sentCount} icon={Send} />
               <KpiTile label="Approved" value={approvedCount} icon={CheckmarkFilled} />
               <KpiTile label="Fee value" value={formatInr(totalFeePaise)} icon={CurrencyRupee} />
-            </div>
+              <RailBrief>COA fee proposals and scope agreements.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

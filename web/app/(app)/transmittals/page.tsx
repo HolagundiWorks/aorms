@@ -18,6 +18,7 @@ import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateTransmittalPdf } from "../../../lib/actions/transmittals";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 // Roles with has_capability('write') (rank >= 40, or an explicit
 // allow-list role — see web/supabase/migrations/0002_capability_helper.sql
@@ -76,7 +77,8 @@ export default async function TransmittalsPage() {
               <KpiTile label="Total transmittals" value={rows.length} icon={Send} />
               <KpiTile label="Acknowledged" value={acknowledgedCount} icon={CheckmarkFilled} />
               <KpiTile label="Pending" value={pendingCount} icon={Time} />
-            </div>
+              <RailBrief>Drawing-issue tracking with client/consultant acknowledgment.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

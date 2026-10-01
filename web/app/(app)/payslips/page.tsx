@@ -18,6 +18,7 @@ import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generatePayslipPdf } from "../../../lib/actions/payslips";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -63,7 +64,8 @@ export default async function PayslipsPage() {
               <KpiTile label="Total payslips" value={rows.length} icon={CurrencyRupee} />
               <KpiTile label="Paid" value={paidCount} icon={CheckmarkFilled} />
               <KpiTile label="Total net" value={formatInr(totalNetPaise)} icon={CurrencyRupee} />
-            </div>
+              <RailBrief>Monthly payslips per team member.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

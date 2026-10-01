@@ -6,6 +6,7 @@ import { AddOfficeTemplateForm } from "../../../components/aorms/AddOfficeTempla
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 const KIND_LABEL: Record<string, string> = {
   LETTER: "Letter",
@@ -71,7 +72,8 @@ export default async function OfficeTemplatesPage() {
             >
               <KpiTile label="Total templates" value={rows.length} icon={Template} />
               <KpiTile label="Document kinds" value={kindCount} icon={DocumentMultiple_02} />
-            </div>
+              <RailBrief>Reusable boilerplate for letters, scope of work, COA fee proposals, contracts, and meeting minutes.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

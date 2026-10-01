@@ -15,6 +15,7 @@ import { AddContractForm } from "../../../components/aorms/AddContractForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -85,7 +86,8 @@ export default async function ContractsPage() {
               <KpiTile label="Total contracts" value={rows.length} icon={DocumentSigned} />
               <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
               <KpiTile label="Total value" value={formatInr(totalValuePaise)} icon={CurrencyRupee} />
-            </div>
+              <RailBrief>Contract / agreement register — clients, consultants, vendors.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

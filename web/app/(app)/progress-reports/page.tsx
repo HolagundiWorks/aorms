@@ -18,6 +18,7 @@ import { IssueProgressReportButton } from "../../../components/aorms/IssueProgre
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateProgressReportPdf } from "../../../lib/actions/progress-reports";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 export default async function ProgressReportsPage() {
   const supabase = await createClient();
@@ -63,7 +64,8 @@ export default async function ProgressReportsPage() {
               <KpiTile label="Total reports" value={rows.length} icon={ReportData} />
               <KpiTile label="Issued" value={issuedCount} icon={DocumentExport} />
               <KpiTile label="Avg physical progress" value={avgPhysicalPct != null ? `${avgPhysicalPct}%` : "—"} icon={ChartLineData} />
-            </div>
+              <RailBrief>Periodic project progress narrative and completion percentages.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

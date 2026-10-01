@@ -16,6 +16,7 @@ import { AddRepoSourceForm } from "../../../components/aorms/AddRepoSourceForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red" | "purple"> = {
   DRAFT: "gray",
@@ -62,7 +63,8 @@ export default async function KnowledgeBankPage() {
               <KpiTile label="Total sources" value={rows.length} icon={Book} />
               <KpiTile label="Published" value={publishedCount} icon={CheckmarkFilled} />
               <KpiTile label="Draft" value={draftCount} icon={Edit} />
-            </div>
+              <RailBrief>Firm reference library — books, standards, and notes ESTI can draw on. The AI rephrase step (raw text → reviewable sections) isn't wired up yet, so new sources stay in Draft until that lands.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

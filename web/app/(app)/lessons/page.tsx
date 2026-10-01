@@ -15,6 +15,7 @@ import { AddLessonForm } from "../../../components/aorms/AddLessonForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 // Roles with has_capability('write') (rank >= 40, or an explicit
 // allow-list role — see web/supabase/migrations/0002_capability_helper.sql
@@ -72,7 +73,8 @@ export default async function LessonsPage() {
             >
               <KpiTile label="Total lessons" value={rows.length} icon={Book} />
               <KpiTile label="Categories" value={categoryCount} icon={Category} />
-            </div>
+              <RailBrief>Firm-wide knowledge captured per project.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

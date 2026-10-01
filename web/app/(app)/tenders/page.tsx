@@ -16,6 +16,7 @@ import { AddTenderForm } from "../../../components/aorms/AddTenderForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "purple" | "green" | "red"> = {
   DRAFT: "gray",
@@ -66,7 +67,8 @@ export default async function TendersPage() {
               <KpiTile label="Total tenders" value={rows.length} icon={RequestQuote} />
               <KpiTile label="Open" value={openCount} icon={FolderOpen} />
               <KpiTile label="Awarded" value={awardedCount} icon={TrophyFilled} />
-            </div>
+              <RailBrief>Firm-issued project tenders — distinct from the AProc work-package tendering module, ported as the two separate systems they are today.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

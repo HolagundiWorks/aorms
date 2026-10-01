@@ -16,6 +16,7 @@ import { ApprovalStatusSelect } from "../../../components/aorms/ApprovalStatusSe
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 // Roles with has_capability('write') (rank >= 40, or an explicit
 // allow-list role — see web/supabase/migrations/0002_capability_helper.sql
@@ -75,7 +76,8 @@ export default async function ApprovalsPage() {
               <KpiTile label="Total approvals" value={rows.length} icon={CheckmarkOutline} />
               <KpiTile label="Pending" value={pendingCount} icon={Time} />
               <KpiTile label="Approved" value={approvedCount} icon={CheckmarkFilled} />
-            </div>
+              <RailBrief>What was issued to a client or authority for sign-off, with channel and response status.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

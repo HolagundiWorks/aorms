@@ -15,6 +15,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SnagStatusSelect } from "../../../components/aorms/SnagStatusSelect";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 export default async function SnagsPage() {
   const supabase = await createClient();
@@ -59,7 +60,8 @@ export default async function SnagsPage() {
               <KpiTile label="Open" value={openCount} icon={FolderOpen} />
               <KpiTile label="In progress" value={inProgressCount} icon={InProgress} />
               <KpiTile label="Closed" value={closedCount} icon={Close} />
-            </div>
+              <RailBrief>Site defect register. Photo attachments aren't wired up yet.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

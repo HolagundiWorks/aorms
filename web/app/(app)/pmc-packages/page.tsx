@@ -16,6 +16,7 @@ import { AddPackageForm } from "../../../components/aorms/AddPackageForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "purple" | "green" | "red"> = {
   DRAFT: "gray",
@@ -66,7 +67,8 @@ export default async function PmcPackagesPage() {
           <KpiTile label="Total packages" value={rows.length} icon={Package} />
           <KpiTile label="Tendering" value={tenderingCount} icon={RequestQuote} />
           <KpiTile label="Awarded" value={awardedCount} icon={TrophyFilled} />
-        </div>
+          <RailBrief>Package-level tendering — a second sealed-bid system alongside the firm-issued Tenders module (Phase 9), ported as the distinct system it is today, not merged.</RailBrief>
+</div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

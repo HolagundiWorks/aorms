@@ -15,6 +15,7 @@ import { AddMasterPlanForm } from "../../../components/aorms/AddMasterPlanForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 export default async function MasterPlansPage() {
   const supabase = await createClient();
@@ -51,7 +52,8 @@ export default async function MasterPlansPage() {
             >
               <KpiTile label="Total plans" value={rows.length} icon={Map} />
               <KpiTile label="Categories" value={categoryCount} icon={Category} />
-            </div>
+              <RailBrief>Firm-wide master plan and zoning file register.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

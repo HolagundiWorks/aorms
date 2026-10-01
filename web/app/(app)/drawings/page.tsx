@@ -17,6 +17,7 @@ import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateDrawingIssuePdf } from "../../../lib/actions/drawings";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   PENDING: "gray",
@@ -86,7 +87,8 @@ export default async function DrawingsPage() {
               <KpiTile label="Ready" value={readyCount} icon={CheckmarkFilled} />
               <KpiTile label="Failed" value={failedCount} icon={WarningFilled} />
               <KpiTile label="Pending review" value={pendingReviewCount} icon={Time} />
-            </div>
+              <RailBrief>DXF register with worker-driven takeoff and revision chaining.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

@@ -7,6 +7,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SetActiveVersionButton } from "../../../components/aorms/SetActiveVersionButton";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 /**
  * Spec Catalog (Library → Specification) — CLAUDE.md's own module map
@@ -66,7 +67,8 @@ export default async function SpecCatalogPage() {
             >
               <KpiTile label="Total versions" value={rows.length} icon={VersionMajor} />
               <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
-            </div>
+              <RailBrief>Versioned material specification catalogue — category/item/make/specification/finish rows that project spec sheets pick from. Only one version is active at a time.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

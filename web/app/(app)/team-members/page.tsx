@@ -17,6 +17,7 @@ import { AddTeamMemberForm } from "../../../components/aorms/AddTeamMemberForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -90,7 +91,8 @@ export default async function TeamMembersPage() {
               <KpiTile label="Total members" value={rows.length} icon={UserMultiple} />
               <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
               <KpiTile label="Monthly payroll" value={formatInr(monthlyPayrollPaise)} icon={CurrencyRupee} />
-            </div>
+              <RailBrief>Firm roster. Adding a team member is owner-only, matching the current backend's own gate.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

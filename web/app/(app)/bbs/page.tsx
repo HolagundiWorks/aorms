@@ -16,6 +16,7 @@ import { AddBbsScheduleForm } from "../../../components/aorms/AddBbsScheduleForm
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 const STATUS_TAG: Record<string, "cool-gray" | "green"> = {
   DRAFT: "cool-gray",
@@ -60,7 +61,8 @@ export default async function BbsPage() {
             >
               <KpiTile label="Total schedules" value={rows.length} icon={Calendar} />
               <KpiTile label="Issued" value={issuedCount} icon={DocumentExport} />
-            </div>
+              <RailBrief>IS 456 / IS 2502 cutting-length schedules — column, beam, slab and footing members.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

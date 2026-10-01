@@ -15,6 +15,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SteelCertStatusSelect } from "../../../components/aorms/SteelCertStatusSelect";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 export default async function PmcSteelCertsPage() {
   const supabase = await createClient();
@@ -56,7 +57,8 @@ export default async function PmcSteelCertsPage() {
           <KpiTile label="Total certificates" value={rows.length} icon={Certificate} />
           <KpiTile label="Issued (kg)" value={totalIssuedKg.toLocaleString("en-IN")} icon={Scales} />
           <KpiTile label="Consumed (kg)" value={totalConsumedKg.toLocaleString("en-IN")} icon={Scales} />
-        </div>
+          <RailBrief>Issued vs consumed steel by period, with wastage. The CERTIFIED status additionally requires the cost:approve capability — enforced by a database trigger, not just this page, so a user without it sees the trigger's own rejection.</RailBrief>
+</div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

@@ -6,6 +6,7 @@ import { KpiTile } from "../../../components/aorms/KpiTile";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { RegisterDeviceForm } from "../../../components/aorms/ai-devices/RegisterDeviceForm";
 import { RemoveDeviceButton } from "../../../components/aorms/ai-devices/RemoveDeviceButton";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 /**
  * Esti Mobile Inference — device monitoring (2026-09-13), Phase A of the
@@ -80,7 +81,8 @@ export default async function AiDevicesPage() {
               <KpiTile label="Busy" value={busyCount} icon={Time} />
               <KpiTile label="Error" value={errorCount} status={errorCount > 0 ? "CRITICAL" : "NORMAL"} icon={WarningFilled} />
               <KpiTile label="Total inferences served" value={totalInferences} icon={ChartLineData} />
-            </div>
+              <RailBrief>Inference devices registered to run Esti — status, model, and health, per the mobile inference architecture.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

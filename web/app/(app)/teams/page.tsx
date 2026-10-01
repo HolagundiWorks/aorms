@@ -6,6 +6,7 @@ import { AddTeamForm } from "../../../components/aorms/AddTeamForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 export default async function TeamsPage() {
   const supabase = await createClient();
@@ -37,7 +38,8 @@ export default async function TeamsPage() {
               }}
             >
               <KpiTile label="Total teams" value={rows.length} icon={Group} />
-            </div>
+              <RailBrief>Groupings of team members — creation is owner-only, matching the current backend.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

@@ -16,6 +16,7 @@ import { AddStandardForm } from "../../../components/aorms/AddStandardForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
 
 export default async function StandardsPage() {
   const supabase = await createClient();
@@ -53,7 +54,8 @@ export default async function StandardsPage() {
             >
               <KpiTile label="Total standards" value={rows.length} icon={Ruler} />
               <KpiTile label="Disciplines" value={disciplineCount} icon={Certificate} />
-            </div>
+              <RailBrief>Design standards by discipline, with attached reference files.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
