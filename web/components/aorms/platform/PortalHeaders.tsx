@@ -36,6 +36,7 @@ export function ConnectDexPortalHeader() {
       navItems={[
         { href: "/connectdex", label: "My Company" },
         { href: "/materials", label: "Materials" },
+        { href: "/connectdex/quotes", label: "Quotes" },
         { href: "/connectdex-apply", label: "Apply" },
       ]}
     />
@@ -60,6 +61,7 @@ export function SysDexPortalHeader() {
         { href: "/admin/connectdex", label: "ConnectDeX", superAdminOnly: true },
         { href: "/admin/ai-connectors", label: "AI Connectors", superAdminOnly: true },
         { href: "/admin/helpdesk", label: "HelpDeX" },
+        { href: "/admin/analytics", label: "Analytics", superAdminOnly: true },
         { href: "/admin/logs", label: "Logs", superAdminOnly: true },
       ]}
     />

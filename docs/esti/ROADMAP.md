@@ -7288,12 +7288,12 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 - [ ] Make the `web` job a required check on `main` (repo setting — owner)
 - [x] ESLint config for `web/` (`web/eslint.config.mjs`; errors gate, 29 warnings are the backlog) + lint in the CI job
 - [x] Staff MFA built: `/platform-mfa` (TOTP enrol + verify), `lib/platform/mfa.ts`, `/admin` layout redirect, and enforcement inside `getCurrentPlatformSessionAccount` (covers Server Actions). **Off by default** (`STAFF_MFA_REQUIRED`): enrol first, confirm a code works, then set `true`. Not live-tested (needs a real staff login); confirm Supabase Auth MFA/TOTP is enabled on `aorms-platform`.
-- [x] Activity-log gaps: migration 0042 applied live — triggers for company tier, account level, plan pricing, platform_staff + `actor_auth_id` (auth.uid(); NULL for service-role admin writes). Tier/level/pricing triggers verified with a rolled-back live test; staff trigger not live-tested. [ ] Pass verified staff id from admin Server Actions so service-role writes get an actor; [ ] show actor on SysDeX Logs
+- [x] Activity-log gaps: migration 0042 applied live — triggers for company tier, account level, plan pricing, platform_staff + `actor_auth_id` (auth.uid(); NULL for service-role admin writes). Tier/level/pricing triggers verified with a rolled-back live test; staff trigger not live-tested. [x] Admin Server Actions (ConnectDeX review/tier/fee, account level/role, password reset, helpdesk, pricing) now append a `STAFF_ACTION` row with the staff id via `logStaffAction` → `log_staff_action()` (0046, applied); [x] Actor column on SysDeX Logs. (Licence override already runs under the staff JWT, so its trigger row has the actor.)
 - [x] Default-privileges migration 0041 — applied live to `aorms-platform` 2026-10-01, `pg_default_acl` verified (postgres/public + connectdex no longer grant to PUBLIC/anon/authenticated)
 
 **P1 — correctness and scale**
 - [x] Materials: escape, bound, page · [x] `pg_trgm` + category indexes (0043, applied) · [ ] SQL-side nearest-first ranking
-- [x] SysDeX Logs/Payments paged · [ ] Accounts/Studios/Companies/Licences/Helpdesk paged + server search
+- [x] SysDeX Logs/Payments paged · [x] Users (Identity accounts) paged + server search · [ ] Studios/Companies/Licences/Helpdesk paged + server search
 - [x] Shared rate-limit store: `public.rate_limit_buckets` + `rate_limit_hit()` (0045, applied, live-tested in a rolled-back block); `checkRateLimitShared` used by all 4 auth callers, falls back to in-memory if the store is unreachable
 - [ ] Split `lib/actions/platform.ts` (1,183 lines) by domain; test that every action gates
 - [ ] Collapse sequential service-role waterfalls (identity / materials / studio pages)
@@ -7303,12 +7303,12 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 **P2 — product**
 - [ ] Licence lifecycle emails (T-30/T-7/T-0), grace state, renew CTA
 - [ ] HelpDeX replies over the existing Hostinger SMTP
-- [ ] ConnectDeX differentiator #1: Studio "Request quote" → company inbox + email
+- [x] ConnectDeX differentiator #1: Studio "Request quote" on every Materials product → supplier inbox at `/connectdex/quotes` with reply/close (`connectdex.quote_requests`, 0047, applied; RLS + column-level UPDATE grant; insert + log trigger verified in a rolled-back block). **No email notification** (no mailer) — suppliers must visit the inbox. [ ] email notification once a mailer exists
 - [ ] Studio↔Company: save vendors, attach product to a Hub spec sheet
 - [ ] Public verified-profile page + CV PDF export
 - [ ] In-portal activity log for Studio/Company owners
 - [ ] Enterprise `<slug>.aorms.in` routing
-- [ ] SysDeX analytics (MRR, plan mix, onboarding funnel, ticket aging)
+- [x] SysDeX analytics at `/admin/analytics` (SUPER_ADMIN): studios/accounts/paid licences/12-month captured revenue by source and month, plan mix, ConnectDeX application funnel, company status/tier, open-ticket age, quote count. Counts of real rows only — **no modelled MRR/churn** (licences are one-time annual orders)
 - [ ] Read-only, logged support impersonation
 
 **P3 — optimisation**

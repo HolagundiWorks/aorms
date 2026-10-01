@@ -3,6 +3,7 @@ import { Button, Column, Grid, Select, SelectItem, Stack, Tag, TextInput, Tile }
 import { createClient as createWebClient } from "../../../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { QuoteRequestForm } from "../../../components/aorms/platform/QuoteRequestForm";
 import { ConnectDexPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
 
 type CompanyEmbed = { id: string; name: string; public_id: string; city: string | null; state: string | null } | null;
@@ -193,6 +194,7 @@ export default async function MaterialsPage({
                       </p>
                     )}
                   </div>
+                  <QuoteRequestForm productId={row.id} productName={row.name} />
                 </Stack>
               </Tile>
             );

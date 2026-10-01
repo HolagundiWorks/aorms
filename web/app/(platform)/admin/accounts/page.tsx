@@ -5,6 +5,7 @@ import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAc
 import { AccountAdminControls } from "../../../../components/aorms/platform/AccountAdminControls";
 import { SendPasswordResetButton } from "../../../../components/aorms/platform/SendPasswordResetButton";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
+import { Pager, pageRange, parsePage } from "../../../../components/aorms/platform/Pager";
 import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 
 /**
@@ -37,7 +38,11 @@ import { SysDexPortalHeader } from "../../../../components/aorms/platform/Portal
  * the actual gating — both still require SUPER_ADMIN, now via app code +
  * RLS rather than "requires direct DB access" being the only path).
  */
-export default async function AdminAccountsPage() {
+export default async function AdminAccountsPage({ searchParams }: { searchParams: Promise<{ page?: string; q?: string }> }) {
+  const sp = await searchParams;
+  const page = parsePage(sp.page);
+  const q = (sp.q ?? "").trim();
+  const [from, to] = pageRange(page);
   const account = await getCurrentPlatformSessionAccount();
   if (!isSuperAdmin(account)) return <AdminAccessDenied title="Users" />;
 
@@ -49,15 +54,25 @@ export default async function AdminAccountsPage() {
   // moment anyone used the new control below. See lib/platform/
   // account.ts's resolveAdminRole for the same "platform_staff first"
   // resolution this list mirrors.
-  const [{ data: accounts }, { data: staffRows }, { data: companyAccounts }] = await Promise.all([
-    platformService.from("accounts").select("id, public_id, full_name, level, created_at").order("created_at", { ascending: false }).limit(200),
+  const [{ data: accounts, count: accountCount }, { data: staffRows }, { data: companyAccounts }] = await Promise.all([
+    (() => {
+      let query = platformService
+        .from("accounts")
+        .select("id, public_id, full_name, level, created_at", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(from, to);
+      // Escape LIKE wildcards; strip characters that would break PostgREST's or() syntax.
+      const term = q.replace(/[\\%_]/g, (c) => `\\${c}`).replace(/[,()]/g, " ");
+      if (term) query = query.or(`public_id.ilike.%${term}%,full_name.ilike.%${term}%`);
+      return query;
+    })(),
     platformService.from("platform_staff").select("id, admin_role"),
     platformService
       .schema("connectdex")
       .from("company_accounts")
       .select("id, public_id, full_name, created_at")
       .order("created_at", { ascending: false })
-      .limit(200),
+      .limit(50),
   ]);
   const staffByAccountId = new Map((staffRows ?? []).map((s) => [s.id, s.admin_role as "SUPER_ADMIN" | "SUPPORT_STAFF"]));
 
@@ -71,6 +86,18 @@ export default async function AdminAccountsPage() {
           <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
             Users — AORMS Identity (AORMS-U-)
           </h2>
+          <form method="GET" action="/admin/accounts" role="search" style={{ marginBottom: "1rem", display: "flex", gap: "0.5rem" }}>
+            <input
+              name="q"
+              defaultValue={q}
+              aria-label="Search users by name or handle"
+              placeholder="Search name or AORMS-U- handle"
+              style={{ flex: 1, minHeight: "2rem", padding: "0 0.75rem", border: "1px solid var(--aorms-rule)", background: "transparent", color: "inherit" }}
+            />
+            <button type="submit" className="cds--btn cds--btn--tertiary cds--btn--sm">
+              Search
+            </button>
+          </form>
           <Table aria-label="Users" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
@@ -107,9 +134,10 @@ export default async function AdminAccountsPage() {
               )}
             </TableBody>
           </Table>
+          <Pager basePath="/admin/accounts" page={page} total={accountCount ?? 0} query={q ? { q } : {}} />
 
           <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
-            Company Accounts — ConnectDeX (AORMS-CU-)
+            Company Accounts — ConnectDeX (AORMS-CU-) · latest 50
           </h2>
           <Table aria-label="Company Accounts" className="aorms-table-spaced">
             <TableHead>
