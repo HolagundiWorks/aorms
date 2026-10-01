@@ -7255,6 +7255,68 @@ prop (codemodded from each page's existing `PageHeader` `result`), CSS hides the
 header copy only when the rail is active, so the toolbar sits directly under the
 title. Pages without a rail keep the result in the header. Guide §15 updated.
 
+
+### Platforms audit + hardening pass (2026-10-01)
+
+Full audit of Identity / ConnectDeX / SysDeX: [PLATFORMS-AUDIT-2026-10-01.md](PLATFORMS-AUDIT-2026-10-01.md)
+(implemented vs. missing, 9 ranked risks, prioritised recommendations).
+Fixed in this pass:
+- **R1 — CI now gates `web/`**: new `web` job in `.github/workflows/ci.yml`
+  (`npm ci`, `tsc --noEmit`, `next build` with dummy env). **Action for the repo
+  owner:** mark it a *required* status check on `main`. Lint is not in the job:
+  `web/` has no ESLint config (root `eslint.config.js` targets the legacy
+  workspace and fails to load here) — tracked below.
+- **R5 — Materials directory**: LIKE wildcards escaped, fetch bounded to the 500
+  newest matches, ranked nearest-first, paged 24 per page (`?page=`).
+- **R6 — SysDeX Logs and Payments** paged server-side (`?page=`, 50/page, exact
+  count) via new `components/aorms/platform/Pager.tsx` — no more silent 200-row cap.
+  Accounts page (two sections) still capped at 200.
+- **R9 — default function privileges**: `platform/supabase/migrations/0041_default_function_privileges.sql`
+  stops new functions being callable by PUBLIC/anon/authenticated by default.
+  **Written, not applied** to the live project (no access token in this session).
+- Doc corrections: stale ConnectDeX-invite open item, stale `aorms-web` ref.
+- Audit item 6 corrected after reading migrations: the activity log is
+  trigger-based by design (0012) with broad coverage; real gaps are missing
+  events (tier/level/role/pricing/staff) and no actor.
+
+## Platforms hardening roadmap (opened 2026-10-01)
+
+Order = audit § 5. `[x]` done, `[ ]` open.
+
+**P0 — protect production**
+- [x] CI job for `web/` (typecheck + build)
+- [ ] Make the `web` job a required check on `main` (repo setting — owner)
+- [ ] Add ESLint config to `web/` and add lint to the CI job
+- [ ] Staff MFA (Supabase TOTP, require `aal2` on `/admin/*`)
+- [ ] Activity-log gaps: triggers for tier/level/admin_role/pricing/staff changes + `actor_account_id`
+- [x] Default-privileges migration written (0041) · [ ] apply live + verify
+
+**P1 — correctness and scale**
+- [x] Materials: escape, bound, page · [ ] `pg_trgm` index + SQL-side ranking
+- [x] SysDeX Logs/Payments paged · [ ] Accounts/Studios/Companies/Licences/Helpdesk paged + server search
+- [ ] Shared rate-limit store (before >1 instance)
+- [ ] Split `lib/actions/platform.ts` (1,183 lines) by domain; test that every action gates
+- [ ] Collapse sequential service-role waterfalls (identity / materials / studio pages)
+- [ ] Error monitoring + Razorpay-webhook failure alerting
+- [ ] Unit/e2e tests for `web/` (start with auth gates, webhook HMAC, licence payment application)
+
+**P2 — product**
+- [ ] Licence lifecycle emails (T-30/T-7/T-0), grace state, renew CTA
+- [ ] HelpDeX replies over the existing Hostinger SMTP
+- [ ] ConnectDeX differentiator #1: Studio "Request quote" → company inbox + email
+- [ ] Studio↔Company: save vendors, attach product to a Hub spec sheet
+- [ ] Public verified-profile page + CV PDF export
+- [ ] In-portal activity log for Studio/Company owners
+- [ ] Enterprise `<slug>.aorms.in` routing
+- [ ] SysDeX analytics (MRR, plan mix, onboarding funnel, ticket aging)
+- [ ] Read-only, logged support impersonation
+
+**P3 — optimisation**
+- [ ] `unstable_cache` for `plan_pricing`/categories with tag revalidation
+- [ ] Column-minimal selects + composite indexes after `get_advisors` (performance)
+- [ ] SQL views for admin aggregates
+- [ ] Per-route client JS review; lazy-load Razorpay/Turnstile
+
 ---
 
 **2026-09-27 — mobile Esti shipped ("contextual commands, not a general
@@ -7467,7 +7529,7 @@ messages"). Findings, in order of severity:
   `DRAWING_MAX_BYTES`, no MIME lock (matching the other two general-
   purpose buckets' own pattern).
 - **ConnectDeX company-invite acceptance is broken end-to-end, not
-  fixed yet.** `lib/actions/connectdex.ts`'s `inviteUserByEmail(...)`
+  fixed yet.** *(Stale — see the 2026-09-30 entry "ConnectDeX invite acceptance — already mostly built"; kept for history.)* `lib/actions/connectdex.ts`'s `inviteUserByEmail(...)`
   call omits `redirectTo` entirely — the *exact* historical bug pattern
   `lib/actions/portal-invites.ts`'s own 2026-09-14 remediation comment
   describes as already fixed elsewhere in the codebase, just missed

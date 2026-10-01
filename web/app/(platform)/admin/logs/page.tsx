@@ -3,6 +3,7 @@ import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../../../../lib/
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { AdminAccessDenied } from "../../../../components/aorms/platform/AdminAccessDenied";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
+import { Pager, parsePage, pageRange } from "../../../../components/aorms/platform/Pager";
 import { SysDexPortalHeader } from "../../../../components/aorms/platform/PortalHeaders";
 
 /**
@@ -31,16 +32,18 @@ import { SysDexPortalHeader } from "../../../../components/aorms/platform/Portal
  * `connectdex`-scoped client, joined in JS by `company_id` instead of a
  * PostgREST embed.
  */
-export default async function AdminLogsPage() {
+export default async function AdminLogsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const page = parsePage((await searchParams).page);
   const account = await getCurrentPlatformSessionAccount();
   if (!isSuperAdmin(account)) return <AdminAccessDenied title="Activity Log" />;
 
   const platformService = createPlatformServiceRoleClient();
-  const { data: log } = await platformService
+  const [from, to] = pageRange(page);
+  const { data: log, count } = await platformService
     .from("platform_activity_log")
-    .select("id, event_type, detail, created_at, company_id, accounts(public_id), studios(name, public_id)")
+    .select("id, event_type, detail, created_at, company_id, accounts(public_id), studios(name, public_id)", { count: "exact" })
     .order("created_at", { ascending: false })
-    .limit(200);
+    .range(from, to);
 
   const companyIds = Array.from(new Set((log ?? []).map((r) => r.company_id).filter((id): id is string => !!id)));
   const { data: companiesRows } =
@@ -54,7 +57,7 @@ export default async function AdminLogsPage() {
       <SysDexPortalHeader />
       <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader title="Activity Log" result="Every platform event on the record." description="Every recorded platform event, most recent first — up to the last 200." />
+        <PageHeader title="Activity Log" result="Every platform event on the record." description="Every recorded platform event, most recent first." />
 
         <Table aria-label="Activity log" className="aorms-table-spaced">
           <TableHead>
@@ -96,6 +99,7 @@ export default async function AdminLogsPage() {
             )}
           </TableBody>
         </Table>
+        <Pager basePath="/admin/logs" page={page} total={count ?? 0} />
       </Column>
     </Grid>
     </>

@@ -6,6 +6,31 @@ on:
   pull_request:
 
 jobs:
+  # The live product (aorms.in) is `web/` — Next.js + Supabase. Hostinger builds it
+  # from `main`, so this job is the gate that stops a broken build reaching
+  # production. Make it a required status check on `main` (repo settings).
+  # Lint is intentionally absent: `web/` has no ESLint config of its own (the
+  # root eslint.config.js targets the legacy workspace) — tracked in ROADMAP.md.
+  web:
+    name: web (typecheck · build)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: web } }
+    env:
+      # Dummy values: the build only needs the variables to exist.
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy
+      SUPABASE_SERVICE_ROLE_KEY: dummy
+      NEXT_PUBLIC_PLATFORM_SUPABASE_URL: https://platform.example.supabase.co
+      NEXT_PUBLIC_PLATFORM_SUPABASE_ANON_KEY: dummy
+      PLATFORM_SUPABASE_SERVICE_ROLE_KEY: dummy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm, cache-dependency-path: web/package-lock.json }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
   node:
     name: TypeScript (contracts · backend · frontend)
     runs-on: ubuntu-latest

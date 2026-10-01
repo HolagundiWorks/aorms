@@ -1,5 +1,7 @@
 # Platforms audit — Identity · ConnectDeX · SysDeX (2026-10-01)
 
+> **Status (same day, follow-up pass):** R1 (CI), R5 (Materials), R6 (logs/payments paging) and R9 (default privileges, migration written, **not yet applied**) are addressed — see ROADMAP.md § "Platforms hardening". Everything else below is still open.
+
 Scope: the three `app/(platform)/*` portals of `web/` (Identity, ConnectDeX,
 SysDeX/HelpDeX) as of `main` after PR #88. Method: read the canonical docs
 (`AORMS-PLATFORM-ARCHITECTURE.md`, `SYSDEX-PORTAL-AUDIT-2026-09-14.md`,
@@ -27,7 +29,7 @@ code and docs, not click-through. Items marked **(unverified)** need a live chec
 3. **No outbound HelpDeX replies** — staff triage status/notes only; the submitter is never emailed.
 4. **No recurring billing** — licences are one-time annual orders; no renewal reminder, no expiry notification, no dunning.
 5. **`<slug>.aorms.in` Enterprise subdomains** are reserved in the DB but do not resolve.
-6. **Admin writes are not audit-logged from the app layer** — `platform_activity_log` is filled by DB triggers on specific tables (0012…); manual licence override, tier changes, role/level changes, password-reset requests are only logged where a trigger exists **(unverified per action)**. No "who did this" for every staff action.
+6. **Activity-log coverage gaps (corrected after checking the migrations).** The log is *deliberately* trigger-based (0012: a trigger fires whatever code path wrote, so it can't be forgotten) and coverage is already broad — signups, studios, memberships/roles/Pro seats, licence + payment lifecycle (Studio, ConnectDeX, Identity), ConnectDeX applications/company status, HelpDeX tickets, admin password resets. What is **missing**: (a) events for company **tier** changes, account **level/admin_role** changes, **plan_pricing** edits and `platform_staff` changes; (b) an **actor** — rows record the subject, not which staff member acted, and service-role writes carry no `auth.uid()`. An app-level `logStaffAction` would contradict the 0012 design for (a) (add triggers instead) but is the only way to get (b) for service-role actions.
 7. **No staff MFA.** SUPER_ADMIN sign-in is password only.
 8. **No Portal-level activity log** for a Studio/Company (only SysDeX sees logs).
 9. **No tests for `web/` at all** (no `*.test.*`, no `test` script) and **CI (`ci.yml`) builds the retired backend/frontend, not `web/`** — nothing automated gates the product that is live on aorms.in.
@@ -54,7 +56,7 @@ code and docs, not click-through. Items marked **(unverified)** need a live chec
 ### P0 — protect production (small, high value)
 - **Add a `web` CI job**: `npm ci`, `tsc --noEmit`, `eslint`, `next build` with dummy env (the exact recipe used manually here), required status check on `main`. Retire or isolate the legacy backend/frontend jobs.
 - **Staff MFA**: Supabase TOTP (AAL2) required for `platform_staff`; gate `/admin/*` on `aal2`.
-- **Audit every staff write**: one `logStaffAction(actor, action, target, before, after)` helper called by all `admin*` actions; surface it on SysDeX Logs with actor.
+- **Close the log gaps**: add triggers for tier / level / admin_role / pricing / staff changes (keeps the 0012 design); add an `actor_account_id` column filled from the verified staff id passed by the admin actions that use the service role; show actor on SysDeX Logs.
 - **Default-privileges migration** (`alter default privileges … revoke execute on functions from public`) so grant gaps stop recurring (R9).
 
 ### P1 — correctness and scale
