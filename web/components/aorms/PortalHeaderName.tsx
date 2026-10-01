@@ -21,11 +21,7 @@ import { HeaderName } from "@carbon/react";
 export function PortalHeaderName({ href, label }: { href: string; label: string }) {
   return (
     <HeaderName as={NextLink} href={href} prefix="">
-      <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
-        {/* Plain <img>, not next/image — a fixed brand asset, not user content. */}
-        <img src="/aorms-logo.png" alt="AORMS" style={{ height: "16px", width: "auto" }} />
-        {label}
-      </span>
+      {label}
     </HeaderName>
   );
 }

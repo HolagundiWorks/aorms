@@ -5,6 +5,7 @@ import { getPlatformNavStatus } from "../../../lib/platform/account";
 import { portalUrl } from "../../../lib/platform/subdomains";
 import { getGreeting, getIstHour, getInitials, getFirstName } from "../../../lib/shell/identity";
 import { IdleSessionGuard } from "../security/IdleSessionGuard";
+import { InstructionsToggle } from "../InstructionsToggle";
 
 export type PlatformNavItem = { href: string; label: string; superAdminOnly?: boolean };
 
@@ -87,6 +88,7 @@ export async function PlatformShellHeader({
         {isAdmin && showSysDexLink && <HeaderMenuItem href={portalUrl("sysdex", "/admin")}>SysDeX</HeaderMenuItem>}
       </HeaderNavigation>
       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginLeft: "auto", paddingRight: "1rem" }}>
+        <InstructionsToggle />
         {signedIn ? (
           <>
             {/* aorms-platform-greeting: hidden below ~480px (globals.scss),

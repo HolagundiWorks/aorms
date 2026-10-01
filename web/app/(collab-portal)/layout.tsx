@@ -6,6 +6,10 @@ import { signOut } from "../../lib/actions/auth";
 import { roleHome } from "../../lib/auth/role-home";
 import { PortalHeaderName } from "../../components/aorms/PortalHeaderName";
 import { IdleSessionGuard } from "../../components/aorms/security/IdleSessionGuard";
+import { InstructionsScope } from "../../components/aorms/InstructionsScope";
+import { InstructionsToggle } from "../../components/aorms/InstructionsToggle";
+import { TitleBlock } from "../../components/aorms/TitleBlock";
+import { BrandWatermark } from "../../components/aorms/BrandWatermark";
 
 /**
  * Collaborator Portal shell — same minimal Carbon `Header` + `Content`
@@ -31,11 +35,12 @@ export default async function CollabPortalLayout({ children }: { children: React
   if (profile?.role !== "CONSULTANT") redirect(roleHome(profile?.role) ?? "/login");
 
   return (
-    <>
+    <InstructionsScope>
       <IdleSessionGuard signOutAction={signOut} />
       <Header aria-label="AORMS Collaborator Portal">
         <PortalHeaderName href="/collab-portal" label="Collaborator Portal" />
         <HeaderGlobalBar>
+          <InstructionsToggle />
           <form action={signOut}>
             <HeaderGlobalAction aria-label="Sign out">
               <Logout size={20} />
@@ -44,6 +49,9 @@ export default async function CollabPortalLayout({ children }: { children: React
         </HeaderGlobalBar>
       </Header>
       <Content>{children}</Content>
-    </>
+      {/* Same sheet footer + AORMS mark as the Office Hub (2026-10-01 portal parity). */}
+      <TitleBlock companyName="" />
+      <BrandWatermark />
+    </InstructionsScope>
   );
 }

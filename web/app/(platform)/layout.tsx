@@ -15,9 +15,12 @@
  * layout's bar stacked on top; now they render just their own.
  */
 import { BrandWatermark } from "../../components/aorms/BrandWatermark";
+import { InstructionsScope } from "../../components/aorms/InstructionsScope";
+import { TitleBlock } from "../../components/aorms/TitleBlock";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   return (
+    <InstructionsScope>
     <div style={{ minHeight: "100vh" }}>
       {children}
       {/* Same small, non-interactive AORMS mark Office Hub's own shell
@@ -25,6 +28,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           here rather than per-portal-header, so it's identical across
           every platform surface including /platform-login/-signup. */}
       <BrandWatermark />
+      {/* Floating sheet footer (portal name / sheet / date), same as the Office Hub — portal parity, 2026-10-01. */}
+      <TitleBlock companyName="" />
     </div>
+    </InstructionsScope>
   );
 }
