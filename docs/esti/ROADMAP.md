@@ -7286,19 +7286,19 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 **P0 — protect production**
 - [x] CI job for `web/` (typecheck + build)
 - [ ] Make the `web` job a required check on `main` (repo setting — owner)
-- [ ] Add ESLint config to `web/` and add lint to the CI job
-- [ ] Staff MFA (Supabase TOTP, require `aal2` on `/admin/*`)
+- [x] ESLint config for `web/` (`web/eslint.config.mjs`; errors gate, 29 warnings are the backlog) + lint in the CI job
+- [x] Staff MFA built: `/platform-mfa` (TOTP enrol + verify), `lib/platform/mfa.ts`, `/admin` layout redirect, and enforcement inside `getCurrentPlatformSessionAccount` (covers Server Actions). **Off by default** (`STAFF_MFA_REQUIRED`): enrol first, confirm a code works, then set `true`. Not live-tested (needs a real staff login); confirm Supabase Auth MFA/TOTP is enabled on `aorms-platform`.
 - [x] Activity-log gaps: migration 0042 applied live — triggers for company tier, account level, plan pricing, platform_staff + `actor_auth_id` (auth.uid(); NULL for service-role admin writes). Tier/level/pricing triggers verified with a rolled-back live test; staff trigger not live-tested. [ ] Pass verified staff id from admin Server Actions so service-role writes get an actor; [ ] show actor on SysDeX Logs
 - [x] Default-privileges migration 0041 — applied live to `aorms-platform` 2026-10-01, `pg_default_acl` verified (postgres/public + connectdex no longer grant to PUBLIC/anon/authenticated)
 
 **P1 — correctness and scale**
-- [x] Materials: escape, bound, page · [ ] `pg_trgm` index + SQL-side ranking
+- [x] Materials: escape, bound, page · [x] `pg_trgm` + category indexes (0043, applied) · [ ] SQL-side nearest-first ranking
 - [x] SysDeX Logs/Payments paged · [ ] Accounts/Studios/Companies/Licences/Helpdesk paged + server search
 - [ ] Shared rate-limit store (before >1 instance)
 - [ ] Split `lib/actions/platform.ts` (1,183 lines) by domain; test that every action gates
 - [ ] Collapse sequential service-role waterfalls (identity / materials / studio pages)
 - [ ] Error monitoring + Razorpay-webhook failure alerting
-- [ ] Unit/e2e tests for `web/` (start with auth gates, webhook HMAC, licence payment application)
+- [x] Unit tests for `web/` (vitest, `npm test`, in CI): Razorpay HMAC verification, portal routing table, rate limiter, pager helpers — 15 tests · [ ] auth-gate and licence-payment-application tests · [ ] e2e
 
 **P2 — product**
 - [ ] Licence lifecycle emails (T-30/T-7/T-0), grace state, renew CTA
@@ -7312,8 +7312,8 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 - [ ] Read-only, logged support impersonation
 
 **P3 — optimisation**
-- [ ] `unstable_cache` for `plan_pricing`/categories with tag revalidation
-- [ ] Column-minimal selects + composite indexes after `get_advisors` (performance)
+- [ ] Cache `plan_pricing`/categories — deferred: only the (already dynamic) landing page reads it uncached and payments must read live prices, so the win is small
+- [x] Performance advisors acted on (0044, applied): 25 RLS policies `auth.uid()` → `(select auth.uid())`, 26 FK/created_at indexes · [ ] 113 `multiple_permissive_policies` (needs per-table semantic review) · [ ] column-minimal selects
 - [ ] SQL views for admin aggregates
 - [ ] Per-route client JS review; lazy-load Razorpay/Turnstile
 
