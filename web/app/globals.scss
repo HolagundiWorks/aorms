@@ -1091,6 +1091,44 @@ a.cds--side-nav__link[aria-current="page"]::before {
   font-variant-numeric: tabular-nums;
 }
 
+// The one list toolbar (ListToolbar.tsx): [ search ] [ filters ] [ sort ] [ view ]
+// then a status line. Same bar on Projects, Tasks and every table screen.
+.aorms-toolbar {
+  margin-block-end: 1rem;
+}
+
+.aorms-toolbar__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.aorms-toolbar__search {
+  flex: 2 1 14rem;
+  min-inline-size: 12rem;
+}
+
+.aorms-toolbar__select {
+  flex: 1 1 9rem;
+  min-inline-size: 8.5rem;
+}
+
+.aorms-toolbar__view {
+  flex: 0 0 auto;
+  min-inline-size: 11rem;
+  margin-inline-start: auto;
+}
+
+.aorms-toolbar__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-block-start: 0.5rem;
+  min-block-size: 2rem;
+}
+
 // Task filter bar: one row that wraps, each control ~11rem.
 .aorms-task-filters {
   display: grid;
