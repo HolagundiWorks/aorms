@@ -10,6 +10,7 @@ import { PageHeader } from "../../../components/aorms/PageHeader";
 import { ProvisionPortalLoginForm } from "../../../components/aorms/ProvisionPortalLoginForm";
 import { inviteConsultantLogin } from "../../../lib/actions/portal-invites";
 import { importConsultantsCsv } from "../../../lib/actions/consultants";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 // Same set as app/(app)/clients/page.tsx's own WRITE_TIER_ROLES — gates
 // the "Add consultant" trigger and CSV import bar for VIEWER the same way
@@ -93,7 +94,7 @@ export default async function ConsultantsPage() {
                 Couldn&apos;t load consultants: {error.message}
               </p>
             ) : (
-              <Table aria-label="Consultants" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Consultants" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Name</TableHeader>
@@ -135,7 +136,7 @@ export default async function ConsultantsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

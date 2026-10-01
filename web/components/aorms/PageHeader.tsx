@@ -60,7 +60,7 @@ export function PageHeader({
       </div>
       {summary && <p className="aorms-summary">{summary}</p>}
       {description && (
-        <p className="cds--type-body-01 aorms-instruction" style={{ color: "var(--cds-text-secondary)", maxWidth: "42rem" }}>
+        <p className="cds--type-body-01 aorms-instruction aorms-page-desc" style={{ color: "var(--cds-text-secondary)", maxWidth: "42rem" }}>
           {description}
         </p>
       )}

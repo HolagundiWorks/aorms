@@ -5,6 +5,8 @@ import { AddDocumentIssueForm } from "../../../components/aorms/AddDocumentIssue
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 /**
  * Document Issues register — Phase 4's own flagged gap ("document_issues
@@ -77,14 +79,15 @@ export default async function DocumentIssuesPage() {
               <KpiTile label="Total issues" value={rows.length} icon={WarningAlt} />
               <KpiTile label="This month" value={thisMonthCount} icon={Calendar} />
               <KpiTile label="Document types" value={entityTypeCount} icon={DocumentMultiple_02} />
-            </div>
+              <RailBrief>Cross-entity revision/issue register — drawings, transmittals, invoices, and every other issued document, in one place.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
                 Couldn&apos;t load document issues: {error.message}
               </p>
             ) : (
-              <Table aria-label="Document issues" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Document issues" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Type</TableHeader>
@@ -125,7 +128,7 @@ export default async function DocumentIssuesPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

@@ -19,6 +19,7 @@ import { PageHeader } from "../../../components/aorms/PageHeader";
 import { ProvisionPortalLoginForm } from "../../../components/aorms/ProvisionPortalLoginForm";
 import { inviteContractorLogin } from "../../../lib/actions/portal-invites";
 import { importContractorsCsv } from "../../../lib/actions/contractors";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 // Same set as app/(app)/clients/page.tsx's own WRITE_TIER_ROLES (mirrored
 // from lib/actions/clients.ts) — gates the "Add contractor" trigger and
@@ -103,7 +104,7 @@ export default async function ContractorsPage() {
                 Couldn&apos;t load contractors: {error.message}
               </p>
             ) : (
-              <Table aria-label="Contractors" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Contractors" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Name</TableHeader>
@@ -151,7 +152,7 @@ export default async function ContractorsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

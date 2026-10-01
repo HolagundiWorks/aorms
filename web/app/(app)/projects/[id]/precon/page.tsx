@@ -26,6 +26,7 @@ import { OpportunityStatusSelect } from "../../../../../components/aorms/Opportu
 import { PageHeader } from "../../../../../components/aorms/PageHeader";
 import { PhaseGateChecklist } from "../../../../../components/aorms/PhaseGateChecklist";
 import { opportunityPriority } from "../../../../../lib/project-precon";
+import { RailBrief } from "../../../../../components/aorms/RailBrief";
 
 const PRIORITY_TAG: Record<string, "red" | "magenta" | "purple" | "gray"> = {
   CRITICAL: "red",
@@ -90,7 +91,8 @@ export default async function ProjectPreconPage({
           <KpiTile label="Critical risks" value={criticalRiskCount} icon={WarningFilled} />
           <KpiTile label="Total opportunities" value={opportunityRows.length} icon={Idea} />
           <KpiTile label="Gates passed" value={`${gatesPassedCount}/${TOTAL_GATE_KEYS}`} icon={CheckmarkOutline} />
-        </div>
+          <RailBrief>Studio design-stage risk and opportunity registers, plus phase gates — not construction readiness (that's AProc's own delivery-side tracking).</RailBrief>
+</div>
 
         <Tabs>
           <TabList aria-label="Precon sections">

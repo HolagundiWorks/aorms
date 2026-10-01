@@ -17,6 +17,8 @@ import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateDrawingIssuePdf } from "../../../lib/actions/drawings";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   PENDING: "gray",
@@ -86,14 +88,15 @@ export default async function DrawingsPage() {
               <KpiTile label="Ready" value={readyCount} icon={CheckmarkFilled} />
               <KpiTile label="Failed" value={failedCount} icon={WarningFilled} />
               <KpiTile label="Pending review" value={pendingReviewCount} icon={Time} />
-            </div>
+              <RailBrief result="A controlled drawing register.">DXF register with worker-driven takeoff and revision chaining.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
                 Couldn&apos;t load drawings: {error.message}
               </p>
             ) : (
-              <Table aria-label="Drawings" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Drawings" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Ref</TableHeader>
@@ -147,7 +150,7 @@ export default async function DrawingsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

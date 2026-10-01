@@ -15,6 +15,8 @@ import { AddMasterPlanForm } from "../../../components/aorms/AddMasterPlanForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 export default async function MasterPlansPage() {
   const supabase = await createClient();
@@ -51,14 +53,15 @@ export default async function MasterPlansPage() {
             >
               <KpiTile label="Total plans" value={rows.length} icon={Map} />
               <KpiTile label="Categories" value={categoryCount} icon={Category} />
-            </div>
+              <RailBrief>Firm-wide master plan and zoning file register.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
                 Couldn&apos;t load plans: {error.message}
               </p>
             ) : (
-              <Table aria-label="Master plans" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Master plans" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Name</TableHeader>
@@ -90,7 +93,7 @@ export default async function MasterPlansPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

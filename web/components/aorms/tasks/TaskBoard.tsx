@@ -19,6 +19,7 @@ import { assignTask, setTaskDueDate, updateTaskStatus } from "../../../lib/actio
 import { addDays } from "../../../lib/tasks/dates";
 import { formatTaskRef } from "../../../lib/tasks/ref";
 import { analyzeAssignee, isOpen, taskAlerts, type TaskAlert } from "../../../lib/tasks/workload";
+import { ListToolbar } from "../ListToolbar";
 import {
   DEFAULT_FILTERS,
   SORT_LABEL,
@@ -247,80 +248,101 @@ export function TaskBoard({
         )}
       </div>
 
-      <div className="aorms-task-filters" role="search" aria-label="Filter and sort tasks">
-        <Search
-          size="md"
-          labelText="Search tasks"
-          placeholder="Search tasks or ID"
-          value={filters.q}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilter("q", e.target.value)}
-          onClear={() => setFilter("q", "")}
-          closeButtonLabelText="Clear search"
-        />
-        <Select id="tf-project" size="md" labelText="Project" value={filters.project} onChange={(e) => setFilter("project", e.target.value)}>
-          <SelectItem value="" text="All projects" />
-          {projects.map((p) => (
-            <SelectItem key={p.id} value={p.id} text={p.title} />
-          ))}
-        </Select>
-        <Select id="tf-person" size="md" labelText="Person" value={filters.assignee} onChange={(e) => setFilter("assignee", e.target.value)}>
-          <SelectItem value="" text="Everyone" />
-          {currentUserId && <SelectItem value={currentUserId} text="Me" />}
-          <SelectItem value="unassigned" text="Unassigned" />
-          {people.filter((p) => p.id !== currentUserId).map((p) => (
-            <SelectItem key={p.id} value={p.id} text={p.name} />
-          ))}
-        </Select>
-        <Select id="tf-priority" size="md" labelText="Priority" value={filters.priority} onChange={(e) => setFilter("priority", e.target.value)}>
-          <SelectItem value="" text="Any priority" />
-          <SelectItem value="CRITICAL" text="Critical" />
-          <SelectItem value="HIGH" text="High" />
-          <SelectItem value="MEDIUM" text="Medium" />
-          <SelectItem value="LOW" text="Low" />
-        </Select>
-        <Select id="tf-date" size="md" labelText="Due date" value={filters.date} onChange={(e) => setFilter("date", e.target.value as DatePreset)}>
-          <SelectItem value="any" text="Any date" />
-          <SelectItem value="overdue" text="Overdue" />
-          <SelectItem value="today" text="Due today" />
-          <SelectItem value="week" text="Next 7 days" />
-          <SelectItem value="month" text="This month" />
-          <SelectItem value="none" text="No deadline" />
-          <SelectItem value="range" text="Custom range…" />
-        </Select>
-        {filters.date === "range" && (
+      <ListToolbar
+        label="Search, filter and sort tasks"
+        search={{ value: filters.q, onChange: (v) => setFilter("q", v), placeholder: "Search tasks or ID" }}
+        filters={[
+          {
+            id: "tf-project",
+            label: "Project",
+            value: filters.project,
+            onChange: (v) => setFilter("project", v),
+            options: [{ value: "", label: "All projects" }, ...projects.map((p) => ({ value: p.id, label: p.title }))],
+          },
+          {
+            id: "tf-person",
+            label: "Person",
+            value: filters.assignee,
+            onChange: (v) => setFilter("assignee", v),
+            options: [
+              { value: "", label: "Everyone" },
+              ...(currentUserId ? [{ value: currentUserId, label: "Me" }] : []),
+              { value: "unassigned", label: "Unassigned" },
+              ...people.filter((p) => p.id !== currentUserId).map((p) => ({ value: p.id, label: p.name })),
+            ],
+          },
+          {
+            id: "tf-priority",
+            label: "Priority",
+            value: filters.priority,
+            onChange: (v) => setFilter("priority", v),
+            options: [
+              { value: "", label: "Any priority" },
+              { value: "CRITICAL", label: "Critical" },
+              { value: "HIGH", label: "High" },
+              { value: "MEDIUM", label: "Medium" },
+              { value: "LOW", label: "Low" },
+            ],
+          },
+          {
+            id: "tf-date",
+            label: "Due date",
+            value: filters.date,
+            onChange: (v) => setFilter("date", v as DatePreset),
+            options: [
+              { value: "any", label: "Any date" },
+              { value: "overdue", label: "Overdue" },
+              { value: "today", label: "Due today" },
+              { value: "week", label: "Next 7 days" },
+              { value: "month", label: "This month" },
+              { value: "none", label: "No deadline" },
+              { value: "range", label: "Custom range…" },
+            ],
+          },
+        ]}
+        extra={
+          filters.date === "range" ? (
+            <>
+              <div className="aorms-toolbar__select">
+                <TextInput id="tf-from" type="date" size="md" labelText="From" value={filters.from} onChange={(e) => setFilter("from", e.target.value)} />
+              </div>
+              <div className="aorms-toolbar__select">
+                <TextInput id="tf-to" type="date" size="md" labelText="To" value={filters.to} onChange={(e) => setFilter("to", e.target.value)} />
+              </div>
+            </>
+          ) : undefined
+        }
+        sort={{
+          id: "tf-sort",
+          label: "Sort by",
+          value: filters.sort,
+          onChange: (v) => setFilter("sort", v as SortKey),
+          options: (Object.keys(SORT_LABEL) as SortKey[]).map((k) => ({ value: k, label: SORT_LABEL[k] })),
+        }}
+        view={{
+          value: view,
+          options: [
+            { value: "board", label: "Board" },
+            { value: "calendar", label: "Calendar" },
+          ],
+          onChange: (v) => setView(v as "board" | "calendar"),
+        }}
+        status={`Showing ${visible.length} of ${tasks.length} tasks${filterCount > 0 ? ` · ${filterCount} filter${filterCount > 1 ? "s" : ""} on` : ""}`}
+        actions={
           <>
-            <TextInput id="tf-from" type="date" size="md" labelText="From" value={filters.from} onChange={(e) => setFilter("from", e.target.value)} />
-            <TextInput id="tf-to" type="date" size="md" labelText="To" value={filters.to} onChange={(e) => setFilter("to", e.target.value)} />
+            {currentUserId && (
+              <Button kind={filters.assignee === currentUserId ? "primary" : "tertiary"} size="sm" onClick={() => setFilter("assignee", filters.assignee === currentUserId ? "" : currentUserId)}>
+                My tasks
+              </Button>
+            )}
+            {(filterCount > 0 || filters.sort !== "priority") && (
+              <Button kind="ghost" size="sm" onClick={() => setFilters(DEFAULT_FILTERS)}>
+                Reset
+              </Button>
+            )}
           </>
-        )}
-        <Select id="tf-sort" size="md" labelText="Sort by" value={filters.sort} onChange={(e) => setFilter("sort", e.target.value as SortKey)}>
-          {(Object.keys(SORT_LABEL) as SortKey[]).map((k) => (
-            <SelectItem key={k} value={k} text={SORT_LABEL[k]} />
-          ))}
-        </Select>
-      </div>
-      <div className="aorms-task-filter-status" aria-live="polite">
-        <div style={{ inlineSize: "14rem" }}>
-          <ContentSwitcher size="sm" selectedIndex={view === "board" ? 0 : 1} onChange={(e) => setView(e.name as "board" | "calendar")}>
-            <Switch name="board" text="Board" />
-            <Switch name="calendar" text="Calendar" />
-          </ContentSwitcher>
-        </div>
-        <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-          Showing {visible.length} of {tasks.length} tasks
-          {filterCount > 0 ? ` · ${filterCount} filter${filterCount > 1 ? "s" : ""} on` : ""}
-        </span>
-        {currentUserId && (
-          <Button kind={filters.assignee === currentUserId ? "primary" : "tertiary"} size="sm" onClick={() => setFilter("assignee", filters.assignee === currentUserId ? "" : currentUserId)}>
-            My tasks
-          </Button>
-        )}
-        {(filterCount > 0 || filters.sort !== "priority") && (
-          <Button kind="ghost" size="sm" onClick={() => setFilters(DEFAULT_FILTERS)}>
-            Reset
-          </Button>
-        )}
-      </div>
+        }
+      />
 
       {/* People strip (replaces the old right-hand team column, which squeezed
           the board): drag a person onto a card to assign, click to filter, drop

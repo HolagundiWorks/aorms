@@ -16,6 +16,8 @@ import { AddPurchaseOrderForm } from "../../../components/aorms/AddPurchaseOrder
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -86,14 +88,15 @@ export default async function PurchaseOrdersPage() {
               <KpiTile label="Total POs" value={rows.length} icon={ShoppingCart} />
               <KpiTile label="Issued" value={issuedCount} icon={DocumentExport} />
               <KpiTile label="Total value" value={formatInr(totalValuePaise)} icon={CurrencyRupee} />
-            </div>
+              <RailBrief>Simple quantity × rate procurement, per project.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
                 Couldn&apos;t load purchase orders: {error.message}
               </p>
             ) : (
-              <Table aria-label="Purchase Orders" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Purchase Orders" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Ref</TableHeader>
@@ -136,7 +139,7 @@ export default async function PurchaseOrdersPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

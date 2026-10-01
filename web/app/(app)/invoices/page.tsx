@@ -16,6 +16,8 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { DownloadPdfLink } from "../../../components/aorms/DownloadPdfLink";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -78,14 +80,15 @@ export default async function InvoicesPage() {
           <KpiTile label="Invoiced" value={formatInr(grandTotalPaise)} icon={CurrencyRupee} />
           <KpiTile label="Outstanding" value={formatInr(outstandingPaise)} icon={Wallet} />
           <KpiTile label="Paid" value={paidCount} icon={CheckmarkFilled} />
-        </div>
+          <RailBrief result="Fees billed and recovered on time.">GST invoicing — CGST/SGST/IGST, place of supply, and s.194J TDS computed automatically.</RailBrief>
+</div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load invoices: {error.message}
           </p>
         ) : (
-          <Table aria-label="Invoices" className="aorms-table-spaced">
+          <><TableToolbar /><Table aria-label="Invoices" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
                 <TableHeader>Ref</TableHeader>
@@ -143,7 +146,7 @@ export default async function InvoicesPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table></>
         )}
           </Column>
         </Grid>

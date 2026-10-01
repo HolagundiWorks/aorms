@@ -16,6 +16,8 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RaBillStatusSelect } from "../../../components/aorms/RaBillStatusSelect";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -59,14 +61,15 @@ export default async function PmcRaBillsPage() {
         >
           <KpiTile label="Total bills" value={rows.length} icon={Receipt} />
           <KpiTile label="Total gross" value={formatInr(totalGrossPaise)} icon={CurrencyRupee} />
-        </div>
+          <RailBrief>Contractor RA bills for AProc work packages — distinct from the Estimation module's own running_bills. CERTIFIED additionally requires cost:approve (database trigger).</RailBrief>
+</div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load bills: {error.message}
           </p>
         ) : (
-          <Table aria-label="RA bills" className="aorms-table-spaced">
+          <><TableToolbar /><Table aria-label="RA bills" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
                 <TableHeader>Ref</TableHeader>
@@ -107,7 +110,7 @@ export default async function PmcRaBillsPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table></>
         )}
       </Column>
       </Grid>

@@ -16,6 +16,8 @@ import { AddEstimateForm } from "../../../components/aorms/AddEstimateForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 const STATUS_TAG: Record<string, "gray" | "blue" | "green" | "red"> = {
   DRAFT: "gray",
@@ -66,14 +68,15 @@ export default async function EstimatesPage() {
           <KpiTile label="Total estimates" value={rows.length} icon={Calculator} />
           <KpiTile label="Draft" value={draftCount} icon={Edit} />
           <KpiTile label="Approved" value={approvedCount} icon={CheckmarkFilled} />
-        </div>
+          <RailBrief result="A measurable cost plan.">Priced BOQ against a rate book, with contingency + GST rollup.</RailBrief>
+</div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load estimates: {error.message}
           </p>
         ) : (
-          <Table aria-label="Estimates" className="aorms-table-spaced">
+          <><TableToolbar /><Table aria-label="Estimates" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
                 <TableHeader>Ref</TableHeader>
@@ -117,7 +120,7 @@ export default async function EstimatesPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table></>
         )}
       </Column>
       </Grid>

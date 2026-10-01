@@ -7,6 +7,7 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../../../components/aorms/KpiTile";
 import { NegotiationOutcomeSelect } from "../../../../../components/aorms/NegotiationOutcomeSelect";
 import { PageHeader } from "../../../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../../../components/aorms/RailBrief";
 
 function formatInr(paise: number): string {
   const sign = paise < 0 ? "-" : "";
@@ -73,7 +74,8 @@ export default async function NegotiationPage({
           <KpiTile label="Total rounds" value={rows.length} icon={Renew} />
           <KpiTile label="Agreed" value={agreedCount} icon={CheckmarkFilled} />
           <KpiTile label="Latest conversion" value={latestConversion != null ? `${latestConversion}%` : "—"} icon={ChartLineData} />
-        </div>
+          <RailBrief>Commercial negotiation rounds. Conversion probability is computed automatically — confidence erodes with each extra round and cumulative discount conceded, advisory only.</RailBrief>
+</div>
 
         {roundsError ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

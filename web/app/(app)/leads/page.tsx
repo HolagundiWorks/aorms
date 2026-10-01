@@ -17,6 +17,8 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { LeadStatusSelect } from "../../../components/aorms/LeadStatusSelect";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 // Roles with has_capability('write') (rank >= 40, or an explicit
 // allow-list role — see web/supabase/migrations/0002_capability_helper.sql
@@ -84,14 +86,15 @@ export default async function LeadsPage() {
               <KpiTile label="Open" value={openCount} icon={FolderOpen} />
               <KpiTile label="Converted" value={convertedCount} icon={CheckmarkFilled} />
               <KpiTile label="Lost" value={lostCount} icon={Close} />
-            </div>
+              <RailBrief>Inbound enquiries, before a client or project exists — the start of the Project OS lead-to-activation pipeline.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
                 Couldn&apos;t load leads: {error.message}
               </p>
             ) : (
-              <Table aria-label="Leads" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Leads" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Ref</TableHeader>
@@ -133,7 +136,7 @@ export default async function LeadsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

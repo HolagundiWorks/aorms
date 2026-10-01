@@ -22,6 +22,8 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { ExpenseRowActions } from "../../../components/aorms/ExpenseRowActions";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 // Roles with has_capability('write') — see migration
 // 0086_accounts_and_expenses.sql's "expenses: staff create draft" /
@@ -76,7 +78,7 @@ function ExpensesTable({
   projectInvoices: { id: string; ref: string; project_id: string }[];
 }) {
   return (
-    <Table aria-label="Expenses" className="aorms-table-spaced">
+    <><TableToolbar /><Table aria-label="Expenses" className="aorms-table-spaced">
       <TableHead>
         <TableRow>
           <TableHeader>Ref</TableHeader>
@@ -135,7 +137,7 @@ function ExpensesTable({
           </TableRow>
         )}
       </TableBody>
-    </Table>
+    </Table></>
   );
 }
 
@@ -193,7 +195,8 @@ export default async function AccountsPage() {
               <KpiTile label="Closed total" value={formatInr(closedTotalPaise)} icon={CurrencyRupee} />
               <KpiTile label="Pending recovery" value={pendingRecoveryCount} icon={Money} />
               <KpiTile label="Cash total" value={formatInr(cashTotalPaise)} icon={Wallet} />
-            </div>
+              <RailBrief>Office and project expenses, receipts, and recovery tracking.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
