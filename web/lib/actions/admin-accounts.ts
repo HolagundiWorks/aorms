@@ -13,6 +13,7 @@
  * client instance is used purely for convenience (already at hand for the
  * getUserById lookup), not because the call itself is privileged.
  */
+import { logStaffAction } from "../platform/staff-audit";
 import { revalidatePath } from "next/cache";
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
@@ -80,5 +81,6 @@ export async function adminTriggerPasswordReset(
   if (logError) return { error: toSafeErrorMessage(logError) };
 
   revalidatePath("/admin/accounts");
+  await logStaffAction("account.password_reset", { accountId, accountKind });
   return { success: `Password reset email sent to ${userData.user.email}.` };
 }

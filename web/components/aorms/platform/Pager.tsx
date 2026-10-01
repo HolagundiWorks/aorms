@@ -17,10 +17,23 @@ export function pageRange(page: number, size = ADMIN_PAGE_SIZE): [number, number
  * hard-capped at 200 rows with no way to see older ones. Plain links, so it works
  * without client JS and keeps the URL shareable.
  */
-export function Pager({ basePath, page, total, size = ADMIN_PAGE_SIZE }: { basePath: string; page: number; total: number; size?: number }) {
+export function Pager({
+  basePath,
+  page,
+  total,
+  size = ADMIN_PAGE_SIZE,
+  query = {},
+}: {
+  basePath: string;
+  page: number;
+  total: number;
+  size?: number;
+  /** Extra query params to preserve across pages (e.g. a search term). */
+  query?: Record<string, string>;
+}) {
   const pages = Math.max(1, Math.ceil(total / size));
   if (pages <= 1) return null;
-  const href = (n: number) => `${basePath}?page=${n}`;
+  const href = (n: number) => `${basePath}?${new URLSearchParams({ ...query, page: String(n) })}`;
   return (
     <nav aria-label="Pagination" style={{ display: "flex", gap: "1rem", alignItems: "center", marginTop: "1.5rem" }}>
       {page > 1 && <NextLink href={href(page - 1)}>Previous</NextLink>}

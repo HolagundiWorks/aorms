@@ -38,6 +38,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aorms.in";
 import { createOrder, verifyPaymentSignature } from "../platform/razorpay";
 import { applyCapturedConnectDexPayment } from "../platform/connectdex-payment";
 import { toSafeErrorMessage } from "../security/safe-error";
+import { logStaffAction } from "../platform/staff-audit";
 
 export type ConnectDexActionState = { error: string; success?: undefined } | { success: string; error?: undefined } | null;
 
@@ -151,6 +152,7 @@ export async function adminInviteConnectDexApplication(applicationId: string): P
     .eq("id", applicationId);
   if (updateError) return { error: toSafeErrorMessage(updateError) };
 
+  await logStaffAction("connectdex.invite_application", { applicationId });
   revalidatePath("/admin/connectdex");
   return { success: `Invited — Company ${company.id} created, pending onboarding.` };
 }
@@ -169,6 +171,7 @@ export async function adminRejectConnectDexApplication(applicationId: string): P
     .eq("status", "PENDING");
   if (error) return { error: toSafeErrorMessage(error) };
 
+  await logStaffAction("connectdex.reject_application", { applicationId });
   revalidatePath("/admin/connectdex");
   return null;
 }
@@ -191,6 +194,7 @@ export async function adminVerifyConnectDexCompany(companyId: string): Promise<C
     .eq("status", "PENDING_VERIFICATION");
   if (error) return { error: toSafeErrorMessage(error) };
 
+  await logStaffAction("connectdex.verify_company", { companyId });
   revalidatePath("/admin/connectdex");
   return null;
 }
@@ -219,6 +223,7 @@ export async function adminSetCompanyTier(_prev: ConnectDexActionState, formData
   const { error } = await platformService.schema("connectdex").from("companies").update({ tier }).eq("id", companyId);
   if (error) return { error: toSafeErrorMessage(error) };
 
+  await logStaffAction("connectdex.set_company_tier", { companyId, tier });
   revalidatePath("/admin/connectdex");
   revalidatePath("/admin/companies");
   return null;
@@ -255,6 +260,7 @@ export async function adminActivateCompany(companyId: string): Promise<ConnectDe
     .eq("id", companyId);
   if (error) return { error: toSafeErrorMessage(error) };
 
+  await logStaffAction("connectdex.activate_company", { companyId });
   revalidatePath("/admin/connectdex");
   revalidatePath("/admin/companies");
   return { success: "Company activated." };
@@ -276,6 +282,7 @@ export async function adminSetConnectDexFee(_prev: ConnectDexActionState, formDa
     .eq("id", true);
   if (error) return { error: toSafeErrorMessage(error) };
 
+  await logStaffAction("connectdex.set_fee");
   revalidatePath("/admin/connectdex");
   return null;
 }

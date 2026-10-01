@@ -38,6 +38,7 @@ import { toSafeErrorMessage } from "../security/safe-error";
 import { bridgeIdentityToOfficeHub, resolveSignInDestination, signOutSafely } from "./auth";
 import { roleHome } from "../auth/role-home";
 import { stampSessionStart, clearSessionStart } from "../supabase/session-cap";
+import { logStaffAction } from "../platform/staff-audit";
 
 export type PlatformActionState = { error: string } | null;
 
@@ -1134,6 +1135,7 @@ export async function adminSetAccountLevel(accountId: string, level: "BASIC" | "
   const { error } = await platformService.from("accounts").update({ level }).eq("id", accountId);
   if (error) return { error: toSafeErrorMessage(error) };
 
+  await logStaffAction("account.set_level", { accountId, level });
   revalidatePath("/admin/accounts");
   return {};
 }
@@ -1178,6 +1180,7 @@ export async function adminSetAccountRole(
     : await supabase.from("platform_staff").delete().eq("id", accountId);
   if (error) return { error: toSafeErrorMessage(error) };
 
+  await logStaffAction("account.set_admin_role", { accountId });
   revalidatePath("/admin/accounts");
   return {};
 }

@@ -25,6 +25,7 @@ import { createOrder, verifyPaymentSignature } from "../platform/razorpay";
 import { applyCapturedPayment } from "../platform/licence-payment";
 import { applyCapturedIdentityPayment } from "../platform/identity-payment";
 import { toSafeErrorMessage } from "../security/safe-error";
+import { logStaffAction } from "../platform/staff-audit";
 
 export type PaymentActionState = { error: string } | null;
 
@@ -342,6 +343,7 @@ export async function adminSetPricing(_prev: PaymentActionState, formData: FormD
     .eq("plan", plan);
   if (error) return { error: toSafeErrorMessage(error) };
 
+  await logStaffAction("pricing.set", { plan });
   revalidatePath("/admin/pricing");
   return null;
 }

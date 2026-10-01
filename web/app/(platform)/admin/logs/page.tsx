@@ -41,7 +41,7 @@ export default async function AdminLogsPage({ searchParams }: { searchParams: Pr
   const [from, to] = pageRange(page);
   const { data: log, count } = await platformService
     .from("platform_activity_log")
-    .select("id, event_type, detail, created_at, company_id, accounts(public_id), studios(name, public_id)", { count: "exact" })
+    .select("id, event_type, detail, created_at, company_id, actor_auth_id, accounts(public_id), studios(name, public_id)", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -50,6 +50,10 @@ export default async function AdminLogsPage({ searchParams }: { searchParams: Pr
     companyIds.length > 0
       ? await platformService.schema("connectdex").from("companies").select("id, name, public_id").in("id", companyIds)
       : { data: [] as { id: string; name: string; public_id: string }[] };
+  const actorIds = Array.from(new Set((log ?? []).map((r) => r.actor_auth_id).filter((id): id is string => !!id)));
+  const { data: actorRows } =
+    actorIds.length > 0 ? await platformService.from("accounts").select("id, public_id").in("id", actorIds) : { data: [] as { id: string; public_id: string }[] };
+  const actorById = new Map((actorRows ?? []).map((a) => [a.id, a.public_id]));
   const companyById = new Map((companiesRows ?? []).map((c) => [c.id, c]));
 
   return (
@@ -65,6 +69,7 @@ export default async function AdminLogsPage({ searchParams }: { searchParams: Pr
               <TableHeader>Event</TableHeader>
               <TableHeader>Account</TableHeader>
               <TableHeader>Studio / Company</TableHeader>
+              <TableHeader>Actor</TableHeader>
               <TableHeader>Detail</TableHeader>
               <TableHeader>Date</TableHeader>
             </TableRow>
@@ -81,6 +86,7 @@ export default async function AdminLogsPage({ searchParams }: { searchParams: Pr
                   <TableCell>
                     {studio ? `${studio.name} (${studio.public_id})` : company ? `${company.name} (${company.public_id})` : "—"}
                   </TableCell>
+                  <TableCell>{row.actor_auth_id ? (actorById.get(row.actor_auth_id) ?? "staff") : "—"}</TableCell>
                   <TableCell>
                     <span className="cds--type-code-01">{JSON.stringify(row.detail)}</span>
                   </TableCell>
@@ -90,7 +96,7 @@ export default async function AdminLogsPage({ searchParams }: { searchParams: Pr
             })}
             {(log ?? []).length === 0 && (
               <TableRow>
-                <TableCell colSpan={5}>
+                <TableCell colSpan={6}>
                   <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                     No activity logged yet.
                   </p>

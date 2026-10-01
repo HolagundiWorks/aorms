@@ -18,6 +18,7 @@ import { createClient as createPlatformClient } from "../platform/server";
 import { getCurrentPlatformSessionAccount } from "../platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 import { toSafeErrorMessage } from "../security/safe-error";
+import { logStaffAction } from "../platform/staff-audit";
 
 export type SupportActionState = { error: string; success?: undefined } | { success: string; error?: undefined } | null;
 
@@ -115,6 +116,7 @@ export async function adminUpdateSupportTicketStatus(
     .eq("id", ticketId);
   if (error) return { error: toSafeErrorMessage(error) };
 
+  await logStaffAction("helpdesk.update_ticket", { status });
   revalidatePath("/admin/helpdesk");
   return {};
 }
