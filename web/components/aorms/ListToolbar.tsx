@@ -1,6 +1,10 @@
 "use client";
 
-import { ContentSwitcher, Search, Select, SelectItem, Switch } from "@carbon/react";
+import { ContentSwitcher, IconSwitch, Search, Select, SelectItem } from "@carbon/react";
+import { Calendar, Dashboard, Grid, List, Menu } from "@carbon/icons-react";
+
+// View-switch icons by option value (label becomes the tooltip).
+const VIEW_ICONS: Record<string, React.ElementType> = { cards: Grid, lines: List, board: Dashboard, calendar: Calendar };
 
 export type ToolbarOption = { value: string; label: string };
 export type ToolbarSelect = {
@@ -83,7 +87,9 @@ export function ListToolbar({
               onChange={(e) => view.onChange(String(e.name))}
             >
               {view.options.map((o) => (
-                <Switch key={o.value} name={o.value} text={o.label} />
+                <IconSwitch key={o.value} name={o.value} text={o.label}>
+                  {(() => { const I = VIEW_ICONS[o.value] ?? Menu; return <I />; })()}
+                </IconSwitch>
               ))}
             </ContentSwitcher>
           </div>
