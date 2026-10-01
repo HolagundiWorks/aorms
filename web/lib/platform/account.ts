@@ -1,5 +1,6 @@
 import { createClient as createWebClient } from "../supabase/server";
 import { createClient as createPlatformClient } from "./server";
+import { sessionIsAal2, staffMfaRequired } from "./mfa";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "./service";
 
 export type AdminRole = "SUPER_ADMIN" | "SUPPORT_STAFF" | null;
@@ -106,7 +107,11 @@ export async function getCurrentPlatformSessionAccount(): Promise<CurrentPlatfor
   const { data: account } = await platformService.from("accounts").select("id, public_id, full_name").eq("id", user.id).maybeSingle();
   if (!account) return null;
 
-  const admin_role = await resolveAdminRole(platformService, account.id);
+  let admin_role = await resolveAdminRole(platformService, account.id);
+  // Staff MFA gate (see lib/platform/mfa.ts): a staff session that has not completed
+  // MFA is treated as non-staff, so every admin page AND Server Action — all of which
+  // gate on this resolver — denies it, not just the UI.
+  if (admin_role !== null && staffMfaRequired() && !(await sessionIsAal2())) admin_role = null;
   return { ...account, admin_role, is_admin: admin_role !== null };
 }
 

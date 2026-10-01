@@ -48,6 +48,7 @@ export const SHARED_PREFIXES = [
   "/support",
   "/platform-auth-callback",
   "/platform-reset-password",
+  "/platform-mfa",
 ];
 
 function matchesPrefix(pathname: string, prefixes: string[]): boolean {

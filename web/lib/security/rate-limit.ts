@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 
 /**
  * 2026-09-14 — enterprise-grade security pass. No rate limiting existed
@@ -72,4 +73,30 @@ export function checkRateLimit(action: string, identifier: string, opts: { max: 
   hits.push(now);
   buckets.set(key, hits);
   return { ok: true };
+}
+
+/**
+ * Shared-store variant (2026-10-01 audit R2): counters live in Postgres
+ * (`public.rate_limit_hit`, platform migration 0045), so limits survive redeploys
+ * and hold across server instances. Fixed window. If the store is unreachable it
+ * falls back to the in-memory limiter above rather than failing sign-in closed —
+ * a degraded limiter beats locking everyone out.
+ */
+export async function checkRateLimitShared(
+  action: string,
+  identifier: string,
+  opts: { max: number; windowMs: number },
+): Promise<RateLimitResult> {
+  try {
+    const { data, error } = await createPlatformServiceRoleClient().rpc("rate_limit_hit", {
+      p_key: `${action}:${identifier}`,
+      p_max: opts.max,
+      p_window_seconds: Math.max(1, Math.ceil(opts.windowMs / 1000)),
+    });
+    const row = Array.isArray(data) ? data[0] : data;
+    if (error || !row) throw new Error(error?.message ?? "empty rate-limit response");
+    return row.allowed ? { ok: true } : { ok: false, retryAfterSeconds: Math.max(1, Number(row.retry_after) || 1) };
+  } catch {
+    return checkRateLimit(action, identifier, opts);
+  }
 }

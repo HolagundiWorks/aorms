@@ -32,7 +32,7 @@ import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 import { resolvePortalHomeFromHost } from "../platform/subdomains";
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
-import { checkRateLimit, rateLimitIdentifier } from "../security/rate-limit";
+import { checkRateLimitShared, rateLimitIdentifier } from "../security/rate-limit";
 import { validatePassword } from "../security/password-policy";
 import { toSafeErrorMessage } from "../security/safe-error";
 import { bridgeIdentityToOfficeHub, resolveSignInDestination, signOutSafely } from "./auth";
@@ -65,7 +65,7 @@ export async function platformSignUp(
   const passwordCheck = validatePassword(password);
   if (!passwordCheck.ok) return { error: passwordCheck.error };
 
-  const rateLimit = checkRateLimit("platformSignUp", await rateLimitIdentifier(), { max: 5, windowMs: 60 * 60 * 1000 });
+  const rateLimit = await checkRateLimitShared("platformSignUp", await rateLimitIdentifier(), { max: 5, windowMs: 60 * 60 * 1000 });
   if (!rateLimit.ok) return { error: `Too many sign-up attempts — try again in ${rateLimit.retryAfterSeconds}s.` };
 
   const supabase = await createPlatformClient();
@@ -226,7 +226,7 @@ export async function platformSignIn(
   // Rate-limited per IP+email so one mistyped password from a real user
   // never blocks them from trying a different account from the same
   // network — only repeated attempts against the same identifier count.
-  const rateLimit = checkRateLimit("platformSignIn", `${await rateLimitIdentifier()}:${email.toLowerCase()}`, {
+  const rateLimit = await checkRateLimitShared("platformSignIn", `${await rateLimitIdentifier()}:${email.toLowerCase()}`, {
     max: 8,
     windowMs: 15 * 60 * 1000,
   });
