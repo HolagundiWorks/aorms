@@ -74,7 +74,7 @@ export default async function LessonsPage() {
             >
               <KpiTile label="Total lessons" value={rows.length} icon={Book} />
               <KpiTile label="Categories" value={categoryCount} icon={Category} />
-              <RailBrief>Firm-wide knowledge captured per project.</RailBrief>
+              <RailBrief result="Information that can be reused.">Firm-wide knowledge captured per project.</RailBrief>
 </div>
 
             {error ? (

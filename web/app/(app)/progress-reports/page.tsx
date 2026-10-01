@@ -65,7 +65,7 @@ export default async function ProgressReportsPage() {
               <KpiTile label="Total reports" value={rows.length} icon={ReportData} />
               <KpiTile label="Issued" value={issuedCount} icon={DocumentExport} />
               <KpiTile label="Avg physical progress" value={avgPhysicalPct != null ? `${avgPhysicalPct}%` : "—"} icon={ChartLineData} />
-              <RailBrief>Periodic project progress narrative and completion percentages.</RailBrief>
+              <RailBrief result="Site progress anyone can verify.">Periodic project progress narrative and completion percentages.</RailBrief>
 </div>
 
             {error ? (

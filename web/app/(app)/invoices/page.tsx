@@ -80,7 +80,7 @@ export default async function InvoicesPage() {
           <KpiTile label="Invoiced" value={formatInr(grandTotalPaise)} icon={CurrencyRupee} />
           <KpiTile label="Outstanding" value={formatInr(outstandingPaise)} icon={Wallet} />
           <KpiTile label="Paid" value={paidCount} icon={CheckmarkFilled} />
-          <RailBrief>GST invoicing — CGST/SGST/IGST, place of supply, and s.194J TDS computed automatically.</RailBrief>
+          <RailBrief result="Fees billed and recovered on time.">GST invoicing — CGST/SGST/IGST, place of supply, and s.194J TDS computed automatically.</RailBrief>
 </div>
 
         {error ? (

@@ -77,7 +77,7 @@ export default async function ApprovalsPage() {
               <KpiTile label="Total approvals" value={rows.length} icon={CheckmarkOutline} />
               <KpiTile label="Pending" value={pendingCount} icon={Time} />
               <KpiTile label="Approved" value={approvedCount} icon={CheckmarkFilled} />
-              <RailBrief>What was issued to a client or authority for sign-off, with channel and response status.</RailBrief>
+              <RailBrief result="Sign-offs on the record.">What was issued to a client or authority for sign-off, with channel and response status.</RailBrief>
 </div>
 
             {error ? (

@@ -46,7 +46,7 @@ export function ListToolbar({
         {search && (
           <div className="aorms-toolbar__search">
             <Search
-              size="md"
+              size="sm"
               labelText="Search"
               placeholder={search.placeholder ?? "Search"}
               value={search.value}
@@ -58,7 +58,7 @@ export function ListToolbar({
         )}
         {filters.map((f) => (
           <div className="aorms-toolbar__select" key={f.id}>
-            <Select id={f.id} size="md" labelText={f.label} value={f.value} onChange={(e) => f.onChange(e.target.value)}>
+            <Select id={f.id} size="sm" labelText={f.label} hideLabel value={f.value} onChange={(e) => f.onChange(e.target.value)}>
               {f.options.map((o) => (
                 <SelectItem key={o.value} value={o.value} text={o.label} />
               ))}
@@ -68,9 +68,9 @@ export function ListToolbar({
         {extra}
         {sort && (
           <div className="aorms-toolbar__select">
-            <Select id={sort.id} size="md" labelText={sort.label} value={sort.value} onChange={(e) => sort.onChange(e.target.value)}>
+            <Select id={sort.id} size="sm" labelText={sort.label} hideLabel value={sort.value} onChange={(e) => sort.onChange(e.target.value)}>
               {sort.options.map((o) => (
-                <SelectItem key={o.value} value={o.value} text={o.label} />
+                <SelectItem key={o.value} value={o.value} text={`Sort: ${o.label}`} />
               ))}
             </Select>
           </div>
@@ -78,7 +78,7 @@ export function ListToolbar({
         {view && (
           <div className="aorms-toolbar__view">
             <ContentSwitcher
-              size="md"
+              size="sm"
               selectedIndex={Math.max(0, view.options.findIndex((o) => o.value === view.value))}
               onChange={(e) => view.onChange(String(e.name))}
             >
@@ -88,13 +88,13 @@ export function ListToolbar({
             </ContentSwitcher>
           </div>
         )}
+        {(status || actions) && (
+          <div className="aorms-toolbar__status" aria-live="polite">
+            {status && <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>{status}</span>}
+            {actions}
+          </div>
+        )}
       </div>
-      {(status || actions) && (
-        <div className="aorms-toolbar__status" aria-live="polite">
-          {status && <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>{status}</span>}
-          {actions}
-        </div>
-      )}
     </div>
   );
 }

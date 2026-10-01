@@ -84,7 +84,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
           <BigStat value={rows.length} label="Projects" />
           <BigStat value={activeCount} label="Active" active />
           <BigStat value={enquiryCount} label="Enquiry" />
-          <RailBrief>Project offices — phases, tasks, and delivery live under each project.</RailBrief>
+          <RailBrief result="A coordinated project record.">Project offices — phases, tasks, and delivery live under each project.</RailBrief>
 </div>
 
         {error ? (

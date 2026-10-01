@@ -4,13 +4,20 @@
  * moved into the rail (CSS hides the header copy only when the rail is active, so
  * a page whose KPI row can't become a rail keeps its description where it was).
  * It is a how-to/summary note, so it carries `.aorms-instruction` and obeys the
- * Instructions toggle. Pulse renders its own live (non-instruction) variant.
+ * Instructions toggle. The optional `result` ("The result" line) moves here too,
+ * so the header ends at the title and the toolbar sits directly beneath it. Pulse renders its own live (non-instruction) variant.
  */
-export function RailBrief({ children }: { children: React.ReactNode }) {
+export function RailBrief({ children, result }: { children: React.ReactNode; result?: string }) {
   return (
     <div className="aorms-rail-brief aorms-instruction">
       <h3 className="aorms-bigstat__label">Brief</h3>
       <p>{children}</p>
+      {result && (
+        <>
+          <h3 className="aorms-bigstat__label aorms-rail-brief__result-label">The result</h3>
+          <p>{result}</p>
+        </>
+      )}
     </div>
   );
 }

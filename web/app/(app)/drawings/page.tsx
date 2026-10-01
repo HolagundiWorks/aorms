@@ -88,7 +88,7 @@ export default async function DrawingsPage() {
               <KpiTile label="Ready" value={readyCount} icon={CheckmarkFilled} />
               <KpiTile label="Failed" value={failedCount} icon={WarningFilled} />
               <KpiTile label="Pending review" value={pendingReviewCount} icon={Time} />
-              <RailBrief>DXF register with worker-driven takeoff and revision chaining.</RailBrief>
+              <RailBrief result="A controlled drawing register.">DXF register with worker-driven takeoff and revision chaining.</RailBrief>
 </div>
 
             {error ? (

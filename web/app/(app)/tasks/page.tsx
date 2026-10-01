@@ -88,7 +88,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
               <KpiTile label="In progress" value={inProgressCount} icon={InProgress} />
               <KpiTile label="Blocked" value={blockedCount} icon={LockedAndBlocked} />
               <KpiTile label="Done" value={doneCount} icon={CheckmarkFilled} />
-              <RailBrief>Drag tasks between columns, drop people onto tasks to assign, and drag deadlines on the calendar.</RailBrief>
+              <RailBrief result="Work that is assigned, dated and finishable.">Drag tasks between columns, drop people onto tasks to assign, and drag deadlines on the calendar.</RailBrief>
 </div>
 
             {error ? (

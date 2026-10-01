@@ -55,7 +55,7 @@ export default async function StandardsPage() {
             >
               <KpiTile label="Total standards" value={rows.length} icon={Ruler} />
               <KpiTile label="Disciplines" value={disciplineCount} icon={Certificate} />
-              <RailBrief>Design standards by discipline, with attached reference files.</RailBrief>
+              <RailBrief result="Information that can be reused.">Design standards by discipline, with attached reference files.</RailBrief>
 </div>
 
             {error ? (

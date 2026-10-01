@@ -92,7 +92,7 @@ export default async function TeamMembersPage() {
               <KpiTile label="Total members" value={rows.length} icon={UserMultiple} />
               <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
               <KpiTile label="Monthly payroll" value={formatInr(monthlyPayrollPaise)} icon={CurrencyRupee} />
-              <RailBrief>Firm roster. Adding a team member is owner-only, matching the current backend's own gate.</RailBrief>
+              <RailBrief result="A team that is known and reachable.">Firm roster. Adding a team member is owner-only, matching the current backend's own gate.</RailBrief>
 </div>
 
             {error ? (

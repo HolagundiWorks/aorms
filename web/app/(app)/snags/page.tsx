@@ -61,7 +61,7 @@ export default async function SnagsPage() {
               <KpiTile label="Open" value={openCount} icon={FolderOpen} />
               <KpiTile label="In progress" value={inProgressCount} icon={InProgress} />
               <KpiTile label="Closed" value={closedCount} icon={Close} />
-              <RailBrief>Site defect register. Photo attachments aren't wired up yet.</RailBrief>
+              <RailBrief result="Resolved site conditions.">Site defect register. Photo attachments aren't wired up yet.</RailBrief>
 </div>
 
             {error ? (

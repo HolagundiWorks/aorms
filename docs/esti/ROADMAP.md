@@ -7246,6 +7246,15 @@ Follow-up to PRs #81/#82 (both live — confirmed in production):
   see git history on this file (pre-2026-09-10) or `CLAUDE.md`'s own Dev/
   verify loop section for what's still true about that stack today.
 
+### Compact one-row toolbar; "The result" moved into the rail (2026-10-01)
+
+User feedback: the toolbar took too much vertical space. `ListToolbar` is now a
+single row (Carbon `sm`, labels hidden, sort options prefixed "Sort:", status and
+actions inline). On the 42 rail screens `RailBrief` takes an optional `result`
+prop (codemodded from each page's existing `PageHeader` `result`), CSS hides the
+header copy only when the rail is active, so the toolbar sits directly under the
+title. Pages without a rail keep the result in the header. Guide §15 updated.
+
 ---
 
 **2026-09-27 — mobile Esti shipped ("contextual commands, not a general

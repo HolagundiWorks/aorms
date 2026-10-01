@@ -77,7 +77,7 @@ export default async function MomsPage() {
               <KpiTile label="Total minutes" value={rows.length} icon={Document} />
               <KpiTile label="Draft" value={draftCount} icon={Edit} />
               <KpiTile label="Issued" value={issuedCount} icon={DocumentExport} />
-              <RailBrief>MOMs — minutes of meeting, per project.</RailBrief>
+              <RailBrief result="Decisions that can be acted upon.">MOMs — minutes of meeting, per project.</RailBrief>
 </div>
 
             {error ? (

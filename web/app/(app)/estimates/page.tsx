@@ -68,7 +68,7 @@ export default async function EstimatesPage() {
           <KpiTile label="Total estimates" value={rows.length} icon={Calculator} />
           <KpiTile label="Draft" value={draftCount} icon={Edit} />
           <KpiTile label="Approved" value={approvedCount} icon={CheckmarkFilled} />
-          <RailBrief>Priced BOQ against a rate book, with contingency + GST rollup.</RailBrief>
+          <RailBrief result="A measurable cost plan.">Priced BOQ against a rate book, with contingency + GST rollup.</RailBrief>
 </div>
 
         {error ? (

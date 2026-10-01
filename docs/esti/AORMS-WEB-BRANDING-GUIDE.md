@@ -507,6 +507,11 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-01 (toolbar)** — `ListToolbar` is now **one compact row** (Carbon `sm`
+  controls, hidden labels, sort options read "Sort: …", status/actions inline, view
+  switch right-aligned). **"The result" moved into the rail** under the Brief
+  (`<RailBrief result="…">`); on rail pages the header ends at the title so the
+  toolbar sits directly beneath it. Non-rail pages keep the result in the header.
 - **2026-10-01 (later)** — Pulse: *Active projects* removed; the live brief moved from the
   heading into the rail below the numerals. **Rail Brief on every rail screen**;
   Projects now uses the KPI rail. **One `ListToolbar`** (search + filters + sort + view)

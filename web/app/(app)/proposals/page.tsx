@@ -77,7 +77,7 @@ export default async function ProposalsPage() {
               <KpiTile label="Sent" value={sentCount} icon={Send} />
               <KpiTile label="Approved" value={approvedCount} icon={CheckmarkFilled} />
               <KpiTile label="Fee value" value={formatInr(totalFeePaise)} icon={CurrencyRupee} />
-              <RailBrief>COA fee proposals and scope agreements.</RailBrief>
+              <RailBrief result="A fee agreed before work begins.">COA fee proposals and scope agreements.</RailBrief>
 </div>
 
             {error ? (

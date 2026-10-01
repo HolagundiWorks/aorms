@@ -68,7 +68,7 @@ export default async function TendersPage() {
               <KpiTile label="Total tenders" value={rows.length} icon={RequestQuote} />
               <KpiTile label="Open" value={openCount} icon={FolderOpen} />
               <KpiTile label="Awarded" value={awardedCount} icon={TrophyFilled} />
-              <RailBrief>Firm-issued project tenders — distinct from the AProc work-package tendering module, ported as the two separate systems they are today.</RailBrief>
+              <RailBrief result="A comparable procurement decision.">Firm-issued project tenders — distinct from the AProc work-package tendering module, ported as the two separate systems they are today.</RailBrief>
 </div>
 
             {error ? (
