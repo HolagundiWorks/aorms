@@ -159,6 +159,18 @@ export default async function StudioDetailPage({
     (m) => m.account_id === currentAccountId && m.role === "OWNER" && m.status === "ACTIVE",
   );
 
+  // Owner-only "Recent activity" (2026-10-01): this studio's own platform events, newest
+  // first. Read with the service role but scoped by studio_id and shown only to its
+  // owners; event type + time only (the raw detail JSON can carry payment/ID fields).
+  const { data: activity } = isOwner
+    ? await createPlatformServiceRoleClient()
+        .from("platform_activity_log")
+        .select("id, event_type, created_at")
+        .eq("studio_id", studio.id)
+        .order("created_at", { ascending: false })
+        .limit(20)
+    : { data: [] as { id: string; event_type: string; created_at: string }[] };
+
   return (
     <>
       <IdentityPortalHeader />
@@ -443,6 +455,34 @@ export default async function StudioDetailPage({
             )}
           </div>
         </Stack>
+        {isOwner && (
+          <div style={{ marginTop: "2rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+              Recent activity
+            </h2>
+            <Table aria-label="Recent studio activity" size="sm">
+              <TableHead>
+                <TableRow>
+                  <TableHeader>Event</TableHeader>
+                  <TableHeader>When</TableHeader>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {(activity ?? []).map((a) => (
+                  <TableRow key={a.id}>
+                    <TableCell>{a.event_type.replaceAll("_", " ").toLowerCase()}</TableCell>
+                    <TableCell>{new Date(a.created_at).toLocaleString()}</TableCell>
+                  </TableRow>
+                ))}
+                {(activity ?? []).length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={2}>No activity recorded yet.</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </Column>
       </Grid>
     </>

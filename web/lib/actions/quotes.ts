@@ -18,6 +18,7 @@ import { createServiceRoleClient } from "../platform/service";
 import { getCurrentPlatformAccount, getCurrentPlatformSessionAccount } from "../platform/account";
 import { checkRateLimitShared, rateLimitIdentifier } from "../security/rate-limit";
 import { toSafeErrorMessage } from "../security/safe-error";
+import { sendEmail } from "../email/send";
 
 export type QuoteActionState = { error: string } | { success: string } | null;
 
@@ -58,8 +59,27 @@ export async function requestQuote(_prev: QuoteActionState, formData: FormData):
   });
   if (error) return { error: toSafeErrorMessage(error) };
 
+  // Best-effort email to the supplier's owner (no-op without SMTP; never blocks the request).
+  let emailed = false;
+  try {
+    const { data: company } = await service.schema("connectdex").from("companies").select("name, owner_id").eq("id", product.company_id).maybeSingle();
+    if (company?.owner_id) {
+      const { data: owner } = await service.auth.admin.getUserById(company.owner_id);
+      if (owner?.user?.email) {
+        const res = await sendEmail({
+          to: owner.user.email,
+          subject: `New quote request for ${company.name}`,
+          text: `A Studio has asked for a quote.\n\n${quantity ? `Quantity: ${quantity}\n` : ""}${message}\n\nReply in your ConnectDeX quotes inbox: https://connectdex.aorms.in/connectdex/quotes\n\n— AORMS ConnectDeX`,
+        });
+        emailed = res.sent;
+      }
+    }
+  } catch {
+    /* notification is best-effort */
+  }
+
   revalidatePath("/connectdex/quotes");
-  return { success: "Quote request sent. The supplier will reply in your ConnectDeX quotes inbox." };
+  return { success: `Quote request sent. The supplier will reply in your ConnectDeX quotes inbox${emailed ? " (they've been emailed)" : ""}.` };
 }
 
 export async function respondToQuote(_prev: QuoteActionState, formData: FormData): Promise<QuoteActionState> {
@@ -78,8 +98,27 @@ export async function respondToQuote(_prev: QuoteActionState, formData: FormData
   if (error) return { error: toSafeErrorMessage(error) };
   if (!data || data.length === 0) return { error: "You can only reply to requests for a company you own." };
 
+  let emailed = false;
+  try {
+    const service = createServiceRoleClient();
+    const { data: q } = await service.schema("connectdex").from("quote_requests").select("requester_id").eq("id", id).maybeSingle();
+    if (q?.requester_id) {
+      const { data: requester } = await service.auth.admin.getUserById(q.requester_id);
+      if (requester?.user?.email) {
+        const res = await sendEmail({
+          to: requester.user.email,
+          subject: "A supplier replied to your quote request",
+          text: `${reply}\n\nSee it in your ConnectDeX quotes inbox: https://connectdex.aorms.in/connectdex/quotes\n\n— AORMS ConnectDeX`,
+        });
+        emailed = res.sent;
+      }
+    }
+  } catch {
+    /* notification is best-effort */
+  }
+
   revalidatePath("/connectdex/quotes");
-  return { success: "Reply sent." };
+  return { success: emailed ? "Reply sent and emailed to the requester." : "Reply sent." };
 }
 
 export async function closeQuote(id: string): Promise<{ error?: string }> {

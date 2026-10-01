@@ -29,6 +29,13 @@ export default async function AdminHelpDeskPage() {
     .select("id, name, email, category, subject, message, status, admin_note, created_at")
     .order("created_at", { ascending: false });
 
+  const { data: replyRows } = await platformService
+    .from("support_ticket_replies")
+    .select("ticket_id, message, emailed, created_at")
+    .order("created_at", { ascending: true });
+  const repliesByTicket = new Map<string, { message: string; emailed: boolean; created_at: string }[]>();
+  for (const r of replyRows ?? []) repliesByTicket.set(r.ticket_id, [...(repliesByTicket.get(r.ticket_id) ?? []), r]);
+
   const sorted = [...(tickets ?? [])].sort((a, b) => {
     const openFirst = (s: string) => (s === "OPEN" || s === "IN_PROGRESS" ? 0 : 1);
     return openFirst(a.status) - openFirst(b.status);
@@ -58,6 +65,13 @@ export default async function AdminHelpDeskPage() {
                     {t.name} · {t.email} · {new Date(t.created_at).toLocaleString()}
                   </p>
                   <p className="cds--type-body-01">{t.message}</p>
+                  {(repliesByTicket.get(t.id) ?? []).map((r, i) => (
+                    <p key={i} className="cds--type-body-01" style={{ borderInlineStart: "2px solid var(--aorms-ink)", paddingInlineStart: "0.75rem", whiteSpace: "pre-wrap" }}>
+                      <strong>Reply</strong> <span className="cds--type-helper-text-01">({new Date(r.created_at).toLocaleString()}, {r.emailed ? "emailed" : "not emailed"})</span>
+                      <br />
+                      {r.message}
+                    </p>
+                  ))}
                   <SupportTicketActionForm ticketId={t.id} currentStatus={t.status} currentNote={t.admin_note} />
                 </Stack>
               </Tile>

@@ -1,6 +1,6 @@
 # Platforms audit — Identity · ConnectDeX · SysDeX (2026-10-01)
 
-> **Status (same day, follow-up pass):** R1 (CI), R5 (Materials), R6 (logs/payments paging) and R9 (default privileges, migration written, **not yet applied**) are addressed — see ROADMAP.md § "Platforms hardening". Everything else below is still open.
+> **Status (end of 2026-10-01):** most of this audit is now addressed — CI gate + lint + 38 tests for `web/`, staff MFA (built, off by default), DB hardening/perf migrations 0041–0048 (applied live), shared rate limiter, paging, staff-action audit trail, error reporting, two money-path bugs fixed, SMTP mailer (HelpDeX replies, licence reminders, quote notifications), ConnectDeX quote requests, SysDeX analytics. **Still open / needs a decision or ops action:** make the `web` check *required* on `main`; set `SMTP_*` / `CRON_SECRET` / `ALERT_WEBHOOK_URL` and add the daily cron; enable `STAFF_MFA_REQUIRED` after enrolment; a real Razorpay test payment; 113 `multiple_permissive_policies` advisories; Enterprise subdomains (wildcard DNS); read-only support impersonation and public verified profiles (need a security/privacy decision); splitting `platform.ts` (deliberately skipped — the new structural gate test covers its risk). Live checklist: ROADMAP.md § "Platforms hardening roadmap".
 
 Scope: the three `app/(platform)/*` portals of `web/` (Identity, ConnectDeX,
 SysDeX/HelpDeX) as of `main` after PR #88. Method: read the canonical docs

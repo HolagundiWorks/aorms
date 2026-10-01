@@ -99,7 +99,7 @@ export default async function QuotesPage() {
       <ConnectDexPortalHeader />
       <Grid>
         <Column sm={4} md={8} lg={12}>
-          <PageHeader title="Quotes" result="Requests answered, nothing lost." description="Quote requests sent by Studios, and the ones you've sent. Suppliers reply here — there is no email notification yet, so check back." />
+          <PageHeader title="Quotes" result="Requests answered, nothing lost." description="Quote requests sent by Studios, and the ones you've sent. Suppliers reply here — when email is configured, both sides are notified; otherwise check back." />
           {incoming.length > 0 && (
             <>
               <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>

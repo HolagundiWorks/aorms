@@ -19,6 +19,7 @@ import { getCurrentPlatformSessionAccount } from "../platform/account";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
 import { toSafeErrorMessage } from "../security/safe-error";
 import { logStaffAction } from "../platform/staff-audit";
+import { sendEmail } from "../email/send";
 
 export type SupportActionState = { error: string; success?: undefined } | { success: string; error?: undefined } | null;
 
@@ -119,4 +120,37 @@ export async function adminUpdateSupportTicketStatus(
   await logStaffAction("helpdesk.update_ticket", { status });
   revalidatePath("/admin/helpdesk");
   return {};
+}
+
+/**
+ * HelpDeX reply (2026-10-01): records the reply against the ticket and emails the
+ * submitter when SMTP is configured. The reply is always stored; `emailed` on the
+ * row and the returned message say whether it was actually delivered, so staff are
+ * never told an email went out when it didn't.
+ */
+export async function adminReplyToSupportTicket(ticketId: string, message: string): Promise<{ error?: string; notice?: string }> {
+  const gate = await requirePlatformAdmin();
+  if ("error" in gate) return gate;
+  const text = message.trim();
+  if (text.length < 1 || text.length > 5000) return { error: "Write a reply (up to 5,000 characters)." };
+
+  const service = createPlatformServiceRoleClient();
+  const { data: ticket } = await service.from("support_tickets").select("id, email, subject, status").eq("id", ticketId).maybeSingle();
+  if (!ticket) return { error: "Ticket not found." };
+
+  const result = await sendEmail({
+    to: ticket.email,
+    subject: `Re: ${ticket.subject}`,
+    text: `${text}\n\n—\nAORMS HelpDeX\nReply to this email to continue the conversation.`,
+    replyTo: process.env.SMTP_FROM ?? undefined,
+  });
+  const { error } = await service
+    .from("support_ticket_replies")
+    .insert({ ticket_id: ticket.id, author_id: gate.accountId, message: text, emailed: result.sent });
+  if (error) return { error: toSafeErrorMessage(error) };
+  if (ticket.status === "OPEN") await service.from("support_tickets").update({ status: "IN_PROGRESS" }).eq("id", ticket.id);
+
+  await logStaffAction("helpdesk.reply", { ticketId, emailed: result.sent });
+  revalidatePath("/admin/helpdesk");
+  return result.sent ? { notice: `Reply emailed to ${ticket.email}.` } : { notice: `Reply saved but NOT emailed — ${result.reason}` };
 }

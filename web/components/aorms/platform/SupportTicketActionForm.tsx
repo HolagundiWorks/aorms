@@ -2,14 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { Button, InlineNotification, Select, SelectItem, Stack, TextArea } from "@carbon/react";
-import { adminUpdateSupportTicketStatus } from "../../../lib/actions/support";
+import { adminReplyToSupportTicket, adminUpdateSupportTicketStatus } from "../../../lib/actions/support";
 
 type Status = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
 
 /**
- * SysDeX/HelpDeX — per-ticket status + admin note. No outbound email
- * reply here (see lib/actions/support.ts's header comment on that scope
- * boundary) — this just triages/resolves the ticket's own status.
+ * SysDeX/HelpDeX — per-ticket status + internal note, and (2026-10-01) a reply to
+ * the submitter. The reply is always stored; it is emailed only when SMTP is
+ * configured, and the result line says which happened.
  */
 export function SupportTicketActionForm({
   ticketId,
@@ -24,6 +24,9 @@ export function SupportTicketActionForm({
   const [note, setNote] = useState(currentNote ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [reply, setReply] = useState("");
+  const [replyNotice, setReplyNotice] = useState<string | null>(null);
+  const [replyPending, startReply] = useTransition();
 
   return (
     <Stack gap={3}>
@@ -58,6 +61,26 @@ export function SupportTicketActionForm({
         }}
       >
         {isPending ? "Saving…" : "Save"}
+      </Button>
+      <TextArea id={`reply-${ticketId}`} labelText="Reply to submitter (emailed when email is configured)" rows={3} value={reply} onChange={(e) => setReply(e.target.value)} />
+      {replyNotice && <InlineNotification kind={replyNotice.includes("NOT emailed") ? "warning" : "success"} title="Reply" subtitle={replyNotice} hideCloseButton lowContrast />}
+      <Button
+        size="sm"
+        kind="tertiary"
+        disabled={replyPending || reply.trim().length === 0}
+        onClick={() => {
+          setReplyNotice(null);
+          startReply(async () => {
+            const res = await adminReplyToSupportTicket(ticketId, reply);
+            if (res.error) setError(res.error);
+            else {
+              setReplyNotice(res.notice ?? "Saved.");
+              setReply("");
+            }
+          });
+        }}
+      >
+        {replyPending ? "Sending…" : "Send reply"}
       </Button>
     </Stack>
   );

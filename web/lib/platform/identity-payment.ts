@@ -24,14 +24,21 @@ import type { createServiceRoleClient } from "./service";
 export async function applyCapturedIdentityPayment(
   platformService: ReturnType<typeof createServiceRoleClient>,
   payment: { id: string; account_id: string; razorpay_payment_id: string },
-): Promise<void> {
-  await platformService
+): Promise<boolean> {
+  // Claim, then verify; release the claim on failure (2026-10-01 audit, see licence-payment.ts).
+  const { data: claimed, error: claimError } = await platformService
     .from("identity_payments")
     .update({ status: "CAPTURED", razorpay_payment_id: payment.razorpay_payment_id, updated_at: new Date().toISOString() })
-    .eq("id", payment.id);
+    .eq("id", payment.id)
+    .neq("status", "CAPTURED")
+    .select("id");
+  if (claimError) throw new Error(`payment claim failed: ${claimError.message}`);
+  if (!claimed || claimed.length === 0) return false;
 
-  await platformService
-    .from("identity_licences")
-    .update({ plan: "AORMS_IDENTITY", expires_at: null })
-    .eq("account_id", payment.account_id);
+  const { error } = await platformService.from("identity_licences").update({ plan: "AORMS_IDENTITY", expires_at: null }).eq("account_id", payment.account_id);
+  if (error) {
+    await platformService.from("identity_payments").update({ status: "AUTHORIZED", updated_at: new Date().toISOString() }).eq("id", payment.id);
+    throw new Error(`identity not verified, payment released for retry: ${error.message}`);
+  }
+  return true;
 }
