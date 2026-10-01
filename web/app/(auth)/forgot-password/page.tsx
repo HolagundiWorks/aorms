@@ -6,6 +6,7 @@ import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/reac
 import { ArrowRight } from "@carbon/icons-react";
 import { requestPasswordReset, type PasswordActionState } from "../../../lib/actions/password-reset";
 import { TurnstileWidget } from "../../../components/aorms/security/TurnstileWidget";
+import { AuthHead } from "../../../components/aorms/AuthHead";
 
 export default function ForgotPasswordPage() {
   const [state, formAction, pending] = useActionState<PasswordActionState, FormData>(requestPasswordReset, null);
@@ -14,15 +15,7 @@ export default function ForgotPasswordPage() {
   return (
     <Form action={formAction}>
       <Stack gap={6}>
-        <div>
-          <Link href="/" aria-label="AORMS home">
-            <img src="/aorms-logo.png" alt="AORMS" style={{ height: "28px", width: "auto", marginBottom: "1.5rem" }} />
-          </Link>
-          <h1 className="cds--type-heading-04">Reset your password</h1>
-          <p className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
-            Enter the email on your AORMS account and we&apos;ll send you a reset link.
-          </p>
-        </div>
+        <AuthHead title={<>Reset your password</>} description={<>Enter the email on your AORMS account and we&apos;ll send you a reset link.</>} result="A reset link in your inbox." />
 
         {success ? (
           <InlineNotification

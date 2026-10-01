@@ -66,7 +66,7 @@ export default async function AdminAccountsPage() {
       <SysDexPortalHeader />
       <Grid>
         <Column sm={4} md={8} lg={16}>
-          <PageHeader title="Users" description="Every person-level login on the AORMS Platform, by kind." />
+          <PageHeader title="Users" result="Every platform login accounted for." description="Every person-level login on the AORMS Platform, by kind." />
 
           <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
             Users — AORMS Identity (AORMS-U-)

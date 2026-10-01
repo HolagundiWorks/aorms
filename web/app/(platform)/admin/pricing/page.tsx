@@ -31,7 +31,7 @@ export default async function AdminPricingPage() {
       <SysDexPortalHeader />
       <Grid>
       <Column sm={4} md={8} lg={8}>
-        <PageHeader title="Pricing" description="A flat fee for each plan — no per-seat billing on any of them." />
+        <PageHeader title="Pricing" result="Plans priced plainly." description="A flat fee for each plan — no per-seat billing on any of them." />
 
         <Stack gap={5}>
           {(pricing ?? []).map((p) => (

@@ -822,6 +822,13 @@ a.cds--side-nav__link[aria-current="page"]::before {
   white-space: nowrap;
 }
 
+// Sign-in family: one centred column (AuthHead + the page's form).
+.aorms-auth {
+  max-inline-size: 30rem;
+  margin-inline: auto;
+  padding: 4rem 1rem 3rem;
+}
+
 // Login footer strip — a miniature title block.
 .aorms-login-foot {
   margin: 0;

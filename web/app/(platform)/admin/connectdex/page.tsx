@@ -56,7 +56,7 @@ export default async function AdminConnectDexPage() {
       <SysDexPortalHeader />
       <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader title="ConnectDeX Partners" description="Review applications, verify onboarding details, and set the flat onboarding fee." />
+        <PageHeader title="ConnectDeX Partners" result="Applications reviewed, partners verified." description="Review applications, verify onboarding details, and set the flat onboarding fee." />
 
         <Stack gap={7}>
           <div>

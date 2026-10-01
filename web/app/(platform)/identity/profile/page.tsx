@@ -37,7 +37,7 @@ export default async function IdentityProfilePage() {
         <IdentityPortalHeader />
         <Grid>
           <Column sm={4} md={8} lg={8}>
-            <PageHeader title="My Profile" description="Sign in to the AORMS Platform first." />
+            <PageHeader title="My Profile" result="A professional identity you carry between studios." description="Sign in to the AORMS Platform first." />
             <NextLink href="/identity" className="cds--link">
               Back to AORMS Identity →
             </NextLink>
@@ -56,7 +56,7 @@ export default async function IdentityProfilePage() {
         <IdentityPortalHeader />
         <Grid>
           <Column sm={4} md={8} lg={8}>
-            <PageHeader title="My Profile" description="This login isn't an AORMS Identity account." />
+            <PageHeader title="My Profile" result="A professional identity you carry between studios." description="This login isn't an AORMS Identity account." />
           </Column>
         </Grid>
       </>
@@ -96,7 +96,7 @@ export default async function IdentityProfilePage() {
       <Grid>
         <Column sm={4} md={8} lg={10}>
           <PageHeader
-            title="My Profile"
+            title="My Profile" result="A professional identity you carry between studios."
             description="Professional info, credentials, and your work history — carries with your portable AORMS Identity."
             actions={
               <Stack gap={4} orientation="horizontal" style={{ alignItems: "center" }}>

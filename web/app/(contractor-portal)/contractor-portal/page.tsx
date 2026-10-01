@@ -21,7 +21,7 @@ export default async function ContractorPortalHomePage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader title="Your tender invitations" description="Tenders you've been invited to bid on." />
+        <PageHeader title="Your tender invitations" result="A bid you can submit with confidence." description="Tenders you've been invited to bid on." />
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

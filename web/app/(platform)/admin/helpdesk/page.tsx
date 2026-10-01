@@ -39,7 +39,7 @@ export default async function AdminHelpDeskPage() {
       <SysDexPortalHeader />
       <Grid>
         <Column sm={4} md={8} lg={16}>
-          <PageHeader title="HelpDeX" description="Support tickets submitted via /support, platform-wide." />
+          <PageHeader title="HelpDeX" result="Support requests answered and closed." description="Support tickets submitted via /support, platform-wide." />
 
           <Stack gap={5}>
             {sorted.map((t) => (

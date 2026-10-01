@@ -37,7 +37,7 @@ export default async function AdminPaymentsPage() {
       <SysDexPortalHeader />
       <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader title="Payments" description="Every Razorpay payment attempt, most recent first." />
+        <PageHeader title="Payments" result="Every payment attempt reconciled." description="Every Razorpay payment attempt, most recent first." />
 
         <Table aria-label="Payments" className="aorms-table-spaced">
           <TableHead>

@@ -78,7 +78,7 @@ export default async function AiConnectorsAdminPage() {
       <Grid>
         <Column sm={4} md={8} lg={16}>
           <PageHeader
-            title="Esti AI Connectors"
+            title="Esti AI Connectors" result="AI that answers only from your own records."
             description="Connect any model over an API, and control which Studio or individual gets to use it. API keys never leave this server — connector rows below show only a masked suffix."
           />
 

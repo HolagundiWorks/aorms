@@ -139,7 +139,7 @@ export default async function IdentityPage() {
         <Grid>
           <Column sm={4} md={8} lg={8}>
             <PageHeader
-              title="AORMS Identity"
+              title="AORMS Identity" result="One identity, portable across every studio."
               description="Signed in to the AORMS Platform, but not with a Studio/Identity account."
             />
             <Tile>
@@ -178,7 +178,7 @@ export default async function IdentityPage() {
         <Grid>
           <Column sm={4} md={8} lg={8}>
             <PageHeader
-              title="AORMS Identity"
+              title="AORMS Identity" result="One identity, portable across every studio."
               description={
                 <>
                   A portable personal identity — your own AORMS-U- handle, usage hours, and level, independent of any
@@ -263,7 +263,7 @@ export default async function IdentityPage() {
       <Grid>
         <Column sm={4} md={8} lg={12}>
           <PageHeader
-            title="AORMS Identity"
+            title="AORMS Identity" result="One identity, portable across every studio."
             description="Your portable personal identity — carries across every studio you work with."
             actions={
               <NextLink href="/identity/profile" className="cds--type-body-01">

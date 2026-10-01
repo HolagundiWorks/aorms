@@ -71,7 +71,7 @@ export default async function AdminStudiosPage() {
       <SysDexPortalHeader />
       <Grid>
         <Column sm={4} md={8} lg={16}>
-          <PageHeader title="Studios" description="Every architecture-firm Studio on the AORMS Platform." />
+          <PageHeader title="Studios" result="Every studio and its licence in view." description="Every architecture-firm Studio on the AORMS Platform." />
 
           <Table aria-label="Studios" className="aorms-table-spaced">
             <TableHead>

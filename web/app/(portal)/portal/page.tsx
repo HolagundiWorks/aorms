@@ -15,7 +15,7 @@ export default async function PortalHomePage() {
     <Grid>
       <Column sm={4} md={8} lg={16}>
         <PageHeader
-          title="Your projects"
+          title="Your projects" result="Your project, in plain view."
           description="Published progress, invoices, drawings and documents for your projects with us."
         />
 

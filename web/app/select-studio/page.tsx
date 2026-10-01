@@ -1,8 +1,11 @@
 import { redirect } from "next/navigation";
-import { Column, Grid, Stack } from "@carbon/react";
+import { Stack } from "@carbon/react";
 import { createClient } from "../../lib/supabase/server";
 import { getStudioAccessOptions } from "../../lib/studio-access";
 import { SwitchFirmTile, JoinStudioTile } from "../../components/aorms/StudioAccessTiles";
+import { AuthHead } from "../../components/aorms/AuthHead";
+import { TitleBlock } from "../../components/aorms/TitleBlock";
+import { BrandWatermark } from "../../components/aorms/BrandWatermark";
 
 /**
  * Multi-tenancy studio picker (migration 0055) — reached from
@@ -21,17 +24,10 @@ export default async function SelectStudioPage() {
   const { firms, joinable } = await getStudioAccessOptions();
 
   return (
-    <div style={{ minHeight: "100vh", padding: "3rem 1rem" }}>
-      <Grid>
-        <Column sm={4} md={6} lg={8} style={{ margin: "0 auto" }}>
+    <>
+      <div className="aorms-auth">
           <Stack gap={6}>
-            <div>
-              <img src="/aorms-logo.png" alt="AORMS" style={{ height: "28px", width: "auto", marginBottom: "1.5rem" }} />
-              <h1 className="cds--type-heading-04">Choose a studio</h1>
-              <p className="cds--type-body-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
-                Your account has access to more than one studio — pick which one to open.
-              </p>
-            </div>
+            <AuthHead title={<>Choose a studio</>} description={<>Your account has access to more than one studio — pick which one to open.</>} result="The right studio open, ready for work." />
 
             {firms.length > 0 ? (
               <div style={{ maxHeight: "45vh", overflowY: "auto" }}>
@@ -60,8 +56,9 @@ export default async function SelectStudioPage() {
               <p className="cds--type-body-01">No studios found for this account yet — contact your studio's owner for an invite.</p>
             ) : null}
           </Stack>
-        </Column>
-      </Grid>
-    </div>
+        </div>
+      <TitleBlock companyName="" />
+      <BrandWatermark />
+    </>
   );
 }

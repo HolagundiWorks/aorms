@@ -55,7 +55,7 @@ export default async function ConnectDexPage() {
         <Grid>
           <Column sm={4} md={8} lg={8}>
             <PageHeader
-              title="ConnectDeX"
+              title="ConnectDeX" result="A supplier presence worth specifying."
               description="Sign in with your AORMS Company account — a separate login from an AORMS Identity/Studio account."
             />
             <Tile>
@@ -92,7 +92,7 @@ export default async function ConnectDexPage() {
       <ConnectDexPortalHeader />
       <Grid>
         <Column sm={4} md={8} lg={12}>
-          <PageHeader title="My Company" description="Every material or interior-supplier company you belong to." />
+          <PageHeader title="My Company" result="Your company, ready to be specified." description="Every material or interior-supplier company you belong to." />
 
           <Stack gap={6}>
             <div>
