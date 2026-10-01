@@ -507,6 +507,11 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-01 (landing)** — public landing page (`app/page.tsx`) adopts the same
+  language via `.aorms-landing` (`globals.scss`): numbered section eyebrows
+  (`00 /`, `01 /` … by CSS counter), ink rules between sections, light headings,
+  flat ruled tiles, schedule-style tags, orange only on link hover. Content and
+  copy unchanged.
 - **2026-10-01 (toolbar)** — `ListToolbar` is now **one compact row** (Carbon `sm`
   controls, hidden labels, sort options read "Sort: …", status/actions inline, view
   switch right-aligned). **"The result" moved into the rail** under the Brief

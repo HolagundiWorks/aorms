@@ -1950,3 +1950,75 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
     display: none !important;
   }
 }
+
+
+// Landing page — the same "architectural operating system" language as the app
+// (2026-10-01): numbered sheets, ink rules, light type, flat tiles, orange only
+// for activity (links/hover/focus), never decoration.
+.aorms-landing {
+  counter-reset: land -1;
+  font-weight: 300;
+
+  header {
+    border-block-end: 1px solid var(--aorms-ink) !important;
+  }
+
+  main > section {
+    border-block-start: 1px solid var(--aorms-ink) !important;
+  }
+
+  main > section#top {
+    border-block-start: 0 !important;
+  }
+
+  h1,
+  h2 {
+    font-weight: 300;
+    letter-spacing: -0.01em;
+  }
+
+  // Sheet number before every section eyebrow: "00 /", "01 /", …
+  .aorms-land-eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.6875rem;
+    font-weight: 400;
+    padding-block-end: 0.5rem;
+    border-block-end: 1px solid var(--aorms-rule);
+    max-inline-size: 42rem;
+  }
+
+  .aorms-land-eyebrow::before {
+    counter-increment: land;
+    content: counter(land, decimal-leading-zero) " / ";
+    color: var(--cds-text-primary);
+  }
+
+  // Flat, ruled tiles — no grey cards, no coloured side stripes.
+  .cds--tile {
+    background: transparent;
+    border: 1px solid var(--aorms-rule);
+    border-inline-start-color: var(--aorms-ink) !important;
+  }
+
+  // Tags read as schedule labels, not coloured pills.
+  .cds--tag {
+    background: transparent;
+    border: 1px solid var(--aorms-rule);
+    color: var(--cds-text-primary);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.6875rem;
+    border-radius: 0;
+  }
+
+  // Orange = activity: nav links and footer links on hover/focus only.
+  header nav a:hover,
+  footer a:hover {
+    color: var(--aorms-orange);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  footer {
+    border-block-start: 1px solid var(--aorms-ink) !important;
+  }
+}
