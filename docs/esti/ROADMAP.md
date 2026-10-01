@@ -7303,10 +7303,10 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 **P2 — product**
 - [x] Licence-expiry reminder emails (T30/T7/T0): `GET /api/cron/licence-reminders` (Bearer `CRON_SECRET`), dedup table `licence_reminders` (0048, applied), emails the Studio owner. **Needs ops setup:** set `SMTP_*` + `CRON_SECRET` in Hostinger env and add a daily Hostinger cron job; until then it does nothing. [ ] grace state, [ ] renew CTA in the email beyond the link
 - [x] HelpDeX replies: staff "Send reply" on each ticket; reply always stored (`support_ticket_replies`, 0048), emailed via `lib/email/send.ts` (nodemailer) when `SMTP_*` is set; UI states plainly when it was NOT emailed. Inbound email replies are not handled.
-- [x] ConnectDeX differentiator #1: Studio "Request quote" on every Materials product → supplier inbox at `/connectdex/quotes` with reply/close (`connectdex.quote_requests`, 0047, applied; RLS + column-level UPDATE grant; insert + log trigger verified in a rolled-back block). **No email notification** (no mailer) — suppliers must visit the inbox. [ ] email notification once a mailer exists
+- [x] ConnectDeX differentiator #1: Studio "Request quote" on every Materials product → supplier inbox at `/connectdex/quotes` with reply/close (`connectdex.quote_requests`, 0047, applied; RLS + column-level UPDATE grant; insert + log trigger verified in a rolled-back block). Notifications need `SMTP_*` (see mailer item); without it suppliers must visit the inbox. [x] email notifications (best-effort via the SMTP mailer): supplier owner on a new request, requester on a reply — silent no-op without `SMTP_*`
 - [ ] Studio↔Company: save vendors, attach product to a Hub spec sheet
 - [ ] Public verified-profile page + CV PDF export
-- [ ] In-portal activity log for Studio/Company owners
+- [x] Studio owners: "Recent activity" (last 20 events, type + time only) on `/studios/[studioId]` · [ ] same for Company owners
 - [ ] Enterprise `<slug>.aorms.in` routing
 - [x] SysDeX analytics at `/admin/analytics` (SUPER_ADMIN): studios/accounts/paid licences/12-month captured revenue by source and month, plan mix, ConnectDeX application funnel, company status/tier, open-ticket age, quote count. Counts of real rows only — **no modelled MRR/churn** (licences are one-time annual orders)
 - [ ] Read-only, logged support impersonation
