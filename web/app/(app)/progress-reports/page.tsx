@@ -18,6 +18,8 @@ import { IssueProgressReportButton } from "../../../components/aorms/IssueProgre
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateProgressReportPdf } from "../../../lib/actions/progress-reports";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 export default async function ProgressReportsPage() {
   const supabase = await createClient();
@@ -63,14 +65,15 @@ export default async function ProgressReportsPage() {
               <KpiTile label="Total reports" value={rows.length} icon={ReportData} />
               <KpiTile label="Issued" value={issuedCount} icon={DocumentExport} />
               <KpiTile label="Avg physical progress" value={avgPhysicalPct != null ? `${avgPhysicalPct}%` : "—"} icon={ChartLineData} />
-            </div>
+              <RailBrief result="Site progress anyone can verify.">Periodic project progress narrative and completion percentages.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
                 Couldn&apos;t load reports: {error.message}
               </p>
             ) : (
-              <Table aria-label="Progress reports" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Progress reports" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Project</TableHeader>
@@ -118,7 +121,7 @@ export default async function ProgressReportsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

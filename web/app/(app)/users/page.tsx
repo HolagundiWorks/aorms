@@ -9,6 +9,8 @@ import { UserRoleSelect } from "../../../components/aorms/UserRoleSelect";
 import { UserDisabledToggle } from "../../../components/aorms/UserDisabledToggle";
 import { MyNameEditor } from "../../../components/aorms/MyNameEditor";
 import { MyCalendarFeedButton } from "../../../components/aorms/MyCalendarFeedButton";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 /**
  * Staff user management — this repo's own module map calls out
@@ -103,7 +105,8 @@ export default async function UsersPage() {
               <KpiTile label="Total staff" value={rows.length} icon={UserMultiple} />
               <KpiTile label="Active" value={activeCount} icon={CheckmarkFilled} />
               <KpiTile label="Owners" value={ownerCount} icon={UserAdmin} />
-            </div>
+              <RailBrief>Staff directory — role and access.</RailBrief>
+</div>
 
             {!isOwner && (
               <InlineNotification
@@ -121,7 +124,7 @@ export default async function UsersPage() {
                 Couldn&apos;t load users: {error.message}
               </p>
             ) : (
-              <Table aria-label="Users" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Users" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Name</TableHeader>
@@ -161,7 +164,7 @@ export default async function UsersPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

@@ -15,6 +15,8 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { SnagStatusSelect } from "../../../components/aorms/SnagStatusSelect";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 export default async function SnagsPage() {
   const supabase = await createClient();
@@ -59,14 +61,15 @@ export default async function SnagsPage() {
               <KpiTile label="Open" value={openCount} icon={FolderOpen} />
               <KpiTile label="In progress" value={inProgressCount} icon={InProgress} />
               <KpiTile label="Closed" value={closedCount} icon={Close} />
-            </div>
+              <RailBrief result="Resolved site conditions.">Site defect register. Photo attachments aren't wired up yet.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
                 Couldn&apos;t load snags: {error.message}
               </p>
             ) : (
-              <Table aria-label="Snags" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Snags" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Ref</TableHeader>
@@ -105,7 +108,7 @@ export default async function SnagsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

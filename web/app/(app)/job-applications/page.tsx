@@ -15,6 +15,8 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { JobApplicationStatusSelect } from "../../../components/aorms/JobApplicationStatusSelect";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 export default async function JobApplicationsPage() {
   const supabase = await createClient();
@@ -53,14 +55,15 @@ export default async function JobApplicationsPage() {
               <KpiTile label="Total applications" value={rows.length} icon={DocumentRequirements} />
               <KpiTile label="In interview" value={interviewCount} icon={Chat} />
               <KpiTile label="Hired" value={hiredCount} icon={UserFollow} />
-            </div>
+              <RailBrief>Recruitment pipeline. Resume upload isn't wired up — same register-only pattern used elsewhere until an upload Route Handler exists.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
                 Couldn&apos;t load applications: {error.message}
               </p>
             ) : (
-              <Table aria-label="Job applications" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Job applications" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Name</TableHeader>
@@ -92,7 +95,7 @@ export default async function JobApplicationsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

@@ -16,6 +16,8 @@ import { AddMomForm } from "../../../components/aorms/AddMomForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 // Roles with has_capability('write') (rank >= 40, or an explicit
 // allow-list role — see web/supabase/migrations/0002_capability_helper.sql
@@ -75,14 +77,15 @@ export default async function MomsPage() {
               <KpiTile label="Total minutes" value={rows.length} icon={Document} />
               <KpiTile label="Draft" value={draftCount} icon={Edit} />
               <KpiTile label="Issued" value={issuedCount} icon={DocumentExport} />
-            </div>
+              <RailBrief result="Decisions that can be acted upon.">MOMs — minutes of meeting, per project.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
                 Couldn&apos;t load minutes: {error.message}
               </p>
             ) : (
-              <Table aria-label="Meeting Minutes" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Meeting Minutes" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Ref</TableHeader>
@@ -125,7 +128,7 @@ export default async function MomsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

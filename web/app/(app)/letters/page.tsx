@@ -16,6 +16,8 @@ import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generateLetterPdf } from "../../../lib/actions/letters";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 // Roles with has_capability('write') (rank >= 40, or an explicit
 // allow-list role — see web/supabase/migrations/0002_capability_helper.sql
@@ -74,14 +76,15 @@ export default async function LettersPage() {
               <KpiTile label="Total letters" value={rows.length} icon={Email} />
               <KpiTile label="PDF ready" value={readyCount} icon={DocumentPdf} />
               <KpiTile label="Recipients" value={recipientCount} icon={UserMultiple} />
-            </div>
+              <RailBrief>Office correspondence register.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
                 Couldn&apos;t load letters: {error.message}
               </p>
             ) : (
-              <Table aria-label="Letters" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Letters" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Ref</TableHeader>
@@ -120,7 +123,7 @@ export default async function LettersPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

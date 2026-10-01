@@ -18,6 +18,8 @@ import { GeneratePdfButton } from "../../../components/aorms/GeneratePdfButton";
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { generatePayslipPdf } from "../../../lib/actions/payslips";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -63,14 +65,15 @@ export default async function PayslipsPage() {
               <KpiTile label="Total payslips" value={rows.length} icon={CurrencyRupee} />
               <KpiTile label="Paid" value={paidCount} icon={CheckmarkFilled} />
               <KpiTile label="Total net" value={formatInr(totalNetPaise)} icon={CurrencyRupee} />
-            </div>
+              <RailBrief>Monthly payslips per team member.</RailBrief>
+</div>
 
             {error ? (
               <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
                 Couldn&apos;t load payslips: {error.message}
               </p>
             ) : (
-              <Table aria-label="Payslips" className="aorms-table-spaced">
+              <><TableToolbar /><Table aria-label="Payslips" className="aorms-table-spaced">
                 <TableHead>
                   <TableRow>
                     <TableHeader>Member</TableHeader>
@@ -117,7 +120,7 @@ export default async function PayslipsPage() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+              </Table></>
             )}
           </Column>
         </Grid>

@@ -15,6 +15,8 @@ import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrig
 import { KpiTile } from "../../../components/aorms/KpiTile";
 import { MilestoneStatusSelect } from "../../../components/aorms/MilestoneStatusSelect";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { RailBrief } from "../../../components/aorms/RailBrief";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 export default async function PmcMilestonesPage() {
   const supabase = await createClient();
@@ -56,14 +58,15 @@ export default async function PmcMilestonesPage() {
           <KpiTile label="Total milestones" value={rows.length} icon={FlagFilled} />
           <KpiTile label="At risk / delayed" value={atRiskCount} icon={WarningFilled} />
           <KpiTile label="Complete" value={completeCount} icon={CheckmarkFilled} />
-        </div>
+          <RailBrief>Owner-side project delivery milestones. CSV/P6 XER import isn't wired up.</RailBrief>
+</div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
             Couldn&apos;t load milestones: {error.message}
           </p>
         ) : (
-          <Table aria-label="Milestones" className="aorms-table-spaced">
+          <><TableToolbar /><Table aria-label="Milestones" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
                 <TableHeader>Ref</TableHeader>
@@ -100,7 +103,7 @@ export default async function PmcMilestonesPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table></>
         )}
       </Column>
       </Grid>

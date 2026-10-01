@@ -13,6 +13,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { NewDraftLinkButton } from "../../../components/aorms/esti/NewDraftLinkButton";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 /**
  * Viewer + entry point over ai_runs (migration 0010). Two writers now:
@@ -49,7 +50,7 @@ export default async function AiRunsPage() {
             Couldn&apos;t load AI runs: {error.message}
           </p>
         ) : (
-          <Table aria-label="AI runs" className="aorms-table-spaced">
+          <><TableToolbar /><Table aria-label="AI runs" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
                 <TableHeader>When</TableHeader>
@@ -101,7 +102,7 @@ export default async function AiRunsPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table></>
         )}
       </Column>
     </Grid>

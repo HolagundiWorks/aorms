@@ -179,11 +179,11 @@ nav has no sheet (no mark, no footer).
 ```
 SHEET MARK            AORMS-04.03 / SITE / PROGRESS REPORTS   ── 1px ink rule
 Title                 + actions (right)
-Summary               live data line (PageHeader `summary`) — Pulse's daily brief
-Description           how-to note (instruction)
+Description           how-to note — only on pages with no rail (otherwise it is the rail's Brief)
 THE RESULT  …         outcome line (instruction)
 ─────────────────
 [ KPI rail | page body ]        ← § 7
+  rail = KPIs, then the BRIEF   (the screen's description / Pulse's live daily brief)
 ```
 
 ---
@@ -259,9 +259,20 @@ KPIs as a **left rail of large numerals**, the page body beside it.
   with a 1px ink rule on top (status stripe and trend row kept).
 - **Fallbacks:** a row nested deeper keeps its normal tile grid. Below `lg` the
   rail becomes a wrapping row above the page.
-- **Applied to** 45 Office Hub list/detail pages plus the SysDeX dashboard.
-  Pulse itself builds its rail with `BigStat`.
-- **Revert** by deleting the `/* Pulse layout on every screen */` CSS block.
+- **Applied to** 45 Office Hub list/detail pages (including **Projects**, whose
+  BigStat row is now the rail) plus the SysDeX dashboard. Pulse builds its rail with
+  `BigStat`. The old "Active projects" board on Pulse was removed (2026-10-01) — the
+  Projects screen is where projects live.
+- **The Brief (2026-10-01).** Directly below the KPIs the rail carries the screen's
+  **Brief** (`RailBrief`): the page's description, moved out of the header. CSS hides
+  the header copy only when the rail is active (`div:has(> .aorms-rail-kpis >
+  .aorms-rail-brief) > :first-child .aorms-page-desc`), so a page whose KPI row can't
+  become a rail keeps its description under the title. The brief is an instruction
+  (`.aorms-instruction`) and obeys the toggle. **Pulse's brief is live, not boilerplate:**
+  *Today's brief* (`PulseBrief`, `briefSentence()`) sits under the Pulse numerals and is
+  *not* an instruction. 42 pages carry a `RailBrief`; pages with a JSX description
+  (Consultants, Contractors, project Decisions, project Overview) keep it in the header.
+- **Revert** by deleting the `/* Pulse layout on every screen */` and `Rail brief` CSS blocks.
 - **When there is no KPI row**, do not invent one; the page is a plain sheet.
 - Content width is `calc(100% - 3rem)` beside the rail; never set widths on the
   page column.
@@ -304,14 +315,39 @@ header/body, **2px ink rule under the header**, uppercase 0.6875rem headers,
 
 ## 10. Component rules
 
+### 10.0 The list toolbar — one control bar everywhere (2026-10-01)
+
+**Rule:** search, filters, sort and the view switch live in **one component**,
+`ListToolbar`, in a **fixed order** — `[ search ………… ] [ filters ] [ sort ] [ view ]`
+— followed by a status line (`Showing X of Y`, quick actions such as *My tasks*, and
+*Reset* when anything is on). Every list screen uses it; do not build a bespoke
+filter row.
+
+| Screen | Search | Filters | Sort | View switch |
+|---|---|---|---|---|
+| Projects (`ProjectsBrowser`) | title, ref, client, city, type | Status, Type | Newest · Name · Reference · Status · Task progress (pinned always on top) | Cards / Lines |
+| Tasks (`TaskBoard`) | title, project, `TASK-0184` | Project, Person, Priority, Due date (+ custom range) | Priority · Due · Effort · Recent · Title | Board / Calendar |
+| **Every table screen** (`TableToolbar`, 47 pages) | any cell | Status (when the table has a Status column) | any column ↑/↓ (text, ₹/numbers and dates compared properly) | — |
+
+- `ListToolbar` is presentational and controlled: the screen owns state and data.
+- `TableToolbar` is for server-rendered tables: place it **immediately before** a
+  Carbon `<Table>` (wrap both in a fragment). It reads the table from the DOM,
+  filters by toggling each row's `display`, and sorts by re-appending the same row
+  nodes inside `<tbody>` (no nodes created/destroyed, so React's later updates still
+  work). Whole-table "empty state" rows are never touched. Action columns (PDF,
+  Actions…) are excluded from sort.
+- A view switch appears only where the screen genuinely has two views.
+- Preferences that should persist (the Projects view) go in a cookie read on the
+  server; filters/sort that define a *view* go in the URL (Tasks) — see § 11.
+
 ### 10.1 Hub sheet & daily brief (Pulse)
 
-- **Brief** (`PulseBrief`, `briefSentence()`): a live one-sentence summary under
-  the Pulse title, replacing boilerplate. Only non-zero parts, most urgent
+- **Brief** (`PulseBrief`, `briefSentence()`): a live one-sentence summary in the
+  **rail, below the numerals** (was under the title until 2026-10-01). Only non-zero parts, most urgent
   first: overdue → due today → meetings → decisions waiting on the client →
   approvals awaiting → blocked → open snags; "nothing is due or waiting" when
-  empty. Rendered through `PageHeader summary` (so the Instructions toggle never
-  hides it).
+  empty. Not an instruction, so the Instructions toggle never hides it (`PageHeader
+  summary` remains available for other live data lines).
 - **Hub** (`HubSheet`): *Projects* (counts by status) · *Today* (IST date; counts
   linking to filtered views; today's meetings with project ref) · *Attention* (≤6
   rows `ref · title · reason`, each a link to the view that resolves it).
@@ -407,7 +443,8 @@ Server Actions) is never altered by styling.
 **Do**
 - Use `PageHeader` (gets the sheet mark and instruction handling for free) with a
   `result` line; use `summary` only for live data.
-- Put KPIs in a direct-child row marked `.aorms-rail-kpis`.
+- Put KPIs in a direct-child row marked `.aorms-rail-kpis`, and the screen's brief in it as a `RailBrief`.
+- Put search/filter/sort/view in `ListToolbar` (or `TableToolbar` before a table) — never a custom row.
 - Use stock Carbon for forms, modals, tabs, tables, notifications.
 - Mark how-to text `.aorms-instruction`; keep facts and errors unmarked.
 - Use `aorms-num` on money/quantity columns; mono for identifiers.
@@ -422,6 +459,7 @@ Server Actions) is never altered by styling.
 - Don't invent Revision/Status or any metadata the app doesn't have.
 - Don't set widths on the content column or reintroduce a desktop nav toggle.
 - Don't build a bespoke component where Carbon has one.
+- Don't scatter search, filter, sort or view controls in different places per screen.
 
 ---
 
@@ -439,7 +477,8 @@ The same rules apply to every surface. What is **shared** (identical) vs what
 | Header | firm name + actions | portal name + tagline + flat nav | portal name only | none (logo in `AuthHead`) |
 | Navigation | icon rail (hover) | flat top nav | none | none |
 | Tokens, tables, buttons, type | identical (global CSS) | identical | identical | identical |
-| Rail layout for KPIs | ✓ (45 pages) | SysDeX dashboard | — (no KPI rows) | — |
+| Rail layout for KPIs + Brief | ✓ (45 pages) | SysDeX dashboard (rail; no brief yet) | — (no KPI rows) | — |
+| List toolbar (search/filter/sort/view) | ✓ (Projects, Tasks, 47 table screens) | — (tables not yet wrapped) | — | — |
 | Layout width | content beside rail | Carbon grid, 4.5rem top clearance for the sheet mark | Carbon `Content` | centred 30rem |
 
 Portal sheet codes live in `PORTALS` (`nav-data.ts`); add a page there to give it
@@ -456,7 +495,8 @@ a sheet.
 | Shell | `components/aorms/AppShell.tsx`, `PortalHeaderName.tsx`, `platform/PlatformShellHeader.tsx`, `BrandWatermark.tsx` |
 | Sheet elements | `SheetMark.tsx`, `TitleBlock.tsx` (floating footer), `PageHeader.tsx`, `AuthHead.tsx` |
 | Instructions | `InstructionsScope.tsx`, `InstructionsToggle.tsx`, `InstructionsToggleButton.tsx` |
-| KPIs | `KpiTile.tsx`, `BigStat.tsx` |
+| KPIs & rail brief | `KpiTile.tsx`, `BigStat.tsx`, `RailBrief.tsx` |
+| List toolbar | `ListToolbar.tsx`, `TableToolbar.tsx` |
 | Projects | `ProjectsBrowser.tsx`, `ProjectCard.tsx`, `PlanGlyph.tsx`, `PhaseStrip.tsx`, `CoverImageControl.tsx`, `lib/projects/covers.ts`, `lib/actions/project-covers.ts` |
 | Tasks | `tasks/TaskBoard.tsx`, `tasks/LibraryManager.tsx`, `tasks/GenerateTasksPanel.tsx`, `lib/tasks/{filter,workload,estimate,dates,ref,starter-library}.ts` |
 | Pulse | `pulse/HubSheet.tsx`, `pulse/PulseBrief.tsx`, `lib/pulse/hub-data.ts` |
@@ -467,6 +507,15 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-01 (toolbar)** — `ListToolbar` is now **one compact row** (Carbon `sm`
+  controls, hidden labels, sort options read "Sort: …", status/actions inline, view
+  switch right-aligned). **"The result" moved into the rail** under the Brief
+  (`<RailBrief result="…">`); on rail pages the header ends at the title so the
+  toolbar sits directly beneath it. Non-rail pages keep the result in the header.
+- **2026-10-01 (later)** — Pulse: *Active projects* removed; the live brief moved from the
+  heading into the rail below the numerals. **Rail Brief on every rail screen**;
+  Projects now uses the KPI rail. **One `ListToolbar`** (search + filters + sort + view)
+  on Projects and Tasks, and `TableToolbar` on 47 table screens.
 - **2026-10-01** — guide rewritten as the canonical `web/` UI/UX rulebook. Sheet
   system, Instructions toggle, floating footer and `AuthHead` extended to all
   portals and the sign-in family; Pulse heading now shows a live daily brief.

@@ -16,6 +16,7 @@ import {
 import { createClient } from "../../../lib/supabase/server";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { resolvePeriodRange, type PeriodFilterInput } from "../../../lib/tax/fy";
+import { TableToolbar } from "../../../components/aorms/TableToolbar";
 
 function formatInr(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -219,7 +220,7 @@ export default async function ReportsPage({
               GST abstract
             </h2>
             <div style={{ overflowX: "auto" }}>
-            <Table aria-label="GST abstract by month" size="sm">
+            <><TableToolbar /><Table aria-label="GST abstract by month" size="sm">
               <TableHead>
                 <TableRow>
                   <TableHeader>Month</TableHeader>
@@ -259,7 +260,7 @@ export default async function ReportsPage({
                   <TableCell><strong>{formatInr(totals.invoiceTotalPaise)}</strong></TableCell>
                 </TableRow>
               </TableBody>
-            </Table>
+            </Table></>
             </div>
 
             <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
@@ -268,7 +269,7 @@ export default async function ReportsPage({
             <p className="cds--type-body-01" style={{ marginBottom: "1rem", color: "var(--cds-text-secondary)" }}>
               TDS your clients deducted on professional fees paid to you — reconcile against Form 26AS/AIS.
             </p>
-            <Table aria-label="TDS abstract by month" size="sm">
+            <><TableToolbar /><Table aria-label="TDS abstract by month" size="sm">
               <TableHead>
                 <TableRow>
                   <TableHeader>Month</TableHeader>
@@ -308,7 +309,7 @@ export default async function ReportsPage({
                   </TableRow>
                 )}
               </TableBody>
-            </Table>
+            </Table></>
           </>
         )}
       </Column>
