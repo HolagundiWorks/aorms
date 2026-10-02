@@ -1,3 +1,4 @@
+import { toSafeErrorMessage } from "../../../../lib/security/safe-error";
 import { NextResponse } from "next/server";
 import { createClient } from "../../../../lib/supabase/server";
 import { resolvePeriodRange, type PeriodFilterInput } from "../../../../lib/tax/fy";
@@ -63,7 +64,7 @@ export async function GET(request: Request) {
     .lte("date_invoice", to)
     .order("date_invoice", { ascending: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: toSafeErrorMessage(error) }, { status: 500 });
 
   const header = ["Ref", "Project", "Status", "Kind", "Date", "Taxable", "CGST", "SGST", "IGST", "GST total", "TDS", "Net", "Grand"];
   const lines = [header.join(",")];

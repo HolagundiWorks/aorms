@@ -1,3 +1,5 @@
+import { toSafeErrorMessage } from "../../../../lib/security/safe-error";
+import { bearerMatches } from "../../../../lib/security/bearer-secret";
 import { NextResponse } from "next/server";
 import { createServiceRoleClient } from "../../../../lib/supabase/service";
 import { getAbsencesToday, getAwaitingPayment, getOpenClientRequests, getOpenConsultantRequests, getOpenTenders, getReadyToBill } from "../../../../lib/dashboard/queries";
@@ -27,8 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "PULSE_RECOMPUTE_SECRET is not configured" }, { status: 500 });
   }
 
-  const auth = request.headers.get("authorization");
-  if (auth !== `Bearer ${secret}`) {
+  if (!bearerMatches(request, secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -107,7 +108,7 @@ export async function POST(request: Request) {
       ];
 
       const { error } = await supabase.from("kpi_snapshots").upsert(rows, { onConflict: "firm_id,metric_key,captured_on" });
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) return NextResponse.json({ error: toSafeErrorMessage(error) }, { status: 500 });
       totalMetrics += rows.length;
     }
 

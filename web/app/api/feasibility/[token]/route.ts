@@ -1,3 +1,4 @@
+import { toSafeErrorMessage } from "../../../../lib/security/safe-error";
 import { NextResponse } from "next/server";
 import { createServiceRoleClient } from "../../../../lib/supabase/service";
 
@@ -28,7 +29,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: toSafeErrorMessage(error) }, { status: 500 });
   }
   if (!data) {
     return NextResponse.json({ error: "Report not found." }, { status: 404 });

@@ -1,3 +1,4 @@
+import { bearerMatches } from "../../../../lib/security/bearer-secret";
 import { NextResponse } from "next/server";
 import { createServiceRoleClient } from "../../../../lib/supabase/service";
 import { recomputeTaskScores } from "../../../../lib/pulse/recompute";
@@ -22,8 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "PULSE_RECOMPUTE_SECRET is not configured" }, { status: 500 });
   }
 
-  const auth = request.headers.get("authorization");
-  if (auth !== `Bearer ${secret}`) {
+  if (!bearerMatches(request, secret)) {
     // 401, not 400 — unlike the Razorpay webhook, there's no legitimate
     // "signature will never verify, stop retrying" case here; a wrong or
     // missing bearer token is a genuine auth failure.

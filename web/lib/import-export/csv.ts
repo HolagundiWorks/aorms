@@ -45,10 +45,16 @@ export function parseCsvFile(text: string): { rows: Record<string, string>[]; er
 
 /** Renders rows into a CSV string with an explicit, stable column order. */
 export function toCsv(rows: Record<string, unknown>[], columns: string[]): string {
-  return Papa.unparse({
-    fields: columns,
-    data: rows.map((row) => columns.map((c) => row[c] ?? "")),
-  });
+  return Papa.unparse(
+    {
+      fields: columns,
+      data: rows.map((row) => columns.map((c) => row[c] ?? "")),
+    },
+    // CSV/formula injection (2026-10-02 security audit): a client or vendor name such as
+    // `=HYPERLINK(...)` or `@SUM(...)` would execute when an export is opened in Excel.
+    // escapeFormulae prefixes such cells (=, +, -, @, tab, CR) with a quote so they stay text.
+    { escapeFormulae: true },
+  );
 }
 
 /** Shared CSV response headers for a download — attachment + no caching (the data is a live query result, not a static asset). */

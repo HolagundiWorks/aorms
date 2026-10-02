@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { timingSafeEqual } from "node:crypto";
+import { bearerMatches } from "../../../../lib/security/bearer-secret";
 import { createServiceRoleClient } from "../../../../lib/platform/service";
 import { mailerConfigured, sendEmail } from "../../../../lib/email/send";
 
@@ -12,13 +12,7 @@ import { mailerConfigured, sendEmail } from "../../../../lib/email/send";
  * after the email is actually sent. Does nothing (and says so) if SMTP isn't configured.
  */
 function authorised(request: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  const given = request.headers.get("authorization") ?? "";
-  const expected = `Bearer ${secret}`;
-  const a = Buffer.from(given);
-  const b = Buffer.from(expected);
-  return a.length === b.length && timingSafeEqual(a, b);
+  return bearerMatches(request, process.env.CRON_SECRET);
 }
 
 const DAY = 86_400_000;

@@ -10,6 +10,8 @@
  * themselves the authorization boundary (isSuperAdmin), not RLS acting
  * on a signed-in browser session.
  */
+import { validateOutboundUrl } from "../security/safe-url";
+import { logStaffAction } from "../platform/staff-audit";
 import { revalidatePath } from "next/cache";
 import { getCurrentPlatformSessionAccount, isSuperAdmin } from "../platform/account";
 import { createServiceRoleClient } from "../platform/service";
@@ -42,6 +44,8 @@ export async function createModelConnector(_prev: ActionResult | null, formData:
     return { error: "Invalid connector kind." };
   }
   if (!baseUrl) return { error: "Base URL is required." };
+  const urlCheck = validateOutboundUrl(baseUrl);
+  if (!urlCheck.ok) return { error: urlCheck.error };
   if (!modelName) return { error: "Model name is required." };
 
   const platform = createServiceRoleClient();
@@ -56,6 +60,7 @@ export async function createModelConnector(_prev: ActionResult | null, formData:
   });
   if (error) return { error: toSafeErrorMessage(error) };
 
+  await logStaffAction("ai_connector.create", { name, kind });
   revalidatePath("/admin/ai-connectors");
   return {};
 }
