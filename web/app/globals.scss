@@ -2133,3 +2133,397 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
     inline-size: auto !important;
   }
 }
+
+// Landing page — "artboards" (2026-10-02), the layout hcworks.in uses: numbered boards side
+// by side, one open at a time. Desktop: vertical strips, the open one is a two-column sheet.
+// Below 66rem: vertical accordion. White/black structure, 1px rules; orange only marks the
+// open board's number (activity). Content is server-rendered; closed boards are display:none.
+.aorms-lp-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  block-size: 3.5rem;
+  padding-inline: 1rem;
+  border-block-end: 1px solid var(--aorms-ink);
+  background: var(--cds-background);
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 20;
+}
+
+.aorms-lp-bar nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.aorms-lp-bar a {
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.aorms-lp-bar a:hover,
+.aorms-lp-bar a:focus-visible {
+  color: var(--aorms-orange-text);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.aorms-lp {
+  display: flex;
+  flex-direction: column;
+  border-block-end: 1px solid var(--aorms-ink);
+}
+
+.aorms-lp-board {
+  border-block-start: 1px solid var(--aorms-ink);
+  min-inline-size: 0;
+}
+
+.aorms-lp-board:first-child {
+  border-block-start: 0;
+}
+
+.aorms-lp-head {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  inline-size: 100%;
+  padding: 1rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.aorms-lp-head:hover {
+  background: var(--cds-layer-01);
+}
+
+.aorms-lp-head:focus-visible {
+  outline: 2px solid var(--cds-focus);
+  outline-offset: -2px;
+}
+
+.aorms-lp-num {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.aorms-lp-title {
+  flex: 1;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.aorms-lp-arrow {
+  transition: transform 150ms;
+}
+
+.aorms-lp-board.is-active .aorms-lp-num {
+  color: var(--aorms-orange-text);
+}
+
+.aorms-lp-board.is-active .aorms-lp-arrow {
+  transform: rotate(90deg);
+}
+
+.aorms-lp-body {
+  display: none;
+  padding: 1.25rem 1rem 2rem;
+  min-inline-size: 0;
+}
+
+.aorms-lp-board.is-active .aorms-lp-body {
+  display: block;
+}
+
+@media (min-width: 66rem) {
+  .aorms-lp {
+    flex-direction: row;
+    block-size: calc(100vh - 3.5rem);
+    min-block-size: 38rem;
+    overflow: hidden;
+  }
+
+  .aorms-lp-board {
+    display: flex;
+    flex: 0 0 3.5rem;
+    border-block-start: 0;
+    border-inline-end: 1px solid var(--aorms-rule);
+  }
+
+  .aorms-lp-board.is-active {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+
+  .aorms-lp-head {
+    flex: 0 0 3.5rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1.25rem;
+    padding: 1.25rem 0;
+    border-inline-end: 1px solid var(--aorms-rule);
+    block-size: 100%;
+  }
+
+  .aorms-lp-board.is-active .aorms-lp-head {
+    background: var(--cds-layer-01);
+  }
+
+  .aorms-lp-num {
+    font-size: 1rem;
+  }
+
+  .aorms-lp-title {
+    flex: 1;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .aorms-lp-arrow {
+    transform: none !important;
+  }
+
+  .aorms-lp-body {
+    flex: 1;
+    container-type: inline-size;
+    overflow-y: auto;
+    padding: 2rem clamp(1.5rem, 3.5vw, 3.5rem) 3rem;
+  }
+
+  .aorms-lp-board.is-active .aorms-lp-body {
+    display: block;
+  }
+
+  .aorms-lp-board:not(.is-active) .aorms-lp-body {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @media (min-width: 66rem) {
+    .aorms-lp-board {
+      transition: flex-basis 250ms ease;
+    }
+  }
+}
+
+// Inside a board: copy (left) + "the result" side (right), as on hcworks.in.
+.aorms-lp-grid {
+  display: grid;
+  gap: 2rem clamp(2rem, 5vw, 4.5rem);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  max-inline-size: 76rem;
+}
+
+// Two columns only when the open board is wide enough (container query — the board's
+// width depends on how many closed strips sit beside it, not on the viewport).
+.aorms-lp-body {
+  container-type: inline-size;
+}
+
+@container (min-width: 44rem) {
+  .aorms-lp-grid {
+    grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 1fr);
+  }
+}
+
+.aorms-lp-eyebrow {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+  margin-block-end: 0.75rem;
+}
+
+.aorms-lp-display {
+  font-size: clamp(1.75rem, 3.2vw, 2.75rem);
+  font-weight: 300;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  max-inline-size: 22ch;
+  white-space: pre-line;
+}
+
+.aorms-lp-lede {
+  margin-block-start: 1rem;
+  max-inline-size: 38rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-lp-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0 0;
+  max-inline-size: 32rem;
+}
+
+.aorms-lp-list li {
+  padding: 0.4rem 0;
+  border-block-end: 1px solid var(--aorms-rule);
+  font-size: 0.9375rem;
+}
+
+.aorms-lp-sub {
+  margin-block: 1.75rem 0.5rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-lp-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr));
+  border-block-start: 1px solid var(--aorms-ink);
+  border-inline-start: 1px solid var(--aorms-rule);
+}
+
+.aorms-lp-card {
+  padding: 0.875rem 1rem 1rem;
+  border-block-end: 1px solid var(--aorms-rule);
+  border-inline-end: 1px solid var(--aorms-rule);
+}
+
+.aorms-lp-card h3 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-block-end: 0.35rem;
+}
+
+.aorms-lp-card p {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-lp-card--ink {
+  border-block-start: 2px solid var(--aorms-ink);
+}
+
+.aorms-lp-result {
+  border-block-start: 2px solid var(--aorms-ink);
+  padding-block-start: 0.875rem;
+}
+
+.aorms-lp-result__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--aorms-orange-text);
+}
+
+.aorms-lp-result__statement {
+  margin-block: 0.4rem 0.5rem;
+  font-size: 1.375rem;
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+.aorms-lp-result p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-lp-side {
+  display: grid;
+  gap: 1.5rem;
+  min-inline-size: 0;
+}
+
+.aorms-lp-shot {
+  border: 1px solid var(--aorms-rule);
+}
+
+.aorms-lp-shot img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+.aorms-lp-shot figcaption {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--cds-text-secondary);
+  border-block-start: 1px solid var(--aorms-rule);
+}
+
+.aorms-lp-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  font-size: 0.8125rem;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-lp-foot nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.aorms-lp-foot a {
+  color: inherit;
+}
+
+.aorms-lp-foot a:hover {
+  color: var(--aorms-orange-text);
+}
+
+.aorms-lp-chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 0.5rem;
+  align-items: center;
+  margin-block-start: 1.25rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+}
+
+.aorms-lp-chain span:not(.aorms-lp-chain__sep) {
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--aorms-rule);
+}
+
+.aorms-lp-price {
+  font-size: 1.75rem;
+  font-weight: 300;
+  line-height: 1.1;
+  margin-block: 0.5rem 0.25rem;
+}
+
+.aorms-skip-link {
+  position: absolute;
+  inset-inline-start: 0.5rem;
+  inset-block-start: -4rem;
+  z-index: 50;
+  padding: 0.5rem 0.75rem;
+  background: var(--aorms-ink);
+  color: #fff;
+}
+
+.aorms-skip-link:focus {
+  inset-block-start: 0.5rem;
+}

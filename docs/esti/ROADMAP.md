@@ -7329,6 +7329,16 @@ timing-unsafe cron secrets, raw DB errors in API routes, SSRF guard on AI-connec
 bucket limits. Open items (leaked-password protection, CSP nonce, plaintext connector keys…)
 are listed in the report.
 
+
+### Landing page redesigned to the hcworks.in artboard layout (2026-10-02)
+
+`app/page.tsx` rebuilt as 11 numbered artboards (00 The Start … 10 Start) with one open at a
+time — vertical strips on desktop, accordion on phones — each a write-up + "The result"
+sheet. Content reorganised from `marketing-content.ts` (no new product claims); pricing still
+reads live `plan_pricing`. Replaces the 2026-10-01 section-stack restyle (`.aorms-landing`
+CSS is now unused). Not yet seen against the real Supabase-backed page (needs live env);
+checked in headless Chromium at 1440 and 390px on a stand-in.
+
 ---
 
 **2026-09-27 — mobile Esti shipped ("contextual commands, not a general

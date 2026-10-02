@@ -507,6 +507,16 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-02 (landing redesign)** — the public landing page (`app/page.tsx`) now uses the
+  hcworks.in layout: numbered **artboards**, one open at a time
+  (`components/aorms/landing/Artboards.tsx`). Desktop: vertical strips (number · title · arrow),
+  the open board widens into a two-column sheet (write-up left, "The result" right; columns
+  switch by container width). Below 66rem: vertical accordion. `#hash` links and the legacy
+  section ids open the right board; all content is server-rendered (closed boards are
+  `display:none` + `inert`), arrow/Home/End keys move between boards. Eleven boards 00–10:
+  Start · Problem · Pulse · Fees & Revisions · Project Record · Automation & ESTI · What it
+  costs you · Your Data · Pricing · See it · Start. Copy reuses `marketing-content.ts`
+  (same product claims); orange only marks the open board's number.
 - **2026-10-02 (rail two-up)** — rail KPIs sit **two per line** on every rail screen (Pulse
   rail 15rem; page rails now 12.5rem, was 11rem). The brief, the office sheet and long values
   (>7 characters, e.g. ₹41,87,000 — `BigStat` adds `aorms-bigstat--wide`) span both columns.

@@ -2,22 +2,18 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { Accordion, AccordionItem, Column, Grid, Tag, Tile } from "@carbon/react";
-import { CheckmarkFilled, Close, ArrowRight } from "@carbon/icons-react";
+import { Accordion, AccordionItem } from "@carbon/react";
 import { createClient } from "../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../lib/platform/service";
 import { portalUrl } from "../lib/platform/subdomains";
 import { roleHome } from "../lib/auth/role-home";
 import { listBlogPosts } from "../lib/blog";
-import { HeroCtas, LiveDemoCtas, FinalCtas } from "../components/aorms/LandingButtons";
-import { LandingHeader } from "../components/aorms/LandingHeader";
+import { HeroCtas, LiveDemoCtas, FinalCtas, ConnectDexCtas } from "../components/aorms/LandingButtons";
 import { BillingForecastPanel } from "../components/aorms/BillingForecastPanel";
-import { RevisionLifecyclePanel } from "../components/aorms/RevisionLifecyclePanel";
 import { TodaysBriefingPanel } from "../components/aorms/TodaysBriefingPanel";
+import { PlanGlyph } from "../components/aorms/PlanGlyph";
 import { OperationalLeakageCalculator } from "../components/aorms/landing/OperationalLeakageCalculator";
-import { MotionRoot } from "../components/aorms/motion/MotionRoot";
-import { MotionReveal } from "../components/aorms/motion/MotionReveal";
-import { MotionEnter } from "../components/aorms/motion/MotionEnter";
+import { Artboards, type Board } from "../components/aorms/landing/Artboards";
 import {
   AORMS_PLATFORM,
   AUTOMATION_SECTION,
@@ -36,9 +32,6 @@ import {
   PULSE_SECTION,
   REVISION_MANAGEMENT,
 } from "../lib/marketing-content";
-
-const PAGE_MAX = 1200;
-const SECTION_PAD = "clamp(3rem, 6vw, 6rem) 0";
 
 /**
  * SEO (spec §35). Title/description/keywords rewritten for the
@@ -84,21 +77,81 @@ const STRUCTURED_DATA = {
   },
 };
 
+
 /**
- * web/'s public marketing landing page.
+ * web/'s public marketing landing page — redesigned 2026-10-02 to the hcworks.in layout:
+ * numbered "artboards", one open at a time (see components/aorms/landing/Artboards.tsx),
+ * each a two-column sheet — the write-up on the left, "the result" on the right. The
+ * sequence follows the order a practice meets its own problem: the question → the
+ * scatter → the daily brief → fees and revisions → the project record → automation and
+ * ESTI → what leakage costs → who holds the data → price → the live demo → start.
+ * Copy is the same product claims as before (marketing-content.ts), reorganised; nothing
+ * here promises a feature the app doesn't have.
  *
- * 2026-09-14 full rebuild per the "AORMS Landing Page & Pricing —
- * Developer Implementation Specification": Problem → Outcome → Product →
- * Proof → ROI → Pricing → Demo, replacing the previous Identity/Studio-
- * account-framed structure. See marketing-content.ts's own header
- * comment for what the spec asked for that this deliberately does NOT
- * claim (no documented API/SSO/audit-log UI, no multi-office claim —
- * this deployment is single-tenant per Studio).
- *
- * Signed-in visitors land on their role's home (`/pulse` for staff,
- * `/portal` for a client — see `lib/auth/role-home.ts`); signed-out
- * visitors get this page.
+ * Signed-in visitors land on their role's home; signed-out visitors get this page.
  */
+
+function Sheet({
+  eyebrow,
+  display,
+  h1,
+  lede,
+  side,
+  children,
+}: {
+  eyebrow: string;
+  display: string;
+  h1?: boolean;
+  lede?: string[];
+  side?: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  const Heading = h1 ? "h1" : "h2";
+  return (
+    <div className="aorms-lp-grid">
+      <div>
+        <p className="aorms-lp-eyebrow">{eyebrow}</p>
+        <Heading className="aorms-lp-display">{display}</Heading>
+        {lede?.map((l) => (
+          <p key={l} className="aorms-lp-lede">
+            {l}
+          </p>
+        ))}
+        {children}
+      </div>
+      {side && <div className="aorms-lp-side">{side}</div>}
+    </div>
+  );
+}
+
+function Cards({ items }: { items: { tag: string; text: string; badge?: string }[] }) {
+  return (
+    <div className="aorms-lp-cards">
+      {items.map((c) => (
+        <div key={c.tag} className="aorms-lp-card">
+          <h3>
+            {c.tag}
+            {c.badge ? ` · ${c.badge}` : ""}
+          </h3>
+          <p>{c.text}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Result({ statement, text }: { statement: string; text: string }) {
+  return (
+    <div className="aorms-lp-result">
+      <p className="aorms-lp-result__label">The result</p>
+      <p className="aorms-lp-result__statement">{statement}</p>
+      <p>{text}</p>
+    </div>
+  );
+}
+
+const Sub = ({ children }: { children: React.ReactNode }) => <p className="aorms-lp-sub">{children}</p>;
+
 export default async function LandingPage() {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
@@ -120,842 +173,419 @@ export default async function LandingPage() {
     Promise.resolve(listBlogPosts()),
   ]);
   const latestPosts = latestPostsAll.slice(0, 3);
-
   const livePrice = (plan: string) => planPricingRows?.find((p) => p.plan === plan)?.base_price_paise ?? 0;
   const formatRupees = (paise: number) => `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
-  return (
-    <MotionRoot>
-    <div className="aorms-landing" style={{ minHeight: "100vh", background: "var(--cds-background)", color: "var(--cds-text-primary)" }}>
-      <LandingHeader />
-      {/* PageSpeed Insights accessibility audit (2026-09-23 report):
-          "Document does not have a main landmark" — this page previously had
-          no <main> at all, just a plain <div> for every section between the
-          header and footer. Wraps exactly the primary-content sections
-          (everything between LandingHeader and the page's own <footer> below,
-          which is already its own landmark) — no visual/layout change, this
-          element carries no styling of its own. */}
-      <main style={{ maxWidth: PAGE_MAX, margin: "0 auto", padding: "0 1rem" }}>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
+  const plans = [
+    { key: "FREE", plan: PRICING.free, price: "₹0", suffix: "", sub: "" },
+    { key: "STUDIO", plan: PRICING.studio, price: formatRupees(livePrice("STUDIO") / 12), suffix: "/month", sub: `${formatRupees(livePrice("STUDIO"))}/year, billed annually` },
+    { key: "PROFESSIONAL", plan: PRICING.professional, price: formatRupees(livePrice("PROFESSIONAL") / 12), suffix: "/month", sub: `${formatRupees(livePrice("PROFESSIONAL"))}/year, billed annually` },
+    { key: "ENTERPRISE", plan: PRICING.enterprise, price: `From ${formatRupees(livePrice("ENTERPRISE"))}`, suffix: "/year", sub: "" },
+  ];
 
-        {/* 1. Hero (spec §4-5) — visual stacked full-width below the
-            headline, same presentation as the dedicated Pulse section
-            further down (id="pulse") rather than squeezed into a narrow
-            side column, per explicit follow-up request ("replace the
-            hero visual with the pulse dashboard visual, copy the same
-            from pulse section"). Both sections render the exact same
-            TodaysBriefingPanel component/data — this only changes the
-            hero's own column layout to match how that panel is shown
-            there (full Grid width, one clean horizontal row). */}
-        <section id="top" className="aorms-land-hero" style={{ padding: "clamp(2.5rem, 5vw, 4rem) 0" }}>
-          <Grid>
-            <Column sm={4} md={8} lg={11}>
-              <MotionEnter step={0}>
-                <p
-                  className="cds--type-productive-heading-01 aorms-land-eyebrow"
-                  style={{ letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-                >
-                  {AORMS_PLATFORM.expansion.toUpperCase()}
-                </p>
-              </MotionEnter>
-              <MotionEnter step={1}>
-                <h1 className="cds--type-heading-06" style={{ marginTop: "0.75rem", maxWidth: 620, whiteSpace: "pre-line" }}>
-                  {AORMS_PLATFORM.heroHeadline}
-                </h1>
-              </MotionEnter>
-              <MotionEnter step={2}>
-                <p className="cds--type-body-02" style={{ marginTop: "1rem", maxWidth: 560, color: "var(--cds-text-secondary)" }}>
-                  {AORMS_PLATFORM.heroSupport}
-                </p>
-              </MotionEnter>
-              <MotionEnter step={3}>
-                <HeroCtas />
-                <p className="cds--type-caption-01" style={{ marginTop: "1rem", color: "var(--cds-text-secondary)" }}>
-                  No credit card required · Browser-based · Built for architecture practices
-                </p>
-              </MotionEnter>
-            </Column>
-            <Column sm={4} md={8} lg={16} style={{ marginTop: "2.5rem" }}>
-              <MotionEnter step={4}>
-                <TodaysBriefingPanel />
-              </MotionEnter>
-            </Column>
-          </Grid>
-        </section>
-
-        {/* 2. Problem (spec §6). Reworked 2026-09-14 (follow-up: "the
-            problem section... feels incomplete") — this was the only
-            section on the page with no real supporting component, just
-            a headline over a row of Tags. Added a genuine before/after
-            comparison (PROBLEM.without/with, five paired scenarios each)
-            beneath the chain, giving it the same substantive weight
-            every other section gets from its own panel. */}
-        <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={10}>
-              <p
-                className="cds--type-productive-heading-01 aorms-land-eyebrow"
-                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-              >
-                {PROBLEM.eyebrow}
-              </p>
-              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem", whiteSpace: "pre-line" }}>
-                {PROBLEM.title}
-              </h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
-                {PROBLEM.body}
-              </p>
-            </Column>
-            <Column sm={4} md={8} lg={16} style={{ marginTop: "2rem" }}>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
-                {PROBLEM.chain.map((step, i) => (
-                  <span key={step} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <Tag type="cool-gray" size="md">
-                      {step}
-                    </Tag>
-                    {i < PROBLEM.chain.length - 1 && <ArrowRight size={14} style={{ color: "var(--cds-icon-secondary)" }} />}
+  const boards: Board[] = [
+    {
+      id: "top",
+      num: "00",
+      title: "The Start",
+      children: (
+        <Sheet
+          h1
+          eyebrow={`00 · ${AORMS_PLATFORM.expansion}`}
+          display={"Where does the practice\nstand today?"}
+          lede={[
+            "In most architecture offices the answer lives in WhatsApp threads, spreadsheets, a drawing folder and somebody's memory.",
+            AORMS_PLATFORM.heroSupport,
+          ]}
+          side={
+            <>
+              <Result statement="One operating record." text="Not another tool to feed — the record the practice already produces, kept in one place, so the answer is one page." />
+              <PlanGlyph seed="aorms-landing" builtUpSqm={420} siteSqm={600} floors={2} height={150} />
+            </>
+          }
+        >
+          <ul className="aorms-lp-list">
+            <li>What is due today?</li>
+            <li>What did the client approve?</li>
+            <li>What can we bill?</li>
+            <li>Who is overloaded?</li>
+          </ul>
+          <HeroCtas />
+          <Sub>AORMS keeps</Sub>
+          <Cards
+            items={[
+              { tag: "Clients", text: "Who they are, what they have approved, what they owe." },
+              { tag: "Projects", text: "Phases, tasks, meetings and drawings on one record." },
+              { tag: "Fees", text: "Progress against each phase's fee — always a live figure." },
+              { tag: "Revisions", text: "Every change tagged, assessed and approved before it is built." },
+              { tag: "Team", text: "Who is on what, and who has too much." },
+              { tag: "Site", text: "Visits, inspections and instructions tied to the project." },
+            ]}
+          />
+        </Sheet>
+      ),
+    },
+    {
+      id: "problem",
+      num: "01",
+      title: "The Problem",
+      children: (
+        <Sheet
+          eyebrow={`01 · ${PROBLEM.eyebrow}`}
+          display={PROBLEM.title}
+          lede={[PROBLEM.body]}
+          side={<Result statement={PROBLEM.resolution.lines.join(". ") + "."} text="One practice, one operating record, one source of truth." />}
+        >
+          <div className="aorms-lp-chain" aria-label="Where project information scatters">
+            {PROBLEM.chain.map((c, i) => (
+              <span key={c} style={{ display: "contents" }}>
+                <span>{c}</span>
+                {i < PROBLEM.chain.length - 1 && (
+                  <span className="aorms-lp-chain__sep" aria-hidden>
+                    →
                   </span>
-                ))}
-              </div>
-            </Column>
-
-            {/* Without / With comparison — the section's real supporting
-                component, five paired scenarios each. */}
-            <Column sm={4} md={4} lg={8} style={{ marginTop: "2rem" }}>
-              <Tile style={{ height: "100%", borderLeft: "3px solid var(--cds-support-error)" }}>
-                <p className="cds--type-productive-heading-02">{PROBLEM.without.title}</p>
-                <div style={{ marginTop: "0.875rem" }}>
-                  {PROBLEM.without.lines.map((line) => (
-                    <div key={line} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start", marginBottom: "0.625rem" }}>
-                      <Close size={16} style={{ color: "var(--cds-support-error)", flexShrink: 0, marginTop: "0.125rem" }} />
-                      <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                        {line}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </Tile>
-            </Column>
-            <Column sm={4} md={4} lg={8} style={{ marginTop: "2rem" }}>
-              <Tile style={{ height: "100%", borderLeft: "3px solid var(--cds-support-success)" }}>
-                <p className="cds--type-productive-heading-02">{PROBLEM.with.title}</p>
-                <div style={{ marginTop: "0.875rem" }}>
-                  {PROBLEM.with.lines.map((line) => (
-                    <div key={line} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start", marginBottom: "0.625rem" }}>
-                      <CheckmarkFilled size={16} style={{ color: "var(--cds-support-success)", flexShrink: 0, marginTop: "0.125rem" }} />
-                      <span className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                        {line}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </Tile>
-            </Column>
-
-            <Column sm={4} md={8} lg={16} style={{ marginTop: "1.5rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-                <p className="cds--type-productive-heading-02">{PROBLEM.resolution.title}:</p>
-                {PROBLEM.resolution.lines.map((line, i) => (
-                  <span key={line} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                    <span className="cds--type-body-02" style={{ color: "var(--cds-text-secondary)" }}>
-                      {line}
-                    </span>
-                    {i < PROBLEM.resolution.lines.length - 1 && <span style={{ color: "var(--cds-border-subtle)" }}>·</span>}
-                  </span>
-                ))}
-              </div>
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* Old way / new way — landing page V2 fragmentation visual.
-            Shows the scatter of tools a practice actually juggles, then
-            names AORMS as the one layer connecting them, without
-            attacking any named competitor. */}
-        {/* "old-way" (tool-logos -> AORMS resolution diagram) and "value"
-            (4-card preview of the feature sections below) were both cut
-            2026-09-20 — explicit feedback that the page was too long, and
-            both sections were saying the same thing the Problem section
-            above and the Pulse/Fee Recovery/Revision Management sections
-            below already say, just a third way. See git history if either
-            is ever wanted back. */}
-
-        {/* 4. Pulse showcase (spec §8). Reworked 2026-09-14 twice —
-            first an audit fix dropped the duplicate TodaysBriefingPanel
-            (it repeated the Hero's exact KPI tiles, teaching nothing
-            new), but that left the section with only an explainer of
-            tiles shown two sections up: "feels incomplete." Added
-            `sampleBrief` (marketing-content.ts) — Pulse calls itself a
-            "daily operating brief," which is a narrative, not five
-            numbers; this is the first place on the page that actually
-            shows one. */}
-        <section id="pulse" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
-              <p
-                className="cds--type-productive-heading-01 aorms-land-eyebrow"
-                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-              >
-                {PULSE_SECTION.eyebrow}
-              </p>
-              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem", maxWidth: 640 }}>
-                {PULSE_SECTION.title}
-              </h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
-                {PULSE_SECTION.body}
-              </p>
-            </Column>
-
-            {/* Sample daily brief — the section's own real content,
-                distinct from the Hero's KPI-tile row above. */}
-            <Column sm={4} md={8} lg={{ span: 10, offset: 3 }}>
-              <Tile style={{ borderLeft: "3px solid var(--cds-support-info)" }} aria-hidden>
-                <p className="cds--type-heading-compact-01">{PULSE_SECTION.sampleBrief.greeting}</p>
-                <div style={{ marginTop: "1rem" }}>
-                  {PULSE_SECTION.sampleBrief.lines.map((line) => (
-                    <p
-                      key={line}
-                      className="cds--type-body-01"
-                      style={{
-                        marginTop: "0.625rem",
-                        paddingLeft: "0.875rem",
-                        borderLeft: "2px solid var(--cds-border-subtle)",
-                        color: "var(--cds-text-secondary)",
-                      }}
-                    >
-                      {line}
-                    </p>
-                  ))}
-                </div>
-              </Tile>
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* 5. Fee Recovery (spec §9) — two columns (text+chain, then the
-            panel), not stacked rows, per explicit follow-up request.
-            id added (UI/UX audit fix, 2026-09-14) — this section had no
-            anchor, so nav/footer links describing it had nowhere real
-            to point. */}
-        <section id="fee-recovery" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={4} lg={7}>
-              <p
-                className="cds--type-productive-heading-01 aorms-land-eyebrow"
-                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-              >
-                {FEE_RECOVERY.eyebrow}
-              </p>
-              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
-                {FEE_RECOVERY.title}
-              </h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
-                {FEE_RECOVERY.body}
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem", alignItems: "center" }}>
-                {FEE_RECOVERY.chain.map((step, i) => (
-                  <span key={step} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <Tag type="blue" size="sm">
-                      {step}
-                    </Tag>
-                    {i < FEE_RECOVERY.chain.length - 1 && <ArrowRight size={14} style={{ color: "var(--cds-icon-secondary)" }} />}
-                  </span>
-                ))}
-              </div>
-            </Column>
-            <Column sm={4} md={4} lg={{ span: 8, offset: 8 }}>
+                )}
+              </span>
+            ))}
+          </div>
+          <Sub>{PROBLEM.without.title}</Sub>
+          <ul className="aorms-lp-list">
+            {PROBLEM.without.lines.map((l) => (
+              <li key={l}>{l}</li>
+            ))}
+          </ul>
+          <Sub>{PROBLEM.with.title}</Sub>
+          <ul className="aorms-lp-list">
+            {PROBLEM.with.lines.map((l) => (
+              <li key={l}>{l}</li>
+            ))}
+          </ul>
+        </Sheet>
+      ),
+    },
+    {
+      id: "pulse",
+      num: "02",
+      title: "Pulse",
+      children: (
+        <Sheet
+          eyebrow={`02 · ${PULSE_SECTION.eyebrow}`}
+          display={PULSE_SECTION.title}
+          lede={[PULSE_SECTION.body]}
+          side={
+            <>
+              <Result statement="A briefed morning." text="What changed, what is urgent, what is billable and what needs attention — written the moment the page loads, from your own records." />
+              <TodaysBriefingPanel />
+            </>
+          }
+        >
+          <Sub>{PULSE_SECTION.sampleBrief.greeting}</Sub>
+          <ul className="aorms-lp-list">
+            {PULSE_SECTION.sampleBrief.lines.map((l) => (
+              <li key={l}>{l}</li>
+            ))}
+          </ul>
+        </Sheet>
+      ),
+    },
+    {
+      id: "fee-recovery",
+      num: "03",
+      title: "Fees & Revisions",
+      aliases: ["revision-management"],
+      children: (
+        <Sheet
+          eyebrow={`03 · ${FEE_RECOVERY.eyebrow}`}
+          display={FEE_RECOVERY.title}
+          lede={[FEE_RECOVERY.body]}
+          side={
+            <>
+              <Result statement="Billing without the month-end scramble." text="What is earned and billable is a live figure, and no client change is built before it is on the record." />
               <BillingForecastPanel />
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* 6. Revision Management (spec §10). id added (UI/UX audit
-            fix, 2026-09-14) — see Fee Recovery above. */}
-        <section id="revision-management" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
-              <p
-                className="cds--type-productive-heading-01 aorms-land-eyebrow"
-                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-              >
-                {REVISION_MANAGEMENT.eyebrow}
-              </p>
-              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem", maxWidth: 640 }}>
-                {REVISION_MANAGEMENT.title}
-              </h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
-                {REVISION_MANAGEMENT.body}
-              </p>
-            </Column>
-            <Column sm={4} md={8} lg={16}>
-              <RevisionLifecyclePanel />
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* 7. Project Operating Record (spec §11). id added + body copy
-            now rendered (UI/UX audit fix, 2026-09-14) — this was the
-            only section on the page with no body copy at all, just a
-            heading over a tag wall with nothing telling a visitor why
-            the list mattered. */}
-        <section id="project-record" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={7}>
-              <p
-                className="cds--type-productive-heading-01 aorms-land-eyebrow"
-                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-              >
-                {PROJECT_RECORD.eyebrow}
-              </p>
-              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
-                {PROJECT_RECORD.title}
-              </h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
-                {PROJECT_RECORD.body}
-              </p>
-            </Column>
-            <Column sm={4} md={8} lg={{ span: 8, offset: 8 }} style={{ marginTop: "1.5rem" }}>
-              <Tile>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                  {PROJECT_RECORD.fields.map((field) => (
-                    <Tag key={field} type="cool-gray" size="md">
-                      {field}
-                    </Tag>
-                  ))}
-                </div>
-              </Tile>
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* Automation — landing page V2, real product flows (Minutes of
-            Meeting → decisions → tasks; drawing → client portal →
-            approval → project record), not the brief's own WhatsApp
-            worked example (no such integration exists — see
-            AUTOMATION_SECTION's header comment in marketing-content.ts). */}
-        <section id="automation" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={10}>
-              <p
-                className="cds--type-productive-heading-01 aorms-land-eyebrow"
-                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-              >
-                {AUTOMATION_SECTION.eyebrow}
-              </p>
-              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
-                {AUTOMATION_SECTION.title}
-              </h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
-                {AUTOMATION_SECTION.body}
-              </p>
-            </Column>
-            {AUTOMATION_SECTION.flows.map((flow, i) => (
-              <Column key={i} sm={4} md={4} lg={8} style={{ marginTop: "2rem" }}>
-                <Tile style={{ height: "100%" }}>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.5rem" }}>
-                    {flow.steps.map((step, j) => (
-                      <div key={step} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}>
-                        <Tag type="blue" size="md">
-                          {step}
-                        </Tag>
-                        {j < flow.steps.length - 1 && (
-                          <ArrowRight size={14} style={{ color: "var(--cds-icon-secondary)", transform: "rotate(90deg)", margin: "0.25rem 0 0.25rem 0.75rem" }} />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </Tile>
-              </Column>
+            </>
+          }
+        >
+          <div className="aorms-lp-chain" aria-label="From work to payment">
+            {FEE_RECOVERY.chain.map((c, i) => (
+              <span key={c} style={{ display: "contents" }}>
+                <span>{c}</span>
+                {i < FEE_RECOVERY.chain.length - 1 && (
+                  <span className="aorms-lp-chain__sep" aria-hidden>
+                    →
+                  </span>
+                )}
+              </span>
             ))}
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* 8. ESTI (spec §12). id added (UI/UX audit fix, 2026-09-14) —
-            the footer's own "ESTI" link had nowhere to point (`href="#"`,
-            a dead link) until this existed. */}
-        <section id="esti" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={7}>
-              <p
-                className="cds--type-productive-heading-01 aorms-land-eyebrow"
-                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-              >
-                {ESTI_SECTION.eyebrow}
-              </p>
-              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem", whiteSpace: "pre-line" }}>
-                {ESTI_SECTION.title}
-              </h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
-                {ESTI_SECTION.body}
-              </p>
-            </Column>
-            <Column sm={4} md={8} lg={{ span: 8, offset: 8 }} style={{ marginTop: "1.5rem" }}>
-              {ESTI_SECTION.exampleQuestions.map((q) => (
-                <Tile key={q} style={{ marginBottom: "0.75rem" }}>
-                  <p className="cds--type-body-01">&ldquo;{q}&rdquo;</p>
-                </Tile>
-              ))}
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* 9. Operational leakage / cost calculator (spec §13) — the
-            standalone ROI Calculator (annual fees / mgmt+admin hours /
-            potential-annual-value form) was removed 2026-09-14 once
-            OperationalLeakageCalculator covered the same "what does
-            leakage cost" ground directly from real cause hours. */}
-        <section id="roi" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
-              <h2 className="cds--type-heading-05">What is operational leakage costing your practice?</h2>
-            </Column>
-
-            {/* Explains what operational leakage is and how it shows up
-                specifically in an Indian practice, ahead of the
-                calculator (explicit follow-up request). */}
-            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2.5rem" }}>
-              <h3 className="cds--type-productive-heading-03">{OPERATIONAL_LEAKAGE.title}</h3>
-              <p className="cds--type-body-02" style={{ marginTop: "0.5rem", maxWidth: 720, color: "var(--cds-text-secondary)" }}>
-                {OPERATIONAL_LEAKAGE.body}
-              </p>
-              <div style={{ marginTop: "1.5rem" }}>
-                <OperationalLeakageCalculator />
-              </div>
-              <p className="cds--type-body-02" style={{ marginTop: "1.5rem", maxWidth: 720, color: "var(--cds-text-secondary)" }}>
-                {OPERATIONAL_LEAKAGE.closing}
-              </p>
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* 11. Control & ownership (spec §9's "Privacy section" — landing
-            page V2). Reframed honest, per-row status (2026-09-20): the
-            brief pitches BYO Drive/AI as live differentiators, but Drive
-            is blocked on an OAuth app that doesn't exist and the AI
-            provider abstraction isn't wired into any live call site yet
-            — see CONTROL_SECTION's header comment in
-            marketing-content.ts. Only "Data" and "Dedicated database"
-            are marked Live/Available; Drive and BYO AI are marked
-            "Coming soon" rather than claimed as present-tense features. */}
-        <section id="control" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={10} style={{ marginBottom: "1.5rem" }}>
-              <p
-                className="cds--type-productive-heading-01 aorms-land-eyebrow"
-                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-              >
-                {CONTROL_SECTION.eyebrow}
-              </p>
-              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
-                {CONTROL_SECTION.title}
-              </h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
-                {CONTROL_SECTION.body}
-              </p>
-            </Column>
-            {CONTROL_SECTION.rows.map((card) => (
-              <Column key={card.title} sm={4} md={4} lg={4} style={{ marginBottom: "1rem" }}>
-                <Tile style={{ height: "100%" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <p className="cds--type-productive-heading-02">{card.title}</p>
-                    <Tag type={card.status === "Live" || card.status === "Available" ? "green" : "cool-gray"} size="sm">
-                      {card.status}
-                    </Tag>
-                  </div>
-                  <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
-                    {card.body}
-                  </p>
-                </Tile>
-              </Column>
-            ))}
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* 12. Pricing (spec §16-20, §25) — reads live prices from
-            plan_pricing so this section never drifts from what /licences
-            actually charges. */}
-        <section id="pricing" data-analytics-event="pricing_view" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
-              <h2 className="cds--type-heading-05">One practice. One subscription. No per-seat tax.</h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.5rem", maxWidth: 640, color: "var(--cds-text-secondary)" }}>
-                AORMS is priced around the practice, not around every person who needs access.
-              </p>
-            </Column>
-
-            {(
-              [
-                { key: "FREE", plan: PRICING.free, price: "₹0", suffix: null, sub: null },
-                {
-                  key: "STUDIO",
-                  plan: PRICING.studio,
-                  price: formatRupees(livePrice("STUDIO") / 12),
-                  suffix: "/month",
-                  sub: `${formatRupees(livePrice("STUDIO"))}/year, billed annually`,
-                },
-                {
-                  key: "PROFESSIONAL",
-                  plan: PRICING.professional,
-                  price: formatRupees(livePrice("PROFESSIONAL") / 12),
-                  suffix: "/month",
-                  sub: `${formatRupees(livePrice("PROFESSIONAL"))}/year, billed annually`,
-                },
-                // sub: null (UI/UX audit fix, 2026-09-14) — "From ₹X/year"
-                // already says this is a starting/custom price; a second
-                // "Custom pricing" line directly under it read as two
-                // different pricing framings stacked instead of one.
-                { key: "ENTERPRISE", plan: PRICING.enterprise, price: `From ${formatRupees(livePrice("ENTERPRISE"))}`, suffix: "/year", sub: null },
-              ] as const
-            ).map(({ key, plan, price, suffix, sub }) => (
-              <Column key={key} sm={4} md={4} lg={4} style={{ marginBottom: "1rem" }}>
-                <Tile style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <h3 className="cds--type-productive-heading-03">{plan.name}</h3>
-                    {"badge" in plan && plan.badge && (
-                      <Tag type="green" size="sm">
-                        {plan.badge}
-                      </Tag>
-                    )}
-                  </div>
-                  <p className="cds--type-caption-01" style={{ marginTop: "0.25rem", color: "var(--cds-text-secondary)" }}>
-                    {plan.tagline}
-                  </p>
-                  <p className="cds--type-heading-04" style={{ marginTop: "0.75rem" }}>
-                    {price}
-                    {suffix && <span className="cds--type-body-01">{suffix}</span>}
-                  </p>
-                  {sub && (
-                    <p className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      {sub}
-                    </p>
+          </div>
+          <Sub>{REVISION_MANAGEMENT.eyebrow} — {REVISION_MANAGEMENT.title}</Sub>
+          <p className="aorms-lp-lede" style={{ marginBlockStart: 0 }}>
+            {REVISION_MANAGEMENT.body}
+          </p>
+          <Cards items={REVISION_MANAGEMENT.stages.map((st) => ({ tag: `${st.n} ${st.title}`, text: st.body }))} />
+        </Sheet>
+      ),
+    },
+    {
+      id: "project-record",
+      num: "04",
+      title: "Project Record",
+      children: (
+        <Sheet
+          eyebrow={`04 · ${PROJECT_RECORD.eyebrow}`}
+          display={PROJECT_RECORD.title}
+          lede={[PROJECT_RECORD.body]}
+          side={
+            <>
+              <Result statement="The status is one page." text="Not a search through a chat thread, an inbox and someone's personal spreadsheet." />
+              <figure className="aorms-lp-shot">
+                <Image src={PRODUCT_SCREENSHOTS[2].src} alt={PRODUCT_SCREENSHOTS[2].alt} width={1440} height={900} sizes="(max-width: 1056px) 100vw, 30vw" />
+                <figcaption>{PRODUCT_SCREENSHOTS[2].caption}</figcaption>
+              </figure>
+            </>
+          }
+        >
+          <Sub>Every project carries</Sub>
+          <Cards items={PROJECT_RECORD.fields.map((f) => ({ tag: f, text: "" }))} />
+        </Sheet>
+      ),
+    },
+    {
+      id: "automation",
+      num: "05",
+      title: "Automation & ESTI",
+      aliases: ["esti"],
+      children: (
+        <Sheet
+          eyebrow={`05 · ${AUTOMATION_SECTION.eyebrow} · ${ESTI_SECTION.eyebrow}`}
+          display={AUTOMATION_SECTION.title}
+          lede={[AUTOMATION_SECTION.body]}
+          side={<Result statement="Routine work that runs itself." text={ESTI_SECTION.body} />}
+        >
+          {AUTOMATION_SECTION.flows.map((f) => (
+            <div key={f.steps.join()} className="aorms-lp-chain">
+              {f.steps.map((c, i) => (
+                <span key={c} style={{ display: "contents" }}>
+                  <span>{c}</span>
+                  {i < f.steps.length - 1 && (
+                    <span className="aorms-lp-chain__sep" aria-hidden>
+                      →
+                    </span>
                   )}
-                  <div style={{ marginTop: "1rem", flex: 1 }}>
-                    {plan.includes.map((line) => (
-                      <div key={line} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start", marginBottom: "0.5rem" }}>
-                        <CheckmarkFilled size={16} style={{ color: "var(--cds-support-success)", flexShrink: 0, marginTop: "0.125rem" }} />
-                        <span className="cds--type-body-01">{line}</span>
-                      </div>
-                    ))}
-                  </div>
-                </Tile>
-              </Column>
-            ))}
-
-            <Column sm={4} md={8} lg={16} style={{ marginTop: "1rem" }}>
-              <p className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>
-                AI included on every paid plan — no per-token billing. Create or join your Studio from your AORMS Identity once you&apos;re
-                signed in.
-              </p>
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* Blog teaser */}
-        {latestPosts.length > 0 && (
-          <section id="blog" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-            <MotionReveal>
-          <Grid>
-              <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
-                <p
-                  className="cds--type-productive-heading-01 aorms-land-eyebrow"
-                  style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-                >
-                  From the Blog
-                </p>
-                <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
-                  Notes on running an architecture practice.
-                </h2>
-              </Column>
-              {latestPosts.map((post) => (
-                <Column key={post.slug} sm={4} md={4} lg={5} style={{ marginBottom: "1rem" }}>
-                  <Tile style={{ height: "100%" }}>
-                    <p className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      {post.date}
-                    </p>
-                    <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.25rem" }}>
-                      <Link href={`/blog/${post.slug}`} className="cds--link">
-                        {post.title}
-                      </Link>
-                    </h3>
-                    <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
-                      {post.description}
-                    </p>
-                  </Tile>
-                </Column>
+                </span>
               ))}
-              <Column sm={4} md={8} lg={16} style={{ marginTop: "0.5rem" }}>
-                <Link href="/blog" className="cds--link">
-                  View all posts →
-                </Link>
-              </Column>
-            </Grid>
-          </MotionReveal>
-          </section>
-        )}
-
-        {/* 13. Live Demo (spec §26) */}
-        <section id="live-demo" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid style={{ marginBottom: "3rem" }}>
-            {PRODUCT_SCREENSHOTS.map((shot) => (
-              <Column key={shot.src} sm={4} md={8} lg={{ span: 5 }} style={{ marginBottom: "1.5rem" }}>
-                <div style={{ border: "1px solid var(--cds-border-subtle)", overflow: "hidden" }}>
-                  <Image
-                    src={shot.src}
-                    alt={shot.alt}
-                    width={1440}
-                    height={900}
-                    style={{ width: "100%", height: "auto", display: "block" }}
-                    sizes="(max-width: 672px) 100vw, 33vw"
-                  />
-                </div>
-                <p
-                  className="cds--type-helper-text-01"
-                  style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}
-                >
-                  {shot.caption}
-                </p>
-              </Column>
+            </div>
+          ))}
+          <Sub>{ESTI_SECTION.title}</Sub>
+          <ul className="aorms-lp-list">
+            {ESTI_SECTION.exampleQuestions.map((q) => (
+              <li key={q}>{q}</li>
             ))}
-          </Grid>
-          <Grid>
-            <Column sm={4} md={8} lg={9}>
-              <h2 className="cds--type-heading-05">Don&apos;t take our word for it. Open the practice.</h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.75rem", color: "var(--cds-text-secondary)" }}>
-                Explore a working AORMS practice and see how projects, fees, revisions, people, and Pulse work together.
-              </p>
-              <LiveDemoCtas />
-            </Column>
-            {/* lg offset is absolute from the grid's own start, not
-                relative to the sibling column — the first column spans
-                9, so this one has to start at offset 10 to sit right
-                after it instead of overlapping it (same Carbon Column
-                offset bug pattern fixed elsewhere on this page,
-                2026-09-14 follow-up: card was landing under/behind the
-                text column instead of beside it). marginTop only
-                applies while sm/md stack the columns full-width — at lg
-                the two columns sit in the same row, so it's zeroed
-                there to keep the card's top edge level with the heading. */}
-            <Column sm={4} md={8} lg={{ span: 6, offset: 10 }} style={{ marginTop: "1.5rem" }} className="live-demo-card">
-              <Tile>
-                <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-support-info)" }}>
-                  Demo credentials
+          </ul>
+        </Sheet>
+      ),
+    },
+    {
+      id: "roi",
+      num: "06",
+      title: "What it costs you",
+      children: (
+        <Sheet
+          eyebrow="06 · Operational leakage"
+          display={OPERATIONAL_LEAKAGE.title}
+          lede={[OPERATIONAL_LEAKAGE.body]}
+        >
+          <div style={{ marginBlockStart: "1.5rem" }}>
+            <OperationalLeakageCalculator />
+          </div>
+        </Sheet>
+      ),
+    },
+    {
+      id: "control",
+      num: "07",
+      title: "Your Data",
+      children: (
+        <Sheet
+          eyebrow={`07 · ${CONTROL_SECTION.eyebrow}`}
+          display={CONTROL_SECTION.title}
+          lede={[CONTROL_SECTION.body]}
+          side={<Result statement="Records you can leave with." text="Structured practice data stays under your account — not a closed system that locks your records in." />}
+        >
+          <Cards items={CONTROL_SECTION.rows.map((r) => ({ tag: r.title, badge: r.status, text: r.body }))} />
+        </Sheet>
+      ),
+    },
+    {
+      id: "pricing",
+      num: "08",
+      title: "Pricing",
+      children: (
+        <Sheet
+          eyebrow="08 · Pricing"
+          display={"One practice. One subscription.\nNo per-seat tax."}
+          lede={["AORMS is priced around the practice, not around every person who needs access."]}
+          side={<Result statement="A price you can plan around." text="AI is included on every paid plan — no per-token billing. Create or join your Studio from your AORMS Identity once you are signed in." />}
+        >
+          <div className="aorms-lp-cards" style={{ marginBlockStart: "1.5rem" }}>
+            {plans.map(({ key, plan, price, suffix, sub }) => (
+              <div key={key} className="aorms-lp-card aorms-lp-card--ink" data-analytics-event={key === "STUDIO" ? "pricing_view" : undefined}>
+                <h3>
+                  {plan.name}
+                  {"badge" in plan && plan.badge ? ` · ${plan.badge}` : ""}
+                </h3>
+                <p>{plan.tagline}</p>
+                <p className="aorms-lp-price">
+                  {price}
+                  {suffix && <span style={{ fontSize: "0.875rem" }}>{suffix}</span>}
                 </p>
-                <p className="cds--type-body-01" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
-                  Read-only access to a sample studio — clients, projects, tasks, invoices, billing forecasts, and revisions, reset nightly.
+                {sub && <p style={{ fontSize: "0.75rem" }}>{sub}</p>}
+                <ul className="aorms-lp-list" style={{ marginBlockStart: "0.75rem" }}>
+                  {plan.includes.map((line) => (
+                    <li key={line} style={{ fontSize: "0.8125rem" }}>
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </Sheet>
+      ),
+    },
+    {
+      id: "live-demo",
+      num: "09",
+      title: "See it",
+      aliases: ["rfi"],
+      children: (
+        <Sheet
+          eyebrow="09 · The live demo"
+          display={"Don't take our word for it.\nOpen the practice."}
+          lede={["Explore a working AORMS practice and see how projects, fees, revisions, people, and Pulse work together."]}
+          side={
+            <>
+              <div className="aorms-lp-result">
+                <p className="aorms-lp-result__label">Demo credentials</p>
+                <p style={{ fontSize: "0.875rem", margin: "0.5rem 0", color: "var(--cds-text-secondary)" }}>
+                  Read-only access to a sample studio — clients, projects, tasks, invoices, billing forecasts and revisions, reset nightly.
                 </p>
-                <p className="cds--type-code-01" style={{ marginTop: "0.75rem" }}>
+                <p className="cds--type-code-01">
                   {DEMO.email}
                   <br />
                   {DEMO.password}
                 </p>
-              </Tile>
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* RFI (FAQ) */}
-        <section id="rfi" style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
-              <p
-                className="cds--type-productive-heading-01 aorms-land-eyebrow"
-                style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-              >
-                RFI
-              </p>
-              <h2 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
-                Requests for information practices ask first
-              </h2>
-            </Column>
-            <Column sm={4} md={8} lg={12}>
-              <Accordion>
-                {FAQ.map((item) => (
-                  <AccordionItem key={item.question} title={item.question}>
-                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                      {item.answer}
-                    </p>
-                  </AccordionItem>
+              </div>
+              <LiveDemoCtas />
+            </>
+          }
+        >
+          <div className="aorms-lp-cards" style={{ marginBlockStart: "1.5rem" }}>
+            {PRODUCT_SCREENSHOTS.map((shot) => (
+              <figure key={shot.src} className="aorms-lp-shot" style={{ margin: 0 }}>
+                <Image src={shot.src} alt={shot.alt} width={1440} height={900} sizes="(max-width: 1056px) 100vw, 20vw" />
+                <figcaption>{shot.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
+          <Sub>Requests for information practices ask first</Sub>
+          <Accordion>
+            {FAQ.map((item) => (
+              <AccordionItem key={item.question} title={item.question}>
+                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  {item.answer}
+                </p>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </Sheet>
+      ),
+    },
+    {
+      id: "contact",
+      num: "10",
+      title: "Start",
+      aliases: ["blog", "connectdex"],
+      children: (
+        <Sheet
+          eyebrow="10 · Start"
+          display={"Run your practice from\none operating record."}
+          lede={["Projects. Fees. Revisions. People. One practice. One system."]}
+          side={
+            <>
+              <Result statement="Start free." text="Free is a real, permanent plan — create your practice and add the first project today." />
+              <div className="aorms-lp-card aorms-lp-card--ink">
+                <h3>Talk to us</h3>
+                <p>
+                  <a href={`mailto:${HUMAN_CENTRIC_WORKS.email}`}>{HUMAN_CENTRIC_WORKS.email}</a>
+                  <br />
+                  {HUMAN_CENTRIC_WORKS.location}
+                </p>
+              </div>
+            </>
+          }
+        >
+          <FinalCtas />
+          {latestPosts.length > 0 && (
+            <>
+              <Sub>From the blog</Sub>
+              <Cards
+                items={latestPosts.map((p) => ({ tag: p.date, text: p.title }))}
+              />
+              <p style={{ marginBlockStart: "0.75rem" }}>
+                {latestPosts.map((p) => (
+                  <span key={p.slug} style={{ display: "block", padding: "0.25rem 0" }}>
+                    <Link href={`/blog/${p.slug}`} className="cds--link">
+                      {p.title}
+                    </Link>
+                  </span>
                 ))}
-              </Accordion>
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* 14. Final CTA (spec §27) */}
-        <section style={{ padding: SECTION_PAD, borderTop: "1px solid var(--cds-border-subtle)", borderBottom: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={12}>
-              <h2 className="cds--type-heading-05">Run your practice from one operating record.</h2>
-              <p className="cds--type-body-02" style={{ marginTop: "0.5rem", color: "var(--cds-text-secondary)" }}>
-                Projects. Fees. Revisions. People. One practice. One system.
-              </p>
-              <FinalCtas />
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-        {/* ConnectDeX Partners — kept small, per spec's non-negotiable
-            list (ConnectDeX out of the primary AORMS story). */}
-        <section id="connectdex" style={{ padding: "1.5rem 0", borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <MotionReveal>
-          <Grid>
-            <Column sm={4} md={8} lg={16} style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "0.5rem 1rem" }}>
-              <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                Also on AORMS: <strong style={{ color: "var(--cds-text-primary)" }}>{CONNECTDEX.name}</strong> — {CONNECTDEX.tagline}.
-              </p>
-              <Link href="/connectdex-partners" className="cds--link">
-                Learn more →
-              </Link>
-            </Column>
-          </Grid>
-          </MotionReveal>
-        </section>
-
-      </main>
-
-      {/* 15. Footer (spec §28) — 5 columns: Product/Solutions/
-          Resources/Company/Account. Its own landmark, deliberately outside
-          <main> above (kept the same maxWidth wrapper style so this is a
-          pure landmark split, no visual change). */}
-      <footer style={{ maxWidth: PAGE_MAX, margin: "0 auto", padding: "3rem 1rem", borderTop: "1px solid var(--cds-border-subtle)" }}>
-          <Grid>
-            <Column sm={4} md={8} lg={4} style={{ marginBottom: "1.5rem" }}>
-              {/* Plain <img>, not next/image — a static marketing asset, no
-                  optimization needed. Explicit width/height (2026-09-24
-                  PageSpeed audit) match the source file's real 816×216
-                  intrinsic ratio at this 24px display height. */}
-              <img src="/aorms-logo.png" alt="AORMS" width={91} height={24} style={{ height: "24px", width: "auto" }} />
-              <p className="cds--type-body-01" style={{ marginTop: "0.75rem", maxWidth: 300, color: "var(--cds-text-secondary)" }}>
-                {AORMS_PLATFORM.tagline} Developed by {HUMAN_CENTRIC_WORKS.legalName}.
-              </p>
-            </Column>
-            <Column sm={2} md={2} lg={2} style={{ marginBottom: "1.5rem" }}>
-              <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-text-secondary)" }}>
-                Product
-              </p>
-              {/* UI/UX audit fix (2026-09-14): "Projects"/"Revisions" both
-                  pointed to #value (identical destination, different
-                  labels) and "ESTI" pointed to `href="#"` (a dead link) —
-                  all three now have real, distinct anchors to point to. */}
-              <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }} aria-label="Product">
-                <Link href="#pulse" className="cds--link">
-                  Pulse
-                </Link>
-                <Link href="#project-record" className="cds--link">
-                  Projects
-                </Link>
-                <Link href="#fee-recovery" className="cds--link">
-                  Fees &amp; Billing
-                </Link>
-                <Link href="#revision-management" className="cds--link">
-                  Revisions
-                </Link>
-                <Link href="#automation" className="cds--link">
-                  Automation
-                </Link>
-                <Link href="#esti" className="cds--link">
-                  ESTI
-                </Link>
-                <Link href="#control" className="cds--link">
-                  Privacy
-                </Link>
-              </nav>
-            </Column>
-            <Column sm={2} md={2} lg={2} style={{ marginBottom: "1.5rem" }}>
-              <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-text-secondary)" }}>
-                Solutions
-              </p>
-              <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }} aria-label="Solutions">
-                <Link href="#pricing" className="cds--link">
-                  Small Practices
-                </Link>
-                <Link href="#pricing" className="cds--link">
-                  Growing Practices
-                </Link>
-                <Link href="#pricing" className="cds--link">
-                  Enterprise Practices
-                </Link>
-              </nav>
-            </Column>
-            <Column sm={2} md={2} lg={2} style={{ marginBottom: "1.5rem" }}>
-              <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-text-secondary)" }}>
-                Resources
-              </p>
-              <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }} aria-label="Resources">
                 <Link href="/blog" className="cds--link">
-                  Blog
+                  View all posts →
                 </Link>
-                <Link href="#roi" className="cds--link">
-                  ROI Calculator
-                </Link>
-              </nav>
-            </Column>
-            <Column sm={2} md={2} lg={2} style={{ marginBottom: "1.5rem" }}>
-              <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-text-secondary)" }}>
-                Company
               </p>
-              <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }} aria-label="Company">
-                <a href={`mailto:${HUMAN_CENTRIC_WORKS.email}`} className="cds--link">
-                  Contact
-                </a>
-                <Link href="/connectdex-partners" className="cds--link">
-                  Partners
-                </Link>
-                <Link href="/privacy" className="cds--link">
-                  Privacy Policy
-                </Link>
-                <Link href="/legal" className="cds--link">
-                  Terms of Service
-                </Link>
-              </nav>
-            </Column>
-            <Column sm={2} md={2} lg={2} style={{ marginBottom: "1.5rem" }}>
-              <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-text-secondary)" }}>
-                Account
-              </p>
-              <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }} aria-label="Account">
-                <Link href="/login" className="cds--link">
-                  Sign In
-                </Link>
-                <Link href={portalUrl("identity", "/platform-signup")} className="cds--link">
-                  Create Practice
-                </Link>
-              </nav>
-            </Column>
-            <Column sm={4} md={8} lg={16} style={{ marginTop: "0.5rem" }}>
-              <p className="cds--type-caption-01" style={{ color: "var(--cds-text-secondary)" }}>
-                {HUMAN_CENTRIC_WORKS.attribution} · {HUMAN_CENTRIC_WORKS.location}
-              </p>
-            </Column>
-          </Grid>
+            </>
+          )}
+          <Sub>Also on AORMS</Sub>
+          <p className="aorms-lp-lede" style={{ marginBlockStart: 0 }}>
+            <strong style={{ color: "var(--cds-text-primary)" }}>{CONNECTDEX.name}</strong> — {CONNECTDEX.tagline}.
+          </p>
+          <ConnectDexCtas />
+        </Sheet>
+      ),
+    },
+  ];
+
+  return (
+    <div style={{ minHeight: "100vh", background: "var(--cds-background)", color: "var(--cds-text-primary)" }}>
+      <a href="#main" className="aorms-skip-link">
+        Skip to content
+      </a>
+      <header className="aorms-lp-bar">
+        <Link href="/" aria-label="AORMS home" style={{ display: "flex", alignItems: "center" }}>
+          <img src="/aorms-logo.png" alt="AORMS" width={91} height={24} style={{ height: "24px", width: "auto" }} />
+        </Link>
+        <nav aria-label="Primary">
+          <Link href="#pricing">Pricing</Link>
+          <Link href="/blog">Blog</Link>
+          <Link href="/login">Sign in</Link>
+          <Link href="#live-demo">Explore the demo →</Link>
+        </nav>
+      </header>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
+      <Artboards boards={boards} />
+      <footer className="aorms-lp-foot">
+        <span>
+          {AORMS_PLATFORM.tagline} {HUMAN_CENTRIC_WORKS.attribution} · {HUMAN_CENTRIC_WORKS.location}
+        </span>
+        <nav aria-label="Footer">
+          <Link href="/blog">Blog</Link>
+          <Link href="/connectdex-partners">Partners</Link>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/legal">Terms</Link>
+          <Link href="/login">Sign in</Link>
+          <Link href={portalUrl("identity", "/platform-signup")}>Create practice</Link>
+        </nav>
       </footer>
     </div>
-    </MotionRoot>
   );
 }
