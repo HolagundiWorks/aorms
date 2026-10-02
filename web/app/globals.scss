@@ -447,11 +447,12 @@ a.cds--side-nav__link[aria-current="page"]::before {
   gap: 0.25rem;
   padding-block-start: 0.75rem;
   border-block-start: 1px solid var(--aorms-ink);
-  min-inline-size: 7rem;
+  min-inline-size: 4rem;
 }
 
+// KPI numerals at 50% of the original 3rem (2026-10-02).
 .aorms-bigstat__value {
-  font-size: 3rem;
+  font-size: 1.5rem;
   line-height: 1;
   font-weight: 300;
   letter-spacing: -0.02em;
@@ -616,16 +617,40 @@ a.cds--side-nav__link[aria-current="page"]::before {
 // Pulse studio workspace: left rail of numerals + working area.
 .aorms-pulse-layout {
   display: grid;
-  grid-template-columns: 11rem minmax(0, 1fr);
+  grid-template-columns: 15rem minmax(0, 1fr);
   gap: 2rem;
   align-items: start;
 }
 
 .aorms-pulse-rail {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.25rem;
   position: sticky;
   inset-block-start: 4rem;
+  // The rail now also carries the office-today sheet, so it can outgrow the viewport.
+  max-block-size: calc(100vh - 5rem);
+  overflow-y: auto;
+  align-content: start;
+}
+
+// Office-today sheet inside the rail: one stacked column, no big heading.
+.aorms-pulse-rail .aorms-hub {
+  margin-block-end: 0;
+  border-block-start: 1px solid var(--aorms-ink);
+  padding-block-start: 0.75rem;
+}
+
+.aorms-pulse-rail .aorms-hub__head h2 {
+  display: none;
+}
+
+.aorms-pulse-rail .aorms-hub__head {
+  margin-block-end: 0.5rem;
+}
+
+.aorms-pulse-rail .aorms-hub__cols {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem 0;
 }
 
 .aorms-pulse-main {
@@ -640,8 +665,19 @@ a.cds--side-nav__link[aria-current="page"]::before {
 
   .aorms-pulse-rail {
     position: static;
+    max-block-size: none;
+    overflow: visible;
     display: flex;
     flex-wrap: wrap;
+    gap: 1rem 2rem;
+  }
+
+  .aorms-pulse-rail .aorms-hub {
+    flex: 1 1 100%;
+  }
+
+  .aorms-pulse-rail .aorms-hub__cols {
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
     gap: 1rem 2rem;
   }
 }
@@ -2067,7 +2103,7 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 @media (max-width: 65.9375rem) {
   // KPI numerals sit two-up instead of one tall column; the brief spans both.
   .aorms-bigstat-row.aorms-rail-kpis .aorms-bigstat__value {
-    font-size: clamp(1.5rem, 7vw, 2.25rem);
+    font-size: 1.5rem;
     overflow-wrap: anywhere;
   }
 
