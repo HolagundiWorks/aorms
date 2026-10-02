@@ -624,13 +624,30 @@ a.cds--side-nav__link[aria-current="page"]::before {
 
 .aorms-pulse-rail {
   display: grid;
-  gap: 1.25rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 1rem;
   position: sticky;
   inset-block-start: 4rem;
   // The rail now also carries the office-today sheet, so it can outgrow the viewport.
   max-block-size: calc(100vh - 5rem);
   overflow-y: auto;
   align-content: start;
+}
+
+// Two KPIs per line; the brief, the office sheet and long values (e.g. ₹41,87,000) span both columns.
+.aorms-pulse-rail > .aorms-rail-brief,
+.aorms-pulse-rail > .aorms-hub,
+.aorms-pulse-rail > :has(> .aorms-bigstat--wide),
+.aorms-pulse-rail > .aorms-bigstat--wide,
+.aorms-rail-kpis > .aorms-rail-brief,
+.aorms-rail-kpis > :has(> .aorms-bigstat--wide),
+.aorms-rail-kpis > .aorms-bigstat--wide {
+  grid-column: 1 / -1;
+}
+
+.aorms-pulse-rail .aorms-bigstat__label,
+.aorms-rail-kpis .aorms-bigstat__label {
+  overflow-wrap: anywhere;
 }
 
 // Office-today sheet inside the rail: one stacked column, no big heading.
@@ -1491,7 +1508,7 @@ a.cds--side-nav__link[aria-current="page"]::before {
 @media (min-width: 66rem) {
   div:has(> .aorms-rail-kpis) {
     display: grid;
-    grid-template-columns: 11rem minmax(0, 1fr);
+    grid-template-columns: 12.5rem minmax(0, 1fr);
     column-gap: 2rem;
     align-items: start;
   }
@@ -1509,7 +1526,8 @@ a.cds--side-nav__link[aria-current="page"]::before {
     grid-column: 1;
     grid-row: 2 / span 40;
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
+    // Two KPIs per line in the rail (2026-10-02); long values and the brief span both.
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 1.5rem !important;
     margin: 0 !important;
     position: sticky;
