@@ -507,6 +507,11 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-02 (Pulse rail)** — KPI numerals (`BigStat`) halved to 1.5rem (was 3rem). The
+  "00 / The office" sheet (Projects · Today · Attention) moved from the Pulse main area
+  into the left rail, stacked in one column below the brief; the rail widened to 15rem and
+  scrolls inside itself (`max-block-size`) when taller than the viewport. Below `lg` it
+  returns to a full-width block above the content.
 - **2026-10-01 (mobile)** — checked at 360/390/768px: (1) header actions (ESTI,
   calculator, Pomodoro, user menu) were pushed off-screen because Carbon's
   `.cds--header__name` out-ranked `.aorms-header-org` — selector now qualified, so the

@@ -771,9 +771,12 @@ export default async function PulsePage() {
                 </Suspense>
               </p>
             </div>
+            {/* The office today (Projects / Today / Attention) — moved from the main area into the rail, below the brief (2026-10-02). */}
+            <Suspense fallback={null}>
+              <HubSheet />
+            </Suspense>
           </aside>
           <div className="aorms-pulse-main">
-            <HubSheet />
 
         {/* Today's Brief + Action Queue, as two separate Tiles side by
             side (2026-09-14 UI-polish request; briefly one merged Tile,
