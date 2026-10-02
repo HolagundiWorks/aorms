@@ -507,16 +507,18 @@ a sheet.
 
 ## 15. Change log
 
-- **2026-10-02 (landing redesign)** — the public landing page (`app/page.tsx`) now uses the
-  hcworks.in layout: numbered **artboards**, one open at a time
-  (`components/aorms/landing/Artboards.tsx`). Desktop: vertical strips (number · title · arrow),
-  the open board widens into a two-column sheet (write-up left, "The result" right; columns
-  switch by container width). Below 66rem: vertical accordion. `#hash` links and the legacy
-  section ids open the right board; all content is server-rendered (closed boards are
-  `display:none` + `inert`), arrow/Home/End keys move between boards. Eleven boards 00–10:
-  Start · Problem · Pulse · Fees & Revisions · Project Record · Automation & ESTI · What it
-  costs you · Your Data · Pricing · See it · Start. Copy reuses `marketing-content.ts`
-  (same product claims); orange only marks the open board's number.
+- **2026-10-02 (landing redesign, current hcworks.in)** — the public landing page
+  (`app/page.tsx`) follows the *current* hcworks.in (re-checked against the live site, not the
+  older accordion-strip layout): one full-viewport sheet at a time — write-up on the left, "The
+  result" plus a generated plan drawing (corner figure) on the right — with a fixed **right-hand
+  nameplate** on desktop (black CTA bar · big mono number · title · prev/next arrows · board
+  index · studio/contact block + footer links). Phones/tablets: black title bar (number | title |
+  mark) and a right-hand **number rail**. `components/aorms/landing/Artboards.tsx`; arrow keys,
+  Home/End and `#hash` links open boards (no scroll-wheel hijacking). Boards 00–10: Start ·
+  Problem · Pulse · Fees & Revisions · Project Record · Automation & ESTI · What it costs you ·
+  Your Data · Pricing · See it · Start. All boards are server-rendered (closed ones
+  `display:none` + `inert`). Copy reuses `marketing-content.ts`; orange only marks the active
+  board's number in the index.
 - **2026-10-02 (rail two-up)** — rail KPIs sit **two per line** on every rail screen (Pulse
   rail 15rem; page rails now 12.5rem, was 11rem). The brief, the office sheet and long values
   (>7 characters, e.g. ₹41,87,000 — `BigStat` adds `aorms-bigstat--wide`) span both columns.

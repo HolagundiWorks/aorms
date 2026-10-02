@@ -7332,9 +7332,10 @@ are listed in the report.
 
 ### Landing page redesigned to the hcworks.in artboard layout (2026-10-02)
 
-`app/page.tsx` rebuilt as 11 numbered artboards (00 The Start … 10 Start) with one open at a
-time — vertical strips on desktop, accordion on phones — each a write-up + "The result"
-sheet. Content reorganised from `marketing-content.ts` (no new product claims); pricing still
+`app/page.tsx` rebuilt as 11 numbered artboards (00 The Start … 10 Start), one full-viewport
+sheet at a time (write-up + "The result" + corner drawing) with a fixed right-hand nameplate on
+desktop and a title bar + number rail on phones — matching the *current* hcworks.in (an
+earlier pass in the same day copied its older strip-accordion layout and was redone). Content reorganised from `marketing-content.ts` (no new product claims); pricing still
 reads live `plan_pricing`. Replaces the 2026-10-01 section-stack restyle (`.aorms-landing`
 CSS is now unused). Not yet seen against the real Supabase-backed page (needs live env);
 checked in headless Chromium at 1440 and 390px on a stand-in.

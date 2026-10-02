@@ -2134,187 +2134,341 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
   }
 }
 
-// Landing page — "artboards" (2026-10-02), the layout hcworks.in uses: numbered boards side
-// by side, one open at a time. Desktop: vertical strips, the open one is a two-column sheet.
-// Below 66rem: vertical accordion. White/black structure, 1px rules; orange only marks the
-// open board's number (activity). Content is server-rendered; closed boards are display:none.
+// Landing page — "artboards" (2026-10-02), re-done against the CURRENT hcworks.in: one full-
+// viewport sheet at a time (copy left, "the result" + a drawing right) with a fixed right-hand
+// NAMEPLATE on desktop (CTA bar · big number · title · prev/next · mark · contact), and on
+// phones a black title bar plus a right-hand number rail. White/black structure with 1px
+// rules; the open board's number is the only orange. Content is server-rendered; closed
+// boards are display:none + inert.
+.aorms-lp {
+  --np-w: 12.5rem;
+  --rail-w: 3.75rem;
+  --bar-h: 3.5rem;
+  position: relative;
+  background: var(--cds-background);
+  color: var(--cds-text-primary);
+}
+
+.aorms-lp-skip {
+  position: absolute;
+  inset-inline-start: 0.5rem;
+  inset-block-start: -4rem;
+  z-index: 60;
+  padding: 0.5rem 0.75rem;
+  background: var(--aorms-ink);
+  color: #fff;
+}
+
+.aorms-lp-skip:focus {
+  inset-block-start: 0.5rem;
+}
+
+.aorms-lp-stage {
+  min-inline-size: 0;
+}
+
+.aorms-lp-board {
+  display: none;
+  min-inline-size: 0;
+}
+
+.aorms-lp-board.is-active {
+  display: block;
+}
+
+.aorms-lp-panel {
+  padding: 1.25rem 1rem 3rem;
+  container-type: inline-size;
+}
+
+// Mobile title bar (black) — number | title, mark on the right.
 .aorms-lp-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  block-size: 3.5rem;
+  block-size: var(--bar-h);
   padding-inline: 1rem;
-  border-block-end: 1px solid var(--aorms-ink);
-  background: var(--cds-background);
+  background: var(--aorms-ink);
+  color: #fff;
   position: sticky;
   inset-block-start: 0;
-  z-index: 20;
+  z-index: 30;
 }
 
-.aorms-lp-bar nav {
+.aorms-lp-bar__left {
   display: flex;
-  align-items: center;
-  gap: 1.25rem;
+  gap: 0.75rem;
+  align-items: baseline;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-transform: uppercase;
 }
 
-.aorms-lp-bar a {
-  color: inherit;
-  text-decoration: none;
-  font-size: 0.875rem;
+.aorms-lp-bar__left .aorms-lp-sep {
+  opacity: 0.5;
 }
 
-.aorms-lp-bar a:hover,
-.aorms-lp-bar a:focus-visible {
-  color: var(--aorms-orange-text);
-  text-decoration: underline;
-  text-underline-offset: 0.25em;
+.aorms-lp-bar__mark {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
-.aorms-lp {
+// Right-hand number rail (phones/tablets).
+.aorms-lp-rail {
+  position: fixed;
+  inset-block: var(--bar-h) 0;
+  inset-inline-end: 0;
+  inline-size: var(--rail-w);
+  z-index: 25;
   display: flex;
   flex-direction: column;
-  border-block-end: 1px solid var(--aorms-ink);
+  background: var(--cds-layer-01);
+  border-inline-start: 1px solid var(--aorms-rule);
 }
 
-.aorms-lp-board {
-  border-block-start: 1px solid var(--aorms-ink);
-  min-inline-size: 0;
-}
-
-.aorms-lp-board:first-child {
-  border-block-start: 0;
-}
-
-.aorms-lp-head {
+.aorms-lp-rail button {
   all: unset;
   box-sizing: border-box;
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  inline-size: 100%;
-  padding: 1rem;
+  flex: 1 1 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.125rem;
   cursor: pointer;
-  font-family: inherit;
+  border-block-end: 1px solid var(--aorms-rule);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: center;
 }
 
-.aorms-lp-head:hover {
-  background: var(--cds-layer-01);
+.aorms-lp-rail button small {
+  font-family: "IBM Plex Sans", Arial, sans-serif;
+  font-size: 0.5rem;
+  font-weight: 500;
+  line-height: 1.1;
+  text-transform: uppercase;
+  max-inline-size: 3.25rem;
+  overflow: hidden;
 }
 
-.aorms-lp-head:focus-visible {
+.aorms-lp-rail button[aria-current="true"] {
+  background: var(--aorms-ink);
+  color: #fff;
+}
+
+.aorms-lp-rail button:focus-visible {
   outline: 2px solid var(--cds-focus);
   outline-offset: -2px;
 }
 
-.aorms-lp-num {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.aorms-lp-title {
-  flex: 1;
-  font-size: 1.0625rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.aorms-lp-arrow {
-  transition: transform 150ms;
-}
-
-.aorms-lp-board.is-active .aorms-lp-num {
-  color: var(--aorms-orange-text);
-}
-
-.aorms-lp-board.is-active .aorms-lp-arrow {
-  transform: rotate(90deg);
-}
-
-.aorms-lp-body {
+// The desktop nameplate is hidden on small screens.
+.aorms-lp-nameplate {
   display: none;
-  padding: 1.25rem 1rem 2rem;
-  min-inline-size: 0;
 }
 
-.aorms-lp-board.is-active .aorms-lp-body {
-  display: block;
+@media (max-width: 63.9375rem) {
+  .aorms-lp-stage {
+    min-block-size: calc(100dvh - var(--bar-h));
+    padding-inline-end: var(--rail-w);
+  }
 }
 
-@media (min-width: 66rem) {
-  .aorms-lp {
-    flex-direction: row;
-    block-size: calc(100vh - 3.5rem);
-    min-block-size: 38rem;
-    overflow: hidden;
+@media (min-width: 64rem) {
+  .aorms-lp-bar,
+  .aorms-lp-rail {
+    display: none;
   }
 
-  .aorms-lp-board {
-    display: flex;
-    flex: 0 0 3.5rem;
-    border-block-start: 0;
-    border-inline-end: 1px solid var(--aorms-rule);
+  .aorms-lp-stage {
+    block-size: 100vh;
+    min-block-size: 36rem;
+    margin-inline-end: var(--np-w);
   }
 
   .aorms-lp-board.is-active {
-    flex: 1 1 auto;
-    min-inline-size: 0;
-  }
-
-  .aorms-lp-head {
-    flex: 0 0 3.5rem;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 1.25rem;
-    padding: 1.25rem 0;
-    border-inline-end: 1px solid var(--aorms-rule);
     block-size: 100%;
-  }
-
-  .aorms-lp-board.is-active .aorms-lp-head {
-    background: var(--cds-layer-01);
-  }
-
-  .aorms-lp-num {
-    font-size: 1rem;
-  }
-
-  .aorms-lp-title {
-    flex: 1;
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    font-size: 0.875rem;
-    white-space: nowrap;
-  }
-
-  .aorms-lp-arrow {
-    transform: none !important;
-  }
-
-  .aorms-lp-body {
-    flex: 1;
-    container-type: inline-size;
     overflow-y: auto;
-    padding: 2rem clamp(1.5rem, 3.5vw, 3.5rem) 3rem;
   }
 
-  .aorms-lp-board.is-active .aorms-lp-body {
-    display: block;
+  .aorms-lp-panel {
+    padding: 1.5rem clamp(1.5rem, 4vw, 4.5rem) 4rem;
+    min-block-size: 100%;
+    position: relative;
   }
 
-  .aorms-lp-board:not(.is-active) .aorms-lp-body {
-    display: none;
+  .aorms-lp-nameplate {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: var(--np-w);
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    background: var(--cds-layer-01);
+    border-inline-start: 1px solid var(--aorms-rule);
+    overflow-y: auto;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  @media (min-width: 66rem) {
-    .aorms-lp-board {
-      transition: flex-basis 250ms ease;
-    }
+.aorms-lp-np__cta {
+  display: block;
+  padding: 1.1rem 1rem;
+  background: var(--aorms-ink);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+.aorms-lp-np__cta:hover,
+.aorms-lp-np__cta:focus-visible {
+  background: #393939;
+  color: #fff;
+}
+
+.aorms-lp-np__num {
+  padding: 1rem 0 0.75rem;
+  text-align: center;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 4.5rem;
+  font-weight: 600;
+  line-height: 1;
+  border-block-end: 1px solid var(--aorms-rule);
+}
+
+.aorms-lp-np__title {
+  padding: 0.875rem 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.aorms-lp-np__arrows {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.aorms-lp-np__arrows button {
+  all: unset;
+  cursor: pointer;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--aorms-ink);
+  font-size: 1rem;
+}
+
+.aorms-lp-np__arrows button:hover:not(:disabled) {
+  background: var(--aorms-ink);
+  color: #fff;
+}
+
+.aorms-lp-np__arrows button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.aorms-lp-np__arrows button:focus-visible {
+  outline: 2px solid var(--cds-focus);
+  outline-offset: 2px;
+}
+
+.aorms-lp-np__index {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+  border-block: 1px solid var(--aorms-rule);
+}
+
+.aorms-lp-np__index button {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  gap: 0.5rem;
+  inline-size: 100%;
+  padding: 0.2rem 1rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.aorms-lp-np__index button span:first-child {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-lp-np__index button[aria-current="true"] {
+  font-weight: 600;
+  background: var(--cds-background);
+}
+
+.aorms-lp-np__index button[aria-current="true"] span:first-child {
+  color: var(--aorms-orange-text);
+}
+
+.aorms-lp-np__index button:hover {
+  background: var(--cds-background);
+}
+
+.aorms-lp-np__index button:focus-visible {
+  outline: 2px solid var(--cds-focus);
+  outline-offset: -2px;
+}
+
+.aorms-lp-np__studio {
+  margin-block-start: auto;
+  padding: 1rem;
+  border-block-start: 1px solid var(--aorms-rule);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+.aorms-lp-np__studio strong {
+  display: block;
+  margin-block-end: 0.35rem;
+  font-size: 0.9375rem;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.aorms-lp-np__studio a {
+  color: inherit;
+}
+
+.aorms-lp-np__studio nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  margin-block-start: 0.5rem;
+  font-family: "IBM Plex Sans", Arial, sans-serif;
+}
+
+.aorms-lp-np__studio a:hover {
+  color: var(--aorms-orange-text);
+}
+
+// The drawing in the bottom-right corner of a sheet (hcworks.in's "corner figure").
+.aorms-lp-corner {
+  display: none;
+  color: var(--aorms-ink);
+  opacity: 0.9;
+}
+
+@media (min-width: 64rem) {
+  .aorms-lp-corner {
+    display: block;
+    position: absolute;
+    inset-inline-end: clamp(1.5rem, 4vw, 4.5rem);
+    inset-block-end: 2rem;
+    inline-size: min(38%, 30rem);
+    pointer-events: none;
   }
 }
 
@@ -2327,12 +2481,7 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
   max-inline-size: 76rem;
 }
 
-// Two columns only when the open board is wide enough (container query — the board's
-// width depends on how many closed strips sit beside it, not on the viewport).
-.aorms-lp-body {
-  container-type: inline-size;
-}
-
+// Two columns only when the open sheet is wide enough (container query on .aorms-lp-panel).
 @container (min-width: 44rem) {
   .aorms-lp-grid {
     grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 1fr);
@@ -2512,18 +2661,4 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
   font-weight: 300;
   line-height: 1.1;
   margin-block: 0.5rem 0.25rem;
-}
-
-.aorms-skip-link {
-  position: absolute;
-  inset-inline-start: 0.5rem;
-  inset-block-start: -4rem;
-  z-index: 50;
-  padding: 0.5rem 0.75rem;
-  background: var(--aorms-ink);
-  color: #fff;
-}
-
-.aorms-skip-link:focus {
-  inset-block-start: 0.5rem;
 }

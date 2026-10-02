@@ -5,7 +5,6 @@ import type { Metadata } from "next";
 import { Accordion, AccordionItem } from "@carbon/react";
 import { createClient } from "../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../lib/platform/service";
-import { portalUrl } from "../lib/platform/subdomains";
 import { roleHome } from "../lib/auth/role-home";
 import { listBlogPosts } from "../lib/blog";
 import { HeroCtas, LiveDemoCtas, FinalCtas, ConnectDexCtas } from "../components/aorms/LandingButtons";
@@ -97,6 +96,7 @@ function Sheet({
   h1,
   lede,
   side,
+  corner,
   children,
 }: {
   eyebrow: string;
@@ -104,10 +104,13 @@ function Sheet({
   h1?: boolean;
   lede?: string[];
   side?: React.ReactNode;
+  /** A generated plan drawing pinned to the sheet's bottom-right corner (hcworks.in's "corner figure"). */
+  corner?: { seed: string; builtUpSqm: number; siteSqm: number; floors: number };
   children?: React.ReactNode;
 }) {
   const Heading = h1 ? "h1" : "h2";
   return (
+    <>
     <div className="aorms-lp-grid">
       <div>
         <p className="aorms-lp-eyebrow">{eyebrow}</p>
@@ -121,6 +124,12 @@ function Sheet({
       </div>
       {side && <div className="aorms-lp-side">{side}</div>}
     </div>
+    {corner && (
+      <div className="aorms-lp-corner" aria-hidden>
+        <PlanGlyph {...corner} height={220} />
+      </div>
+    )}
+    </>
   );
 }
 
@@ -187,6 +196,7 @@ export default async function LandingPage() {
     {
       id: "top",
       num: "00",
+      short: "Start",
       title: "The Start",
       children: (
         <Sheet
@@ -198,11 +208,9 @@ export default async function LandingPage() {
             AORMS_PLATFORM.heroSupport,
           ]}
           side={
-            <>
-              <Result statement="One operating record." text="Not another tool to feed — the record the practice already produces, kept in one place, so the answer is one page." />
-              <PlanGlyph seed="aorms-landing" builtUpSqm={420} siteSqm={600} floors={2} height={150} />
-            </>
+            <Result statement="One operating record." text="Not another tool to feed — the record the practice already produces, kept in one place, so the answer is one page." />
           }
+          corner={{ seed: "aorms-landing", builtUpSqm: 420, siteSqm: 600, floors: 2 }}
         >
           <ul className="aorms-lp-list">
             <li>What is due today?</li>
@@ -228,6 +236,7 @@ export default async function LandingPage() {
     {
       id: "problem",
       num: "01",
+      short: "Problem",
       title: "The Problem",
       children: (
         <Sheet
@@ -235,6 +244,7 @@ export default async function LandingPage() {
           display={PROBLEM.title}
           lede={[PROBLEM.body]}
           side={<Result statement={PROBLEM.resolution.lines.join(". ") + "."} text="One practice, one operating record, one source of truth." />}
+          corner={{ seed: "scatter", builtUpSqm: 300, siteSqm: 520, floors: 1 }}
         >
           <div className="aorms-lp-chain" aria-label="Where project information scatters">
             {PROBLEM.chain.map((c, i) => (
@@ -266,6 +276,7 @@ export default async function LandingPage() {
     {
       id: "pulse",
       num: "02",
+      short: "Pulse",
       title: "Pulse",
       children: (
         <Sheet
@@ -291,6 +302,7 @@ export default async function LandingPage() {
     {
       id: "fee-recovery",
       num: "03",
+      short: "Fees",
       title: "Fees & Revisions",
       aliases: ["revision-management"],
       children: (
@@ -328,6 +340,7 @@ export default async function LandingPage() {
     {
       id: "project-record",
       num: "04",
+      short: "Record",
       title: "Project Record",
       children: (
         <Sheet
@@ -352,6 +365,7 @@ export default async function LandingPage() {
     {
       id: "automation",
       num: "05",
+      short: "Auto",
       title: "Automation & ESTI",
       aliases: ["esti"],
       children: (
@@ -360,6 +374,7 @@ export default async function LandingPage() {
           display={AUTOMATION_SECTION.title}
           lede={[AUTOMATION_SECTION.body]}
           side={<Result statement="Routine work that runs itself." text={ESTI_SECTION.body} />}
+          corner={{ seed: "routine", builtUpSqm: 640, siteSqm: 900, floors: 3 }}
         >
           {AUTOMATION_SECTION.flows.map((f) => (
             <div key={f.steps.join()} className="aorms-lp-chain">
@@ -387,6 +402,7 @@ export default async function LandingPage() {
     {
       id: "roi",
       num: "06",
+      short: "Cost",
       title: "What it costs you",
       children: (
         <Sheet
@@ -403,6 +419,7 @@ export default async function LandingPage() {
     {
       id: "control",
       num: "07",
+      short: "Data",
       title: "Your Data",
       children: (
         <Sheet
@@ -410,6 +427,7 @@ export default async function LandingPage() {
           display={CONTROL_SECTION.title}
           lede={[CONTROL_SECTION.body]}
           side={<Result statement="Records you can leave with." text="Structured practice data stays under your account — not a closed system that locks your records in." />}
+          corner={{ seed: "records", builtUpSqm: 380, siteSqm: 700, floors: 2 }}
         >
           <Cards items={CONTROL_SECTION.rows.map((r) => ({ tag: r.title, badge: r.status, text: r.body }))} />
         </Sheet>
@@ -418,6 +436,7 @@ export default async function LandingPage() {
     {
       id: "pricing",
       num: "08",
+      short: "Price",
       title: "Pricing",
       children: (
         <Sheet
@@ -455,6 +474,7 @@ export default async function LandingPage() {
     {
       id: "live-demo",
       num: "09",
+      short: "Demo",
       title: "See it",
       aliases: ["rfi"],
       children: (
@@ -503,6 +523,7 @@ export default async function LandingPage() {
     {
       id: "contact",
       num: "10",
+      short: "Start",
       title: "Start",
       aliases: ["blog", "connectdex"],
       children: (
@@ -556,36 +577,27 @@ export default async function LandingPage() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--cds-background)", color: "var(--cds-text-primary)" }}>
-      <a href="#main" className="aorms-skip-link">
-        Skip to content
-      </a>
-      <header className="aorms-lp-bar">
-        <Link href="/" aria-label="AORMS home" style={{ display: "flex", alignItems: "center" }}>
-          <img src="/aorms-logo.png" alt="AORMS" width={91} height={24} style={{ height: "24px", width: "auto" }} />
-        </Link>
-        <nav aria-label="Primary">
-          <Link href="#pricing">Pricing</Link>
-          <Link href="/blog">Blog</Link>
-          <Link href="/login">Sign in</Link>
-          <Link href="#live-demo">Explore the demo →</Link>
-        </nav>
-      </header>
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
-      <Artboards boards={boards} />
-      <footer className="aorms-lp-foot">
-        <span>
-          {AORMS_PLATFORM.tagline} {HUMAN_CENTRIC_WORKS.attribution} · {HUMAN_CENTRIC_WORKS.location}
-        </span>
-        <nav aria-label="Footer">
-          <Link href="/blog">Blog</Link>
-          <Link href="/connectdex-partners">Partners</Link>
-          <Link href="/privacy">Privacy</Link>
-          <Link href="/legal">Terms</Link>
-          <Link href="/login">Sign in</Link>
-          <Link href={portalUrl("identity", "/platform-signup")}>Create practice</Link>
-        </nav>
-      </footer>
-    </div>
+      <Artboards
+        boards={boards}
+        nameplate={{
+          cta: { label: "Explore the demo →", href: "#live-demo" },
+          studio: "AORMS",
+          lines: [
+            { text: HUMAN_CENTRIC_WORKS.email, href: `mailto:${HUMAN_CENTRIC_WORKS.email}` },
+            { text: HUMAN_CENTRIC_WORKS.attribution },
+            { text: HUMAN_CENTRIC_WORKS.location },
+          ],
+          links: [
+            { label: "Sign in", href: "/login" },
+            { label: "Blog", href: "/blog" },
+            { label: "Partners", href: "/connectdex-partners" },
+            { label: "Privacy", href: "/privacy" },
+            { label: "Terms", href: "/legal" },
+          ],
+        }}
+      />
+    </>
   );
 }
