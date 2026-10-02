@@ -777,6 +777,15 @@ export default async function PulsePage() {
             </Suspense>
           </aside>
           <div className="aorms-pulse-main">
+        {/* KPI tabs (moved to the top of the working area 2026-10-02) — Pulse / Finance / Team / Others. Three tiles carry a
+            green/amber/red health status (KpiTile.tsx's `status` prop);
+            the rest stay plain counts — see that file's own comment for
+            why not every KPI gets one. */}
+        <div style={{ marginBottom: "1rem" }}>
+          <KpiTabs pulse={pulseKpis} finance={financeKpis} team={teamKpis} others={othersKpis} />
+        </div>
+
+
 
         {/* Today's Brief + Action Queue, as two separate Tiles side by
             side (2026-09-14 UI-polish request; briefly one merged Tile,
@@ -795,14 +804,6 @@ export default async function PulsePage() {
             <ActionQueue items={topPriorities} />
           </Column>
         </Grid>
-
-        {/* KPI tabs — Pulse / Finance / Team / Others. Three tiles carry a
-            green/amber/red health status (KpiTile.tsx's `status` prop);
-            the rest stay plain counts — see that file's own comment for
-            why not every KPI gets one. */}
-        <div style={{ marginBottom: "1rem" }}>
-          <KpiTabs pulse={pulseKpis} finance={financeKpis} team={teamKpis} others={othersKpis} />
-        </div>
 
         {/* Everything else — organized into switchable tabs (see
             DashboardTabs.tsx's own header comment for the grouping

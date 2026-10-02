@@ -507,6 +507,10 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-02 (rail two-up)** — rail KPIs sit **two per line** on every rail screen (Pulse
+  rail 15rem; page rails now 12.5rem, was 11rem). The brief, the office sheet and long values
+  (>7 characters, e.g. ₹41,87,000 — `BigStat` adds `aorms-bigstat--wide`) span both columns.
+  Pulse: the KPI tabs (Pulse/Finance/Team/Others) moved to the top of the working area.
 - **2026-10-02 (Pulse rail)** — KPI numerals (`BigStat`) halved to 1.5rem (was 3rem). The
   "00 / The office" sheet (Projects · Today · Attention) moved from the Pulse main area
   into the left rail, stacked in one column below the brief; the rail widened to 15rem and

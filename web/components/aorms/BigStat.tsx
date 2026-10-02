@@ -20,7 +20,7 @@ export function BigStat({
   href?: string;
 }) {
   const body = (
-    <div className={`aorms-bigstat${active ? " aorms-bigstat--active" : ""}`}>
+    <div className={`aorms-bigstat${active ? " aorms-bigstat--active" : ""}${String(value).length > 7 ? " aorms-bigstat--wide" : ""}`}>
       <span className="aorms-bigstat__value">{value}</span>
       <span className="aorms-bigstat__label">{label}</span>
     </div>
