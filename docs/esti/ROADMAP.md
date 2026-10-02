@@ -7329,6 +7329,14 @@ timing-unsafe cron secrets, raw DB errors in API routes, SSRF guard on AI-connec
 bucket limits. Open items (leaked-password protection, CSP nonce, plaintext connector keys…)
 are listed in the report.
 
+
+### Portal: hcworks-style nameplate + corner drawing (2026-10-02)
+
+Office Hub screens gain a right-hand sheet nameplate (≥ 90rem) and a faint generated plan drawing
+in the bottom-right (≥ 66rem), matching the landing page redesign. Hub sheets only. Checked on a
+stand-in page (axe 0 violations, no overflow at 1600/1200/390px); real screens need a login.
+Not applied to the Client/Contractor/Collaborator portals or Identity/ConnectDeX/SysDeX shells.
+
 ---
 
 **2026-09-27 — mobile Esti shipped ("contextual commands, not a general

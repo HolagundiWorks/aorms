@@ -507,6 +507,16 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-02 (portal nameplate + corner drawing)** — the landing page's hcworks.in-style
+  visual language is now in the Office Hub. **Nameplate** (`PortalNameplate.tsx`, ≥ 90rem):
+  fixed right-hand panel — studio on a black bar linking to Pulse, the section, the sheet's big
+  mono number (`07.01`), its title, ←/→ to the previous/next sheet (same order as the side
+  nav), and who is signed in; content, floating mark/Ask-ESTI button and sheet footer shift
+  left to clear it. **Corner drawing** (`CornerFigure`, ≥ 66rem): a generated plan (`PlanGlyph`,
+  seeded by the sheet number) pinned bottom-right at `z-index:-1`, 18% opacity,
+  `aria-hidden` — decorative only; it is behind content, not above it (do not lift
+  `.cds--content` into a stacking context to "fix" it: that traps modals under the header).
+  Hub sheets only; portals/sign-in keep their own shells. axe: 0 violations at 1600/1200/390px.
 - **2026-10-02 (rail two-up)** — rail KPIs sit **two per line** on every rail screen (Pulse
   rail 15rem; page rails now 12.5rem, was 11rem). The brief, the office sheet and long values
   (>7 characters, e.g. ₹41,87,000 — `BigStat` adds `aorms-bigstat--wide`) span both columns.

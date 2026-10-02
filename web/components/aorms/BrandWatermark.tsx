@@ -15,6 +15,7 @@ export function BrandWatermark() {
     <img
       src="/aorms-logo.png"
       alt=""
+      className="aorms-watermark"
       aria-hidden
       style={{
         position: "fixed",

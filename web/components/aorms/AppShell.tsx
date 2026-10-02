@@ -43,6 +43,7 @@ import { FloatingAskPulse } from "./pulse/FloatingAskPulse";
 import { getInitials } from "../../lib/shell/identity";
 import { NAV_GROUPS, NAV_TOP, groupSheet, itemSheet, topSheet } from "../../lib/shell/nav-data";
 import { TitleBlock } from "./TitleBlock";
+import { CornerFigure, PortalNameplate } from "./PortalNameplate";
 import { INSTRUCTIONS_COOKIE } from "../../lib/shell/preferences";
 
 
@@ -299,7 +300,11 @@ export function AppShell({
           </SideNavLink>
         </SideNavItems>
       </SideNav>
-      <Content data-instructions={instructions ? "on" : "off"}>{children}</Content>
+      <CornerFigure />
+      <Content className="aorms-has-np" data-instructions={instructions ? "on" : "off"}>
+        {children}
+      </Content>
+      <PortalNameplate companyName={companyName} userName={userName} userRole={userRole} />
       <TitleBlock companyName={companyName} />
       <FloatingAskPulse projects={projects} />
       <BrandWatermark />
