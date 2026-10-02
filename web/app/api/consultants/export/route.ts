@@ -5,6 +5,7 @@
  * match import-template's and importConsultantsCsv's own expectations
  * (lib/actions/consultants.ts), so an exported file re-imports cleanly.
  */
+import { toSafeErrorMessage } from "../../../../lib/security/safe-error";
 import { NextResponse } from "next/server";
 import { createClient } from "../../../../lib/supabase/server";
 import { toCsv, csvResponseInit } from "../../../../lib/import-export/csv";
@@ -18,7 +19,7 @@ export async function GET(): Promise<NextResponse> {
     .select("name, discipline, firm, email, phone")
     .order("name");
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: toSafeErrorMessage(error) }, { status: 500 });
 
   const csv = toCsv(
     (consultants ?? []).map((c) => ({ Name: c.name, Discipline: c.discipline, Firm: c.firm, Email: c.email, Phone: c.phone })),

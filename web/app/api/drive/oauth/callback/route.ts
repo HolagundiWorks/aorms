@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { decodeState, exchangeCodeForTokens, fetchGoogleAccountEmail } from "../../../../../lib/drive/oauth";
+import { cookies } from "next/headers";
+import { DRIVE_OAUTH_NONCE_COOKIE, decodeState, exchangeCodeForTokens, fetchGoogleAccountEmail } from "../../../../../lib/drive/oauth";
 import { createClient as createPlatformClient } from "../../../../../lib/platform/server";
 
 /**
@@ -20,19 +21,29 @@ export async function GET(request: Request) {
   const state = url.searchParams.get("state");
   const error = url.searchParams.get("error");
 
+  // Redirect targets are built from the public site URL, never `url.origin` — behind
+  // Hostinger's proxy the request origin is the internal :3000 address (see proxy.ts).
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aorms.in";
   let redirectBase = "/identity";
-  const fail = (reason: string) => NextResponse.redirect(new URL(`${redirectBase}?drive_error=${encodeURIComponent(reason)}`, url.origin));
+  const fail = (reason: string) => NextResponse.redirect(new URL(`${redirectBase}?drive_error=${encodeURIComponent(reason)}`, SITE_URL));
 
   if (error) return fail(error);
   if (!code || !state) return fail("missing_code");
 
-  let parsedState: { studioId: string; accountId: string };
+  let parsedState: { studioId: string; accountId: string; nonce: string };
   try {
     parsedState = decodeState(state);
     redirectBase = `/studios/${parsedState.studioId}`;
   } catch {
     return fail("invalid_state");
   }
+
+  // The nonce in the signed state must match the httpOnly cookie set in the browser that
+  // started the flow — otherwise this callback was not initiated by this user (login CSRF).
+  const cookieStore = await cookies();
+  const cookieNonce = cookieStore.get(DRIVE_OAUTH_NONCE_COOKIE)?.value;
+  cookieStore.delete(DRIVE_OAUTH_NONCE_COOKIE);
+  if (!cookieNonce || cookieNonce !== parsedState.nonce) return fail("session_mismatch");
 
   const platform = await createPlatformClient();
   const {
@@ -59,9 +70,9 @@ export async function GET(request: Request) {
       p_refresh_token: tokens.refresh_token,
       p_google_account_email: email,
     });
-    if (rpcError) return fail(rpcError.message.slice(0, 100));
+    if (rpcError) return fail("connect_failed");
 
-    return NextResponse.redirect(new URL(`${redirectBase}?drive_connected=true`, url.origin));
+    return NextResponse.redirect(new URL(`${redirectBase}?drive_connected=true`, SITE_URL));
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown_error";
     return fail(message.slice(0, 100));

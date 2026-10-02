@@ -6,6 +6,7 @@
  * expectations (lib/actions/clients.ts), so an exported file re-imports
  * cleanly without edits.
  */
+import { toSafeErrorMessage } from "../../../../lib/security/safe-error";
 import { NextResponse } from "next/server";
 import { createClient } from "../../../../lib/supabase/server";
 import { toCsv, csvResponseInit } from "../../../../lib/import-export/csv";
@@ -19,7 +20,7 @@ export async function GET(): Promise<NextResponse> {
     .select("name, kind, city, email, phone, contact_person")
     .order("name");
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: toSafeErrorMessage(error) }, { status: 500 });
 
   const csv = toCsv(
     (clients ?? []).map((c) => ({

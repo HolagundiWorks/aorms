@@ -14,6 +14,8 @@
  * documented scope escalation, not assumed here.
  */
 
+import { createHmac, timingSafeEqual } from "node:crypto";
+
 const AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
@@ -24,17 +26,40 @@ function requireEnv(name: string): string {
   return value;
 }
 
-export type DriveOAuthState = { studioId: string; accountId: string; nonce: string };
+export type DriveOAuthState = { studioId: string; accountId: string; nonce: string; exp?: number };
 
+/** Cookie that binds an OAuth round-trip to the browser that started it (see decodeState). */
+export const DRIVE_OAUTH_NONCE_COOKIE = "aorms_drive_oauth";
+const STATE_TTL_MS = 15 * 60 * 1000;
+
+function sign(payload: string): string {
+  return createHmac("sha256", requireEnv("GOOGLE_OAUTH_CLIENT_SECRET")).update(`drive-oauth-state:${payload}`).digest("base64url");
+}
+
+/**
+ * OAuth `state` (2026-10-02 security audit): previously unsigned base64 JSON whose
+ * `nonce` was never checked, so an attacker could finish OAuth with their OWN Google
+ * account and send a victim a callback link — the victim's session matched the embedded
+ * accountId and the victim's Studio got linked to the attacker's Drive (login CSRF).
+ * Now HMAC-signed, expiring, and the nonce must also match an httpOnly cookie set only
+ * in the browser that started the flow.
+ */
 export function encodeState(state: DriveOAuthState): string {
-  return Buffer.from(JSON.stringify(state)).toString("base64url");
+  const payload = Buffer.from(JSON.stringify({ ...state, exp: Date.now() + STATE_TTL_MS })).toString("base64url");
+  return `${payload}.${sign(payload)}`;
 }
 
 export function decodeState(raw: string): DriveOAuthState {
-  const parsed = JSON.parse(Buffer.from(raw, "base64url").toString("utf-8"));
-  if (typeof parsed?.studioId !== "string" || typeof parsed?.accountId !== "string") {
+  const [payload, sig] = raw.split(".");
+  if (!payload || !sig) throw new Error("Invalid OAuth state");
+  const expected = Buffer.from(sign(payload));
+  const given = Buffer.from(sig);
+  if (expected.length !== given.length || !timingSafeEqual(expected, given)) throw new Error("Invalid OAuth state");
+  const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf-8"));
+  if (typeof parsed?.studioId !== "string" || typeof parsed?.accountId !== "string" || typeof parsed?.nonce !== "string") {
     throw new Error("Invalid OAuth state");
   }
+  if (typeof parsed.exp !== "number" || parsed.exp < Date.now()) throw new Error("OAuth state expired");
   return parsed;
 }
 

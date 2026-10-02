@@ -40,7 +40,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "../../../lib/platform/server";
 import { createClient as createWebClient } from "../../../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
-import { bridgeIdentityToOfficeHub, resolveSignInDestination } from "../../../lib/actions/auth";
+import { bridgeIdentityToOfficeHub, resolveSignInDestination } from "../../../lib/auth/bridge";
 import { roleHome } from "../../../lib/auth/role-home";
 import { safeNextPath } from "../../../lib/security/safe-next-path";
 import { stampSessionStartOnResponse } from "../../../lib/supabase/session-cap";

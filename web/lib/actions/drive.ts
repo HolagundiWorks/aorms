@@ -3,7 +3,8 @@
 import { redirect } from "next/navigation";
 import crypto from "node:crypto";
 import { createClient as createPlatformClient } from "../platform/server";
-import { buildAuthUrl, encodeState } from "../drive/oauth";
+import { cookies } from "next/headers";
+import { buildAuthUrl, DRIVE_OAUTH_NONCE_COOKIE, encodeState } from "../drive/oauth";
 
 /**
  * Starts the Google Drive connection flow (docs/esti/AORMS-V2-DEVELOPER-
@@ -39,6 +40,15 @@ export async function startDriveConnection(studioId: string): Promise<never> {
     .maybeSingle();
   if (!membership) redirect(`/studios/${studioId}?drive_error=` + encodeURIComponent("Only the Studio owner can connect Google Drive."));
 
-  const state = encodeState({ studioId, accountId: user.id, nonce: crypto.randomUUID() });
+  const nonce = crypto.randomUUID();
+  // Bind this OAuth round-trip to this browser: the callback requires the same nonce back.
+  (await cookies()).set(DRIVE_OAUTH_NONCE_COOKIE, nonce, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 15 * 60,
+    path: "/api/drive/oauth",
+  });
+  const state = encodeState({ studioId, accountId: user.id, nonce });
   redirect(buildAuthUrl(state));
 }

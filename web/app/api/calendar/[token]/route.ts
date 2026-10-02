@@ -1,3 +1,4 @@
+import { toSafeErrorMessage } from "../../../../lib/security/safe-error";
 import { NextResponse } from "next/server";
 import { createServiceRoleClient } from "../../../../lib/supabase/service";
 import { loadWorkloadEvents, parseCalendarScope } from "../../../../lib/calendar/workload";
@@ -32,7 +33,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: toSafeErrorMessage(error) }, { status: 500 });
   }
   if (!profile || profile.disabled || EXCLUDED_ROLES.has(profile.role)) {
     return new NextResponse("Not found", { status: 404 });

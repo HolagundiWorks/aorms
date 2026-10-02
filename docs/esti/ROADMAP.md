@@ -7317,6 +7317,18 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 - [ ] SQL views for admin aggregates
 - [ ] Per-route client JS review; lazy-load Razorpay/Turnstile
 
+
+### Security audit — all portals (2026-10-02)
+
+Full report: [SECURITY-AUDIT-2026-10-02.md](SECURITY-AUDIT-2026-10-02.md). Fixed: cross-tenant
+`ai_devices` leak (RLS), Google Drive OAuth login-CSRF, session-minting bridge functions
+exposed as Server Actions (moved to `lib/auth/bridge.ts` + guard test), invites not joining
+the inviter's firm, CSV formula injection, `xlsx` CVEs (→ 0.20.3), `anon` EXECUTE on 20
+SECURITY DEFINER functions (both DBs; migrations web 0093, platform 0049, applied live),
+timing-unsafe cron secrets, raw DB errors in API routes, SSRF guard on AI-connector URLs,
+bucket limits. Open items (leaked-password protection, CSP nonce, plaintext connector keys…)
+are listed in the report.
+
 ---
 
 **2026-09-27 — mobile Esti shipped ("contextual commands, not a general

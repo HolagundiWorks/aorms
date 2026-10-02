@@ -7,6 +7,7 @@
  * no extra privilege beyond what an authenticated finance-ops user
  * already has on /reconcile itself.
  */
+import { toSafeErrorMessage } from "../../../../../lib/security/safe-error";
 import { NextResponse } from "next/server";
 import { createClient } from "../../../../../lib/supabase/server";
 import { toCsv, csvResponseInit } from "../../../../../lib/import-export/csv";
@@ -29,7 +30,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const supabase = await createClient();
 
   const { data: batch, error } = await supabase.from("reconcile").select("ref, label, lines").eq("id", id).maybeSingle();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: toSafeErrorMessage(error) }, { status: 500 });
   if (!batch) return NextResponse.json({ error: "Reconciliation batch not found." }, { status: 404 });
 
   const lines = (batch.lines ?? []) as ReconcileLine[];

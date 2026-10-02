@@ -37,15 +37,27 @@ const INVITE_REDIRECT_TO = `${SITE_URL}/auth/callback?next=${encodeURIComponent(
  * succeeding or failing.
  */
 
-async function requireOwner(): Promise<{ userId: string } | { error: string }> {
+async function requireOwner(): Promise<{ userId: string; firmId: string } | { error: string }> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in first." };
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  const { data: profile } = await supabase.from("profiles").select("role, firm_id").eq("id", user.id).maybeSingle();
   if (profile?.role !== "OWNER") return { error: "Only the firm owner can provision a portal login." };
-  return { userId: user.id };
+  if (!profile.firm_id) return { error: "No active studio — pick one first." };
+  return { userId: user.id, firmId: profile.firm_id };
+}
+
+/**
+ * Puts a freshly invited user into the inviter's firm (2026-10-02 security audit). The
+ * profile trigger creates the row with `firm_id` NULL; without this the invited
+ * staff/contractor/consultant had no firm at all (current_firm_id() null → no data,
+ * and nothing scoping them to the inviting studio). Also records the membership so the
+ * studio switcher knows about it. Service-role, called only after the OWNER gate.
+ */
+async function attachToFirm(admin: ReturnType<typeof createServiceRoleClient>, profileId: string, firmId: string, role: string) {
+  await admin.from("profile_firm_memberships").insert({ profile_id: profileId, firm_id: firmId, role, status: "ACTIVE" });
 }
 
 export async function inviteContractorLogin(contractorId: string, email: string): Promise<{ error?: string }> {
@@ -68,9 +80,10 @@ export async function inviteContractorLogin(contractorId: string, email: string)
 
   const { error: profileError } = await admin
     .from("profiles")
-    .update({ role: "CONTRACTOR", contractor_id: contractorId, full_name: contractor.name })
+    .update({ role: "CONTRACTOR", contractor_id: contractorId, full_name: contractor.name, firm_id: gate.firmId })
     .eq("id", invited.user.id);
   if (profileError) return { error: toSafeErrorMessage(profileError) };
+  await attachToFirm(admin, invited.user.id, gate.firmId, "CONTRACTOR");
 
   await supabase.rpc("write_audit", {
     p_entity: "contractor",
@@ -104,9 +117,10 @@ export async function inviteConsultantLogin(consultantId: string, email: string)
 
   const { error: profileError } = await admin
     .from("profiles")
-    .update({ role: "CONSULTANT", consultant_id: consultantId, full_name: consultant.name })
+    .update({ role: "CONSULTANT", consultant_id: consultantId, full_name: consultant.name, firm_id: gate.firmId })
     .eq("id", invited.user.id);
   if (profileError) return { error: toSafeErrorMessage(profileError) };
+  await attachToFirm(admin, invited.user.id, gate.firmId, "CONSULTANT");
 
   await supabase.rpc("write_audit", {
     p_entity: "consultant",
@@ -145,8 +159,9 @@ export async function inviteStaffMember(_prev: { error: string } | null, formDat
   });
   if (inviteError) return { error: toSafeErrorMessage(inviteError) };
 
-  const { error: profileError } = await admin.from("profiles").update({ role, full_name: fullName }).eq("id", invited.user.id);
+  const { error: profileError } = await admin.from("profiles").update({ role, full_name: fullName, firm_id: gate.firmId }).eq("id", invited.user.id);
   if (profileError) return { error: toSafeErrorMessage(profileError) };
+  await attachToFirm(admin, invited.user.id, gate.firmId, role);
 
   const supabase = await createClient();
   await supabase.rpc("write_audit", {
