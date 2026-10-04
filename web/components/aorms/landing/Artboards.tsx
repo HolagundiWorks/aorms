@@ -3,6 +3,23 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState, type KeyboardEvent, type ReactNode } from "react";
 
+/** Live HH:MM:SS (IST) — the title sheet's running instrument. Blank until mounted so server and client markup match. */
+function LiveClock({ className }: { className?: string }) {
+  const [t, setT] = useState("");
+  useEffect(() => {
+    const fmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: "Asia/Kolkata" });
+    const tick = () => setT(fmt.format(new Date()));
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  return (
+    <span className={className} suppressHydrationWarning>
+      {t || "--:--:--"}
+    </span>
+  );
+}
+
 export type Board = {
   id: string;
   num: string;
@@ -30,6 +47,8 @@ export type Nameplate = {
  * open one — but no scroll-wheel hijacking. Every board is rendered on the server (closed
  * boards are `display:none` + `inert`), so the whole page stays crawlable.
  */
+const pad = (n: number) => String(n).padStart(2, "0");
+
 export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: Nameplate }) {
   const [active, setActive] = useState(0);
 
@@ -93,11 +112,11 @@ export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: N
       {/* Phones/tablets: black title bar + right-hand number rail */}
       <div className="aorms-lp-bar" aria-hidden>
         <span className="aorms-lp-bar__left">
-          <span>{cur.num}</span>
+          <span>{cur.num} / {pad(boards.length)}</span>
           <span className="aorms-lp-sep">|</span>
           <span>{cur.title}</span>
         </span>
-        <span className="aorms-lp-bar__mark">AORMS</span>
+        <LiveClock className="aorms-lp-bar__mark" />
       </div>
       <nav className="aorms-lp-rail" aria-label="Sections">
         {boards.map((b, i) => (
@@ -116,7 +135,7 @@ export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: N
               key={b.id}
               id={b.id}
               className={`aorms-lp-board${open ? " is-active" : ""}`}
-              aria-label={`${b.num} ${b.title}`}
+              aria-label={`${b.num} of ${pad(boards.length)}, ${b.title}`}
               aria-hidden={!open}
               {...(open ? {} : { inert: true })}
             >
@@ -131,8 +150,13 @@ export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: N
         <Link href={nameplate.cta.href} className="aorms-lp-np__cta">
           {nameplate.cta.label}
         </Link>
+        <div className="aorms-lp-np__clock" role="timer" aria-label="Local time (IST)">
+          <strong>AORMS</strong>
+          <LiveClock />
+        </div>
         <div className="aorms-lp-np__num" aria-hidden>
           {cur.num}
+          <small>/ {pad(boards.length)}</small>
         </div>
         <p className="aorms-lp-np__title">{cur.title}</p>
         <div className="aorms-lp-np__arrows">

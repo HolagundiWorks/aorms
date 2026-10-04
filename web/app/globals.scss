@@ -2864,3 +2864,90 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 .aorms-pub-link:focus-visible {
   border-block-end-color: var(--aorms-ink);
 }
+
+// Landing hero: the six things AORMS connects, as one mono line (2026-10-04).
+.aorms-lp-chips {
+  margin-block-start: 1.25rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+// The project spine: stages as a vertical, numbered schedule (2026-10-04).
+.aorms-lp-spine {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  max-inline-size: 28rem;
+  border-block-start: 2px solid var(--aorms-ink);
+}
+
+.aorms-lp-spine li {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.5rem 0;
+  border-block-end: 1px solid var(--aorms-rule);
+  font-size: 1.125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.aorms-lp-spine li span {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: var(--cds-text-secondary);
+}
+
+// Landing v2 (seven boards) — live clock, "01 / 07" counter, workflow list, compact pricing (2026-10-04).
+.aorms-lp-np__clock {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.75rem 1rem 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.aorms-lp-np__num small {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-lp-bar__mark {
+  font-variant-numeric: tabular-nums;
+}
+
+.aorms-lp-spine--flow {
+  max-inline-size: 36rem;
+}
+
+.aorms-lp-spine--flow li {
+  padding-block: 0.75rem;
+}
+
+.aorms-lp-spine--flow strong {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.aorms-lp-spine--flow small {
+  display: block;
+  margin-block-start: 0.125rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-lp-cards--compact .aorms-lp-card .aorms-lp-price {
+  margin-block-start: 0.5rem;
+}

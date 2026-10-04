@@ -7352,3 +7352,18 @@ portal screens not rendered live (no login in the sandbox).
 Blog, ConnectDeX Partners and legal pages use the shared `PublicShell` (nameplate + mono nav row) so
 they match the landing page. Nameplate sits flush to the top on header-less pages. Verified: tsc, lint,
 vitest, build, screenshots at 1600px.
+
+### 2026-10-04 — Landing content re-centred on the project spine
+
+Landing copy moved from "feature list" to "one project spine" (see `web/lib/marketing-spine.ts`); layout
+untouched. Decisions: the proposed **Local / Cloud / Hybrid** section was written as **cloud-only** (AORMS is
+web-only, no on-prem install — CLAUDE.md); the CTA uses the canonical expansion "Architecture Operations &
+Resource Management System" (not "Office Resources"); tender flow omits "negotiation" (not in the app);
+ESTI examples omit meeting-attendance questions. Revisit if any of those become real features.
+
+### 2026-10-04 — Landing cut to seven boards + live clock
+
+16 boards → 7 (Start · Project · Office · Workflow · Memory · System · Enter); "The Problem" folded into
+the Project board. Cost calculator, pricing strip and demo credentials share board 06. Counter reads
+"NN / 07"; nameplate and phone title bar show a live IST clock. Same cloud-only / no-negotiation /
+no-attendance honesty rules as the 16-board entry above.
