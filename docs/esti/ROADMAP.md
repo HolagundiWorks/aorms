@@ -7376,3 +7376,18 @@ See branding guide §15. Wheel navigation lives in `components/aorms/landing/Art
 
 See branding guide §15. Copy in `web/lib/marketing-spine.ts`; JSON-LD in `web/app/page.tsx`. Not claimed:
 staff MFA (flag-gated, off by default) and Google Drive documents (shown as "Coming soon").
+
+### 2026-10-04 — Demo accounts at every level (code ready; NOT yet applied live)
+
+`web/lib/demo-accounts.json` (roster) · `web/supabase/migrations/0094_demo_role_accounts.sql` (`demo_roster`,
+`sync_demo_accounts()`, nightly cron 21:40 UTC) · `web/scripts/provision-demo-users.mjs` (creates logins via the
+Auth admin API, sets the shared password, calls the sync) · sign-in page lists the roster with a Fill button.
+Roles: Owner, Partner, Senior, Accountant, HR Manager, Associate, Viewer, plus Client / Consultant / Contractor
+portals (Contractor portal has no seeded tender yet; Site Supervisor has no portal so it is omitted).
+
+**Found while building this (live check, 2026-10-04):** `demo@aorms.in` is currently an **OWNER** in "Demo
+Architecture Studio", not the read-only VIEWER this file and the landing page describe — a public login with
+write and admin rights. The five named staff logins `reset_demo_data()` / the landing-example seed expect
+(aditi.rao, vikram.shah, akash.mehta, priya.nair, rohan.desai @aorms.in) do not exist, so both nightly jobs
+return early and the demo data is not being refreshed. The roster uses those emails, so provisioning also revives
+the nightly reset. Applying 0094 + running the script demotes `demo@aorms.in` to VIEWER.

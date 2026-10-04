@@ -2902,3 +2902,45 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
     font-size: 1.75rem;
   }
 }
+
+// Demo accounts on the sign-in page — one row per level, indented by seniority (2026-10-04).
+.aorms-demo-roster {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+
+.aorms-demo-roster li {
+  border-block-start: 1px solid var(--aorms-rule);
+}
+
+.aorms-demo-roster button {
+  display: grid;
+  gap: 0.125rem;
+  inline-size: 100%;
+  padding: 0.5rem 0.5rem;
+  text-align: start;
+  background: none;
+  border: 0;
+  color: var(--aorms-ink);
+  cursor: pointer;
+}
+
+.aorms-demo-roster button:hover {
+  background: var(--cds-layer-hover-01);
+}
+
+.aorms-demo-roster button:focus-visible {
+  outline: 2px solid var(--aorms-ink);
+  outline-offset: -2px;
+}
+
+.aorms-demo-roster span {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+}
+
+.aorms-demo-roster small {
+  color: var(--cds-text-secondary);
+  font-size: 0.75rem;
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "email": "aditi.rao@aorms.in",
+    "name": "Aditi Rao",
+    "role": "OWNER",
+    "level": 1,
+    "title": "Principal",
+    "can": "Everything: firm settings, users and roles, salaries, all projects and finances."
+  },
+  {
+    "email": "vikram.shah@aorms.in",
+    "name": "Vikram Shah",
+    "role": "PARTNER",
+    "level": 2,
+    "title": "Partner",
+    "can": "Invoices, fees, finance, reports and HR across the practice; cannot administer the firm or see salaries."
+  },
+  {
+    "email": "akash.mehta@aorms.in",
+    "name": "Akash Mehta",
+    "role": "SENIOR",
+    "level": 3,
+    "title": "Senior Architect",
+    "can": "Leads projects and tenders and edits project work; no invoicing, fees or HR."
+  },
+  {
+    "email": "rohan.desai@aorms.in",
+    "name": "Rohan Desai",
+    "role": "ACCOUNTANT",
+    "level": 3,
+    "title": "Accountant",
+    "can": "Invoices, fees, expenses, reconciliation, reports and cost approval."
+  },
+  {
+    "email": "demo.hr@aorms.in",
+    "name": "Meena Iyer",
+    "role": "HR_MANAGER",
+    "level": 3,
+    "title": "HR Manager",
+    "can": "Team, payslips and job applications; edits records, no finance."
+  },
+  {
+    "email": "priya.nair@aorms.in",
+    "name": "Priya Nair",
+    "role": "ASSOCIATE",
+    "level": 4,
+    "title": "Associate Architect",
+    "can": "Edits assigned projects and tasks; no invoicing, fees or HR."
+  },
+  {
+    "email": "demo@aorms.in",
+    "name": "AORMS Demo",
+    "role": "VIEWER",
+    "level": 5,
+    "title": "Viewer (read-only)",
+    "can": "Looks at everything staff can see; cannot change anything."
+  },
+  {
+    "email": "demo.client@aorms.in",
+    "name": "Demo Client",
+    "role": "CLIENT",
+    "level": 6,
+    "title": "Client (portal)",
+    "can": "Client Portal: only their own project, approvals and updates."
+  },
+  {
+    "email": "demo.consultant@aorms.in",
+    "name": "Demo Consultant",
+    "role": "CONSULTANT",
+    "level": 6,
+    "title": "Consultant (portal)",
+    "can": "Collaborator Portal: only the projects and tasks they are engaged on."
+  },
+  {
+    "email": "demo.contractor@aorms.in",
+    "name": "Demo Contractor",
+    "role": "CONTRACTOR",
+    "level": 6,
+    "title": "Contractor (portal)",
+    "can": "Contractor Portal: invited tenders and bids."
+  }
+]
