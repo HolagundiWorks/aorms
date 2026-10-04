@@ -9,6 +9,7 @@ import { IdleSessionGuard } from "../../components/aorms/security/IdleSessionGua
 import { InstructionsScope } from "../../components/aorms/InstructionsScope";
 import { InstructionsToggle } from "../../components/aorms/InstructionsToggle";
 import { TitleBlock } from "../../components/aorms/TitleBlock";
+import { SheetNameplate } from "../../components/aorms/SheetNameplate";
 import { BrandWatermark } from "../../components/aorms/BrandWatermark";
 
 /**
@@ -28,7 +29,7 @@ export default async function CollabPortalLayout({ children }: { children: React
   } = await supabase.auth.getUser();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, full_name")
     .eq("id", user?.id ?? "")
     .maybeSingle();
 
@@ -48,7 +49,8 @@ export default async function CollabPortalLayout({ children }: { children: React
           </form>
         </HeaderGlobalBar>
       </Header>
-      <Content>{children}</Content>
+      <Content className="aorms-has-np">{children}</Content>
+      <SheetNameplate who={{ name: profile?.full_name?.trim() || "Collaborator", role: "Collaborator" }} />
       {/* Same sheet footer + AORMS mark as the Office Hub (2026-10-01 portal parity). */}
       <TitleBlock companyName="" />
       <BrandWatermark />

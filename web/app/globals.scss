@@ -2692,7 +2692,7 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 }
 
 @media (min-width: 90rem) {
-  .aorms-has-np {
+  body:has(.aorms-np) .aorms-has-np {
     margin-inline-end: 12.5rem;
   }
 
@@ -2701,22 +2701,27 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
   }
 
   // Keep the fixed floating items clear of the nameplate.
-  .aorms-watermark {
+  body:has(.aorms-np) .aorms-watermark {
     inset-inline-end: 13.5rem !important;
     right: 13.5rem !important;
   }
 
-  .aorms-floating-ask {
+  body:has(.aorms-np) .aorms-floating-ask {
     right: 13.5rem !important;
   }
 
-  .aorms-sheet-footer {
+  body:has(.aorms-np) .aorms-sheet-footer {
     inset-inline-end: 19.75rem;
+  }
+
+  // Under the shell header when the page has one; flush to the top on header-less pages (public portal forms).
+  body:has(.cds--header) .aorms-np {
+    inset-block-start: 3rem;
   }
 
   .aorms-np {
     position: fixed;
-    inset-block: 3rem 0;
+    inset-block: 0;
     inset-inline-end: 0;
     inline-size: 12.5rem;
     z-index: 5;
@@ -2815,4 +2820,47 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 .aorms-np__who strong {
   color: var(--cds-text-primary);
   font-size: 0.875rem;
+}
+
+// Public content pages (blog, partners, legal) — shared header row, 2026-10-04.
+.aorms-pub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 2rem 0 1rem;
+}
+
+.aorms-pub-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.aorms-pub-nav a {
+  color: var(--aorms-ink);
+  text-decoration: none;
+  padding-block: 0.25rem;
+  border-block-end: 1px solid transparent;
+}
+
+.aorms-pub-nav a:hover,
+.aorms-pub-nav a[aria-current="page"] {
+  border-block-end-color: var(--aorms-ink);
+}
+
+.aorms-pub-link {
+  color: var(--aorms-ink);
+  text-decoration: none;
+  border-block-end: 1px solid var(--aorms-rule);
+}
+
+.aorms-pub-link:hover,
+.aorms-pub-link:focus-visible {
+  border-block-end-color: var(--aorms-ink);
 }

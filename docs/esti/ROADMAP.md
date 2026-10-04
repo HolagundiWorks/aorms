@@ -7339,3 +7339,16 @@ earlier pass in the same day copied its older strip-accordion layout and was red
 reads live `plan_pricing`. Replaces the 2026-10-01 section-stack restyle (`.aorms-landing`
 CSS is now unused). Not yet seen against the real Supabase-backed page (needs live env);
 checked in headless Chromium at 1440 and 390px on a stand-in.
+
+### 2026-10-04 — Sheet nameplate on every portal
+
+`SheetNameplate` (generalised from the Office Hub's `PortalNameplate`) now renders on Identity,
+ConnectDeX, SysDeX and the Client / Contractor / Collaborator portals at ≥ 90rem. Layout shifts
+scoped with `body:has(.aorms-np)`. Verified: tsc, lint (0 errors), vitest, full build. Authenticated
+portal screens not rendered live (no login in the sandbox).
+
+### 2026-10-04 — Public content pages join the sheet system
+
+Blog, ConnectDeX Partners and legal pages use the shared `PublicShell` (nameplate + mono nav row) so
+they match the landing page. Nameplate sits flush to the top on header-less pages. Verified: tsc, lint,
+vitest, build, screenshots at 1600px.

@@ -21,12 +21,7 @@ export default function BlogIndexPage() {
   return (
     <Stack gap={7}>
       <div>
-        <p
-          className="cds--type-productive-heading-01"
-          style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-        >
-          AORMS Blog
-        </p>
+        <p className="aorms-lp-eyebrow">B-01 · AORMS Blog</p>
         <h1 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
           Notes on running an architecture practice.
         </h1>
@@ -38,7 +33,7 @@ export default function BlogIndexPage() {
               {post.date}
             </p>
             <h2 className="cds--type-productive-heading-03" style={{ marginTop: "0.25rem" }}>
-              <Link href={`/blog/${post.slug}`} className="cds--link">
+              <Link href={`/blog/${post.slug}`} className="aorms-pub-link">
                 {post.title}
               </Link>
             </h2>
