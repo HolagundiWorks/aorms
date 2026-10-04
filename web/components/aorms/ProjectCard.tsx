@@ -25,10 +25,11 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 /** Project board card: generated plan drawing, ref, title, lifecycle status, task progress. */
-export function ProjectCard({ p }: { p: ProjectCardData }) {
+export function ProjectCard({ p, href }: { p: ProjectCardData; /** Pass `null` to render a non-link card (e.g. the signed-out landing page's sample). */ href?: string | null }) {
   const pct = p.tasksTotal ? Math.round((p.tasksDone / p.tasksTotal) * 100) : null;
-  return (
-    <Link href={`/projects/${p.id}`} className="aorms-project-card">
+  const target = href === undefined ? `/projects/${p.id}` : href;
+  const inner = (
+    <>
       <div className="aorms-project-card__plan">
         <PlanGlyph seed={p.ref} builtUpSqm={p.builtUpSqm} siteSqm={p.siteSqm} floors={p.floors} />
       </div>
@@ -48,6 +49,13 @@ export function ProjectCard({ p }: { p: ProjectCardData }) {
         </div>
         <span>{pct === null ? "—" : `${pct}%`}</span>
       </div>
+    </>
+  );
+  return target ? (
+    <Link href={target} className="aorms-project-card">
+      {inner}
     </Link>
+  ) : (
+    <div className="aorms-project-card">{inner}</div>
   );
 }

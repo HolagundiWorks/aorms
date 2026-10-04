@@ -481,6 +481,11 @@ export const FAQ = [
       "In your own firm's cloud workspace, hosted on AWS in Mumbai (ap-south-1). ESTI, the built-in AI agent, answers only from your firm's own validated records — it never trains a third-party model and never guesses from public data.",
   },
   {
+    question: "Can clients, contractors and consultants log in?",
+    answer:
+      "Yes, each to their own portal and nothing else: clients see their own projects and approvals, invited contractors submit sealed bids on tenders you issue, and consultants see only the projects they are engaged on. None of them needs a staff login.",
+  },
+  {
     question: "Is there a desktop app?",
     answer: "No — AORMS is web-only, single sign-on into one office hub. No installers, no per-app logins, no separate desktop shell to maintain.",
   },

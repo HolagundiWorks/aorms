@@ -2595,6 +2595,7 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 
 .aorms-lp-side {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem;
   min-inline-size: 0;
 }
@@ -2900,18 +2901,7 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
   color: var(--cds-text-secondary);
 }
 
-// Landing v2 (seven boards) — live clock, "01 / 07" counter, workflow list, compact pricing (2026-10-04).
-.aorms-lp-np__clock {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 0.75rem 1rem 0;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  font-variant-numeric: tabular-nums;
-}
-
+// Landing v2 (seven boards) — "01 / 07" counter, workflow list, compact pricing (2026-10-04).
 .aorms-lp-np__num small {
   display: block;
   font-size: 0.875rem;
@@ -2950,4 +2940,26 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 
 .aorms-lp-cards--compact .aorms-lp-card .aorms-lp-price {
   margin-block-start: 0.5rem;
+}
+
+// Landing: real BigStat figures in a row, beside the sample project (2026-10-04).
+.aorms-lp-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-block: 1rem;
+}
+
+.aorms-lp-grid > * {
+  min-inline-size: 0;
+}
+
+.aorms-lp-display + .aorms-lp-cards {
+  margin-block-start: 1.5rem;
+}
+
+@media (max-width: 40rem) {
+  .aorms-lp-stats .aorms-bigstat__value {
+    font-size: 1.75rem;
+  }
 }

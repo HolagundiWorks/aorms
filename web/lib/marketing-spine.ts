@@ -68,3 +68,65 @@ export const SPINE_CTA = {
   display: "Build the office\naround the project.",
   lede: ["AORMS brings projects, people, information and decisions into one operating system for architecture practices."],
 } as const;
+
+/** Portals and in-app behaviours that now exist in the product — kept in step with the app (2026-10-04). */
+export const SPINE_OUTSIDE = {
+  tag: "Outside the office",
+  portals: [
+    { tag: "Client portal", text: "Clients see their own projects, approvals and updates — no staff login." },
+    { tag: "Contractor portal", text: "Invited contractors submit sealed lump-sum bids on firm-issued tenders." },
+    { tag: "Collaborator portal", text: "Consultants see only the projects and tasks they are engaged on." },
+  ],
+} as const;
+
+export const SPINE_INAPP = {
+  tag: "In the app",
+  items: [
+    { tag: "Numbered sheets", text: "Every screen is a numbered drawing sheet, with a nameplate to step through them." },
+    { tag: "Pulse", text: "A daily brief written from your own records, with the day's KPIs beside it." },
+    { tag: "Your view", text: "Lists as a table, as cards or as a board — one toolbar, same everywhere." },
+    { tag: "Instructions", text: "Hint text on or off, per person — experts get a quieter screen." },
+  ],
+} as const;
+
+/** The sample project shown on the landing page (matches the read-only live demo practice). */
+export const SPINE_SAMPLE = {
+  project: {
+    id: "sample",
+    ref: "DEMO-PRJ-04",
+    title: "Lakeview Clubhouse Redevelopment",
+    status: "ACTIVE",
+    clientName: "Lakeview Residents Association",
+    city: "Bengaluru",
+    builtUpSqm: 640,
+    siteSqm: 1100,
+    floors: 3,
+    tasksDone: 18,
+    tasksTotal: 27,
+  },
+  phases: ["Concept", "Schematic", "Design", "Tender", "Build", "Handover"],
+  currentPhase: 2,
+  stats: [
+    { value: 16, label: "Total projects" },
+    { value: 9, label: "Active", active: true },
+    { value: 2, label: "Enquiries" },
+  ],
+  caption: "Sample practice — the same components you see inside AORMS. Open the live demo to click through.",
+} as const;
+
+export const SPINE_SEO = {
+  description:
+    "AORMS is the operating system for an architecture practice — one project spine connecting projects, site, people, accounts, tenders and knowledge, with ESTI, a project-aware assistant. Cloud-hosted in India.",
+  keywords: [
+    "architecture practice management software",
+    "architecture practice operating system",
+    "architecture firm management software India",
+    "architect project management software",
+    "architecture billing and fee tracking software",
+    "architecture tender management software",
+    "architecture site supervision software",
+    "architecture knowledge management",
+    "client portal for architects",
+    "AORMS",
+  ],
+} as const;

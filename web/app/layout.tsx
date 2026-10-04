@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     template: "%s — AORMS",
   },
   description:
-    "AORMS is an operating system for architecture practices, connecting projects, fees, revisions, billing, approvals, teams, and practice intelligence in one platform.",
+    "AORMS is the operating system for an architecture practice — one project spine connecting projects, site, people, accounts, tenders and knowledge, with ESTI, a project-aware assistant. Cloud-hosted in India.",
   keywords: [
     "architecture practice management software",
     "architecture firm management software",
@@ -44,23 +44,23 @@ export const metadata: Metadata = {
     "architecture project tracking software",
   ],
   authors: [{ name: "Human Centric Works" }],
+  applicationName: "AORMS",
+  category: "business",
   robots: { index: true, follow: true },
   openGraph: {
     type: "website",
     siteName: "AORMS",
     title: "AORMS — Architecture Practice Operating System",
     description:
-      "AORMS is an operating system for architecture practices, connecting projects, fees, revisions, billing, approvals, teams, and practice intelligence in one platform.",
+      "AORMS is the operating system for an architecture practice — one project spine connecting projects, site, people, accounts, tenders and knowledge, with ESTI, a project-aware assistant. Cloud-hosted in India.",
     url: "https://aorms.in",
     locale: "en_IN",
-    images: [{ url: "/aorms-logo.png", width: 816, height: 216, alt: "AORMS" }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "AORMS — Architecture Practice Operating System",
     description:
-      "AORMS is an operating system for architecture practices, connecting projects, fees, revisions, billing, approvals, teams, and practice intelligence in one platform.",
-    images: ["/aorms-logo.png"],
+      "AORMS is the operating system for an architecture practice — one project spine connecting projects, site, people, accounts, tenders and knowledge, with ESTI, a project-aware assistant. Cloud-hosted in India.",
   },
 };
 
