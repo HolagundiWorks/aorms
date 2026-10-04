@@ -48,7 +48,7 @@ export function FloatingAskPulse({ projects }: { projects: ProjectOption[] }) {
   const currentProject = match ? (projects.find((p) => p.id === match[1]) ?? null) : null;
 
   return (
-    <div style={{ position: "fixed", right: "1rem", bottom: "3.5rem", zIndex: 2 }}>
+    <div className="aorms-floating-ask" style={{ position: "fixed", right: "1rem", bottom: "3.5rem", zIndex: 2 }}>
       <Popover open={open} onRequestClose={() => setOpen(false)} align="top-end" caret>
         <button
           type="button"
