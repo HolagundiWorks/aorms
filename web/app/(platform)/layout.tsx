@@ -16,15 +16,12 @@
  */
 import { BrandWatermark } from "../../components/aorms/BrandWatermark";
 import { InstructionsScope } from "../../components/aorms/InstructionsScope";
-import { SheetNameplate } from "../../components/aorms/SheetNameplate";
-import { getPlatformNavStatus } from "../../lib/platform/account";
 import { TitleBlock } from "../../components/aorms/TitleBlock";
 
-export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
-  const status = await getPlatformNavStatus();
+export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   return (
     <InstructionsScope>
-    <div className="aorms-has-np" style={{ minHeight: "100vh" }}>
+    <div style={{ minHeight: "100vh" }}>
       {children}
       {/* Same small, non-interactive AORMS mark Office Hub's own shell
           uses (2026-09-14 branding consistency pass) — rendered once
@@ -33,7 +30,6 @@ export default async function PlatformLayout({ children }: { children: React.Rea
       <BrandWatermark />
       {/* Floating sheet footer (portal name / sheet / date), same as the Office Hub — portal parity, 2026-10-01. */}
       <TitleBlock companyName="" />
-      <SheetNameplate who={status.signedIn ? { name: status.displayName } : undefined} />
     </div>
     </InstructionsScope>
   );
