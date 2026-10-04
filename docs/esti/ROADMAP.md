@@ -7360,3 +7360,10 @@ untouched. Decisions: the proposed **Local / Cloud / Hybrid** section was writte
 web-only, no on-prem install — CLAUDE.md); the CTA uses the canonical expansion "Architecture Operations &
 Resource Management System" (not "Office Resources"); tender flow omits "negotiation" (not in the app);
 ESTI examples omit meeting-attendance questions. Revisit if any of those become real features.
+
+### 2026-10-04 — Landing cut to seven boards + live clock
+
+16 boards → 7 (Start · Project · Office · Workflow · Memory · System · Enter); "The Problem" folded into
+the Project board. Cost calculator, pricing strip and demo credentials share board 06. Counter reads
+"NN / 07"; nameplate and phone title bar show a live IST clock. Same cloud-only / no-negotiation /
+no-attendance honesty rules as the 16-board entry above.

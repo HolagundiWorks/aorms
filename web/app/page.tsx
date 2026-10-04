@@ -17,27 +17,19 @@ import {
   AORMS_PLATFORM,
   CONNECTDEX,
   DEMO,
-  ESTI_SECTION,
   FAQ,
   HUMAN_CENTRIC_WORKS,
-  OPERATIONAL_LEAKAGE,
   PRICING,
   PRODUCT_SCREENSHOTS,
 } from "../lib/marketing-content";
 import {
-  SPINE_ACCOUNTS,
   SPINE_CTA,
-  SPINE_DATA,
-  SPINE_DNA,
-  SPINE_ESTI,
   SPINE_HERO,
-  SPINE_KNOWLEDGE,
-  SPINE_MODULES,
-  SPINE_PROBLEM,
+  SPINE_MEMORY,
+  SPINE_OFFICE,
   SPINE_PROJECT,
-  SPINE_SITE,
-  SPINE_STAGES,
-  SPINE_TENDER,
+  SPINE_SYSTEM,
+  SPINE_WORKFLOW,
 } from "../lib/marketing-spine";
 
 /**
@@ -203,15 +195,14 @@ export default async function LandingPage() {
   const boards: Board[] = [
     {
       id: "top",
-      num: "00",
+      num: "01",
       short: "Start",
-      title: "The Start",
+      title: "Start",
       children: (
         <Sheet
           h1
           eyebrow={SPINE_HERO.eyebrow}
           display={SPINE_HERO.display}
-          lede={[...SPINE_HERO.lede]}
           side={<Result statement={SPINE_HERO.statement} text="Not another tool to feed — the record the practice already produces, kept in one place, so the answer is one page." />}
           corner={{ seed: "aorms-landing", builtUpSqm: 420, siteSqm: 600, floors: 2 }}
         >
@@ -221,131 +212,29 @@ export default async function LandingPage() {
       ),
     },
     {
-      id: "problem",
-      num: "01",
-      short: "Problem",
-      title: "The Problem",
-      children: (
-        <Sheet
-          eyebrow="01 · The problem"
-          display={SPINE_PROBLEM.display}
-          lede={[...SPINE_PROBLEM.lede]}
-          side={<Result statement="The distance between the information." text={SPINE_PROBLEM.point} />}
-          corner={{ seed: "scatter", builtUpSqm: 300, siteSqm: 520, floors: 1 }}
-        >
-          <Cards items={SPINE_PROBLEM.scatter.map((t) => ({ tag: t, text: "" }))} />
-        </Sheet>
-      ),
-    },
-    {
-      id: "spine",
-      num: "02",
-      short: "Spine",
-      title: "The Project Spine",
-      children: (
-        <Sheet
-          eyebrow="02 · The project spine"
-          display={SPINE_STAGES.display}
-          lede={[SPINE_STAGES.body]}
-          side={<Result statement="One continuous record." text="From the first brief to maintenance, the project keeps its history — nothing is re-created at a hand-off." />}
-          corner={{ seed: "spine", builtUpSqm: 520, siteSqm: 800, floors: 3 }}
-        >
-          <ol className="aorms-lp-spine" aria-label="Project stages, brief to maintenance">
-            {SPINE_STAGES.stages.map((c, i) => (
-              <li key={c}>
-                <span>{String(i + 1).padStart(2, "0")}</span>
-                {c}
-              </li>
-            ))}
-          </ol>
-        </Sheet>
-      ),
-    },
-    {
-      id: "office",
-      num: "03",
-      short: "Office",
-      title: "The Office, Mapped",
-      children: (
-        <Sheet
-          eyebrow="03 · Modules"
-          display={SPINE_MODULES.display}
-          side={<Result statement={SPINE_MODULES.foot} text="Seven modules, one project record underneath them." />}
-        >
-          <Cards items={[...SPINE_MODULES.modules]} />
-        </Sheet>
-      ),
-    },
-    {
       id: "project",
-      num: "04",
+      num: "02",
       short: "Project",
-      title: "The Project Is the Interface",
-      aliases: ["project-record"],
+      title: "The Project",
+      aliases: ["spine", "problem", "dna", "project-record"],
       children: (
         <Sheet
-          eyebrow="04 · The project page"
+          eyebrow="The project spine"
           display={SPINE_PROJECT.display}
           lede={[...SPINE_PROJECT.lede]}
           side={
             <>
-              <Result statement="The status is one page." text="Not a search through a chat thread, an inbox and someone's personal spreadsheet." />
+              <Result statement="The status is one page." text={SPINE_PROJECT.foot} />
               <figure className="aorms-lp-shot">
                 <Image src={PRODUCT_SCREENSHOTS[2].src} alt={PRODUCT_SCREENSHOTS[2].alt} width={1440} height={900} sizes="(max-width: 1056px) 100vw, 30vw" />
                 <figcaption>{PRODUCT_SCREENSHOTS[2].caption}</figcaption>
               </figure>
             </>
           }
+          corner={{ seed: "spine", builtUpSqm: 520, siteSqm: 800, floors: 3 }}
         >
-          <Cards items={SPINE_PROJECT.tabs.map((t) => ({ tag: t, text: "" }))} />
-        </Sheet>
-      ),
-    },
-    {
-      id: "dna",
-      num: "05",
-      short: "DNA",
-      title: "Project DNA",
-      children: (
-        <Sheet
-          eyebrow="05 · Signature concept"
-          display={SPINE_DNA.display}
-          lede={[...SPINE_DNA.lede]}
-          side={<Result statement={SPINE_DNA.foot} text="Tasks, drawings, fees and decisions all hang off the same identity." />}
-          corner={{ seed: "dna", builtUpSqm: 380, siteSqm: 700, floors: 2 }}
-        >
-          <Cards items={SPINE_DNA.fields.map((t) => ({ tag: t, text: "" }))} />
-        </Sheet>
-      ),
-    },
-    {
-      id: "site",
-      num: "06",
-      short: "Site",
-      title: "Site",
-      children: (
-        <Sheet
-          eyebrow="06 · Site"
-          display={SPINE_SITE.display}
-          side={<Result statement="Recorded where it happened." text={SPINE_SITE.foot} />}
-        >
-          <Cards items={SPINE_SITE.items.map((t) => ({ tag: t, text: "" }))} />
-        </Sheet>
-      ),
-    },
-    {
-      id: "tender",
-      num: "07",
-      short: "Tender",
-      title: "Tender",
-      children: (
-        <Sheet
-          eyebrow="07 · Tender"
-          display={SPINE_TENDER.display}
-          side={<Result statement="A traceable record." text={SPINE_TENDER.foot} />}
-        >
-          <div className="aorms-lp-chain" aria-label="Tender flow, BOQ to record">
-            {SPINE_TENDER.flow.map((c, i, arr) => (
+          <div className="aorms-lp-chain" aria-label="Project stages, brief to handover">
+            {SPINE_PROJECT.stages.map((c, i, arr) => (
               <span key={c} style={{ display: "contents" }}>
                 <span>{c}</span>
                 {i < arr.length - 1 && (
@@ -356,69 +245,81 @@ export default async function LandingPage() {
               </span>
             ))}
           </div>
+          <Sub>Project DNA</Sub>
+          <p className="aorms-lp-chips" style={{ marginBlockStart: 0 }}>{SPINE_PROJECT.dna.join(" · ")}</p>
         </Sheet>
       ),
     },
     {
-      id: "accounts",
-      num: "08",
-      short: "Accounts",
-      title: "Accounts",
-      aliases: ["fee-recovery", "revision-management"],
+      id: "office",
+      num: "03",
+      short: "Office",
+      title: "The Office",
+      aliases: ["site", "tender", "accounts", "fee-recovery", "revision-management"],
       children: (
         <Sheet
-          eyebrow="08 · Accounts"
-          display={SPINE_ACCOUNTS.display}
-          lede={[SPINE_ACCOUNTS.foot]}
+          eyebrow="The office"
+          display={SPINE_OFFICE.display}
           side={
             <>
-              <Result statement="Billing without the month-end scramble." text="What is earned and billable is a live figure, and no client change is built before it is on the record." />
+              <Result statement={SPINE_OFFICE.foot} text="Six parts of the practice, one project record underneath them." />
               <BillingForecastPanel />
             </>
           }
         >
-          <Cards items={SPINE_ACCOUNTS.figures.map((t) => ({ tag: t, text: "" }))} />
+          <Cards items={[...SPINE_OFFICE.matrix]} />
         </Sheet>
       ),
     },
     {
-      id: "knowledge",
-      num: "09",
-      short: "Memory",
-      title: "Knowledge Bank",
+      id: "workflow",
+      num: "04",
+      short: "Flow",
+      title: "The Workflow",
       children: (
         <Sheet
-          eyebrow="09 · Knowledge Bank"
-          display={SPINE_KNOWLEDGE.display}
-          lede={[...SPINE_KNOWLEDGE.lede]}
-          side={<Result statement="Institutional memory." text={SPINE_KNOWLEDGE.foot} />}
-          corner={{ seed: "records", builtUpSqm: 640, siteSqm: 900, floors: 3 }}
+          eyebrow="The workflow"
+          display={SPINE_WORKFLOW.display}
+          side={<Result statement="Information that moves." text="What is captured on site or in a meeting becomes a task, a record and, in time, knowledge — without being re-typed." />}
+          corner={{ seed: "routine", builtUpSqm: 640, siteSqm: 900, floors: 3 }}
         >
-          <Cards items={SPINE_KNOWLEDGE.items.map((t) => ({ tag: t, text: "" }))} />
+          <ol className="aorms-lp-spine aorms-lp-spine--flow" aria-label="From information to action">
+            {SPINE_WORKFLOW.steps.map((st, i) => (
+              <li key={st.tag}>
+                <span>{String(i + 1).padStart(2, "0")}</span>
+                <div>
+                  <strong>{st.tag}</strong>
+                  <small>{st.text}</small>
+                </div>
+              </li>
+            ))}
+          </ol>
         </Sheet>
       ),
     },
     {
-      id: "automation",
-      num: "10",
-      short: "Esti",
-      title: "ESTI",
-      aliases: ["esti", "pulse"],
+      id: "memory",
+      num: "05",
+      short: "Memory",
+      title: "The Memory",
+      aliases: ["knowledge", "esti", "automation", "pulse"],
       children: (
         <Sheet
-          eyebrow="10 · ESTI"
-          display={SPINE_ESTI.display}
-          lede={[...SPINE_ESTI.lede]}
+          eyebrow="The memory"
+          display={SPINE_MEMORY.display}
+          lede={[...SPINE_MEMORY.lede]}
           side={
             <>
-              <Result statement="Ask your practice, not the internet." text={ESTI_SECTION.body} />
+              <Result statement="Ask the project." text={SPINE_MEMORY.esti} />
               <TodaysBriefingPanel />
             </>
           }
         >
-          <Sub>Ask ESTI</Sub>
+          <Sub>Knowledge Bank</Sub>
+          <p className="aorms-lp-chips" style={{ marginBlockStart: 0 }}>{SPINE_MEMORY.knowledge.join(" · ")}</p>
+          <Sub>ESTI</Sub>
           <ul className="aorms-lp-list">
-            {SPINE_ESTI.questions.map((q) => (
+            {SPINE_MEMORY.questions.map((q) => (
               <li key={q}>{q}</li>
             ))}
           </ul>
@@ -426,87 +327,16 @@ export default async function LandingPage() {
       ),
     },
     {
-      id: "control",
-      num: "11",
-      short: "Data",
-      title: "Your Data",
+      id: "system",
+      num: "06",
+      short: "System",
+      title: "The System",
+      aliases: ["control", "roi", "pricing", "live-demo", "rfi"],
       children: (
         <Sheet
-          eyebrow="11 · Control & ownership"
-          display={SPINE_DATA.display}
-          lede={[...SPINE_DATA.lede]}
-          side={<Result statement="Records you can leave with." text="Structured practice data stays under your account — not a closed system that locks your records in." />}
-        >
-          <Cards items={[...SPINE_DATA.rows]} />
-        </Sheet>
-      ),
-    },
-    {
-      id: "roi",
-      num: "12",
-      short: "Cost",
-      title: "What it costs you",
-      children: (
-        <Sheet
-          eyebrow="12 · Operational leakage"
-          display={OPERATIONAL_LEAKAGE.title}
-          lede={[OPERATIONAL_LEAKAGE.body]}
-        >
-          <div style={{ marginBlockStart: "1.5rem" }}>
-            <OperationalLeakageCalculator />
-          </div>
-        </Sheet>
-      ),
-    },
-    {
-      id: "pricing",
-      num: "13",
-      short: "Price",
-      title: "Pricing",
-      children: (
-        <Sheet
-          eyebrow="13 · Pricing"
-          display={"One practice. One subscription.\nNo per-seat tax."}
-          lede={["AORMS is priced around the practice, not around every person who needs access."]}
-          side={<Result statement="A price you can plan around." text="AI is included on every paid plan — no per-token billing. Create or join your Studio from your AORMS Identity once you are signed in." />}
-        >
-          <div className="aorms-lp-cards" style={{ marginBlockStart: "1.5rem" }}>
-            {plans.map(({ key, plan, price, suffix, sub }) => (
-              <div key={key} className="aorms-lp-card aorms-lp-card--ink" data-analytics-event={key === "STUDIO" ? "pricing_view" : undefined}>
-                <h3>
-                  {plan.name}
-                  {"badge" in plan && plan.badge ? ` · ${plan.badge}` : ""}
-                </h3>
-                <p>{plan.tagline}</p>
-                <p className="aorms-lp-price">
-                  {price}
-                  {suffix && <span style={{ fontSize: "0.875rem" }}>{suffix}</span>}
-                </p>
-                {sub && <p style={{ fontSize: "0.75rem" }}>{sub}</p>}
-                <ul className="aorms-lp-list" style={{ marginBlockStart: "0.75rem" }}>
-                  {plan.includes.map((line) => (
-                    <li key={line} style={{ fontSize: "0.8125rem" }}>
-                      {line}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </Sheet>
-      ),
-    },
-    {
-      id: "live-demo",
-      num: "14",
-      short: "Demo",
-      title: "See it",
-      aliases: ["rfi"],
-      children: (
-        <Sheet
-          eyebrow="14 · The live demo"
-          display={"Don't take our word for it.\nOpen the practice."}
-          lede={["Explore a working AORMS practice and see how projects, fees, revisions, people, and Pulse work together."]}
+          eyebrow="The system"
+          display={SPINE_SYSTEM.display}
+          lede={[...SPINE_SYSTEM.lede]}
           side={
             <>
               <div className="aorms-lp-result">
@@ -524,36 +354,38 @@ export default async function LandingPage() {
             </>
           }
         >
-          <div className="aorms-lp-cards" style={{ marginBlockStart: "1.5rem" }}>
-            {PRODUCT_SCREENSHOTS.map((shot) => (
-              <figure key={shot.src} className="aorms-lp-shot" style={{ margin: 0 }}>
-                <Image src={shot.src} alt={shot.alt} width={1440} height={900} sizes="(max-width: 1056px) 100vw, 20vw" />
-                <figcaption>{shot.caption}</figcaption>
-              </figure>
+          <Cards items={[...SPINE_SYSTEM.rows]} />
+          <Sub>See what it costs</Sub>
+          <OperationalLeakageCalculator />
+          <Sub>Pricing</Sub>
+          <div className="aorms-lp-cards aorms-lp-cards--compact">
+            {plans.map(({ key, plan, price, suffix, sub }) => (
+              <div key={key} className="aorms-lp-card aorms-lp-card--ink" data-analytics-event={key === "STUDIO" ? "pricing_view" : undefined}>
+                <h3>
+                  {plan.name}
+                  {"badge" in plan && plan.badge ? ` · ${plan.badge}` : ""}
+                </h3>
+                <p>{plan.tagline}</p>
+                <p className="aorms-lp-price">
+                  {price}
+                  {suffix && <span style={{ fontSize: "0.875rem" }}>{suffix}</span>}
+                </p>
+                {sub && <p style={{ fontSize: "0.75rem" }}>{sub}</p>}
+              </div>
             ))}
           </div>
-          <Sub>Requests for information practices ask first</Sub>
-          <Accordion>
-            {FAQ.map((item) => (
-              <AccordionItem key={item.question} title={item.question}>
-                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                  {item.answer}
-                </p>
-              </AccordionItem>
-            ))}
-          </Accordion>
         </Sheet>
       ),
     },
     {
       id: "contact",
-      num: "15",
-      short: "Start",
-      title: "Start",
-      aliases: ["blog", "connectdex"],
+      num: "07",
+      short: "Enter",
+      title: "Enter AORMS",
+      aliases: ["blog", "connectdex", "start"],
       children: (
         <Sheet
-          eyebrow="15 · AORMS"
+          eyebrow="Enter AORMS"
           display={SPINE_CTA.display}
           lede={[...SPINE_CTA.lede]}
           side={
@@ -596,6 +428,16 @@ export default async function LandingPage() {
             <strong style={{ color: "var(--cds-text-primary)" }}>{CONNECTDEX.name}</strong> — {CONNECTDEX.tagline}.
           </p>
           <ConnectDexCtas />
+          <Sub>Requests for information practices ask first</Sub>
+          <Accordion>
+            {FAQ.map((item) => (
+              <AccordionItem key={item.question} title={item.question}>
+                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  {item.answer}
+                </p>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </Sheet>
       ),
     },

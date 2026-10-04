@@ -507,6 +507,12 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-04 (landing v2: seven boards)** — the landing page is cut from 16 boards to 7 (copy in
+  `lib/marketing-spine.ts`): 01 Start · 02 The Project (spine + DNA) · 03 The Office · 04 The Workflow ·
+  05 The Memory (Knowledge + ESTI) · 06 The System (data, cost calculator, pricing strip, demo) · 07 Enter
+  AORMS (CTA, blog, FAQ). Numbers read "NN / 07"; the nameplate and phone bar carry a live IST clock
+  (HH:MM:SS, client-only). All earlier `#hash` anchors alias to the new boards. The 16-board entry below
+  is superseded.
 - **2026-10-04 (landing content: project spine)** — landing boards re-ordered around one project spine
   (copy in `lib/marketing-spine.ts`): 00 Start · 01 Problem · 02 Spine · 03 Office mapped · 04 Project
   page · 05 Project DNA · 06 Site · 07 Tender · 08 Accounts · 09 Knowledge · 10 ESTI · 11 Your data ·

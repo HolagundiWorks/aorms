@@ -2899,3 +2899,55 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
   font-size: 0.75rem;
   color: var(--cds-text-secondary);
 }
+
+// Landing v2 (seven boards) — live clock, "01 / 07" counter, workflow list, compact pricing (2026-10-04).
+.aorms-lp-np__clock {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.75rem 1rem 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.aorms-lp-np__num small {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-lp-bar__mark {
+  font-variant-numeric: tabular-nums;
+}
+
+.aorms-lp-spine--flow {
+  max-inline-size: 36rem;
+}
+
+.aorms-lp-spine--flow li {
+  padding-block: 0.75rem;
+}
+
+.aorms-lp-spine--flow strong {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.aorms-lp-spine--flow small {
+  display: block;
+  margin-block-start: 0.125rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-lp-cards--compact .aorms-lp-card .aorms-lp-price {
+  margin-block-start: 0.5rem;
+}
