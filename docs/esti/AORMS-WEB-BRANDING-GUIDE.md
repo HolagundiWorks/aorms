@@ -507,6 +507,11 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-04 (landing: visual hierarchy)** — one loud thing per board: the headline scales to 4.5rem
+  (hero 5rem), the first lede steps up to ~1.3rem in primary ink, "The result" statement becomes the right
+  column's headline (~2rem light), eyebrows get a 2px ink rule, sub-labels move to ink, cards get more room, and
+  boards get breathing room above the headline on desktop. Scale order: display ≫ lede > statement > body >
+  label. Also: hash jumps no longer tuck a board under the phone title bar.
 - **2026-10-04 (nameplate is landing-family only)** — the right-hand sheet nameplate is removed from the Office
   Hub, Identity / ConnectDeX / SysDeX and the Client / Contractor / Collaborator portals (`SheetNameplate`
   deleted, `PortalNameplate` removed; the faint corner drawing stays in the Hub). It now exists only on the
