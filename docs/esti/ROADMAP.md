@@ -7377,7 +7377,7 @@ See branding guide §15. Wheel navigation lives in `components/aorms/landing/Art
 See branding guide §15. Copy in `web/lib/marketing-spine.ts`; JSON-LD in `web/app/page.tsx`. Not claimed:
 staff MFA (flag-gated, off by default) and Google Drive documents (shown as "Coming soon").
 
-### 2026-10-04 — Demo accounts at every level (code ready; NOT yet applied live)
+### 2026-10-04 — Demo accounts at every level (applied live)
 
 `web/lib/demo-accounts.json` (roster) · `web/supabase/migrations/0094_demo_role_accounts.sql` (`demo_roster`,
 `sync_demo_accounts()`, nightly cron 21:40 UTC) · `web/scripts/provision-demo-users.mjs` (creates logins via the
@@ -7391,3 +7391,11 @@ write and admin rights. The five named staff logins `reset_demo_data()` / the la
 (aditi.rao, vikram.shah, akash.mehta, priya.nair, rohan.desai @aorms.in) do not exist, so both nightly jobs
 return early and the demo data is not being refreshed. The roster uses those emails, so provisioning also revives
 the nightly reset. Applying 0094 + running the script demotes `demo@aorms.in` to VIEWER.
+
+**Applied live (2026-10-04):** migration 0094 applied to `aorms-web`; `scripts/provision-demo-users.mjs` run against
+it (service-role key fetched via the Management API for that one run, never stored). Verified: all 10 profiles carry
+their roster role, are in the demo firm, have a membership row, and portal logins are linked to their Portal Demo
+records; password sign-in returned a session for all 10. `demo@aorms.in` is now the read-only VIEWER the landing page
+describes, and the five staff logins `reset_demo_data()` expects now exist, so the nightly reset can run. The shared
+demo password was exposed in chat during provisioning only in the sense that it is already public; the Supabase
+**personal access token and service-role key were shared in chat and should be rotated**.
