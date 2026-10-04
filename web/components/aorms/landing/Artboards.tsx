@@ -3,22 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState, type KeyboardEvent, type ReactNode } from "react";
 
-/** Live HH:MM:SS (IST) — the title sheet's running instrument. Blank until mounted so server and client markup match. */
-function LiveClock({ className }: { className?: string }) {
-  const [t, setT] = useState("");
-  useEffect(() => {
-    const fmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: "Asia/Kolkata" });
-    const tick = () => setT(fmt.format(new Date()));
-    tick();
-    const id = window.setInterval(tick, 1000);
-    return () => window.clearInterval(id);
-  }, []);
-  return (
-    <span className={className} suppressHydrationWarning>
-      {t || "--:--:--"}
-    </span>
-  );
-}
+const pad = (n: number) => String(n).padStart(2, "0");
 
 export type Board = {
   id: string;
@@ -44,10 +29,9 @@ export type Nameplate = {
  * the CTA, the big board number, its title, prev/next arrows, a small index, and the studio's
  * contact block. Phones: a black title bar (number | title) and a right-hand number rail.
  * Same behaviours as hcworks.in — arrow keys / Home / End move between boards and `#hash` links
- * open one — but no scroll-wheel hijacking. Every board is rendered on the server (closed
+ * open one — but scroll-wheel moves between boards only at the edge of a board. Every board is rendered on the server (closed
  * boards are `display:none` + `inert`), so the whole page stays crawlable.
  */
-const pad = (n: number) => String(n).padStart(2, "0");
 
 export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: Nameplate }) {
   const [active, setActive] = useState(0);
@@ -98,6 +82,44 @@ export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: N
     return () => document.removeEventListener("keydown", onKey);
   }, [active, boards.length, go]);
 
+  // Scroll moves section to section (2026-10-04): a wheel gesture that hits the top/bottom edge of
+  // the open board advances to the previous/next one. Boards taller than the screen scroll normally
+  // first; a short cooldown stops one trackpad flick (and its inertia) skipping several boards.
+  useEffect(() => {
+    let unlockAt = 0;
+    let lastT = 0;
+    let moved = false;
+    function onWheel(e: WheelEvent) {
+      if (e.ctrlKey || Math.abs(e.deltaY) < 4 || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest("input, textarea, select, [role=listbox], [role=dialog], .cds--modal, .cds--data-table-content")) return;
+      const now = Date.now();
+      if (now < unlockAt) {
+        unlockAt = Math.max(unlockAt, now + 250); // inertia keeps the lock alive until the gesture really stops
+        return;
+      }
+      // Desktop: the open board is its own scroller; phones/tablets: the window scrolls.
+      const board = document.querySelector<HTMLElement>(".aorms-lp-board.is-active");
+      const own = board && getComputedStyle(board).overflowY === "auto";
+      const el = own ? board : (document.scrollingElement ?? document.documentElement);
+      const view = own ? board.clientHeight : window.innerHeight;
+      const atTop = el.scrollTop <= 1;
+      const atBottom = el.scrollTop + view >= el.scrollHeight - 2;
+      const edge = e.deltaY > 0 ? atBottom : atTop;
+      // Momentum from a scroll that was still moving the board must not carry straight on to the next one.
+      if (now - lastT >= 200) moved = false; // a pause starts a new gesture
+      lastT = now;
+      if (!edge) moved = true;
+      if (!edge || moved) return;
+      if (e.deltaY > 0 && active < boards.length - 1) go(active + 1);
+      else if (e.deltaY < 0 && active > 0) go(active - 1);
+      else return;
+      unlockAt = now + 700;
+    }
+    window.addEventListener("wheel", onWheel, { passive: true });
+    return () => window.removeEventListener("wheel", onWheel);
+  }, [active, boards.length, go]);
+
   const cur = boards[active]!;
 
   function railKey(e: KeyboardEvent<HTMLButtonElement>, i: number) {
@@ -116,7 +138,7 @@ export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: N
           <span className="aorms-lp-sep">|</span>
           <span>{cur.title}</span>
         </span>
-        <LiveClock className="aorms-lp-bar__mark" />
+        <span className="aorms-lp-bar__mark">AORMS</span>
       </div>
       <nav className="aorms-lp-rail" aria-label="Sections">
         {boards.map((b, i) => (
@@ -150,10 +172,6 @@ export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: N
         <Link href={nameplate.cta.href} className="aorms-lp-np__cta">
           {nameplate.cta.label}
         </Link>
-        <div className="aorms-lp-np__clock" role="timer" aria-label="Local time (IST)">
-          <strong>AORMS</strong>
-          <LiveClock />
-        </div>
         <div className="aorms-lp-np__num" aria-hidden>
           {cur.num}
           <small>/ {pad(boards.length)}</small>

@@ -7367,3 +7367,7 @@ ESTI examples omit meeting-attendance questions. Revisit if any of those become 
 the Project board. Cost calculator, pricing strip and demo credentials share board 06. Counter reads
 "NN / 07"; nameplate and phone title bar show a live IST clock. Same cloud-only / no-negotiation /
 no-attendance honesty rules as the 16-board entry above.
+
+### 2026-10-04 — Landing: clock removed, scroll moves section to section
+
+See branding guide §15. Wheel navigation lives in `components/aorms/landing/Artboards.tsx`.

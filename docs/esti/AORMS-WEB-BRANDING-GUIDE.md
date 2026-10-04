@@ -507,6 +507,11 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-04 (landing: scroll between sections, no clock)** — the live clock is removed (nameplate and
+  phone bar). The mouse wheel / trackpad now moves between landing boards: a board taller than the screen
+  scrolls first, and only a *fresh* gesture at its top/bottom edge advances (700ms cooldown; momentum from a
+  scroll that was still moving the board never carries over). Arrow keys, rail and `#hash` still work; touch
+  scrolling is native.
 - **2026-10-04 (landing v2: seven boards)** — the landing page is cut from 16 boards to 7 (copy in
   `lib/marketing-spine.ts`): 01 Start · 02 The Project (spine + DNA) · 03 The Office · 04 The Workflow ·
   05 The Memory (Knowledge + ESTI) · 06 The System (data, cost calculator, pricing strip, demo) · 07 Enter
