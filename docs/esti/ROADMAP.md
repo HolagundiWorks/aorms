@@ -7399,3 +7399,8 @@ records; password sign-in returned a session for all 10. `demo@aorms.in` is now 
 describes, and the five staff logins `reset_demo_data()` expects now exist, so the nightly reset can run. The shared
 demo password was exposed in chat during provisioning only in the sense that it is already public; the Supabase
 **personal access token and service-role key were shared in chat and should be rotated**.
+
+### 2026-10-04 — Portal nameplates removed (landing pages only)
+
+Direction: the right-hand side panel was meant for landing pages only. Removed from the Office Hub and all
+platform/portal shells; kept on the landing page and public content pages. Corner drawing in the Hub unchanged.

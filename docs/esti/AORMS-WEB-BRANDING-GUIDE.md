@@ -507,6 +507,11 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-04 (nameplate is landing-family only)** — the right-hand sheet nameplate is removed from the Office
+  Hub, Identity / ConnectDeX / SysDeX and the Client / Contractor / Collaborator portals (`SheetNameplate`
+  deleted, `PortalNameplate` removed; the faint corner drawing stays in the Hub). It now exists only on the
+  public landing page and the public content pages (blog, partners, legal). Supersedes the earlier
+  "nameplate on every portal" entries below.
 - **2026-10-04 (landing nameplate trimmed; demo login)** — the landing nameplate no longer carries the
   prev/next arrows or the section index (the number, title, wheel scroll, arrow keys and `#hash` links
   still move between boards). The sign-in page shows the read-only demo credentials with a "Fill demo
