@@ -2692,7 +2692,7 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 }
 
 @media (min-width: 90rem) {
-  .aorms-has-np {
+  body:has(.aorms-np) .aorms-has-np {
     margin-inline-end: 12.5rem;
   }
 
@@ -2701,16 +2701,16 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
   }
 
   // Keep the fixed floating items clear of the nameplate.
-  .aorms-watermark {
+  body:has(.aorms-np) .aorms-watermark {
     inset-inline-end: 13.5rem !important;
     right: 13.5rem !important;
   }
 
-  .aorms-floating-ask {
+  body:has(.aorms-np) .aorms-floating-ask {
     right: 13.5rem !important;
   }
 
-  .aorms-sheet-footer {
+  body:has(.aorms-np) .aorms-sheet-footer {
     inset-inline-end: 19.75rem;
   }
 

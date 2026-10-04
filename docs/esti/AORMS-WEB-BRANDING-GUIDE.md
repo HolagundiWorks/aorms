@@ -507,6 +507,12 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-04 (nameplate on every portal)** — `components/aorms/SheetNameplate.tsx` brings the Office Hub's
+  right-hand sheet nameplate to Identity, ConnectDeX, SysDeX and the Client / Contractor / Collaborator
+  portals (portal name bar · mono sheet number · title · prev/next within the portal · signed-in name).
+  Wired in the `(platform)`, `(portal)`, `(collab-portal)`, `(contractor-portal)` layouts; sign-in sheets
+  (`00…`) get none. The ≥ 90rem layout shifts are now scoped with `body:has(.aorms-np)`, so shells without
+  a nameplate aren't shifted. Corner drawing remains Office-Hub-only.
 - **2026-10-02 (landing redesign, current hcworks.in)** — the public landing page
   (`app/page.tsx`) follows the *current* hcworks.in (re-checked against the live site, not the
   older accordion-strip layout): one full-viewport sheet at a time — write-up on the left, "The
