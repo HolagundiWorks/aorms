@@ -2821,3 +2821,46 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
   color: var(--cds-text-primary);
   font-size: 0.875rem;
 }
+
+// Public content pages (blog, partners, legal) — shared header row, 2026-10-04.
+.aorms-pub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 2rem 0 1rem;
+}
+
+.aorms-pub-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.aorms-pub-nav a {
+  color: var(--aorms-ink);
+  text-decoration: none;
+  padding-block: 0.25rem;
+  border-block-end: 1px solid transparent;
+}
+
+.aorms-pub-nav a:hover,
+.aorms-pub-nav a[aria-current="page"] {
+  border-block-end-color: var(--aorms-ink);
+}
+
+.aorms-pub-link {
+  color: var(--aorms-ink);
+  text-decoration: none;
+  border-block-end: 1px solid var(--aorms-rule);
+}
+
+.aorms-pub-link:hover,
+.aorms-pub-link:focus-visible {
+  border-block-end-color: var(--aorms-ink);
+}

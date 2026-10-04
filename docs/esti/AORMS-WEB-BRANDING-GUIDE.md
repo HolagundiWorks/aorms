@@ -507,6 +507,11 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-04 (public content pages)** — blog, ConnectDeX Partners and legal pages now share
+  `components/aorms/PublicShell.tsx`: logo + mono link row (Partners · Blog · Privacy · Terms · Sign in)
+  and the right-hand sheet nameplate (00 landing · P-01 · B-01/B-02 · L-01/L-02, prev/next). Eyebrows use
+  `.aorms-lp-eyebrow`, blog links are ink with a rule, partner-card eyebrows use `--aorms-orange-text`.
+  The nameplate sits flush to the top on header-less pages.
 - **2026-10-04 (nameplate on every portal)** — `components/aorms/SheetNameplate.tsx` brings the Office Hub's
   right-hand sheet nameplate to Identity, ConnectDeX, SysDeX and the Client / Contractor / Collaborator
   portals (portal name bar · mono sheet number · title · prev/next within the portal · signed-in name).

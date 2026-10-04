@@ -22,12 +22,7 @@ export default function ConnectDexPartnersPage() {
   return (
     <Grid>
       <Column sm={4} md={8} lg={16} style={{ marginBottom: "2rem" }}>
-        <p
-          className="cds--type-productive-heading-01"
-          style={{ letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--cds-text-secondary)" }}
-        >
-          {CONNECTDEX.name}
-        </p>
+        <p className="aorms-lp-eyebrow">P-01 · {CONNECTDEX.name}</p>
         <h1 className="cds--type-heading-05" style={{ marginTop: "0.5rem" }}>
           Building materials? List your catalogue.
         </h1>
@@ -39,7 +34,7 @@ export default function ConnectDexPartnersPage() {
       {COMPANY_IDENTITY.map((f) => (
         <Column key={f.title} sm={4} md={4} lg={5} style={{ marginBottom: "1rem" }}>
           <Tile style={{ height: "100%" }}>
-            <p className="cds--type-productive-heading-01" style={{ color: "var(--cds-support-info)" }}>
+            <p className="cds--type-productive-heading-01" style={{ color: "var(--aorms-orange-text)" }}>
               {f.eyebrow}
             </p>
             <h3 className="cds--type-productive-heading-03" style={{ marginTop: "0.5rem" }}>
