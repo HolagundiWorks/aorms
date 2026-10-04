@@ -2348,78 +2348,17 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
   text-transform: uppercase;
 }
 
-.aorms-lp-np__arrows {
-  display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-}
 
-.aorms-lp-np__arrows button {
-  all: unset;
-  cursor: pointer;
-  inline-size: 2.25rem;
-  block-size: 2.25rem;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--aorms-ink);
-  font-size: 1rem;
-}
 
-.aorms-lp-np__arrows button:hover:not(:disabled) {
-  background: var(--aorms-ink);
-  color: #fff;
-}
 
-.aorms-lp-np__arrows button:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
 
-.aorms-lp-np__arrows button:focus-visible {
-  outline: 2px solid var(--cds-focus);
-  outline-offset: 2px;
-}
 
-.aorms-lp-np__index {
-  list-style: none;
-  margin: 0;
-  padding: 0.5rem 0;
-  border-block: 1px solid var(--aorms-rule);
-}
 
-.aorms-lp-np__index button {
-  all: unset;
-  box-sizing: border-box;
-  display: flex;
-  gap: 0.5rem;
-  inline-size: 100%;
-  padding: 0.2rem 1rem;
-  cursor: pointer;
-  font-size: 0.75rem;
-}
 
-.aorms-lp-np__index button span:first-child {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  color: var(--cds-text-secondary);
-}
 
-.aorms-lp-np__index button[aria-current="true"] {
-  font-weight: 600;
-  background: var(--cds-background);
-}
 
-.aorms-lp-np__index button[aria-current="true"] span:first-child {
-  color: var(--aorms-orange-text);
-}
 
-.aorms-lp-np__index button:hover {
-  background: var(--cds-background);
-}
 
-.aorms-lp-np__index button:focus-visible {
-  outline: 2px solid var(--cds-focus);
-  outline-offset: -2px;
-}
 
 .aorms-lp-np__studio {
   margin-block-start: auto;

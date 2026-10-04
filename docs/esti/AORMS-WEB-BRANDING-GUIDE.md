@@ -507,6 +507,10 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-04 (landing nameplate trimmed; demo login)** — the landing nameplate no longer carries the
+  prev/next arrows or the section index (the number, title, wheel scroll, arrow keys and `#hash` links
+  still move between boards). The sign-in page shows the read-only demo credentials with a "Fill demo
+  credentials" button.
 - **2026-10-04 (landing: SEO, real components, portal write-up)** — landing visuals now use the portal's own
   components with sample data (`ProjectCard` — new `href={null}` static mode — `PhaseStrip`, `BigStat`) instead
   of a screenshot; copy gained "Outside the office" (Client / Contractor / Collaborator portals) and "In the

@@ -177,24 +177,6 @@ export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: N
           <small>/ {pad(boards.length)}</small>
         </div>
         <p className="aorms-lp-np__title">{cur.title}</p>
-        <div className="aorms-lp-np__arrows">
-          <button type="button" onClick={() => go(active - 1)} disabled={active === 0} aria-label="Previous section">
-            ←
-          </button>
-          <button type="button" onClick={() => go(active + 1)} disabled={active === boards.length - 1} aria-label="Next section">
-            →
-          </button>
-        </div>
-        <ul className="aorms-lp-np__index">
-          {boards.map((b, i) => (
-            <li key={b.id}>
-              <button type="button" aria-current={i === active} onClick={() => go(i)}>
-                <span>{b.num}</span>
-                <span>{b.title}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
         <footer className="aorms-lp-np__studio">
           <strong>{nameplate.studio}</strong>
           {nameplate.lines.map((l) => (
