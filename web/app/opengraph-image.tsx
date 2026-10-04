@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "AORMS — The Command Center for Architecture Practice";
+export const alt = "AORMS — The operating system for an architecture practice";
 
 /**
  * Generic branded OG/social-share image (2026-09-10) — previously the
@@ -34,10 +34,10 @@ export default function OpengraphImage() {
       >
         <div style={{ fontSize: 96, fontWeight: 700, letterSpacing: "-0.02em", display: "flex" }}>AORMS</div>
         <div style={{ fontSize: 36, color: "#c6c6c6", marginTop: 24, display: "flex" }}>
-          The Command Center for Architecture Practice.
+          The operating system for an architecture practice.
         </div>
         <div style={{ fontSize: 24, color: "#8d8d8d", marginTop: 40, display: "flex", letterSpacing: "0.05em" }}>
-          DEVELOPED FOR ARCHITECTURE PRACTICES IN INDIA
+          ONE PROJECT SPINE · ONE CONNECTED PRACTICE
         </div>
       </div>
     ),

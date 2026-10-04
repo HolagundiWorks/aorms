@@ -507,6 +507,14 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-04 (landing: SEO, real components, portal write-up)** — landing visuals now use the portal's own
+  components with sample data (`ProjectCard` — new `href={null}` static mode — `PhaseStrip`, `BigStat`) instead
+  of a screenshot; copy gained "Outside the office" (Client / Contractor / Collaborator portals) and "In the
+  app" (numbered sheets, Pulse, list/card/board views, Instructions toggle). SEO: description/keywords rewritten
+  for the project-spine positioning (title keeps "Architecture Practice Operating System"), single JSON-LD
+  graph (Organization · WebSite · SoftwareApplication with live INR offers · FAQPage), `summary_large_image`
+  Twitter card, generated 1200×630 OG image, FAQ gained the portal-logins question. Mobile fix: the board's
+  side column no longer sizes to its widest child.
 - **2026-10-04 (landing: scroll between sections, no clock)** — the live clock is removed (nameplate and
   phone bar). The mouse wheel / trackpad now moves between landing boards: a board taller than the screen
   scrolls first, and only a *fresh* gesture at its top/bottom edge advances (700ms cooldown; momentum from a

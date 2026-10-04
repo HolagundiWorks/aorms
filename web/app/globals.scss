@@ -2595,6 +2595,7 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 
 .aorms-lp-side {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem;
   min-inline-size: 0;
 }
@@ -2939,4 +2940,26 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 
 .aorms-lp-cards--compact .aorms-lp-card .aorms-lp-price {
   margin-block-start: 0.5rem;
+}
+
+// Landing: real BigStat figures in a row, beside the sample project (2026-10-04).
+.aorms-lp-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-block: 1rem;
+}
+
+.aorms-lp-grid > * {
+  min-inline-size: 0;
+}
+
+.aorms-lp-display + .aorms-lp-cards {
+  margin-block-start: 1.5rem;
+}
+
+@media (max-width: 40rem) {
+  .aorms-lp-stats .aorms-bigstat__value {
+    font-size: 1.75rem;
+  }
 }

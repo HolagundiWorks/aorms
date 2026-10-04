@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { Accordion, AccordionItem } from "@carbon/react";
 import { createClient } from "../lib/supabase/server";
@@ -11,6 +10,9 @@ import { HeroCtas, LiveDemoCtas, FinalCtas, ConnectDexCtas } from "../components
 import { BillingForecastPanel } from "../components/aorms/BillingForecastPanel";
 import { TodaysBriefingPanel } from "../components/aorms/TodaysBriefingPanel";
 import { PlanGlyph } from "../components/aorms/PlanGlyph";
+import { BigStat } from "../components/aorms/BigStat";
+import { PhaseStrip } from "../components/aorms/PhaseStrip";
+import { ProjectCard } from "../components/aorms/ProjectCard";
 import { OperationalLeakageCalculator } from "../components/aorms/landing/OperationalLeakageCalculator";
 import { Artboards, type Board } from "../components/aorms/landing/Artboards";
 import {
@@ -20,11 +22,14 @@ import {
   FAQ,
   HUMAN_CENTRIC_WORKS,
   PRICING,
-  PRODUCT_SCREENSHOTS,
 } from "../lib/marketing-content";
 import {
   SPINE_CTA,
   SPINE_HERO,
+  SPINE_INAPP,
+  SPINE_OUTSIDE,
+  SPINE_SAMPLE,
+  SPINE_SEO,
   SPINE_MEMORY,
   SPINE_OFFICE,
   SPINE_PROJECT,
@@ -41,41 +46,75 @@ import {
  * explicitly.
  */
 export const metadata: Metadata = {
-  title: `${AORMS_PLATFORM.expansion} — ${AORMS_PLATFORM.name}`,
-  description: AORMS_PLATFORM.metaDescription,
-  keywords: [
-    "architecture practice management software",
-    "architecture firm management software",
-    "architecture project management software India",
-    "architecture billing software",
-    "architecture practice ERP",
-    "architecture office management software",
-    "architecture project tracking software",
-  ],
+  title: `${AORMS_PLATFORM.name} — Architecture Practice Operating System`,
+  description: SPINE_SEO.description,
+  keywords: [...SPINE_SEO.keywords],
   alternates: { canonical: "https://aorms.in/" },
   openGraph: {
-    title: `${AORMS_PLATFORM.expansion} — ${AORMS_PLATFORM.name}`,
-    description: AORMS_PLATFORM.metaDescription,
+    type: "website",
+    siteName: "AORMS",
+    locale: "en_IN",
+    title: `${AORMS_PLATFORM.name} — Architecture Practice Operating System`,
+    description: SPINE_SEO.description,
     url: "https://aorms.in/",
   },
-};
-
-const STRUCTURED_DATA = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: AORMS_PLATFORM.name,
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web",
-  description: AORMS_PLATFORM.heroSupport,
-  url: "https://aorms.in/",
-  offers: { "@type": "Offer", availability: "https://schema.org/InStock" },
-  publisher: {
-    "@type": "Organization",
-    name: HUMAN_CENTRIC_WORKS.legalName,
-    email: HUMAN_CENTRIC_WORKS.email,
+  twitter: {
+    card: "summary_large_image",
+    title: `${AORMS_PLATFORM.name} — Architecture Practice Operating System`,
+    description: SPINE_SEO.description,
   },
 };
 
+/** One JSON-LD graph: Organization + WebSite + SoftwareApplication (with live INR prices) + FAQPage (the FAQ is on the page). */
+function structuredData(offers: { name: string; price: number }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://aorms.in/#org",
+        name: HUMAN_CENTRIC_WORKS.legalName,
+        url: "https://aorms.in/",
+        logo: "https://aorms.in/aorms-logo.png",
+        email: HUMAN_CENTRIC_WORKS.email,
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://aorms.in/#site",
+        url: "https://aorms.in/",
+        name: AORMS_PLATFORM.name,
+        inLanguage: "en-IN",
+        publisher: { "@id": "https://aorms.in/#org" },
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://aorms.in/#app",
+        name: AORMS_PLATFORM.name,
+        alternateName: "Architecture Operations & Resource Management System",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        description: SPINE_SEO.description,
+        url: "https://aorms.in/",
+        publisher: { "@id": "https://aorms.in/#org" },
+        offers: offers.map((o) => ({
+          "@type": "Offer",
+          name: o.name,
+          price: o.price,
+          priceCurrency: "INR",
+          availability: "https://schema.org/InStock",
+        })),
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: FAQ.map((f) => ({
+          "@type": "Question",
+          name: f.question,
+          acceptedAnswer: { "@type": "Answer", text: f.answer },
+        })),
+      },
+    ],
+  };
+}
 
 /**
  * web/'s public marketing landing page — redesigned 2026-10-02 to the hcworks.in layout:
@@ -192,6 +231,11 @@ export default async function LandingPage() {
     { key: "ENTERPRISE", plan: PRICING.enterprise, price: `From ${formatRupees(livePrice("ENTERPRISE"))}`, suffix: "/year", sub: "" },
   ];
 
+  const jsonLdOffers = [
+    { name: "Free", price: 0 },
+    ...(["STUDIO", "PROFESSIONAL"] as const).map((k) => ({ name: PRICING[k === "STUDIO" ? "studio" : "professional"].name, price: livePrice(k) / 100 })).filter((o) => o.price > 0),
+  ];
+
   const boards: Board[] = [
     {
       id: "top",
@@ -203,8 +247,13 @@ export default async function LandingPage() {
           h1
           eyebrow={SPINE_HERO.eyebrow}
           display={SPINE_HERO.display}
-          side={<Result statement={SPINE_HERO.statement} text="Not another tool to feed — the record the practice already produces, kept in one place, so the answer is one page." />}
-          corner={{ seed: "aorms-landing", builtUpSqm: 420, siteSqm: 600, floors: 2 }}
+          side={
+            <>
+              <Result statement={SPINE_HERO.statement} text="Not another tool to feed — the record the practice already produces, kept in one place, so the answer is one page." />
+              <Sub>A project, as AORMS shows it</Sub>
+              <ProjectCard p={SPINE_SAMPLE.project} href={null} />
+            </>
+          }
         >
           <p className="aorms-lp-chips">{SPINE_HERO.connects.join(" · ")}</p>
           <HeroCtas />
@@ -225,13 +274,18 @@ export default async function LandingPage() {
           side={
             <>
               <Result statement="The status is one page." text={SPINE_PROJECT.foot} />
-              <figure className="aorms-lp-shot">
-                <Image src={PRODUCT_SCREENSHOTS[2].src} alt={PRODUCT_SCREENSHOTS[2].alt} width={1440} height={900} sizes="(max-width: 1056px) 100vw, 30vw" />
-                <figcaption>{PRODUCT_SCREENSHOTS[2].caption}</figcaption>
-              </figure>
+              <PhaseStrip steps={[...SPINE_SAMPLE.phases]} currentIndex={SPINE_SAMPLE.currentPhase} />
+              <div className="aorms-lp-stats">
+                {SPINE_SAMPLE.stats.map((st) => (
+                  <BigStat key={st.label} value={st.value} label={st.label} active={"active" in st ? st.active : undefined} />
+                ))}
+              </div>
+              <ProjectCard p={SPINE_SAMPLE.project} href={null} />
+              <p className="cds--type-helper-text-01" style={{ marginBlockStart: "0.5rem", color: "var(--cds-text-secondary)" }}>
+                {SPINE_SAMPLE.caption}
+              </p>
             </>
           }
-          corner={{ seed: "spine", builtUpSqm: 520, siteSqm: 800, floors: 3 }}
         >
           <div className="aorms-lp-chain" aria-label="Project stages, brief to handover">
             {SPINE_PROJECT.stages.map((c, i, arr) => (
@@ -268,6 +322,8 @@ export default async function LandingPage() {
           }
         >
           <Cards items={[...SPINE_OFFICE.matrix]} />
+          <Sub>{SPINE_OUTSIDE.tag}</Sub>
+          <Cards items={[...SPINE_OUTSIDE.portals]} />
         </Sheet>
       ),
     },
@@ -294,6 +350,8 @@ export default async function LandingPage() {
               </li>
             ))}
           </ol>
+          <Sub>{SPINE_INAPP.tag}</Sub>
+          <Cards items={[...SPINE_INAPP.items]} />
         </Sheet>
       ),
     },
@@ -445,7 +503,7 @@ export default async function LandingPage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData(jsonLdOffers)).replace(/</g, "\\u003c") }} />
       <Artboards
         boards={boards}
         nameplate={{
