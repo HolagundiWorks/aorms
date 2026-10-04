@@ -2714,9 +2714,14 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
     inset-inline-end: 19.75rem;
   }
 
+  // Under the shell header when the page has one; flush to the top on header-less pages (public portal forms).
+  body:has(.cds--header) .aorms-np {
+    inset-block-start: 3rem;
+  }
+
   .aorms-np {
     position: fixed;
-    inset-block: 3rem 0;
+    inset-block: 0;
     inset-inline-end: 0;
     inline-size: 12.5rem;
     z-index: 5;
