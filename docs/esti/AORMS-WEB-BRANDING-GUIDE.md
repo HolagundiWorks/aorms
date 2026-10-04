@@ -507,65 +507,15 @@ a sheet.
 
 ## 15. Change log
 
-- **2026-10-02 (portal nameplate + corner drawing)** — the landing page's hcworks.in-style
-  visual language is now in the Office Hub. **Nameplate** (`PortalNameplate.tsx`, ≥ 90rem):
-  fixed right-hand panel — studio on a black bar linking to Pulse, the section, the sheet's big
-  mono number (`07.01`), its title, ←/→ to the previous/next sheet (same order as the side
-  nav), and who is signed in; content, floating mark/Ask-ESTI button and sheet footer shift
-  left to clear it. **Corner drawing** (`CornerFigure`, ≥ 66rem): a generated plan (`PlanGlyph`,
-  seeded by the sheet number) pinned bottom-right at `z-index:-1`, 18% opacity,
-  `aria-hidden` — decorative only; it is behind content, not above it (do not lift
-  `.cds--content` into a stacking context to "fix" it: that traps modals under the header).
-  Hub sheets only; portals/sign-in keep their own shells. axe: 0 violations at 1600/1200/390px.
-- **2026-10-02 (rail two-up)** — rail KPIs sit **two per line** on every rail screen (Pulse
-  rail 15rem; page rails now 12.5rem, was 11rem). The brief, the office sheet and long values
-  (>7 characters, e.g. ₹41,87,000 — `BigStat` adds `aorms-bigstat--wide`) span both columns.
-  Pulse: the KPI tabs (Pulse/Finance/Team/Others) moved to the top of the working area.
-- **2026-10-02 (Pulse rail)** — KPI numerals (`BigStat`) halved to 1.5rem (was 3rem). The
-  "00 / The office" sheet (Projects · Today · Attention) moved from the Pulse main area
-  into the left rail, stacked in one column below the brief; the rail widened to 15rem and
-  scrolls inside itself (`max-block-size`) when taller than the viewport. Below `lg` it
-  returns to a full-width block above the content.
-- **2026-10-01 (mobile)** — checked at 360/390/768px: (1) header actions (ESTI,
-  calculator, Pomodoro, user menu) were pushed off-screen because Carbon's
-  `.cds--header__name` out-ranked `.aorms-header-org` — selector now qualified, so the
-  org name hides ≤42rem and the actions show; (2) KPI numerals two-up (fluid size)
-  instead of one tall column below the rail breakpoint; (3) floating sheet footer hidden
-  ≤42rem and content gets bottom padding so the fixed mark/Ask-Esti button never cover
-  the last row. No horizontal page overflow at any tested width.
-- **2026-10-01 (WCAG 2.2 AA audit)** — axe-core (wcag2a/aa, 2.1, 2.2 AA, best-practice)
-  run against the Hub shell (desktop + 390px, rail hovered), Blog and Legal.
-  Found and fixed: (1) **orange text 3.3:1 on white** → new `--aorms-orange-text`
-  `#c2310a` (5.6:1) for every orange *text* use; `--aorms-orange` stays for fills,
-  rules and borders only; (2) **floating sheet footer** used `opacity: .5` (3.4:1) →
-  solid `#6f6f6f` (5.0:1), same look; it is now a `<footer>` landmark; (3) **heading
-  order** — rail "Brief"/"The result" labels are `<p>`, Pulse hub/brief and task
-  column/month labels are `<h2>`. Result: 0 violations. Rule going forward: never
-  use `--aorms-orange` for text; never fade text with `opacity`.
-- **2026-10-01 (black chrome)** — shell header and side nav render in Carbon's `g100`
-  theme (`#161616`, = `--aorms-ink`) on every shell (Hub, Platform, portals); page
-  content stays white. Done by re-scoping theme tokens on `.cds--header` /
-  `.cds--side-nav`, so children adapt automatically.
-- **2026-10-01 (landing)** — public landing page (`app/page.tsx`) adopts the same
-  language via `.aorms-landing` (`globals.scss`): numbered section eyebrows
-  (`00 /`, `01 /` … by CSS counter), ink rules between sections, light headings,
-  flat ruled tiles, schedule-style tags, orange only on link hover. Content and
-  copy unchanged.
-- **2026-10-01 (toolbar)** — `ListToolbar` is now **one compact row** (Carbon `sm`
-  controls, hidden labels, sort options read "Sort: …", status/actions inline, view
-  switch right-aligned). **"The result" moved into the rail** under the Brief
-  (`<RailBrief result="…">`); on rail pages the header ends at the title so the
-  toolbar sits directly beneath it. Non-rail pages keep the result in the header.
-- **2026-10-01 (later)** — Pulse: *Active projects* removed; the live brief moved from the
-  heading into the rail below the numerals. **Rail Brief on every rail screen**;
-  Projects now uses the KPI rail. **One `ListToolbar`** (search + filters + sort + view)
-  on Projects and Tasks, and `TableToolbar` on 47 table screens.
-- **2026-10-01** — guide rewritten as the canonical `web/` UI/UX rulebook. Sheet
-  system, Instructions toggle, floating footer and `AuthHead` extended to all
-  portals and the sign-in family; Pulse heading now shows a live daily brief.
-- **2026-09-30** — Architectural presentation layer (tokens, schedule tables,
-  rail, hub, project cards/pins/images, task board rework, floating footer
-  replacing the bordered title block, Instructions toggle, Pulse rail on all KPI
-  screens). Exception to pure-Carbon recorded in `CLAUDE.md`.
-- **2026-09-14** — original shell/branding guide (header anatomy, watermark,
-  per-portal identity); superseded sections folded into §§ 2, 6.
+- **2026-10-02 (landing redesign, current hcworks.in)** — the public landing page
+  (`app/page.tsx`) follows the *current* hcworks.in (re-checked against the live site, not the
+  older accordion-strip layout): one full-viewport sheet at a time — write-up on the left, "The
+  result" plus a generated plan drawing (corner figure) on the right — with a fixed **right-hand
+  nameplate** on desktop (black CTA bar · big mono number · title · prev/next arrows · board
+  index · studio/contact block + footer links). Phones/tablets: black title bar (number | title |
+  mark) and a right-hand **number rail**. `components/aorms/landing/Artboards.tsx`; arrow keys,
+  Home/End and `#hash` links open boards (no scroll-wheel hijacking). Boards 00–10: Start ·
+  Problem · Pulse · Fees & Revisions · Project Record · Automation & ESTI · What it costs you ·
+  Your Data · Pricing · See it · Start. All boards are server-rendered (closed ones
+  `display:none` + `inert`). Copy reuses `marketing-content.ts`; orange only marks the active
+  board's number in the index.
