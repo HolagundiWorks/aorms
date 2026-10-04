@@ -7,6 +7,7 @@ import NextLink from "next/link";
 import { platformSignIn, signInWithGoogle, type PlatformActionState } from "../../../lib/actions/platform";
 import { offerToSaveCredentials } from "../../../lib/credential-store";
 import { AuthHead } from "../../../components/aorms/AuthHead";
+import { DEMO } from "../../../lib/marketing-content";
 import { TurnstileWidget } from "../../../components/aorms/security/TurnstileWidget";
 
 export default function PlatformLoginPage() {
@@ -60,6 +61,33 @@ export default function PlatformLoginPage() {
             </p>
           </Stack>
         </Form>
+          <div className="aorms-lp-result" aria-label="Demo credentials">
+            <p className="aorms-lp-result__label">Try the live demo</p>
+            <p className="cds--type-helper-text-01" style={{ marginBlock: "0.5rem", color: "var(--cds-text-secondary)" }}>
+              Read-only access to a sample studio — reset nightly.
+            </p>
+            <p className="cds--type-code-01">
+              {DEMO.email}
+              <br />
+              {DEMO.password}
+            </p>
+            <Button
+              type="button"
+              kind="tertiary"
+              size="sm"
+              style={{ marginBlockStart: "0.75rem" }}
+              onClick={() => {
+                const set = (id: string, v: string) => {
+                  const el = document.getElementById(id) as HTMLInputElement | null;
+                  if (el) el.value = v;
+                };
+                set("email", DEMO.email);
+                set("password", DEMO.password);
+              }}
+            >
+              Fill demo credentials
+            </Button>
+          </div>
           <dl className="aorms-login-foot">
             <div>
               <dt>System</dt>
