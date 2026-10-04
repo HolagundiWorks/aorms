@@ -7391,3 +7391,8 @@ write and admin rights. The five named staff logins `reset_demo_data()` / the la
 (aditi.rao, vikram.shah, akash.mehta, priya.nair, rohan.desai @aorms.in) do not exist, so both nightly jobs
 return early and the demo data is not being refreshed. The roster uses those emails, so provisioning also revives
 the nightly reset. Applying 0094 + running the script demotes `demo@aorms.in` to VIEWER.
+
+### 2026-10-04 — Portal nameplates removed (landing pages only)
+
+Direction: the right-hand side panel was meant for landing pages only. Removed from the Office Hub and all
+platform/portal shells; kept on the landing page and public content pages. Corner drawing in the Hub unchanged.

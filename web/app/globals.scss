@@ -2636,7 +2636,7 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
     margin-inline-end: 12.5rem;
   }
 
-  .aorms-corner {
+  body:has(.aorms-np) .aorms-corner {
     inset-inline-end: 14rem;
   }
 
