@@ -2864,3 +2864,38 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 .aorms-pub-link:focus-visible {
   border-block-end-color: var(--aorms-ink);
 }
+
+// Landing hero: the six things AORMS connects, as one mono line (2026-10-04).
+.aorms-lp-chips {
+  margin-block-start: 1.25rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+// The project spine: stages as a vertical, numbered schedule (2026-10-04).
+.aorms-lp-spine {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  max-inline-size: 28rem;
+  border-block-start: 2px solid var(--aorms-ink);
+}
+
+.aorms-lp-spine li {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.5rem 0;
+  border-block-end: 1px solid var(--aorms-rule);
+  font-size: 1.125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.aorms-lp-spine li span {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: var(--cds-text-secondary);
+}

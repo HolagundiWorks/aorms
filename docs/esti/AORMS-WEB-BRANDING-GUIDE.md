@@ -507,6 +507,12 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-04 (landing content: project spine)** — landing boards re-ordered around one project spine
+  (copy in `lib/marketing-spine.ts`): 00 Start · 01 Problem · 02 Spine · 03 Office mapped · 04 Project
+  page · 05 Project DNA · 06 Site · 07 Tender · 08 Accounts · 09 Knowledge · 10 ESTI · 11 Your data ·
+  12 Cost · 13 Pricing · 14 Demo · 15 Start. Layout unchanged. Old `#fee-recovery`, `#revision-management`,
+  `#project-record`, `#pulse` hashes alias to the new boards. Not claimed: local/on-prem install, tender
+  negotiation step, attendance-aware ESTI answers.
 - **2026-10-04 (public content pages)** — blog, ConnectDeX Partners and legal pages now share
   `components/aorms/PublicShell.tsx`: logo + mono link row (Partners · Blog · Privacy · Terms · Sign in)
   and the right-hand sheet nameplate (00 landing · P-01 · B-01/B-02 · L-01/L-02, prev/next). Eyebrows use
