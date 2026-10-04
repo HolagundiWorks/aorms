@@ -400,11 +400,9 @@ export default async function LandingPage() {
               <div className="aorms-lp-result">
                 <p className="aorms-lp-result__label">Demo credentials</p>
                 <p style={{ fontSize: "0.875rem", margin: "0.5rem 0", color: "var(--cds-text-secondary)" }}>
-                  Read-only access to a sample studio — clients, projects, tasks, invoices, billing forecasts and revisions, reset nightly.
+                  A sample studio, open at every level — Owner, Partner, Senior, Accountant, HR Manager, Associate, Viewer, and the Client, Consultant and Contractor portals. Pick one on the sign-in page; same password for all; reset nightly.
                 </p>
                 <p className="cds--type-code-01">
-                  {DEMO.email}
-                  <br />
                   {DEMO.password}
                 </p>
               </div>
