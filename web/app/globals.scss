@@ -2944,3 +2944,106 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
   color: var(--cds-text-secondary);
   font-size: 0.75rem;
 }
+
+// ── Landing: visual hierarchy pass (2026-10-04) ───────────────────────────────────────────
+// One loud thing per board (the headline), one supporting voice (the lede), then quiet,
+// consistently-labelled detail. Scale steps are deliberate: display ≫ lede > statement > body > label.
+.aorms-lp-display {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  max-inline-size: 18ch;
+  text-wrap: balance;
+}
+
+h1.aorms-lp-display {
+  font-size: clamp(2.75rem, 5.4vw, 5rem);
+  max-inline-size: 20ch;
+}
+
+.aorms-lp-eyebrow {
+  display: inline-block;
+  padding-block-start: 0.625rem;
+  border-block-start: 2px solid var(--aorms-ink);
+  margin-block-end: 1.75rem;
+  color: var(--aorms-ink);
+}
+
+.aorms-lp-lede {
+  margin-block-start: 1.5rem;
+  max-inline-size: 34rem;
+  font-size: clamp(1.0625rem, 1.4vw, 1.3125rem);
+  line-height: 1.4;
+  color: var(--cds-text-primary);
+}
+
+.aorms-lp-lede + .aorms-lp-lede {
+  margin-block-start: 0.75rem;
+  font-size: 1rem;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-lp-chips {
+  margin-block-start: 2rem;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+}
+
+.aorms-lp-sub {
+  margin-block: 2.75rem 0.75rem;
+  color: var(--aorms-ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.aorms-lp-card {
+  padding: 1rem 1.125rem 1.25rem;
+}
+
+.aorms-lp-card h3 {
+  font-size: 0.8125rem;
+}
+
+.aorms-lp-card p {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.aorms-lp-result {
+  border-block-start-width: 3px;
+}
+
+.aorms-lp-result .aorms-lp-result__statement {
+  margin-block: 0.5rem 0.75rem;
+  font-size: clamp(1.5rem, 2.2vw, 2.125rem);
+  font-weight: 300;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--cds-text-primary);
+}
+
+@media (min-width: 64rem) {
+  // Breathing room above the headline so the board is composed, not top-hugging.
+  .aorms-lp-grid {
+    padding-block-start: clamp(0rem, 9vh, 5.5rem);
+  }
+}
+
+.aorms-lp-np__num {
+  font-size: 5.5rem;
+  padding-block-start: 1.25rem;
+}
+
+.aorms-lp-np__title {
+  font-size: 1.5rem;
+  padding-block: 1rem;
+}
+
+.aorms-lp-lede + .aorms-lp-cards {
+  margin-block-start: 2rem;
+}
+
+// A `#hash` jump must not tuck the board's first line under the phone title bar.
+.aorms-lp-board {
+  scroll-margin-block-start: var(--bar-h, 3.5rem);
+}
