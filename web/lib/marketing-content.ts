@@ -79,19 +79,19 @@ export const DEMO = {
  */
 export const PRODUCT_SCREENSHOTS = [
   {
-    src: "/screenshots/pulse-dashboard.png",
-    alt: "AORMS Pulse dashboard showing today's brief, next-up tasks, and office KPIs",
-    caption: "Pulse — the daily brief, written from real project data",
+    src: "/screenshots/pulse-2026-10.png",
+    alt: "AORMS Pulse: rail of large KPI numerals, today's brief, KPI tiles with alert lines and the Next-up task list",
+    caption: "Pulse — the daily brief, written from your own project data",
   },
   {
-    src: "/screenshots/tasks-board.png",
-    alt: "AORMS office-wide task list with status, priority, and Pulse escalation columns",
-    caption: "Tasks — one office-wide list, not a chat thread",
+    src: "/screenshots/projects-2026-10.png",
+    alt: "AORMS Projects as cards: a generated plan drawing, reference, status and progress for each project",
+    caption: "Projects — every project as a card, one record each",
   },
   {
-    src: "/screenshots/projects-list.png",
-    alt: "AORMS projects list showing every practice's projects with client, type, and status",
-    caption: "Projects — every practice's projects, one table",
+    src: "/screenshots/invoices-2026-10.png",
+    alt: "AORMS Invoices: KPI rail (total, invoiced, outstanding, paid) beside the GST invoice table",
+    caption: "Invoices — GST, TDS and what is outstanding, in one table",
   },
 ] as const;
 

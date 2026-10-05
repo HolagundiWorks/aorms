@@ -107,11 +107,11 @@ export const SPINE_SAMPLE = {
   phases: ["Concept", "Schematic", "Design", "Tender", "Build", "Handover"],
   currentPhase: 2,
   stats: [
-    { value: 16, label: "Total projects" },
+    { value: 18, label: "Projects" },
     { value: 9, label: "Active", active: true },
-    { value: 2, label: "Enquiries" },
+    { value: 4, label: "Enquiries" },
   ],
-  caption: "Sample practice — the same components you see inside AORMS. Open the live demo to click through.",
+  caption: "Snapshot of the read-only demo practice (5 October 2026) — open the live demo to click through.",
 } as const;
 
 export const SPINE_SEO = {

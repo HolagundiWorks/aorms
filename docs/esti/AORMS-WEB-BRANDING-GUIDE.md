@@ -507,6 +507,13 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-05 (landing: portal snapshots and KPIs refreshed)** — landing visuals now track the current portal. New
+  snapshots captured from the live demo practice (signed in as the demo Owner): Pulse, Projects (cards) and
+  Invoices, cropped to the KPI rail + content, versioned filenames `*-2026-10.png` (old Sept shots and the Tasks
+  shot removed — it showed QA test rows). `TodaysBriefingPanel` is rebuilt from the portal's own `BigStat` rail and
+  `KpiTile` (severity stripe, movement vs yesterday) with the demo's Pulse figures; the Project board's counts
+  are 18 / 9 / 4. Placement: Project → Projects snapshot · Office → Pulse KPI panel + Invoices snapshot ·
+  Workflow → billing forecast · Memory → Pulse snapshot.
 - **2026-10-04 (landing: visual hierarchy)** — one loud thing per board: the headline scales to 4.5rem
   (hero 5rem), the first lede steps up to ~1.3rem in primary ink, "The result" statement becomes the right
   column's headline (~2rem light), eyebrows get a 2px ink rule, sub-labels move to ink, cards get more room, and
