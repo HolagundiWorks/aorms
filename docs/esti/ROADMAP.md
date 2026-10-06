@@ -7314,7 +7314,7 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 **P3 — optimisation**
 - [ ] Cache `plan_pricing`/categories — deferred: only the (already dynamic) landing page reads it uncached and payments must read live prices, so the win is small
 - [x] Performance advisors acted on (0044, applied): 25 RLS policies `auth.uid()` → `(select auth.uid())`, 26 FK/created_at indexes · [ ] 113 `multiple_permissive_policies` (needs per-table semantic review) · [ ] column-minimal selects
-- [ ] SQL views for admin aggregates
+- [x] SQL aggregates for admin analytics: `public.admin_analytics(p_since)` (platform migration 0052, applied, service-role only) replaces pulling whole tables into Node on `/admin/analytics`; verified against the live data. Other admin list pages already page + aggregate only for the visible page
 - [ ] Per-route client JS review; Razorpay/Turnstile already `afterInteractive`; `lazyOnload` would risk a payment click or form submit racing the script, so intentionally unchanged
 
 

@@ -19,34 +19,33 @@ export default async function AdminAnalyticsPage() {
   if (!isSuperAdmin(account)) return <AdminAccessDenied title="Analytics" />;
 
   const svc = createPlatformServiceRoleClient();
-  const cx = svc.schema("connectdex");
   const since = new Date();
   since.setUTCMonth(since.getUTCMonth() - 11, 1);
   since.setUTCHours(0, 0, 0, 0);
 
-  const count = async (q: PromiseLike<{ count: number | null }>) => (await q).count ?? 0;
-  const [studios, accounts, licences, payments, identityPay, cxPay, apps, companies, tickets, quotes] = await Promise.all([
-    count(svc.from("studios").select("id", { count: "exact", head: true })),
-    count(svc.from("accounts").select("id", { count: "exact", head: true })),
-    svc.from("licences").select("plan"),
-    svc.from("payments").select("amount_paise, created_at").eq("status", "CAPTURED").gte("created_at", since.toISOString()),
-    svc.from("identity_payments").select("amount_paise, created_at").eq("status", "CAPTURED").gte("created_at", since.toISOString()),
-    cx.from("connectdex_payments").select("amount_paise, created_at").eq("status", "CAPTURED").gte("created_at", since.toISOString()),
-    cx.from("connectdex_applications").select("status"),
-    cx.from("companies").select("status, tier"),
-    svc.from("support_tickets").select("status, created_at").in("status", ["OPEN", "IN_PROGRESS"]),
-    count(cx.from("quote_requests").select("id", { count: "exact", head: true })),
-  ]);
-
-  const tally = <T,>(rows: T[] | null, key: (r: T) => string) => {
-    const m = new Map<string, number>();
-    for (const r of rows ?? []) m.set(key(r), (m.get(key(r)) ?? 0) + 1);
-    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  // All aggregation happens in SQL (platform migration 0052, `public.admin_analytics`) — one
+  // round trip returning counts/sums instead of whole tables pulled into Node.
+  type Tally = { k: string; n: number }[];
+  type Analytics = {
+    studios: number;
+    accounts: number;
+    quotes: number;
+    plan_mix: Tally;
+    app_funnel: Tally;
+    company_status: Tally;
+    tier_mix: Tally;
+    revenue: { m: string; src: "licence" | "identity" | "connectdex"; paise: number }[];
+    ticket_age: { lt1: number; d1_3: number; d3_7: number; gt7: number };
   };
-  const planMix = tally(licences.data, (l) => l.plan);
-  const appFunnel = tally(apps.data, (a) => a.status);
-  const companyStatus = tally(companies.data, (c) => c.status);
-  const tierMix = tally(companies.data, (c) => c.tier ?? "—");
+  const { data, error } = await svc.rpc("admin_analytics", { p_since: since.toISOString() });
+  if (error) throw new Error(error.message);
+  const a = data as Analytics;
+  const { studios, accounts, quotes } = a;
+  const toRows = (t: Tally): [string, number][] => t.map((r) => [r.k, Number(r.n)]);
+  const planMix = toRows(a.plan_mix);
+  const appFunnel = toRows(a.app_funnel);
+  const companyStatus = toRows(a.company_status);
+  const tierMix = toRows(a.tier_mix);
 
   // Revenue by month (captured payments across Studio licences, Identity and ConnectDeX fees).
   const months: string[] = [];
@@ -55,25 +54,15 @@ export default async function AdminAnalyticsPage() {
     months.push(d.toISOString().slice(0, 7));
   }
   const rev = new Map(months.map((m) => [m, { licence: 0, identity: 0, connectdex: 0 }]));
-  const add = (rows: { amount_paise: number; created_at: string }[] | null, k: "licence" | "identity" | "connectdex") => {
-    for (const r of rows ?? []) {
-      const b = rev.get(r.created_at.slice(0, 7));
-      if (b) b[k] += r.amount_paise;
-    }
-  };
-  add(payments.data, "licence");
-  add(identityPay.data, "identity");
-  add(cxPay.data, "connectdex");
+  for (const r of a.revenue) {
+    const bucket = rev.get(r.m);
+    if (bucket) bucket[r.src] += Number(r.paise);
+  }
   const total12 = [...rev.values()].reduce((s, b) => s + b.licence + b.identity + b.connectdex, 0);
 
-  const now = Date.now();
-  const age = { "< 1 day": 0, "1–3 days": 0, "3–7 days": 0, "> 7 days": 0 };
-  for (const t of tickets.data ?? []) {
-    const days = (now - new Date(t.created_at).getTime()) / 86_400_000;
-    age[days < 1 ? "< 1 day" : days < 3 ? "1–3 days" : days < 7 ? "3–7 days" : "> 7 days"]++;
-  }
+  const age = { "< 1 day": a.ticket_age.lt1, "1–3 days": a.ticket_age.d1_3, "3–7 days": a.ticket_age.d3_7, "> 7 days": a.ticket_age.gt7 };
 
-  const paidLicences = (licences.data ?? []).filter((l) => l.plan !== "FREE").length;
+  const paidLicences = planMix.filter(([plan]) => plan !== "FREE").reduce((n, [, c]) => n + c, 0);
   const simple = (rows: [string, number][], label: string) => (
     <Table aria-label={label} className="aorms-table-spaced" size="sm">
       <TableHead>
