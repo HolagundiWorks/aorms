@@ -3052,3 +3052,23 @@ h1.aorms-lp-display {
     font-size: 0.875rem;
   }
 }
+
+// Landing's live Projects gallery: small 3-up tiles beside the copy (hover reveals the name, as in the portal).
+@media (min-width: 40rem) {
+  .aorms-lp-live-gallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.aorms-lp-live-gallery .aorms-pcard__veil {
+  padding: 0.5rem;
+  gap: 0.125rem;
+}
+
+.aorms-lp-live-gallery .aorms-pcard__name {
+  font-size: 0.8125rem;
+}
+
+.aorms-lp-live-gallery .aorms-pcard__meta {
+  font-size: 0.625rem;
+}

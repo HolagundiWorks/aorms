@@ -507,6 +507,13 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-06 (landing: live components, not snapshots)** — the landing page no longer uses screenshots. Boards
+  render the portal's own components with dummy data and count the numbers up when first shown
+  (`AnimatedNumber`; `BigStat`/`KpiTile` gained an `animate` prop): Pulse KPI panel (`TodaysBriefingPanel`),
+  `landing/LiveProjects` (the placeholder gallery), `landing/LiveInvoices` (KPI rail + Carbon table, rail computed
+  from the rows), `landing/LiveBrief` (daily brief + Next up). `public/screenshots` and `PRODUCT_SCREENSHOTS`
+  removed. Fix: `AnimatedNumber` could show negative values on its first frame (rAF timestamp before the start
+  time); progress is now clamped at 0.
 - **2026-10-06 (project gallery + placeholder images)** — in the Office Hub, a project without a cover image now
   shows one of twelve architectural placeholder illustrations (`public/placeholders/project-1…12.svg`, picked from
   the ref's running number via `lib/projects/placeholder.ts`) instead of the generated plot/plan drawing; real covers

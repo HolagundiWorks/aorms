@@ -59,7 +59,7 @@ export function AnimatedNumber({
         observer.disconnect();
         const start = performance.now();
         const tick = (now: number) => {
-          const progress = Math.min(1, (now - start) / duration);
+          const progress = Math.min(1, Math.max(0, (now - start) / duration)); // rAF timestamps can precede `start`
           // ease-out-cubic
           const eased = 1 - Math.pow(1 - progress, 3);
           setDisplay(value * eased);

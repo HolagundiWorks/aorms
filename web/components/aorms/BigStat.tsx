@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AnimatedNumber } from "./AnimatedNumber";
 
 /**
  * Large-numeral KPI — the "Architectural Operating System" counterpart to
@@ -13,15 +14,18 @@ export function BigStat({
   label,
   active,
   href,
+  animate,
 }: {
   value: string | number;
   label: string;
   active?: boolean;
   href?: string;
+  /** Count up when scrolled into view (landing page demos only; a numeric `value` is required). */
+  animate?: "plain" | "inr";
 }) {
   const body = (
     <div className={`aorms-bigstat${active ? " aorms-bigstat--active" : ""}${String(value).length > 7 ? " aorms-bigstat--wide" : ""}`}>
-      <span className="aorms-bigstat__value">{value}</span>
+      <span className="aorms-bigstat__value">{animate && typeof value === "number" ? <AnimatedNumber value={value} kind={animate} /> : value}</span>
       <span className="aorms-bigstat__label">{label}</span>
     </div>
   );

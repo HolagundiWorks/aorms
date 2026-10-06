@@ -3,7 +3,7 @@ import { BigStat } from "./BigStat";
 import { KpiTile } from "./KpiTile";
 
 /**
- * Landing visual for Pulse — rebuilt (2026-10-05) from the portal's own components so it matches what a
+ * Landing visual for Pulse — rebuilt (2026-10-05; numbers count up when scrolled into view, 2026-10-06) from the portal's own components so it matches what a
  * signed-in practice actually sees: the left rail of large numerals (BigStat, two-up), the "ready to bill"
  * figure, the written brief, and the Pulse tab's KPI tiles (KpiTile — severity stripe, icon, movement vs
  * yesterday). Figures mirror the read-only demo practice's Pulse on the day this was captured; they are
@@ -30,10 +30,10 @@ export function TodaysBriefingPanel() {
 
       <div style={{ padding: "1.25rem", display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "1rem 1.5rem" }}>
         {RAIL.map((s) => (
-          <BigStat key={s.label} value={s.value} label={s.label} active={"active" in s ? s.active : undefined} />
+          <BigStat key={s.label} value={s.value} label={s.label} active={"active" in s ? s.active : undefined} animate="plain" />
         ))}
         <div style={{ gridColumn: "1 / -1" }}>
-          <BigStat value="₹7,14,800" label="Ready to bill" />
+          <BigStat value={714800} label="Ready to bill" animate="inr" />
         </div>
       </div>
 
@@ -42,10 +42,10 @@ export function TodaysBriefingPanel() {
       </p>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", padding: "0 1.25rem 1.25rem" }}>
-        <KpiTile label="Critical" value={4} status="CRITICAL" icon={ErrorFilled} trend={{ direction: "up", value: "1", label: "vs yesterday", impact: "negative" }} />
-        <KpiTile label="Blocked tasks" value={2} status="NEEDS_INTERVENTION" icon={UnlockedFilled} trend={{ direction: "flat", value: "0", label: "vs yesterday", impact: "neutral" }} />
-        <KpiTile label="Projects at risk" value={6} status="CRITICAL" icon={WarningAltFilled} />
-        <KpiTile label="Open revisions" value={2} status="WATCH" icon={Renew} />
+        <KpiTile animate label="Critical" value={4} status="CRITICAL" icon={ErrorFilled} trend={{ direction: "up", value: "1", label: "vs yesterday", impact: "negative" }} />
+        <KpiTile animate label="Blocked tasks" value={2} status="NEEDS_INTERVENTION" icon={UnlockedFilled} trend={{ direction: "flat", value: "0", label: "vs yesterday", impact: "neutral" }} />
+        <KpiTile animate label="Projects at risk" value={6} status="CRITICAL" icon={WarningAltFilled} />
+        <KpiTile animate label="Open revisions" value={2} status="WATCH" icon={Renew} />
       </div>
     </div>
   );

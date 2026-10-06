@@ -111,7 +111,7 @@ export const SPINE_SAMPLE = {
     { value: 9, label: "Active", active: true },
     { value: 4, label: "Enquiries" },
   ],
-  caption: "Snapshot of the read-only demo practice (5 October 2026) — open the live demo to click through.",
+  caption: "Sample data — the same components you see inside AORMS. Open the live demo to click through.",
 } as const;
 
 export const SPINE_SEO = {
