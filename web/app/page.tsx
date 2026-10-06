@@ -11,6 +11,7 @@ import { BillingForecastPanel } from "../components/aorms/BillingForecastPanel";
 import { TodaysBriefingPanel } from "../components/aorms/TodaysBriefingPanel";
 import { PlanGlyph } from "../components/aorms/PlanGlyph";
 import { BigStat } from "../components/aorms/BigStat";
+import Image from "next/image";
 import { PhaseStrip } from "../components/aorms/PhaseStrip";
 import { ProjectCard } from "../components/aorms/ProjectCard";
 import { OperationalLeakageCalculator } from "../components/aorms/landing/OperationalLeakageCalculator";
@@ -21,6 +22,7 @@ import {
   DEMO,
   FAQ,
   HUMAN_CENTRIC_WORKS,
+  PRODUCT_SCREENSHOTS,
   PRICING,
 } from "../lib/marketing-content";
 import {
@@ -198,6 +200,16 @@ function Result({ statement, text }: { statement: string; text: string }) {
   );
 }
 
+function Shot({ i }: { i: number }) {
+  const shot = PRODUCT_SCREENSHOTS[i]!;
+  return (
+    <figure className="aorms-lp-shot">
+      <Image src={shot.src} alt={shot.alt} width={900} height={shot.src.includes("pulse") ? 440 : shot.src.includes("projects") ? 560 : 470} sizes="(max-width: 1056px) 100vw, 34vw" />
+      <figcaption>{shot.caption}</figcaption>
+    </figure>
+  );
+}
+
 const Sub = ({ children }: { children: React.ReactNode }) => <p className="aorms-lp-sub">{children}</p>;
 
 export default async function LandingPage() {
@@ -280,7 +292,7 @@ export default async function LandingPage() {
                   <BigStat key={st.label} value={st.value} label={st.label} active={"active" in st ? st.active : undefined} />
                 ))}
               </div>
-              <ProjectCard p={SPINE_SAMPLE.project} href={null} />
+              <Shot i={1} />
               <p className="cds--type-helper-text-01" style={{ marginBlockStart: "0.5rem", color: "var(--cds-text-secondary)" }}>
                 {SPINE_SAMPLE.caption}
               </p>
@@ -317,7 +329,8 @@ export default async function LandingPage() {
           side={
             <>
               <Result statement={SPINE_OFFICE.foot} text="Six parts of the practice, one project record underneath them." />
-              <BillingForecastPanel />
+              <TodaysBriefingPanel />
+              <Shot i={2} />
             </>
           }
         >
@@ -336,7 +349,12 @@ export default async function LandingPage() {
         <Sheet
           eyebrow="The workflow"
           display={SPINE_WORKFLOW.display}
-          side={<Result statement="Information that moves." text="What is captured on site or in a meeting becomes a task, a record and, in time, knowledge — without being re-typed." />}
+          side={
+            <>
+              <Result statement="Information that moves." text="What is captured on site or in a meeting becomes a task, a record and, in time, knowledge — without being re-typed."  />
+              <BillingForecastPanel />
+            </>
+          }
           corner={{ seed: "routine", builtUpSqm: 640, siteSqm: 900, floors: 3 }}
         >
           <ol className="aorms-lp-spine aorms-lp-spine--flow" aria-label="From information to action">
@@ -369,7 +387,7 @@ export default async function LandingPage() {
           side={
             <>
               <Result statement="Ask the project." text={SPINE_MEMORY.esti} />
-              <TodaysBriefingPanel />
+              <Shot i={0} />
             </>
           }
         >

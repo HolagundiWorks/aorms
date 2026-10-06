@@ -7404,3 +7404,9 @@ demo password was exposed in chat during provisioning only in the sense that it 
 
 Direction: the right-hand side panel was meant for landing pages only. Removed from the Office Hub and all
 platform/portal shells; kept on the landing page and public content pages. Corner drawing in the Hub unchanged.
+
+### 2026-10-05 — Landing: portal snapshots and KPIs refreshed
+
+Fresh snapshots (Pulse, Projects, Invoices) from the live demo; Pulse KPI panel rebuilt from `BigStat`/`KpiTile`;
+sample counts updated to the demo practice (18 projects / 9 active / 4 enquiries). Re-capture when the portal UI
+changes: sign in as a demo Owner at identity.aorms.in and clip each page (see branding guide §15).
