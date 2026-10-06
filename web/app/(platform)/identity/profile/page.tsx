@@ -3,6 +3,8 @@ import { Column, Grid, Stack, Tag, Tile } from "@carbon/react";
 import { createClient as createPlatformClient } from "../../../../lib/platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../../lib/platform/service";
 import { getSignedFileUrl, getWorkHistory } from "../../../../lib/actions/account-profile";
+import { isIdentityVerified } from "../../../../lib/platform/identity-verified";
+import { PublicProfileToggle } from "../../../../components/aorms/platform/PublicProfileToggle";
 import { AccountProfileForm } from "../../../../components/aorms/platform/AccountProfileForm";
 import { AccountPhotoUpload } from "../../../../components/aorms/platform/AccountPhotoUpload";
 import { AddCertificateForm } from "../../../../components/aorms/platform/AddCertificateForm";
@@ -66,7 +68,7 @@ export default async function IdentityProfilePage() {
   const [{ data: profileDetails }, { data: certificateRows }, workHistory] = await Promise.all([
     platformService
       .from("account_profile_details")
-      .select("nickname, degree, qualification, coa_number, additional_qualifications, photo_key")
+      .select("nickname, degree, qualification, coa_number, additional_qualifications, photo_key, public_profile")
       .eq("account_id", account.id)
       .maybeSingle(),
     platformService
@@ -121,6 +123,15 @@ export default async function IdentityProfilePage() {
               </h2>
               <Tile>
                 <AccountPhotoUpload photoUrl={photoUrl} />
+              </Tile>
+            </div>
+
+            <div>
+              <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+                Public profile
+              </h2>
+              <Tile>
+                <PublicProfileToggle handle={account.public_id} enabled={profileDetails?.public_profile ?? false} verified={await isIdentityVerified(account.id)} />
               </Tile>
             </div>
 

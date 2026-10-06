@@ -28,7 +28,7 @@ export const PORTAL_HOME: Record<PortalKey, string> = {
  * prefixes across portals never overlap.
  */
 export const PORTAL_OWNED_PREFIXES: Record<PortalKey, string[]> = {
-  identity: ["/identity", "/studios", "/licences"],
+  identity: ["/identity", "/studios", "/licences", "/p"],
   connectdex: ["/connectdex", "/connectdex-apply", "/companies", "/materials"],
   sysdex: ["/admin"],
 };

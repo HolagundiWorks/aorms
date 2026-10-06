@@ -39,6 +39,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
+import { isIdentityVerified } from "../platform/identity-verified";
 import { getFirmRoleForStudio } from "../platform/firm-studio";
 import { matchesClaimedType } from "../security/file-signature";
 import { toSafeErrorMessage } from "../security/safe-error";
@@ -237,6 +238,24 @@ export type WorkHistoryEntry = {
   endedAt: string | null;
   isCurrent: boolean;
 };
+
+/**
+ * Opt in/out of the public verified profile at /p/<AORMS-U-id>. Turning it ON requires a
+ * verified Identity; turning it OFF is always allowed. The public page re-checks both.
+ */
+export async function setPublicProfile(formData: FormData): Promise<void> {
+  const gate = await requireAccountId();
+  if ("error" in gate) return;
+  const enable = String(formData.get("enable") ?? "") === "1";
+  if (enable && !(await isIdentityVerified(gate.accountId))) return;
+
+  const platformService = createPlatformServiceRoleClient();
+  const { error } = await platformService
+    .from("account_profile_details")
+    .upsert({ account_id: gate.accountId, public_profile: enable, updated_at: new Date().toISOString() }, { onConflict: "account_id" });
+  if (error) throw new Error(toSafeErrorMessage(error));
+  revalidatePath("/identity/profile");
+}
 
 /**
  * "Auto generated based on company usage" — every field here comes

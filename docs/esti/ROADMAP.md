@@ -7305,7 +7305,7 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 - [x] HelpDeX replies: staff "Send reply" on each ticket; reply always stored (`support_ticket_replies`, 0048), emailed via `lib/email/send.ts` (nodemailer) when `SMTP_*` is set; UI states plainly when it was NOT emailed. Inbound email replies are not handled.
 - [x] ConnectDeX differentiator #1: Studio "Request quote" on every Materials product → supplier inbox at `/connectdex/quotes` with reply/close (`connectdex.quote_requests`, 0047, applied; RLS + column-level UPDATE grant; insert + log trigger verified in a rolled-back block). Notifications need `SMTP_*` (see mailer item); without it suppliers must visit the inbox. [x] email notifications (best-effort via the SMTP mailer): supplier owner on a new request, requester on a reply — silent no-op without `SMTP_*`
 - [x] Studio↔Company: save vendors (`connectdex.saved_vendors`, platform migration 0051 applied; Save/Saved toggle + "Saved vendors" list on `/materials`; own-rows RLS, inserts via Server Action) · [ ] attach product to a Hub spec sheet (crosses the Hub/Platform project boundary — needs a design decision)
-- [ ] Public verified-profile page + CV PDF export
+- [x] Public verified-profile page `/p/<AORMS-U-id>` (identity portal; platform migration 0053 applied — `account_profile_details.public_profile`, default off). Opt-in toggle on `/identity/profile`; enabling needs a verified Identity and the page re-checks both every request (else 404). Shows name, photo, COA, qualifications, certificate titles, Studio history — no files/contact. `noindex` by default. CV PDF = browser print of the existing `/identity/profile/resume`. Not render-tested in a browser from this session
 - [x] Studio owners: "Recent activity" (last 20 events, type + time only) on `/studios/[studioId]` · [x] same for Company owners
 - [ ] Enterprise `<slug>.aorms.in` routing
 - [x] SysDeX analytics at `/admin/analytics` (SUPER_ADMIN): studios/accounts/paid licences/12-month captured revenue by source and month, plan mix, ConnectDeX application funnel, company status/tier, open-ticket age, quote count. Counts of real rows only — **no modelled MRR/churn** (licences are one-time annual orders)
@@ -7317,6 +7317,10 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 - [x] SQL aggregates for admin analytics: `public.admin_analytics(p_since)` (platform migration 0052, applied, service-role only) replaces pulling whole tables into Node on `/admin/analytics`; verified against the live data. Other admin list pages already page + aggregate only for the visible page
 - [ ] Per-route client JS review; Razorpay/Turnstile already `afterInteractive`; `lazyOnload` would risk a payment click or form submit racing the script, so intentionally unchanged
 
+
+### Security audit — 2026-10-06
+
+Report: [SECURITY-AUDIT-2026-10-06.md](SECURITY-AUDIT-2026-10-06.md). Fixed: `next_ref`/`emit_event` open to portal roles (web migration 0095, applied), `sharp` advisory. Open: enable leaked-password protection on both Supabase projects (dashboard).
 
 ### Security audit — all portals (2026-10-02)
 
