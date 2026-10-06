@@ -7410,3 +7410,9 @@ platform/portal shells; kept on the landing page and public content pages. Corne
 Fresh snapshots (Pulse, Projects, Invoices) from the live demo; Pulse KPI panel rebuilt from `BigStat`/`KpiTile`;
 sample counts updated to the demo practice (18 projects / 9 active / 4 enquiries). Re-capture when the portal UI
 changes: sign in as a demo Owner at identity.aorms.in and clip each page (see branding guide §15).
+
+### 2026-10-06 — Project gallery with placeholder images
+
+Projects card view is now an image-only gallery; projects without a cover get an architectural placeholder
+illustration instead of the generated plot drawing (see branding guide §15). Placeholders are generated
+illustrations, not photographs — replace by uploading a cover image on the project page.

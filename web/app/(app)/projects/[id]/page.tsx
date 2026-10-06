@@ -18,7 +18,7 @@ import { ActivationGate } from "../../../../components/aorms/ActivationGate";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../../components/aorms/ContextPanel";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { KpiTile } from "../../../../components/aorms/KpiTile";
-import { PlanGlyph } from "../../../../components/aorms/PlanGlyph";
+import { placeholderFor } from "../../../../lib/projects/placeholder";
 import { PhaseStrip } from "../../../../components/aorms/PhaseStrip";
 import Link from "next/link";
 import { CoverImageControl } from "../../../../components/aorms/CoverImageControl";
@@ -191,15 +191,11 @@ export default async function ProjectDetailPage({
 
             <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 20rem) minmax(0, 1fr)", gap: "2rem", marginBottom: "0.5rem" }} className="aorms-hub-head">
               <div style={{ color: "var(--aorms-ink)" }}>
-                {coverUrl ? (
-                  <div className="aorms-pcard__media" style={{ maxInlineSize: "20rem" }}>
-                    {/* Signed Supabase URL — plain <img>, not next/image. */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={coverUrl} alt={`${project.title} cover`} />
-                  </div>
-                ) : (
-                  <PlanGlyph seed={project.ref} builtUpSqm={project.built_up_area_sqm} siteSqm={project.site_area_sqm} floors={project.floor_count} height={140} />
-                )}
+                <div className="aorms-pcard__media" style={{ maxInlineSize: "20rem" }}>
+                  {/* Signed Supabase URL or static placeholder — plain <img>, not next/image. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={coverUrl ?? placeholderFor(project.ref)} alt={coverUrl ? `${project.title} cover` : ""} />
+                </div>
                 {canEditCover && <CoverImageControl projectId={project.id} hasCover={!!project.cover_image_key} />}
               </div>
               <div className="aorms-facts" style={{ alignSelf: "end" }}>

@@ -507,6 +507,13 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-06 (project gallery + placeholder images)** — in the Office Hub, a project without a cover image now
+  shows one of twelve architectural placeholder illustrations (`public/placeholders/project-1…12.svg`, picked from
+  the ref's running number via `lib/projects/placeholder.ts`) instead of the generated plot/plan drawing; real covers
+  still win. The Projects card view is a gallery: tight 0.5rem gutters, 4:3 tiles, **no caption under the image** —
+  name, ref, status, progress and client appear over the image on hover/focus (always on touch), and the link's
+  accessible name carries title, ref and status. Lines view thumbnails and the project page cover use the same
+  placeholders; phones get a two-up gallery. `PlanGlyph` remains on the landing page and the corner figure.
 - **2026-10-05 (landing: portal snapshots and KPIs refreshed)** — landing visuals now track the current portal. New
   snapshots captured from the live demo practice (signed in as the demo Owner): Pulse, Projects (cards) and
   Invoices, cropped to the KPI rail + content, versioned filenames `*-2026-10.png` (old Sept shots and the Tasks
