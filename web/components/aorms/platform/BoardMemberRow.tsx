@@ -3,7 +3,8 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button, Form, InlineNotification, Stack, TableCell, TableRow, TextInput } from "@carbon/react";
 import { Edit } from "@carbon/icons-react";
-import { updateStudioBoardMember, type PlatformActionState } from "../../../lib/actions/platform";
+import { updateStudioBoardMember } from "../../../lib/actions/platform-studio";
+import { type PlatformActionState } from "../../../lib/actions/platform-types";
 import { RemoveBoardMemberButton } from "./RemoveBoardMemberButton";
 
 export type BoardMember = {

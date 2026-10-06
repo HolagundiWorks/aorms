@@ -31,7 +31,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../platform/service";
-import type { PlatformActionState } from "./platform";
+import type { PlatformActionState } from "./platform-types";
 import { toSafeErrorMessage } from "../security/safe-error";
 
 // Instant self-serve company creation (createCompany) was removed here

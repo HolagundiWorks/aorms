@@ -7292,10 +7292,10 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 - [x] Default-privileges migration 0041 — applied live to `aorms-platform` 2026-10-01, `pg_default_acl` verified (postgres/public + connectdex no longer grant to PUBLIC/anon/authenticated)
 
 **P1 — correctness and scale**
-- [x] Materials: escape, bound, page · [x] `pg_trgm` + category indexes (0043, applied) · [ ] SQL-side nearest-first ranking
-- [x] SysDeX Logs/Payments paged · [x] Users (Identity accounts) paged + server search · [x] Studios/Companies/Licences paged (50/page; aggregates only for the page) · [ ] Helpdesk paged · [ ] server search on those lists
+- [x] Materials: escape, bound, page · [x] `pg_trgm` + category indexes (0043, applied) · [x] SQL-side nearest-first ranking (`connectdex.search_products` RPC, platform migration 0050, applied)
+- [x] SysDeX Logs/Payments paged · [x] Users (Identity accounts) paged + server search · [x] Studios/Companies/Licences paged (50/page; aggregates only for the page) · [x] Helpdesk paged · [x] server search on those lists (Helpdesk: subject/name/email + status filter)
 - [x] Shared rate-limit store: `public.rate_limit_buckets` + `rate_limit_hit()` (0045, applied, live-tested in a rolled-back block); `checkRateLimitShared` used by all 4 auth callers, falls back to in-memory if the store is unreachable
-- [ ] Split `lib/actions/platform.ts` (1,183 lines) by domain; test that every action gates
+- [x] Split `lib/actions/platform.ts` into `platform-auth` / `-studio` / `-usage` / `-admin` / `-types`; the admin-gate test scans every `lib/actions` file
 - [ ] Collapse sequential service-role waterfalls (identity / materials / studio pages)
 - [x] Error reporting: `instrumentation.ts` `onRequestError` + `lib/observability.ts` (structured JSON to stderr; optional `ALERT_WEBHOOK_URL` Slack-style alert). No vendor SDK — swap for Sentry if a DSN appears. **Money-path fixes found while wiring this:** (a) the Razorpay webhook wrote its dedup row *before* processing, so a processing failure turned Razorpay's retry into a dropped "replay" — now wrapped, dedup row removed on failure, 500 + alert; (b) the three `applyCaptured*` functions marked the payment CAPTURED first and ignored entitlement-update errors (a paid licence could stay unextended with the payment "done") — now claim-then-apply, release the claim and throw on failure; client fast-paths catch and report. 4 new unit tests (fake Supabase)
 - [x] Unit tests for `web/` (vitest, `npm test`, in CI): Razorpay HMAC verification, portal routing table, rate limiter, pager helpers — 15 tests · [x] auth-gate test (every exported `admin*` Server Action must call an admin gate — structural, fails CI if one is added without) and licence/identity payment-application tests (38 tests total) · [ ] e2e
@@ -7306,7 +7306,7 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 - [x] ConnectDeX differentiator #1: Studio "Request quote" on every Materials product → supplier inbox at `/connectdex/quotes` with reply/close (`connectdex.quote_requests`, 0047, applied; RLS + column-level UPDATE grant; insert + log trigger verified in a rolled-back block). Notifications need `SMTP_*` (see mailer item); without it suppliers must visit the inbox. [x] email notifications (best-effort via the SMTP mailer): supplier owner on a new request, requester on a reply — silent no-op without `SMTP_*`
 - [ ] Studio↔Company: save vendors, attach product to a Hub spec sheet
 - [ ] Public verified-profile page + CV PDF export
-- [x] Studio owners: "Recent activity" (last 20 events, type + time only) on `/studios/[studioId]` · [ ] same for Company owners
+- [x] Studio owners: "Recent activity" (last 20 events, type + time only) on `/studios/[studioId]` · [x] same for Company owners
 - [ ] Enterprise `<slug>.aorms.in` routing
 - [x] SysDeX analytics at `/admin/analytics` (SUPER_ADMIN): studios/accounts/paid licences/12-month captured revenue by source and month, plan mix, ConnectDeX application funnel, company status/tier, open-ticket age, quote count. Counts of real rows only — **no modelled MRR/churn** (licences are one-time annual orders)
 - [ ] Read-only, logged support impersonation
@@ -7315,7 +7315,7 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 - [ ] Cache `plan_pricing`/categories — deferred: only the (already dynamic) landing page reads it uncached and payments must read live prices, so the win is small
 - [x] Performance advisors acted on (0044, applied): 25 RLS policies `auth.uid()` → `(select auth.uid())`, 26 FK/created_at indexes · [ ] 113 `multiple_permissive_policies` (needs per-table semantic review) · [ ] column-minimal selects
 - [ ] SQL views for admin aggregates
-- [ ] Per-route client JS review; lazy-load Razorpay/Turnstile
+- [ ] Per-route client JS review; Razorpay/Turnstile already `afterInteractive`; `lazyOnload` would risk a payment click or form submit racing the script, so intentionally unchanged
 
 
 ### Security audit — all portals (2026-10-02)

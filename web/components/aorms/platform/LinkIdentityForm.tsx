@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { Link } from "@carbon/icons-react";
-import { linkPlatformIdentity, type PlatformActionState } from "../../../lib/actions/platform";
+import { linkPlatformIdentity } from "../../../lib/actions/platform-auth";
+import { type PlatformActionState } from "../../../lib/actions/platform-types";
 
 /**
  * `knownHandle` is set when the visitor already has an active AORMS

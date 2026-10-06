@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Button, InlineNotification } from "@carbon/react";
 import { TrashCan } from "@carbon/icons-react";
-import { removeStudioContact } from "../../../lib/actions/platform";
+import { removeStudioContact } from "../../../lib/actions/platform-studio";
 
 export function RemoveContactButton({
   contactId,

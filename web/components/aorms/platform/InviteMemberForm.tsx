@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { UserFollow } from "@carbon/icons-react";
-import { inviteStudioMember, type PlatformActionState } from "../../../lib/actions/platform";
+import { inviteStudioMember } from "../../../lib/actions/platform-studio";
+import { type PlatformActionState } from "../../../lib/actions/platform-types";
 
 export function InviteMemberForm({ studioId }: { studioId: string }) {
   const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(inviteStudioMember, null);

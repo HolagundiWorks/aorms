@@ -1,6 +1,6 @@
 import NextLink from "next/link";
 import { Header, HeaderName, HeaderNavigation, HeaderMenuItem } from "@carbon/react";
-import { platformSignOut } from "../../../lib/actions/platform";
+import { platformSignOut } from "../../../lib/actions/platform-auth";
 import { getPlatformNavStatus } from "../../../lib/platform/account";
 import { portalUrl } from "../../../lib/platform/subdomains";
 import { getGreeting, getIstHour, getInitials, getFirstName } from "../../../lib/shell/identity";

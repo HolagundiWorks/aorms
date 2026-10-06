@@ -12,7 +12,7 @@
  */
 import { useState, useTransition } from "react";
 import { Select, SelectItem, InlineLoading, InlineNotification } from "@carbon/react";
-import { adminSetAccountLevel, adminSetAccountRole } from "../../../lib/actions/platform";
+import { adminSetAccountLevel, adminSetAccountRole } from "../../../lib/actions/platform-admin";
 
 export function AccountAdminControls({
   accountId,

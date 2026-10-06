@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { Button, Form, InlineNotification, Stack, TableCell, TableRow, TextInput } from "@carbon/react";
 import { Edit } from "@carbon/icons-react";
 import { updateProductTestResult } from "../../../../lib/actions/materials";
-import type { PlatformActionState } from "../../../../lib/actions/platform";
+import type { PlatformActionState } from "../../../../lib/actions/platform-types";
 import { RemoveProductTestResultButton } from "./RemoveProductTestResultButton";
 
 export type ProductTestResult = {

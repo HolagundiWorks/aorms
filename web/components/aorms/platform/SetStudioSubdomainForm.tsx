@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button, InlineNotification, TextInput } from "@carbon/react";
-import { setStudioSubdomain } from "../../../lib/actions/platform";
+import { setStudioSubdomain } from "../../../lib/actions/platform-studio";
 
 /**
  * Enterprise-only, owner-only, on /studios/[studioId] — reserves

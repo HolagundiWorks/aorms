@@ -3,7 +3,8 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button, Checkbox, Form, InlineNotification, Stack, Tag, TableCell, TableRow, TextInput } from "@carbon/react";
 import { Edit } from "@carbon/icons-react";
-import { updateStudioContact, type PlatformActionState } from "../../../lib/actions/platform";
+import { updateStudioContact } from "../../../lib/actions/platform-studio";
+import { type PlatformActionState } from "../../../lib/actions/platform-types";
 import { RemoveContactButton } from "./RemoveContactButton";
 
 export type Contact = {

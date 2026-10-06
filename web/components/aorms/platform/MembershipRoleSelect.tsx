@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { InlineNotification, Select, SelectItem } from "@carbon/react";
-import { updateStudioMembershipRole } from "../../../lib/actions/platform";
+import { updateStudioMembershipRole } from "../../../lib/actions/platform-studio";
 
 export function MembershipRoleSelect({ membershipId, role }: { membershipId: string; role: string }) {
   const [error, setError] = useState<string | null>(null);

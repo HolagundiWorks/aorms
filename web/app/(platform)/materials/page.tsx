@@ -18,7 +18,6 @@ type ProductRow = {
 };
 
 const PAGE_SIZE = 24;
-const MAX_WINDOW = 500;
 
 const CATEGORY_LABELS: Record<string, string> = {
   BUILDING_MATERIAL: "Building material",
@@ -96,36 +95,47 @@ export default async function MaterialsPage({
     }
   }
 
-  let query = platformService
-    .schema("connectdex")
-    .from("products")
-    .select("id, name, category, sku, mrp_paise, companies(id, name, public_id, city, state)");
-  // Escape LIKE wildcards so a search for "50%" or "a_b" matches literally.
-  if (q) query = query.ilike("name", `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
-  if (category) query = query.eq("category", category);
-
-  // Bounded window (2026-10-01 audit R5): ranking is done in JS, so fetch at most
-  // MAX_WINDOW newest matches, rank them, then page the result. Narrow the search
-  // to see older products.
-  const { data: products, error } = await query.order("created_at", { ascending: false }).limit(MAX_WINDOW);
-  if (error) throw new Error(error.message);
-
-  const rows = (products ?? []) as ProductRow[];
-
-  // Three-tier nearest-first ordering: same city, then same state, then
-  // the rest. Stable within each tier (products already came back newest
-  // first from the query).
-  const tier = (row: ProductRow): number => {
-    const company = (Array.isArray(row.companies) ? row.companies[0] : row.companies) as CompanyEmbed;
-    if (!company) return 3;
-    if (referenceCity && company.city && company.city.toLowerCase() === referenceCity.toLowerCase()) return 0;
-    if (referenceState && company.state && company.state.toLowerCase() === referenceState.toLowerCase()) return 1;
-    return 2;
+  // SQL-side nearest-first ranking + paging (2026-10-06, roadmap P1; migration platform/0050):
+  // `connectdex.search_products` ranks same city → same state → rest (newest first inside each tier),
+  // applies the name/category filters and OFFSET/LIMIT, and returns the full match count — so every
+  // match is reachable, not just a 500-row JS window.
+  const requestedOffset = (page - 1) * PAGE_SIZE;
+  const searchArgs = { p_q: q, p_category: category, p_city: referenceCity ?? "", p_state: referenceState ?? "", p_limit: PAGE_SIZE };
+  type SearchRow = {
+    id: string;
+    name: string;
+    category: string;
+    sku: string | null;
+    mrp_paise: number | null;
+    company_id: string | null;
+    company_name: string | null;
+    company_public_id: string | null;
+    company_city: string | null;
+    company_state: string | null;
+    total_count: number;
   };
-  const ranked = [...rows].sort((a, b) => tier(a) - tier(b));
-  const pageCount = Math.max(1, Math.ceil(ranked.length / PAGE_SIZE));
+  let { data: found, error } = await platformService.schema("connectdex").rpc("search_products", { ...searchArgs, p_offset: requestedOffset });
+  if (error) throw new Error(error.message);
+  let hits = (found ?? []) as SearchRow[];
+  // A page past the end (stale link) falls back to the last page.
+  const total = hits[0]?.total_count ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount);
-  const sorted = ranked.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  if (hits.length === 0 && currentPage !== page) {
+    ({ data: found, error } = await platformService.schema("connectdex").rpc("search_products", { ...searchArgs, p_offset: (currentPage - 1) * PAGE_SIZE }));
+    if (error) throw new Error(error.message);
+    hits = (found ?? []) as SearchRow[];
+  }
+  const sorted: ProductRow[] = hits.map((h) => ({
+    id: h.id,
+    name: h.name,
+    category: h.category,
+    sku: h.sku,
+    mrp_paise: h.mrp_paise,
+    companies: h.company_id
+      ? { id: h.company_id, name: h.company_name ?? "", public_id: h.company_public_id ?? "", city: h.company_city, state: h.company_state }
+      : null,
+  }));
   const pageHref = (n: number) => `/materials?${new URLSearchParams({ ...(q ? { q } : {}), ...(category ? { category } : {}), page: String(n) })}`;
 
   return (
@@ -209,8 +219,7 @@ export default async function MaterialsPage({
           <nav aria-label="Pagination" style={{ display: "flex", gap: "1rem", alignItems: "center", marginTop: "1.5rem" }}>
             {currentPage > 1 && <NextLink href={pageHref(currentPage - 1)}>Previous</NextLink>}
             <span className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
-              Page {currentPage} of {pageCount}
-              {ranked.length >= MAX_WINDOW ? ` · showing the ${MAX_WINDOW} newest matches — narrow your search to see more` : ""}
+              Page {currentPage} of {pageCount} · {total.toLocaleString("en-IN")} products
             </span>
             {currentPage < pageCount && <NextLink href={pageHref(currentPage + 1)}>Next</NextLink>}
           </nav>

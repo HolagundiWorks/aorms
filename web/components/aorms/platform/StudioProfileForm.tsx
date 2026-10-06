@@ -2,7 +2,8 @@
 
 import { useActionState } from "react";
 import { Button, Checkbox, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
-import { updateStudioProfile, type PlatformActionState } from "../../../lib/actions/platform";
+import { updateStudioProfile } from "../../../lib/actions/platform-studio";
+import { type PlatformActionState } from "../../../lib/actions/platform-types";
 import { GST_STATE_CODES } from "../../../lib/tax/place-of-supply";
 import { FormGrid } from "../FormGrid";
 

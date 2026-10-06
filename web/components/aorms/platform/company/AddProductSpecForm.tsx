@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { Add } from "@carbon/icons-react";
 import { addProductSpecification } from "../../../../lib/actions/materials";
-import type { PlatformActionState } from "../../../../lib/actions/platform";
+import type { PlatformActionState } from "../../../../lib/actions/platform-types";
 
 export function AddProductSpecForm({ productId, companyId }: { productId: string; companyId: string }) {
   const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(addProductSpecification, null);
