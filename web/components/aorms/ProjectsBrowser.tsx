@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { InlineNotification, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { Pin, PinFilled } from "@carbon/icons-react";
-import { PlanGlyph } from "./PlanGlyph";
+import { placeholderFor } from "../../lib/projects/placeholder";
 import { ListToolbar } from "./ListToolbar";
 import { MotionRoot } from "./motion/MotionRoot";
 import { MotionStagger } from "./motion/MotionStagger";
@@ -48,7 +48,7 @@ const STATUS_TAG: Record<string, "green" | "blue" | "gray" | "purple" | "teal"> 
 };
 
 /**
- * Projects as image cards (hover reveals the project name) or as a compact
+ * Projects as an image gallery (hover reveals the project name; nothing is printed under the images) or as a compact
  * schedule of lines, with personal pins floating to the top of either view.
  * The chosen view is remembered in a cookie the server page reads on the next
  * visit, so the page renders in the right layout with no flash. Pinning is
@@ -136,34 +136,27 @@ export function ProjectsBrowser({ projects, initialView }: { projects: BrowserPr
     </button>
   );
 
+  // Gallery tile (2026-10-06): the image is the whole card — no caption underneath. The name, client and
+  // progress appear over the image on hover / keyboard focus (and permanently on touch screens); the link's
+  // accessible name always carries title, ref and status.
   const card = (p: BrowserProject) => {
     const pct = p.tasksTotal ? Math.round((p.tasksDone / p.tasksTotal) * 100) : null;
+    const status = STATUS_LABEL[p.status] ?? p.status;
     return (
       <div className="aorms-pcard" key={p.id}>
-        <Link href={`/projects/${p.id}`} className="aorms-pcard__link">
+        <Link href={`/projects/${p.id}`} className="aorms-pcard__link" aria-label={`${p.title}, ${p.ref}, ${status}`}>
           <div className="aorms-pcard__media">
-            {p.coverUrl ? (
-              // Plain <img>: a short-lived signed Supabase URL, not a next/image source.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={p.coverUrl} alt="" loading="lazy" />
-            ) : (
-              <div className="aorms-pcard__plan">
-                <PlanGlyph seed={p.ref} builtUpSqm={p.builtUpSqm} siteSqm={p.siteSqm} floors={p.floors} height={110} />
-              </div>
-            )}
-            <div className="aorms-pcard__veil">
+            {/* Plain <img>: a short-lived signed Supabase URL or a static placeholder, not a next/image source. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={p.coverUrl ?? placeholderFor(p.ref)} alt="" loading="lazy" />
+            <div className="aorms-pcard__veil" aria-hidden>
               <span className="aorms-pcard__name">{p.title}</span>
               <span className="aorms-pcard__meta">
-                {[p.clientName, p.city].filter(Boolean).join(" · ") || p.projectType}
+                {[p.ref, status].join(" · ")}
                 {pct !== null ? ` · ${pct}% of tasks done` : ""}
               </span>
+              <span className="aorms-pcard__meta">{[p.clientName, p.city].filter(Boolean).join(" · ") || p.projectType}</span>
             </div>
-          </div>
-          <div className="aorms-pcard__cap">
-            <span className="aorms-project-card__ref">{p.ref}</span>
-            <span className="aorms-project-card__phase" style={{ color: p.status === "ACTIVE" ? "var(--aorms-orange-text)" : undefined }}>
-              {STATUS_LABEL[p.status] ?? p.status}
-            </span>
           </div>
         </Link>
         {pinButton(p, `aorms-pin aorms-pin--card${pinned.has(p.id) ? " is-pinned" : ""}`)}
@@ -274,7 +267,7 @@ export function ProjectsBrowser({ projects, initialView }: { projects: BrowserPr
                   <Link href={`/projects/${p.id}`} className="aorms-pline__title">
                     <span className="aorms-pline__thumb" aria-hidden>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      {p.coverUrl ? <img src={p.coverUrl} alt="" loading="lazy" /> : null}
+                      <img src={p.coverUrl ?? placeholderFor(p.ref)} alt="" loading="lazy" />
                     </span>
                     {p.title}
                   </Link>

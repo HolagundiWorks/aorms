@@ -934,9 +934,10 @@ a.cds--side-nav__link[aria-current="page"]::before {
 }
 
 .aorms-pcard-grid {
+  // Gallery: tight, even gutters; the images carry the page.
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  gap: 1.5rem 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.5rem;
 }
 
 .aorms-pcard {
@@ -955,7 +956,6 @@ a.cds--side-nav__link[aria-current="page"]::before {
   aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--cds-layer);
-  border: 1px solid var(--aorms-rule);
 }
 
 .aorms-pcard__media > img {
@@ -1018,13 +1018,6 @@ a.cds--side-nav__link[aria-current="page"]::before {
   opacity: 0.85;
 }
 
-.aorms-pcard__cap {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.5rem;
-  padding-block-start: 0.5rem;
-}
 
 // Touch screens have no hover: show the name permanently.
 @media (hover: none) {
@@ -3046,4 +3039,16 @@ h1.aorms-lp-display {
 // A `#hash` jump must not tuck the board's first line under the phone title bar.
 .aorms-lp-board {
   scroll-margin-block-start: var(--bar-h, 3.5rem);
+}
+
+// Phones: two-up gallery.
+@media (max-width: 40rem) {
+  .aorms-pcard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem;
+  }
+
+  .aorms-pcard__name {
+    font-size: 0.875rem;
+  }
 }
