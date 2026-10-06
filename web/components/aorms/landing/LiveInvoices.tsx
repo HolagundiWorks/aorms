@@ -10,23 +10,22 @@ import { BigStat } from "../BigStat";
 const ROWS = [
   { ref: "INV-01", client: "Aurelia Developers", total: 590000, paid: 590000, status: "PAID" },
   { ref: "INV-02", client: "Aurelia Developers", total: 767000, paid: 0, status: "ISSUED" },
-  { ref: "INV-04", client: "Kavya Interiors LLP", total: 212400, paid: 0, status: "ISSUED" },
-  { ref: "INV-05", client: "Silver Oak Builders", total: 2596000, paid: 1000000, status: "PART PAID" },
+  { ref: "INV-05", client: "Silver Oak Builders", total: 2596000, paid: 1000000, status: "PARTIAL" },
   { ref: "INV-08", client: "Ananya & Kabir Menon", total: 165200, paid: 0, status: "DRAFT" },
 ] as const;
 
-const TAG: Record<string, "green" | "blue" | "gray" | "purple"> = { PAID: "green", ISSUED: "blue", "PART PAID": "purple", DRAFT: "gray" };
+const TAG: Record<string, "green" | "blue" | "gray" | "purple"> = { PAID: "green", ISSUED: "blue", "PARTIAL": "purple", DRAFT: "gray" };
 
 export function LiveInvoices() {
   const invoiced = ROWS.filter((r) => r.status !== "DRAFT").reduce((a, r) => a + r.total, 0);
   const outstanding = ROWS.filter((r) => r.status !== "DRAFT").reduce((a, r) => a + (r.total - r.paid), 0);
   const paidCount = ROWS.filter((r) => r.status === "PAID").length;
   return (
-    <div aria-hidden style={{ border: "1px solid var(--cds-border-subtle)", background: "var(--cds-layer)", padding: "1.25rem" }}>
+    <div aria-hidden style={{ border: "1px solid var(--cds-border-subtle)", background: "var(--cds-layer)", padding: "1rem 1.25rem" }}>
       <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
         Invoices
       </p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "1rem 1.5rem", margin: "0.75rem 0 1.25rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "0.75rem 1.5rem", margin: "0.5rem 0 0.75rem" }}>
         <BigStat value={ROWS.length} label="Invoices" animate="plain" />
         <BigStat value={invoiced} label="Invoiced" animate="inr" />
         <BigStat value={outstanding} label="Outstanding" animate="inr" active />

@@ -6,8 +6,7 @@ import { createClient } from "../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../lib/platform/service";
 import { roleHome } from "../lib/auth/role-home";
 import { listBlogPosts } from "../lib/blog";
-import { HeroCtas, LiveDemoCtas, FinalCtas, ConnectDexCtas } from "../components/aorms/LandingButtons";
-import { BillingForecastPanel } from "../components/aorms/BillingForecastPanel";
+import { HeroCtas, LiveDemoCtas, FinalCtas } from "../components/aorms/LandingButtons";
 import { TodaysBriefingPanel } from "../components/aorms/TodaysBriefingPanel";
 import { PlanGlyph } from "../components/aorms/PlanGlyph";
 import { BigStat } from "../components/aorms/BigStat";
@@ -138,6 +137,8 @@ function Sheet({
   h1,
   lede,
   side,
+  middle,
+  compact,
   corner,
   children,
 }: {
@@ -146,6 +147,10 @@ function Sheet({
   h1?: boolean;
   lede?: string[];
   side?: React.ReactNode;
+  /** A third column between the copy and the side (desktop only; stacks on narrow sheets). */
+  middle?: React.ReactNode;
+  /** Denser sheet: smaller headline so more fits in one screen. */
+  compact?: boolean;
   /** A generated plan drawing pinned to the sheet's bottom-right corner (hcworks.in's "corner figure"). */
   corner?: { seed: string; builtUpSqm: number; siteSqm: number; floors: number };
   children?: React.ReactNode;
@@ -153,10 +158,10 @@ function Sheet({
   const Heading = h1 ? "h1" : "h2";
   return (
     <>
-    <div className="aorms-lp-grid">
+    <div className={`aorms-lp-grid${middle ? " aorms-lp-grid--three" : ""}`}>
       <div>
         <p className="aorms-lp-eyebrow">{eyebrow}</p>
-        <Heading className="aorms-lp-display">{display}</Heading>
+        <Heading className={`aorms-lp-display${compact ? " aorms-lp-display--compact" : ""}`}>{display}</Heading>
         {lede?.map((l) => (
           <p key={l} className="aorms-lp-lede">
             {l}
@@ -164,6 +169,7 @@ function Sheet({
         ))}
         {children}
       </div>
+      {middle && <div className="aorms-lp-side aorms-lp-mid">{middle}</div>}
       {side && <div className="aorms-lp-side">{side}</div>}
     </div>
     {corner && (
@@ -316,12 +322,12 @@ export default async function LandingPage() {
       children: (
         <Sheet
           eyebrow="The office"
+          compact
           display={SPINE_OFFICE.display}
           side={
             <>
               <Result statement={SPINE_OFFICE.foot} text="Six parts of the practice, one project record underneath them." />
               <TodaysBriefingPanel />
-              <LiveInvoices />
             </>
           }
         >
@@ -339,14 +345,14 @@ export default async function LandingPage() {
       children: (
         <Sheet
           eyebrow="The workflow"
+          compact
           display={SPINE_WORKFLOW.display}
           side={
             <>
               <Result statement="Information that moves." text="What is captured on site or in a meeting becomes a task, a record and, in time, knowledge — without being re-typed."  />
-              <BillingForecastPanel />
+              <LiveInvoices />
             </>
           }
-          corner={{ seed: "routine", builtUpSqm: 640, siteSqm: 900, floors: 3 }}
         >
           <ol className="aorms-lp-spine aorms-lp-spine--flow" aria-label="From information to action">
             {SPINE_WORKFLOW.steps.map((st, i) => (
@@ -360,7 +366,9 @@ export default async function LandingPage() {
             ))}
           </ol>
           <Sub>{SPINE_INAPP.tag}</Sub>
-          <Cards items={[...SPINE_INAPP.items]} />
+          <div className="aorms-lp-tight">
+            <Cards items={[...SPINE_INAPP.items]} />
+          </div>
         </Sheet>
       ),
     },
@@ -404,12 +412,37 @@ export default async function LandingPage() {
           eyebrow="The system"
           display={SPINE_SYSTEM.display}
           lede={[...SPINE_SYSTEM.lede]}
+          compact
+          middle={
+            <>
+              <Sub>See what it costs</Sub>
+              <OperationalLeakageCalculator />
+            </>
+          }
           side={
             <>
+              <Sub>Pricing</Sub>
+              <div className="aorms-lp-tight"><div className="aorms-lp-cards aorms-lp-cards--compact">
+                {plans.map(({ key, plan, price, suffix, sub }) => (
+                  <div key={key} className="aorms-lp-card aorms-lp-card--ink" data-analytics-event={key === "STUDIO" ? "pricing_view" : undefined}>
+                    <h3>
+                      {plan.name}
+                      {"badge" in plan && plan.badge ? ` · ${plan.badge}` : ""}
+                    </h3>
+                    <p>{plan.tagline}</p>
+                    <p className="aorms-lp-price">
+                      {price}
+                      {suffix && <span style={{ fontSize: "0.875rem" }}>{suffix}</span>}
+                    </p>
+                    {sub && <p style={{ fontSize: "0.75rem" }}>{sub}</p>}
+                  </div>
+                ))}
+              </div>
+              </div>
               <div className="aorms-lp-result">
                 <p className="aorms-lp-result__label">Demo credentials</p>
                 <p style={{ fontSize: "0.875rem", margin: "0.5rem 0", color: "var(--cds-text-secondary)" }}>
-                  A sample studio, open at every level — Owner, Partner, Senior, Accountant, HR Manager, Associate, Viewer, and the Client, Consultant and Contractor portals. Pick one on the sign-in page; same password for all; reset nightly.
+                  A sample studio, open at every level — staff roles and the three portals. Pick one on the sign-in page; one password for all; reset nightly.
                 </p>
                 <p className="cds--type-code-01">
                   {DEMO.password}
@@ -419,25 +452,8 @@ export default async function LandingPage() {
             </>
           }
         >
-          <Cards items={[...SPINE_SYSTEM.rows]} />
-          <Sub>See what it costs</Sub>
-          <OperationalLeakageCalculator />
-          <Sub>Pricing</Sub>
-          <div className="aorms-lp-cards aorms-lp-cards--compact">
-            {plans.map(({ key, plan, price, suffix, sub }) => (
-              <div key={key} className="aorms-lp-card aorms-lp-card--ink" data-analytics-event={key === "STUDIO" ? "pricing_view" : undefined}>
-                <h3>
-                  {plan.name}
-                  {"badge" in plan && plan.badge ? ` · ${plan.badge}` : ""}
-                </h3>
-                <p>{plan.tagline}</p>
-                <p className="aorms-lp-price">
-                  {price}
-                  {suffix && <span style={{ fontSize: "0.875rem" }}>{suffix}</span>}
-                </p>
-                {sub && <p style={{ fontSize: "0.75rem" }}>{sub}</p>}
-              </div>
-            ))}
+          <div className="aorms-lp-tight">
+            <Cards items={[...SPINE_SYSTEM.rows]} />
           </div>
         </Sheet>
       ),
@@ -453,9 +469,55 @@ export default async function LandingPage() {
           eyebrow="Enter AORMS"
           display={SPINE_CTA.display}
           lede={[...SPINE_CTA.lede]}
+          compact
+          middle={
+            <>
+              <Sub>Requests for information practices ask first</Sub>
+              <Accordion>
+                {FAQ.map((item) => (
+                  <AccordionItem key={item.question} title={item.question}>
+                    <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+                      {item.answer}
+                    </p>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+              <Sub>Also on AORMS</Sub>
+              <p className="aorms-lp-lede" style={{ marginBlockStart: 0 }}>
+                <strong style={{ color: "var(--cds-text-primary)" }}>{CONNECTDEX.name}</strong> — {CONNECTDEX.tagline}.
+              </p>
+              <p style={{ marginBlockStart: "0.5rem" }}>
+                <Link href="/connectdex-partners" className="cds--link">
+                  Become a Partner →
+                </Link>
+              </p>
+            </>
+          }
           side={
             <>
               <Result statement="Start free." text="Free is a real, permanent plan — create your practice and add the first project today." />
+              {latestPosts.length > 0 && (
+                <>
+                  <Sub>From the blog</Sub>
+                  <p style={{ marginBlockStart: "0.75rem" }}>
+                    {latestPosts.map((p) => (
+                      <span key={p.slug} style={{ display: "block", padding: "0.25rem 0" }}>
+                        <Link href={`/blog/${p.slug}`} className="cds--link">
+                          {p.title}
+                        </Link>
+                      </span>
+                    ))}
+                    <Link href="/blog" className="cds--link">
+                      View all posts →
+                    </Link>
+                  </p>
+                </>
+              )}
+            </>
+          }
+        >
+          <FinalCtas />
+          <div style={{ marginBlockStart: "1.5rem" }}>
               <div className="aorms-lp-card aorms-lp-card--ink">
                 <h3>Talk to us</h3>
                 <p>
@@ -464,45 +526,7 @@ export default async function LandingPage() {
                   {HUMAN_CENTRIC_WORKS.location}
                 </p>
               </div>
-            </>
-          }
-        >
-          <FinalCtas />
-          {latestPosts.length > 0 && (
-            <>
-              <Sub>From the blog</Sub>
-              <Cards
-                items={latestPosts.map((p) => ({ tag: p.date, text: p.title }))}
-              />
-              <p style={{ marginBlockStart: "0.75rem" }}>
-                {latestPosts.map((p) => (
-                  <span key={p.slug} style={{ display: "block", padding: "0.25rem 0" }}>
-                    <Link href={`/blog/${p.slug}`} className="cds--link">
-                      {p.title}
-                    </Link>
-                  </span>
-                ))}
-                <Link href="/blog" className="cds--link">
-                  View all posts →
-                </Link>
-              </p>
-            </>
-          )}
-          <Sub>Also on AORMS</Sub>
-          <p className="aorms-lp-lede" style={{ marginBlockStart: 0 }}>
-            <strong style={{ color: "var(--cds-text-primary)" }}>{CONNECTDEX.name}</strong> — {CONNECTDEX.tagline}.
-          </p>
-          <ConnectDexCtas />
-          <Sub>Requests for information practices ask first</Sub>
-          <Accordion>
-            {FAQ.map((item) => (
-              <AccordionItem key={item.question} title={item.question}>
-                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-                  {item.answer}
-                </p>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          </div>
         </Sheet>
       ),
     },

@@ -3109,3 +3109,72 @@ h1.aorms-lp-display {
   background: #fff;
   color: var(--aorms-ink);
 }
+
+// ── Landing: every board fits one desktop screen (2026-10-06) ────────────────────────────
+// Dense boards use a smaller headline and, where needed, a third column; tight card grids sit two-up inside
+// a narrow column. Narrow sheets (phones, tablets) keep the single stacked column and scroll as before.
+.aorms-lp-display--compact {
+  font-size: clamp(2rem, 3.4vw, 3.25rem);
+}
+
+.aorms-lp-tight .aorms-lp-cards {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.aorms-lp-tight .aorms-lp-card {
+  padding: 0.625rem 0.75rem 0.75rem;
+}
+
+.aorms-lp-tight .aorms-lp-card p {
+  font-size: 0.8125rem;
+}
+
+@container (min-width: 56rem) {
+  .aorms-lp-grid--three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-inline-size: none;
+  }
+}
+
+@media (min-width: 64rem) {
+  .aorms-lp-grid {
+    padding-block-start: clamp(0rem, 4vh, 3rem);
+  }
+
+  .aorms-lp-panel {
+    padding-block-end: 1.5rem;
+  }
+
+  .aorms-lp-eyebrow {
+    margin-block-end: 1.25rem;
+  }
+
+  .aorms-lp-sub {
+    margin-block-start: 1.5rem;
+  }
+
+  .aorms-lp-spine--flow li {
+    padding-block: 0.4rem;
+  }
+}
+
+.aorms-lp-mid .aorms-lp-lede {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.aorms-lp-mid .aorms-lp-sub {
+  margin-block-start: 1.25rem;
+}
+
+.aorms-lp-mid .cds--accordion__title {
+  font-size: 0.8125rem;
+}
+
+.aorms-lp-mid .cds--accordion__heading {
+  min-block-size: 2.5rem;
+}
+
+.aorms-lp-lede + .aorms-lp-tight {
+  margin-block-start: 1.5rem;
+}

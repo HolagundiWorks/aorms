@@ -507,6 +507,12 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-06 (landing: every board fits one desktop screen)** — verified at 1366×768, 1440×900 and 1920×1080 (board
+  scrollHeight == viewport). Dense boards use a smaller headline (`compact`) and a third column (`middle` on
+  `Sheet`, container query ≥ 56rem): System = copy + rows · cost calculator · pricing + demo; Enter = copy + Talk to
+  us · FAQ + ConnectDeX · result + blog. The Invoices demo moved to the Workflow board (replacing the billing
+  forecast panel and corner figure), the Pulse KPI panel is compact (4-up rail, two tiles), the ConnectDeX teaser is
+  a text link, and the blog is links only. Narrow sheets (phones/tablets) still stack and scroll.
 - **2026-10-06 (portal sign-out fix; landing Sign in)** — Client, Contractor and Collaborator portals: the header
   Sign out did nothing because Carbon's `HeaderGlobalAction` renders `type="button"` and so never submitted its
   `<form action={signOut}>`; it is now a real submit button (`cds--header__action`). Reproduced on production
