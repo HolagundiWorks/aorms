@@ -3,6 +3,7 @@ import { Button, Column, Grid, Select, SelectItem, Stack, Tag, TextInput, Tile }
 import { createClient as createWebClient } from "../../../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../../../lib/platform/service";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { SaveVendorButton } from "../../../components/aorms/platform/SaveVendorButton";
 import { QuoteRequestForm } from "../../../components/aorms/platform/QuoteRequestForm";
 import { ConnectDexPortalHeader } from "../../../components/aorms/platform/PortalHeaders";
 
@@ -73,9 +74,23 @@ export default async function MaterialsPage({
   // access (the catalogue is platform-wide read, per RLS).
   let referenceCity: string | null = null;
   let referenceState: string | null = null;
+  const savedCompanyIds = new Set<string>();
+  const savedVendors: { id: string; name: string; public_id: string; city: string | null; state: string | null }[] = [];
   if (handle) {
     const { data: account } = await platformService.from("accounts").select("id").eq("public_id", handle).maybeSingle();
     if (account) {
+      const { data: saves } = await platformService
+        .schema("connectdex")
+        .from("saved_vendors")
+        .select("company_id, companies(id, name, public_id, city, state)")
+        .eq("account_id", account.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      for (const row of saves ?? []) {
+        savedCompanyIds.add(row.company_id);
+        const c = (Array.isArray(row.companies) ? row.companies[0] : row.companies) as (typeof savedVendors)[number] | null;
+        if (c) savedVendors.push(c);
+      }
       const { data: studioMembership } = await platformService
         .from("studio_memberships")
         .select("studios(city, state)")
@@ -171,6 +186,23 @@ export default async function MaterialsPage({
           </Stack>
         </form>
 
+        {savedVendors.length > 0 && (
+          <Tile style={{ marginBottom: "1.5rem" }}>
+            <strong className="cds--type-productive-heading-02">Saved vendors</strong>
+            <ul style={{ marginTop: "0.5rem" }}>
+              {savedVendors.map((v) => (
+                <li key={v.id} className="cds--type-body-01">
+                  <NextLink href={`/companies/${v.id}`}>{v.name}</NextLink>{" "}
+                  <span style={{ color: "var(--cds-text-secondary)" }}>
+                    {v.public_id}
+                    {(v.city || v.state) && ` · ${[v.city, v.state].filter(Boolean).join(", ")}`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Tile>
+        )}
+
         <Stack gap={4}>
           {sorted.map((row) => {
             const company = (Array.isArray(row.companies) ? row.companies[0] : row.companies) as CompanyEmbed;
@@ -204,7 +236,10 @@ export default async function MaterialsPage({
                       </p>
                     )}
                   </div>
-                  <QuoteRequestForm productId={row.id} productName={row.name} />
+                  <Stack gap={2} orientation="horizontal" style={{ alignItems: "center" }}>
+                    {company && handle && <SaveVendorButton companyId={company.id} saved={savedCompanyIds.has(company.id)} />}
+                    <QuoteRequestForm productId={row.id} productName={row.name} />
+                  </Stack>
                 </Stack>
               </Tile>
             );
