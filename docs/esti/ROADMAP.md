@@ -7426,3 +7426,8 @@ See branding guide §15. Sample data lives in the component files (`components/a
 
 External-portal sign-out was a non-submitting button (see branding guide §15); fixed and verified against the live
 demo logins. Landing nameplate and phone bar gained a Sign in button. `source-map-js` bumped to 1.2.2.
+
+### 2026-10-06 — Landing: every board fits one desktop screen
+
+See branding guide §15. Re-check with `scrollHeight == clientHeight` on `.aorms-lp-board.is-active` at 1366×768,
+1440×900 and 1920×1080 after any landing copy change.

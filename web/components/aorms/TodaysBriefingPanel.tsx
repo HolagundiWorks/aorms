@@ -1,4 +1,4 @@
-import { ErrorFilled, Renew, UnlockedFilled, WarningAltFilled } from "@carbon/icons-react";
+import { ErrorFilled, WarningAltFilled } from "@carbon/icons-react";
 import { BigStat } from "./BigStat";
 import { KpiTile } from "./KpiTile";
 
@@ -19,7 +19,7 @@ const RAIL = [
 export function TodaysBriefingPanel() {
   return (
     <div style={{ border: "1px solid var(--cds-border-subtle)", background: "var(--cds-layer)" }} aria-hidden>
-      <div style={{ padding: "1.25rem 1.25rem 0.75rem", borderBottom: "1px solid var(--cds-border-subtle)" }}>
+      <div style={{ padding: "1rem 1.25rem 0.5rem", borderBottom: "1px solid var(--cds-border-subtle)" }}>
         <p className="cds--type-label-01" style={{ color: "var(--cds-text-secondary)" }}>
           Pulse
         </p>
@@ -28,7 +28,7 @@ export function TodaysBriefingPanel() {
         </p>
       </div>
 
-      <div style={{ padding: "1.25rem", display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "1rem 1.5rem" }}>
+      <div style={{ padding: "1rem 1.25rem", display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "0.75rem 1rem" }}>
         {RAIL.map((s) => (
           <BigStat key={s.label} value={s.value} label={s.label} active={"active" in s ? s.active : undefined} animate="plain" />
         ))}
@@ -37,15 +37,13 @@ export function TodaysBriefingPanel() {
         </div>
       </div>
 
-      <p className="cds--type-body-01" style={{ padding: "0 1.25rem 1.25rem", color: "var(--cds-text-secondary)" }}>
+      <p className="cds--type-body-01" style={{ padding: "0 1.25rem 1rem", color: "var(--cds-text-secondary)" }}>
         14 tasks overdue, 2 due today, 2 decisions waiting on the client, 3 tasks blocked and 1 open snag.
       </p>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", padding: "0 1.25rem 1.25rem" }}>
         <KpiTile animate label="Critical" value={4} status="CRITICAL" icon={ErrorFilled} trend={{ direction: "up", value: "1", label: "vs yesterday", impact: "negative" }} />
-        <KpiTile animate label="Blocked tasks" value={2} status="NEEDS_INTERVENTION" icon={UnlockedFilled} trend={{ direction: "flat", value: "0", label: "vs yesterday", impact: "neutral" }} />
         <KpiTile animate label="Projects at risk" value={6} status="CRITICAL" icon={WarningAltFilled} />
-        <KpiTile animate label="Open revisions" value={2} status="WATCH" icon={Renew} />
       </div>
     </div>
   );
