@@ -77,23 +77,7 @@ export const DEMO = {
  * mockups, not a design file, the real running app with the real seeded
  * demo studio's data.
  */
-export const PRODUCT_SCREENSHOTS = [
-  {
-    src: "/screenshots/pulse-2026-10.png",
-    alt: "AORMS Pulse: rail of large KPI numerals, today's brief, KPI tiles with alert lines and the Next-up task list",
-    caption: "Pulse — the daily brief, written from your own project data",
-  },
-  {
-    src: "/screenshots/projects-2026-10.png",
-    alt: "AORMS Projects as cards: a generated plan drawing, reference, status and progress for each project",
-    caption: "Projects — every project as a card, one record each",
-  },
-  {
-    src: "/screenshots/invoices-2026-10.png",
-    alt: "AORMS Invoices: KPI rail (total, invoiced, outstanding, paid) beside the GST invoice table",
-    caption: "Invoices — GST, TDS and what is outstanding, in one table",
-  },
-] as const;
+
 
 export const HUMAN_CENTRIC_WORKS = {
   legalName: "Human Centric Works",

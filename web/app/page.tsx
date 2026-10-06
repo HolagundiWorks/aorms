@@ -11,8 +11,10 @@ import { BillingForecastPanel } from "../components/aorms/BillingForecastPanel";
 import { TodaysBriefingPanel } from "../components/aorms/TodaysBriefingPanel";
 import { PlanGlyph } from "../components/aorms/PlanGlyph";
 import { BigStat } from "../components/aorms/BigStat";
-import Image from "next/image";
 import { PhaseStrip } from "../components/aorms/PhaseStrip";
+import { LiveProjects } from "../components/aorms/landing/LiveProjects";
+import { LiveInvoices } from "../components/aorms/landing/LiveInvoices";
+import { LiveBrief } from "../components/aorms/landing/LiveBrief";
 import { ProjectCard } from "../components/aorms/ProjectCard";
 import { OperationalLeakageCalculator } from "../components/aorms/landing/OperationalLeakageCalculator";
 import { Artboards, type Board } from "../components/aorms/landing/Artboards";
@@ -22,7 +24,6 @@ import {
   DEMO,
   FAQ,
   HUMAN_CENTRIC_WORKS,
-  PRODUCT_SCREENSHOTS,
   PRICING,
 } from "../lib/marketing-content";
 import {
@@ -200,16 +201,6 @@ function Result({ statement, text }: { statement: string; text: string }) {
   );
 }
 
-function Shot({ i }: { i: number }) {
-  const shot = PRODUCT_SCREENSHOTS[i]!;
-  return (
-    <figure className="aorms-lp-shot">
-      <Image src={shot.src} alt={shot.alt} width={900} height={shot.src.includes("pulse") ? 440 : shot.src.includes("projects") ? 560 : 470} sizes="(max-width: 1056px) 100vw, 34vw" />
-      <figcaption>{shot.caption}</figcaption>
-    </figure>
-  );
-}
-
 const Sub = ({ children }: { children: React.ReactNode }) => <p className="aorms-lp-sub">{children}</p>;
 
 export default async function LandingPage() {
@@ -289,10 +280,10 @@ export default async function LandingPage() {
               <PhaseStrip steps={[...SPINE_SAMPLE.phases]} currentIndex={SPINE_SAMPLE.currentPhase} />
               <div className="aorms-lp-stats">
                 {SPINE_SAMPLE.stats.map((st) => (
-                  <BigStat key={st.label} value={st.value} label={st.label} active={"active" in st ? st.active : undefined} />
+                  <BigStat key={st.label} value={st.value} label={st.label} active={"active" in st ? st.active : undefined} animate="plain" />
                 ))}
               </div>
-              <Shot i={1} />
+              <LiveProjects />
               <p className="cds--type-helper-text-01" style={{ marginBlockStart: "0.5rem", color: "var(--cds-text-secondary)" }}>
                 {SPINE_SAMPLE.caption}
               </p>
@@ -330,7 +321,7 @@ export default async function LandingPage() {
             <>
               <Result statement={SPINE_OFFICE.foot} text="Six parts of the practice, one project record underneath them." />
               <TodaysBriefingPanel />
-              <Shot i={2} />
+              <LiveInvoices />
             </>
           }
         >
@@ -387,7 +378,7 @@ export default async function LandingPage() {
           side={
             <>
               <Result statement="Ask the project." text={SPINE_MEMORY.esti} />
-              <Shot i={0} />
+              <LiveBrief />
             </>
           }
         >

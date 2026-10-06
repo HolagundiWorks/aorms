@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Tile } from "@carbon/react";
 import { ArrowUp, ArrowDown, ArrowRight } from "@carbon/icons-react";
 import { KPI_SEVERITY } from "../../lib/kpi-severity";
+import { AnimatedNumber } from "./AnimatedNumber";
 
 /**
  * The status read some KPIs support (2026-09-13, extended to 4 tiers
@@ -102,6 +103,7 @@ export function KpiTile({
   icon: Icon,
   trend,
   href,
+  animate,
 }: {
   label: string;
   value: string | number;
@@ -109,6 +111,8 @@ export function KpiTile({
   icon?: ComponentType<{ size?: number }>;
   trend?: KpiTrend;
   href?: string;
+  /** Count up when scrolled into view (landing page demos only; numeric `value` required). */
+  animate?: boolean;
 }) {
   const TrendIcon = trend ? TREND_ICON[trend.direction] : null;
 
@@ -161,7 +165,7 @@ export function KpiTile({
         style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}
         title={String(value)}
       >
-        {value}
+        {animate && typeof value === "number" ? <AnimatedNumber value={value} /> : value}
       </p>
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "0.25rem", minWidth: 0 }}>
         <p

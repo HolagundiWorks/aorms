@@ -7416,3 +7416,8 @@ changes: sign in as a demo Owner at identity.aorms.in and clip each page (see br
 Projects card view is now an image-only gallery; projects without a cover get an architectural placeholder
 illustration instead of the generated plot drawing (see branding guide §15). Placeholders are generated
 illustrations, not photographs — replace by uploading a cover image on the project page.
+
+### 2026-10-06 — Landing: live components with animated dummy data replace snapshots
+
+See branding guide §15. Sample data lives in the component files (`components/aorms/landing/Live*.tsx`,
+`TodaysBriefingPanel.tsx`, `lib/marketing-spine.ts`); no screenshots to re-capture any more.
