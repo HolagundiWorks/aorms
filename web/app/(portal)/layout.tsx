@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Content, Header, HeaderGlobalAction, HeaderGlobalBar } from "@carbon/react";
+import { Content, Header, HeaderGlobalBar } from "@carbon/react";
 import { Logout } from "@carbon/icons-react";
 import { createClient } from "../../lib/supabase/server";
 import { signOut } from "../../lib/actions/auth";
@@ -43,9 +43,10 @@ export default async function PortalLayout({ children }: { children: React.React
         <HeaderGlobalBar>
           <InstructionsToggle />
           <form action={signOut}>
-            <HeaderGlobalAction aria-label="Sign out">
+            {/* A real submit button: Carbon's HeaderGlobalAction renders type="button", so inside a <form> it never submitted (sign-out did nothing, 2026-10-06). */}
+            <button type="submit" className="cds--header__action" aria-label="Sign out" title="Sign out">
               <Logout size={20} />
-            </HeaderGlobalAction>
+            </button>
           </form>
         </HeaderGlobalBar>
       </Header>

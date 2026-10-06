@@ -507,6 +507,12 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-06 (portal sign-out fix; landing Sign in)** — Client, Contractor and Collaborator portals: the header
+  Sign out did nothing because Carbon's `HeaderGlobalAction` renders `type="button"` and so never submitted its
+  `<form action={signOut}>`; it is now a real submit button (`cds--header__action`). Reproduced on production
+  (Office Hub sign-out worked, client portal did not). Landing: a prominent **Sign in** button sits under the
+  nameplate CTA, and in the phone title bar. Dependency: `source-map-js` 1.2.1 → 1.2.2 (event-loop DoS advisory)
+  in `web/package-lock.json` and the legacy root `pnpm-lock.yaml`.
 - **2026-10-06 (landing: live components, not snapshots)** — the landing page no longer uses screenshots. Boards
   render the portal's own components with dummy data and count the numbers up when first shown
   (`AnimatedNumber`; `BigStat`/`KpiTile` gained an `animate` prop): Pulse KPI panel (`TodaysBriefingPanel`),

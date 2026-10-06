@@ -18,6 +18,8 @@ export type Board = {
 
 export type Nameplate = {
   cta: { label: string; href: string };
+  /** Prominent sign-in button under the CTA (and in the phone title bar). */
+  signIn?: { label: string; href: string };
   studio: string;
   lines: { text: string; href?: string }[];
   links: { label: string; href: string }[];
@@ -132,13 +134,21 @@ export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: N
   return (
     <div className="aorms-lp" id="main">
       {/* Phones/tablets: black title bar + right-hand number rail */}
-      <div className="aorms-lp-bar" aria-hidden>
-        <span className="aorms-lp-bar__left">
+      <div className="aorms-lp-bar">
+        <span className="aorms-lp-bar__left" aria-hidden>
           <span>{cur.num} / {pad(boards.length)}</span>
           <span className="aorms-lp-sep">|</span>
           <span>{cur.title}</span>
         </span>
-        <span className="aorms-lp-bar__mark">AORMS</span>
+        {nameplate.signIn ? (
+          <Link href={nameplate.signIn.href} className="aorms-lp-bar__signin">
+            {nameplate.signIn.label}
+          </Link>
+        ) : (
+          <span className="aorms-lp-bar__mark" aria-hidden>
+            AORMS
+          </span>
+        )}
       </div>
       <nav className="aorms-lp-rail" aria-label="Sections">
         {boards.map((b, i) => (
@@ -172,6 +182,11 @@ export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: N
         <Link href={nameplate.cta.href} className="aorms-lp-np__cta">
           {nameplate.cta.label}
         </Link>
+        {nameplate.signIn && (
+          <Link href={nameplate.signIn.href} className="aorms-lp-np__signin">
+            {nameplate.signIn.label}
+          </Link>
+        )}
         <div className="aorms-lp-np__num" aria-hidden>
           {cur.num}
           <small>/ {pad(boards.length)}</small>
