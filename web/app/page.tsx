@@ -515,6 +515,7 @@ export default async function LandingPage() {
         boards={boards}
         nameplate={{
           cta: { label: "Explore the demo →", href: "#live-demo" },
+          signIn: { label: "Sign in", href: "/login" },
           studio: "AORMS",
           lines: [
             { text: HUMAN_CENTRIC_WORKS.email, href: `mailto:${HUMAN_CENTRIC_WORKS.email}` },

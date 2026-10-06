@@ -7421,3 +7421,8 @@ illustrations, not photographs — replace by uploading a cover image on the pro
 
 See branding guide §15. Sample data lives in the component files (`components/aorms/landing/Live*.tsx`,
 `TodaysBriefingPanel.tsx`, `lib/marketing-spine.ts`); no screenshots to re-capture any more.
+
+### 2026-10-06 — Portal sign-out fixed, landing Sign in, source-map-js 1.2.2
+
+External-portal sign-out was a non-submitting button (see branding guide §15); fixed and verified against the live
+demo logins. Landing nameplate and phone bar gained a Sign in button. `source-map-js` bumped to 1.2.2.

@@ -3072,3 +3072,40 @@ h1.aorms-lp-display {
 .aorms-lp-live-gallery .aorms-pcard__meta {
   font-size: 0.625rem;
 }
+
+// Landing: Sign in button under the nameplate CTA, and in the phone title bar (2026-10-06).
+.aorms-lp-np__signin {
+  display: block;
+  padding: 0.9rem 1rem;
+  border-block-end: 1px solid var(--aorms-ink);
+  background: transparent;
+  color: var(--aorms-ink);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+.aorms-lp-np__signin:hover,
+.aorms-lp-np__signin:focus-visible {
+  background: var(--aorms-ink);
+  color: #fff;
+}
+
+.aorms-lp-bar__signin {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #fff;
+  color: #fff;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.aorms-lp-bar__signin:hover,
+.aorms-lp-bar__signin:focus-visible {
+  background: #fff;
+  color: var(--aorms-ink);
+}
