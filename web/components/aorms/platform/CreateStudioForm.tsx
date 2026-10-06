@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { Add } from "@carbon/icons-react";
-import { createStudio, type PlatformActionState } from "../../../lib/actions/platform";
+import { createStudio } from "../../../lib/actions/platform-studio";
+import { type PlatformActionState } from "../../../lib/actions/platform-types";
 
 export function CreateStudioForm() {
   const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(createStudio, null);

@@ -179,6 +179,18 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
     (m) => m.account_id === currentAccountId && m.role === "OWNER" && m.status === "ACTIVE",
   );
 
+  // Owner-only "Recent activity" (2026-10-06, mirrors the Studio page): this company's own platform
+  // events, newest first. Service role, scoped by company_id and shown only to its ACTIVE owners;
+  // event type + time only (the raw detail JSON can carry payment/ID fields).
+  const { data: activity } = isOwner
+    ? await platformService
+        .from("platform_activity_log")
+        .select("id, event_type, created_at")
+        .eq("company_id", company.id)
+        .order("created_at", { ascending: false })
+        .limit(20)
+    : { data: [] as { id: string; event_type: string; created_at: string }[] };
+
   return (
     <>
       <ConnectDexPortalHeader />
@@ -376,6 +388,34 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
             )}
           </div>
         </Stack>
+        {isOwner && (
+          <div style={{ marginTop: "2rem" }}>
+            <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>
+              Recent activity
+            </h2>
+            <Table aria-label="Recent company activity" size="sm">
+              <TableHead>
+                <TableRow>
+                  <TableHeader>Event</TableHeader>
+                  <TableHeader>When</TableHeader>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {(activity ?? []).map((a) => (
+                  <TableRow key={a.id}>
+                    <TableCell>{a.event_type.replaceAll("_", " ").toLowerCase()}</TableCell>
+                    <TableCell>{new Date(a.created_at).toLocaleString()}</TableCell>
+                  </TableRow>
+                ))}
+                {(activity ?? []).length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={2}>No activity recorded yet.</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </Column>
       </Grid>
     </>

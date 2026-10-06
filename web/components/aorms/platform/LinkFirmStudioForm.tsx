@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { Link } from "@carbon/icons-react";
-import { linkFirmToStudio, type PlatformActionState } from "../../../lib/actions/platform";
+import { linkFirmToStudio } from "../../../lib/actions/platform-auth";
+import { type PlatformActionState } from "../../../lib/actions/platform-types";
 
 /**
  * Firm Settings' own studio link (2026-09-14) — deployment-wide, not

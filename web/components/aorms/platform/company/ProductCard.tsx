@@ -21,7 +21,7 @@ import {
 } from "@carbon/react";
 import { Edit } from "@carbon/icons-react";
 import { updateProduct } from "../../../../lib/actions/materials";
-import type { PlatformActionState } from "../../../../lib/actions/platform";
+import type { PlatformActionState } from "../../../../lib/actions/platform-types";
 import { FormGrid } from "../../FormGrid";
 import { RemoveProductButton } from "./RemoveProductButton";
 import { ProductSpecRow, type ProductSpec } from "./ProductSpecRow";

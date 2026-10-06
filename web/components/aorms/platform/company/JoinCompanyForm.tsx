@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { UserFollow } from "@carbon/icons-react";
 import { joinCompany } from "../../../../lib/actions/company";
-import type { PlatformActionState } from "../../../../lib/actions/platform";
+import type { PlatformActionState } from "../../../../lib/actions/platform-types";
 
 export function JoinCompanyForm() {
   const [state, formAction, pending] = useActionState<PlatformActionState, FormData>(joinCompany, null);

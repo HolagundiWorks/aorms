@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Button, InlineNotification } from "@carbon/react";
 import { TrashCan } from "@carbon/icons-react";
-import { leaveStudio } from "../../../lib/actions/platform";
+import { leaveStudio } from "../../../lib/actions/platform-studio";
 
 export function LeaveStudioButton({ membershipId, studioName }: { membershipId: string; studioName: string }) {
   const [error, setError] = useState<string | null>(null);

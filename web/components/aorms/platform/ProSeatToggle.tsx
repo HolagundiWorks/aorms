@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button, InlineNotification, Tag } from "@carbon/react";
-import { assignProSeat, revokeProSeat } from "../../../lib/actions/platform";
+import { assignProSeat, revokeProSeat } from "../../../lib/actions/platform-studio";
 
 /**
  * Owner-only PRO seat control on /studios/[studioId] — a member is either

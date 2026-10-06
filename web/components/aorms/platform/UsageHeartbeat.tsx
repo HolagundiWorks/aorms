@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { recordHeartbeat } from "../../../lib/actions/platform";
+import { recordHeartbeat } from "../../../lib/actions/platform-usage";
 
 const INTERVAL_MS = 60_000;
 

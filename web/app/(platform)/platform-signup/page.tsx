@@ -4,7 +4,8 @@ import { useActionState } from "react";
 import { Button, Form, InlineNotification, PasswordInput, Stack, TextInput } from "@carbon/react";
 import { ArrowRight } from "@carbon/icons-react";
 import NextLink from "next/link";
-import { platformSignUp, signInWithGoogle, type PlatformActionState } from "../../../lib/actions/platform";
+import { platformSignUp, signInWithGoogle } from "../../../lib/actions/platform-auth";
+import { type PlatformActionState } from "../../../lib/actions/platform-types";
 import { TurnstileWidget } from "../../../components/aorms/security/TurnstileWidget";
 import { AuthHead } from "../../../components/aorms/AuthHead";
 

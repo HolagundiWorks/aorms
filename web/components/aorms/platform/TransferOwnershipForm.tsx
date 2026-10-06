@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button, InlineNotification, Select, SelectItem } from "@carbon/react";
-import { transferStudioOwnership } from "../../../lib/actions/platform";
+import { transferStudioOwnership } from "../../../lib/actions/platform-studio";
 
 type Member = { accountId: string; label: string };
 

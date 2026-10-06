@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 import { Button, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { UserFollow } from "@carbon/icons-react";
-import { addStudioBoardMember, type PlatformActionState } from "../../../lib/actions/platform";
+import { addStudioBoardMember } from "../../../lib/actions/platform-studio";
+import { type PlatformActionState } from "../../../lib/actions/platform-types";
 import { FormGrid } from "../FormGrid";
 
 export function AddBoardMemberForm({ studioId }: { studioId: string }) {

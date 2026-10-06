@@ -28,7 +28,7 @@
  */
 import { revalidatePath } from "next/cache";
 import { createClient as createPlatformClient } from "../platform/server";
-import type { PlatformActionState } from "./platform";
+import type { PlatformActionState } from "./platform-types";
 import { toSafeErrorMessage } from "../security/safe-error";
 
 // ── Products ─────────────────────────────────────────────────────────────

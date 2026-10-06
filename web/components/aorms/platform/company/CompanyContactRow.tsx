@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { Button, Checkbox, Form, InlineNotification, Stack, Tag, TableCell, TableRow, TextInput } from "@carbon/react";
 import { Edit } from "@carbon/icons-react";
 import { updateCompanyContact } from "../../../../lib/actions/company";
-import type { PlatformActionState } from "../../../../lib/actions/platform";
+import type { PlatformActionState } from "../../../../lib/actions/platform-types";
 import { RemoveCompanyContactButton } from "./RemoveCompanyContactButton";
 
 export type CompanyContact = {

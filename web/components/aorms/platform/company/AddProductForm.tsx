@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import { Add } from "@carbon/icons-react";
 import { addProduct } from "../../../../lib/actions/materials";
-import type { PlatformActionState } from "../../../../lib/actions/platform";
+import type { PlatformActionState } from "../../../../lib/actions/platform-types";
 import { FormGrid } from "../../FormGrid";
 
 export function AddProductForm({ companyId }: { companyId: string }) {

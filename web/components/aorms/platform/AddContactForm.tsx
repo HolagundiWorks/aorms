@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 import { Button, Checkbox, Form, InlineNotification, Stack, TextInput } from "@carbon/react";
 import { UserFollow } from "@carbon/icons-react";
-import { addStudioContact, type PlatformActionState } from "../../../lib/actions/platform";
+import { addStudioContact } from "../../../lib/actions/platform-studio";
+import { type PlatformActionState } from "../../../lib/actions/platform-types";
 import { FormGrid } from "../FormGrid";
 
 export function AddContactForm({ studioId }: { studioId: string }) {

@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { Button, Checkbox, Form, InlineNotification, Select, SelectItem, Stack, TextInput } from "@carbon/react";
 import { updateCompanyProfile } from "../../../../lib/actions/company";
-import type { PlatformActionState } from "../../../../lib/actions/platform";
+import type { PlatformActionState } from "../../../../lib/actions/platform-types";
 import { GST_STATE_CODES } from "../../../../lib/tax/place-of-supply";
 import { FormGrid } from "../../FormGrid";
 
