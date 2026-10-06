@@ -7318,6 +7318,10 @@ Order = audit § 5. `[x]` done, `[ ]` open.
 - [ ] Per-route client JS review; Razorpay/Turnstile already `afterInteractive`; `lazyOnload` would risk a payment click or form submit racing the script, so intentionally unchanged
 
 
+### Security audit — 2026-10-06
+
+Report: [SECURITY-AUDIT-2026-10-06.md](SECURITY-AUDIT-2026-10-06.md). Fixed: `next_ref`/`emit_event` open to portal roles (web migration 0095, applied), `sharp` advisory. Open: enable leaked-password protection on both Supabase projects (dashboard).
+
 ### Security audit — all portals (2026-10-02)
 
 Full report: [SECURITY-AUDIT-2026-10-02.md](SECURITY-AUDIT-2026-10-02.md). Fixed: cross-tenant
