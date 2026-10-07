@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { BigStat } from "../../../components/aorms/BigStat";
 
 const STATUS_TAG: Record<string, "cool-gray" | "blue" | "green" | "red"> = {
   INVITED: "cool-gray",
@@ -22,6 +23,13 @@ export default async function ContractorPortalHomePage() {
     <Grid>
       <Column sm={4} md={8} lg={16}>
         <PageHeader title="Your tender invitations" result="A bid you can submit with confidence." description="Tenders you've been invited to bid on." />
+
+        <div className="aorms-bigstat-row">
+          <BigStat value={(invitations ?? []).length} label="Invitations" />
+          <BigStat value={(invitations ?? []).filter((i) => i.status === "INVITED" || i.status === "VIEWED").length} label="Awaiting your bid" active />
+          <BigStat value={(invitations ?? []).filter((i) => i.status === "SUBMITTED").length} label="Bids submitted" />
+          <BigStat value={(invitations ?? []).filter((i) => i.status === "DECLINED").length} label="Declined" />
+        </div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>

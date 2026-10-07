@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { PageHeader } from "../../../components/aorms/PageHeader";
+import { BigStat } from "../../../components/aorms/BigStat";
 
 function formatInr(paise: number | null): string {
   if (paise == null) return "—";
@@ -23,6 +24,13 @@ export default async function CollabPortalHomePage() {
           title="Your engagements" result="Information shared without chasing."
           description="Projects you're engaged on, agreed fee, and payments received."
         />
+
+        <div className="aorms-bigstat-row">
+          <BigStat value={(engagements ?? []).length} label="Engagements" />
+          <BigStat value={(engagements ?? []).filter((e) => e.status === "ACTIVE").length} label="Active" active />
+          <BigStat value={formatInr((engagements ?? []).reduce((n, e) => n + (e.agreed_fee_paise ?? 0), 0))} label="Agreed fee" />
+          <BigStat value={formatInr((engagements ?? []).reduce((n, e) => n + (e.paid_paise ?? 0), 0))} label="Paid to date" />
+        </div>
 
         {error ? (
           <p className="cds--type-body-01" style={{ color: "var(--cds-support-error)" }}>
