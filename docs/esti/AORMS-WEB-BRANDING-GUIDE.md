@@ -507,6 +507,7 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-07 (sign-in: demo credentials rework)** — `components/aorms/platform/DemoAccounts.tsx` replaces the flat ten-button list (each with a paragraph) under the form. It sits beside the form from lg up (`.aorms-login-grid`, both above the fold at 1440×900) and below it on narrower screens. Accounts are grouped as the product is — Office by level (L1–L5) and the three Portals — each row a radio (title, name, level), selected row marked with the orange rule. Picking one fills the form and shows, once, what that sign-in can do; the shared password is shown once with a Copy button. Same `lib/demo-accounts.json` source as before.
 - **2026-10-06 (landing: every board fits one desktop screen)** — verified at 1366×768, 1440×900 and 1920×1080 (board
   scrollHeight == viewport). Dense boards use a smaller headline (`compact`) and a third column (`middle` on
   `Sheet`, container query ≥ 56rem): System = copy + rows · cost calculator · pricing + demo; Enter = copy + Talk to

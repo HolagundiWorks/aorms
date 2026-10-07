@@ -2897,45 +2897,165 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
 }
 
 // Demo accounts on the sign-in page — one row per level, indented by seniority (2026-10-04).
-.aorms-demo-roster {
+// Sign-in page layout + demo accounts (2026-10-07): the form keeps its 30rem column; from lg the demo
+// accounts sit beside it (form left, demo right) so both are above the fold.
+.aorms-login-grid {
+  max-inline-size: 30rem;
+  margin: 0 auto;
+  padding: 4rem 1rem 3rem;
+  display: grid;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+@media (min-width: 66rem) {
+  .aorms-login-grid {
+    max-inline-size: 62rem;
+    grid-template-columns: minmax(0, 30rem) minmax(0, 1fr);
+    gap: 4rem;
+  }
+}
+
+.aorms-demo {
+  border-block-start: 2px solid var(--aorms-ink);
+  padding-block-start: 0.875rem;
+  display: grid;
+  gap: 0.625rem;
+}
+
+.aorms-demo__head {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.aorms-demo__lede {
+  font-size: 0.875rem;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-demo__label {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-block-end: 0.25rem;
+
+  span {
+    margin-inline-start: 0.5rem;
+    color: var(--cds-text-secondary);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+}
+
+.aorms-demo__group ul {
   list-style: none;
-  margin: 0.75rem 0 0;
+  margin: 0;
   padding: 0;
 }
 
-.aorms-demo-roster li {
-  border-block-start: 1px solid var(--aorms-rule);
-}
-
-.aorms-demo-roster button {
-  display: grid;
-  gap: 0.125rem;
+.aorms-demo__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   inline-size: 100%;
-  padding: 0.5rem 0.5rem;
-  text-align: start;
+  padding: 0.3125rem 0.75rem;
   background: none;
   border: 0;
+  border-block-start: 1px solid var(--aorms-rule);
+  border-inline-start: 2px solid transparent;
   color: var(--aorms-ink);
+  text-align: start;
   cursor: pointer;
+
+  &:hover {
+    background: var(--cds-layer-hover-01);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--aorms-ink);
+    outline-offset: -2px;
+  }
+
+  &[aria-checked="true"] {
+    border-inline-start-color: var(--aorms-orange);
+    background: var(--cds-layer-01);
+  }
 }
 
-.aorms-demo-roster button:hover {
-  background: var(--cds-layer-hover-01);
+.aorms-demo__who {
+  display: grid;
+  gap: 0.0625rem;
+  font-size: 0.875rem;
+
+  span {
+    font-size: 0.75rem;
+    color: var(--cds-text-secondary);
+  }
 }
 
-.aorms-demo-roster button:focus-visible {
-  outline: 2px solid var(--aorms-ink);
-  outline-offset: -2px;
-}
-
-.aorms-demo-roster span {
+.aorms-demo__level {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
+  color: var(--cds-text-secondary);
 }
 
-.aorms-demo-roster small {
-  color: var(--cds-text-secondary);
+.aorms-demo__detail {
+  min-block-size: 4rem;
+  padding: 0.625rem 0.75rem;
+  background: var(--cds-layer-01);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.75rem;
+  }
+
+  p + p {
+    margin-block-start: 0.25rem;
+    color: var(--cds-text-secondary);
+  }
+}
+
+.aorms-demo__password {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
   font-size: 0.75rem;
+
+  span {
+    color: var(--cds-text-secondary);
+  }
+
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.8125rem;
+  }
+
+  button {
+    background: none;
+    border: 0;
+    border-block-end: 1px solid var(--aorms-rule);
+    padding: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--aorms-ink);
+
+    &:hover,
+    &:focus-visible {
+      border-block-end-color: var(--aorms-orange);
+    }
+  }
+}
+
+.aorms-demo__foot {
+  font-size: 0.6875rem;
+  color: var(--cds-text-secondary);
 }
 
 // ── Landing: visual hierarchy pass (2026-10-04) ───────────────────────────────────────────

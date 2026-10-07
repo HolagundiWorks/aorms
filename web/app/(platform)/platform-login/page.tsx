@@ -8,8 +8,7 @@ import { platformSignIn, signInWithGoogle } from "../../../lib/actions/platform-
 import { type PlatformActionState } from "../../../lib/actions/platform-types";
 import { offerToSaveCredentials } from "../../../lib/credential-store";
 import { AuthHead } from "../../../components/aorms/AuthHead";
-import { DEMO } from "../../../lib/marketing-content";
-import demoAccounts from "../../../lib/demo-accounts.json";
+import { DemoAccounts } from "../../../components/aorms/platform/DemoAccounts";
 import { TurnstileWidget } from "../../../components/aorms/security/TurnstileWidget";
 
 export default function PlatformLoginPage() {
@@ -18,8 +17,8 @@ export default function PlatformLoginPage() {
   return (
     // Centred single column with real top padding (2026-09-30 UI audit: the
     // Grid/Column version sat flush top-left at wide widths).
-    <div style={{ maxWidth: "30rem", margin: "0 auto", padding: "4rem 1rem 3rem" }}>
-      <div>
+    <div className="aorms-login-grid">
+      <div className="aorms-login-main">
         <Stack gap={6}>
           <AuthHead
             title="Sign in to AORMS"
@@ -63,33 +62,6 @@ export default function PlatformLoginPage() {
             </p>
           </Stack>
         </Form>
-          <div className="aorms-lp-result" aria-label="Demo accounts">
-            <p className="aorms-lp-result__label">Try the live demo — pick a level</p>
-            <p className="cds--type-helper-text-01" style={{ marginBlock: "0.5rem", color: "var(--cds-text-secondary)" }}>
-              One sample studio, signed in as each level of the practice. Same password for all: <code>{DEMO.password}</code>. Reset nightly.
-            </p>
-            <ul className="aorms-demo-roster">
-              {demoAccounts.map((a) => (
-                <li key={a.email} style={{ paddingInlineStart: `${(a.level - 1) * 0.5}rem` }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const set = (id: string, v: string) => {
-                        const el = document.getElementById(id) as HTMLInputElement | null;
-                        if (el) el.value = v;
-                      };
-                      set("email", a.email);
-                      set("password", DEMO.password);
-                    }}
-                  >
-                    <strong>{a.title}</strong>
-                    <span>{a.email}</span>
-                    <small>{a.can}</small>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
           <dl className="aorms-login-foot">
             <div>
               <dt>System</dt>
@@ -106,6 +78,7 @@ export default function PlatformLoginPage() {
           </dl>
         </Stack>
       </div>
+      <DemoAccounts />
     </div>
   );
 }
