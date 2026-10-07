@@ -7435,3 +7435,11 @@ demo logins. Landing nameplate and phone bar gained a Sign in button. `source-ma
 
 See branding guide §15. Re-check with `scrollHeight == clientHeight` on `.aorms-lp-board.is-active` at 1366×768,
 1440×900 and 1920×1080 after any landing copy change.
+
+### 2026-10-07 — Client Portal project sheet redesigned (project image, KPI rail, side pane)
+
+The Client Portal's project page (`/portal/[projectId]`) was a flat stack of eight tables under a tag row, with the
+generated plan drawing as the only picture. It now has the Office Hub project page's anatomy: left sticky KPI rail,
+phase strip, the project's own cover image, the record in four numbered groups, and a right side pane. Verified with
+`tsc --noEmit` and `eslint` only — not click-tested signed in as a client (the demo client login points at the cloud
+project, so a signed-in browser pass is left to the user). See branding guide §15.

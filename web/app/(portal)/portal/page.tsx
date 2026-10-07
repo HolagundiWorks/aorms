@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Column, Grid } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { placeholderFor } from "../../../lib/projects/placeholder";
+import { signCoverUrls } from "../../../lib/projects/covers";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { BigStat } from "../../../components/aorms/BigStat";
 
@@ -23,12 +24,14 @@ export default async function PortalHomePage() {
   const supabase = await createClient();
 
   const [{ data: projects, error }, { count: awaiting }, { count: unpaid }] = await Promise.all([
-    supabase.from("project_offices").select("id, ref, title, status, project_type, city").order("created_at", { ascending: false }),
+    supabase.from("project_offices").select("id, ref, title, status, project_type, city, cover_image_key").order("created_at", { ascending: false }),
     supabase.from("approvals").select("id", { count: "exact", head: true }).eq("status", "SENT"),
     supabase.from("invoices").select("id", { count: "exact", head: true }).eq("status", "ISSUED"),
   ]);
 
   const rows = projects ?? [];
+  // Signed cover URLs, minted only for the keys the RLS-scoped read above returned; a project without one gets a placeholder.
+  const covers = await signCoverUrls(rows.map((p) => p.cover_image_key));
   const active = rows.filter((p) => p.status === "ACTIVE").length;
 
   return (
@@ -64,7 +67,7 @@ export default async function PortalHomePage() {
                   <Link href={`/portal/${p.id}`} className="aorms-pcard__link" aria-label={`${p.title}, ${p.ref}, ${status}`}>
                     <div className="aorms-pcard__media">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={placeholderFor(p.ref)} alt="" loading="lazy" />
+                      <img src={(p.cover_image_key && covers.get(p.cover_image_key)) || placeholderFor(p.ref)} alt="" loading="lazy" />
                       <div className="aorms-pcard__veil" aria-hidden>
                         <span className="aorms-pcard__name">{p.title}</span>
                         <span className="aorms-pcard__meta">{[p.ref, status].join(" · ")}</span>
