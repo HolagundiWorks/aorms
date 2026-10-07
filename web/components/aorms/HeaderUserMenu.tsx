@@ -32,6 +32,7 @@ export function HeaderUserMenu({
   initials,
   hour,
   hasMultipleStudios,
+  showFirmSettings = true,
 }: {
   name: string;
   role: string;
@@ -39,6 +40,8 @@ export function HeaderUserMenu({
   hour: number;
   /** True when this profile belongs to more than one firm (profile_firm_memberships, migration 0055) — shows a "Switch studio" link to the picker. */
   hasMultipleStudios?: boolean;
+  /** Staff-only link; portal roles (client) have no Firm settings page. */
+  showFirmSettings?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const greeting = getGreeting(hour);
@@ -112,9 +115,11 @@ export function HeaderUserMenu({
               gap: "0.75rem",
             }}
           >
-            <Link href="/firm-settings" onClick={() => setOpen(false)} className="cds--type-body-01" style={{ color: "inherit" }}>
-              Firm settings
-            </Link>
+            {showFirmSettings ? (
+              <Link href="/firm-settings" onClick={() => setOpen(false)} className="cds--type-body-01" style={{ color: "inherit" }}>
+                Firm settings
+              </Link>
+            ) : null}
             {hasMultipleStudios ? (
               <Link href="/select-studio" onClick={() => setOpen(false)} className="cds--type-body-01" style={{ color: "inherit" }}>
                 Switch studio
