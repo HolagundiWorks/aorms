@@ -138,9 +138,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <Stack gap={3} style={{ marginTop: "0.75rem" }}>
         {Array.isArray(children) ? (
           children.map((child, i) => (
-            <p key={i} className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
+            // A div, not a p: every child is already a <p> (nested <p> is invalid HTML and caused a hydration error).
+            <div key={i} className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
               {child}
-            </p>
+            </div>
           ))
         ) : (
           <div className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>

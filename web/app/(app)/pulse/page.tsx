@@ -292,7 +292,7 @@ export default async function PulsePage() {
           readyToBill.rows.map((r) => (
             <WidgetRow
               key={r.id}
-              href={`/invoices/${r.id}`}
+              href="/invoices"
               primary={r.ref}
               secondary={r.projectTitle ?? "—"}
               right={<span className="cds--type-body-01">{formatInr(r.netReceivablePaise)}</span>}
@@ -308,7 +308,7 @@ export default async function PulsePage() {
           awaitingPayment.rows.map((r) => (
             <WidgetRow
               key={r.id}
-              href={`/invoices/${r.id}`}
+              href="/invoices"
               primary={r.ref}
               secondary={r.projectTitle ?? "—"}
               right={
