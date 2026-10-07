@@ -19,14 +19,18 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { aormsMotion, standardTransition } from "../../../lib/motion/tokens";
 
+// Client-only memory of the previous tab. It must never be read or written while rendering on the server: that
+// module is shared across every request, so the server-rendered `initial` styles varied per request and never
+// matched the client's first render (hydration mismatch on every /projects/[id]/* page).
 let lastIndex = -1;
 
 export function PanelSlide({ children, order, base }: { children: ReactNode; order: string[]; base: (pathname: string) => string }) {
   const pathname = usePathname();
   const slug = base(pathname);
   const index = Math.max(0, order.indexOf(slug));
-  const direction = lastIndex < 0 || index === lastIndex ? 0 : index > lastIndex ? 1 : -1;
-  lastIndex = index;
+  const onServer = typeof window === "undefined";
+  const direction = onServer || lastIndex < 0 || index === lastIndex ? 0 : index > lastIndex ? 1 : -1;
+  if (!onServer) lastIndex = index;
 
   return (
     <MotionConfig reducedMotion="user">
