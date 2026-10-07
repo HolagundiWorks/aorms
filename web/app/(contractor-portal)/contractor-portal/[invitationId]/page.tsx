@@ -61,6 +61,12 @@ export default async function ContractorInvitationDetailPage({
       : tender.project_offices
     : null;
 
+  // `project_offices` is not readable by a contractor under RLS (migration 0098's function returns the name).
+  const { data: projectRows } = await supabase.rpc("my_tender_projects");
+  const ownProject = (projectRows ?? []).find((r: { invitation_id: string }) => r.invitation_id === invitationId) as
+    | { project_ref: string; project_title: string }
+    | undefined;
+
   const { data: bid } = await supabase
     .from("tender_bids")
     .select("amount_paise, completion_weeks, notes")
@@ -72,7 +78,7 @@ export default async function ContractorInvitationDetailPage({
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader eyebrow={`${project?.title ?? "—"} (${project?.ref ?? "—"})`} title={tender?.title ?? "Tender"} />
+        <PageHeader eyebrow={`${ownProject?.project_title ?? project?.title ?? "—"} (${ownProject?.project_ref ?? project?.ref ?? "—"})`} title={tender?.title ?? "Tender"} />
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "1.5rem" }}>
           <Tag type={STATUS_TAG[invitation.status] ?? "cool-gray"} size="sm">
             {invitation.status}
