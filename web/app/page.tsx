@@ -6,8 +6,9 @@ import { createClient } from "../lib/supabase/server";
 import { createServiceRoleClient as createPlatformServiceRoleClient } from "../lib/platform/service";
 import { roleHome } from "../lib/auth/role-home";
 import { listBlogPosts } from "../lib/blog";
-import { HeroCtas, LiveDemoCtas, FinalCtas } from "../components/aorms/LandingButtons";
+import { HeroCtas, FinalCtas } from "../components/aorms/LandingButtons";
 import { TodaysBriefingPanel } from "../components/aorms/TodaysBriefingPanel";
+import { PricingPlans, signupHref, talkHref, type PricingPlan } from "../components/aorms/landing/PricingPlans";
 import { PlanGlyph } from "../components/aorms/PlanGlyph";
 import { BigStat } from "../components/aorms/BigStat";
 import { PhaseStrip } from "../components/aorms/PhaseStrip";
@@ -233,11 +234,50 @@ export default async function LandingPage() {
   const livePrice = (plan: string) => planPricingRows?.find((p) => p.plan === plan)?.base_price_paise ?? 0;
   const formatRupees = (paise: number) => `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
-  const plans = [
-    { key: "FREE", plan: PRICING.free, price: "₹0", suffix: "", sub: "" },
-    { key: "STUDIO", plan: PRICING.studio, price: formatRupees(livePrice("STUDIO") / 12), suffix: "/month", sub: `${formatRupees(livePrice("STUDIO"))}/year, billed annually` },
-    { key: "PROFESSIONAL", plan: PRICING.professional, price: formatRupees(livePrice("PROFESSIONAL") / 12), suffix: "/month", sub: `${formatRupees(livePrice("PROFESSIONAL"))}/year, billed annually` },
-    { key: "ENTERPRISE", plan: PRICING.enterprise, price: `From ${formatRupees(livePrice("ENTERPRISE"))}`, suffix: "/year", sub: "" },
+  const monthly = (plan: string) => formatRupees(livePrice(plan) / 12);
+  const yearly = (plan: string) => `${formatRupees(livePrice(plan))} a year, billed annually`;
+  const plans: PricingPlan[] = [
+    {
+      key: "FREE",
+      name: PRICING.free.name,
+      fit: "Try it on a real project",
+      price: "₹0",
+      suffix: "",
+      note: "Free, permanently",
+      features: ["1 team member, 2 active projects", "Pulse, fees, revisions and approvals", "Upgrade only when you outgrow it"],
+      cta: { label: "Start free", href: signupHref },
+    },
+    {
+      key: "STUDIO",
+      name: PRICING.studio.name,
+      fit: "Up to 10 people",
+      price: monthly("STUDIO"),
+      suffix: "/month",
+      note: yearly("STUDIO"),
+      features: ["10 active projects, unlimited clients", "Billing, GST workflows, client portal", "Team and workload, ESTI Lite"],
+      cta: { label: "Start with Studio", href: signupHref },
+      featured: true,
+    },
+    {
+      key: "PROFESSIONAL",
+      name: PRICING.professional.name,
+      fit: "Up to 25 people",
+      price: monthly("PROFESSIONAL"),
+      suffix: "/month",
+      note: yearly("PROFESSIONAL"),
+      features: ["Unlimited projects, everything in Studio", "Fee-leakage detection, advanced analytics", "Full ESTI, priority support, guided onboarding"],
+      cta: { label: "Start with Practice", href: signupHref },
+    },
+    {
+      key: "ENTERPRISE",
+      name: PRICING.enterprise.name,
+      fit: "25+ people",
+      price: `From ${formatRupees(livePrice("ENTERPRISE"))}`,
+      suffix: "/year",
+      note: "Priced to your practice",
+      features: ["Your own address, yourstudio.aorms.in", "Dedicated onboarding and support", "A dedicated database on request"],
+      cta: { label: "Talk to us", href: talkHref },
+    },
   ];
 
   const jsonLdOffers = [
@@ -417,38 +457,20 @@ export default async function LandingPage() {
             <>
               <Sub>See what it costs</Sub>
               <OperationalLeakageCalculator />
+              <p style={{ marginBlockStart: "0.75rem", fontSize: "0.8125rem" }}>
+                Want to see it first?{" "}
+                <Link href="/login" className="cds--link" data-analytics-event="live_demo_enter">
+                  Open the live demo →
+                </Link>{" "}
+                <span style={{ color: "var(--cds-text-secondary)" }}>Password: {DEMO.password}</span>
+              </p>
             </>
           }
           side={
             <>
               <Sub>Pricing</Sub>
-              <div className="aorms-lp-tight"><div className="aorms-lp-cards aorms-lp-cards--compact">
-                {plans.map(({ key, plan, price, suffix, sub }) => (
-                  <div key={key} className="aorms-lp-card aorms-lp-card--ink" data-analytics-event={key === "STUDIO" ? "pricing_view" : undefined}>
-                    <h3>
-                      {plan.name}
-                      {"badge" in plan && plan.badge ? ` · ${plan.badge}` : ""}
-                    </h3>
-                    <p>{plan.tagline}</p>
-                    <p className="aorms-lp-price">
-                      {price}
-                      {suffix && <span style={{ fontSize: "0.875rem" }}>{suffix}</span>}
-                    </p>
-                    {sub && <p style={{ fontSize: "0.75rem" }}>{sub}</p>}
-                  </div>
-                ))}
-              </div>
-              </div>
-              <div className="aorms-lp-result">
-                <p className="aorms-lp-result__label">Demo credentials</p>
-                <p style={{ fontSize: "0.875rem", margin: "0.5rem 0", color: "var(--cds-text-secondary)" }}>
-                  A sample studio, open at every level — staff roles and the three portals. Pick one on the sign-in page; one password for all; reset nightly.
-                </p>
-                <p className="cds--type-code-01">
-                  {DEMO.password}
-                </p>
-              </div>
-              <LiveDemoCtas />
+              <PricingPlans plans={plans} />
+              <p className="aorms-lp-plans__foot">Prices in INR · paid plans billed annually.</p>
             </>
           }
         >
