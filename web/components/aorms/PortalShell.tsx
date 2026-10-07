@@ -9,7 +9,6 @@ import { OrganisationIdentity } from "./OrganisationIdentity";
 import { HeaderUserMenu } from "./HeaderUserMenu";
 import { BrandWatermark } from "./BrandWatermark";
 import { TitleBlock } from "./TitleBlock";
-import { CornerFigure } from "./PortalNameplate";
 import { getInitials } from "../../lib/shell/identity";
 import { INSTRUCTIONS_COOKIE } from "../../lib/shell/preferences";
 
@@ -20,8 +19,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
 /**
  * Client Portal shell (2026-10-07) — the Office Hub's structure, scoped to a client: the firm's name leads the
  * header, the same user menu (greeting, role, sign out) sits at its right, a left icon rail expands on hover with
- * numbered sheets, an Instructions switch closes the rail, and the corner figure, title block and AORMS mark
- * frame the page. The rail lists "Your projects" and — once a project is open — that project's sections
+ * numbered sheets, an Instructions switch closes the rail, and the title block and AORMS mark frame the page
+ * (no corner plan drawing here — a portal shows the project's own image instead). The rail lists "Your projects" and — once a project is open — that project's sections
  * (anchors on the same page, so every route stays real and deep-linkable). No staff links: no Pulse, Tasks or
  * Firm settings. Same CSS as AppShell (globals.scss keys off `.cds--side-nav ~ .cds--content`).
  */
@@ -124,7 +123,6 @@ export function PortalShell({
           </SideNavLink>
         </SideNavItems>
       </SideNav>
-      <CornerFigure />
       <Content data-instructions={instructions ? "on" : "off"}>{children}</Content>
       <TitleBlock companyName={companyName} />
       <BrandWatermark />

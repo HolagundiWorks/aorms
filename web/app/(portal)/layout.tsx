@@ -13,9 +13,9 @@ import { PortalShell, type PortalSection } from "../../components/aorms/PortalSh
 /** Sections of an open project, in page order — anchors match the ids on `portal/[projectId]/page.tsx`. */
 const PROJECT_SECTIONS: PortalSection[] = [
   { label: "Phases", anchor: "phases" },
-  { label: "Invoices", anchor: "invoices" },
   { label: "Approvals", anchor: "approvals" },
   { label: "Decisions", anchor: "decisions" },
+  { label: "Invoices", anchor: "invoices" },
   { label: "Drawings", anchor: "drawings" },
   { label: "Transmittals", anchor: "transmittals" },
   { label: "Meeting minutes", anchor: "minutes" },
