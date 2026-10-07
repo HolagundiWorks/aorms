@@ -19,6 +19,11 @@ export default async function ContractorPortalHomePage() {
     .select("id, status, invited_at, tenders(title, category, status, due_date, project_offices(title))")
     .order("invited_at", { ascending: false });
 
+  // `project_offices` is not readable by a contractor under RLS; this security-definer function (migration 0098)
+  // returns the project name for the caller's own invitations only.
+  const { data: projectRows } = await supabase.rpc("my_tender_projects");
+  const projectByInvitation = new Map((projectRows ?? []).map((r: { invitation_id: string; project_title: string }) => [r.invitation_id, r.project_title]));
+
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
@@ -62,7 +67,7 @@ export default async function ContractorPortalHomePage() {
                   : null;
                 return (
                   <TableRow key={inv.id}>
-                    <TableCell>{project?.title ?? "—"}</TableCell>
+                    <TableCell>{projectByInvitation.get(inv.id) ?? project?.title ?? "—"}</TableCell>
                     <TableCell>
                       <Link href={`/contractor-portal/${inv.id}`}>{tender?.title ?? "—"}</Link>
                     </TableCell>
