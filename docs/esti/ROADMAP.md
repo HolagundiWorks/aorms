@@ -7443,3 +7443,9 @@ generated plan drawing as the only picture. It now has the Office Hub project pa
 phase strip, the project's own cover image, the record in four numbered groups, and a right side pane. Verified with
 `tsc --noEmit` and `eslint` only — not click-tested signed in as a client (the demo client login points at the cloud
 project, so a signed-in browser pass is left to the user). See branding guide §15.
+
+### 2026-10-07 — Collaborator and Contractor portals take the project sheet
+
+Same anatomy as the Client Portal's project sheet (KPI rail, project image, numbered groups, side pane), plus the image
+gallery on both home pages. Shared building blocks live in `web/components/aorms/PortalSheet.tsx`. Verified with `tsc`,
+`eslint` and `vitest` only — not click-tested signed in as a consultant or contractor. See branding guide §15.

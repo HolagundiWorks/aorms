@@ -13,11 +13,11 @@ import { PortalShell, type PortalSection } from "../../components/aorms/PortalSh
 /** Sections of an open project, in page order — anchors match the ids on the detail page. */
 const PROJECT_SECTIONS: PortalSection[] = [
   { label: "Phases", anchor: "phases" },
-  { label: "Drawings", anchor: "drawings" },
-  { label: "Transmittals", anchor: "transmittals" },
   { label: "Tasks for you", anchor: "tasks" },
   { label: "Submit", anchor: "submit" },
   { label: "Your submissions", anchor: "submissions" },
+  { label: "Drawings", anchor: "drawings" },
+  { label: "Transmittals", anchor: "transmittals" },
 ];
 
 /**
