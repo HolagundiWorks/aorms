@@ -34,6 +34,8 @@ export function PortalShell({
   userRole,
   istHour,
   projectSections,
+  homeLabel = "Your projects",
+  sectionsTitle = "This project",
   initialInstructions = true,
 }: {
   children: React.ReactNode;
@@ -43,8 +45,12 @@ export function PortalShell({
   userName: string;
   userRole: string;
   istHour: number;
-  /** Sections of an open project, linked from the rail. */
+  /** Sections of an open project (or tender), linked from the rail. */
   projectSections: PortalSection[];
+  /** Rail label for the portal's list page. */
+  homeLabel?: string;
+  /** Rail group title shown once an item is open. */
+  sectionsTitle?: string;
   initialInstructions?: boolean;
 }) {
   const pathname = usePathname();
@@ -91,10 +97,10 @@ export function PortalShell({
         <SideNavItems>
           <SideNavLink as={NextLink} href={homeHref} renderIcon={FolderDetails} isActive={pathname === homeHref} onClick={collapseNav}>
             <span className="aorms-sheet-no">{pad(0)}</span>
-            Your projects
+            {homeLabel}
           </SideNavLink>
           {projectBase && projectSections.length > 0 && (
-            <SideNavMenu title={`${pad(1)}\u2002This project`} renderIcon={Document} defaultExpanded>
+            <SideNavMenu title={`${pad(1)}\u2002${sectionsTitle}`} renderIcon={Document} defaultExpanded>
               {projectSections.map((s, i) => (
                 <SideNavMenuItem key={s.anchor} as={NextLink} href={`${homeHref}/${projectBase[1]}#${s.anchor}`} onClick={collapseNav}>
                   <span className="aorms-sheet-no">{`${pad(1)}.${pad(i + 1)}`}</span>
