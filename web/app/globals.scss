@@ -3298,3 +3298,118 @@ h1.aorms-lp-display {
 .aorms-lp-lede + .aorms-lp-tight {
   margin-block-start: 1.5rem;
 }
+
+// Landing pricing (2026-10-07): one ruled row per plan — fit, monthly figure, annual total, three
+// differences, one action. The recommended plan carries the orange rule ("start here").
+.aorms-lp-plans {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.aorms-lp-plan {
+  border: 1px solid var(--aorms-rule);
+  border-block-start: 2px solid var(--aorms-ink);
+  padding: 0.5rem 0.75rem 0.4375rem;
+  display: grid;
+  gap: 0.25rem;
+
+  &.is-featured {
+    border-block-start-color: var(--aorms-orange);
+    background: var(--cds-layer-01);
+  }
+
+  h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+}
+
+.aorms-lp-plan__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.aorms-lp-plan__badge {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--aorms-orange-text);
+}
+
+.aorms-lp-plan__fit {
+  font-size: 0.75rem;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-lp-plan__price {
+  text-align: end;
+  font-size: 1.375rem;
+  font-weight: 300;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  small {
+    font-size: 0.75rem;
+    margin-inline-start: 0.125rem;
+    color: var(--cds-text-secondary);
+  }
+
+  span {
+    display: block;
+    margin-block-start: 0.125rem;
+    font-size: 0.6875rem;
+    font-weight: 400;
+    color: var(--cds-text-secondary);
+    white-space: normal;
+  }
+}
+
+.aorms-lp-plan__features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--cds-text-secondary);
+
+  li::before {
+    content: "— ";
+    color: var(--aorms-rule);
+  }
+}
+
+.aorms-lp-plan__cta {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--cds-text-primary);
+  text-decoration: none;
+  justify-self: start;
+  border-block-end: 1px solid var(--aorms-rule);
+
+  &:hover,
+  &:focus-visible {
+    border-block-end-color: var(--aorms-orange);
+  }
+}
+
+.is-featured .aorms-lp-plan__cta {
+  border-block-end-color: var(--aorms-orange);
+}
+
+.aorms-lp-plans__foot {
+  margin-block-start: 0.5rem;
+  font-size: 0.6875rem;
+  color: var(--cds-text-secondary);
+}
