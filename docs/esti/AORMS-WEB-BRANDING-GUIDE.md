@@ -507,6 +507,7 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-07 (Client Portal follows the Office Hub structure)** — `app/(portal)/layout.tsx` now renders `components/aorms/PortalShell.tsx`: the firm's name leads the header, the same user menu (greeting, role, sign out; no "Firm settings" for a client) sits at its right, and a left icon rail (hover to expand, numbered sheets, Instructions switch) lists "Your projects" and, inside a project, that project's sections as anchors on the same page (`#phases`, `#invoices`, `#approvals`, `#decisions`, `#drawings`, `#transmittals`, `#minutes`, `#contact`). Corner figure, title block and AORMS mark as in the Hub. The home page is the Hub's Projects page scoped to the client: four `BigStat`s (projects, active, awaiting your response, invoices to pay) and the image gallery linking to `/portal/<id>`. The firm name comes from `public.my_firm_name()` (web migration 0096) because `firms` is staff-only under RLS. Contractor and Collaborator portals still use the older plain header — same treatment is the follow-up.
 - **2026-10-06 (landing: every board fits one desktop screen)** — verified at 1366×768, 1440×900 and 1920×1080 (board
   scrollHeight == viewport). Dense boards use a smaller headline (`compact`) and a third column (`middle` on
   `Sheet`, container query ≥ 56rem): System = copy + rows · cost calculator · pricing + demo; Enter = copy + Talk to
