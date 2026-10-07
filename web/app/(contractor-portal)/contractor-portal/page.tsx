@@ -3,6 +3,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../lib/supabase/server";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { BigStat } from "../../../components/aorms/BigStat";
+import { placeholderFor } from "../../../lib/projects/placeholder";
 
 const STATUS_TAG: Record<string, "cool-gray" | "blue" | "green" | "red"> = {
   INVITED: "cool-gray",
@@ -23,6 +24,7 @@ export default async function ContractorPortalHomePage() {
   // returns the project name for the caller's own invitations only.
   const { data: projectRows } = await supabase.rpc("my_tender_projects");
   const projectByInvitation = new Map((projectRows ?? []).map((r: { invitation_id: string; project_title: string }) => [r.invitation_id, r.project_title]));
+  const refByInvitation = new Map((projectRows ?? []).map((r: { invitation_id: string; project_ref: string }) => [r.invitation_id, r.project_ref]));
 
   return (
     <Grid>
@@ -41,6 +43,31 @@ export default async function ContractorPortalHomePage() {
             Couldn&apos;t load your invitations: {error.message}
           </p>
         ) : (
+          <>
+          {(invitations ?? []).length > 0 && (
+            <div className="aorms-pcard-grid" style={{ marginBottom: "2rem" }}>
+              {(invitations ?? []).map((inv) => {
+                const tender = Array.isArray(inv.tenders) ? inv.tenders[0] : (inv.tenders as { title: string; due_date: string | null } | null);
+                const ref = refByInvitation.get(inv.id) ?? tender?.title ?? inv.id;
+                return (
+                  <div className="aorms-pcard" key={inv.id}>
+                    <Link href={`/contractor-portal/${inv.id}`} className="aorms-pcard__link" aria-label={`${tender?.title ?? "Tender"}, ${inv.status}`}>
+                      <div className="aorms-pcard__media">
+                        {/* A contractor cannot read project covers under RLS — always the shared placeholder. */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={placeholderFor(ref)} alt="" loading="lazy" />
+                        <div className="aorms-pcard__veil" aria-hidden>
+                          <span className="aorms-pcard__name">{tender?.title ?? "Tender"}</span>
+                          <span className="aorms-pcard__meta">{[projectByInvitation.get(inv.id), inv.status].filter(Boolean).join(" · ")}</span>
+                          {tender?.due_date && <span className="aorms-pcard__meta">Due {tender.due_date}</span>}
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+          )}
           <Table aria-label="Your tender invitations" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
@@ -92,6 +119,7 @@ export default async function ContractorPortalHomePage() {
               )}
             </TableBody>
           </Table>
+          </>
         )}
       </Column>
     </Grid>

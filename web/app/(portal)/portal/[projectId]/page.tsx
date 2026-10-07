@@ -12,38 +12,11 @@ import { PortalSubmissionForms } from "../../../../components/aorms/PortalSubmis
 import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { PhaseStrip } from "../../../../components/aorms/PhaseStrip";
 import { KpiTile } from "../../../../components/aorms/KpiTile";
+import { SheetEmptyRow, SheetGroup } from "../../../../components/aorms/PortalSheet";
 
 function formatInr(paise: number | null): string {
   if (paise == null) return "—";
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
-}
-
-const pad = (n: number) => String(n).padStart(2, "0");
-
-function EmptyRow({ cols, children }: { cols: number; children: React.ReactNode }) {
-  return (
-    <TableRow>
-      <TableCell colSpan={cols}>
-        <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
-          {children}
-        </p>
-      </TableCell>
-    </TableRow>
-  );
-}
-
-/** A numbered group of the project sheet — the hierarchy the page was missing: group → section → table. */
-function Group({ no, title, note, children }: { no: number; title: string; note: string; children: React.ReactNode }) {
-  return (
-    <section className="aorms-cp__group" aria-label={title}>
-      <header className="aorms-cp__group-head">
-        <span className="aorms-cp__group-no">{pad(no)}</span>
-        <h2 className="cds--type-heading-03">{title}</h2>
-        <span className="aorms-cp__group-note">{note}</span>
-      </header>
-      {children}
-    </section>
-  );
 }
 
 /**
@@ -202,7 +175,7 @@ export default async function PortalProjectDetailPage({
 
         <div className="aorms-cp">
           <div className="aorms-cp__main">
-            <Group no={1} title="Your response" note="Approvals and decisions the studio is waiting on">
+            <SheetGroup no={1} title="Your response" note="Approvals and decisions the studio is waiting on">
               <h3 id="approvals" className="aorms-cp__sub">
                 Approvals
               </h3>
@@ -241,7 +214,7 @@ export default async function PortalProjectDetailPage({
                       </TableCell>
                     </TableRow>
                   ))}
-                  {(approvals ?? []).length === 0 && <EmptyRow cols={5}>Nothing sent for your approval yet.</EmptyRow>}
+                  {(approvals ?? []).length === 0 && <SheetEmptyRow cols={5}>Nothing sent for your approval yet.</SheetEmptyRow>}
                 </TableBody>
               </Table>
 
@@ -285,12 +258,12 @@ export default async function PortalProjectDetailPage({
                       </TableCell>
                     </TableRow>
                   ))}
-                  {(decisions ?? []).length === 0 && <EmptyRow cols={4}>Nothing sent for your review yet.</EmptyRow>}
+                  {(decisions ?? []).length === 0 && <SheetEmptyRow cols={4}>Nothing sent for your review yet.</SheetEmptyRow>}
                 </TableBody>
               </Table>
-            </Group>
+            </SheetGroup>
 
-            <Group no={2} title="Money" note="Invoices issued to you">
+            <SheetGroup no={2} title="Money" note="Invoices issued to you">
               <h3 id="invoices" className="aorms-cp__sub">
                 Invoices
               </h3>
@@ -318,12 +291,12 @@ export default async function PortalProjectDetailPage({
                       </TableCell>
                     </TableRow>
                   ))}
-                  {invoiceList.length === 0 && <EmptyRow cols={5}>No invoices issued yet.</EmptyRow>}
+                  {invoiceList.length === 0 && <SheetEmptyRow cols={5}>No invoices issued yet.</SheetEmptyRow>}
                 </TableBody>
               </Table>
-            </Group>
+            </SheetGroup>
 
-            <Group no={3} title="Documents" note="Drawings, transmittals and meeting minutes issued to you">
+            <SheetGroup no={3} title="Documents" note="Drawings, transmittals and meeting minutes issued to you">
               <h3 id="drawings" className="aorms-cp__sub">
                 Drawings
               </h3>
@@ -345,7 +318,7 @@ export default async function PortalProjectDetailPage({
                       </TableCell>
                     </TableRow>
                   ))}
-                  {(drawings ?? []).length === 0 && <EmptyRow cols={3}>No drawings issued yet.</EmptyRow>}
+                  {(drawings ?? []).length === 0 && <SheetEmptyRow cols={3}>No drawings issued yet.</SheetEmptyRow>}
                 </TableBody>
               </Table>
 
@@ -378,7 +351,7 @@ export default async function PortalProjectDetailPage({
                       </TableCell>
                     </TableRow>
                   ))}
-                  {(transmittals ?? []).length === 0 && <EmptyRow cols={4}>No transmittals issued yet.</EmptyRow>}
+                  {(transmittals ?? []).length === 0 && <SheetEmptyRow cols={4}>No transmittals issued yet.</SheetEmptyRow>}
                 </TableBody>
               </Table>
 
@@ -403,12 +376,12 @@ export default async function PortalProjectDetailPage({
                       <TableCell>{m.venue ?? "—"}</TableCell>
                     </TableRow>
                   ))}
-                  {(moms ?? []).length === 0 && <EmptyRow cols={4}>No meeting minutes issued yet.</EmptyRow>}
+                  {(moms ?? []).length === 0 && <SheetEmptyRow cols={4}>No meeting minutes issued yet.</SheetEmptyRow>}
                 </TableBody>
               </Table>
-            </Group>
+            </SheetGroup>
 
-            <Group no={4} title="Conversation" note="Write to the studio and follow what you have sent">
+            <SheetGroup no={4} title="Conversation" note="Write to the studio and follow what you have sent">
               <h3 id="contact" className="aorms-cp__sub">
                 Get in touch
               </h3>
@@ -439,10 +412,10 @@ export default async function PortalProjectDetailPage({
                       <TableCell>{new Date(s.created_at).toLocaleDateString("en-IN")}</TableCell>
                     </TableRow>
                   ))}
-                  {(submissions ?? []).length === 0 && <EmptyRow cols={5}>You haven&apos;t submitted anything yet.</EmptyRow>}
+                  {(submissions ?? []).length === 0 && <SheetEmptyRow cols={5}>You haven&apos;t submitted anything yet.</SheetEmptyRow>}
                 </TableBody>
               </Table>
-            </Group>
+            </SheetGroup>
           </div>
 
           {/* Side pane — what is waiting on the client, the project's facts, and the next invoice. */}

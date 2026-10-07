@@ -3,6 +3,8 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../lib/supabase/server";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { BigStat } from "../../../components/aorms/BigStat";
+import { placeholderFor } from "../../../lib/projects/placeholder";
+import { signCoverUrls } from "../../../lib/projects/covers";
 
 function formatInr(paise: number | null): string {
   if (paise == null) return "—";
@@ -14,8 +16,16 @@ export default async function CollabPortalHomePage() {
 
   const { data: engagements, error } = await supabase
     .from("engagements")
-    .select("id, scope, agreed_fee_paise, paid_paise, status, project_offices(id, ref, title, status)")
+    .select("id, scope, agreed_fee_paise, paid_paise, status, project_offices(id, ref, title, status, cover_image_key)")
     .order("created_at", { ascending: false });
+
+  type GalleryProject = { id: string; ref: string; title: string; cover_image_key: string | null };
+  const galleryRows = (engagements ?? []).flatMap((e) => {
+    const project = (Array.isArray(e.project_offices) ? e.project_offices[0] : e.project_offices) as GalleryProject | null | undefined;
+    return project ? [{ e, project }] : [];
+  });
+  // Signed cover URLs, minted only for keys the RLS-scoped read above returned; a project without one gets a placeholder.
+  const covers = await signCoverUrls(galleryRows.map((r) => r.project.cover_image_key));
 
   return (
     <Grid>
@@ -37,6 +47,26 @@ export default async function CollabPortalHomePage() {
             Couldn&apos;t load your engagements: {error.message}
           </p>
         ) : (
+          <>
+          {galleryRows.length > 0 && (
+            <div className="aorms-pcard-grid" style={{ marginBottom: "2rem" }}>
+              {galleryRows.map(({ e, project }) => (
+                <div className="aorms-pcard" key={e.id}>
+                  <Link href={`/collab-portal/${project.id}`} className="aorms-pcard__link" aria-label={`${project.title}, ${project.ref}, ${e.status}`}>
+                    <div className="aorms-pcard__media">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={(project.cover_image_key && covers.get(project.cover_image_key)) || placeholderFor(project.ref)} alt="" loading="lazy" />
+                      <div className="aorms-pcard__veil" aria-hidden>
+                        <span className="aorms-pcard__name">{project.title}</span>
+                        <span className="aorms-pcard__meta">{[project.ref, e.status].join(" · ")}</span>
+                        {e.scope && <span className="aorms-pcard__meta">{e.scope}</span>}
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
           <Table aria-label="Your engagements" className="aorms-table-spaced">
             <TableHead>
               <TableRow>
@@ -79,6 +109,7 @@ export default async function CollabPortalHomePage() {
               )}
             </TableBody>
           </Table>
+          </>
         )}
       </Column>
     </Grid>
