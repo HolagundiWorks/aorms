@@ -4,6 +4,7 @@ import { Tile } from "@carbon/react";
 import { ArrowUp, ArrowDown, ArrowRight } from "@carbon/icons-react";
 import { KPI_SEVERITY } from "../../lib/kpi-severity";
 import { AnimatedNumber } from "./AnimatedNumber";
+import { isAmountValue } from "../../lib/kpi-amount";
 
 /**
  * The status read some KPIs support (2026-09-13, extended to 4 tiers
@@ -126,6 +127,8 @@ export function KpiTile({
   // span, and to sighted users via the stripe's tooltip.
   const card = (
     <Tile
+      // Amount tiles are marked so a two-up KPI rail gives them a full line (globals.scss `.aorms-kpi--amount`).
+      className={isAmountValue(value) ? "aorms-kpi--amount" : undefined}
       style={{
         inlineSize: "9rem",
         blockSize: "5.5rem",

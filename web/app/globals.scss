@@ -634,14 +634,18 @@ a.cds--side-nav__link[aria-current="page"]::before {
   align-content: start;
 }
 
-// Two KPIs per line; the brief, the office sheet and long values (e.g. ₹41,87,000) span both columns.
+// Two KPIs per line; the brief, the office sheet, every amount (anything showing ₹) and long values span both columns.
 .aorms-pulse-rail > .aorms-rail-brief,
 .aorms-pulse-rail > .aorms-hub,
 .aorms-pulse-rail > :has(> .aorms-bigstat--wide),
 .aorms-pulse-rail > .aorms-bigstat--wide,
+.aorms-pulse-rail > :has(> .aorms-kpi--amount),
+.aorms-pulse-rail > .aorms-kpi--amount,
 .aorms-rail-kpis > .aorms-rail-brief,
 .aorms-rail-kpis > :has(> .aorms-bigstat--wide),
-.aorms-rail-kpis > .aorms-bigstat--wide {
+.aorms-rail-kpis > .aorms-bigstat--wide,
+.aorms-rail-kpis > :has(> .aorms-kpi--amount),
+.aorms-rail-kpis > .aorms-kpi--amount {
   grid-column: 1 / -1;
 }
 
