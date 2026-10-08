@@ -47,3 +47,26 @@ describe("buildMeetingIcs", () => {
     expect(ics).toContain("SUMMARY:Site\\, visit");
   });
 });
+
+import { computeFinalAccount } from "../lib/billing/final-account";
+import { buildMeasurementAbstract } from "../lib/billing/measurement-abstract";
+describe("final account + measurement abstract", () => {
+  it("rolls variations, certified net, retention and balance", () => {
+    const bill = { status: "CLOSED", grossPaise: 1_000_000, gstPaise: 180_000, retentionPaise: 50_000, tdsPaise: 20_000, cessPaise: 10_000, gstTdsPaise: 0, advanceRecoveryPaise: 0, otherDeductionPaise: 0, paidPaise: 700_000 };
+    const fa = computeFinalAccount(2_000_000, 100_000, [bill, { ...bill, status: "DRAFT", paidPaise: 0 }]);
+    expect(fa.finalValuePaise).toBe(2_100_000);
+    expect(fa.netCertifiedPaise).toBe(1_100_000);
+    expect(fa.balanceDuePaise).toBe(1_100_000 + 50_000 - 700_000);
+    expect(fa.unbilledPaise).toBe(100_000);
+    expect(fa.projected).toBe(true);
+  });
+  it("accumulates quantities across bills", () => {
+    const a = buildMeasurementAbstract([
+      { billNo: "1", description: "PCC", unit: "cum", ratePaise: 500_000, thisQty: 4 },
+      { billNo: "2", description: "pcc ", unit: "cum", ratePaise: 500_000, thisQty: 6 },
+    ]);
+    expect(a.rows).toHaveLength(1);
+    expect(a.rows[0].toDateQty).toBe(10);
+    expect(a.totalPaise).toBe(5_000_000);
+  });
+});

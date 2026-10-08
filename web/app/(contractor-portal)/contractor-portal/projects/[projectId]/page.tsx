@@ -6,6 +6,8 @@ import { placeholderFor } from "../../../../../lib/projects/placeholder";
 import { PageHeader } from "../../../../../components/aorms/PageHeader";
 import { KpiTile } from "../../../../../components/aorms/KpiTile";
 import { SheetEmptyRow, SheetFacts, SheetGroup, SheetPane, SheetSub } from "../../../../../components/aorms/PortalSheet";
+import { computeFinalAccount } from "../../../../../lib/billing/final-account";
+import { buildMeasurementAbstract } from "../../../../../lib/billing/measurement-abstract";
 import { computeCpm, dateForOffset, type Activity } from "../../../../../lib/scheduling/cpm";
 import { ContractorMessageForm, ContractorRaBillForm, ContractorRaiseForm } from "../../../../../components/aorms/ContractorProjectForms";
 
@@ -54,13 +56,24 @@ export default async function ContractorProjectPage({ params }: { params: Promis
   const project = rows[0];
   const pkg = rows.find((r) => r.package_id) ?? null;
 
-  const [{ data: drawings }, { data: milestones }, { data: bills }, { data: submissions }, { data: variations }] = await Promise.all([
+  const [{ data: drawings }, { data: milestones }, { data: bills }, { data: submissions }, { data: variations }, { data: steel }] = await Promise.all([
     supabase.from("drawings").select("id, ref, title, rev_no, root_id, is_current, revision_note, created_at, storage_key").eq("project_id", projectId).order("created_at", { ascending: false }),
     supabase.from("pmc_milestones").select("id, ref, title, planned_date, actual_date, percent_complete, status, notes, duration_days, predecessor_id, dep_type, lag_days").eq("project_id", projectId).order("sort_order"),
     supabase.from("pmc_ra_bills").select("id, ref, bill_no, period_start, period_end, status, gross_paise, advance_recovery_paise, retention_paise, other_deduction_paise, narrative, attachment_key, paid_paise, paid_at, gst_paise, tds_paise, cess_paise, gst_tds_paise").eq("project_id", projectId).order("created_at", { ascending: false }),
     supabase.from("contractor_submissions").select("id, kind, subject, body, status, response_note, created_at, meeting_at, meeting_place, storage_key, file_name, percent_complete, applied_at").eq("project_id", projectId).order("created_at", { ascending: false }),
     supabase.from("pmc_variations").select("id, ref, title, amount_paise, approved_at").eq("project_id", projectId).order("created_at"),
+    supabase.from("pmc_steel_certs").select("id, ref, period_start, period_end, issued_kg, consumed_kg, wastage_pct, narrative").eq("project_id", projectId).order("period_start"),
   ]);
+  const billIds = (bills ?? []).map((b) => b.id);
+  const { data: raLines } = billIds.length
+    ? await supabase.from("pmc_ra_lines").select("bill_id, description, unit, this_qty, rate_paise, sort_order").in("bill_id", billIds)
+    : { data: [] as { bill_id: string; description: string; unit: string | null; this_qty: number; rate_paise: number; sort_order: number }[] };
+  const billNoById = new Map((bills ?? []).map((b) => [b.id, b.bill_no as string]));
+  const abstract = buildMeasurementAbstract(
+    [...(raLines ?? [])]
+      .sort((a, b) => Number(billNoById.get(a.bill_id)) - Number(billNoById.get(b.bill_id)) || a.sort_order - b.sort_order)
+      .map((l) => ({ billNo: billNoById.get(l.bill_id) ?? "?", description: l.description, unit: l.unit, ratePaise: l.rate_paise, thisQty: l.this_qty })),
+  );
   const subIds = (submissions ?? []).map((s) => s.id);
   const { data: messages } = subIds.length
     ? await supabase.from("submission_messages").select("id, contractor_submission_id, author_name, author_side, body, created_at").in("contractor_submission_id", subIds).order("created_at")
@@ -103,6 +116,17 @@ export default async function ContractorProjectPage({ params }: { params: Promis
   const cpm = cpmActivities.length ? computeCpm(cpmActivities) : null;
   const cpmStart = (cpmSource.map((m) => m.planned_date).filter(Boolean).sort()[0] as string | undefined) ?? new Date().toISOString().slice(0, 10);
   const cpmRows = cpm ? cpm.activities.map((a) => ({ ...a, title: cpmSource.find((m) => m.id === a.id)?.title ?? "" })) : [];
+
+  const finalAccount = computeFinalAccount(
+    originalValue ?? 0,
+    variationTotal,
+    (bills ?? []).map((b) => ({
+      status: b.status ?? "", grossPaise: b.gross_paise ?? 0, gstPaise: b.gst_paise ?? 0, retentionPaise: b.retention_paise ?? 0, tdsPaise: b.tds_paise ?? 0,
+      cessPaise: b.cess_paise ?? 0, gstTdsPaise: b.gst_tds_paise ?? 0, advanceRecoveryPaise: b.advance_recovery_paise ?? 0, otherDeductionPaise: b.other_deduction_paise ?? 0, paidPaise: b.paid_paise ?? 0,
+    })),
+  );
+  const steelIssued = (steel ?? []).reduce((n, c) => n + (c.issued_kg ?? 0), 0);
+  const steelConsumed = (steel ?? []).reduce((n, c) => n + (c.consumed_kg ?? 0), 0);
 
   return (
     <Grid>
@@ -355,6 +379,105 @@ export default async function ContractorProjectPage({ params }: { params: Promis
               {pctBilled != null && (
                 <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
                   {pctBilled}% of the contract value has been claimed{progress != null ? `, against ${progress}% programme progress` : ""}.
+                </p>
+              )}
+              <SheetSub id="abstract">Measurement abstract (to date)</SheetSub>
+              {abstract.rows.length === 0 ? (
+                <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  Bills submitted with measurement lines build a running abstract here: quantity per item for each bill and to date.
+                </p>
+              ) : (
+                <Table aria-label="Measurement abstract" size="sm" className="aorms-table-spaced">
+                  <TableHead>
+                    <TableRow>
+                      <TableHeader>Item</TableHeader>
+                      <TableHeader>Unit</TableHeader>
+                      <TableHeader className="aorms-num">Rate</TableHeader>
+                      {abstract.billNos.map((n) => <TableHeader key={n} className="aorms-num">{`Bill ${n}`}</TableHeader>)}
+                      <TableHeader className="aorms-num">To date</TableHeader>
+                      <TableHeader className="aorms-num">Amount</TableHeader>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {abstract.rows.map((r) => (
+                      <TableRow key={`${r.description}|${r.unit}|${r.ratePaise}`}>
+                        <TableCell>{r.description}</TableCell>
+                        <TableCell>{r.unit || "—"}</TableCell>
+                        <TableCell className="aorms-num">{inr(r.ratePaise)}</TableCell>
+                        {abstract.billNos.map((n) => <TableCell key={n} className="aorms-num">{r.billQty[n] ?? "—"}</TableCell>)}
+                        <TableCell className="aorms-num">{r.toDateQty}</TableCell>
+                        <TableCell className="aorms-num">{inr(r.toDateAmountPaise)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+
+              <SheetSub id="steel">Steel reconciliation</SheetSub>
+              {(steel ?? []).length === 0 ? (
+                <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>No certified steel reconciliation for this project yet.</p>
+              ) : (
+                <Table aria-label="Steel reconciliation" size="sm" className="aorms-table-spaced">
+                  <TableHead>
+                    <TableRow>
+                      <TableHeader>Period</TableHeader>
+                      <TableHeader className="aorms-num">Issued (kg)</TableHeader>
+                      <TableHeader className="aorms-num">Consumed (kg)</TableHeader>
+                      <TableHeader className="aorms-num">Wastage</TableHeader>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {(steel ?? []).map((c) => (
+                      <TableRow key={c.id}>
+                        <TableCell>{`${day(c.period_start)} – ${day(c.period_end)}`}{c.narrative ? ` · ${c.narrative}` : ""}</TableCell>
+                        <TableCell className="aorms-num">{c.issued_kg.toLocaleString("en-IN")}</TableCell>
+                        <TableCell className="aorms-num">{c.consumed_kg.toLocaleString("en-IN")}</TableCell>
+                        <TableCell className="aorms-num">{c.wastage_pct}%</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell><strong>Total</strong></TableCell>
+                      <TableCell className="aorms-num"><strong>{steelIssued.toLocaleString("en-IN")}</strong></TableCell>
+                      <TableCell className="aorms-num"><strong>{steelConsumed.toLocaleString("en-IN")}</strong></TableCell>
+                      <TableCell className="aorms-num"><strong>{steelIssued > 0 ? `${(((steelIssued - steelConsumed) / steelIssued) * 100).toFixed(2)}%` : "—"}</strong></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              )}
+
+              <SheetSub id="final-account">{finalAccount.projected ? "Final account (projected)" : "Final account"}</SheetSub>
+              <Table aria-label="Final account" size="sm" className="aorms-table-spaced">
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Item</TableHeader>
+                    <TableHeader className="aorms-num">Amount</TableHeader>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(
+                    [
+                      ["Original contract value", inr(finalAccount.originalPaise)],
+                      ["+ Approved variations", inr(finalAccount.variationsPaise)],
+                      ["Final contract value", inr(finalAccount.finalValuePaise)],
+                      ["Certified work (gross)", inr(finalAccount.certifiedGrossPaise)],
+                      ["Submitted, not yet certified", inr(finalAccount.uncertifiedPaise)],
+                      ["Not yet billed", inr(finalAccount.unbilledPaise)],
+                      ["Net certified (after GST and deductions)", inr(finalAccount.netCertifiedPaise)],
+                      ["+ Retention to be released on completion", inr(finalAccount.retentionHeldPaise)],
+                      ["− Received to date", inr(finalAccount.receivedPaise)],
+                      ["Balance due to you on completion", inr(finalAccount.balanceDuePaise)],
+                    ] as [string, string][]
+                  ).map(([k, v]) => (
+                    <TableRow key={k}>
+                      <TableCell>{k}</TableCell>
+                      <TableCell className="aorms-num">{v}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {finalAccount.projected && (
+                <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  Projected: some work is still to be billed or certified, so these figures will move.
                 </p>
               )}
             </SheetGroup>

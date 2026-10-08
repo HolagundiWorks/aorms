@@ -20,8 +20,12 @@ const PROJECT_SECTIONS: PortalSection[] = [
   { label: "Drawings", anchor: "drawings" },
   { label: "Change log", anchor: "changelog" },
   { label: "Progress schedule", anchor: "progress" },
+  { label: "Critical path", anchor: "cpm" },
   { label: "Running bills", anchor: "bills" },
   { label: "Cost tracking", anchor: "cost" },
+  { label: "Measurement abstract", anchor: "abstract" },
+  { label: "Steel reconciliation", anchor: "steel" },
+  { label: "Final account", anchor: "final-account" },
   { label: "Tickets and meetings", anchor: "tickets" },
 ];
 const SECTION_GROUPS: PortalSectionGroup[] = [
