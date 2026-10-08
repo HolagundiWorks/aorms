@@ -55,7 +55,8 @@ and a thread — re-applied nightly by `seed_portal_demo_data()`.
 - **Site visits / joint measurements:** two new request kinds in the same form and inbox.
 - **Critical path:** the studio sets duration, predecessor, link type and lag per milestone (Programme Milestones); the contractor sees a computed critical path, float and Gantt bars.
 - **Variations and payments (0103):** studio adds signed variations per package (approval needs `cost:approve`) and records payment received on each RA bill; the contractor's cost tracking shows original value, approved variations, revised value, received to date and certified-but-unpaid.
-- Still not built: final account, joint-measurement abstract, steel reconciliation, rate-book linked-item derivation. The attachment upload and email paths need the service-role key and SMTP, so they were not exercised on the local QA stack.
+- **Measurement abstract, steel reconciliation, final account (0104):** the abstract accumulates RA-line quantities per item across bills (`lib/billing/measurement-abstract.ts`); steel certs become visible to the contractor once certified; the final account (`lib/billing/final-account.ts`) rolls original + approved variations, certified net, retention to release and received into a balance due, flagged *projected* until everything is billed and certified.
+- Still not built: rate-book linked-item derivation. The attachment upload and email paths need the service-role key and SMTP, so they were not exercised on the local QA stack.
 
 ## 4. AQC-Core logic ported (2026-10-08)
 Reference repo `HolagundiWorks/AQC` (read-only). Ported as deterministic, tested TypeScript (`tests/ra-bill-cpm.test.ts`):
