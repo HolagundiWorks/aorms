@@ -22,11 +22,11 @@ function fillSignIn(email: string, password: string) {
 /**
  * Demo credentials for the sign-in page (2026-10-07 rework). One sample studio, ten sign-ins, grouped the way
  * the product is: the office by level, then the three outside portals. Picking a row fills the form and shows,
- * once, what that sign-in can do (instead of ten paragraphs); the shared password is shown once and copyable.
+ * once, what that sign-in can do (instead of ten paragraphs). No credential is ever printed: the email and the
+ * (masked) password only appear in the sign-in form's own fields.
  */
 export function DemoAccounts() {
   const [selected, setSelected] = useState<Account | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const office = demoAccounts.filter((a) => !PORTAL_ROLES.has(a.role));
   const portals = demoAccounts.filter((a) => PORTAL_ROLES.has(a.role));
@@ -34,16 +34,6 @@ export function DemoAccounts() {
   function pick(a: Account) {
     setSelected(a);
     fillSignIn(a.email, DEMO.password);
-  }
-
-  async function copyPassword() {
-    try {
-      await navigator.clipboard.writeText(DEMO.password);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* clipboard blocked — the password is visible to copy by hand */
-    }
   }
 
   const group = (label: string, hint: string, rows: Account[]) => (
@@ -70,7 +60,7 @@ export function DemoAccounts() {
   return (
     <section className="aorms-demo" aria-label="Demo accounts">
       <p className="aorms-demo__head">Try the live demo</p>
-      <p className="aorms-demo__lede">One sample studio, every level. Pick one to fill the form.</p>
+      <p className="aorms-demo__lede">One sample studio, every level. Pick one and the form fills itself.</p>
 
       {group("Office", "L1 sees most · L5 least", office)}
       {group("Portals", "outside the office", portals)}
@@ -79,7 +69,7 @@ export function DemoAccounts() {
         {selected ? (
           <>
             <p>
-              <strong>{selected.title}</strong> · <code>{selected.email}</code>
+              <strong>{selected.title}</strong> · {selected.name}
             </p>
             <p>{selected.can}</p>
           </>
@@ -88,13 +78,6 @@ export function DemoAccounts() {
         )}
       </div>
 
-      <div className="aorms-demo__password">
-        <span>Password, all accounts</span>
-        <code>{DEMO.password}</code>
-        <button type="button" onClick={copyPassword}>
-          {copied ? "Copied" : "Copy"}
-        </button>
-      </div>
       <p className="aorms-demo__foot">Sample data, reset nightly.</p>
     </section>
   );
