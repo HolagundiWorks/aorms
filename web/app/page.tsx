@@ -21,7 +21,6 @@ import { Artboards, type Board } from "../components/aorms/landing/Artboards";
 import {
   AORMS_PLATFORM,
   CONNECTDEX,
-  DEMO,
   FAQ,
   HUMAN_CENTRIC_WORKS,
   PRICING,
@@ -461,8 +460,7 @@ export default async function LandingPage() {
                 Want to see it first?{" "}
                 <Link href="/login" className="cds--link" data-analytics-event="live_demo_enter">
                   Open the live demo →
-                </Link>{" "}
-                <span style={{ color: "var(--cds-text-secondary)" }}>Password: {DEMO.password}</span>
+                </Link>
               </p>
             </>
           }
