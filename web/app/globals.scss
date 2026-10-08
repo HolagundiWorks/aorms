@@ -478,6 +478,16 @@ a.cds--side-nav__link[aria-current="page"]::before {
   margin-block-end: 2rem;
 }
 
+// An amount (anything showing ₹) always sits alone on its line, in any KPI container and at every width:
+// the two-up rails, the auto-fill tile grids and the BigStat flex rows. (`a:has` covers a tile wrapped in a link.)
+.aorms-kpi--amount,
+a:has(> .aorms-kpi--amount),
+.aorms-bigstat--wide,
+a:has(> .aorms-bigstat--wide) {
+  grid-column: 1 / -1;
+  flex: 1 0 100%;
+}
+
 // Project board cards (ProjectCard.tsx).
 .aorms-project-grid {
   display: grid;
