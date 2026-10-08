@@ -124,6 +124,8 @@ Android business logic anywhere.
 
 ## Open items — honest, not yet done
 
+- **AQC ↔ AORMS connection (proposed 2026-10-08, undecided):** AQC owns estimation/costing, AORMS stores and shows what AQC publishes, Community free / Pro connected with an AORMS login. Plan, conflicts with current docs and the seven decisions needed: [AQC-CONNECT-PLAN.md](AQC-CONNECT-PLAN.md).
+
 - **Android app product direction, set 2026-09-20 — a full IA spec from
   the user, "Today" slice shipped, rest genuinely ahead.** Explicit
   architectural decision: the Android app (`android/`, native Kotlin +
