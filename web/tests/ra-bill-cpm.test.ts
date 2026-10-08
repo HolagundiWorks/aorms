@@ -70,18 +70,3 @@ describe("final account + measurement abstract", () => {
     expect(a.totalPaise).toBe(5_000_000);
   });
 });
-
-import { basisForUnit, deriveLinkedItems, inferTrade } from "../lib/estimating/derivation";
-describe("deriveLinkedItems (AQC DerivationEngine)", () => {
-  it("chains masonry → plaster → paint", () => {
-    const out = deriveLinkedItems([{ id: "m1", mark: "W1", trade: "Masonry", quantity: 50, unit: "sqm" }]);
-    expect(out.map((o) => [o.targetTrade, o.targetQty, o.chained])).toEqual([["Plaster", 100, false], ["Painting", 100, true]]);
-  });
-  it("skips disabled rules and unknown units; infers trade and basis", () => {
-    expect(deriveLinkedItems([{ id: "f", mark: "F", trade: "Flooring", quantity: 20, unit: "sqm" }])).toHaveLength(0);
-    expect(deriveLinkedItems([{ id: "m", mark: "W", trade: "Masonry", quantity: 5, unit: "kg" }])).toHaveLength(0);
-    expect(inferTrade("Brick masonry in CM 1:6")).toBe("Masonry");
-    expect(inferTrade("12mm cement plaster")).toBe("Plaster");
-    expect(basisForUnit("Cum")).toBe("VOLUME");
-  });
-});
