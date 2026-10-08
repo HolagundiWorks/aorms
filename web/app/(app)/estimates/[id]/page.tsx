@@ -13,6 +13,8 @@ import {
 } from "@carbon/react";
 import { createClient } from "../../../../lib/supabase/server";
 import { NewEstimateItemForm } from "../../../../components/aorms/NewEstimateItemForm";
+import { AddLinkedItemsButton } from "../../../../components/aorms/AddLinkedItemsButton";
+import { proposeLinkedLines } from "../../../../lib/estimating/derivation";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
 import { computeEstimateMarkups } from "../../../../lib/tax/estimate-markups";
 
@@ -111,6 +113,7 @@ export default async function EstimateDetailPage({
     : (estimate.rate_books as { id: string; name: string } | null);
 
   const rows = items ?? [];
+  const linked = proposeLinkedLines(rows);
   const totals = computeTotals(rows, estimate);
 
   const { data: rateBookItems } = rateBook
@@ -181,6 +184,36 @@ export default async function EstimateDetailPage({
                 )}
               </TableBody>
             </Table>
+
+            {linked.length > 0 && (
+              <div style={{ marginTop: "1.5rem" }}>
+                <h3 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>Linked items</h3>
+                <p className="cds--type-helper-text-01" style={{ marginBottom: "0.75rem", color: "var(--cds-text-secondary)" }}>
+                  Quantities that follow from your items (masonry → plaster → paint), from the rule book ported from AQC. Added at rate 0 for you to price.
+                </p>
+                <Table aria-label="Proposed linked items" size="sm" className="aorms-table-spaced">
+                  <TableHead>
+                    <TableRow>
+                      <TableHeader>Proposed item</TableHeader>
+                      <TableHeader className="aorms-num">From</TableHeader>
+                      <TableHeader className="aorms-num">Factor</TableHeader>
+                      <TableHeader className="aorms-num">Quantity</TableHeader>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {linked.map((l) => (
+                      <TableRow key={l.description}>
+                        <TableCell>{l.targetTrade} · {l.ruleName}{l.chained ? " (chained)" : ""}</TableCell>
+                        <TableCell className="aorms-num">{l.sourceQty} {l.sourceTrade}</TableCell>
+                        <TableCell className="aorms-num">× {l.factor}</TableCell>
+                        <TableCell className="aorms-num">{l.targetQty} {l.targetUnit}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <AddLinkedItemsButton estimateId={estimate.id} count={linked.length} />
+              </div>
+            )}
 
             <div style={{ marginTop: "1.5rem", maxWidth: "24rem", marginLeft: "auto" }}>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0" }}>

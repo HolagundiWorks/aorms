@@ -1,5 +1,6 @@
 "use server";
 
+import { proposeLinkedLines } from "../estimating/derivation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -284,4 +285,29 @@ export async function sendTakeoffItemToEstimate(
 
   revalidatePath(`/takeoff/${projectId}`);
   return null;
+}
+
+export type DeriveActionState = { error: string } | { ok: string } | null;
+
+/**
+ * "Add linked items" — AQC-style derivation (lib/estimating/derivation.ts): recomputes the proposals server-side from the
+ * estimate's own items (never trusts the client) and inserts the ones not already present, rate 0 for pricing afterwards,
+ * `linked_item_id` pointing at the source item. The estimate-editable lock trigger still applies.
+ */
+export async function addLinkedItems(_prev: DeriveActionState, formData: FormData): Promise<DeriveActionState> {
+  const estimateId = String(formData.get("estimateId") ?? "").trim();
+  if (!estimateId) return { error: "Missing estimate." };
+  const supabase = await createClient();
+  const { data: items, error: itemsError } = await supabase.from("estimate_items").select("id, description, unit, quantity").eq("estimate_id", estimateId);
+  if (itemsError) return { error: toSafeErrorMessage(itemsError) };
+
+  const proposals = proposeLinkedLines(items ?? []);
+  if (proposals.length === 0) return { ok: "Nothing new to add — every linked item is already in the estimate." };
+  for (const p of proposals) {
+    const res = await insertEstimateItem(supabase, {
+      estimateId, rateBookItemId: null, description: p.description, unit: p.targetUnit, quantity: p.targetQty, ratePaise: 0, linkedItemId: p.sourceItemId,
+    });
+    if (res) return res;
+  }
+  return { ok: `Added ${proposals.length} linked item${proposals.length === 1 ? "" : "s"}. Price them from the rate book.` };
 }
