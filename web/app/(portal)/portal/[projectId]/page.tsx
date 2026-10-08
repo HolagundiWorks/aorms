@@ -56,6 +56,8 @@ export default async function PortalProjectDetailPage({
   }
   if (!project) notFound();
 
+  const { data: released } = await supabase.rpc("aqc_released_versions", { p_project_office: projectId });
+
   const [
     { data: phases },
     { data: invoices },
@@ -381,7 +383,36 @@ export default async function PortalProjectDetailPage({
               </Table>
             </SheetGroup>
 
-            <SheetGroup no={4} title="Conversation" note="Write to the studio and follow what you have sent">
+            <SheetGroup no={4} title="Estimate and schedule" note="Issued by the studio from its costing system">
+              <h3 id="estimate" className="aorms-cp__sub">Released to you</h3>
+              {(released ?? []).length === 0 ? (
+                <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>Nothing has been released to you yet.</p>
+              ) : (
+                <Table aria-label="Released estimate and schedule" size="sm" className="aorms-table-spaced">
+                  <TableHead>
+                    <TableRow>
+                      <TableHeader>Document</TableHeader>
+                      <TableHeader className="aorms-num">Total</TableHeader>
+                      <TableHeader>Issued</TableHeader>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {((released ?? []) as { id: string; kind: string; version: number; summary: Record<string, unknown>; created_at: string }[]).map((v) => {
+                      const s = v.summary;
+                      return (
+                        <TableRow key={v.id}>
+                          <TableCell>{v.kind === "estimate" ? "Estimate" : "Schedule"} · v{v.version}</TableCell>
+                          <TableCell className="aorms-num">{typeof s.grandTotalPaise === "number" ? formatInr(s.grandTotalPaise) : "—"}</TableCell>
+                          <TableCell>{new Date(v.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+            </SheetGroup>
+
+            <SheetGroup no={5} title="Conversation" note="Write to the studio and follow what you have sent">
               <h3 id="contact" className="aorms-cp__sub">
                 Get in touch
               </h3>

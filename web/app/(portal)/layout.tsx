@@ -18,6 +18,7 @@ const PROJECT_SECTIONS: PortalSection[] = [
   { label: "Invoices", anchor: "invoices" },
   { label: "Drawings", anchor: "drawings" },
   { label: "Transmittals", anchor: "transmittals" },
+  { label: "Estimate", anchor: "estimate" },
   { label: "Meeting minutes", anchor: "minutes" },
   { label: "Get in touch", anchor: "contact" },
 ];

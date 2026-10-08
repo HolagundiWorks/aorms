@@ -28,3 +28,20 @@ describe("contract", () => {
     expect(p.rows).toEqual([]);
   });
 });
+
+import { buildAqcSeed } from "../lib/aqc/seed";
+describe("buildAqcSeed (portal -> AQC)", () => {
+  it("fills AQC's project and party blocks from AORMS records", () => {
+    const s = buildAqcSeed(
+      { id: "p1", ref: "PRJ-1", title: "Lakeview Residence", city: "Hosapete", site_address: "Plot 4", contact_email: null, contact_phone: null },
+      { company_name: "Aurelia", architect_name: "A. Rao", gstin: "29X", pan: "P", email: "a@x", phone: "9", address_line1: "12 MG Road", address_line2: null, city: "Hosapete", pincode: "583201", state: "KA" },
+      { name: "Mr. Kumar", contact_person: null, email: null, phone: null },
+      { name: "SLC", company_name: "Sri Lakshmi Constructions", contact_person: "S. Lakshmi", gstin: "29Y", pan: null, email: null, phone: null, city: "Hosapete" },
+    );
+    expect(s.project).toMatchObject({ name: "Lakeview Residence", location: "Plot 4, Hosapete", client_name: "Mr. Kumar", company_name: "Aurelia", hub_project_id: "p1", prepared_by_name: "A. Rao" });
+    expect(s.project.address).toBe("12 MG Road, Hosapete, KA, 583201");
+    expect(s.parties.pm.signatory_role).toBe("Project Manager");
+    expect(s.parties.contractor.company).toBe("Sri Lakshmi Constructions");
+    expect(buildAqcSeed({ id: "p", ref: "r", title: "t", city: null, site_address: null, contact_email: null, contact_phone: null }, { company_name: null, architect_name: null, gstin: null, pan: null, email: null, phone: null, address_line1: null, address_line2: null, city: null, pincode: null, state: null }, null, null).parties.contractor.company).toBe("");
+  });
+});

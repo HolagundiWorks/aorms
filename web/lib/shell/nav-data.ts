@@ -38,6 +38,7 @@ export const NAV_GROUPS: NavGroupData[] = [
     title: "Estimation & Tech",
     items: [
       { href: "/rate-books", label: "Rate Books" },
+      { href: "/aqc", label: "AQC · Costing" },
       { href: "/estimates", label: "Estimates" },
       { href: "/takeoff", label: "Take-off" },
       { href: "/spec-sheets", label: "Spec Sheets" },
