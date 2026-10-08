@@ -3,6 +3,8 @@
 // models' ToJson in HolagundiWorks/AQC. Take-off rows are schemaless string dictionaries in AQC; the field
 // names below are best-effort (see README.md) and carry no row ids — exactly like a real save.
 import { writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import process from "node:process";
 
 const s = (v) => String(v);
 const row = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, s(v)]));
@@ -119,5 +121,5 @@ const project = {
   last_estimate_rate_book_version_id: "",
 };
 
-writeFileSync(new URL("./pilot-sample.bbsproj", import.meta.url), JSON.stringify(project, null, 2) + "\n");
-console.log("wrote pilot-sample.bbsproj");
+writeFileSync(fileURLToPath(new URL("./pilot-sample.bbsproj", import.meta.url)), JSON.stringify(project, null, 2) + "\n");
+process.stdout.write("wrote pilot-sample.bbsproj\n");
