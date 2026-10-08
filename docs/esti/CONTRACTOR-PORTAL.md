@@ -47,10 +47,17 @@ and a thread — re-applied nightly by `seed_portal_demo_data()`.
 ## 3. Known gaps (documented, not built)
 - **Meeting scheduling is a request, not a booking.** The studio replies with a time; there is no calendar, invite or availability check.
 - **No drawing file download.** Contractors see the register and revision history, not the DXF/PDF (no storage-read policy; demo rows have no file).
-- **Bills are lump-sum claims.** No measurement lines (`pmc_ra_lines`), no joint-measurement abstract, no steel reconciliation.
+- ~~Bills are lump-sum claims.~~ **Done (migration 0101):** measurement-line RA bills (previous / this-bill qty × rate into `pmc_ra_lines`) with AQC-Core's statutory terms — retention, GST added, TDS 194C, labour cess, GST-TDS, advance recovery — and a live net-payable statement. TS twin `lib/billing/ra-bill.ts`; SQL recomputes in `submit_contractor_ra_bill_lines`. Still missing: joint-measurement abstract, steel reconciliation.
 - **Cost tracking is derived** from package value and bills only: no variations/deviations, final account or payment (received) dates.
 - **Progress is reported, not edited.** The studio keeps the programme; a contractor's progress update does not change milestones automatically.
 - **No attachments** on tickets or bills (photos, measurement sheets); `contractor_submissions.storage_key` exists but there is no upload.
 - **No notifications.** New tickets and bills reach the studio only by visiting the inbox / RA-bill list.
 - **Awarding a tender does not create a package.** An awarded tender makes the project "current", but a contractor can only bill against a `pmc_packages` row.
 - **Site visits and joint measurements** (kinds in the original design) have no form.
+
+## 4. AQC-Core logic ported (2026-10-08)
+Reference repo `HolagundiWorks/AQC` (read-only). Ported as deterministic, tested TypeScript (`tests/ra-bill-cpm.test.ts`):
+- **Billing** — `lib/billing/ra-bill.ts` (`RunningBill`: gross, GST, retention/TDS/cess/GST-TDS, net; `PREFIX/RA/FY/NNN` numbering).
+- **Scheduling** — `lib/scheduling/cpm.ts` (`ScheduleCalculator`: FS/SS/FF/SF + lag, forward/backward pass, float, critical path, cycle detection). **Engine only — not yet wired to a UI**: milestones carry no dependency links, so a Gantt/critical-path view needs predecessor + duration columns first.
+- **Estimation** — markup cascade already live in `lib/tax/estimate-markups.ts`; linked-item derivation and rate-book versioning are not ported.
+- Pending from the original list (still open): meeting booking/.ics, drawing download, attachments upload UI, notifications, tender-award → package, progress → milestone apply, site-visit/joint-measurement forms. DB prerequisites for several are in 0101.

@@ -87,8 +87,35 @@ export async function submitRaBill(_prev: ContractorProjectActionState, formData
   const periodEnd = String(formData.get("periodEnd") ?? "").trim();
   const grossRaw = String(formData.get("gross") ?? "").trim();
   const narrative = String(formData.get("narrative") ?? "").trim();
+  const linesRaw = String(formData.get("lines") ?? "").trim();
 
   if (!projectId || !packageId) return { error: "Missing package." };
+
+  // Measurement-line bill (AQC RunningBill): lines + statutory terms; the database recomputes every amount.
+  if (linesRaw) {
+    let lines: unknown;
+    let terms: unknown;
+    try {
+      lines = JSON.parse(linesRaw);
+      terms = JSON.parse(String(formData.get("terms") ?? "{}"));
+    } catch {
+      return { error: "The bill lines could not be read." };
+    }
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("submit_contractor_ra_bill_lines", {
+      p_package: packageId,
+      p_bill_no: billNo,
+      p_start: periodStart || null,
+      p_end: periodEnd || null,
+      p_narrative: narrative,
+      p_terms: terms as object,
+      p_lines: lines as object,
+    });
+    if (error) return { error: error.message.replace(/^.*?: /, "").slice(0, 160) || toSafeErrorMessage(error) };
+    revalidatePath(`/contractor-portal/projects/${projectId}`);
+    return { ok: "Bill submitted to the studio for site check." };
+  }
+
   const grossPaise = grossRaw ? Math.round(Number(grossRaw.replaceAll(",", "")) * 100) : NaN;
   if (!Number.isFinite(grossPaise) || grossPaise <= 0) return { error: "Enter the gross amount claimed in rupees." };
 
