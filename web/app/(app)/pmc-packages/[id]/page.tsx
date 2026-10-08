@@ -3,6 +3,7 @@ import { Column, Grid, Table, TableBody, TableCell, TableHead, TableHeader, Tabl
 import { createClient } from "../../../../lib/supabase/server";
 import { NewPackageInviteForm } from "../../../../components/aorms/NewPackageInviteForm";
 import { OpenBidsButton, AwardBidButton } from "../../../../components/aorms/PackageBidActions";
+import { NewVariationForm, VariationStatusSelect } from "../../../../components/aorms/FinanceForms";
 import { PageHeader } from "../../../../components/aorms/PageHeader";
 
 /**
@@ -26,6 +27,7 @@ export default async function PmcPackageDetailPage({
     { data: invites },
     { data: bids, error: bidsError },
     { data: contractors },
+    { data: variations },
   ] = await Promise.all([
     supabase.from("pmc_packages").select("id, ref, title, trade, status, bids_opened_at, contractor_id, project_offices(title)").eq("id", id).maybeSingle(),
     supabase.from("pmc_package_invites").select("id, status, contractors(id, name)").eq("package_id", id),
@@ -35,6 +37,7 @@ export default async function PmcPackageDetailPage({
       .eq("package_id", id)
       .order("submitted_at", { ascending: false }),
     supabase.from("contractors").select("id, name"),
+    supabase.from("pmc_variations").select("id, ref, title, note, amount_paise, status").eq("package_id", id).order("created_at"),
   ]);
 
   if (pkgError) {
@@ -144,6 +147,41 @@ export default async function PmcPackageDetailPage({
             </TableBody>
           </Table>
         )}
+
+        <h2 className="cds--type-heading-02" style={{ margin: "2rem 0 1rem" }}>
+          Variations
+        </h2>
+        <p className="cds--type-body-01" style={{ marginBottom: "1rem", color: "var(--cds-text-secondary)" }}>
+          Approved variations adjust the contract value the contractor sees (additions positive, omissions negative).
+        </p>
+        <NewVariationForm packageId={pkg.id} />
+        <Table aria-label="Variations" className="aorms-table-spaced">
+          <TableHead>
+            <TableRow>
+              <TableHeader>Ref</TableHeader>
+              <TableHeader>Variation</TableHeader>
+              <TableHeader className="aorms-num">Amount</TableHeader>
+              <TableHeader>Status</TableHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {(variations ?? []).map((v) => (
+              <TableRow key={v.id}>
+                <TableCell>{v.ref}</TableCell>
+                <TableCell>{v.title}{v.note ? ` — ${v.note}` : ""}</TableCell>
+                <TableCell className="aorms-num">{formatInr(v.amount_paise)}</TableCell>
+                <TableCell><VariationStatusSelect id={v.id} packageId={pkg.id} status={v.status} /></TableCell>
+              </TableRow>
+            ))}
+            {(variations ?? []).length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4}>
+                  <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>No variations yet.</p>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </Column>
     </Grid>
   );
