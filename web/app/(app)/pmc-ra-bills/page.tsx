@@ -29,7 +29,7 @@ export default async function PmcRaBillsPage() {
   const [{ data: bills, error }, { data: projects }] = await Promise.all([
     supabase
       .from("pmc_ra_bills")
-      .select("id, ref, bill_no, period_start, period_end, gross_paise, status, project_offices(title)")
+      .select("id, ref, bill_no, period_start, period_end, gross_paise, status, submitted_by_contractor_id, project_offices(title)")
       .order("created_at", { ascending: false }),
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
@@ -87,6 +87,11 @@ export default async function PmcRaBillsPage() {
                   <TableRow key={b.id}>
                     <TableCell>
                       <Link href={`/pmc-ra-bills/${b.id}`}>{b.ref}</Link>
+                      {b.submitted_by_contractor_id && (
+                        <span className="cds--type-helper-text-01" style={{ display: "block", color: "var(--cds-text-secondary)" }}>
+                          Submitted by contractor
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell>{b.bill_no}</TableCell>
                     <TableCell>{project?.title ?? "—"}</TableCell>

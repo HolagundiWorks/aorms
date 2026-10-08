@@ -13,6 +13,8 @@ import { getInitials } from "../../lib/shell/identity";
 import { INSTRUCTIONS_COOKIE } from "../../lib/shell/preferences";
 
 export type PortalSection = { label: string; anchor: string };
+/** A rail group shown once a page under `prefix/<id>` is open (e.g. a tender, or a current project). */
+export type PortalSectionGroup = { prefix: string; title: string; sections: PortalSection[] };
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -33,6 +35,7 @@ export function PortalShell({
   userRole,
   istHour,
   projectSections,
+  sectionGroups,
   homeLabel = "Your projects",
   sectionsTitle = "This project",
   initialInstructions = true,
@@ -46,6 +49,8 @@ export function PortalShell({
   istHour: number;
   /** Sections of an open project (or tender), linked from the rail. */
   projectSections: PortalSection[];
+  /** Several section groups (each under its own path prefix); when given they replace `projectSections`. */
+  sectionGroups?: PortalSectionGroup[];
   /** Rail label for the portal's list page. */
   homeLabel?: string;
   /** Rail group title shown once an item is open. */
@@ -78,7 +83,17 @@ export function PortalShell({
     }
   }
 
-  const projectBase = new RegExp(`^${homeHref}/([^/]+)$`).exec(pathname);
+  const groups: PortalSectionGroup[] = sectionGroups ?? [{ prefix: homeHref, title: sectionsTitle, sections: projectSections }];
+  let openGroup: PortalSectionGroup | null = null;
+  let openId: string | null = null;
+  for (const g of groups) {
+    const m = new RegExp(`^${g.prefix}/([^/]+)$`).exec(pathname);
+    if (m) {
+      openGroup = g;
+      openId = m[1];
+      break;
+    }
+  }
   const collapseNav = () => setMobileOpen(false);
 
   return (
@@ -98,16 +113,16 @@ export function PortalShell({
             <span className="aorms-sheet-no">{pad(0)}</span>
             {homeLabel}
           </SideNavLink>
-          {projectBase && projectSections.length > 0 && (
+          {openGroup && openId && openGroup.sections.length > 0 && (
             <>
               <li className="aorms-sidenav-group" aria-hidden="true">
-                {`${pad(1)}\u2002${sectionsTitle}`}
+                {`${pad(1)}\u2002${openGroup.title}`}
               </li>
-              {projectSections.map((sct, i) => (
+              {openGroup.sections.map((sct, i) => (
                 <SideNavLink
                   key={sct.anchor}
                   as={NextLink}
-                  href={`${homeHref}/${projectBase[1]}#${sct.anchor}`}
+                  href={`${openGroup.prefix}/${openId}#${sct.anchor}`}
                   className="aorms-sidenav-sub"
                   onClick={collapseNav}
                 >

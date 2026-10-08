@@ -7444,6 +7444,10 @@ phase strip, the project's own cover image, the record in four numbered groups, 
 `tsc --noEmit` and `eslint` only — not click-tested signed in as a client (the demo client login points at the cloud
 project, so a signed-in browser pass is left to the user). See branding guide §15.
 
+### 2026-10-08 — Contractor Portal: current projects, drawings, bills, cost, progress, tickets
+
+Audit, access model, what shipped (migrations 0099/0100, `/contractor-portal/projects/[id]`, studio inbox `/contractor-tickets`) and the list of known gaps are in [CONTRACTOR-PORTAL.md](CONTRACTOR-PORTAL.md).
+
 ### 2026-10-07 — Collaborator and Contractor portals take the project sheet
 
 Same anatomy as the Client Portal's project sheet (KPI rail, project image, numbered groups, side pane), plus the image
