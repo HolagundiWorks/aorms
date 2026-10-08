@@ -3633,3 +3633,8 @@ h1.aorms-lp-display {
 .aorms-thread__reply {
   border-inline-start-color: var(--aorms-orange);
 }
+
+/* Contractor Portal critical-path bars (AQC ScheduleCalculator view) */
+.aorms-gantt { position: relative; display: block; inline-size: 100%; min-inline-size: 8rem; block-size: 0.75rem; background: var(--cds-layer-accent, #e0e0e0); }
+.aorms-gantt > span { position: absolute; inset-block: 0; background: var(--cds-text-primary, #161616); }
+.aorms-gantt > span[data-critical="1"] { background: var(--aorms-orange, #ff4f18); }

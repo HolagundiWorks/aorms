@@ -67,3 +67,27 @@ export async function updateMilestoneStatus(milestoneId: string, status: string)
   revalidatePath("/pmc-milestones");
   return {};
 }
+
+/** Set a milestone's duration and predecessor link (AQC-style PDM: FS/SS/FF/SF + lag) for the critical-path view. */
+export async function updateMilestoneSchedule(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const id = String(formData.get("id") ?? "").trim();
+  const durationRaw = String(formData.get("durationDays") ?? "").trim();
+  const predecessorId = String(formData.get("predecessorId") ?? "").trim() || null;
+  const depType = String(formData.get("depType") ?? "FS").trim();
+  const lag = Math.round(Number(String(formData.get("lagDays") ?? "0").trim() || "0"));
+  const duration = durationRaw === "" ? null : Math.round(Number(durationRaw));
+  if (!id) return { error: "Missing milestone." };
+  if (duration !== null && (!Number.isFinite(duration) || duration < 0 || duration > 5000)) return { error: "Duration must be 0–5000 days." };
+  if (!["FS", "SS", "FF", "SF"].includes(depType)) return { error: "Invalid link type." };
+  if (!Number.isFinite(lag) || Math.abs(lag) > 5000) return { error: "Invalid lag." };
+  if (predecessorId === id) return { error: "A milestone can't follow itself." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("pmc_milestones")
+    .update({ duration_days: duration, predecessor_id: predecessorId, dep_type: depType, lag_days: lag, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { error: toSafeErrorMessage(error) };
+  revalidatePath("/pmc-milestones");
+  return null;
+}

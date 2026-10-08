@@ -2,7 +2,7 @@ import { Column, Grid, Tag } from "@carbon/react";
 import { createClient } from "../../../lib/supabase/server";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { BigStat } from "../../../components/aorms/BigStat";
-import { StudioMessageForm, TicketRespondForm } from "../../../components/aorms/ContractorTicketForms";
+import { ApplyProgressButton, StudioMessageForm, TicketRespondForm } from "../../../components/aorms/ContractorTicketForms";
 
 const KIND_LABEL: Record<string, string> = { TICKET: "Ticket", MEETING_REQUEST: "Meeting", RFI: "RFI", PROGRESS_UPDATE: "Progress", NOTE: "Note", SITE_VISIT: "Site visit", JOINT_MEASUREMENT: "Joint measurement" };
 const SUB_TAG: Record<string, "red" | "blue" | "green" | "gray"> = { OPEN: "red", RESPONDED: "blue", RESOLVED: "green" };
@@ -17,7 +17,7 @@ export default async function ContractorTicketsPage() {
   const supabase = await createClient();
   const { data: items, error } = await supabase
     .from("contractor_submissions")
-    .select("id, kind, subject, body, status, response_note, created_at, contractors(name), project_offices(ref, title)")
+    .select("id, kind, subject, body, status, response_note, created_at, meeting_at, meeting_place, storage_key, file_name, milestone_id, percent_complete, applied_at, contractors(name), project_offices(ref, title)")
     .order("created_at", { ascending: false });
   const ids = (items ?? []).map((i) => i.id);
   const { data: messages } = ids.length
@@ -52,6 +52,18 @@ export default async function ContractorTicketsPage() {
                 <span className="cds--type-helper-text-01">{[contractor?.name, project ? `${project.title} (${project.ref})` : null, day(r.created_at)].filter(Boolean).join(" · ")}</span>
               </div>
               {r.body && <p className="cds--type-body-01" style={{ whiteSpace: "pre-wrap" }}>{r.body}</p>}
+              {r.meeting_at && (
+                <p className="aorms-thread__reply">
+                  <strong>Meeting confirmed:</strong> {new Date(r.meeting_at).toLocaleString("en-GB", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" })} IST{r.meeting_place ? ` · ${r.meeting_place}` : ""} · <a href={`/api/contractor-file/ics?id=${r.id}`}>Calendar file</a>
+                </p>
+              )}
+              {r.storage_key && <p className="cds--type-helper-text-01"><a href={`/api/contractor-file?t=submission&id=${r.id}`}>{r.file_name ?? "Attachment"}</a></p>}
+              {r.kind === "PROGRESS_UPDATE" && r.percent_complete != null && (
+                <>
+                  <p className="cds--type-helper-text-01">Reports {r.percent_complete}% complete · {r.applied_at ? "applied to the programme" : "not yet applied"}</p>
+                  {!r.applied_at && r.milestone_id && <ApplyProgressButton id={r.id} />}
+                </>
+              )}
               {thread.map((m) => (
                 <p key={m.id} className="aorms-thread__msg">
                   <strong>{m.author_side === "FIRM" ? "Studio" : m.author_name}</strong>
@@ -60,7 +72,7 @@ export default async function ContractorTicketsPage() {
                   {m.body}
                 </p>
               ))}
-              <TicketRespondForm id={r.id} status={r.status ?? "OPEN"} note={r.response_note} />
+              <TicketRespondForm id={r.id} status={r.status ?? "OPEN"} note={r.response_note} canSchedule={["MEETING_REQUEST", "SITE_VISIT", "JOINT_MEASUREMENT"].includes(r.kind)} />
               <StudioMessageForm submissionId={r.id} />
             </div>
           );

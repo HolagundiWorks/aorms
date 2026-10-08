@@ -13,6 +13,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { AddMilestoneForm } from "../../../components/aorms/AddMilestoneForm";
 import { ContextPanel, ContextPanelContent, ContextPanelLayout, ContextPanelTrigger } from "../../../components/aorms/ContextPanel";
 import { KpiTile } from "../../../components/aorms/KpiTile";
+import { MilestoneScheduleForm } from "../../../components/aorms/MilestoneScheduleForm";
 import { MilestoneStatusSelect } from "../../../components/aorms/MilestoneStatusSelect";
 import { PageHeader } from "../../../components/aorms/PageHeader";
 import { RailBrief } from "../../../components/aorms/RailBrief";
@@ -24,7 +25,7 @@ export default async function PmcMilestonesPage() {
   const [{ data: milestones, error }, { data: projects }] = await Promise.all([
     supabase
       .from("pmc_milestones")
-      .select("id, ref, title, planned_date, actual_date, percent_complete, status, project_offices(title)")
+      .select("id, project_id, ref, title, planned_date, actual_date, percent_complete, status, duration_days, predecessor_id, dep_type, lag_days, project_offices(title)")
       .order("sort_order"),
     supabase.from("project_offices").select("id, title").order("title"),
   ]);
@@ -75,6 +76,7 @@ export default async function PmcMilestonesPage() {
                 <TableHeader>Planned</TableHeader>
                 <TableHeader>Actual</TableHeader>
                 <TableHeader>Status</TableHeader>
+                <TableHeader>Schedule (days · after · link · lag)</TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -90,12 +92,22 @@ export default async function PmcMilestonesPage() {
                     <TableCell>
                       <MilestoneStatusSelect milestoneId={m.id} status={m.status} />
                     </TableCell>
+                    <TableCell>
+                      <MilestoneScheduleForm
+                        id={m.id}
+                        durationDays={m.duration_days}
+                        predecessorId={m.predecessor_id}
+                        depType={m.dep_type ?? "FS"}
+                        lagDays={m.lag_days ?? 0}
+                        options={(milestones ?? []).filter((o) => o.project_id === m.project_id).map((o) => ({ id: o.id, label: `${o.ref} · ${o.title}` }))}
+                      />
+                    </TableCell>
                   </TableRow>
                 );
               })}
               {(milestones ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6}>
+                  <TableCell colSpan={7}>
                     <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>
                       No milestones yet.
                     </p>

@@ -44,13 +44,20 @@ thread post. Contractor-submitted RA bills appear in `/pmc-ra-bills` tagged *Sub
 **Demo data** (0100): two packages, milestones, three bills, a drawing with three revisions, tickets, a meeting request
 and a thread — re-applied nightly by `seed_portal_demo_data()`.
 
-## 3. Known gaps (documented, not built)
-- **Meeting scheduling is a request, not a booking.** The studio replies with a time; there is no calendar, invite or availability check.
-- **No drawing file download.** Contractors see the register and revision history, not the DXF/PDF (no storage-read policy; demo rows have no file).
-- **Bills are lump-sum claims.** No measurement lines (`pmc_ra_lines`), no joint-measurement abstract, no steel reconciliation.
-- **Cost tracking is derived** from package value and bills only: no variations/deviations, final account or payment (received) dates.
-- **Progress is reported, not edited.** The studio keeps the programme; a contractor's progress update does not change milestones automatically.
-- **No attachments** on tickets or bills (photos, measurement sheets); `contractor_submissions.storage_key` exists but there is no upload.
-- **No notifications.** New tickets and bills reach the studio only by visiting the inbox / RA-bill list.
-- **Awarding a tender does not create a package.** An awarded tender makes the project "current", but a contractor can only bill against a `pmc_packages` row.
-- **Site visits and joint measurements** (kinds in the original design) have no form.
+## 3. Pending items — built 2026-10-08 (migrations 0101, 0102)
+- **Meeting scheduling:** the studio confirms a date, time (IST) and place on a meeting / site-visit / joint-measurement request; the contractor sees it on the thread and downloads an `.ics` (`/api/contractor-file/ics`).
+- **Drawing download:** the drawings table links each file through `/api/contractor-file?t=drawing` (RLS lookup, then a 5-minute signed URL).
+- **Measurement-line RA bills:** see § 4.
+- **Attachments:** photo/PDF (10 MB) on tickets, progress updates and bills, stored in the private `contractor-attachments` bucket, served through the same signed-URL route.
+- **Notifications:** email to the firm's owners/partners on new items and bills; email to the contractor on a studio reply or meeting confirmation. Best-effort — needs `SMTP_*`; silent when unconfigured.
+- **Tender award → package:** `awardTender` creates the `pmc_packages` row (value = the sealed bid, `tender_id` recorded) so the contractor can bill straight away.
+- **Progress updates:** the contractor picks a milestone and a percentage; the studio's **Apply to milestone** button writes it (100% marks COMPLETE with today's actual date). The programme stays the studio's decision.
+- **Site visits / joint measurements:** two new request kinds in the same form and inbox.
+- **Critical path:** the studio sets duration, predecessor, link type and lag per milestone (Programme Milestones); the contractor sees a computed critical path, float and Gantt bars.
+- Still not built: variations/deviations and final account, payment-received dates, joint-measurement abstract, steel reconciliation, rate-book linked-item derivation. The attachment upload and email paths need the service-role key and SMTP, so they were not exercised on the local QA stack.
+
+## 4. AQC-Core logic ported (2026-10-08)
+Reference repo `HolagundiWorks/AQC` (read-only). Ported as deterministic, tested TypeScript (`tests/ra-bill-cpm.test.ts`):
+- **Billing** — `lib/billing/ra-bill.ts` (`RunningBill`: gross, GST, retention/TDS/cess/GST-TDS, net; `PREFIX/RA/FY/NNN` numbering).
+- **Scheduling** — `lib/scheduling/cpm.ts` (`ScheduleCalculator`: FS/SS/FF/SF + lag, forward/backward pass, float, critical path, cycle detection). Wired to the contractor's Progress schedule (critical path + Gantt) via milestone duration/predecessor columns (0102).
+- **Estimation** — markup cascade already live in `lib/tax/estimate-markups.ts`; linked-item derivation and rate-book versioning are not ported.
