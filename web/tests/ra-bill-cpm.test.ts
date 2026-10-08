@@ -37,3 +37,13 @@ describe("computeCpm (AQC ScheduleCalculator)", () => {
     expect(dateForOffset("2026-10-01", 8)).toBe("2026-10-09");
   });
 });
+
+import { buildMeetingIcs } from "../lib/contractor/ics";
+describe("buildMeetingIcs", () => {
+  it("builds an escaped UTC event", () => {
+    const ics = buildMeetingIcs({ uid: "u1", startsAt: new Date("2026-10-20T05:30:00Z"), summary: "Site, visit", place: "Office" });
+    expect(ics).toContain("DTSTART:20261020T053000Z");
+    expect(ics).toContain("DTEND:20261020T063000Z");
+    expect(ics).toContain("SUMMARY:Site\\, visit");
+  });
+});

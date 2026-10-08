@@ -6,6 +6,7 @@ import { placeholderFor } from "../../../../../lib/projects/placeholder";
 import { PageHeader } from "../../../../../components/aorms/PageHeader";
 import { KpiTile } from "../../../../../components/aorms/KpiTile";
 import { SheetEmptyRow, SheetFacts, SheetGroup, SheetPane, SheetSub } from "../../../../../components/aorms/PortalSheet";
+import { computeCpm, dateForOffset, type Activity } from "../../../../../lib/scheduling/cpm";
 import { ContractorMessageForm, ContractorRaBillForm, ContractorRaiseForm } from "../../../../../components/aorms/ContractorProjectForms";
 
 const inr = (paise: number | null | undefined) => (paise == null ? "—" : `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`);
@@ -54,10 +55,10 @@ export default async function ContractorProjectPage({ params }: { params: Promis
   const pkg = rows.find((r) => r.package_id) ?? null;
 
   const [{ data: drawings }, { data: milestones }, { data: bills }, { data: submissions }] = await Promise.all([
-    supabase.from("drawings").select("id, ref, title, rev_no, root_id, is_current, revision_note, created_at").eq("project_id", projectId).order("created_at", { ascending: false }),
-    supabase.from("pmc_milestones").select("id, ref, title, planned_date, actual_date, percent_complete, status, notes").eq("project_id", projectId).order("sort_order"),
-    supabase.from("pmc_ra_bills").select("id, ref, bill_no, period_start, period_end, status, gross_paise, advance_recovery_paise, retention_paise, other_deduction_paise, narrative").eq("project_id", projectId).order("created_at", { ascending: false }),
-    supabase.from("contractor_submissions").select("id, kind, subject, body, status, response_note, created_at").eq("project_id", projectId).order("created_at", { ascending: false }),
+    supabase.from("drawings").select("id, ref, title, rev_no, root_id, is_current, revision_note, created_at, storage_key").eq("project_id", projectId).order("created_at", { ascending: false }),
+    supabase.from("pmc_milestones").select("id, ref, title, planned_date, actual_date, percent_complete, status, notes, duration_days, predecessor_id, dep_type, lag_days").eq("project_id", projectId).order("sort_order"),
+    supabase.from("pmc_ra_bills").select("id, ref, bill_no, period_start, period_end, status, gross_paise, advance_recovery_paise, retention_paise, other_deduction_paise, narrative, attachment_key, gst_paise, tds_paise, cess_paise, gst_tds_paise").eq("project_id", projectId).order("created_at", { ascending: false }),
+    supabase.from("contractor_submissions").select("id, kind, subject, body, status, response_note, created_at, meeting_at, meeting_place, storage_key, file_name, percent_complete, applied_at").eq("project_id", projectId).order("created_at", { ascending: false }),
   ]);
   const subIds = (submissions ?? []).map((s) => s.id);
   const { data: messages } = subIds.length
@@ -75,7 +76,7 @@ export default async function ContractorProjectPage({ params }: { params: Promis
 
   const claimed = (bills ?? []).reduce((n, b) => n + (b.gross_paise ?? 0), 0);
   const certifiedBills = (bills ?? []).filter((b) => CERTIFIED.has(b.status ?? ""));
-  const net = (b: NonNullable<typeof bills>[number]) => (b.gross_paise ?? 0) - (b.advance_recovery_paise ?? 0) - (b.retention_paise ?? 0) - (b.other_deduction_paise ?? 0);
+  const net = (b: NonNullable<typeof bills>[number]) => (b.gross_paise ?? 0) + (b.gst_paise ?? 0) - (b.advance_recovery_paise ?? 0) - (b.retention_paise ?? 0) - (b.other_deduction_paise ?? 0) - (b.tds_paise ?? 0) - (b.cess_paise ?? 0) - (b.gst_tds_paise ?? 0);
   const certifiedGross = certifiedBills.reduce((n, b) => n + (b.gross_paise ?? 0), 0);
   const certifiedNet = certifiedBills.reduce((n, b) => n + net(b), 0);
   const retention = certifiedBills.reduce((n, b) => n + (b.retention_paise ?? 0), 0);
@@ -86,6 +87,17 @@ export default async function ContractorProjectPage({ params }: { params: Promis
   const progress = (milestones ?? []).length ? Math.round((milestones ?? []).reduce((n, m) => n + (m.percent_complete ?? 0), 0) / (milestones ?? []).length) : null;
   const openTickets = (submissions ?? []).filter((s) => s.status === "OPEN").length;
   const nextBillNo = String((bills ?? []).length + 1);
+
+  const cpmSource = (milestones ?? []).filter((m) => m.duration_days != null);
+  const cpmIds = new Set(cpmSource.map((m) => m.id));
+  const cpmActivities: Activity[] = cpmSource.map((m) => ({
+    id: m.id,
+    durationDays: m.duration_days ?? 0,
+    links: m.predecessor_id && cpmIds.has(m.predecessor_id) ? [{ predecessorId: m.predecessor_id, type: (m.dep_type ?? "FS") as "FS", lagDays: m.lag_days ?? 0 }] : [],
+  }));
+  const cpm = cpmActivities.length ? computeCpm(cpmActivities) : null;
+  const cpmStart = (cpmSource.map((m) => m.planned_date).filter(Boolean).sort()[0] as string | undefined) ?? new Date().toISOString().slice(0, 10);
+  const cpmRows = cpm ? cpm.activities.map((a) => ({ ...a, title: cpmSource.find((m) => m.id === a.id)?.title ?? "" })) : [];
 
   return (
     <Grid>
@@ -119,6 +131,7 @@ export default async function ContractorProjectPage({ params }: { params: Promis
                     <TableHeader>Title</TableHeader>
                     <TableHeader>Revision</TableHeader>
                     <TableHeader>Issued</TableHeader>
+                    <TableHeader>File</TableHeader>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -130,9 +143,10 @@ export default async function ContractorProjectPage({ params }: { params: Promis
                         <Tag type={d.rev_no > 1 ? "blue" : "gray"} size="sm">{`Rev ${d.rev_no}`}</Tag>
                       </TableCell>
                       <TableCell>{day(d.created_at)}</TableCell>
+                      <TableCell>{d.storage_key ? <a href={`/api/contractor-file?t=drawing&id=${d.id}`}>Download</a> : "—"}</TableCell>
                     </TableRow>
                   ))}
-                  {latest.length === 0 && <SheetEmptyRow cols={4}>No drawings issued to you yet.</SheetEmptyRow>}
+                  {latest.length === 0 && <SheetEmptyRow cols={5}>No drawings issued to you yet.</SheetEmptyRow>}
                 </TableBody>
               </Table>
 
@@ -195,11 +209,49 @@ export default async function ContractorProjectPage({ params }: { params: Promis
                   {(milestones ?? []).length === 0 && <SheetEmptyRow cols={5}>The studio hasn&apos;t published a programme for this project yet.</SheetEmptyRow>}
                 </TableBody>
               </Table>
+              <SheetSub id="cpm">Critical path</SheetSub>
+              {cpmRows.length === 0 ? (
+                <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  The studio has not set durations and dependencies on the programme yet, so no critical path is available.
+                </p>
+              ) : (
+                <>
+                  <p className="cds--type-helper-text-01" style={{ marginBottom: "0.5rem", color: "var(--cds-text-secondary)" }}>
+                    Computed from milestone durations and links (forward and backward pass). Project length {cpm!.projectDurationDays} days{cpm!.hasCycle ? " — a dependency loop was found and ignored" : ""}.
+                  </p>
+                  <Table aria-label="Critical path" size="sm" className="aorms-table-spaced">
+                    <TableHead>
+                      <TableRow>
+                        <TableHeader>Milestone</TableHeader>
+                        <TableHeader>Schedule</TableHeader>
+                        <TableHeader>Start</TableHeader>
+                        <TableHeader>Finish</TableHeader>
+                        <TableHeader className="aorms-num">Float (days)</TableHeader>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {cpmRows.map((r) => (
+                        <TableRow key={r.id}>
+                          <TableCell>{r.title} {r.isCritical && <Tag type="red" size="sm">Critical</Tag>}</TableCell>
+                          <TableCell>
+                            <span className="aorms-gantt" role="img" aria-label={`Day ${r.earlyStart} to ${r.earlyFinish}`}>
+                              <span style={{ insetInlineStart: `${(r.earlyStart / Math.max(1, cpm!.projectDurationDays)) * 100}%`, inlineSize: `${Math.max(1.5, ((r.earlyFinish - r.earlyStart) / Math.max(1, cpm!.projectDurationDays)) * 100)}%` }} data-critical={r.isCritical ? "1" : undefined} />
+                            </span>
+                          </TableCell>
+                          <TableCell>{day(dateForOffset(cpmStart, r.earlyStart))}</TableCell>
+                          <TableCell>{day(dateForOffset(cpmStart, r.earlyFinish))}</TableCell>
+                          <TableCell className="aorms-num">{r.totalFloat}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </>
+              )}
               <SheetSub>Report progress</SheetSub>
               <p className="cds--type-helper-text-01" style={{ marginBottom: "0.75rem", color: "var(--cds-text-secondary)" }}>
                 The programme is kept by the studio. Send a progress update and they will update the milestones.
               </p>
-              <ContractorRaiseForm projectId={projectId} defaultKind="PROGRESS_UPDATE" />
+              <ContractorRaiseForm projectId={projectId} defaultKind="PROGRESS_UPDATE" milestones={(milestones ?? []).map((m) => ({ id: m.id, ref: m.ref, title: m.title }))} />
             </SheetGroup>
 
             <SheetGroup no={3} title="Running bills and cost" note="Submit your bills and see where the contract stands">
@@ -217,7 +269,7 @@ export default async function ContractorProjectPage({ params }: { params: Promis
                 <TableBody>
                   {(bills ?? []).map((b) => (
                     <TableRow key={b.id}>
-                      <TableCell>{`${b.ref} · No. ${b.bill_no}`}</TableCell>
+                      <TableCell>{`${b.ref} · No. ${b.bill_no}`}{b.attachment_key && <> · <a href={`/api/contractor-file?t=bill&id=${b.id}`}>Backup</a></>}</TableCell>
                       <TableCell>{`${day(b.period_start)} – ${day(b.period_end)}`}</TableCell>
                       <TableCell className="aorms-num">{inr(b.gross_paise)}</TableCell>
                       <TableCell className="aorms-num">{CERTIFIED.has(b.status ?? "") ? inr(net(b)) : "—"}</TableCell>
@@ -276,7 +328,7 @@ export default async function ContractorProjectPage({ params }: { params: Promis
 
             <SheetGroup no={4} title="Tickets, meetings and messages" note="Raise an issue, ask for a meeting, reply to the studio">
               <SheetSub id="tickets">Raise something</SheetSub>
-              <ContractorRaiseForm projectId={projectId} />
+              <ContractorRaiseForm projectId={projectId} milestones={(milestones ?? []).map((m) => ({ id: m.id, ref: m.ref, title: m.title }))} />
               <SheetSub>Your threads</SheetSub>
               {(submissions ?? []).length === 0 && <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>Nothing raised yet.</p>}
               {(submissions ?? []).map((s) => {
@@ -290,6 +342,15 @@ export default async function ContractorProjectPage({ params }: { params: Promis
                       <span className="cds--type-helper-text-01">{day(s.created_at)}</span>
                     </div>
                     {s.body && <p className="cds--type-body-01" style={{ whiteSpace: "pre-wrap" }}>{s.body}</p>}
+                    {s.meeting_at && (
+                      <p className="aorms-thread__reply">
+                        <strong>Meeting confirmed:</strong> {new Date(s.meeting_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}{s.meeting_place ? ` · ${s.meeting_place}` : ""} · <a href={`/api/contractor-file/ics?id=${s.id}`}>Add to calendar</a>
+                      </p>
+                    )}
+                    {s.kind === "PROGRESS_UPDATE" && s.percent_complete != null && (
+                      <p className="cds--type-helper-text-01">{s.percent_complete}% reported · {s.applied_at ? "applied to the programme" : "awaiting the studio"}</p>
+                    )}
+                    {s.storage_key && <p className="cds--type-helper-text-01"><a href={`/api/contractor-file?t=submission&id=${s.id}`}>{s.file_name ?? "Attachment"}</a></p>}
                     {s.response_note && (
                       <p className="aorms-thread__reply">
                         <strong>Studio:</strong> {s.response_note}

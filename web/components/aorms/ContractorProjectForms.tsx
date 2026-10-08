@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Button, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
+import { Button, FileUploaderButton, Form, InlineNotification, Select, SelectItem, Stack, TextArea, TextInput } from "@carbon/react";
 import {
   postContractorMessage,
   raiseContractorSubmission,
@@ -21,24 +21,41 @@ function Notice({ state }: { state: ContractorProjectActionState }) {
 }
 
 /** Raise a ticket, request a meeting, ask an RFI, post a progress update or send a note — one form, one inbox at the studio. */
-export function ContractorRaiseForm({ projectId, defaultKind = "TICKET" }: { projectId: string; defaultKind?: string }) {
+export function ContractorRaiseForm({ projectId, defaultKind = "TICKET", milestones = [] }: { projectId: string; defaultKind?: string; milestones?: { id: string; ref: string; title: string }[] }) {
   const [state, action, pending] = useActionState(raiseContractorSubmission, null);
+  const [kind, setKind] = useState(defaultKind);
   return (
     <Form action={action}>
       <input type="hidden" name="projectId" value={projectId} />
       <Stack gap={4}>
         <Notice state={state} />
         <FormGrid>
-          <Select id={`kind-${defaultKind}`} name="kind" labelText="What are you sending?" defaultValue={defaultKind}>
+          <Select id={`kind-${defaultKind}`} name="kind" labelText="What are you sending?" value={kind} onChange={(e) => setKind(e.target.value)}>
             <SelectItem value="TICKET" text="Raise a ticket (site issue or clash)" />
             <SelectItem value="MEETING_REQUEST" text="Request a meeting" />
             <SelectItem value="RFI" text="Request for information (RFI)" />
             <SelectItem value="PROGRESS_UPDATE" text="Progress update" />
+            <SelectItem value="SITE_VISIT" text="Request a site visit" />
+            <SelectItem value="JOINT_MEASUREMENT" text="Request a joint measurement" />
             <SelectItem value="NOTE" text="Other communication" />
           </Select>
           <TextInput id={`subject-${defaultKind}`} name="subject" labelText="Subject" required maxLength={200} />
         </FormGrid>
-        <TextInput id={`pref-${defaultKind}`} name="preferredDate" labelText="Preferred meeting date (meeting requests)" type="date" />
+        {(kind === "MEETING_REQUEST" || kind === "SITE_VISIT" || kind === "JOINT_MEASUREMENT") && (
+          <TextInput id={`pref-${defaultKind}`} name="preferredDate" labelText="Preferred date" type="date" />
+        )}
+        {kind === "PROGRESS_UPDATE" && (
+          <FormGrid>
+            <Select id={`ms-${defaultKind}`} name="milestoneId" labelText="Milestone" defaultValue="">
+              <SelectItem value="" text="Choose a milestone" />
+              {milestones.map((m) => (
+                <SelectItem key={m.id} value={m.id} text={`${m.ref} · ${m.title}`} />
+              ))}
+            </Select>
+            <TextInput id={`pct-${defaultKind}`} name="percentComplete" labelText="Percent complete (0–100)" inputMode="numeric" />
+          </FormGrid>
+        )}
+        <FileUploaderButton labelText="Attach photo or PDF (optional, 10 MB)" buttonKind="tertiary" size="sm" name="attachment" accept={[".jpg", ".jpeg", ".png", ".webp", ".pdf"]} disableLabelChanges={false} />
         <TextArea id={`body-${defaultKind}`} name="body" labelText="Details" rows={3} maxLength={4000} />
         <Button type="submit" size="sm" disabled={pending}>
           {pending ? "Sending…" : "Send to the studio"}
@@ -138,6 +155,7 @@ export function ContractorRaBillForm({ projectId, packageId, nextBillNo }: { pro
             <tr><td><strong>Net payable</strong></td><td style={{ textAlign: "right" }}><strong>₹ {rupees(st.netPaise)}</strong></td></tr>
           </tbody>
         </table>
+        <FileUploaderButton labelText="Attach measurement sheet / backup (optional)" buttonKind="tertiary" size="sm" name="attachment" accept={[".jpg", ".jpeg", ".png", ".webp", ".pdf"]} />
         <TextArea id="ra-narrative" name="narrative" labelText="Work covered" rows={3} maxLength={2000} />
         <Button type="submit" size="sm" disabled={pending || st.grossPaise <= 0}>
           {pending ? "Submitting…" : "Submit running bill"}

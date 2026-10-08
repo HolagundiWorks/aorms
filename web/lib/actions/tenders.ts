@@ -105,6 +105,29 @@ export async function awardTender(tenderId: string, contractorId: string): Promi
     .eq("id", tenderId);
   if (error) return { error: toSafeErrorMessage(error) };
 
+  // Awarding creates the billing package the contractor works against (once per tender): value = their sealed bid.
+  const { data: existing } = await supabase.from("pmc_packages").select("id").eq("tender_id", tenderId).maybeSingle();
+  if (!existing) {
+    const { data: tender } = await supabase.from("tenders").select("project_id, title, category").eq("id", tenderId).maybeSingle();
+    const { data: inv } = await supabase.from("tender_invitations").select("id").eq("tender_id", tenderId).eq("contractor_id", contractorId).maybeSingle();
+    const { data: bid } = inv ? await supabase.from("tender_bids").select("amount_paise").eq("invitation_id", inv.id).maybeSingle() : { data: null };
+    const { data: ref } = await supabase.rpc("next_ref", { p_scope: "pmc_package", p_default_prefix: "PKG" });
+    if (tender && ref) {
+      const { error: pkgErr } = await supabase.from("pmc_packages").insert({
+        project_id: tender.project_id,
+        ref,
+        title: tender.title,
+        trade: tender.category,
+        status: "AWARDED",
+        contractor_id: contractorId,
+        contract_value_paise: bid?.amount_paise ?? null,
+        award_date: new Date().toISOString().slice(0, 10),
+        tender_id: tenderId,
+      });
+      if (pkgErr) return { error: `Tender awarded, but the package could not be created: ${toSafeErrorMessage(pkgErr)}` };
+    }
+  }
+
   await supabase.rpc("write_audit", {
     p_entity: "tender",
     p_entity_id: tenderId,
