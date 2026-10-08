@@ -1,195 +1,226 @@
-# AQC ↔ AORMS connection — plan of action
+# AQC ↔ AORMS connection — final plan
 
-> **Status: PROPOSED (2026-10-08) — not yet decided.** Written at the user's direction: *estimation and costing will be
-> handled by AQC; the AORMS portal is for uploading and viewing; Community is free; Pro connects AORMS and AQC for the
-> AQC portal; AQC requires an AORMS login.* Section 1 lists where this conflicts with what the repo currently says —
-> those need an explicit decision (section 9) before build starts, per CLAUDE.md § Process.
+> **Status: DECIDED (2026-10-08).** Decisions below are the user's; the comparison (§2) is from a read of AQC-Core
+> (`HolagundiWorks/AQC`, `ProjectStore`, `AqcSqliteStore`, `Aorms.Bridge`, the C++ engine boundary) against the AORMS
+> schema (`aorms-web`, 111 tables) and platform (`aorms-platform`). Nothing in this document is built yet.
 
-## 0. The decision in one paragraph
+## 0. Decisions (final)
 
-**AQC** (HolagundiWorks/AQC, "AQC-Core", WinUI 3 + C++ engine, AGPL Community / commercial dual-licence) is the
-**system of record for quantities, estimates, rate books, BBS, running-account bills and schedules** — the engine
-produces the numbers. **AORMS** (`web/`, Next.js + Supabase) is the **office hub and the three outside portals**: it
-stores what AQC *publishes* (PDFs, abstracts, scalar totals), shows it to the right people (staff, client, contractor,
-consultant) and takes uploads back (contractor bills and measurements, site photos). **Community** AQC runs standalone
-and free, exactly as today. **Pro** connects an AQC install to a Studio's AORMS workspace; connected mode needs an AORMS
-Platform login and a Pro entitlement.
+| # | Decision |
+|---|---|
+| D1 | **AORMS's own estimation is frozen.** No new work on `web/` estimates, rate books, take-off, BBS, derivation or markups. They stay readable (and usable) as they are; AQC is where estimation and costing are done. The unmerged linked-item derivation commits were reverted out of PR #134. |
+| D2 | **AQC stays open source** (AGPL "Community"). The engine and the desktop app are free and work standalone, exactly as today. |
+| D3 | **Pro = the same AQC, connected to AORMS.** Bundled with AORMS — there is no separate product to buy and **no licence keys**. |
+| D4 | **The AORMS login *is* the licence.** Signing in with an AORMS Platform account that belongs to a Studio is the entitlement. No `activate` call, no `licenseToken`, no `ESTI_PRODUCT_API_KEY`. |
+| D5 | **Project data is imported from the portal.** A connected AQC does not invent projects: the project, its client, firm, contractors, drawings and site/portal inputs come *from* AORMS; the user opens a portal project in AQC. |
+| D6 | **All data is synced to the database.** Every section of an AQC project (take-off sheets, levels, settings, estimates, bills, schedule, contracts, stores, org …) is stored in AORMS's database, not only a published subset. |
 
-## 1. What the repo says today, and what changes
+Consequences: the billing/licence phase (earlier "P6") is **dropped**; "Pro" is a *mode* (signed in + synced), and the
+earlier "publish allow-list / never-sync scratch" idea is replaced by *sync everything, show selectively* (§4).
 
-| Today | Source | Under this plan |
+## 1. Roles after the change
+
+| Concern | AQC (desktop, authoritative) | AORMS (web, authoritative) |
 |---|---|---|
-| AQC is listed as *removed, separate repos* | CLAUDE.md "Removed (legacy)" | AQC becomes a **connected product** (still its own repo). Update the list. |
-| `web/` has its own rate books, estimates, BOQ, take-off (17 categories), BBS, markup cascade, derivation | ROADMAP § History (2026-09-06/07/08) | Under the split these are **not extended further**. Decide: keep as the *Community fallback inside AORMS* or retire after Pro ships (section 9, Q1). |
-| PR #134 adds linked-item derivation to `web/` estimates | open PR | **Do not merge that part** — it deepens the module the plan hands to AQC. The contractor-side views in the same PR (measurement abstract, steel, final account) are viewing, not estimating, and are fine. |
-| Contractor submits RA bills with measurement lines and the AORMS database computes deductions | PR #132 | Keep the *upload*; stop treating AORMS as the calculator. Certification and the Interim Payment Certificate move to AQC and are published back (section 5). |
-| AQC's bridge targets `POST /platform/v1/activate`, `/api/sync/meta`, `/api/sync/ingest`, HLP licence keys and an "AORMS Connect" `session.json` | AQC `docs/AORMS-BRIDGE.md`, `PROJECT-SYNC.md` | That hub (Fastify + `esti_sync_record`) **no longer exists** and Connect was removed. The *design* (outbox, allow-list, content-hash skip, LWW policy) is reusable; the *endpoints and auth* are rewritten (sections 3–4). |
-| Plans: `licences.plan` = TRIAL / STANDARD / PREMIUM (per Studio, per seat); `identity_licences` = FREE / AORMS_IDENTITY (per person) | `platform/supabase/migrations/0004`, `0010`, `0017` | Add the **Pro entitlement** to the Studio licence (section 6). "Community" is the absence of a connected entitlement, not a new row. |
-| Identity authority is the `aorms-platform` Supabase project (`accounts`, `AORMS-U-`) | AORMS-PLATFORM-ARCHITECTURE | AQC signs in against it. No new identity system. |
+| Quantities, BBS, BOQ, rate books, estimates, markups, derivation, schedule (CPM/PERT), RA-bill maths, final account | **Computes and owns** | Stores the synced data; shows it; **never recomputes** |
+| Projects, clients, contractors, consultants, people, roles, permissions, drawings register, transmittals, approvals, tenders, invoices, HR, expenses | Reads (imported) | **Owns** |
+| Portals (client, contractor, collaborator) | — | **Owns** — uploads in, views out |
+| Money | AQC engine is the source of truth for derived amounts | Display only |
 
-## 2. Roles — who owns what
+Rule inherited from AQC: *the engine is the single source of truth for numbers.* AORMS only stores, versions, filters
+and displays them.
 
-| Concern | AQC | AORMS |
+## 2. Structure and flow — AQC vs AORMS (the comparison)
+
+### 2.1 How AQC is built
+
+* **One in-memory aggregate per project** — `ProjectStore` — saved as a single `.bbsproj` JSON (`format v17`) or exported
+  to a relational `.aqcdb` (SQLite) that is *additive*, not the working store.
+* **Sections inside a project:** `Info` (name, location, client, company, GSTIN/CIN/PAN, logo, `HubProjectId`), `Parties`
+  (two personas: **PM** and **Contractor**, each with letterhead, signatory, number prefix), `Markups`, `Settings`
+  (bar diameters, covers, τbd, hook/bend constants, civil yields), `Levels`, ~**28 take-off sheets**, the PDF take-off
+  state, `Schedule`, `Office` (letters/memos), `ContractBook`, `Accounts` (RA bills + cash/bank), `Stores`
+  (suppliers, warehouses, PO, GRN, issues, stock), `Org` (sites, resources, employees, attendance, payroll),
+  `LinkRules`, and the **last estimate snapshot**.
+* **Take-off rows are schemaless:** each is a `Dictionary<string,string>` (no id) with fields per category. They map
+  1:1 onto AORMS's own `takeoff_items(category, fields jsonb)` shape — a good sign, because the AORMS table was
+  designed as a port of exactly this.
+* **App-level, not per project:** the **rate-book library** (`ratebooks.json`, versioned schedules) and the Bridge's
+  `firm.db` (tokens, outboxes).
+* **Calculation flow:** Levels → element and civil sheets → **C++ `bbs_engine`** (RCC/BBS) and `CivilBoqCalculator`
+  (civil) → `DerivationEngine` (linked trades) → `EstimateCalculator` (qty × rate-book version + markups) →
+  Contracts / Accounts (RA bills, deductions, IPC) → Schedule. The estimate is a **recomputable snapshot** (exported
+  for reporting, deliberately not re-imported).
+* **Persistence of money:** `double` in rupees, rounded to 2 dp at calculation points.
+* **Connection today:** `Aorms.Bridge` — an outbox (`meta_outbox`, `artifact_outbox`), a `syncToken`, a shared
+  `catalog.json` from the retired AORMS Connect launcher, licence activation by key. It targets endpoints
+  (`/platform/v1/activate`, `/api/sync/meta`, `/api/sync/ingest`) that **no longer exist**.
+
+### 2.2 How AORMS is built
+
+* **Relational, multi-tenant:** every tenant table has `firm_id`, every policy checks `firm_id = current_firm_id()`;
+  one row per fact, not one document per project.
+* **Money in integer paise.**
+* **Two Supabase projects:** `aorms-web` (Studio data) and `aorms-platform` (identity, Studios, licences, payments).
+* **Portals** read through RLS with role-specific policies (`my_contractor_id()`, `my_contractor_project_ids()`).
+
+### 2.3 Section-by-section mapping
+
+| AQC section | AORMS equivalent today | Gap / treatment |
 |---|---|---|
-| Rate books, estimates, markups, derivation, BOQ, BBS, take-off | **Owns, computes** | Stores the published result, never recomputes |
-| RA bill calculation, statutory deductions, IPC, final account | **Owns** | Shows published statements; contractor *uploads* claims and measurements |
-| Schedule (CPM/PERT, Gantt) | **Owns** | Shows published schedule; contractor posts progress updates |
-| Projects, clients, contractors, people, permissions | Reads (catalogue) | **Owns** |
-| Drawings register, transmittals, approvals, tenders | Reads / contributes | **Owns** |
-| Money rules | Integer paise end to end; AQC is the source of truth for derived money | Display only; never edits a published figure |
-| Portals (client, contractor, collaborator) | — | **Owns** |
+| `Info` + `HubProjectId` | `project_offices` | **Import** from AORMS; `HubProjectId` = `project_offices.id` |
+| `Parties` (PM, Contractor) | `firms`, `clients`, `contractors` | **Import** (firm letterhead, contractor record) |
+| `Levels`, `Settings`, `Markups`, `Yields` | none (estimates carry only 4 markup %) | Sync as project-level JSON |
+| Take-off sheets (28) | `takeoff_items` (17 categories, jsonb) | Sync **all 28** into a generic row store; AORMS's own table stays frozen |
+| RCC/BBS | `bbs_schedules/members/items` | Same — AQC rows go to the generic store; AORMS BBS frozen |
+| Estimate snapshot + lines | `estimates`, `estimate_items` | Synced as **immutable versions** (artifact), never merged into AORMS's native estimates |
+| Rate books (versioned, app-level) | `rate_books`, `rate_book_items` (no versioning) | New **firm-level** versioned store so every seat shares one library |
+| Link rules | none (derivation in code) | Sync with the project |
+| Schedule (activities, links, CPM) | `pmc_milestones` (+ duration/predecessor, 0102) | **New** `aqc` schedule rows; milestones stay the portal-facing summary |
+| ContractBook (work orders, tenders, SOR) | `contracts`, `tenders`, `pmc_packages` | AQC rows synced as-is; AORMS native tenders/packages stay authoritative for award |
+| Accounts — RA bills + deductions | `pmc_ra_bills`, `pmc_ra_lines`, `pmc_variations` | Contractor *claims* originate in AORMS (inbox); **certified** bill/IPC comes back from AQC |
+| Accounts — cash/bank | `expenses`, `accounts` | AQC copy synced; AORMS finance is authoritative (no merge) |
+| Stores (suppliers, PO, GRN, issues, stock) | `purchase_orders`, `po_items` (no GRN/issue/stock) | AQC rows synced; AORMS PO unchanged |
+| Org (sites, resources, employees, payroll) | `attendance`, `payslips`, `hr_profiles` | AQC copy synced; AORMS HR authoritative (no merge) |
+| Office register (letters) | `letters`, `documents` | AQC copy synced; AORMS authoritative |
 
-Principle (inherited from AQC): *the engine is the single source of truth for numbers.* AORMS never writes a
-derived quantity or amount; it only stores, versions and displays what AQC published.
+Reading of the table: **the compute-heavy sections have no AORMS counterpart worth keeping (AQC wins); the
+office/finance/HR sections overlap and AORMS must stay authoritative** — in connected mode AQC keeps its local copy
+and syncs it, but nothing is merged into AORMS-native tables.
 
-## 3. Architecture
+### 2.4 Mismatches that the design has to absorb
+
+1. **No row ids in AQC take-off rows.** Add a stable `_rid` field (GUID) on first sync; harmless in `.bbsproj`.
+2. **Document vs relational.** Solved by a generic row store (§4) rather than forcing 28 sheets into typed tables.
+3. **`double` rupees vs integer paise.** The generic store keeps AQC's raw values (jsonb); any typed projection AORMS
+   needs (portal figures) converts once, with a fixed rule — round half away from zero to paise — and is flagged
+   *derived from AQC*.
+4. **Two sources for office data** (cash, letters, payroll, stores). Ownership matrix above; no automatic merge.
+5. **Concurrent editing.** AQC has no merge logic (whole-project in memory). Use a **per-project edit lease** (§4.4).
+6. **Estimate is a snapshot.** Versioned and immutable; recompute happens only in AQC.
+7. **The old hub is gone.** Bridge endpoints, `session.json`, `catalog.json` and licence keys are replaced (§3).
+
+## 3. Identity and entitlement (login is the licence)
 
 ```
-AQC desktop (Pro)                       AORMS web (Next.js)                     AORMS Platform (Supabase)
-─────────────────                       ───────────────────                     ─────────────────────────
-Engine + local .bbsproj / SQLite
- │  sign in (device-code / PKCE) ───────────────────────────────────────────►  Auth: accounts (AORMS-U-)
- │◄───────────── platform access token ◄─────────────────────────────────────
- │  GET /api/aqc/v1/entitlement ─────►  verify JWT with Platform ───────────►  licences (Studio plan + aqc_connect)
- │  GET /api/aqc/v1/catalog  ────────►  projects the caller may publish to (firm_id scoped, RLS)
- │  POST /api/aqc/v1/publications ───►  metadata + content hash → returns signed upload URL(s)
- │  PUT  signed URL (PDF/xlsx) ──────►  private bucket `aqc-publications`
- │  POST …/publications/{id}/commit ─►  row in aqc_publications, event in aqc_sync_events
- │  GET  /api/aqc/v1/inbox?since=seq ►  contractor bills, measurements, progress, approvals to act on
-Portals (staff, client, contractor) read aqc_publications through RLS — read-only "Estimate & costing" views.
+AQC (Pro mode)                         AORMS web                        aorms-platform
+──────────────                         ─────────                        ──────────────
+Sign in (device code / PKCE) ──────────────────────────────────────────► Auth (accounts, AORMS-U-, MFA)
+◄───────────────────── access + refresh token ─────────────────────────
+GET /api/aqc/v1/session ───────────►  verify JWT, resolve Studio membership + firm_id
+◄──── { account, studio, firmId, role, capabilities, connected:true }
 ```
 
-* **Two Supabase projects stay as they are.** Entitlement is read from the Platform; publications live in `aorms-web`
-  (the Studio's own data, `firm_id` on every row, RLS `firm_id = current_firm_id()` like the other ~90 tables).
-* **AQC never gets a service-role key and never talks to Postgres.** It calls the versioned `/api/aqc/v1` routes with a
-  user access token; the route does the authorisation and uses the caller's RLS-scoped client for reads/writes
-  (service role only for storage signing, as `lib/receipts/upload.ts` already does).
-* **Contract** lives in `web/lib/aqc/contract.ts` (zod) and is copied to AQC as `docs/SYNC-CONTRACT.md` with a version
-  tag; breaking changes bump `aqc-contract` (the existing AQC versioning rule).
+* **Entitlement rule:** a valid Platform session **and** an ACTIVE membership of a Studio that has an Office Hub
+  firm. That is all. The Studio's existing licence status is read only to suspend (expired/non-payment → the Studio
+  is already locked out of the hub; AQC follows).
+* **No second credential.** Tokens go in Windows Credential Manager. `firm.db` keeps no secrets.
+* **Community mode is unchanged:** not signed in → no network calls, no sync, local `.bbsproj` only.
+* **Capabilities** reuse AORMS's: `fees:manage` (estimates), `write` (project data), `cost:approve` (certify a bill).
+  AQC hides actions the role can't perform; the server enforces them.
+* **Devices:** each install registers once (`aqc_installs`), revocable from the account page. A sensible cap per
+  account (default 3) is configuration, not a licence.
 
-## 4. Data plane
+## 4. Data plane — sync everything, show selectively
 
-**Bind.** An AQC project is bound once to an AORMS `project_offices.id` picked from `/catalog`. The id is stored in the
-`.bbsproj` (`HubProjectId`, already in AQC's `ProjectInfo`). Unbound projects never publish.
+### 4.1 Import (portal → AQC)
 
-**Publish allow-list** (additive only; everything else stays local):
+Opening a project in AQC is a **pull**: `GET /api/aqc/v1/projects` (the caller's, RLS-scoped) and
+`GET /api/aqc/v1/projects/{id}/seed` returning project info, firm letterhead/party data, client, contractors on the
+project, the drawings register (with signed download URLs so a drawing can be loaded straight into the take-off
+viewer), approved joint measurements, contractor RA claims and progress updates waiting in the inbox, and the
+milestone summary. A project cannot be created in AQC in connected mode; "New project" starts in AORMS (Community
+mode can still create local projects, and a local project can later be **adopted** into an AORMS project once).
 
-| Entity | Form | Shown to |
-|---|---|---|
-| `estimateSummary` (totals, markups, version, date) | scalars + PDF | staff, client (when marked client-visible) |
-| `boq` / `rateAbstract` | PDF + xlsx | staff |
-| `bbsSchedule` | PDF + xlsx | staff, contractor (when issued) |
-| `runningBill` / `ipc` (certified) | scalars + PDF | staff, contractor (own package), client (when sent) |
-| `jointMeasurement` (approved abstract) | scalars + PDF | staff, contractor (own) |
-| `schedule` (activities, dates, critical flags, % complete) | JSON | staff, client, contractor (own) |
-| `finalAccount` | scalars + PDF | staff, contractor (own) |
+### 4.2 Sync (AQC → database)
 
-**Never sync:** AI transcripts, measurement scratch, draft estimates, unissued drawings, local rate-book internals.
+Generic, lossless, queryable store in `aorms-web` (all `firm_id`-scoped, RLS):
 
-**Versioning.** Each publish is a new immutable version `(project, entity, entity_id, version)`; the portals show the
-latest *issued* version and keep the history (same idea as drawing revisions). Content-hash skip: republishing identical
-bytes is a no-op.
+| Table | Holds |
+|---|---|
+| `aqc_projects` | one row per bound project: `project_office_id`, `format_version`, `settings jsonb` (levels, markups, covers, yields, link rules), `head_seq`, `lease_*` |
+| `aqc_rows` | every row of every sheet/book: `(project_id, section, row_id, fields jsonb, deleted, updated_at, updated_by, seq)` |
+| `aqc_versions` | immutable snapshots: estimate, BOQ, BBS schedule, certified bill/IPC, final account — `(kind, version, content_hash, summary jsonb, storage_key)` |
+| `aqc_rate_books` / `aqc_rate_items` | firm-level versioned rate books shared across seats |
+| `aqc_installs`, `aqc_events` | device registry; monotonic per-firm `seq` for catch-up |
 
-**Pull (inbox).** AQC polls `/inbox?since=<seq>` for things it must act on: contractor RA-bill claims and measurement
-lines, progress updates, approvals. Acting on one publishes the result (e.g. a certified bill). The contractor portal
-upload that exists today (PR #132) is the producer for this inbox.
+* **Row-level sync with an outbox**, as AQC's bridge already does: enqueue locally, flush in order, `seq`-checked.
+* **Content-hash skip** for artifacts; PDFs/xlsx go to a private `aqc` bucket via signed URLs.
+* **No service-role key on the desktop, no direct database access** — everything goes through versioned
+  `/api/aqc/v1` routes that authorise, then use the caller's RLS-scoped client.
+* **Contract:** `web/lib/aqc/contract.ts` (zod), mirrored into AQC with a version tag; breaking change bumps
+  `aqc-contract`.
 
-**Conflict policy** (from AQC's bridge doc, tightened): AQC wins on every derived number; AORMS wins on project
-metadata, people and permissions; task-like fields are last-writer-wins per field; every write carries the last seen `seq`
-and is rejected if stale.
+### 4.3 Show (database → portals)
 
-**New tables (aorms-web):** `aqc_installs` (device registration, revocable), `aqc_publications` (versioned rows + storage
-key + content hash + visibility), `aqc_sync_events` (monotonic `seq` per firm for catch-up), `aqc_inbox_acks`.
-All carry `firm_id`; write access only through the `/api/aqc/v1` routes for a user with the right capability
-(`fees:manage` for estimates, `write` for bills, `cost:approve` to certify — existing capability names).
+Staff, client, contractor and collaborator pages read **typed projections**, not the raw store:
 
-## 5. Contractor, client and consultant loops
+| Portal | Sees |
+|---|---|
+| Staff | Estimate and costing tab per project (latest version, history), BOQ/BBS files, schedule, bills, final account |
+| Client | Estimate summary and schedule, only after staff mark a version *client-visible* |
+| Contractor | Their package only: issued BBS, certified bills/IPC, measurement abstract, schedule, final account |
+| Collaborator | Items explicitly shared |
 
-1. Contractor uploads a running bill with measurement lines and backup (exists) → lands in the AQC inbox.
-2. Studio staff open it in AQC, check measurements, apply statutory deductions with AQC's engine, certify.
-3. AQC publishes the certified bill / IPC → the AORMS bill status becomes CERTIFIED (the existing
-   `pmc_ra_bills_certify_guard` and `cost:approve` rule still apply on the AORMS side, so certification is double-gated).
-4. The contractor sees the certified statement, retention and balance in the portal; payment-received dates are still
-   recorded in AORMS (migration 0103) because payment is an office event, not an engineering one.
-5. The client portal shows the estimate summary and schedule once marked client-visible.
+Projections are written by the **sync route** from the version's `summary jsonb` (scalars AQC itself computed). The
+web app never derives a figure from `aqc_rows`.
 
-## 6. Licensing — Community vs Pro
+### 4.4 Concurrency and offline
 
-| | Community (free) | Pro |
-|---|---|---|
-| AQC desktop | Full engine, local files, AGPL | Same engine |
-| Login | **Not required** | AORMS Platform login required (connected mode) |
-| Sync with AORMS | None | Bind, publish, pull inbox |
-| Portals' "Estimate & costing" views | Empty state ("not connected") | Populated |
-| AORMS office hub | Free tier as defined on the landing page | Studio on a paid plan |
+* **Edit lease:** one writer per project at a time (`lease_holder`, `lease_expires_at`, heartbeat). A second device
+  opens read-only with an "edited on <device>" banner. Avoids inventing merge logic AQC does not have.
+* **Offline:** unlimited; the outbox replays in order. Lease expiry rules decide who wins on reconnect; a stale
+  `base_seq` is rejected and the user is offered "pull and reapply".
+* **Deletes** are soft (`deleted=true`) so a replay can't resurrect or lose rows silently.
 
-* Entitlement = a Studio licence that is active **and** carries the `aqc_connect` feature. Implement as a column
-  `licences.features text[]` (or a new `PRO` plan row in `plan_pricing` — Q2) so entitlement stays a data change, not a
-  deploy. The route `/api/aqc/v1/entitlement` returns `{ plan, connected: boolean, seats, expiresAt }`.
-* Payment reuses the Razorpay flow already in place for Studio licences (`payments`, verified-webhook only; the
-  self-serve free-edit hole in 0011 stays closed).
-* **Seat model:** one seat = one signed-in person; `aqc_installs` caps devices per seat (Q4).
-* **AGPL note:** the dual-licence in AQC's `LICENSING.md` is unchanged; a hosted/SaaS use of AQC itself still needs a
-  commercial licence. The connector in AQC stays open source; the *entitlement check* lives server-side in AORMS.
-* **Grace:** if the entitlement lapses AQC drops to Community behaviour (local work continues, publishing pauses,
-  nothing is deleted); already-published versions stay visible in AORMS read-only.
+### 4.5 Closing the loop with the contractor portal
 
-## 7. Security
+1. Contractor uploads a running bill with measurement lines and backup in the portal (exists).
+2. It appears in AQC's **inbox** for that project.
+3. Staff check it in AQC; AQC's engine computes deductions and certifies.
+4. AQC syncs the **certified bill/IPC version**; AORMS shows it and sets `pmc_ra_bills.status = CERTIFIED`
+   (the existing `cost:approve` guard still applies server-side, so certification is double-gated).
+5. Payment received is recorded in AORMS (an office event).
 
-* AQC sign-in: OAuth 2.0 **device-code** (or loopback PKCE) against Platform Auth — no password in the desktop app, MFA
-  respected (the Platform already has `/platform-mfa`). Tokens kept in Windows Credential Manager, not in `firm.db`.
-* Every route: verify JWT → resolve account → resolve Studio and `firm_id` → check entitlement → check capability →
-  RLS-scoped query. Never trust a project id from the client without the catalogue check.
-* Uploads: signed URLs, size caps, file-signature validation (`lib/security/file-signature.ts`), private bucket, reads
-  only through a signed URL minted after an RLS row lookup (the same pattern as `/api/contractor-file`).
-* Device registry with revoke; per-device rate limiting (`rate_limit_buckets` exists); audit via `write_audit`.
-* Threat to design for: a stolen AQC token publishing into the wrong Studio → catalogue and `firm_id` come from the
-  token's membership, never from the request body.
+## 5. Security
 
-## 8. Phases
+* Device-code / PKCE sign-in against Platform Auth; MFA honoured; refresh tokens in the OS credential store.
+* Every route: verify JWT → resolve account → Studio → `firm_id` → capability → RLS. `firm_id` and `project_id` are
+  **never** taken from the request body without the membership check.
+* Signed uploads, size caps, file-signature validation (`lib/security/file-signature.ts`), private bucket, reads only
+  via signed URL minted after an RLS lookup (the `/api/contractor-file` pattern).
+* Device revocation, per-device rate limits (`rate_limit_buckets`), `write_audit` on every state change.
+* **Open-source consequence:** the AQC client is public, so *all* authorisation is server-side; the client is
+  untrusted. That is also why there is nothing licence-shaped to crack.
+
+## 6. Phases
 
 | Phase | Work | Repo | Exit |
 |---|---|---|---|
-| **P0 — Decide** | Answer section 9; update CLAUDE.md (AQC no longer "removed"), ROADMAP, this doc to "Decided" | aorms | Written decisions; PR #134 scoped |
-| **P1 — Entitlement + login** | `features`/Pro on Studio licence; `/api/aqc/v1/entitlement`; device-code auth; `aqc_installs`; admin toggle in `/admin/licences` | aorms (+ platform migration) | A test Studio is Pro; a curl with a Platform token returns `connected: true` |
-| **P2 — Ingest** | Tables, bucket, `catalog` / `publications` / `commit` / `inbox` routes, contract + tests, audit | aorms | Contract tests green; RLS cross-firm test denies |
-| **P3 — Portal views** | Read-only "Estimate & costing" on project, client and contractor pages; empty states; visibility flag | aorms | Seeded publication visible to the right roles only (browser QA per role) |
-| **P4 — AQC bridge** | Rewrite `Aorms.Bridge`: sign-in, entitlement gate, bind, outbox, publish, pull; keep Community path untouched; remove Connect/`session.json` dependency | AQC | End-to-end: sign in → bind → publish → appears in portal |
-| **P5 — Contractor loop** | Inbox producer for bills/measurements/progress; certified bill and IPC back-publish; status mapping | both | A contractor bill is certified in AQC and shows CERTIFIED in the portal |
-| **P6 — Billing** | Pro plan price, Razorpay checkout, lapse/grace handling, pricing page copy | aorms | Paid Studio turns connected on; lapse turns it off cleanly |
-| **P7 — Retire/freeze web estimation** | Per Q1: banner "managed in AQC", then hide or keep as Community fallback; export to AQC import format | aorms | No new feature work in `web/` estimation |
-| **P8 — Pilot + hardening** | One real Studio, security review, load test of publish, docs | both | Pilot signed off |
+| **P0** | Adopt this plan: update CLAUDE.md (AQC is a connected product, not "removed"), ROADMAP | aorms | Docs merged |
+| **P1 — Session** | `/api/aqc/v1/session`, device-code auth, `aqc_installs`, account-page device list | aorms | A Platform token returns `connected:true`; a non-member is refused |
+| **P2 — Store + contract** | `aqc_*` tables, bucket, `projects` / `seed` / `rows` / `versions` / `inbox` / `lease` routes, zod contract, contract tests, RLS cross-firm denial tests | aorms | Contract tests green; second-firm token reads nothing |
+| **P3 — Portal views** | Staff "Estimate & costing" tab; client/contractor read-only views with visibility flag; empty states | aorms | Browser QA per role with a seeded version |
+| **P4 — AQC client** | Replace `Aorms.Bridge`: sign-in, project picker (import), `_rid` ids, outbox sync of all sections, lease, versions upload; remove Connect/licence code; Community path untouched | AQC | Sign in → open portal project → edit → sync → visible in portal |
+| **P5 — Contractor loop** | Inbox producer (bills, measurements, progress), certified-bill back-sync, status mapping | both | Contractor bill certified in AQC shows CERTIFIED in portal |
+| **P6 — Rate-book library** | Firm-level versioned rate books shared across seats | both | Two seats see the same versioned book |
+| **P7 — Freeze/migrate** | Banner on frozen AORMS estimation; one-way export of existing AORMS estimates/take-off/BBS into an AQC project | both | Export opens in AQC with identical totals (checked on a real estimate) |
+| **P8 — Pilot** | One real Studio, security review, volume test of row sync | both | Sign-off |
 
-Each phase follows the repo rule: migration → verify live → browser QA → docs in the same pass.
+Each phase: migration → verify live → browser QA → docs in the same pass (repo rule).
 
-## 9. Decisions needed before P1
+## 7. Remaining open points (small, none blocks P0–P2)
 
-1. **Q1 — Existing `web/` estimation:** keep as the in-AORMS Community fallback, freeze read-only, or retire after Pro?
-   (Recommendation: freeze — no new work, keep readable, export to AQC.)
-2. **Q2 — Plan shape:** add a feature flag to existing STANDARD/PREMIUM, or a distinct **PRO** plan? What is the price
-   and is it per seat or per Studio? (Recommendation: feature flag + a named plan row for pricing display.)
-3. **Q3 — Does Community AQC need any login?** The brief reads as "Community is standalone, login only when connecting".
-   Confirm — if Community must also sign in, offline use and the AGPL story change.
-4. **Q4 — Device limit per seat** (e.g. 2 installs) and whether a team seat can share an install.
-5. **Q5 — Client visibility:** is publishing to the client portal automatic once issued, or a separate "release to client"
-   step in AORMS?
-6. **Q6 — Scope of the first release:** estimate summary + schedule only (smallest useful), or include running bills and
-   IPC from day one? (Recommendation: summary + schedule first, bills in P5.)
-7. **Q7 — AQC's own remaining bridge assumptions:** does anything else in AQC still depend on the old hub or Connect
-   (Joint Measurement pull, project catalogue)? Needs a read of AQC's `Aorms.Bridge` project before P4 is estimated.
+1. **Suspension rule:** the entitlement follows the Studio's existing licence status — confirm a TRIAL or expired
+   Studio should lose connected mode (assumed yes).
+2. **Device cap per account** (default 3) — confirm the number.
+3. **Adopting a local Community project** into an AORMS project: allowed once, by a user with `write` — confirm.
+4. **Client visibility** is a per-version staff action in AORMS (assumed), not automatic on sync.
+5. **First pilot Studio** and a real AQC project file to test P4/P7 against.
 
-## 10. Risks
+## 8. Risks
 
-* **Two sources of numbers during transition** — mitigated by freezing `web/` estimation (Q1) and never recomputing
-  published figures.
-* **Desktop auth UX** — device-code is slower than a saved password; mitigate with long-lived refresh tokens in the
-  credential store and silent refresh.
-* **Offline** — AQC is local-first; the outbox must tolerate days offline and replay in order with `seq` checks.
-* **Contract drift between two repos** — one versioned contract file, copied with a tag, contract tests in both repos.
-* **Licence lapse mid-project** — defined grace behaviour (section 6) so work is never held hostage.
-
-## 11. What I would build first
-
-P0 decisions, then **P1 + P2** together in AORMS (entitlement, device registry, ingest routes, tables, contract tests) —
-they are independent of any AQC change and make the AQC side testable with a stub client. P4 can then start against a
-live, tested API instead of a paper design.
+* **Large `.bbsproj`** (thousands of rows): row-level sync keeps writes small; initial sync is chunked.
+* **Drift between the two repos' contracts:** one versioned contract file with tests on both sides.
+* **Frozen AORMS estimation confusing users:** banner + export path (P7); no removal until a Studio has migrated.
+* **Desktop sign-in friction:** long-lived refresh token, silent refresh, offline allowed for the lease duration.

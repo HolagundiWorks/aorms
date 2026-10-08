@@ -12,7 +12,10 @@
 - ❌ AStudio (architecture practice mgr) — removed, allied app
 - ❌ AConsulting (engineering practice mgr) — removed, allied app
 - ❌ AProc / AQC PM (project mgmt technical) — removed, allied app
-- ❌ AQC Estimation / BBS (technical installers) — removed, separate repos
+- ❌ AQC Estimation / BBS as *installers shipped with AORMS* — removed. **Superseded 2026-10-08:** AQC
+  (`HolagundiWorks/AQC`, open source) is now a **connected product** — it does estimation and costing; AORMS
+  stores, syncs and shows it, and the AORMS login is the licence. `web/` estimation is frozen. See
+  [`docs/esti/AQC-CONNECT-PLAN.md`](docs/esti/AQC-CONNECT-PLAN.md).
 - ❌ ADraft / ShilpiDB (drafting / geometry) — removed, allied apps
 - ❌ Desktop installers, Windows setup, Tauri shell — web-only now
 - ❌ **EOMS** (external knowledge bank API) — retired 2026-09, physically
@@ -232,7 +235,7 @@ VPS: [`docs/esti/VPS-INSTALL.md`](docs/esti/VPS-INSTALL.md) ·
 - ❌ `AORMS_STUDIO` / `ASTUDIO` — allied app removed
 - ❌ `AORMS_CONSULTANCY` / `ACONSULTING` — allied app removed
 - ❌ `AORMS_PMC` / `APROC` — allied app removed
-- ❌ `AQC_ESTIMATION`, `AQC_BBS` — separate repos, removed
+- ❌ `AQC_ESTIMATION`, `AQC_BBS` constants — removed (AQC is connected via the Platform login, not a product constant; see the AQC plan)
 - ❌ `ADRAFT` / `AADT`, `SHILPIDB` — allied apps removed
 - ❌ `SUITE_*` constants — no longer a suite, single web app
 

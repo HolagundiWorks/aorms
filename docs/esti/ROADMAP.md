@@ -124,7 +124,7 @@ Android business logic anywhere.
 
 ## Open items — honest, not yet done
 
-- **AQC ↔ AORMS connection (proposed 2026-10-08, undecided):** AQC owns estimation/costing, AORMS stores and shows what AQC publishes, Community free / Pro connected with an AORMS login. Plan, conflicts with current docs and the seven decisions needed: [AQC-CONNECT-PLAN.md](AQC-CONNECT-PLAN.md).
+- **AQC ↔ AORMS connection (DECIDED 2026-10-08):** AQC (open source) does estimation/costing; AORMS login is the licence (no keys); portal projects are imported into AQC; all AQC data syncs to the database; `web/` estimation is frozen. Final plan with the AQC-vs-AORMS structure comparison, data plane and phases P0–P8: [AQC-CONNECT-PLAN.md](AQC-CONNECT-PLAN.md). Nothing built yet.
 
 - **Android app product direction, set 2026-09-20 — a full IA spec from
   the user, "Today" slice shipped, rest genuinely ahead.** Explicit
