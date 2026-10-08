@@ -108,6 +108,15 @@ and syncs it, but nothing is merged into AORMS-native tables.
 
 ## 3. Identity and entitlement (login is the licence)
 
+> **Refinement (2026-10-09, while building P1):** AQC signs in to the **Office Hub** (the same Supabase Auth the mobile app
+> uses) and sends that access token as a bearer; every API call then runs as that user under RLS, with `firm_id` and role
+> from `profiles`. The **Platform** is consulted only for *entitlement* (the Studio linked to the firm, via
+> `firms.platform_studio_public_id`, and its licence). This keeps authorisation in one place (the hub's RLS) and means the
+> desktop never talks to two auth systems. The diagram below shows the Platform as the sign-in authority; read it as
+> "Hub sign-in, Platform entitlement". **Entitled plans:** `STUDIO`, `PROFESSIONAL`, `ENTERPRISE`, not expired; `FREE`/trial,
+> expired and unlinked Studios are refused with a reason (`lib/aqc/entitlement.ts`). Portal roles (client, contractor,
+> consultant) cannot use AQC.
+
 ```
 AQC (Pro mode)                         AORMS web                        aorms-platform
 ──────────────                         ─────────                        ──────────────
@@ -246,6 +255,15 @@ Each phase: migration → verify live → browser QA → docs in the same pass (
 * **Drift between the two repos' contracts:** one versioned contract file with tests on both sides.
 * **Frozen AORMS estimation confusing users:** banner + export path (P7); no removal until a Studio has migrated.
 * **Desktop sign-in friction:** long-lived refresh token, silent refresh, offline allowed for the lease duration.
+
+## 8a. Build status
+
+| Phase | State |
+|---|---|
+| P1 session + entitlement | **Built 2026-10-09** — `POST/GET /api/aqc/v1/session`, `aqc_sessions` (one per account), entitlement evaluation, `session_replaced` (409). Migration `0105`. |
+| P2 store + contract | **Built (core)** — `aqc_projects` / `aqc_rows` / `aqc_versions`, bind-once, edit lease (423 `lease_required`), row batches with `seq`, delta pull, immutable versions with content-hash skip, `client_visible` staff-only. Routes under `/api/aqc/v1/projects`. Not yet: `seed` (portal data import), `inbox`, signed file upload/download, rate-book tables. |
+| Verified | Against the live `aorms-web` with the demo Studio: see `web/tests/fixtures/aqc/demo-e2e.mjs`. The live **Platform licence lookup was not exercised locally** (the local Platform service key is a placeholder); the same Studio and licence data was read directly on the Platform, and the evaluation logic is unit-tested. Confirm on the first deploy. |
+| Demo Studio | `AORMS-S-R0QV` (Aurelia Design Collective) set to `PROFESSIONAL` on the Platform so the demo account is entitled; this also lifts the FREE-plan record caps for the demo Studio. |
 
 ## 9. Test fixture
 
