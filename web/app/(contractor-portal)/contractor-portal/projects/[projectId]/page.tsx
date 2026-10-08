@@ -54,11 +54,12 @@ export default async function ContractorProjectPage({ params }: { params: Promis
   const project = rows[0];
   const pkg = rows.find((r) => r.package_id) ?? null;
 
-  const [{ data: drawings }, { data: milestones }, { data: bills }, { data: submissions }] = await Promise.all([
+  const [{ data: drawings }, { data: milestones }, { data: bills }, { data: submissions }, { data: variations }] = await Promise.all([
     supabase.from("drawings").select("id, ref, title, rev_no, root_id, is_current, revision_note, created_at, storage_key").eq("project_id", projectId).order("created_at", { ascending: false }),
     supabase.from("pmc_milestones").select("id, ref, title, planned_date, actual_date, percent_complete, status, notes, duration_days, predecessor_id, dep_type, lag_days").eq("project_id", projectId).order("sort_order"),
-    supabase.from("pmc_ra_bills").select("id, ref, bill_no, period_start, period_end, status, gross_paise, advance_recovery_paise, retention_paise, other_deduction_paise, narrative, attachment_key, gst_paise, tds_paise, cess_paise, gst_tds_paise").eq("project_id", projectId).order("created_at", { ascending: false }),
+    supabase.from("pmc_ra_bills").select("id, ref, bill_no, period_start, period_end, status, gross_paise, advance_recovery_paise, retention_paise, other_deduction_paise, narrative, attachment_key, paid_paise, paid_at, gst_paise, tds_paise, cess_paise, gst_tds_paise").eq("project_id", projectId).order("created_at", { ascending: false }),
     supabase.from("contractor_submissions").select("id, kind, subject, body, status, response_note, created_at, meeting_at, meeting_place, storage_key, file_name, percent_complete, applied_at").eq("project_id", projectId).order("created_at", { ascending: false }),
+    supabase.from("pmc_variations").select("id, ref, title, amount_paise, approved_at").eq("project_id", projectId).order("created_at"),
   ]);
   const subIds = (submissions ?? []).map((s) => s.id);
   const { data: messages } = subIds.length
@@ -81,7 +82,11 @@ export default async function ContractorProjectPage({ params }: { params: Promis
   const certifiedNet = certifiedBills.reduce((n, b) => n + net(b), 0);
   const retention = certifiedBills.reduce((n, b) => n + (b.retention_paise ?? 0), 0);
   const inReview = (bills ?? []).filter((b) => !CERTIFIED.has(b.status ?? "")).reduce((n, b) => n + (b.gross_paise ?? 0), 0);
-  const contractValue = pkg?.contract_value_paise ?? null;
+  const originalValue = pkg?.contract_value_paise ?? null;
+  // Variations visible to a contractor are the approved ones only (RLS); they revise the contract value.
+  const variationTotal = (variations ?? []).reduce((n, v) => n + (v.amount_paise ?? 0), 0);
+  const contractValue = originalValue != null ? originalValue + variationTotal : null;
+  const received = (bills ?? []).reduce((n, b) => n + (b.paid_paise ?? 0), 0);
   const balance = contractValue != null ? Math.max(0, contractValue - claimed) : null;
   const pctBilled = contractValue ? Math.round((claimed / contractValue) * 100) : null;
   const progress = (milestones ?? []).length ? Math.round((milestones ?? []).reduce((n, m) => n + (m.percent_complete ?? 0), 0) / (milestones ?? []).length) : null;
@@ -275,6 +280,7 @@ export default async function ContractorProjectPage({ params }: { params: Promis
                       <TableCell className="aorms-num">{CERTIFIED.has(b.status ?? "") ? inr(net(b)) : "—"}</TableCell>
                       <TableCell>
                         <Tag type={CERTIFIED.has(b.status ?? "") ? "green" : "gray"} size="sm">{BILL_LABEL[b.status ?? ""] ?? b.status}</Tag>
+                        {(b.paid_paise ?? 0) > 0 && <span className="cds--type-helper-text-01"> · paid {inr(b.paid_paise)}{b.paid_at ? ` on ${day(b.paid_at)}` : ""}</span>}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -303,12 +309,16 @@ export default async function ContractorProjectPage({ params }: { params: Promis
                 <TableBody>
                   {(
                     [
-                      ["Contract value", inr(contractValue)],
+                      ["Original contract value", inr(originalValue)],
+                      ["Approved variations", inr(variationTotal)],
+                      ["Revised contract value", inr(contractValue)],
                       ["Claimed to date (all bills, gross)", inr(claimed)],
                       ["Still in review (not yet certified)", inr(inReview)],
                       ["Certified (gross)", inr(certifiedGross)],
                       ["Certified (net of advance, retention, deductions)", inr(certifiedNet)],
                       ["Retention held", inr(retention)],
+                      ["Received to date", inr(received)],
+                      ["Certified, awaiting payment", inr(Math.max(0, certifiedNet - received))],
                       ["Balance to bill", inr(balance)],
                     ] as [string, string][]
                   ).map(([k, v]) => (
@@ -319,6 +329,29 @@ export default async function ContractorProjectPage({ params }: { params: Promis
                   ))}
                 </TableBody>
               </Table>
+              {(variations ?? []).length > 0 && (
+                <>
+                  <SheetSub>Approved variations</SheetSub>
+                  <Table aria-label="Approved variations" size="sm" className="aorms-table-spaced">
+                    <TableHead>
+                      <TableRow>
+                        <TableHeader>Ref</TableHeader>
+                        <TableHeader>Variation</TableHeader>
+                        <TableHeader className="aorms-num">Amount</TableHeader>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {(variations ?? []).map((v) => (
+                        <TableRow key={v.id}>
+                          <TableCell>{v.ref}</TableCell>
+                          <TableCell>{v.title}</TableCell>
+                          <TableCell className="aorms-num">{inr(v.amount_paise)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </>
+              )}
               {pctBilled != null && (
                 <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
                   {pctBilled}% of the contract value has been claimed{progress != null ? `, against ${progress}% programme progress` : ""}.
