@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
-import { Header, HeaderName, HeaderGlobalBar, HeaderMenuButton, SideNav, SideNavItems, SideNavLink, SideNavMenu, SideNavMenuItem, Content } from "@carbon/react";
-import { FolderDetails, Document, Information } from "@carbon/icons-react";
+import { Header, HeaderName, HeaderGlobalBar, HeaderMenuButton, SideNav, SideNavItems, SideNavLink, Content } from "@carbon/react";
+import { FolderDetails, Information } from "@carbon/icons-react";
 import { OrganisationIdentity } from "./OrganisationIdentity";
 import { HeaderUserMenu } from "./HeaderUserMenu";
 import { BrandWatermark } from "./BrandWatermark";
@@ -99,14 +99,23 @@ export function PortalShell({
             {homeLabel}
           </SideNavLink>
           {projectBase && projectSections.length > 0 && (
-            <SideNavMenu title={`${pad(1)}\u2002${sectionsTitle}`} renderIcon={Document} defaultExpanded>
-              {projectSections.map((s, i) => (
-                <SideNavMenuItem key={s.anchor} as={NextLink} href={`${homeHref}/${projectBase[1]}#${s.anchor}`} onClick={collapseNav}>
+            <>
+              <li className="aorms-sidenav-group" aria-hidden="true">
+                {`${pad(1)}\u2002${sectionsTitle}`}
+              </li>
+              {projectSections.map((sct, i) => (
+                <SideNavLink
+                  key={sct.anchor}
+                  as={NextLink}
+                  href={`${homeHref}/${projectBase[1]}#${sct.anchor}`}
+                  className="aorms-sidenav-sub"
+                  onClick={collapseNav}
+                >
                   <span className="aorms-sheet-no">{`${pad(1)}.${pad(i + 1)}`}</span>
-                  {s.label}
-                </SideNavMenuItem>
+                  {sct.label}
+                </SideNavLink>
               ))}
-            </SideNavMenu>
+            </>
           )}
           <SideNavLink
             href="#instructions"
