@@ -3300,6 +3300,42 @@ h1.aorms-lp-display {
   .aorms-pcard__name {
     font-size: 0.875rem;
   }
+
+  // Two-up tiles are ~11rem wide: tighter veil, the name clamped to two lines, each meta line to one, and a
+  // darker scrim so the always-on (touch) text stays legible on light images.
+  .aorms-pcard__veil {
+    padding: 0.5rem;
+    gap: 0.125rem;
+    background: linear-gradient(to top, rgba(22, 22, 22, 0.92), rgba(22, 22, 22, 0.55) 65%, rgba(22, 22, 22, 0.1));
+  }
+
+  .aorms-pcard__name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.2;
+  }
+
+  .aorms-pcard__meta {
+    font-size: 0.6875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Phones: KPI tiles in an auto-fill 9rem grid fell to ONE narrow column (2 × 9rem + gap just misses a 390px
+// screen). Two equal columns instead; amounts still take a full line (rule above).
+@media (max-width: 41.99rem) {
+  .aorms-rail-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .aorms-rail-kpis > .cds--tile,
+  .aorms-rail-kpis > a > .cds--tile {
+    inline-size: auto !important;
+  }
 }
 
 // Landing's live Projects gallery: small 3-up tiles beside the copy (hover reveals the name, as in the portal).
@@ -3541,4 +3577,19 @@ h1.aorms-lp-display {
   margin-block-start: 0.5rem;
   font-size: 0.6875rem;
   color: var(--cds-text-secondary);
+}
+
+// Portal rail: the section group is a flat label + links (a Carbon SideNavMenu collapses itself whenever the
+// phone rail is closed, so its links were hidden after opening the navigation).
+.aorms-sidenav-group {
+  padding: 0.75rem 1rem 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+}
+
+.aorms-sidenav-sub .cds--side-nav__link {
+  padding-inline-start: 2.5rem;
 }
