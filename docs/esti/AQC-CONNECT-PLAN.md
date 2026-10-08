@@ -15,6 +15,12 @@
 | D5 | **Project data is imported from the portal.** A connected AQC does not invent projects: the project, its client, firm, contractors, drawings and site/portal inputs come *from* AORMS; the user opens a portal project in AQC. |
 | D6 | **All data is synced to the database.** Every section of an AQC project (take-off sheets, levels, settings, estimates, bills, schedule, contracts, stores, org …) is stored in AORMS's database, not only a published subset. |
 
+| D7 | **Trial or expired Studio loses connected mode.** The entitlement follows the Studio's licence status; AQC drops to Community behaviour (local work continues, nothing deleted, nothing syncs). |
+| D8 | **One active session per user.** No device cap and no device registry. Signing in on a second machine ends the first session (the first sees "signed in elsewhere" and falls back to read-only / Community until it signs in again). |
+| D9 | **Login first; online projects first.** AQC opens to a sign-in screen. After sign-in it shows the user's **online projects** (from AORMS) instead of local files. A local project can be **pushed online** — adopted into an AORMS project **once**. Community (not signed in) still opens local files. |
+| D10 | **Releasing an estimate to the client is a staff action**, per version, in AORMS. Syncing never makes anything client-visible. |
+| D11 | **No pilot Studio or real AQC file yet.** A synthetic pilot project file is provided as a test fixture (§9). |
+
 Consequences: the billing/licence phase (earlier "P6") is **dropped**; "Pro" is a *mode* (signed in + synced), and the
 earlier "publish allow-list / never-sync scratch" idea is replaced by *sync everything, show selectively* (§4).
 
@@ -118,10 +124,26 @@ GET /api/aqc/v1/session ───────────►  verify JWT, resolv
 * **Community mode is unchanged:** not signed in → no network calls, no sync, local `.bbsproj` only.
 * **Capabilities** reuse AORMS's: `fees:manage` (estimates), `write` (project data), `cost:approve` (certify a bill).
   AQC hides actions the role can't perform; the server enforces them.
-* **Devices:** each install registers once (`aqc_installs`), revocable from the account page. A sensible cap per
-  account (default 3) is configuration, not a licence.
+* **One active session per user (D8):** sign-in creates `aqc_sessions(account_id unique, session_id, started_at,
+  last_seen_at)`; a new sign-in replaces the row. Every API call carries the `session_id` claim; a stale one gets
+  `409 session_replaced` and AQC shows "signed in on another computer — sign in here to continue". Replaces the earlier
+  device registry and cap. Pending offline outbox rows survive and replay after the next sign-in (subject to the
+  project lease).
+* **Entitlement lapse (D7):** if the Studio becomes TRIAL-expired or expired, `/session` returns `connected:false`
+  with a reason; AQC switches to Community behaviour and keeps the outbox untouched until it reconnects.
 
 ## 4. Data plane — sync everything, show selectively
+
+### 4.0 First-run flow (D9)
+
+1. AQC launches to **Sign in** (AORMS account; "Continue without signing in" = Community, local files only).
+2. After sign-in: **Online projects** list (the user's AORMS projects, with sync state) and a secondary **Local
+   projects** list. Opening an online project pulls its data (§4.1) and the AQC project becomes bound.
+3. **Push local project online:** on a local project, *Push online* → pick the target AORMS project (or create a new
+   one from AQC if the user has `write`) → the project is bound **once**, `_rid` ids are minted, all sections upload,
+   and the local file becomes a cached copy of the online project. Rebinding or pushing the same local file to a
+   second AORMS project is refused.
+4. Not signed in / lapsed: the Local list is all that shows.
 
 ### 4.1 Import (portal → AQC)
 
@@ -129,8 +151,7 @@ Opening a project in AQC is a **pull**: `GET /api/aqc/v1/projects` (the caller's
 `GET /api/aqc/v1/projects/{id}/seed` returning project info, firm letterhead/party data, client, contractors on the
 project, the drawings register (with signed download URLs so a drawing can be loaded straight into the take-off
 viewer), approved joint measurements, contractor RA claims and progress updates waiting in the inbox, and the
-milestone summary. A project cannot be created in AQC in connected mode; "New project" starts in AORMS (Community
-mode can still create local projects, and a local project can later be **adopted** into an AORMS project once).
+milestone summary. In connected mode a new project is created either in AORMS or from AQC's *Push online* (above).
 
 ### 4.2 Sync (AQC → database)
 
@@ -142,7 +163,7 @@ Generic, lossless, queryable store in `aorms-web` (all `firm_id`-scoped, RLS):
 | `aqc_rows` | every row of every sheet/book: `(project_id, section, row_id, fields jsonb, deleted, updated_at, updated_by, seq)` |
 | `aqc_versions` | immutable snapshots: estimate, BOQ, BBS schedule, certified bill/IPC, final account — `(kind, version, content_hash, summary jsonb, storage_key)` |
 | `aqc_rate_books` / `aqc_rate_items` | firm-level versioned rate books shared across seats |
-| `aqc_installs`, `aqc_events` | device registry; monotonic per-firm `seq` for catch-up |
+| `aqc_sessions`, `aqc_events` | the single active session per account (D8); monotonic per-firm `seq` for catch-up |
 
 * **Row-level sync with an outbox**, as AQC's bridge already does: enqueue locally, flush in order, `seq`-checked.
 * **Content-hash skip** for artifacts; PDFs/xlsx go to a private `aqc` bucket via signed URLs.
@@ -167,8 +188,8 @@ web app never derives a figure from `aqc_rows`.
 
 ### 4.4 Concurrency and offline
 
-* **Edit lease:** one writer per project at a time (`lease_holder`, `lease_expires_at`, heartbeat). A second device
-  opens read-only with an "edited on <device>" banner. Avoids inventing merge logic AQC does not have.
+* **Edit lease:** one writer per project at a time (`lease_holder`, `lease_expires_at`, heartbeat). A second user (or the same user
+  after a session replace) opens read-only with an "edited by <name>" banner. Avoids inventing merge logic AQC does not have.
 * **Offline:** unlimited; the outbox replays in order. Lease expiry rules decide who wins on reconnect; a stale
   `base_seq` is rejected and the user is offered "pull and reapply".
 * **Deletes** are soft (`deleted=true`) so a replay can't resurrect or lose rows silently.
@@ -189,7 +210,7 @@ web app never derives a figure from `aqc_rows`.
   **never** taken from the request body without the membership check.
 * Signed uploads, size caps, file-signature validation (`lib/security/file-signature.ts`), private bucket, reads only
   via signed URL minted after an RLS lookup (the `/api/contractor-file` pattern).
-* Device revocation, per-device rate limits (`rate_limit_buckets`), `write_audit` on every state change.
+* Single-session enforcement, per-account rate limits (`rate_limit_buckets`), `write_audit` on every state change.
 * **Open-source consequence:** the AQC client is public, so *all* authorisation is server-side; the client is
   untrusted. That is also why there is nothing licence-shaped to crack.
 
@@ -198,10 +219,10 @@ web app never derives a figure from `aqc_rows`.
 | Phase | Work | Repo | Exit |
 |---|---|---|---|
 | **P0** | Adopt this plan: update CLAUDE.md (AQC is a connected product, not "removed"), ROADMAP | aorms | Docs merged |
-| **P1 — Session** | `/api/aqc/v1/session`, device-code auth, `aqc_installs`, account-page device list | aorms | A Platform token returns `connected:true`; a non-member is refused |
+| **P1 — Session** | `/api/aqc/v1/session`, device-code auth, `aqc_sessions` (single active session) | aorms | A Platform token returns `connected:true`; a non-member is refused |
 | **P2 — Store + contract** | `aqc_*` tables, bucket, `projects` / `seed` / `rows` / `versions` / `inbox` / `lease` routes, zod contract, contract tests, RLS cross-firm denial tests | aorms | Contract tests green; second-firm token reads nothing |
 | **P3 — Portal views** | Staff "Estimate & costing" tab; client/contractor read-only views with visibility flag; empty states | aorms | Browser QA per role with a seeded version |
-| **P4 — AQC client** | Replace `Aorms.Bridge`: sign-in, project picker (import), `_rid` ids, outbox sync of all sections, lease, versions upload; remove Connect/licence code; Community path untouched | AQC | Sign in → open portal project → edit → sync → visible in portal |
+| **P4 — AQC client** | Replace `Aorms.Bridge`: sign-in-first screen, online-projects list, *Push online* (one-time adopt), `_rid` ids, outbox sync of all sections, lease, versions upload; remove Connect/licence code; Community path untouched | AQC | Sign in → open portal project → edit → sync → visible in portal |
 | **P5 — Contractor loop** | Inbox producer (bills, measurements, progress), certified-bill back-sync, status mapping | both | Contractor bill certified in AQC shows CERTIFIED in portal |
 | **P6 — Rate-book library** | Firm-level versioned rate books shared across seats | both | Two seats see the same versioned book |
 | **P7 — Freeze/migrate** | Banner on frozen AORMS estimation; one-way export of existing AORMS estimates/take-off/BBS into an AQC project | both | Export opens in AQC with identical totals (checked on a real estimate) |
@@ -209,14 +230,15 @@ web app never derives a figure from `aqc_rows`.
 
 Each phase: migration → verify live → browser QA → docs in the same pass (repo rule).
 
-## 7. Remaining open points (small, none blocks P0–P2)
+## 7. Resolved points and what remains
 
-1. **Suspension rule:** the entitlement follows the Studio's existing licence status — confirm a TRIAL or expired
-   Studio should lose connected mode (assumed yes).
-2. **Device cap per account** (default 3) — confirm the number.
-3. **Adopting a local Community project** into an AORMS project: allowed once, by a user with `write` — confirm.
-4. **Client visibility** is a per-version staff action in AORMS (assumed), not automatic on sync.
-5. **First pilot Studio** and a real AQC project file to test P4/P7 against.
+| Point | Resolution |
+|---|---|
+| Trial / expired Studio | Loses connected mode (D7) |
+| Device cap | None; one active session per user (D8) |
+| Adopt a local project | Yes, once, via *Push online*; login-first UI (D9) |
+| Client visibility | Staff action per version (D10) |
+| Pilot Studio / real file | None exists; synthetic fixture provided (§9). **Still needed:** one real AQC save to replace it before P4/P7 are signed off |
 
 ## 8. Risks
 
@@ -224,3 +246,14 @@ Each phase: migration → verify live → browser QA → docs in the same pass (
 * **Drift between the two repos' contracts:** one versioned contract file with tests on both sides.
 * **Frozen AORMS estimation confusing users:** banner + export path (P7); no removal until a Studio has migrated.
 * **Desktop sign-in friction:** long-lived refresh token, silent refresh, offline allowed for the lease duration.
+
+## 9. Test fixture
+
+`web/tests/fixtures/aqc/pilot-sample.bbsproj` — a synthetic G+1 residence in AQC's `.bbsproj` v17 layout (generated by
+`make-pilot-sample.mjs`, documented in the folder's README). Contents: project/parties, 2 levels, RCC and civil
+take-off rows (≈25 rows across 14 sheets), openings, an 8-activity schedule with FS/SS links, a work order, one
+certified RA bill and a cash entry, stores/org stubs, default link rules, no estimate snapshot.
+`web/tests/aqc-fixture.test.ts` checks it has exactly AQC's 47 top-level keys, string-valued id-less take-off rows,
+resolvable references, a critical path through our ported CPM engine, and a bill that reproduces through our ported
+billing engine. **Limit:** field names inside RCC member rows are best-effort — replace with a real AQC save when one
+exists. Use: the P2 contract tests and the P4 client's import/sync tests load this file.
