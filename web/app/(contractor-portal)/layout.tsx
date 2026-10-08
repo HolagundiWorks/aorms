@@ -8,13 +8,25 @@ import { getIstHour } from "../../lib/shell/identity";
 import { INSTRUCTIONS_COOKIE } from "../../lib/shell/preferences";
 import { IdleSessionGuard } from "../../components/aorms/security/IdleSessionGuard";
 import { InstructionsScope } from "../../components/aorms/InstructionsScope";
-import { PortalShell, type PortalSection } from "../../components/aorms/PortalShell";
+import { PortalShell, type PortalSection, type PortalSectionGroup } from "../../components/aorms/PortalShell";
 
-/** Sections of an open tender, in page order — anchors match the ids on the detail page. */
-const PROJECT_SECTIONS: PortalSection[] = [
+/** Sections of an open tender / current project, in page order — anchors match the ids on the detail pages. */
+const TENDER_SECTIONS: PortalSection[] = [
   { label: "Scope", anchor: "scope" },
   { label: "Instructions", anchor: "instructions" },
   { label: "Your bid", anchor: "bid" },
+];
+const PROJECT_SECTIONS: PortalSection[] = [
+  { label: "Drawings", anchor: "drawings" },
+  { label: "Change log", anchor: "changelog" },
+  { label: "Progress schedule", anchor: "progress" },
+  { label: "Running bills", anchor: "bills" },
+  { label: "Cost tracking", anchor: "cost" },
+  { label: "Tickets and meetings", anchor: "tickets" },
+];
+const SECTION_GROUPS: PortalSectionGroup[] = [
+  { prefix: "/contractor-portal/projects", title: "This project", sections: PROJECT_SECTIONS },
+  { prefix: "/contractor-portal", title: "This tender", sections: TENDER_SECTIONS },
 ];
 
 /**
@@ -52,8 +64,9 @@ export default async function ContractorPortalLayout({ children }: { children: R
         userName={profile?.full_name?.trim() || "there"}
         userRole={ROLE_LABEL[profile?.role ?? ""] ?? "Contractor"}
         istHour={getIstHour()}
-        projectSections={PROJECT_SECTIONS}
-        homeLabel="Your tenders"
+        projectSections={TENDER_SECTIONS}
+        sectionGroups={SECTION_GROUPS}
+        homeLabel="Projects and tenders"
         sectionsTitle="This tender"
         initialInstructions={instructionsOn}
       >

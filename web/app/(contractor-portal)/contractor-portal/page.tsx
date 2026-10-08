@@ -26,10 +26,41 @@ export default async function ContractorPortalHomePage() {
   const projectByInvitation = new Map((projectRows ?? []).map((r: { invitation_id: string; project_title: string }) => [r.invitation_id, r.project_title]));
   const refByInvitation = new Map((projectRows ?? []).map((r: { invitation_id: string; project_ref: string }) => [r.invitation_id, r.project_ref]));
 
+  // Current projects: where the contractor holds an awarded package or tender (migration 0099).
+  const { data: currentRows } = await supabase.rpc("my_contractor_projects");
+  const current = [...new Map(((currentRows ?? []) as { project_id: string; project_ref: string; project_title: string; project_status: string; city: string | null; package_title: string | null }[]).map((r) => [r.project_id, r])).values()];
+
   return (
     <Grid>
       <Column sm={4} md={8} lg={16}>
-        <PageHeader title="Your tender invitations" result="A bid you can submit with confidence." description="Tenders you've been invited to bid on." />
+        <PageHeader title="Your projects and tenders" result="Drawings, bills and bids in one place." description="Projects you are working on, and tenders you've been invited to bid on." />
+
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>Current projects</h2>
+        {current.length === 0 ? (
+          <p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "2rem" }}>
+            No current projects yet — a project appears here once the studio awards you a package.
+          </p>
+        ) : (
+          <div className="aorms-pcard-grid" style={{ marginBottom: "2rem" }}>
+            {current.map((p) => (
+              <div className="aorms-pcard" key={p.project_id}>
+                <Link href={`/contractor-portal/projects/${p.project_id}`} className="aorms-pcard__link" aria-label={`${p.project_title}, ${p.project_ref}`}>
+                  <div className="aorms-pcard__media">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={placeholderFor(p.project_ref)} alt="" loading="lazy" />
+                    <div className="aorms-pcard__veil" aria-hidden>
+                      <span className="aorms-pcard__name">{p.project_title}</span>
+                      <span className="aorms-pcard__meta">{[p.project_ref, p.project_status.replaceAll("_", " ")].join(" · ")}</span>
+                      <span className="aorms-pcard__meta">{p.package_title ?? p.city ?? ""}</span>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <h2 className="cds--type-heading-02" style={{ marginBottom: "1rem" }}>Tender invitations</h2>
 
         <div className="aorms-bigstat-row">
           <BigStat value={(invitations ?? []).length} label="Invitations" />

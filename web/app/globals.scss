@@ -3593,3 +3593,43 @@ h1.aorms-lp-display {
 .aorms-sidenav-sub .cds--side-nav__link {
   padding-inline-start: 2.5rem;
 }
+
+// Contractor project sheet (2026-10-08): milestone progress bar and message threads.
+.aorms-bar {
+  display: inline-block;
+  inline-size: 5rem;
+  block-size: 0.375rem;
+  background: var(--aorms-rule);
+  vertical-align: middle;
+
+  > span {
+    display: block;
+    block-size: 100%;
+    background: var(--aorms-orange);
+  }
+}
+
+.aorms-thread {
+  border-block-start: 1px solid var(--aorms-rule);
+  padding-block: 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.aorms-thread__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.aorms-thread__reply,
+.aorms-thread__msg {
+  font-size: 0.875rem;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 2px solid var(--aorms-rule);
+}
+
+.aorms-thread__reply {
+  border-inline-start-color: var(--aorms-orange);
+}

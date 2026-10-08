@@ -31,6 +31,7 @@ export const NAV_GROUPS: NavGroupData[] = [
       { href: "/pmc-steel-certs", label: "Steel Certification" },
       { href: "/pmc-ra-bills", label: "RA Bills" },
       { href: "/approvals", label: "Approvals" },
+      { href: "/contractor-tickets", label: "Contractor Tickets" },
     ],
   },
   {
@@ -177,7 +178,7 @@ export const PORTALS: Record<string, PortalNav> = {
     ],
   },
   client: { code: "CL", name: "Client Portal", items: [{ href: "/portal", label: "Projects" }] },
-  contractor: { code: "CT", name: "Contractor Portal", items: [{ href: "/contractor-portal", label: "Tenders" }] },
+  contractor: { code: "CT", name: "Contractor Portal", items: [{ href: "/contractor-portal", label: "Tenders" }, { href: "/contractor-portal/projects", label: "Projects" }] },
   collab: { code: "CB", name: "Collaborator Portal", items: [{ href: "/collab-portal", label: "Projects" }] },
 };
 
