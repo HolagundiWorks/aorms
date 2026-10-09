@@ -15,9 +15,10 @@ const inr = (paise: unknown) => (typeof paise === "number" ? `₹${(paise / 100)
  */
 export default async function AqcPage() {
   const supabase = await createClient();
-  const [{ data: projects, error }, { data: versions }] = await Promise.all([
+  const [{ data: projects, error }, { data: versions }, { data: rateBooks }] = await Promise.all([
     supabase.from("aqc_projects").select("id, head_seq, updated_at, lease_expires_at, project_offices(ref, title)").order("updated_at", { ascending: false }),
     supabase.from("aqc_versions").select("id, aqc_project_id, kind, version, summary, client_visible, contractor_visible, storage_key, created_at").order("created_at", { ascending: false }),
+    supabase.from("aqc_rate_versions").select("id, name, notes, revision, item_count, is_active, updated_at").order("updated_at", { ascending: false }),
   ]);
   const rows = projects ?? [];
   const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
@@ -37,6 +38,39 @@ export default async function AqcPage() {
             No project has been pushed from AQC yet. Sign in to AQC with your AORMS account, open a project online, or push a local project online.
           </p>
         )}
+        <section style={{ marginBottom: "2rem" }}>
+          <h2 className="cds--type-heading-02" style={{ marginBottom: "0.5rem" }}>Shared rate books</h2>
+          <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)", marginBottom: "0.5rem" }}>
+            The rate books every AQC seat in this studio prices from. Edited and published in AQC; shown here read-only.
+          </p>
+          <Table aria-label="Shared rate books" size="sm" className="aorms-table-spaced">
+            <TableHead>
+              <TableRow>
+                <TableHeader>Rate book</TableHeader>
+                <TableHeader className="aorms-num">Items</TableHeader>
+                <TableHeader className="aorms-num">Revision</TableHeader>
+                <TableHeader>Updated</TableHeader>
+                <TableHeader>Status</TableHeader>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {(rateBooks ?? []).map((r) => (
+                <TableRow key={r.id}>
+                  <TableCell>{r.name}{r.notes ? ` — ${r.notes}` : ""}</TableCell>
+                  <TableCell className="aorms-num">{r.item_count}</TableCell>
+                  <TableCell className="aorms-num">{r.revision}</TableCell>
+                  <TableCell>{day(r.updated_at)}</TableCell>
+                  <TableCell>{r.is_active ? <Tag type="green" size="sm">Active</Tag> : <span className="cds--type-helper-text-01">—</span>}</TableCell>
+                </TableRow>
+              ))}
+              {(rateBooks ?? []).length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5}><p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>No rate book published from AQC yet.</p></TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </section>
         {rows.map((p) => {
           const po = one(p.project_offices as { ref: string; title: string } | { ref: string; title: string }[] | null);
           const vs = (versions ?? []).filter((v) => v.aqc_project_id === p.id);
