@@ -56,7 +56,7 @@ export default async function PortalProjectDetailPage({
   }
   if (!project) notFound();
 
-  const { data: released } = await supabase.rpc("aqc_released_versions", { p_project_office: projectId });
+  const { data: released } = await supabase.rpc("aqc_released_versions_v2", { p_project_office: projectId });
 
   const [
     { data: phases },
@@ -394,16 +394,18 @@ export default async function PortalProjectDetailPage({
                       <TableHeader>Document</TableHeader>
                       <TableHeader className="aorms-num">Total</TableHeader>
                       <TableHeader>Issued</TableHeader>
+                      <TableHeader>File</TableHeader>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {((released ?? []) as { id: string; kind: string; version: number; summary: Record<string, unknown>; created_at: string }[]).map((v) => {
+                    {((released ?? []) as { id: string; kind: string; version: number; summary: Record<string, unknown>; created_at: string; has_file: boolean }[]).map((v) => {
                       const s = v.summary;
                       return (
                         <TableRow key={v.id}>
                           <TableCell>{v.kind === "estimate" ? "Estimate" : "Schedule"} · v{v.version}</TableCell>
                           <TableCell className="aorms-num">{typeof s.grandTotalPaise === "number" ? formatInr(s.grandTotalPaise) : "—"}</TableCell>
                           <TableCell>{new Date(v.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</TableCell>
+                          <TableCell>{v.has_file ? <a href={`/api/contractor-file?t=aqc&id=${v.id}`}>Download</a> : "—"}</TableCell>
                         </TableRow>
                       );
                     })}

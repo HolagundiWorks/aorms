@@ -40,3 +40,10 @@ export const AddVersionBody = z.object({
 export const SessionBody = z.object({ clientLabel: z.string().max(120).optional() });
 
 export const ROW_BATCH = 500;
+
+export const UploadInitBody = z.object({
+  kind: z.enum(["estimate", "boq", "bbs", "schedule", "running_bill", "ipc", "final_account", "joint_measurement"]),
+  contentType: z.string().max(120),
+  sizeBytes: z.number().int(),
+  sha256: z.string().length(64),
+});

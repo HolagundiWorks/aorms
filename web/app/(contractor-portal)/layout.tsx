@@ -25,6 +25,7 @@ const PROJECT_SECTIONS: PortalSection[] = [
   { label: "Cost tracking", anchor: "cost" },
   { label: "Measurement abstract", anchor: "abstract" },
   { label: "Steel reconciliation", anchor: "steel" },
+  { label: "Issued costing", anchor: "issued" },
   { label: "Final account", anchor: "final-account" },
   { label: "Tickets and meetings", anchor: "tickets" },
 ];
