@@ -471,7 +471,13 @@ export const FAQ = [
   },
   {
     question: "Is there a desktop app?",
-    answer: "No — AORMS is web-only, single sign-on into one office hub. No installers, no per-app logins, no separate desktop shell to maintain.",
+    answer:
+      "AORMS itself is web-only — one sign-in into one office hub, no installer to maintain. Estimation and costing are done in AQC, a separate free and open-source Windows application; the AQC bridge (in build, for Studio and above) connects it to your AORMS projects using your AORMS login.",
+  },
+  {
+    question: "Does AORMS do estimates and costing?",
+    answer:
+      "Those are done in AQC — quantities, bar schedules, rate books, estimates and running bills — and the AQC bridge keeps the results with your project, with what clients and contractors can see under your control. The bridge is in build; AQC works on its own in the meantime.",
   },
   {
     question: "Is there a genuinely free plan?",

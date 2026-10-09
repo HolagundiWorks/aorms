@@ -33,6 +33,7 @@ import {
   SPINE_SAMPLE,
   SPINE_SEO,
   SPINE_MEMORY,
+  SPINE_COSTING,
   SPINE_OFFICE,
   SPINE_PROJECT,
   SPINE_SYSTEM,
@@ -441,8 +442,47 @@ export default async function LandingPage() {
       ),
     },
     {
-      id: "system",
+      id: "costing",
       num: "06",
+      short: "Costing",
+      title: "The Costing",
+      aliases: ["aqc", "bridge", "estimation", "estimates", "costing-bridge"],
+      children: (
+        <Sheet
+          eyebrow="The AQC bridge"
+          compact
+          display={SPINE_COSTING.display}
+          lede={[...SPINE_COSTING.lede]}
+          side={
+            <>
+              <Result statement={SPINE_COSTING.foot} text="Your AORMS login is the licence." />
+              <Sub>Status</Sub>
+              <p className="aorms-lp-lede" style={{ marginBlockStart: 0 }}>{SPINE_COSTING.status}</p>
+              <Sub>What it connects</Sub>
+              <p className="aorms-lp-chips" style={{ marginBlockStart: 0 }}>{SPINE_COSTING.chips.join(" · ")}</p>
+              <Sub>Community and paid</Sub>
+              <p className="aorms-lp-lede" style={{ marginBlockStart: 0 }}>{SPINE_COSTING.community}</p>
+              <p className="aorms-lp-lede">{SPINE_COSTING.plans}</p>
+            </>
+          }
+        >
+          <ol className="aorms-lp-spine aorms-lp-spine--flow" aria-label="How the AQC bridge works">
+            {SPINE_COSTING.steps.map((st, i) => (
+              <li key={st.tag}>
+                <span>{String(i + 1).padStart(2, "0")}</span>
+                <div>
+                  <strong>{st.tag}</strong>
+                  <small>{st.text}</small>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </Sheet>
+      ),
+    },
+    {
+      id: "system",
+      num: "07",
       short: "System",
       title: "The System",
       aliases: ["control", "roi", "pricing", "live-demo", "rfi"],
@@ -480,7 +520,7 @@ export default async function LandingPage() {
     },
     {
       id: "contact",
-      num: "07",
+      num: "08",
       short: "Enter",
       title: "Enter AORMS",
       aliases: ["blog", "connectdex", "start"],

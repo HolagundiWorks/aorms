@@ -507,6 +507,14 @@ a sheet.
 
 ## 15. Change log
 
+- **2026-10-09 (landing: the AQC bridge)** — a new board, **06 Costing** (`id: costing`, aliases `aqc`, `bridge`,
+  `estimation`, `estimates`), is added between Memory and System; System becomes 07 and Enter 08 (eight boards).
+  Copy in `SPINE_COSTING` (`lib/marketing-spine.ts`): estimation and costing are done in AQC (open source,
+  separate Windows app), the bridge keeps the result with the project, the AORMS login is the licence, Community
+  stays free and standalone, the bridge is for Studio and above. **Status is stated once as "In build — not yet
+  released"; never badge it Live** until the AQC client ships (docs/esti/AQC-CONNECT-PLAN.md § 8a). No download
+  link and no installer claim. FAQ: "Is there a desktop app?" reworded (AORMS web-only; AQC separate) and
+  "Does AORMS do estimates and costing?" added. Same ink-and-rule sheet as the other boards; no new components.
 - **2026-10-08 (Contractor Portal current projects)** — new project sheet at `/contractor-portal/projects/[id]` on the same `aorms-cp` sheet system: KPI tiles (amounts one per row), hero image, four numbered groups (Drawings + change log · Progress schedule · Running bills + cost tracking · Tickets, meetings and messages) and a side pane. `PortalShell` takes `sectionGroups` so the rail shows a different section list under `/contractor-portal/projects/<id>` than under a tender. New classes `.aorms-bar` (milestone progress) and `.aorms-thread*` (message threads, also used by the studio inbox `/contractor-tickets`). Scope, access model and known gaps: `docs/esti/CONTRACTOR-PORTAL.md`.
 - **2026-10-08 (portal phone pass)** — found by checking the Contractor and Collaborator portals at 390 px: (1) the rail's section group was a Carbon `SideNavMenu`, which collapses itself whenever the phone rail is closed, so the section links were hidden after opening the navigation — `PortalShell` now renders a flat group label plus links (`.aorms-sidenav-group`, `.aorms-sidenav-sub`); (2) two-up gallery tiles overflowed their always-on text on touch — tighter padding, name clamped to two lines, one-line meta, darker scrim; (3) KPI tiles in an auto-fill 9rem grid fell to a single narrow column on phones — two equal columns below 42rem (amounts still take a full line). Tables keep scrolling inside their own container.
 - **2026-10-08 (no demo credentials on display)** — the landing page no longer prints the demo password (the System board keeps only the "Open the live demo" link), and the sign-in page's `DemoAccounts` panel no longer shows the email or the password row/Copy button. Picking a role still fills the sign-in form (the password field is masked); the panel shows only the role, the person's name and what that sign-in can do.

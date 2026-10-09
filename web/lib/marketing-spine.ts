@@ -4,6 +4,11 @@
  * Every claim maps to something the app has today. Deliberately NOT claimed: a local/on-premises
  * install (AORMS is cloud-only — CLAUDE.md "web-only"), a tender "negotiation" step, ESTI answering
  * from meeting attendance. Documents-in-Drive is shown as "Coming soon", matching CONTROL_SECTION.
+ *
+ * 2026-10-09: eight boards — "Costing" (the AQC bridge) added. The bridge is in build: AORMS-side sign-in, sync store,
+ * contractor inbox and client release exist; the AQC desktop client is not yet released. Every bridge item is therefore
+ * badged "In build", never "Live" (docs/esti/AQC-CONNECT-PLAN.md § 8a). AQC itself is a separate Windows application —
+ * there is no AORMS installer and no download link here.
  */
 
 export const SPINE_HERO = {
@@ -51,6 +56,27 @@ export const SPINE_MEMORY = {
   knowledge: ["Codes", "Details", "Specifications", "Rates", "Vendors", "Decisions", "Templates"],
   esti: "A project-aware assistant that works from your AORMS information.",
   questions: ["What changed in this project?", "What is pending?", "What was decided?", "Which consultant is responsible?"],
+} as const;
+
+/** The AQC bridge — estimation and costing happen in AQC; AORMS keeps and shows the result. */
+export const SPINE_COSTING = {
+  display: "Costed in AQC.\nKept with the project.",
+  lede: [
+    "AQC is the open-source estimation and costing tool made for this: quantities, bar schedules, rate books, estimates, running bills and the construction schedule.",
+    "The AQC bridge connects it to your AORMS projects. Your AORMS login is the licence — nothing else to buy or register.",
+  ],
+  chips: ["Quantities", "Bar schedules", "Rate books", "Estimates", "Running bills", "Schedule"],
+  steps: [
+    { tag: "Sign in once", text: "Use your AORMS account. One active session per person." },
+    { tag: "Open the project", text: "Pick an online project — its title block, parties and drawings arrive filled in. Or push a local project online." },
+    { tag: "Work as you do today", text: "Everything you cost is saved to your practice's own database, one editor at a time." },
+    { tag: "Release what clients see", text: "Estimates and schedules reach the client portal only when you release them." },
+    { tag: "Contractor bills, certified", text: "Contractors submit running bills in the portal; you certify in AQC and the certified statement comes back." },
+  ],
+  status: "In build — not yet released. Until then AQC works on its own, and AORMS keeps its own project record.",
+  community: "AQC stays free and open source on its own — Community needs no sign-in and sends nothing to AORMS.",
+  plans: "The bridge is for studios on Studio and above.",
+  foot: "Costing stays in the tool built for it. The project keeps the record.",
 } as const;
 
 export const SPINE_SYSTEM = {
@@ -116,8 +142,10 @@ export const SPINE_SAMPLE = {
 
 export const SPINE_SEO = {
   description:
-    "AORMS is the operating system for an architecture practice — one project spine connecting projects, site, people, accounts, tenders and knowledge, with ESTI, a project-aware assistant. Cloud-hosted in India.",
+    "AORMS is the operating system for an architecture practice — one project spine connecting projects, site, people, accounts, tenders and knowledge, with ESTI, a project-aware assistant, and a bridge to AQC for estimation and costing. Cloud-hosted in India.",
   keywords: [
+    "architecture estimation and costing software",
+    "AQC bridge",
     "architecture practice management software",
     "architecture practice operating system",
     "architecture firm management software India",
