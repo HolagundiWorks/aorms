@@ -3,11 +3,12 @@ import { createClient } from "../../../lib/supabase/server";
 import { createServiceRoleClient } from "../../../lib/supabase/service";
 import { CONTRACTOR_ATTACHMENTS_BUCKET } from "../../../lib/contractor/attachments";
 import { DRAWINGS_BUCKET } from "../../../lib/drawings/upload";
+import { AQC_BUCKET } from "../../../lib/aqc/files";
 
 /**
  * Signed download for contractor-facing files. The row is looked up with the caller's own RLS-scoped client first
  * (a contractor sees only their own submissions/bills and drawings of their projects; staff see their firm's), so a
- * signed URL is only minted for a file the caller could already see. `?t=drawing|submission|bill&id=<uuid>`.
+ * signed URL is only minted for a file the caller could already see. `?t=drawing|submission|bill|aqc&id=<uuid>` (`aqc` = a file attached to an AQC version; the row policies decide who can see it: staff, a client for released versions, a contractor for released bar schedules and their own certificates).
  */
 export async function GET(req: NextRequest) {
   const t = req.nextUrl.searchParams.get("t") ?? "";
@@ -24,12 +25,19 @@ export async function GET(req: NextRequest) {
     key = (await supabase.from("contractor_submissions").select("storage_key").eq("id", id).maybeSingle()).data?.storage_key ?? null;
   } else if (t === "bill") {
     key = (await supabase.from("pmc_ra_bills").select("attachment_key").eq("id", id).maybeSingle()).data?.attachment_key ?? null;
+  } else if (t === "aqc") {
+    bucket = AQC_BUCKET;
+    key = (await supabase.from("aqc_versions").select("storage_key").eq("id", id).maybeSingle()).data?.storage_key ?? null;
   } else {
     return NextResponse.json({ error: "Bad type" }, { status: 400 });
   }
   if (!key) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const { data } = await createServiceRoleClient().storage.from(bucket).createSignedUrl(key, 300);
-  if (!data?.signedUrl) return NextResponse.json({ error: "File unavailable" }, { status: 404 });
-  return NextResponse.redirect(data.signedUrl);
+  try {
+    const { data } = await createServiceRoleClient().storage.from(bucket).createSignedUrl(key, 300);
+    if (!data?.signedUrl) return NextResponse.json({ error: "File unavailable" }, { status: 404 });
+    return NextResponse.redirect(data.signedUrl);
+  } catch {
+    return NextResponse.json({ error: "File storage isn't available right now." }, { status: 503 });
+  }
 }

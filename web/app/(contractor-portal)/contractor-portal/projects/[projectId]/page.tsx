@@ -56,13 +56,15 @@ export default async function ContractorProjectPage({ params }: { params: Promis
   const project = rows[0];
   const pkg = rows.find((r) => r.package_id) ?? null;
 
-  const [{ data: drawings }, { data: milestones }, { data: bills }, { data: submissions }, { data: variations }, { data: steel }] = await Promise.all([
+  const [{ data: drawings }, { data: milestones }, { data: bills }, { data: submissions }, { data: variations }, { data: steel }, { data: aqcVersions }] = await Promise.all([
     supabase.from("drawings").select("id, ref, title, rev_no, root_id, is_current, revision_note, created_at, storage_key").eq("project_id", projectId).order("created_at", { ascending: false }),
     supabase.from("pmc_milestones").select("id, ref, title, planned_date, actual_date, percent_complete, status, notes, duration_days, predecessor_id, dep_type, lag_days").eq("project_id", projectId).order("sort_order"),
     supabase.from("pmc_ra_bills").select("id, ref, bill_no, period_start, period_end, status, gross_paise, advance_recovery_paise, retention_paise, other_deduction_paise, narrative, attachment_key, paid_paise, paid_at, gst_paise, tds_paise, cess_paise, gst_tds_paise").eq("project_id", projectId).order("created_at", { ascending: false }),
     supabase.from("contractor_submissions").select("id, kind, subject, body, status, response_note, created_at, meeting_at, meeting_place, storage_key, file_name, percent_complete, applied_at").eq("project_id", projectId).order("created_at", { ascending: false }),
     supabase.from("pmc_variations").select("id, ref, title, amount_paise, approved_at").eq("project_id", projectId).order("created_at"),
     supabase.from("pmc_steel_certs").select("id, ref, period_start, period_end, issued_kg, consumed_kg, wastage_pct, narrative").eq("project_id", projectId).order("period_start"),
+    // RLS: bar schedules / schedules staff released to contractors, and the certified statement (ipc) of this contractor's own bills.
+    supabase.from("aqc_versions").select("id, kind, version, summary, storage_key, created_at").order("created_at", { ascending: false }),
   ]);
   const billIds = (bills ?? []).map((b) => b.id);
   const { data: raLines } = billIds.length
@@ -441,6 +443,39 @@ export default async function ContractorProjectPage({ params }: { params: Promis
                       <TableCell className="aorms-num"><strong>{steelConsumed.toLocaleString("en-IN")}</strong></TableCell>
                       <TableCell className="aorms-num"><strong>{steelIssued > 0 ? `${(((steelIssued - steelConsumed) / steelIssued) * 100).toFixed(2)}%` : "—"}</strong></TableCell>
                     </TableRow>
+                  </TableBody>
+                </Table>
+              )}
+
+              <SheetSub id="issued">Issued from the studio&apos;s costing</SheetSub>
+              {(aqcVersions ?? []).length === 0 ? (
+                <p className="cds--type-helper-text-01" style={{ color: "var(--cds-text-secondary)" }}>
+                  Bar schedules and programmes the studio releases to you, and the certified statement for each of your bills, appear here.
+                </p>
+              ) : (
+                <Table aria-label="Issued from costing" size="sm" className="aorms-table-spaced">
+                  <TableHead>
+                    <TableRow>
+                      <TableHeader>Document</TableHeader>
+                      <TableHeader className="aorms-num">Net payable</TableHeader>
+                      <TableHeader>Issued</TableHeader>
+                      <TableHeader>File</TableHeader>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {(aqcVersions ?? []).map((v) => {
+                      const sm = v.summary as Record<string, unknown>;
+                      const label = v.kind === "ipc" ? "Certified statement" : v.kind === "bbs" ? "Bar bending schedule" : "Schedule";
+                      const net = v.kind === "ipc" && typeof sm.netPaise === "number" ? inr(sm.netPaise) : "—";
+                      return (
+                        <TableRow key={v.id}>
+                          <TableCell>{label} · v{v.version}</TableCell>
+                          <TableCell className="aorms-num">{net}</TableCell>
+                          <TableCell>{day(v.created_at)}</TableCell>
+                          <TableCell>{v.storage_key ? <a href={`/api/contractor-file?t=aqc&id=${v.id}`}>Download</a> : "—"}</TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}

@@ -41,7 +41,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ bil
 
   let version: number | null = null;
   if (b.aqcProjectId && b.contentHash) {
-    const v = await ctx.supabase.rpc("aqc_add_version", { p_aqc_project: b.aqcProjectId, p_kind: "ipc", p_content_hash: b.contentHash, p_summary: { billId, ...b, contentHash: undefined, aqcProjectId: undefined }, p_storage_key: null });
+    // `netPaise` is derived from AQC's own figures so the contractor's statement shows what they are paid.
+    const netPaise = bill.gross_paise + b.gstPaise - b.retentionPaise - b.tdsPaise - b.cessPaise - b.gstTdsPaise - b.advanceRecoveryPaise - b.otherDeductionPaise;
+    const v = await ctx.supabase.rpc("aqc_add_version", { p_aqc_project: b.aqcProjectId, p_kind: "ipc", p_content_hash: b.contentHash, p_summary: { billId, grossPaise: bill.gross_paise, netPaise, ...b, contentHash: undefined, aqcProjectId: undefined }, p_storage_key: null });
     if (!v.error) version = v.data as number;
   }
   await ctx.supabase.rpc("write_audit", { p_entity: "pmc_ra_bill", p_entity_id: billId, p_action: "UPDATE", p_before: null, p_after: { status: "CERTIFIED", via: "AQC" } });

@@ -45,3 +45,15 @@ describe("buildAqcSeed (portal -> AQC)", () => {
     expect(buildAqcSeed({ id: "p", ref: "r", title: "t", city: null, site_address: null, contact_email: null, contact_phone: null }, { company_name: null, architect_name: null, gstin: null, pan: null, email: null, phone: null, address_line1: null, address_line2: null, city: null, pincode: null, state: null }, null, null).parties.contractor.company).toBe("");
   });
 });
+
+import { buildAqcStorageKey, checkAqcUpload } from "../lib/aqc/files";
+describe("aqc file uploads", () => {
+  const sha = "a".repeat(64);
+  it("validates type, size and hash and mints a prefixed key", () => {
+    expect(checkAqcUpload({ contentType: "application/pdf", sizeBytes: 1000, sha256: sha })).toEqual({ ok: true, ext: "pdf" });
+    expect(checkAqcUpload({ contentType: "application/zip", sizeBytes: 1000, sha256: sha }).ok).toBe(false);
+    expect(checkAqcUpload({ contentType: "application/pdf", sizeBytes: 26 * 1024 * 1024, sha256: sha }).ok).toBe(false);
+    expect(checkAqcUpload({ contentType: "application/pdf", sizeBytes: 10, sha256: "xyz" }).ok).toBe(false);
+    expect(buildAqcStorageKey("f1", "p1", "estimate", sha, "pdf")).toBe(`f1/p1/estimate/${sha}.pdf`);
+  });
+});

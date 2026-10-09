@@ -17,7 +17,7 @@ export default async function AqcPage() {
   const supabase = await createClient();
   const [{ data: projects, error }, { data: versions }] = await Promise.all([
     supabase.from("aqc_projects").select("id, head_seq, updated_at, lease_expires_at, project_offices(ref, title)").order("updated_at", { ascending: false }),
-    supabase.from("aqc_versions").select("id, aqc_project_id, kind, version, summary, client_visible, created_at").order("created_at", { ascending: false }),
+    supabase.from("aqc_versions").select("id, aqc_project_id, kind, version, summary, client_visible, contractor_visible, storage_key, created_at").order("created_at", { ascending: false }),
   ]);
   const rows = projects ?? [];
   const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
@@ -56,7 +56,9 @@ export default async function AqcPage() {
                     <TableHeader>Version</TableHeader>
                     <TableHeader>Figure from AQC</TableHeader>
                     <TableHeader>Issued</TableHeader>
+                    <TableHeader>File</TableHeader>
                     <TableHeader>Client</TableHeader>
+                    <TableHeader>Contractor</TableHeader>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -69,15 +71,19 @@ export default async function AqcPage() {
                         <TableCell>{KIND_LABEL[v.kind] ?? v.kind} · v{v.version}</TableCell>
                         <TableCell className="aorms-num">{figure}</TableCell>
                         <TableCell>{day(v.created_at)}</TableCell>
+                        <TableCell>{v.storage_key ? <a href={`/api/contractor-file?t=aqc&id=${v.id}`}>Download</a> : "—"}</TableCell>
                         <TableCell>
                           {releasable ? <AqcReleaseButton versionId={v.id} visible={v.client_visible} /> : <span className="cds--type-helper-text-01">Staff only</span>}
+                        </TableCell>
+                        <TableCell>
+                          {["bbs", "schedule"].includes(v.kind) ? <AqcReleaseButton versionId={v.id} visible={v.contractor_visible} audience="contractor" /> : v.kind === "ipc" ? <span className="cds--type-helper-text-01">Their own bill</span> : <span className="cds--type-helper-text-01">—</span>}
                         </TableCell>
                       </TableRow>
                     );
                   })}
                   {vs.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4}><p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>No version issued from AQC yet.</p></TableCell>
+                      <TableCell colSpan={6}><p className="cds--type-body-01" style={{ color: "var(--cds-text-secondary)" }}>No version issued from AQC yet.</p></TableCell>
                     </TableRow>
                   )}
                 </TableBody>

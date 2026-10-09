@@ -12,3 +12,12 @@ export async function setVersionClientVisible(versionId: string, visible: boolea
   revalidatePath("/aqc");
   return {};
 }
+
+/** Staff release of a bar schedule or schedule version to the contractors on the project. Needs `fees:manage` (database function). */
+export async function setVersionContractorVisible(versionId: string, visible: boolean): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("aqc_set_contractor_visible", { p_version: versionId, p_visible: visible });
+  if (error) return { error: error.message.includes("not authorized") ? "You can't release these to contractors." : toSafeErrorMessage(error) };
+  revalidatePath("/aqc");
+  return {};
+}
