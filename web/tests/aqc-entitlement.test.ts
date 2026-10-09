@@ -57,3 +57,19 @@ describe("aqc file uploads", () => {
     expect(buildAqcStorageKey("f1", "p1", "estimate", sha, "pdf")).toBe(`f1/p1/estimate/${sha}.pdf`);
   });
 });
+
+import { findDuplicateCodes, hashRateItems, PublishRateBookBody } from "../lib/aqc/rate-books";
+describe("aqc rate books", () => {
+  const a = { code: "PCC-148", category: "Concrete", description: "PCC 1:4:8", unit: "cum", rate: 5200 };
+  const b = { code: "RCC-M25", category: "Concrete", description: "RCC M25", unit: "cum", rate: 9800.5 };
+  it("hashes independent of item order and sensitive to any change", () => {
+    expect(hashRateItems("v1", "", [a, b])).toBe(hashRateItems("v1", "", [b, a]));
+    expect(hashRateItems("v1", "", [a, b])).not.toBe(hashRateItems("v1", "", [a, { ...b, rate: 9801 }]));
+    expect(hashRateItems("v1", "", [a, b])).not.toBe(hashRateItems("v2", "", [a, b]));
+  });
+  it("finds duplicate codes and validates the payload", () => {
+    expect(findDuplicateCodes([a, a, b])).toEqual(["PCC-148"]);
+    expect(PublishRateBookBody.safeParse({ clientId: "v1-default", name: "v1 Default", items: [a, { ...b, rate: -1 }] }).success).toBe(false);
+    expect(PublishRateBookBody.parse({ clientId: "v1", name: "n", items: [a] }).activate).toBe(false);
+  });
+});
