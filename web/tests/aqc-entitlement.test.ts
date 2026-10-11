@@ -21,6 +21,8 @@ describe("contract", () => {
     expect(AqcRow.safeParse({ section: "masonry", row_id: "a1", fields: { mark: "MW1", length: "18000" } }).success).toBe(true);
     expect(AqcRow.safeParse({ section: "nope", row_id: "a1", fields: {} }).success).toBe(false);
     expect(AqcRow.safeParse({ section: "masonry", row_id: "x".repeat(65), fields: {} }).success).toBe(false);
+    expect(AqcRow.safeParse({ section: "schedule_activities", row_id: "a1", fields: { id: "a1", links: [{ to: "a2", type: "FS" }] } }).success).toBe(true);
+    expect(AqcRow.safeParse({ section: "masonry", row_id: "a1", fields: { big: "x".repeat(70000) } }).success).toBe(false);
   });
   it("defaults the project payload", () => {
     const p = PushProjectBody.parse({ projectOfficeId: "8072d05b-bff6-4090-ac93-8907ab434ed2" });

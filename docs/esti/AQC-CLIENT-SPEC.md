@@ -84,7 +84,7 @@ After sign-in the home screen lists **Online projects** first and **Local projec
 
 ## 5. What goes where — `.bbsproj` v17 → contract sections
 
-`fields` values are strings, numbers, booleans or null (AQC's string dictionaries pass through unchanged).
+`fields` values are strings, numbers, booleans or null (AQC's string dictionaries pass through unchanged); nested JSON (e.g. a schedule activity's `links[]`) is also accepted, up to 64 KB per row.
 
 | `.bbsproj` key | `section` | Row id |
 |---|---|---|
