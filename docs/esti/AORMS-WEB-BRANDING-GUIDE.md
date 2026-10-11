@@ -621,6 +621,7 @@ a sheet.
   Your Data · Pricing · See it · Start. All boards are server-rendered (closed ones
   `display:none` + `inert`). Copy reuses `marketing-content.ts`; orange only marks the active
   board's number in the index.
+- **2026-10-11 (landing: AORMS wordmark)** — the landing had no logo (only the text "AORMS" in the nameplate footer). The wordmark (`/aorms-logo.png`, black with a navy O) now tops the desktop nameplate on white, above the CTA, and sits on a white chip in the black phone title bar (it would vanish on black); both link home. `Artboards`' `nameplate.logo`.
 - **2026-10-11 (landing: scroll-to-zoom on portal visuals)** — `components/aorms/landing/ZoomToScreen.tsx`
   wraps the landing's portal visuals (hero project card, Projects gallery, Today's briefing,
   Invoices, Pulse brief). Hover + scroll **down** zooms the visual about the cursor (AutoCAD-style;

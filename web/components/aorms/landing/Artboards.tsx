@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState, type KeyboardEvent, type ReactNode } from "react";
 
@@ -17,6 +18,8 @@ export type Board = {
 };
 
 export type Nameplate = {
+  /** The AORMS wordmark, shown at the top of the desktop nameplate and in the phone title bar (links home). */
+  logo?: { src: string; alt: string; href: string; width: number; height: number };
   cta: { label: string; href: string };
   /** Prominent sign-in button under the CTA (and in the phone title bar). */
   signIn?: { label: string; href: string };
@@ -135,6 +138,11 @@ export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: N
     <div className="aorms-lp" id="main">
       {/* Phones/tablets: black title bar + right-hand number rail */}
       <div className="aorms-lp-bar">
+        {nameplate.logo && (
+          <Link href={nameplate.logo.href} className="aorms-lp-bar__logo" aria-label={nameplate.logo.alt}>
+            <Image src={nameplate.logo.src} alt="" width={nameplate.logo.width} height={nameplate.logo.height} priority />
+          </Link>
+        )}
         <span className="aorms-lp-bar__left" aria-hidden>
           <span>{cur.num} / {pad(boards.length)}</span>
           <span className="aorms-lp-sep">|</span>
@@ -179,6 +187,11 @@ export function Artboards({ boards, nameplate }: { boards: Board[]; nameplate: N
 
       {/* Desktop nameplate */}
       <aside className="aorms-lp-nameplate" aria-label="Page navigation">
+        {nameplate.logo && (
+          <Link href={nameplate.logo.href} className="aorms-lp-np__logo" aria-label={nameplate.logo.alt}>
+            <Image src={nameplate.logo.src} alt="" width={nameplate.logo.width} height={nameplate.logo.height} priority />
+          </Link>
+        )}
         <Link href={nameplate.cta.href} className="aorms-lp-np__cta">
           {nameplate.cta.label}
         </Link>
