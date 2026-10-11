@@ -19,7 +19,8 @@ export const AQC_SECTIONS = [
 export const AqcRow = z.object({
   section: z.enum(AQC_SECTIONS),
   row_id: z.string().min(1).max(64),
-  fields: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])),
+  // Scalars, plus nested JSON where AQC's own model nests (schedule activity `links[]`); one row stays under 64 KB.
+  fields: z.record(z.string(), z.unknown()).refine((f) => JSON.stringify(f).length <= 65536, "Row too large."),
   deleted: z.boolean().optional(),
 });
 export type AqcRow = z.infer<typeof AqcRow>;
