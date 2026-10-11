@@ -26,7 +26,7 @@
    * `403 not_linked` — Identity-only user: "Sign in to AORMS on the web once with this account, then try again."
    * `403 pending` — "Your studio hasn't approved your access yet."
    * `429 rate_limited` — show `retryAfterSeconds`. `503 unavailable` — retry later.
-4. `POST /session` with `Authorization: Bearer <accessToken>` and body `{ clientLabel: "AQC <version> · <machine>" }` →
+4. `POST /session` with `Authorization: Bearer <accessToken>` and body `{ clientLabel: "AQC <version> · <machine>", app: "aqc" }` (`app` is optional, default `"aqc"`; the CAD program sends `"aad"` — sessions are per app, see [AORMS-SUITE-SIGNIN.md](AORMS-SUITE-SIGNIN.md)) →
    `{ sessionId, account, studio{firmId,name,publicId}, role, capabilities{write,"fees:manage","cost:approve"}, entitlement{connected,plan,expiresAt} }`.
    * `403 not_connected` (`reason`: `PLAN_NOT_CONNECTED` | `EXPIRED` | `NO_STUDIO`) → say why and offer Community.
    * `403 role_not_allowed` — portal accounts cannot use AQC.
@@ -107,7 +107,7 @@ The `takeoff` block (PDF path, scale, drawn items) holds a local file path, so i
 
 `POST /projects/{aqcId}/versions` `{ kind, contentHash, summary, storageKey? }` → `201 { version }` (the version **number**, e.g. `1`). The same `contentHash` for the same `kind` returns the
 existing version (idempotent). Kinds and who may add them: `estimate`, `boq`, `schedule` (`fees:manage`); `running_bill`, `ipc`, `final_account`
-(`cost:approve`); `bbs`, `joint_measurement` (`write`). `403 forbidden` otherwise.
+(`cost:approve`); `bbs`, `joint_measurement`, `cad_bridge` (`write`; `cad_bridge` is the CAD take-off JSON published by AAD for AQC to import, never client-visible). `403 forbidden` otherwise. `GET /projects/{aqcId}/versions?kind=<kind>` filters; `GET /files/version/{versionId}` → `{ url }` downloads a version's file.
 
 `summary` is free JSON, but AORMS reads these keys (all **integer paise**; convert AQC's rupee `double` with *round half away from zero*):
 

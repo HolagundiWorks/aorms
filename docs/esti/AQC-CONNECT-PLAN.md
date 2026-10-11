@@ -16,7 +16,7 @@
 | D6 | **All data is synced to the database.** Every section of an AQC project (take-off sheets, levels, settings, estimates, bills, schedule, contracts, stores, org …) is stored in AORMS's database, not only a published subset. |
 
 | D7 | **Trial or expired Studio loses connected mode.** The entitlement follows the Studio's licence status; AQC drops to Community behaviour (local work continues, nothing deleted, nothing syncs). |
-| D8 | **One active session per user.** No device cap and no device registry. Signing in on a second machine ends the first session (the first sees "signed in elsewhere" and falls back to read-only / Community until it signs in again). |
+| D8 | **One active session per user per app** (refined 2026-10-11 for the suite: AAD and AQC each have their own; see [AORMS-SUITE-SIGNIN.md](AORMS-SUITE-SIGNIN.md)). No device cap and no device registry. Signing in on a second machine ends the first session (the first sees "signed in elsewhere" and falls back to read-only / Community until it signs in again). |
 | D9 | **Login first; online projects first.** AQC opens to a sign-in screen. After sign-in it shows the user's **online projects** (from AORMS) instead of local files. A local project can be **pushed online** — adopted into an AORMS project **once**. Community (not signed in) still opens local files. |
 | D10 | **Releasing an estimate to the client is a staff action**, per version, in AORMS. Syncing never makes anything client-visible. |
 | D11 | **No pilot Studio or real AQC file yet.** A synthetic pilot project file is provided as a test fixture (§9). |

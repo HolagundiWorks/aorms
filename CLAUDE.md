@@ -16,7 +16,7 @@
   (`HolagundiWorks/AQC`, open source) is now a **connected product** — it does estimation and costing; AORMS
   stores, syncs and shows it, and the AORMS login is the licence. `web/` estimation is frozen. See
   [`docs/esti/AQC-CONNECT-PLAN.md`](docs/esti/AQC-CONNECT-PLAN.md).
-- ❌ ADraft / ShilpiDB (drafting / geometry) — removed, allied apps
+- ❌ ADraft / ShilpiDB (drafting / geometry) — removed, allied apps. **Superseded 2026-10-11 for the CAD program:** **AAD** (`HolagundiWorks/AADT`, open source, desktop 2D CAD) is now a **connected product** alongside AQC under one shared AORMS sign-in (separate apps, one session per app, the login is the licence). See [`docs/esti/AORMS-SUITE-SIGNIN.md`](docs/esti/AORMS-SUITE-SIGNIN.md). ADraft and ShilpiDB stay removed.
 - ❌ Desktop installers, Windows setup, Tauri shell — web-only now
 - ❌ **EOMS** (external knowledge bank API) — retired 2026-09, physically
   removed: `backend/src/lib/eoms/`, `backend/src/modules/eoms/`,
@@ -281,7 +281,7 @@ index only if Ask ESTI should see it (wiki is not a public marketing surface).
 | --- | --- |
 | Focus on office hub features (clients, projects, proposals, invoices, team, finances, KB) | Reference allied apps (AStudio, AConsulting, AProc, ADraft, ShilpiDB) |
 | Web-only, SPA-focused, Carbon Design System | Desktop apps, Windows installers, Tauri shell, launcher |
-| ESTI AI agent for office automation + insights | Multiple per-app logins; legacy suite architecture |
+| ESTI AI agent for office automation + insights | Separate per-app logins (the desktop apps AAD and AQC share ONE AORMS sign-in — see AORMS-SUITE-SIGNIN.md); legacy suite architecture |
 | SSO + federated identity for office hub | Custom installer setup, license manager, local-first |
 | Update landing.tsx for office benefits; remove allied app CTAs | Mention architects, consultants, PMC services as separate products |
 

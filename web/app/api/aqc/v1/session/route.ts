@@ -18,13 +18,13 @@ async function describe(ctx: Exclude<Awaited<ReturnType<typeof authenticateAqc>>
   };
 }
 
-/** POST: sign in — starts the account's single active session (a previous one is replaced). */
+/** POST: sign in — starts the account's active session for this app (`aqc` default, or `aad`); a previous session of the SAME app is replaced. */
 export async function POST(request: Request) {
   const ctx = await authenticateAqc(request, { requireSession: false });
   if (!isCtx(ctx)) return ctx;
   const body = SessionBody.safeParse(await request.json().catch(() => ({})));
   if (!body.success) return err(400, "bad_request", "Invalid request.");
-  const { data: sessionId, error } = await ctx.supabase.rpc("aqc_start_session", { p_client_label: body.data.clientLabel ?? null });
+  const { data: sessionId, error } = await ctx.supabase.rpc("aqc_start_session_v2", { p_client_label: body.data.clientLabel ?? null, p_app: body.data.app });
   if (error || !sessionId) return err(400, "bad_request", "Could not start a session.");
   return NextResponse.json(await describe(ctx, sessionId as string));
 }

@@ -3,6 +3,7 @@ import { authenticateAqc, err, isCtx } from "../../../../../../../lib/aqc/auth";
 import { createServiceRoleClient } from "../../../../../../../lib/supabase/service";
 import { CONTRACTOR_ATTACHMENTS_BUCKET } from "../../../../../../../lib/contractor/attachments";
 import { DRAWINGS_BUCKET } from "../../../../../../../lib/drawings/upload";
+import { AQC_BUCKET } from "../../../../../../../lib/aqc/files";
 
 /**
  * GET: a 5-minute signed URL for a file AQC may open — a current drawing (to load into the take-off viewer) or a
@@ -24,6 +25,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ kind
     key = (await ctx.supabase.from("pmc_ra_bills").select("attachment_key").eq("id", id).maybeSingle()).data?.attachment_key ?? null;
   } else if (kind === "submission") {
     key = (await ctx.supabase.from("contractor_submissions").select("storage_key").eq("id", id).maybeSingle()).data?.storage_key ?? null;
+  } else if (kind === "version") {
+    // A published version's file (estimate PDF, the CAD take-off JSON …); staff-only through RLS on aqc_versions.
+    bucket = AQC_BUCKET;
+    key = (await ctx.supabase.from("aqc_versions").select("storage_key").eq("id", id).maybeSingle()).data?.storage_key ?? null;
   } else {
     return err(400, "bad_request", "Unknown file kind.");
   }
