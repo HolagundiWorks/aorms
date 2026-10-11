@@ -5649,6 +5649,10 @@ a real visitor sees).
 
 ---
 
+### 2026-10-11 — suite sign-in: AAD (CAD) + AQC under one AORMS login (server side)
+
+Owner decisions: separate apps with one shared sign-in; CAD take-off reaches AQC via the portal (local file stays as the offline path); AAD follows the AQC licence rule (login = licence). Built on the AQC connection: migration `0111` (sessions keyed `(account_id, client_app)`, so AAD and AQC don't replace each other; old `aqc_start_session(text)` kept as `aqc`), `0112` (version kind `cad_bridge`), `POST /api/aqc/v1/drawings` (CAD saves DXF/PDF to a project), `GET /files/version/{id}`, `…/versions?kind=`. Both migrations applied to the live project; 167 vitest; scripted live run against a local dev server (session isolation, permissions, DWG refusal). Storage upload not exercised locally. Spec: [AORMS-SUITE-SIGNIN.md](./AORMS-SUITE-SIGNIN.md). Not built: AAD network code (AADT repo), AQC `app`/`CadBridgeApi`/shared Credential Manager store, Windows verification (notably the refresh-token rotation race between two apps).
+
 ### 2026-09-14 — enterprise-grade security hardening + performance pass
 
 Explicit user request: full security audit with gaps filled, an

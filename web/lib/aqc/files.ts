@@ -12,6 +12,7 @@ const TYPES: Record<string, string> = {
   "text/csv": "csv",
   "image/png": "png",
   "image/jpeg": "jpg",
+  "application/json": "json", // the CAD take-off (`hcw-aqc-bridge` v1) published as a cad_bridge version
 };
 
 export type UploadCheck = { ok: true; ext: string } | { ok: false; message: string };

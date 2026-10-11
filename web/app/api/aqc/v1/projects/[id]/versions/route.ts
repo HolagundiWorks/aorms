@@ -8,7 +8,10 @@ export async function GET(request: Request, { params }: Ctx) {
   const { id } = await params;
   const ctx = await authenticateAqc(request, { requireSession: true });
   if (!isCtx(ctx)) return ctx;
-  const { data, error } = await ctx.supabase.from("aqc_versions").select("id, kind, version, summary, storage_key, client_visible, created_at").eq("aqc_project_id", id).order("created_at", { ascending: false });
+  const kind = new URL(request.url).searchParams.get("kind");
+  let q = ctx.supabase.from("aqc_versions").select("id, kind, version, summary, storage_key, client_visible, created_at").eq("aqc_project_id", id).order("created_at", { ascending: false });
+  if (kind) q = q.eq("kind", kind);
+  const { data, error } = await q;
   if (error) return err(400, "bad_request", "Could not read versions.");
   return NextResponse.json({ versions: data ?? [] });
 }

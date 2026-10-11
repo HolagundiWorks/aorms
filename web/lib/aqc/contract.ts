@@ -33,17 +33,19 @@ export const PushProjectBody = z.object({
   rows: z.array(AqcRow).max(20000).default([]),
 });
 export const AddVersionBody = z.object({
-  kind: z.enum(["estimate", "boq", "bbs", "schedule", "running_bill", "ipc", "final_account", "joint_measurement"]),
+  kind: z.enum(["estimate", "boq", "bbs", "schedule", "running_bill", "ipc", "final_account", "joint_measurement", "cad_bridge"]),
   contentHash: z.string().min(8).max(128),
   summary: z.record(z.string(), z.unknown()).default({}),
   storageKey: z.string().max(300).nullish(),
 });
-export const SessionBody = z.object({ clientLabel: z.string().max(120).optional() });
+/** Desktop clients that can hold a session (AQC take-off, AAD CAD). One active session per user per app. */
+export const AQC_APPS = ["aqc", "aad"] as const;
+export const SessionBody = z.object({ clientLabel: z.string().max(120).optional(), app: z.enum(AQC_APPS).default("aqc") });
 
 export const ROW_BATCH = 500;
 
 export const UploadInitBody = z.object({
-  kind: z.enum(["estimate", "boq", "bbs", "schedule", "running_bill", "ipc", "final_account", "joint_measurement"]),
+  kind: z.enum(["estimate", "boq", "bbs", "schedule", "running_bill", "ipc", "final_account", "joint_measurement", "cad_bridge"]),
   contentType: z.string().max(120),
   sizeBytes: z.number().int(),
   sha256: z.string().length(64),
