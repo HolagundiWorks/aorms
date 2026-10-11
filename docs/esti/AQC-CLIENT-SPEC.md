@@ -105,7 +105,7 @@ The `takeoff` block (PDF path, scale, drawn items) holds a local file path, so i
 
 ## 6. Versions (what portals and certificates show)
 
-`POST /projects/{aqcId}/versions` `{ kind, contentHash, summary, storageKey? }` → `201 { version }`. The same `contentHash` for the same `kind` returns the
+`POST /projects/{aqcId}/versions` `{ kind, contentHash, summary, storageKey? }` → `201 { version }` (the version **number**, e.g. `1`). The same `contentHash` for the same `kind` returns the
 existing version (idempotent). Kinds and who may add them: `estimate`, `boq`, `schedule` (`fees:manage`); `running_bill`, `ipc`, `final_account`
 (`cost:approve`); `bbs`, `joint_measurement` (`write`). `403 forbidden` otherwise.
 
