@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { authenticateAqc, dbError, err, isCtx } from "../../../../../../../lib/aqc/auth";
 import { PushRowsBody } from "../../../../../../../lib/aqc/contract";
 
-const PAGE = 2000;
+// PostgREST caps a response at 1000 rows (hosted default `max_rows`), so a page larger than that would be cut off
+// while `more` still said "done" — the client would silently miss rows. Keep PAGE at or below the cap.
+const PAGE = 1000;
 type Ctx = { params: Promise<{ id: string }> };
 
 /** GET ?since=<seq>: rows changed after a seq (catch-up / open an online project). Returns `nextSince` and `more`. */
@@ -20,7 +22,7 @@ export async function GET(request: Request, { params }: Ctx) {
   if (error) return err(400, "bad_request", "Could not read rows.");
   if (!project) return err(404, "not_found", "AQC project not found.");
   const last = rows && rows.length ? rows[rows.length - 1].seq : since;
-  return NextResponse.json({ headSeq: project.head_seq, formatVersion: project.format_version, settings: since === 0 ? project.settings : undefined, rows: rows ?? [], nextSince: last, more: (rows?.length ?? 0) === PAGE });
+  return NextResponse.json({ headSeq: project.head_seq, formatVersion: project.format_version, settings: since === 0 ? project.settings : undefined, rows: rows ?? [], nextSince: last, more: (rows?.length ?? 0) >= PAGE });
 }
 
 /** POST: upsert a batch of rows. Needs the edit lease (423 lease_required otherwise). */
