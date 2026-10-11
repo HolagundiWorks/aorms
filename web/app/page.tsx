@@ -18,6 +18,7 @@ import { LiveBrief } from "../components/aorms/landing/LiveBrief";
 import { ProjectCard } from "../components/aorms/ProjectCard";
 import { OperationalLeakageCalculator } from "../components/aorms/landing/OperationalLeakageCalculator";
 import { Artboards, type Board } from "../components/aorms/landing/Artboards";
+import { ZoomToScreen, type PortalScreen } from "../components/aorms/landing/ZoomToScreen";
 import {
   AORMS_PLATFORM,
   CONNECTDEX,
@@ -182,6 +183,14 @@ function Sheet({
   );
 }
 
+/** The real demo-studio screens the landing visuals zoom into (public/landing/screens — captures of the live product). */
+const SCREENS = {
+  project: { src: "/landing/screens/project.jpg", alt: "A project's overview in AORMS: phases, open tasks, decisions, fees, invoiced and contacts", title: "Project · Overview", href: "#live-demo", hrefLabel: "Explore the live demo →" },
+  projects: { src: "/landing/screens/projects.jpg", alt: "The Projects gallery in AORMS with cover illustrations, filters and search", title: "Projects", href: "#live-demo", hrefLabel: "Explore the live demo →" },
+  pulse: { src: "/landing/screens/pulse.jpg", alt: "Pulse in AORMS: today's brief, next-up tasks and the office at a glance", title: "Pulse · Today", href: "#live-demo", hrefLabel: "Explore the live demo →" },
+  invoices: { src: "/landing/screens/invoices.jpg", alt: "The Invoices register in AORMS with GST, TDS, net receivable and status", title: "Accounts · Invoices", href: "#live-demo", hrefLabel: "Explore the live demo →" },
+} satisfies Record<string, PortalScreen>;
+
 function Cards({ items }: { items: { tag: string; text: string; badge?: string }[] }) {
   return (
     <div className="aorms-lp-cards">
@@ -300,7 +309,9 @@ export default async function LandingPage() {
             <>
               <Result statement={SPINE_HERO.statement} text="Not another tool to feed — the record the practice already produces, kept in one place, so the answer is one page." />
               <Sub>A project, as AORMS shows it</Sub>
-              <ProjectCard p={SPINE_SAMPLE.project} href={null} />
+              <ZoomToScreen screen={SCREENS.project}>
+                <ProjectCard p={SPINE_SAMPLE.project} href={null} />
+              </ZoomToScreen>
             </>
           }
         >
@@ -329,7 +340,9 @@ export default async function LandingPage() {
                   <BigStat key={st.label} value={st.value} label={st.label} active={"active" in st ? st.active : undefined} animate="plain" />
                 ))}
               </div>
-              <LiveProjects />
+              <ZoomToScreen screen={SCREENS.projects}>
+                <LiveProjects />
+              </ZoomToScreen>
               <p className="cds--type-helper-text-01" style={{ marginBlockStart: "0.5rem", color: "var(--cds-text-secondary)" }}>
                 {SPINE_SAMPLE.caption}
               </p>
@@ -367,7 +380,9 @@ export default async function LandingPage() {
           side={
             <>
               <Result statement={SPINE_OFFICE.foot} text="Six parts of the practice, one project record underneath them." />
-              <TodaysBriefingPanel />
+              <ZoomToScreen screen={SCREENS.pulse}>
+                <TodaysBriefingPanel />
+              </ZoomToScreen>
             </>
           }
         >
@@ -390,7 +405,9 @@ export default async function LandingPage() {
           side={
             <>
               <Result statement="Information that moves." text="What is captured on site or in a meeting becomes a task, a record and, in time, knowledge — without being re-typed."  />
-              <LiveInvoices />
+              <ZoomToScreen screen={SCREENS.invoices}>
+                <LiveInvoices />
+              </ZoomToScreen>
             </>
           }
         >
@@ -426,7 +443,9 @@ export default async function LandingPage() {
           side={
             <>
               <Result statement="Ask the project." text={SPINE_MEMORY.esti} />
-              <LiveBrief />
+              <ZoomToScreen screen={SCREENS.pulse}>
+                <LiveBrief />
+              </ZoomToScreen>
             </>
           }
         >

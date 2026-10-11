@@ -621,3 +621,13 @@ a sheet.
   Your Data · Pricing · See it · Start. All boards are server-rendered (closed ones
   `display:none` + `inert`). Copy reuses `marketing-content.ts`; orange only marks the active
   board's number in the index.
+- **2026-10-11 (landing: scroll-to-zoom on portal visuals)** — `components/aorms/landing/ZoomToScreen.tsx`
+  wraps the landing's portal visuals (hero project card, Projects gallery, Today's briefing,
+  Invoices, Pulse brief). Hover + scroll **down** zooms the visual about the cursor (AutoCAD-style;
+  flip `ZOOM_IN_DIRECTION` for literal scroll-up-zooms-in), and past ~2.1× the **real portal screen**
+  grows out of that visual's rectangle to fill the view (captures of the demo studio in
+  `public/landing/screens/*.jpg`, 1600×900 — re-capture when the portal's look changes; hide the
+  Next dev badge and use the demo owner at 900px height). Scroll up / Esc / × closes. At 1× an
+  upward scroll still moves to the previous board; while a visual is hovered, downward scroll zooms
+  instead of advancing the board. A "View the screen" button gives keyboard and touch the same
+  screen; reduced-motion opens it without the zoom. Orange marks only the zoom-progress hairline.

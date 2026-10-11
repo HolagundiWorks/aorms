@@ -3638,3 +3638,168 @@ h1.aorms-lp-display {
 .aorms-gantt { position: relative; display: block; inline-size: 100%; min-inline-size: 8rem; block-size: 0.75rem; background: var(--cds-layer-accent, #e0e0e0); }
 .aorms-gantt > span { position: absolute; inset-block: 0; background: var(--cds-text-primary, #161616); }
 .aorms-gantt > span[data-critical="1"] { background: var(--aorms-orange, #ff4f18); }
+
+// ── Landing: scroll-to-zoom on portal visuals (components/aorms/landing/ZoomToScreen.tsx, 2026-10-11) ──
+// Hover a visual and scroll: it zooms about the cursor, then the real portal screen grows out of its own
+// rectangle. Orange only marks the zoom progress (activity), never decoration.
+.aorms-zoom {
+  position: relative;
+  overflow: hidden;
+  min-inline-size: 0;
+  cursor: zoom-in;
+}
+
+.aorms-zoom__lens {
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.aorms-zoom__hint {
+  position: absolute;
+  inset-block-end: 0.5rem;
+  inset-inline-end: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cds-text-inverse, #fff);
+  background: var(--cds-background-inverse, #161616);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms;
+}
+
+.aorms-zoom:hover .aorms-zoom__hint {
+  opacity: 1;
+}
+
+.aorms-zoom[data-zoomed] .aorms-zoom__hint {
+  opacity: 0;
+}
+
+.aorms-zoom__bar {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  block-size: 2px;
+  background: var(--aorms-orange);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+
+// The keyboard / touch route to the same screen: visible on focus, and always on touch screens.
+.aorms-zoom__open {
+  position: absolute;
+  inset-block-start: 0.5rem;
+  inset-inline-end: 0.5rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  color: var(--cds-text-inverse, #fff);
+  background: var(--cds-background-inverse, #161616);
+  border: 0;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 160ms;
+}
+
+.aorms-zoom__open:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--cds-focus, #0f62fe);
+  outline-offset: 2px;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .aorms-zoom { cursor: default; }
+  .aorms-zoom__open { opacity: 1; }
+  .aorms-zoom__hint { display: none; }
+}
+
+.aorms-zoom-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgb(22 22 22 / 0);
+  transition: background 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.aorms-zoom-veil.is-open {
+  background: rgb(22 22 22 / 0.72);
+}
+
+.aorms-zoom-frame {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--cds-layer, #fff);
+  border: 1px solid var(--aorms-rule);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 0.35);
+  transition:
+    top 480ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    left 480ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    width 480ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    height 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.aorms-zoom-frame__bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #161616;
+  white-space: nowrap;
+}
+
+.aorms-zoom-frame__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.aorms-zoom-frame__actions a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.aorms-zoom-frame__actions button {
+  padding: 0 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: #fff;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.aorms-zoom-frame__shot {
+  position: relative;
+  flex: 1;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+// The capture is anchored top-left and cropped to the frame, so while the frame is still the size of the
+// visual it shows the top of the screen, and reveals the rest as it grows.
+.aorms-zoom-frame__shot img {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aorms-zoom__lens { transition: none !important; }
+  .aorms-zoom-veil,
+  .aorms-zoom-frame { transition: none; }
+}
