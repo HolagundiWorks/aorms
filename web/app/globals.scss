@@ -2351,6 +2351,35 @@ div:has(> .aorms-rail-kpis) > .aorms-rail-kpis:not(.aorms-rail-kpis ~ .aorms-rai
   z-index: 30;
 }
 
+// The AORMS wordmark (black with a navy O) sits on a white chip so it reads on the black phone bar.
+.aorms-lp-bar__logo {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  padding: 0.25rem 0.5rem;
+  background: #fff;
+}
+
+.aorms-lp-bar__logo img {
+  display: block;
+  block-size: 1.125rem;
+  inline-size: auto;
+}
+
+// Desktop: the wordmark tops the nameplate, above the CTA.
+.aorms-lp-np__logo {
+  display: block;
+  padding: 1.1rem 1rem 0.9rem;
+  background: #fff;
+  border-block-end: 1px solid var(--aorms-rule);
+}
+
+.aorms-lp-np__logo img {
+  display: block;
+  block-size: 1.75rem;
+  inline-size: auto;
+}
+
 .aorms-lp-bar__left {
   display: flex;
   gap: 0.75rem;

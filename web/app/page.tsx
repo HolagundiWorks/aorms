@@ -617,6 +617,7 @@ export default async function LandingPage() {
       <Artboards
         boards={boards}
         nameplate={{
+          logo: { src: "/aorms-logo.png", alt: "AORMS — home", href: "/", width: 816, height: 216 },
           cta: { label: "Explore the demo →", href: "#live-demo" },
           signIn: { label: "Sign in", href: "/login" },
           studio: "AORMS",
