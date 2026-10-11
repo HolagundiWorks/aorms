@@ -73,3 +73,12 @@ describe("aqc rate books", () => {
     expect(PublishRateBookBody.parse({ clientId: "v1", name: "n", items: [a] }).activate).toBe(false);
   });
 });
+
+import { LoginBody } from "../lib/aqc/login";
+describe("aqc login body", () => {
+  it("needs a valid email and a password", () => {
+    expect(LoginBody.safeParse({ email: "a@b.in", password: "x" }).success).toBe(true);
+    expect(LoginBody.safeParse({ email: "nope", password: "x" }).success).toBe(false);
+    expect(LoginBody.safeParse({ email: "a@b.in", password: "" }).success).toBe(false);
+  });
+});
