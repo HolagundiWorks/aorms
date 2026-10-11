@@ -21,7 +21,7 @@ One OS credential holds the sign-in for every suite app on a machine:
 |---|---|
 | Windows | Credential Manager generic credential, target `AORMS/Connect`, user name = email |
 | macOS / Linux (AAD only) | the same target/service name in the system keychain (`keyring`) — AQC is Windows-only, so nothing is shared there |
-| Blob (UTF-8 JSON) | `{ "v": 1, "refreshToken": "…", "email": "…", "updatedAt": "<ISO>" }` |
+| Blob (UTF-8 JSON) | `{ "v": 1, "refreshToken": "…", "email": "…", "updatedAt": <Unix seconds, integer> }` |
 | Never stored | the access token, the password, the per-app `sessionId` (each app keeps its own in a per-app entry, e.g. `AORMS/Connect/aqc`, `AORMS/Connect/aad`) |
 
 **Refresh-token rotation.** Supabase refresh tokens rotate: each use returns a new one and invalidates the old (after a short reuse window). Two apps refreshing from the same stored token can therefore break each other. Rule for every app:
@@ -58,6 +58,6 @@ Enforced by the server for every call (`lib/aqc/entitlement.ts`): Studio / Profe
 |---|---|
 | Migrations `0111` (sessions per app), `0112` (`cad_bridge` kind) | applied to the live `aorms-web` project 2026-10-11 |
 | `/session` `app`, `POST /drawings`, `GET /files/version/{id}`, `GET …/versions?kind=` | built; tested locally (167 vitest; scripted live run: session isolation, kind permissions, DWG/non-drawing refusal, VIEWER 403). **Not exercised:** the actual storage upload (the local server has placeholder storage keys) — verify on the deployed site |
-| AQC `Aorms.Connect` | A1–A7 done; does not yet send `app`, no `CadBridgeApi`, no shared credential store |
-| AAD (AADT repo) | no network code yet; its bridge writer (`aqcexport`) is its last unbuilt port item |
+| AQC `Aorms.Connect` | A1–A7 done; sends `app`, shared-store rotation rule, `CadBridgeApi` (AQC repo branch `claude/aqc-suite-signin`, 80 tests). **Not yet written:** the Windows Credential Manager store and the app wiring |
+| AAD (AADT repo) | crate `cadcraft-aorms` + commands `aorms.signin/restore/signout/status/projects/open/pull/drawings` (branch `claude/aorms-connect`: 25 + 12 tests, live smoke against a local server: signed in as `aad`, pulled a project's details and floors). **Not built:** UI, drawing push, take-off push (`aqcexport` writer is its last unbuilt port item) |
 | Windows verification | none yet |
