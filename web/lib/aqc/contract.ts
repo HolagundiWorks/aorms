@@ -50,3 +50,16 @@ export const UploadInitBody = z.object({
   sizeBytes: z.number().int(),
   sha256: z.string().length(64),
 });
+
+/** AAD drawing tasks / notes (additive; no contract version bump — old clients never call these). */
+export const AAD_TASK_STATUSES = ["TODO", "IN_PROGRESS", "BLOCKED", "DONE"] as const;
+export const TaskStatusBody = z.object({ status: z.enum(AAD_TASK_STATUSES) });
+export const NoteCreateBody = z.object({
+  body: z.string().trim().min(1).max(2000),
+  x: z.number().finite().min(-1e12).max(1e12),
+  y: z.number().finite().min(-1e12).max(1e12),
+});
+export const NotePatchBody = z
+  .object({ body: z.string().trim().min(1).max(2000).optional(), status: z.enum(["OPEN", "RESOLVED"]).optional() })
+  .refine((b) => b.body !== undefined || b.status !== undefined, "Nothing to change.");
+export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
